@@ -1,0 +1,29 @@
+= STF: Blender
+:homepage: https://github.com/emperorofmars/stf_blender
+:keywords: stf, 3d, fileformat, format, interchange, interoperability
+:hardbreaks-option:
+:idprefix:
+:idseparator: -
+:library: Asciidoctor
+:table-caption!:
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+endif::[]
+
+**Squirrel Transfer Format - Modular 3D Interchange Format**
+Intended for (not only) game development use-cases.
+
+Documentation: https://github.com/emperorofmars/stf[]
+
+
+== License
+All source-code in this repository, except when noted in individual files and/or directoried, is dual-licensed under either:
+
+* MIT License (LICENSE-MIT or http://opensource.org/licenses/MIT[])
+* Apache License, Version 2.0 (LICENSE-APACHE or http://www.apache.org/licenses/LICENSE-2.0[])
+
+
+// Command to build the extension with a default Windows Blender installation:
+// Change the Blender version in the path accordingly.
+// C:\'Program Files'\'Blender Foundation'\'Blender 4.2'\blender.exe --command extension build
