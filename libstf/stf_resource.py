@@ -18,6 +18,7 @@ class STF_SceneHierarchy_Resource(STF_Resource):
 	root: str
 	nodes: dict[str, STF_Node_Resource]
 	referenced_resources: list[str]
+	origin_resources: list[str]
 
 class STF_Data_Resource(STF_Resource):
 	fallback: str
