@@ -23,7 +23,7 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 		try:
 			print("export")
 
-			# save settings of wanted
+			# save settings if wanted
 
 			# create stf_file
 

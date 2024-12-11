@@ -1,9 +1,11 @@
+from .stf_registry import STF_Profile
 
 
 class STF_Resource:
 	type: str
 	name: str
 	degraded: bool
+	def validate(type_instance: any, profiles: list[STF_Profile] = None) -> bool: False
 
 class STF_Component_Resource(STF_Resource):
 	overrides: list[str]

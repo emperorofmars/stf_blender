@@ -18,7 +18,7 @@ Documentation: https://github.com/emperorofmars/stf[]
 
 
 == License
-All source-code in this repository, except when noted in individual files and/or directoried, is dual-licensed under either:
+All source-code in this repository, except when noted in individual files and/or directories, is dual-licensed under either:
 
 * MIT License (LICENSE-MIT or http://opensource.org/licenses/MIT[])
 * Apache License, Version 2.0 (LICENSE-APACHE or http://www.apache.org/licenses/LICENSE-2.0[])
