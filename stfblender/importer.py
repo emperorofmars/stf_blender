@@ -19,11 +19,11 @@ class ImportSTF(bpy.types.Operator, ImportHelper):
 
 	def execute(self, context):
 		context.window.cursor_set('WAIT')
+		file = None
 		try:
 			# Read and parse stf_file from disk
 			file = open(self.filepath, "rb")
 			stf_file = STF_File.parse_from_buffer(file)
-			file.close()
 
 			print("stf_file")
 			print(stf_file.definition)
@@ -35,6 +35,7 @@ class ImportSTF(bpy.types.Operator, ImportHelper):
 			self.report({'ERROR'}, str(error))
 			return {"CANCELLED"}
 		finally:
+			if(file is not None): file.close()
 			context.window.cursor_set('DEFAULT')
 
 

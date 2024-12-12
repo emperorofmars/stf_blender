@@ -22,6 +22,7 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 
 	def execute(self, context):
 		context.window.cursor_set('WAIT')
+		file = None
 		try:
 			# Save settings if wanted
 
@@ -29,7 +30,6 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 			stf_file = STF_File()
 			file = open(self.filepath, "wb")
 			stf_file.serialize(file)
-			file.close()
 
 			self.report({'INFO'}, "STF asset exported successfully!")
 			return {"FINISHED"}
@@ -37,6 +37,7 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 			self.report({'ERROR'}, str(error))
 			return {"CANCELLED"}
 		finally:
+			if(file is not None): file.close()
 			context.window.cursor_set('DEFAULT')
 
 
