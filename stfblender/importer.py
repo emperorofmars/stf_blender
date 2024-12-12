@@ -26,7 +26,7 @@ class ImportSTF(bpy.types.Operator, ImportHelper):
 			stf_file = STF_File.parse_from_buffer(file)
 
 			print("stf_file")
-			print(stf_file.definition)
+			print(stf_file.definition.to_dict())
 
 
 			self.report({'INFO'}, "STF asset imported successfully!")

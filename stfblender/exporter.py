@@ -1,3 +1,4 @@
+import json
 import bpy
 from bpy_extras.io_utils import ExportHelper
 
@@ -23,6 +24,7 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 	def execute(self, context):
 		context.window.cursor_set('WAIT')
 		file = None
+		file_json = None
 		try:
 			# Save settings if wanted
 
@@ -31,6 +33,10 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 			file = open(self.filepath, "wb")
 			stf_file.serialize(file)
 
+			json_string = json.dumps(stf_file.definition.to_dict()).encode(encoding="utf-8")
+			file_json = open(self.filepath + ".json", "wb")
+			file_json.write(json_string)
+
 			self.report({'INFO'}, "STF asset exported successfully!")
 			return {"FINISHED"}
 		except STFException as error:
@@ -38,6 +44,7 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 			return {"CANCELLED"}
 		finally:
 			if(file is not None): file.close()
+			if(file_json is not None): file_json.close()
 			context.window.cursor_set('DEFAULT')
 
 

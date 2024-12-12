@@ -2,48 +2,14 @@
 import io
 import json
 
-
-class STF_Meta_AssetInfo:
-	asset_name: str
-	asset_author: str
-	asset_version: str
-	asset_license: str
-	asset_license_url: str
-	asset_documentation: str
-	asset_documentation_url: str
-	generator: str
-	timestamp: str
-
-class STF_Meta:
-	version_major: int = 0
-	version_minor: int = 0
-	root: str
-	profiles: list[str] = []
-	meta: STF_Meta_AssetInfo = STF_Meta_AssetInfo()
-
-class STF_Buffer_Included:
-	type: str = "stf.buffer.included"
-	index: int
-
-class STF_Buffer_File:
-	type: str = "stf.buffer.file"
-	path: str
-
-class STF_Buffer_JsonArray:
-	type: str = "stf.buffer.json_array"
-	data: list[io.BytesIO]
-
-class STF_JsonDefinition:
-	meta: STF_Meta = STF_Meta()
-	resources: dict[str, dict] = dict()
-	buffers: list[STF_Buffer_Included | STF_Buffer_File | STF_Buffer_JsonArray] = []
+from .stf_definition import STF_JsonDefinition
 
 
 class STF_File:
 	binary_version_major: int = 0
 	binary_version_minor: int = 0
-	#definition: STF_JsonDefinition = STF_JsonDefinition()
-	definition: dict[str, dict] = {"meta": {"version_major": 0, "version_minor": 0}, "resources": {}, "buffers": []}
+	definition: STF_JsonDefinition = STF_JsonDefinition()
+	#definition: dict[str, dict] = {"meta": {"version_major": 0, "version_minor": 0}, "resources": {}, "buffers": []}
 	buffers_included: list[io.BytesIO] = []
 
 	@staticmethod
@@ -75,7 +41,7 @@ class STF_File:
 			print(buffer_lens[len(buffer_lens) - 1])
 
 		# Read the Json definition buffer
-		ret.definition = json.loads(buffer.read(json_buffer_len).decode("utf-8"))
+		ret.definition = STF_JsonDefinition.from_dict(json.loads(buffer.read(json_buffer_len).decode("utf-8")))
 
 		# Read all other buffers
 		for buffer_idx in range(0, num_buffers):
@@ -97,7 +63,7 @@ class STF_File:
 		buffer.write(num_buffers_with_json.to_bytes(length=4, byteorder="little"))
 
 		# Convert Json definition to buffer
-		definition_buffer = json.dumps(self.definition).encode(encoding="utf-8")
+		definition_buffer = json.dumps(self.definition.to_dict()).encode(encoding="utf-8")
 
 		# Serialize length of Json definition buffer
 		buffer_len = len(definition_buffer)
