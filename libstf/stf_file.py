@@ -9,7 +9,6 @@ class STF_File:
 	binary_version_major: int = 0
 	binary_version_minor: int = 0
 	definition: STF_JsonDefinition = STF_JsonDefinition()
-	#definition: dict[str, dict] = {"meta": {"version_major": 0, "version_minor": 0}, "resources": {}, "buffers": []}
 	buffers_included: list[io.BytesIO] = []
 
 	@staticmethod

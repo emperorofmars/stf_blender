@@ -1,12 +1,12 @@
 import bpy
 from bpy_extras.io_utils import ImportHelper
 
-from ..libstf.stf_file import STF_File
-from ..libstf.stf_exception import STFException
+from ...libstf.stf_file import STF_File
+from ...libstf.stf_exception import STFException
 
 
 class ImportSTF(bpy.types.Operator, ImportHelper):
-	"""Import a STF file"""
+	"""Import a STF file (.stf/.stf.json)"""
 	bl_idname = 'stf.import'
 	bl_label = 'Import STF'
 	bl_options = {'PRESET', 'REGISTER', 'UNDO'}
@@ -35,7 +35,7 @@ class ImportSTF(bpy.types.Operator, ImportHelper):
 			self.report({'ERROR'}, str(error))
 			return {"CANCELLED"}
 		finally:
-			if(file is not None): file.close()
+			if(file is not None and not file.closed): file.close()
 			context.window.cursor_set('DEFAULT')
 
 
