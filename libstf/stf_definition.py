@@ -1,6 +1,7 @@
-
 import io
 
+class STF_Profile:
+	name: str
 
 class STF_Meta_AssetInfo:
 	asset_name: str
@@ -56,7 +57,7 @@ class STF_Meta:
 	version_major: int = 0
 	version_minor: int = 0
 	root: str = "foo"
-	profiles: list[str] = []
+	profiles: list[STF_Profile] = []
 	meta: STF_Meta_AssetInfo = STF_Meta_AssetInfo()
 
 	@staticmethod

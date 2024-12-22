@@ -1,4 +1,3 @@
-
 import io
 import json
 
@@ -12,7 +11,7 @@ class STF_File:
 	buffers_included: list[io.BytesIO] = []
 
 	@staticmethod
-	def parse_from_buffer(buffer: io.BytesIO):
+	def parse(buffer: io.BytesIO):
 		ret = STF_File()
 		# Read and check magic number
 		magic_number = buffer.read(4)

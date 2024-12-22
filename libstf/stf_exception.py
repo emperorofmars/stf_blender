@@ -1,3 +1,0 @@
-
-class STFException(Exception):
-	pass

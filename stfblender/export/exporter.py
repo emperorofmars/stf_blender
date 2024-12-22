@@ -3,7 +3,6 @@ import bpy
 from bpy_extras.io_utils import ExportHelper
 
 from ...libstf.stf_file import STF_File, STF_JsonDefinition
-from ...libstf.stf_exception import STFException
 
 from .determine_export_root import determine_export_root_children, determine_export_root_collection
 
@@ -68,7 +67,7 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 
 			self.report({'INFO'}, "STF asset exported successfully!")
 			return {"FINISHED"}
-		except STFException as error:
+		except Exception as error:
 			self.report({'ERROR'}, str(error))
 			return {"CANCELLED"}
 		finally:

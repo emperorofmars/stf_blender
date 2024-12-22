@@ -1,36 +1,29 @@
+import io
 
-class STF_Profile:
-	pass
+from .stf_report import STFReport
+from .stf_file import STF_File
+from .stf_processor import STF_Processor
 
 
 class STF_ImportContext:
-	profiles: list[STF_Profile]
-	def add_import_warning(self, warning: str): pass
-	def add_import_error(self, error: str): pass
+	__file: STF_File
+
+	__processors: dict[str, STF_Processor]
+
+	__imported_resources: dict[str, any] # ID -> imported object
 
 
-class STF_ImportContext_Top(STF_ImportContext):
-	profiles: list[STF_Profile]
-	def get_resource_by_index(self, index: int) -> dict: pass
-	def get_buffer_by_index(self, index: int) -> bytearray: pass
+	def import_resource(self, json: dict) -> any | None:
+		pass
+
+	def import_buffer(self, id: str) -> io.BytesIO:
+		pass
+
+	def get_resource(self, id: int) -> dict:
+		pass
 
 
-class STF_ImportContext_Data(STF_ImportContext):
-	profiles: list[STF_Profile]
-	def get_resource_by_index(self, index: int) -> dict: pass
-	def get_buffer_by_index(self, index: int) -> bytearray: pass
+	def report(self, report: STFReport):
+		pass
 
-
-class STF_ImportContext_Prefab(STF_ImportContext):
-	profiles: list[STF_Profile]
-	def get_resource_by_index(self, index: int) -> dict: pass
-	def get_hierarchy_node(self, node_id: str) -> dict: pass
-
-
-class STF_TypeProcessor:
-	type: str
-	import_context: STF_ImportContext
-
-	#validate: function[STF_ImportContext_Top, dict]
-	#process: function[STF_ImportContext_Top, dict]
 
