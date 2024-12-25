@@ -1,11 +1,13 @@
 from typing import Callable
 
-from .stf_export_context import STF_ExportContext
-from .stf_import_context import STF_ImportContext
-
 
 class STF_Processor:
-	type: str
-	kind: str
-	import_func: Callable[[STF_ImportContext, dict], any]
-	export_func: Callable[[STF_ExportContext, any], dict]
+	stf_type: str
+	stf_kind: str
+	understood_types: list = []
+	import_func: Callable[[any, dict, str], any]
+	export_func: Callable[[any, any], tuple[dict, str]]
+
+
+# from .stf_export_context import STF_ExportContext
+# from .stf_import_context import STF_ImportContext

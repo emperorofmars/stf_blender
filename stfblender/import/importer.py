@@ -1,6 +1,8 @@
 import bpy
 from bpy_extras.io_utils import ImportHelper
 
+from ...libstf.stf_report import STFException
+from ...libstf.stf_import_context import STF_ImportContext
 from ...libstf.stf_file import STF_File
 
 
@@ -24,13 +26,18 @@ class ImportSTF(bpy.types.Operator, ImportHelper):
 			file = open(self.filepath, "rb")
 			stf_file = STF_File.parse(file)
 
+			stf_context = STF_ImportContext(stf_file)
+			root = stf_context.import_resource(stf_context.get_root_id())
+
+
 			print("stf_file")
+			print(root)
 			print(stf_file.definition.to_dict())
 
 
 			self.report({'INFO'}, "STF asset imported successfully!")
 			return {'FINISHED'}
-		except Exception as error:
+		except STFException as error:
 			self.report({'ERROR'}, str(error))
 			return {"CANCELLED"}
 		finally:

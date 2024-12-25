@@ -14,7 +14,13 @@ class STFCollectionPanel(bpy.types.Panel):
 
 	def draw(self, context):
 		from .export.exporter import ExportSTF
-		if(context.scene.stf_root_collection == context.collision):
+		if(context.collection.stf_id):
+			self.layout.label(text="STF ID: " + context.collection.stf_id)
+			# also allow editing the ID
+		else:
+			self.layout.label(text="Generate STF ID")
+
+		if(context.scene.stf_root_collection == context.collection):
 			self.layout.label(text="STF root prefab")
 			self.layout.label(text="Export")
 			self.layout.operator(operator=ExportSTF.bl_idname, text="Export as STF").root_collection = context.collection.name

@@ -11,8 +11,6 @@ class STF_Meta_AssetInfo:
 	asset_license_url: str
 	asset_documentation: str
 	asset_documentation_url: str
-	generator: str
-	timestamp: str
 
 	custom_values: dict[str, str] = {}
 
@@ -56,9 +54,11 @@ class STF_Meta_AssetInfo:
 class STF_Meta:
 	version_major: int = 0
 	version_minor: int = 0
-	root: str = "foo"
+	generator: str
+	timestamp: str
+	root: str
 	profiles: list[STF_Profile] = []
-	meta: STF_Meta_AssetInfo = STF_Meta_AssetInfo()
+	asset_info: STF_Meta_AssetInfo = STF_Meta_AssetInfo()
 
 	@staticmethod
 	def from_dict(dict: dict):
@@ -67,7 +67,7 @@ class STF_Meta:
 		ret.version_minor = dict["version_minor"]
 		ret.root = dict["root"]
 		ret.profiles = dict["profiles"]
-		ret.meta = STF_Meta_AssetInfo.from_dict(dict["meta"])
+		ret.asset_info = STF_Meta_AssetInfo.from_dict(dict["asset_info"])
 		return ret
 
 	def to_dict(self):
@@ -76,7 +76,7 @@ class STF_Meta:
 			"version_minor": self.version_minor,
 			"root": self.root,
 			"profiles": self.profiles,
-			"meta": self.meta.to_dict(),
+			"asset_info": self.asset_info.to_dict(),
 		}
 
 
@@ -134,7 +134,7 @@ class STF_Buffer_JsonArray:
 class STF_JsonDefinition:
 	stf: STF_Meta = STF_Meta()
 	resources: dict[str, dict] = dict()
-	buffers: dict[str, STF_Buffer_Included | STF_Buffer_File | STF_Buffer_JsonArray] = {}
+	buffers: dict[str, STF_Buffer_Included | STF_Buffer_File | STF_Buffer_JsonArray] = dict()
 
 	@staticmethod
 	def from_dict(dict):

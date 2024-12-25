@@ -2,9 +2,12 @@ import json
 import bpy
 from bpy_extras.io_utils import ExportHelper
 
-from ...libstf.stf_file import STF_File, STF_JsonDefinition
+from ...libstf.stf_registry import get_stf_processors
+from ...libstf.stf_report import STFException
+from ...libstf.stf_definition import STF_Meta_AssetInfo
+from ...libstf.stf_export_context import STF_ExportContext, create_stf_binary_file, create_stf_definition
 
-from .determine_export_root import determine_export_root_children, determine_export_root_collection
+from .determine_export_root import determine_export_root_collection
 
 
 class ExportSTF(bpy.types.Operator, ExportHelper):
@@ -30,49 +33,56 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 
 	def execute(self, context):
 		context.window.cursor_set('WAIT')
-		file = None
-		file_json = None
+		files = []
 		try:
-			# Save settings if wanted
+			# TODO: Save settings if wanted
 
 			collection = determine_export_root_collection(self.root_collection)
-			determine_export_root_children(collection)
+
+			processors = get_stf_processors(bpy.context.preferences.addons.keys())
+
+			# TODO: configure profiles, generate asset info
+			stf_context = STF_ExportContext(profiles=[], asset_info=STF_Meta_AssetInfo(), processors=processors)
 
 			# run modules to actually generate this definition
-			json_definition = STF_JsonDefinition()
+			stf_context.serialize_resource(collection)
+
+			if(not stf_context.get_root_id()):
+				raise Exception("Export Failed")
 
 			if(self.format == "binary"):
 				# Create and write stf_file to disk
-				stf_file = STF_File()
-				stf_file.definition = json_definition
-				# set buffers
-				file = open(self.filepath, "wb")
-				stf_file.serialize(file)
+				stf_file = create_stf_binary_file(stf_context)
+				files.append(open(self.filepath, "wb"))
+				stf_file.serialize(files[len(files) - 1])
 
 				if(self.debug):
 					# Also write out the json itself for debugging purposes
-					json_string = json.dumps(json_definition.to_dict()).encode(encoding="utf-8")
-					file_json = open(self.filepath + ".json", "wb")
-					file_json.write(json_string)
+					json_string = json.dumps(stf_file.definition.to_dict()).encode(encoding="utf-8")
+					files.append(open(self.filepath + ".json", "wb"))
+					files[len(files) - 1].write(json_string)
 
 			elif(self.format == "json_contained"):
-				json_string = json.dumps(json_definition.to_dict()).encode(encoding="utf-8")
-				file_json = open(self.filepath + ".stf.json", "wb")
-				file_json.write(json_string)
+				stf_definition = create_stf_definition(stf_context, self.format)
+				json_string = json.dumps(stf_definition.to_dict()).encode(encoding="utf-8")
+				files.append(open(self.filepath + ".stf.json", "wb"))
+				files[len(files) - 1].write(json_string)
 
 			elif(self.format == "json_seperate"):
-				json_string = json.dumps(json_definition.to_dict()).encode(encoding="utf-8")
-				file_json = open(self.filepath + ".stf.json", "wb")
-				file_json.write(json_string)
+				stf_definition = create_stf_definition(stf_context, self.format)
+				# TODO generate all buffers as files as well
+				json_string = json.dumps(stf_definition.to_dict()).encode(encoding="utf-8")
+				files.append(open(self.filepath + ".stf.json", "wb"))
+				files[len(files) - 1].write(json_string)
 
 			self.report({'INFO'}, "STF asset exported successfully!")
 			return {"FINISHED"}
-		except Exception as error:
+		except STFException as error:
 			self.report({'ERROR'}, str(error))
 			return {"CANCELLED"}
 		finally:
-			if(file is not None and not file.closed): file.close()
-			if(file_json is not None and not file_json.closed): file_json.close()
+			for file in files:
+				if(file is not None and not file.closed): file.close()
 			context.window.cursor_set('DEFAULT')
 
 	def draw(self, context):
