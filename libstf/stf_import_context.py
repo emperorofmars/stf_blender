@@ -1,6 +1,5 @@
 import io
 
-from .stf_registry import get_all_stf_processors
 from .stf_report import STFReport
 from .stf_file import STF_File
 from .stf_processor import STF_Processor

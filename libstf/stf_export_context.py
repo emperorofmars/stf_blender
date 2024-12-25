@@ -1,9 +1,8 @@
 import io
 from enum import Enum
 
-from .stf_registry import get_all_stf_processors
 from .stf_definition import STF_JsonDefinition, STF_Meta_AssetInfo, STF_Profile
-from .stf_report import STFReport
+from .stf_report import STF_Report_Severity, STFReport
 from .stf_processor import STF_Processor
 from .stf_file import STF_File
 
@@ -33,6 +32,9 @@ class STF_ExportContext:
 		self.__asset_info = asset_info
 
 	def serialize_resource(self, object: any) -> str | None:
+		if(object in self.__resources):
+			return self.__exported_resources[self.__resources[object]]
+
 		selected_processor = None
 		for _, processor in self.__processors.items():
 			if(type(object) in processor.understood_types):
@@ -42,17 +44,16 @@ class STF_ExportContext:
 		if(selected_processor):
 			print(selected_processor)
 			resource, id = selected_processor.export_func(self, object)
-			# check for recursion
-			if(resource):
+			if(resource and id):
 				self.__resources[object] = resource
 				self.__exported_resources[id] = resource
 				if(not self.__root_id):
 					self.__root_id = id
 				return id
+			else:
+				self.report(STFReport(message="Resource Export Failed", stf_severity=STF_Report_Severity.Error, stf_id=id, stf_type=selected_processor.stf_type, application_object=object))
 		else:
-			# add warning report or something
-			print("NO Processor!")
-			pass
+			self.report(STFReport(message="NO Processor Found!", stf_severity=STF_Report_Severity.Error, application_object=object))
 		return None
 
 	def serialize_buffer(self, data: io.BytesIO) -> str:
@@ -81,6 +82,17 @@ class STF_ExportContext:
 
 	def get_exported_buffers(self) -> dict[str, io.BytesIO]:
 		return self.__exported_buffers
+
+
+class STF_DataExportContext:
+	__context: STF_ExportContext
+	__resource: dict
+	def __init__(self, context: STF_ExportContext, resource: dict):
+		self.__context = context
+
+	def serialize_resource(self, resource: object) -> int:
+		#self.__resource["referenced_resources"][index]
+		pass
 
 
 def create_stf_definition(context: STF_ExportContext, generator: str = "libstf_python") -> STF_JsonDefinition:
