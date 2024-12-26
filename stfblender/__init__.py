@@ -15,4 +15,4 @@ class STF_File_Handler(bpy.types.FileHandler):
 		return poll_file_object_drop(context)
 
 
-from .resource_types import register_stf_processors
+from .modules import register_stf_processors

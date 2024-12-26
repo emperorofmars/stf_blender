@@ -1,9 +1,9 @@
 import uuid
 import bpy
 
-from ...libstf.stf_import_context import STF_ImportContext
-from ...libstf.stf_export_context import STF_ExportContext
-from ...libstf.stf_processor import STF_Processor
+from ....libstf.stf_import_context import STF_ImportContext
+from ....libstf.stf_export_context import STF_ExportContext
+from ....libstf.stf_processor import STF_Processor
 
 
 _stf_type = "stf.prefab"
