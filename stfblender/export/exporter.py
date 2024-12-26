@@ -7,8 +7,6 @@ from ...libstf.stf_report import STFException
 from ...libstf.stf_definition import STF_Meta_AssetInfo
 from ...libstf.stf_export_context import STF_ExportContext, create_stf_binary_file, create_stf_definition
 
-from .determine_export_root import determine_export_root_collection
-
 
 class ExportSTF(bpy.types.Operator, ExportHelper):
 	"""Export as STF file (.stf/.stf.json)"""

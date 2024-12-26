@@ -14,7 +14,7 @@ class STF_Buffer_Mode(Enum):
 
 
 class STF_ExportContext:
-	__processors: dict[str, STF_Processor]
+	__processors: list[STF_Processor]
 
 	__root_id: str = None
 	__resources: dict[any, str] = {} # original object -> ID of exported STF Json resource
@@ -26,7 +26,7 @@ class STF_ExportContext:
 
 	__reports: list[STFReport] = []
 
-	def __init__(self, profiles: list[STF_Profile], asset_info: STF_Meta_AssetInfo, processors: dict[str, STF_Processor]):
+	def __init__(self, profiles: list[STF_Profile], asset_info: STF_Meta_AssetInfo, processors: list[STF_Processor]):
 		self.__processors = processors
 		self.__profiles = profiles
 		self.__asset_info = asset_info
@@ -36,7 +36,7 @@ class STF_ExportContext:
 			return self.__exported_resources[self.__resources[object]]
 
 		selected_processor = None
-		for _, processor in self.__processors.items():
+		for processor in self.__processors:
 			if(type(object) in processor.understood_types):
 				selected_processor = processor
 				break

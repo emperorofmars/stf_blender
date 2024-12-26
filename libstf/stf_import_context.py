@@ -7,11 +7,11 @@ from .stf_processor import STF_Processor
 
 class STF_ImportContext:
 	__file: STF_File
-	__processors: dict[str, STF_Processor]
+	__processors: list[STF_Processor]
 
 	__imported_resources: dict[str, any] # ID -> imported object
 
-	def __init__(self, file: STF_File, processors: dict[str, STF_Processor]):
+	def __init__(self, file: STF_File, processors: list[STF_Processor]):
 		self.__file = file
 		self.__processors = processors
 
