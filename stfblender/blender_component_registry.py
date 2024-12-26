@@ -11,7 +11,8 @@ class STF_Component(bpy.types.PropertyGroup):
 
 
 class STF_Blender_Component(STF_Processor):
-	panel_bl_idname: str
+	draw_component_func: str
+	filter: list[str]
 
 
 class STFAddComponentOperatorBase:
@@ -64,7 +65,7 @@ def get_component_modules(filter: str = None) -> list[STF_Blender_Component]:
 	return ret
 
 
-def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component: STF_Component):
+def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component: STF_Component, object: any):
 	box = layout.box()
 	box.label(text=component.stf_type)
 	box.label(text=component.stf_id)
@@ -77,7 +78,7 @@ def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, compo
 			break
 
 	if(selected_module):
-		selected_module.draw_component_func(box, context, component)
+		selected_module.draw_component_func(box, context, component, object)
 	else:
 		box.label(text="Unknown Type")
 

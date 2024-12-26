@@ -107,4 +107,4 @@ class STFCollectionPanel(bpy.types.Panel):
 		row.template_list(STFDrawComponentList.bl_idname, "", context.collection, "stf_components", context.collection, "stf_active_component_index")
 		if(len(context.collection.stf_components) > context.collection.stf_active_component_index):
 			row.operator(STFRemoveCollectionComponentOperator.bl_idname, icon="X", text="").index = context.collection.stf_active_component_index
-			draw_component(self.layout, context, context.collection.stf_components[context.collection.stf_active_component_index])
+			draw_component(self.layout, context, context.collection.stf_components[context.collection.stf_active_component_index], context.collection)

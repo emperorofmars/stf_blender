@@ -14,8 +14,8 @@ class AVA_Avatar(bpy.types.PropertyGroup):
 	viewport: bpy.props.StringProperty(name="Viewport") # type: ignore
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component: any):
-	layout.label(text="WOOOOOOOO")
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component: STF_Blender_Component, object: AVA_Avatar):
+	layout.prop(object.stf_ava_avatar, "viewport")
 
 def _stf_import(context: STF_ImportContext, json: dict, id: str) -> any:
 	pass
