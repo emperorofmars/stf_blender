@@ -4,7 +4,7 @@ import bpy
 from ....libstf.stf_import_context import STF_ImportContext
 from ....libstf.stf_export_context import STF_ExportContext
 from ....libstf.stf_processor import STF_Processor
-from ...blender_component_registry import STF_Blender_Component, STF_Component
+from ...component_utils import STF_Blender_Component
 
 
 _stf_type = "ava.avatar"
@@ -24,7 +24,7 @@ def _stf_export(context: STF_ExportContext, object: any) -> tuple[dict, str]:
 	pass
 
 
-class STF_Module_AVA_Avatar(STF_Blender_Component):
+class STF_Module_AVA_Avatar(STF_Blender_Component, STF_Processor):
 	stf_type = _stf_type
 	stf_kind = "component"
 	understood_types = [AVA_Avatar]

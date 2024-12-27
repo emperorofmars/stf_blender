@@ -5,6 +5,7 @@ from .stf_definition import STF_JsonDefinition
 
 
 class STF_File:
+	""" Holds all data of a binary STF file. Provides methods to parse and serialize it to and from a io-buffer, which can be a file. """
 	binary_version_major: int = 0
 	binary_version_minor: int = 0
 	definition: STF_JsonDefinition = STF_JsonDefinition()

@@ -132,6 +132,7 @@ class STF_Buffer_JsonArray:
 
 
 class STF_JsonDefinition:
+	""" Represents the STF Json definition's top level object. """
 	stf: STF_Meta = STF_Meta()
 	resources: dict[str, dict] = dict()
 	buffers: dict[str, STF_Buffer_Included | STF_Buffer_File | STF_Buffer_JsonArray] = dict()

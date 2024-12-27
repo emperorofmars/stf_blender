@@ -4,7 +4,7 @@ import bpy
 from ....libstf.stf_import_context import STF_ImportContext
 from ....libstf.stf_export_context import STF_ExportContext
 from ....libstf.stf_processor import STF_Processor
-from ...blender_component_registry import STF_Component
+from ...component_utils import STF_Component
 
 
 _stf_type = "stf.prefab"
@@ -18,17 +18,6 @@ def _stf_export(context: STF_ExportContext, object: any) -> tuple[dict, str]:
 	if(not collection.stf_id):
 		import uuid
 		collection.stf_id = str(uuid.uuid4())
-
-	print("collection.asset_data")
-	print(collection.asset_data)
-	print("collection.bl_rna")
-	print(collection.bl_rna)
-	print("collection.id_data")
-	print(collection.id_data)
-	print("collection.exporters")
-	print(collection.exporters)
-	print("collection.all_objects")
-	print(collection.all_objects)
 
 	ret = {
 		"type": _stf_type,

@@ -1,7 +1,8 @@
 import bpy
 import uuid
 
-from ...blender_component_registry import STFAddComponentOperatorBase, STFRemoveComponentOperatorBase, draw_component, get_component_modules, draw_component_selection
+from ...id_utils import draw_stf_id_ui
+from ...component_utils import STFAddComponentOperatorBase, STFRemoveComponentOperatorBase, draw_components_ui
 
 
 class STFSetCollectionAsRootOperator(bpy.types.Operator):
@@ -49,20 +50,12 @@ class STFAddCollectionComponentOperator(bpy.types.Operator, STFAddComponentOpera
 	def get_property(self, context):
 		return context.collection
 
+
 class STFRemoveCollectionComponentOperator(bpy.types.Operator, STFRemoveComponentOperatorBase):
 	bl_idname = "stf.remove_collection_component"
 
 	def get_property(self, context):
 		return context.collection
-
-
-
-class STFDrawComponentList(bpy.types.UIList):
-	bl_idname = "COLLECTION_UL_stf_component_list"
-
-	def draw_item(self, context, layout, data, item, icon, active_data, active_propname):
-		layout.label(text=item.stf_type)
-		layout.label(text=item.stf_id)
 
 
 class STFCollectionPanel(bpy.types.Panel):
@@ -91,20 +84,9 @@ class STFCollectionPanel(bpy.types.Panel):
 		self.layout.separator(factor=1, type="SPACE")
 
 		# Set ID
-		if(context.collection.stf_id):
-			self.layout.prop(context.collection, "stf_id")
-		else:
-			self.layout.operator(STFSetCollectionIDOperator.bl_idname)
+		draw_stf_id_ui(self.layout, context, context.collection, STFSetCollectionIDOperator.bl_idname)
 
 		self.layout.separator(factor=2, type="LINE")
 
 		# Components
-		row = self.layout.row()
-		draw_component_selection(row, context, "")
-		row.operator(STFAddCollectionComponentOperator.bl_idname).stf_type = bpy.context.scene.stf_component_modules
-
-		row = self.layout.row()
-		row.template_list(STFDrawComponentList.bl_idname, "", context.collection, "stf_components", context.collection, "stf_active_component_index")
-		if(len(context.collection.stf_components) > context.collection.stf_active_component_index):
-			row.operator(STFRemoveCollectionComponentOperator.bl_idname, icon="X", text="").index = context.collection.stf_active_component_index
-			draw_component(self.layout, context, context.collection.stf_components[context.collection.stf_active_component_index], context.collection)
+		draw_components_ui(self.layout, context, context.collection, STFAddCollectionComponentOperator.bl_idname, STFRemoveCollectionComponentOperator.bl_idname)

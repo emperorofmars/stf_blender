@@ -1,22 +1,23 @@
 import uuid
 import bpy
 
-from ..libstf.stf_registry import get_all_stf_processors
-from ..libstf.stf_processor import STF_Processor
+from ..libstf.stf_registry import get_stf_processors
 
 
 class STF_Component(bpy.types.PropertyGroup):
+	"""This property defines the type and ID, from which the appropriate registered function can handle the correct object"""
 	stf_type: bpy.props.StringProperty(name="Type") # type: ignore
 	stf_id: bpy.props.StringProperty(name="ID") # type: ignore
 
 
-class STF_Blender_Component(STF_Processor):
+class STF_Blender_Component:
+	"""Extension to STF_Processor which also associates a function to draw the component in Blender's UI"""
 	draw_component_func: str
 	filter: list[str]
 
 
 class STFAddComponentOperatorBase:
-	"""Add Component"""
+	"""Base class to add an STF component to a Blender object"""
 	bl_label = "Add Component"
 	bl_category = "STF"
 	bl_options = {"REGISTER", "UNDO"}
@@ -34,6 +35,7 @@ class STFAddComponentOperatorBase:
 
 
 class STFRemoveComponentOperatorBase:
+	"""Base class to remove an STF component from a Blender object"""
 	bl_label = "Remove Component"
 	bl_category = "STF"
 	bl_options = {"REGISTER", "UNDO"}
@@ -51,9 +53,17 @@ class STFRemoveComponentOperatorBase:
 		pass
 
 
+class STFDrawComponentList(bpy.types.UIList):
+	bl_idname = "COLLECTION_UL_stf_component_list"
+
+	def draw_item(self, context, layout, data, item, icon, active_data, active_propname):
+		layout.label(text=item.stf_type)
+		layout.label(text=item.stf_id)
+
+
 def get_component_modules(filter: str = None) -> list[STF_Blender_Component]:
 	ret = []
-	for processor in get_all_stf_processors():
+	for processor in get_stf_processors(bpy.context.preferences.addons.keys()):
 		if(isinstance(processor, STF_Blender_Component) or hasattr(processor, "draw_component_func")):
 			if(hasattr(processor, "filter") and filter):
 				if(filter in getattr(processor, "filter")):
@@ -87,9 +97,27 @@ def draw_component_selection(layout: bpy.types.UILayout, context: bpy.types.Cont
 	layout.prop(bpy.context.scene, "stf_component_modules", text=label)
 
 
+def draw_components_ui(
+		layout: bpy.types.UILayout,
+		context: bpy.types.Context,
+		object: any,
+		add_component_op: str,
+		remove_component_op: str
+		):
+	row = layout.row()
+	draw_component_selection(row, context, "")
+	row.operator(add_component_op).stf_type = context.scene.stf_component_modules
+
+	row = layout.row()
+	row.template_list(STFDrawComponentList.bl_idname, "", object, "stf_components", object, "stf_active_component_index")
+	if(len(object.stf_components) > object.stf_active_component_index):
+		row.operator(remove_component_op, icon="X", text="").index = object.stf_active_component_index
+		draw_component(layout, context, object.stf_components[object.stf_active_component_index], object)
+
+
+
 def _build_stf_component_types_enum_callback(self, context) -> list:
 	return [((module.stf_type, module.stf_type, "")) for module in get_component_modules()]
-
 
 def register():
 	bpy.types.Scene.stf_component_modules = bpy.props.EnumProperty(
