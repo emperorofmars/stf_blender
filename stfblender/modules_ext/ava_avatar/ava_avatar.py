@@ -1,4 +1,3 @@
-
 import bpy
 
 from ....libstf.stf_import_context import STF_ImportContext

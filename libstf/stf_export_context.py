@@ -49,6 +49,9 @@ class STF_ExportContext:
 				self.__exported_resources[id] = resource
 				if(not self.__root_id):
 					self.__root_id = id
+
+				# TODO: run export hooks
+
 				return id
 			else:
 				self.report(STFReport(message="Resource Export Failed", stf_severity=STF_Report_Severity.Error, stf_id=id, stf_type=selected_processor.stf_type, application_object=object))
