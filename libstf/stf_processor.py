@@ -31,7 +31,7 @@ class STF_ExportHook(STF_Processor):
 		To do so, create a STF_ExportHook derived class with 'stf.mesh' as its 'target_stf_type'.
 		It's 'export_func' checks if the model has split normals definitions, and creates a 'stf.mesh.split_normals' component on the underlying 'stf.mesh'.
 	"""
-	target_stf_type: str
+	target_stf_types: list[str]
 
 	# (Export Context, The Application Object) -> (Json Dict, ID)
 	export_hook_func: Callable[[any, any], tuple[dict, str]]
