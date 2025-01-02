@@ -1,9 +1,10 @@
 import io
 from enum import Enum
+from typing import Callable
 
 from .stf_definition import STF_JsonDefinition, STF_Meta_AssetInfo, STF_Profile
 from .stf_report import STF_Report_Severity, STFReport
-from .stf_processor import STF_Processor
+from .stf_processor import STF_ExportComponentHook, STF_Processor
 from .stf_file import STF_File
 
 
@@ -36,16 +37,22 @@ class STF_ExportState:
 
 	_reports: list[STFReport] = []
 
-	def __init__(self, profiles: list[STF_Profile], asset_info: STF_Meta_AssetInfo, processors: list[STF_Processor]):
+	_get_components_from_resource: Callable[[any], list[any]]
+
+	def __init__(self, profiles: list[STF_Profile], asset_info: STF_Meta_AssetInfo, processors: list[STF_Processor], get_components_from_resource: Callable[[any], list[any]]):
 		self._processors = processors
 		self._profiles = profiles
 		self._asset_info = asset_info
+		self._get_components_from_resource = get_components_from_resource
 
 	def determine_processor(self, application_object: any) -> STF_Processor:
 		for processor in self._processors:
 			if(type(application_object) in processor.understood_types):
 				return processor
 		return None
+
+	def get_components(self, application_object: any) -> list[any]:
+		return self._get_components_from_resource(application_object)
 
 	def get_resource_id(self, application_object: any) -> str:
 		if(application_object in self._resources):

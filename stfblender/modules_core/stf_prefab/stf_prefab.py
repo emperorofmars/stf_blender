@@ -51,12 +51,15 @@ def _stf_export(context: STF_RootExportContext, application_object: any) -> tupl
 		if(blender_object.parent == None):
 			root_nodes.append(node_export_context.serialize_resource(blender_object))
 
-	if(len(collection.stf_components) > 0):
+	"""if(len(collection.stf_components) > 0):
 		components = ret["components"] = {}
 		for component in collection.stf_components:
 			print(str(component))
 			print(str(component.stf_id))
 			print(str(component.stf_type))
+			# TODO export components
+
+			#context.serialize_resource()"""
 
 	return ret, collection.stf_id, node_export_context
 
