@@ -1,7 +1,7 @@
 import bpy
 import uuid
 
-from ...utils.id_utils import draw_stf_id_ui
+from ...utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
 from ...utils.component_utils import STFAddComponentOperatorBase, STFRemoveComponentOperatorBase, draw_components_ui, set_stf_component_filter
 
 
@@ -23,39 +23,23 @@ class STFSetCollectionAsRootOperator(bpy.types.Operator):
 		return {"FINISHED"}
 
 
-class STFSetCollectionIDOperator(bpy.types.Operator):
+class STFSetCollectionIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
 	"""Set STF-ID for Collection"""
 	bl_idname = "stf.set_collection_stf_id"
-	bl_label = "Set STF-ID"
-	bl_category = "STF"
-	bl_options = {"REGISTER", "UNDO"}
-
 	@classmethod
-	def poll(cls, context):
-		return context.collection is not None
-
-	def execute(self, context):
-		context.collection.stf_id = str(uuid.uuid4())
-		return {"FINISHED"}
-
+	def poll(cls, context): return context.collection is not None
+	def get_property(self, context): return context.collection
 
 class STFAddCollectionComponentOperator(bpy.types.Operator, STFAddComponentOperatorBase):
 	"""Add Component to Collection"""
 	bl_idname = "stf.add_collection_component"
-
 	@classmethod
-	def poll(cls, context):
-		return context.collection is not None
-
-	def get_property(self, context):
-		return context.collection
-
+	def poll(cls, context): return context.collection is not None
+	def get_property(self, context): return context.collection
 
 class STFRemoveCollectionComponentOperator(bpy.types.Operator, STFRemoveComponentOperatorBase):
 	bl_idname = "stf.remove_collection_component"
-
-	def get_property(self, context):
-		return context.collection
+	def get_property(self, context): return context.collection
 
 
 class STFCollectionPanel(bpy.types.Panel):
@@ -74,6 +58,8 @@ class STFCollectionPanel(bpy.types.Panel):
 	def draw(self, context):
 		from ...export.exporter import ExportSTF
 		set_stf_component_filter(bpy.types.Collection)
+
+		self.layout.label(text="stf.prefab")
 
 		# Export Functionality
 		if(context.scene.stf_root_collection == context.collection):

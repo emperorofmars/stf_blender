@@ -78,16 +78,13 @@ class STF_RootExportContext:
 	def get_profiles(self) -> list[STF_Profile]:
 		return self._state._profiles
 
-	def get_state(self) -> STF_ExportState:
-		return self._state
-
 
 class STF_ResourceExportContext(STF_RootExportContext):
 	_json_resource: dict
 	_parent_context: STF_RootExportContext
 
 	def __init__(self, parent_context: STF_RootExportContext, json_resource: dict):
-		super().__init__(parent_context.get_state())
+		super().__init__(parent_context._state)
 		self._parent_context = parent_context
 		self._json_resource = json_resource
 		self.ensure_resource_properties()

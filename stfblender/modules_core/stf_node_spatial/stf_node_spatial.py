@@ -52,7 +52,7 @@ register_stf_processors = [
 
 
 def register():
-	bpy.types.Object.stf_id = bpy.props.StringProperty(name="Node ID") # type: ignore
+	bpy.types.Object.stf_id = bpy.props.StringProperty(name="ID") # type: ignore
 	bpy.types.Object.stf_components = bpy.props.CollectionProperty(type=STF_Component, name="Components") # type: ignore
 	bpy.types.Object.stf_active_component_index = bpy.props.IntProperty()
 

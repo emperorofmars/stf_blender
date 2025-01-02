@@ -70,21 +70,8 @@ class STF_ExportState:
 		# handle severety
 		self._reports.append(report)
 
-	def get_root_id(self) -> str | None:
+	def get_root_id(self):
 		return self._root_id
-
-	def get_asset_info(self) -> STF_Meta_AssetInfo:
-		return self._asset_info
-
-	def get_profiles(self) -> list[STF_Profile]:
-		return self._profiles
-
-	def get_exported_resources(self) -> dict[str, dict]:
-		return self._exported_resources
-
-	def get_exported_buffers(self) -> dict[str, io.BytesIO]:
-		return self._exported_buffers
-
 
 
 def create_stf_definition(context: STF_ExportState, generator: str = "libstf_python") -> STF_JsonDefinition:
@@ -96,10 +83,10 @@ def create_stf_definition(context: STF_ExportState, generator: str = "libstf_pyt
 	ret.stf.root = context.get_root_id()
 	ret.stf.generator = generator
 	ret.stf.timestamp = datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat()
-	ret.stf.asset_info = context.get_asset_info()
-	ret.stf.profiles = context.get_profiles()
-	ret.resources = context.get_exported_resources()
-	ret.buffers = context.get_exported_buffers()
+	ret.stf.asset_info = context._asset_info
+	ret.stf.profiles = context._profiles
+	ret.resources = context._exported_resources
+	ret.buffers = context._exported_buffers
 	return ret
 
 
