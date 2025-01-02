@@ -1,8 +1,8 @@
 import bpy
 import uuid
 
-from ...id_utils import draw_stf_id_ui
-from ...component_utils import STFAddComponentOperatorBase, STFRemoveComponentOperatorBase, draw_components_ui
+from ...utils.id_utils import draw_stf_id_ui
+from ...utils.component_utils import STFAddComponentOperatorBase, STFRemoveComponentOperatorBase, draw_components_ui
 
 
 class STFSetCollectionAsRootOperator(bpy.types.Operator):

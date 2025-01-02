@@ -3,10 +3,13 @@ import bpy
 from ....libstf.stf_import_context import STF_ImportContext
 from ....libstf.stf_export_context import STF_ExportContext
 from ....libstf.stf_processor import STF_Processor
-from ...component_utils import STF_Component
+from ...utils.component_utils import STF_Component
+
+from ..stf_node_spatial.stf_node_spatial import STF_BlenderNodeExportContext
 
 
 _stf_type = "stf.prefab"
+_stf_type_node = "stf.node.spatial"
 
 
 def _stf_import(context: STF_ImportContext, json: dict, id: str) -> any:
@@ -21,10 +24,22 @@ def _stf_export(context: STF_ExportContext, object: any) -> tuple[dict, str]:
 	ret = {
 		"type": _stf_type,
 		"name": collection.name,
-		"root": None,
-		"nodes": None,
-		"animations": None
+		"nodes": [],
+		"components": [],
+		# "animations": None,
+		"used_resources": [],
+		"used_buffers": [],
 	}
+
+	node_export_context = STF_BlenderNodeExportContext(context, ret)
+	for object in collection.all_objects:
+		node_export_context.export_node(object)
+
+
+	for component in collection.stf_components:
+		print(component)
+
+
 	return ret, collection.stf_id
 
 

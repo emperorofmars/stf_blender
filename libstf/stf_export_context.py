@@ -42,7 +42,6 @@ class STF_ExportContext:
 				break
 
 		if(selected_processor):
-			print(selected_processor)
 			resource, id = selected_processor.export_func(self, object)
 			if(resource and id):
 				self.__resources[object] = resource
@@ -50,7 +49,11 @@ class STF_ExportContext:
 				if(not self.__root_id):
 					self.__root_id = id
 
-				# TODO: run export hooks
+				# Export components from application native constructs
+				for processor in self.__processors:
+					if(hasattr(processor, "target_stf_types") and hasattr(processor, "export_hook_func") and selected_processor.stf_type in getattr(processor, "target_stf_types")):
+						export_hook_func = getattr(processor, "export_hook_func")
+						export_hook_func(STF_DataExportContext(self, resource), object)
 
 				return id
 			else:
@@ -65,11 +68,9 @@ class STF_ExportContext:
 		id = uuid.uuid4()
 		self.__exported_buffers[id] = data
 
-
 	def report(self, report: STFReport):
 		# handle severety
 		self.__reports.append(report)
-
 
 	def get_root_id(self) -> str | None:
 		return self.__root_id
@@ -87,15 +88,39 @@ class STF_ExportContext:
 		return self.__exported_buffers
 
 
+
 class STF_DataExportContext:
 	__context: STF_ExportContext
 	__resource: dict
+
 	def __init__(self, context: STF_ExportContext, resource: dict):
 		self.__context = context
+		self.__resource = resource
 
-	def serialize_resource(self, resource: object) -> int:
-		#self.__resource["referenced_resources"][index]
-		pass
+	def serialize_resource(self, resource: object):
+		id = self.__context.serialize_resource(resource)
+		self.__resource.referenced_resources.append(id)
+
+	def serialize_buffer(self, data: io.BytesIO) -> str:
+		import uuid
+		id = uuid.uuid4()
+		self.__context.__exported_buffers[id] = data
+		self.__resource.referenced_buffers.append(id)
+		return id
+
+	def report(self, report: STFReport):
+		# handle severety
+		self.__context.__reports.append(report)
+
+	def get_root_id(self) -> str | None:
+		return self.__context.__root_id
+
+	def get_asset_info(self) -> STF_Meta_AssetInfo:
+		return self.__context.__asset_info
+
+	def get_profiles(self) -> list[STF_Profile]:
+		return self.__context.__profiles
+
 
 
 def create_stf_definition(context: STF_ExportContext, generator: str = "libstf_python") -> STF_JsonDefinition:

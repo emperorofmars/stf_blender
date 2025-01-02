@@ -1,7 +1,7 @@
 import uuid
 import bpy
 
-from ..libstf.stf_registry import get_stf_processors
+from ...libstf.stf_registry import get_stf_processors
 
 
 class STF_Component(bpy.types.PropertyGroup):

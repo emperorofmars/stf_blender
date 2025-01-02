@@ -3,7 +3,7 @@ import bpy
 from ....libstf.stf_import_context import STF_ImportContext
 from ....libstf.stf_export_context import STF_ExportContext
 from ....libstf.stf_processor import STF_Processor
-from ...component_utils import STF_Blender_Component
+from ...utils.component_utils import STF_Blender_Component
 
 
 _stf_type = "ava.avatar"
