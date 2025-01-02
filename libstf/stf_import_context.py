@@ -1,33 +1,34 @@
 import io
+from typing import Callable
 
+from .stf_import_state import STF_ImportState
 from .stf_report import STFReport
-from .stf_file import STF_File
-from .stf_processor import STF_Processor
+from .stf_util import run_tasks
 
 
 class STF_ImportContext:
-	__file: STF_File
-	__processors: list[STF_Processor]
+	_state: STF_ImportState
 
-	__imported_resources: dict[str, any] # ID -> imported object
+	_tasks: list[Callable] = []
 
-	def __init__(self, file: STF_File, processors: list[STF_Processor]):
-		self.__file = file
-		self.__processors = processors
+	def __init__(self, state: STF_ImportState):
+		self._state = state
 
 	def import_resource(self, id: str) -> any:
 		pass
 
 	def import_buffer(self, id: str) -> io.BytesIO:
-		pass
+		return self._state.import_buffer(id)
 
 	def get_json_resource(self, id: int) -> dict:
-		pass
+		return self._state.get_json_resource(id)
 
 	def get_root_id(self) -> str:
-		return self.__file.definition.stf.root
-
+		return self._state._file.definition.stf.root
 
 	def report(self, report: STFReport):
-		pass
+		self._state.report(report)
+
+	def run_tasks(self):
+		run_tasks(self)
 

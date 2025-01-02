@@ -11,6 +11,8 @@ _stf_type = "ava.constraint.twist"
 
 class AVA_Constraint_Twist(bpy.types.PropertyGroup):
 	stf_id: bpy.props.StringProperty(name="ID") # type: ignore
+	stf_name: bpy.props.StringProperty(name="Name") # type: ignore
+
 	weight: bpy.props.FloatProperty(name="Weight", default=0.5) # type: ignore
 
 

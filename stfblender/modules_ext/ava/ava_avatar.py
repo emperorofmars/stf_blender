@@ -11,6 +11,8 @@ _stf_type = "ava.avatar"
 
 class AVA_Avatar(bpy.types.PropertyGroup):
 	stf_id: bpy.props.StringProperty(name="ID") # type: ignore
+	stf_name: bpy.props.StringProperty(name="Name") # type: ignore
+
 	viewport: bpy.props.StringProperty(name="Viewport") # type: ignore
 
 

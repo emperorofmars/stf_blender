@@ -1,9 +1,11 @@
 import io
 from typing import Callable
 
+
 from .stf_export_state import STF_ExportState
 from .stf_definition import STF_Meta_AssetInfo, STF_Profile
 from .stf_report import STF_Report_Severity, STFReport
+from .stf_util import run_tasks
 
 
 class STF_RootExportContext:
@@ -58,18 +60,9 @@ class STF_RootExportContext:
 		self._tasks.append(task)
 
 	def run_tasks(self):
-		max_iterations = 1000
-		while(len(self._tasks) > 0 and max_iterations > 0):
-			taskset = self._tasks
-			self._tasks = []
-			for task in taskset:
-				task()
-			max_iterations -= 1
-		if(len(self._tasks) > 0):
-			self.report(STFReport(message="Recursion", severity=STF_Report_Severity.Error))
+		run_tasks(self)
 
 	def report(self, report: STFReport):
-		# handle severety
 		self._state.report(report)
 
 	def get_root_id(self) -> str | None:
