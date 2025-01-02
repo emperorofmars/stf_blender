@@ -12,8 +12,8 @@ class STF_Processor:
 	# (Import Context, Json Dict, ID) -> The Application Object
 	import_func: Callable[[any, dict, str], any]
 
-	# (Export Context, The Application Object) -> (Json Dict, ID)
-	export_func: Callable[[any, any], tuple[dict, str]]
+	# (Export Context, The Application Object) -> (Json Dict, ID, Export Context)
+	export_func: Callable[[any, any], tuple[dict, str, any]]
 
 	# Behaves like this type. For example a 'my.custom.super_fancy_mesh' can be like 'stf.mesh'.
 	like_stf_type: str | None
@@ -28,10 +28,11 @@ class STF_ExportHook(STF_Processor):
 		For example, split normals are not defined as an explicit STF component in Blender, they are just a Blender native thing.
 		The basic 'stf.mesh' STF resource doesn't support specifiying split normals.
 
-		To do so, create a STF_ExportHook derived class with 'stf.mesh' as its 'target_stf_type'.
-		It's 'export_func' checks if the model has split normals definitions, and creates a 'stf.mesh.split_normals' component on the underlying 'stf.mesh'.
+		To do so, create a STF_ExportHook derived class with 'bpy.types.Mesh' as its 'target_application_types'.
+		It's 'export_hook_func' checks if the model has split normals definitions, and creates a 'stf.mesh.split_normals' component on the underlying 'stf.mesh' resource.
 	"""
-	target_stf_types: list[str]
+	# List of application types this processor can hook into
+	target_application_types: list = []
 
-	# (Export Context, The Application Object) -> (Json Dict, ID)
-	export_hook_func: Callable[[any, any], tuple[dict, str]]
+	# (Export Context, The Application Object) -> (Json Dict, ID, Export Context)
+	export_hook_func: Callable[[any, any], tuple[dict, str, any]]

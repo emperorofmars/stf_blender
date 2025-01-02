@@ -3,9 +3,10 @@ import bpy
 from bpy_extras.io_utils import ExportHelper
 
 from ...libstf.stf_registry import get_stf_processors
+from ...libstf.stf_export_state import STF_ExportState, create_stf_binary_file, create_stf_definition
+from ...libstf.stf_export_context import STF_RootExportContext
 from ...libstf.stf_report import STFException
 from ...libstf.stf_definition import STF_Meta_AssetInfo
-from ...libstf.stf_export_context import STF_ExportContext, create_stf_binary_file, create_stf_definition
 
 
 class ExportSTF(bpy.types.Operator, ExportHelper):
@@ -39,12 +40,13 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 			processors = get_stf_processors(bpy.context.preferences.addons.keys())
 
 			# TODO: configure profiles, generate asset info
-			stf_context = STF_ExportContext(profiles=[], asset_info=STF_Meta_AssetInfo(), processors=processors)
 
-			# run modules to actually generate this definition
-			stf_context.serialize_resource(collection)
+			stf_state = STF_ExportState(profiles=[], asset_info=STF_Meta_AssetInfo(), processors=processors)
+			stf_context = STF_RootExportContext(stf_state)
+			root_id = stf_context.serialize_resource(collection)
+			stf_context.run_tasks()
 
-			if(not stf_context.get_root_id()):
+			if(not stf_state.get_root_id()):
 				raise Exception("Export Failed")
 
 			if(self.format == "binary"):
@@ -53,13 +55,13 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 					export_filepath += ".stf"
 
 				# Create and write stf_file to disk
-				stf_file = create_stf_binary_file(stf_context)
+				stf_file = create_stf_binary_file(stf_state)
 				files.append(open(export_filepath, "wb"))
 				stf_file.serialize(files[len(files) - 1])
 
 				if(self.debug):
 					# Also write out the json itself for debugging purposes
-					json_string = json.dumps(stf_file.definition.to_dict()).encode(encoding="utf-8")
+					json_string = json.dumps(stf_file.definition.to_dict(), indent="\t").encode(encoding="utf-8")
 					files.append(open(export_filepath + ".json", "wb"))
 					files[len(files) - 1].write(json_string)
 
@@ -71,7 +73,7 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 					else:
 						export_filepath += ".stf.json"
 
-				stf_definition = create_stf_definition(stf_context, self.format)
+				stf_definition = create_stf_definition(stf_state, self.format)
 				json_string = json.dumps(stf_definition.to_dict()).encode(encoding="utf-8")
 				files.append(open(export_filepath, "wb"))
 				files[len(files) - 1].write(json_string)
@@ -84,13 +86,18 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 					else:
 						export_filepath += ".stf.json"
 
-				stf_definition = create_stf_definition(stf_context, self.format)
+				stf_definition = create_stf_definition(stf_state, self.format)
 				# TODO generate all buffers as files as well
 				json_string = json.dumps(stf_definition.to_dict()).encode(encoding="utf-8")
 				files.append(open(export_filepath, "wb"))
 				files[len(files) - 1].write(json_string)
 
-			self.report({'INFO'}, "STF asset exported successfully!")
+			if(len(stf_state._reports) > 0):
+				self.report({'WARNING'}, "STF asset exported with reports!")
+				for report in stf_state._reports:
+					print(report.to_string())
+			else:
+				self.report({'INFO'}, "STF asset exported successfully!")
 			return {"FINISHED"}
 		except STFException as error:
 			self.report({'ERROR'}, str(error))

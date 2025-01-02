@@ -23,6 +23,15 @@ class STFReport:
 		self.stf_type = stf_type
 		self.application_object = application_object
 
+	def to_string(self) -> str:
+		self.severity.name
+		ret = "== STF " + self.severity.name + " =="
+		if(self.stf_type): ret += "\nSTF Type: " + self.stf_type
+		if(self.stf_id): ret += "\nID: " + self.stf_id
+		if(self.application_object is not None): ret += "\nApp Object: " + str(self.application_object)
+		ret += "\nMessage:\n" + self.message
+		return ret
+
 
 class STFException(Exception):
 	stf_report: STFReport

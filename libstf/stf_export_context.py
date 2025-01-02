@@ -1,147 +1,111 @@
 import io
-from enum import Enum
+from typing import Callable
 
-from .stf_definition import STF_JsonDefinition, STF_Meta_AssetInfo, STF_Profile
+from .stf_export_state import STF_ExportState
+from .stf_definition import STF_Meta_AssetInfo, STF_Profile
 from .stf_report import STF_Report_Severity, STFReport
-from .stf_processor import STF_Processor
-from .stf_file import STF_File
 
 
-class STF_Buffer_Mode(Enum):
-	included_binary = 0
-	included_json = 1
-	external = 1
+def run_export_hooks(self, object: any, object_ctx: any):
+	for processor in self._state._processors:
+		if(hasattr(processor, "target_application_types") and hasattr(processor, "export_hook_func") and type(object) in getattr(processor, "target_application_types")):
+			export_hook_func = getattr(processor, "export_hook_func")
+			export_hook_func(object_ctx, object)
+
+def export_components(self, object: any, object_ctx: any):
+	pass
 
 
-class STF_ExportContext:
-	__processors: list[STF_Processor]
+class STF_RootExportContext:
+	_state: STF_ExportState
 
-	__root_id: str = None
-	__resources: dict[any, str] = {} # original object -> ID of exported STF Json resource
-	__exported_resources: dict[str, dict] = {} # ID -> exported STF Json resource
-	__exported_buffers: dict[str, io.BytesIO] = {} # ID -> exported STF Json buffer
+	_tasks: list[Callable] = []
 
-	__profiles: list[STF_Profile]
-	__asset_info: STF_Meta_AssetInfo
+	def __init__(self, state: STF_ExportState):
+		self._state = state
 
-	__reports: list[STFReport] = []
+	def get_resource_id(self, application_object: any) -> str | None:
+		return self._state.get_resource_id(application_object)
 
-	def __init__(self, profiles: list[STF_Profile], asset_info: STF_Meta_AssetInfo, processors: list[STF_Processor]):
-		self.__processors = processors
-		self.__profiles = profiles
-		self.__asset_info = asset_info
+	def register_serialized_resource(self, application_object: any, json_resource: dict, id: str):
+		self._state.register_serialized_resource(application_object, json_resource, id)
 
-	def serialize_resource(self, object: any) -> str | None:
-		if(object in self.__resources):
-			return self.__exported_resources[self.__resources[object]]
+	def serialize_resource(self, application_object: any) -> str | None:
+		if(application_object == None): return None
+		if(id := self.get_resource_id(application_object)): return id
 
-		selected_processor = None
-		for processor in self.__processors:
-			if(type(object) in processor.understood_types):
-				selected_processor = processor
-				break
-
-		if(selected_processor):
-			resource, id = selected_processor.export_func(self, object)
-			if(resource and id):
-				self.__resources[object] = resource
-				self.__exported_resources[id] = resource
-				if(not self.__root_id):
-					self.__root_id = id
+		if(selected_processor := self._state.determine_processor(application_object)):
+			json_resource, id, ctx = selected_processor.export_func(self, application_object)
+			if(json_resource and id and ctx):
+				self.register_serialized_resource(application_object, json_resource, id)
 
 				# Export components from application native constructs
-				for processor in self.__processors:
-					if(hasattr(processor, "target_stf_types") and hasattr(processor, "export_hook_func") and selected_processor.stf_type in getattr(processor, "target_stf_types")):
-						export_hook_func = getattr(processor, "export_hook_func")
-						export_hook_func(STF_DataExportContext(self, resource), object)
+				run_export_hooks(self, application_object, ctx)
+
+				export_components(self, application_object, ctx)
 
 				return id
 			else:
-				self.report(STFReport(message="Resource Export Failed", stf_severity=STF_Report_Severity.Error, stf_id=id, stf_type=selected_processor.stf_type, application_object=object))
+				self.report(STFReport(message="Resource Export Failed", severity=STF_Report_Severity.Error, stf_id=id, stf_type=selected_processor.stf_type, application_object=application_object))
 		else:
-			self.report(STFReport(message="NO Processor Found!", stf_severity=STF_Report_Severity.Error, application_object=object))
+			self.report(STFReport(message="NO Processor Found", severity=STF_Report_Severity.Error, application_object=application_object))
 		return None
 
 	def serialize_buffer(self, data: io.BytesIO) -> str:
-		import uuid
+		return self._state.serialize_buffer(data)
 
-		id = uuid.uuid4()
-		self.__exported_buffers[id] = data
+	def add_task(self, task: Callable):
+		self._tasks.append(task)
+
+	def run_tasks(self):
+		max_iterations = 1000
+		while(len(self._tasks) > 0 and max_iterations > 0):
+			taskset = self._tasks
+			self._tasks = []
+			for task in taskset:
+				task()
+			max_iterations -= 1
+		if(len(self._tasks) > 0):
+			self.report(STFReport(message="Recursion", severity=STF_Report_Severity.Error))
 
 	def report(self, report: STFReport):
 		# handle severety
-		self.__reports.append(report)
+		self._state.report(report)
 
 	def get_root_id(self) -> str | None:
-		return self.__root_id
+		return self._state._root_id
 
 	def get_asset_info(self) -> STF_Meta_AssetInfo:
-		return self.__asset_info
+		return self._state._asset_info
 
 	def get_profiles(self) -> list[STF_Profile]:
-		return self.__profiles
+		return self._state._profiles
 
-	def get_exported_resources(self) -> dict[str, dict]:
-		return self.__exported_resources
-
-	def get_exported_buffers(self) -> dict[str, io.BytesIO]:
-		return self.__exported_buffers
+	def get_state(self) -> STF_ExportState:
+		return self._state
 
 
+class STF_ResourceExportContext(STF_RootExportContext):
+	_json_resource: dict
 
-class STF_DataExportContext:
-	__context: STF_ExportContext
-	__resource: dict
+	def __init__(self, parent_context: STF_RootExportContext, json_resource: dict):
+		super().__init__(parent_context.get_state())
+		self._json_resource = json_resource
+		self.ensure_resource_properties()
 
-	def __init__(self, context: STF_ExportContext, resource: dict):
-		self.__context = context
-		self.__resource = resource
+	def ensure_resource_properties(self):
+		if(not hasattr(self._json_resource, "referenced_resources")):
+			self._json_resource["referenced_resources"] = []
+		if(not hasattr(self._json_resource, "referenced_buffers")):
+			self._json_resource["referenced_buffers"] = []
 
-	def serialize_resource(self, resource: object):
-		id = self.__context.serialize_resource(resource)
-		self.__resource.referenced_resources.append(id)
+	def register_serialized_resource(self, application_object: any, json_resource: dict, id: str):
+		super().register_serialized_resource(application_object, json_resource, id)
+		if(id and id not in self._json_resource["referenced_resources"]):
+			self._json_resource["referenced_resources"].append(id)
 
 	def serialize_buffer(self, data: io.BytesIO) -> str:
-		import uuid
-		id = uuid.uuid4()
-		self.__context.__exported_buffers[id] = data
-		self.__resource.referenced_buffers.append(id)
+		id = super().serialize_buffer(data)
+		self._json_resource["referenced_buffers"].append(id)
 		return id
 
-	def report(self, report: STFReport):
-		# handle severety
-		self.__context.__reports.append(report)
-
-	def get_root_id(self) -> str | None:
-		return self.__context.__root_id
-
-	def get_asset_info(self) -> STF_Meta_AssetInfo:
-		return self.__context.__asset_info
-
-	def get_profiles(self) -> list[STF_Profile]:
-		return self.__context.__profiles
-
-
-
-def create_stf_definition(context: STF_ExportContext, generator: str = "libstf_python") -> STF_JsonDefinition:
-	import datetime
-
-	ret = STF_JsonDefinition()
-	ret.stf.version_major = 0
-	ret.stf.version_minor = 0
-	ret.stf.root = context.get_root_id()
-	ret.stf.generator = generator
-	ret.stf.timestamp = datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat()
-	ret.stf.asset_info = context.get_asset_info()
-	ret.stf.profiles = context.get_profiles()
-	ret.resources = context.get_exported_resources()
-	ret.buffers = context.get_exported_buffers()
-	return ret
-
-
-def create_stf_binary_file(context: STF_ExportContext, generator: str = "libstf_python") -> STF_File:
-	ret = STF_File()
-	ret.binary_version_major = 0
-	ret.binary_version_minor = 0
-	ret.definition = create_stf_definition(context, generator)
-	return ret

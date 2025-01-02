@@ -1,60 +1,54 @@
 import bpy
 
 from ....libstf.stf_import_context import STF_ImportContext
-from ....libstf.stf_export_context import STF_DataExportContext, STF_ExportContext
 from ....libstf.stf_processor import STF_Processor
 from ...utils.component_utils import STF_Component
+from ...utils.id_utils import ensure_stf_id
+from ...utils.trs_utils import to_trs
+from ..stf_prefab.stf_prefab import STF_BlenderNodeExportContext
 
 
 _stf_type = "stf.node.spatial"
 
 
-def stf_import(context: STF_ImportContext, json: dict, id: str) -> any:
+def _stf_import(context: STF_ImportContext, json: dict, id: str) -> any:
 	pass
 
 
-class STF_BlenderNodeExportContext(STF_DataExportContext):
-	def export_node(self, blender_object: bpy.types.Object) -> str:
-		if(blender_object.stf_id and blender_object.stf_id in self.__resource["nodes"].keys()):
-			return blender_object.stf_id
-		else:
-			# determine this from the registry
-			(node, id) = stf_export(self, blender_object)
-			self.__resource["nodes"][id] = node
-			return id
-
-def stf_export(context: STF_BlenderNodeExportContext, object: any) -> tuple[dict, str]:
+def _stf_export(context: STF_BlenderNodeExportContext, object: any) -> tuple[dict, str, any]:
 	blender_object: bpy.types.Object = object
-	if(not blender_object.stf_id):
-		import uuid
-		blender_object.stf_id = str(uuid.uuid4())
+	ensure_stf_id(blender_object)
 
 	children = []
 	for child in blender_object.children:
-		children.append(context.export_node(child))
-
-	# TODO: handle: blender_object.parent_type
-
-	parent = None
-	if(blender_object.parent):
-		parent = context.export_node(parent)
+		children.append(context.serialize_resource(child))
 
 	node = {
 		"type": _stf_type,
 		"name": blender_object.name,
-		"trs": [
-			blender_object.delta_location,
-			blender_object.delta_rotation_quaternion,
-			blender_object.delta_scale,
-		],
-		"parent": parent,
-		"children": children,
-		"components": [],
+		"trs": to_trs(blender_object.location, blender_object.rotation_quaternion, blender_object.scale),
+		"children": children
 	}
 
-	# TODO: handle node components
+	# TODO: handle: blender_object.parent_type
+	if(blender_object.parent):
+		def set_parent():
+			node["parent"] = context.serialize_resource(blender_object.parent)
+		context.add_task(set_parent)
+	return node, blender_object.stf_id, context
 
-	return (node, blender_object.stf_id)
+
+class STF_Module_STF_Node_Spatial(STF_Processor):
+	stf_type = _stf_type
+	stf_kind = "node"
+	understood_types = [bpy.types.Object]
+	import_func = _stf_import
+	export_func = _stf_export
+
+
+register_stf_processors = [
+	STF_Module_STF_Node_Spatial
+]
 
 
 def register():

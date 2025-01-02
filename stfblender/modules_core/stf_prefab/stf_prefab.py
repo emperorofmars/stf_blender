@@ -1,46 +1,55 @@
 import bpy
 
 from ....libstf.stf_import_context import STF_ImportContext
-from ....libstf.stf_export_context import STF_ExportContext
+from ....libstf.stf_export_context import STF_ResourceExportContext, STF_RootExportContext
 from ....libstf.stf_processor import STF_Processor
 from ...utils.component_utils import STF_Component
-
-from ..stf_node_spatial.stf_node_spatial import STF_BlenderNodeExportContext
+from ...utils.id_utils import ensure_stf_id
 
 
 _stf_type = "stf.prefab"
-_stf_type_node = "stf.node.spatial"
+
+
+class STF_BlenderNodeExportContext(STF_ResourceExportContext):
+	def ensure_resource_properties(self):
+		super().ensure_resource_properties()
+		if(not hasattr(self._json_resource, "nodes")):
+			self._json_resource["nodes"] = {}
+
+	def get_resource_id(self, application_object: any) -> str | None:
+		if(type(application_object) is bpy.types.Object):
+			if(application_object.stf_id and application_object.stf_id in self._json_resource["nodes"].keys()):
+				return application_object.stf_id
+			else:
+				return None
+		else:
+			return super().get_resource_id(application_object)
+
+	def register_serialized_resource(self, application_object: any, json_resource: dict, id: str):
+		if(type(application_object) is bpy.types.Object):
+			self._json_resource["nodes"][id] = json_resource
+		else:
+			super().register_serialized_resource(application_object, json_resource, id)
 
 
 def _stf_import(context: STF_ImportContext, json: dict, id: str) -> any:
 	pass
 
-def _stf_export(context: STF_ExportContext, object: any) -> tuple[dict, str]:
-	collection: bpy.types.Collection = object
-	if(not collection.stf_id):
-		import uuid
-		collection.stf_id = str(uuid.uuid4())
+def _stf_export(context: STF_RootExportContext, application_object: any) -> tuple[dict, str, any]:
+	collection: bpy.types.Collection = application_object
+	ensure_stf_id(collection)
 
 	ret = {
 		"type": _stf_type,
 		"name": collection.name,
-		"nodes": [],
-		"components": [],
-		# "animations": None,
-		"used_resources": [],
-		"used_buffers": [],
 	}
 
 	node_export_context = STF_BlenderNodeExportContext(context, ret)
-	for object in collection.all_objects:
-		node_export_context.export_node(object)
+	for blender_object in collection.all_objects:
+		if(blender_object.parent == None):
+			node_export_context.serialize_resource(blender_object)
 
-
-	for component in collection.stf_components:
-		print(component)
-
-
-	return ret, collection.stf_id
+	return ret, collection.stf_id, node_export_context
 
 
 class STF_Module_STF_Prefab(STF_Processor):

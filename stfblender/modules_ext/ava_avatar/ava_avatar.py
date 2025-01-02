@@ -1,7 +1,6 @@
 import bpy
 
 from ....libstf.stf_import_context import STF_ImportContext
-from ....libstf.stf_export_context import STF_ExportContext
 from ....libstf.stf_processor import STF_Processor
 from ...utils.component_utils import STF_Blender_Component
 
@@ -19,7 +18,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 def _stf_import(context: STF_ImportContext, json: dict, id: str) -> any:
 	pass
 
-def _stf_export(context: STF_ExportContext, object: any) -> tuple[dict, str]:
+def _stf_export(context: any, object: any) -> tuple[dict, str]:
 	pass
 
 
