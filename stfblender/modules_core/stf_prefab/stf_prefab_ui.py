@@ -2,7 +2,7 @@ import bpy
 import uuid
 
 from ...utils.id_utils import draw_stf_id_ui
-from ...utils.component_utils import STFAddComponentOperatorBase, STFRemoveComponentOperatorBase, draw_components_ui
+from ...utils.component_utils import STFAddComponentOperatorBase, STFRemoveComponentOperatorBase, draw_components_ui, set_stf_component_filter
 
 
 class STFSetCollectionAsRootOperator(bpy.types.Operator):
@@ -73,6 +73,7 @@ class STFCollectionPanel(bpy.types.Panel):
 
 	def draw(self, context):
 		from ...export.exporter import ExportSTF
+		set_stf_component_filter(bpy.types.Collection)
 
 		# Export Functionality
 		if(context.scene.stf_root_collection == context.collection):

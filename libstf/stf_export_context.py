@@ -6,12 +6,6 @@ from .stf_definition import STF_Meta_AssetInfo, STF_Profile
 from .stf_report import STF_Report_Severity, STFReport
 
 
-def run_export_hooks(self, object: any, object_ctx: any):
-	for processor in self._state._processors:
-		if(hasattr(processor, "target_application_types") and hasattr(processor, "export_hook_func") and type(object) in getattr(processor, "target_application_types")):
-			export_hook_func = getattr(processor, "export_hook_func")
-			export_hook_func(object_ctx, object)
-
 def export_components(self, object: any, object_ctx: any):
 	pass
 
@@ -40,7 +34,10 @@ class STF_RootExportContext:
 				self.register_serialized_resource(application_object, json_resource, id)
 
 				# Export components from application native constructs
-				run_export_hooks(self, application_object, ctx)
+				for processor in self._state._processors:
+					if(hasattr(processor, "target_application_types") and hasattr(processor, "export_hook_func") and type(object) in getattr(processor, "target_application_types")):
+						export_hook_func = getattr(processor, "export_hook_func")
+						export_hook_func(ctx, object)
 
 				export_components(self, application_object, ctx)
 
@@ -87,9 +84,11 @@ class STF_RootExportContext:
 
 class STF_ResourceExportContext(STF_RootExportContext):
 	_json_resource: dict
+	_parent_context: STF_RootExportContext
 
 	def __init__(self, parent_context: STF_RootExportContext, json_resource: dict):
 		super().__init__(parent_context.get_state())
+		self._parent_context = parent_context
 		self._json_resource = json_resource
 		self.ensure_resource_properties()
 
@@ -108,4 +107,7 @@ class STF_ResourceExportContext(STF_RootExportContext):
 		id = super().serialize_buffer(data)
 		self._json_resource["referenced_buffers"].append(id)
 		return id
+
+	def add_task(self, task):
+		return self._parent_context.add_task(task)
 

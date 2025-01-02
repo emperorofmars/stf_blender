@@ -1,0 +1,54 @@
+import bpy
+
+from ....libstf.stf_import_context import STF_ImportContext
+from ....libstf.stf_processor import STF_Processor
+from ...utils.component_utils import STF_Blender_Component
+
+
+_stf_type = "ava.constraint.twist"
+
+
+class AVA_Constraint_Twist(bpy.types.PropertyGroup):
+	stf_id: bpy.props.StringProperty(name="ID") # type: ignore
+	weight: bpy.props.FloatProperty(name="Weight", default=0.5) # type: ignore
+
+
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Blender_Component, object: any, component: AVA_Constraint_Twist):
+	layout.prop(component, "weight")
+
+
+def _stf_import(context: STF_ImportContext, json: dict, id: str) -> any:
+	pass
+
+def _stf_export(context: any, object: any) -> tuple[dict, str, any]:
+	pass
+
+
+class STF_Module_AVA_Constraint_Twist(STF_Blender_Component, STF_Processor):
+	stf_type = _stf_type
+	stf_kind = "component"
+	understood_types = [AVA_Constraint_Twist]
+	import_func = _stf_import
+	export_func = _stf_export
+
+	blender_property_name = "stf_ava_constraint_twist"
+	single = True
+	filter = [bpy.types.Object, bpy.types.Bone]
+	draw_component_func = _draw_component
+
+
+register_stf_processors = [
+	STF_Module_AVA_Constraint_Twist
+]
+
+
+def register():
+	bpy.types.Object.stf_ava_constraint_twist = bpy.props.CollectionProperty(type=AVA_Constraint_Twist) # type: ignore
+	bpy.types.Bone.stf_ava_constraint_twist = bpy.props.CollectionProperty(type=AVA_Constraint_Twist) # type: ignore
+
+def unregister():
+	if hasattr(bpy.types.Object, "stf_ava_constraint_twist"):
+		del bpy.types.Object.stf_ava_constraint_twist
+	if hasattr(bpy.types.Bone, "stf_ava_constraint_twist"):
+		del bpy.types.Bone.stf_ava_constraint_twist
+

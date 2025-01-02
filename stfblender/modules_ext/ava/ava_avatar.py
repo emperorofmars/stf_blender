@@ -9,16 +9,18 @@ _stf_type = "ava.avatar"
 
 
 class AVA_Avatar(bpy.types.PropertyGroup):
+	stf_id: bpy.props.StringProperty(name="ID") # type: ignore
 	viewport: bpy.props.StringProperty(name="Viewport") # type: ignore
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component: STF_Blender_Component, object: AVA_Avatar):
-	layout.prop(object.stf_ava_avatar, "viewport")
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Blender_Component, object: any, component: AVA_Avatar):
+	layout.prop(component, "viewport")
+
 
 def _stf_import(context: STF_ImportContext, json: dict, id: str) -> any:
 	pass
 
-def _stf_export(context: any, object: any) -> tuple[dict, str]:
+def _stf_export(context: any, object: any) -> tuple[dict, str, any]:
 	pass
 
 
@@ -28,8 +30,11 @@ class STF_Module_AVA_Avatar(STF_Blender_Component, STF_Processor):
 	understood_types = [AVA_Avatar]
 	import_func = _stf_import
 	export_func = _stf_export
+
+	blender_property_name = "stf_ava_avatar"
+	single = True
+	filter = [bpy.types.Collection]
 	draw_component_func = _draw_component
-	filter = ["collection"]
 
 
 register_stf_processors = [
@@ -38,7 +43,7 @@ register_stf_processors = [
 
 
 def register():
-	bpy.types.Collection.stf_ava_avatar = bpy.props.PointerProperty(type=AVA_Avatar) # type: ignore
+	bpy.types.Collection.stf_ava_avatar = bpy.props.CollectionProperty(type=AVA_Avatar) # type: ignore
 
 def unregister():
 	if hasattr(bpy.types.Collection, "stf_ava_avatar"):

@@ -31,10 +31,10 @@ def _stf_export(context: STF_BlenderNodeExportContext, object: any) -> tuple[dic
 	}
 
 	# TODO: handle: blender_object.parent_type
-	if(blender_object.parent):
+	"""if(blender_object.parent):
 		def set_parent():
 			node["parent"] = context.serialize_resource(blender_object.parent)
-		context.add_task(set_parent)
+		context.add_task(set_parent)"""
 	return node, blender_object.stf_id, context
 
 
@@ -52,7 +52,7 @@ register_stf_processors = [
 
 
 def register():
-	bpy.types.Object.stf_id = bpy.props.StringProperty(name="Prefab ID") # type: ignore
+	bpy.types.Object.stf_id = bpy.props.StringProperty(name="Node ID") # type: ignore
 	bpy.types.Object.stf_components = bpy.props.CollectionProperty(type=STF_Component, name="Components") # type: ignore
 	bpy.types.Object.stf_active_component_index = bpy.props.IntProperty()
 

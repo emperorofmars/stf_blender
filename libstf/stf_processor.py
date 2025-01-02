@@ -34,5 +34,5 @@ class STF_ExportHook(STF_Processor):
 	# List of application types this processor can hook into
 	target_application_types: list = []
 
-	# (Export Context, The Application Object) -> (Json Dict, ID, Export Context)
+	# (Export Context, The targeted Application Object) -> (Json Dict, ID, Export Context)
 	export_hook_func: Callable[[any, any], tuple[dict, str, any]]

@@ -1,6 +1,8 @@
+from typing import Callable
 import uuid
 import bpy
 
+from ...libstf.stf_processor import STF_Processor
 from ...libstf.stf_registry import get_stf_processors
 
 
@@ -10,10 +12,11 @@ class STF_Component(bpy.types.PropertyGroup):
 	stf_id: bpy.props.StringProperty(name="ID") # type: ignore
 
 
-class STF_Blender_Component:
+class STF_Blender_Component(STF_Processor):
 	"""Extension to STF_Processor which also associates a function to draw the component in Blender's UI"""
-	draw_component_func: str
-	filter: list[str]
+	blender_property_name: str
+	filter: list
+	draw_component_func: Callable
 
 
 class STFAddComponentOperatorBase:
@@ -23,11 +26,16 @@ class STFAddComponentOperatorBase:
 	bl_options = {"REGISTER", "UNDO"}
 
 	stf_type: bpy.props.StringProperty(name="Type") # type: ignore
+	property_name: bpy.props.StringProperty() # type: ignore
 
 	def execute(self, context):
-		new_item: STF_Component = self.get_property(context).stf_components.add()
-		new_item.stf_id = str(uuid.uuid4())
-		new_item.stf_type = self.stf_type
+		target = self.get_property(context)
+		component_ref: STF_Component = target.stf_components.add()
+		component_ref.stf_id = str(uuid.uuid4())
+		component_ref.stf_type = self.stf_type
+
+		new_component = getattr(target, self.property_name).add()
+		new_component.stf_id = component_ref.stf_id
 		return {"FINISHED"}
 
 	def get_property(self, context) -> any:
@@ -41,12 +49,24 @@ class STFRemoveComponentOperatorBase:
 	bl_options = {"REGISTER", "UNDO"}
 
 	index: bpy.props.IntProperty(name = "component_index", default=-1) # type: ignore
+	property_name: bpy.props.StringProperty() # type: ignore
 
 	def invoke(self, context, event):
 		return context.window_manager.invoke_confirm(self, event)
 
 	def execute(self, context):
-		self.get_property(context).stf_components.remove(self.index)
+		target = self.get_property(context)
+		component_ref = target.stf_components[self.index]
+
+		component_type_list = getattr(target, self.property_name)
+		target_component_index = None
+		for index, component in enumerate(component_type_list):
+			if(component.stf_id == component_ref.stf_id):
+				target_component_index = index
+				break
+
+		component_type_list.remove(target_component_index)
+		target.stf_components.remove(self.index)
 		return {"FINISHED"}
 
 	def get_property(self, context) -> any:
@@ -61,7 +81,7 @@ class STFDrawComponentList(bpy.types.UIList):
 		layout.label(text=item.stf_id)
 
 
-def get_component_modules(filter: str = None) -> list[STF_Blender_Component]:
+def get_component_modules(filter = None) -> list[STF_Blender_Component]:
 	ret = []
 	for processor in get_stf_processors(bpy.context.preferences.addons.keys()):
 		if(isinstance(processor, STF_Blender_Component) or hasattr(processor, "draw_component_func")):
@@ -75,26 +95,28 @@ def get_component_modules(filter: str = None) -> list[STF_Blender_Component]:
 	return ret
 
 
-def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component: STF_Component, object: any):
+def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component, object: any, component: any):
 	box = layout.box()
-	box.label(text=component.stf_type)
-	box.label(text=component.stf_id)
+	box.label(text=component_ref.stf_type)
+	box.label(text=component_ref.stf_id)
 
 	modules = get_component_modules()
 	selected_module = None
 	for module in modules:
-		if(module.stf_type == component.stf_type and module.draw_component_func):
+		if(module.stf_type == component_ref.stf_type and module.draw_component_func):
 			selected_module = module
 			break
 
 	if(selected_module):
-		selected_module.draw_component_func(box, context, component, object)
+		selected_module.draw_component_func(box, context, component_ref, object, component)
 	else:
 		box.label(text="Unknown Type")
 
 
-def draw_component_selection(layout: bpy.types.UILayout, context: bpy.types.Context, label: str = "Select Component"):
-	layout.prop(bpy.context.scene, "stf_component_modules", text=label)
+def find_component_module(modules: list[STF_Blender_Component], stf_type: str) -> STF_Blender_Component:
+	for module in modules:
+		if(module.stf_type == stf_type):
+			return module
 
 
 def draw_components_ui(
@@ -104,20 +126,41 @@ def draw_components_ui(
 		add_component_op: str,
 		remove_component_op: str
 		):
-	row = layout.row()
-	draw_component_selection(row, context, "")
-	row.operator(add_component_op).stf_type = context.scene.stf_component_modules
+	modules = get_component_modules()
 
-	row = layout.row()
-	row.template_list(STFDrawComponentList.bl_idname, "", object, "stf_components", object, "stf_active_component_index")
-	if(len(object.stf_components) > object.stf_active_component_index):
-		row.operator(remove_component_op, icon="X", text="").index = object.stf_active_component_index
-		draw_component(layout, context, object.stf_components[object.stf_active_component_index], object)
+	if(context.scene.stf_component_modules):
+		row = layout.row()
+		row.prop(bpy.context.scene, "stf_component_modules", text="")
+		selected_add_module = find_component_module(modules, context.scene.stf_component_modules)
+		if(selected_add_module):
+			add_button = row.operator(add_component_op)
+			add_button.stf_type = context.scene.stf_component_modules
+			add_button.property_name = selected_add_module.blender_property_name
 
+		row = layout.row()
+		row.template_list(STFDrawComponentList.bl_idname, "", object, "stf_components", object, "stf_active_component_index")
+		if(len(object.stf_components) > object.stf_active_component_index):
+			component_ref = object.stf_components[object.stf_active_component_index]
+
+			selected_module = find_component_module(modules, component_ref.stf_type)
+			remove_button = row.operator(remove_component_op, icon="X", text="")
+			remove_button.index = object.stf_active_component_index
+			remove_button.property_name = selected_module.blender_property_name
+
+			for component in getattr(object, selected_module.blender_property_name):
+				if(component.stf_id == component_ref.stf_id):
+					draw_component(layout, context, component_ref, object, component)
+					break
+
+
+stf_component_filter = None
+def set_stf_component_filter(filter: str = None):
+	global stf_component_filter
+	stf_component_filter = filter
 
 
 def _build_stf_component_types_enum_callback(self, context) -> list:
-	return [((module.stf_type, module.stf_type, "")) for module in get_component_modules()]
+	return [((module.stf_type, module.stf_type, "")) for module in get_component_modules(stf_component_filter)]
 
 def register():
 	bpy.types.Scene.stf_component_modules = bpy.props.EnumProperty(
