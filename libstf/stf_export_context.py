@@ -30,10 +30,9 @@ class STF_RootExportContext:
 				self.register_serialized_resource(application_object, json_resource, id)
 
 				# Export components from application native constructs
-				for processor in self._state._processors:
-					if(hasattr(processor, "target_application_types") and hasattr(processor, "export_hook_func") and type(application_object) in getattr(processor, "target_application_types")):
-						export_hook_func = getattr(processor, "export_hook_func")
-						export_hook_func(ctx, application_object)
+				for processor in self._state.get_hook_processors(application_object):
+					export_hook_func = getattr(processor, "export_hook_func")
+					export_hook_func(ctx, application_object)
 
 				# Export components explicitely defined by this application
 				components = self._state.get_components(application_object)

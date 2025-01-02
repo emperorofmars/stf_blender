@@ -4,28 +4,21 @@ from typing import Callable
 
 from .stf_definition import STF_JsonDefinition, STF_Meta_AssetInfo, STF_Profile
 from .stf_report import STF_Report_Severity, STFReport
-from .stf_processor import STF_ExportComponentHook, STF_Processor
+from .stf_processor import STF_ExportComponentHook, STF_ExportHook, STF_Processor
 from .stf_file import STF_File
 
 
 class STF_Buffer_Mode(Enum):
 	included_binary = 0
 	included_json = 1
-	external = 1
-
-
-def run_export_hooks(self, application_object: any, object_ctx: any):
-	for processor in self.__processors:
-		if(hasattr(processor, "target_application_types") and hasattr(processor, "export_hook_func") and type(application_object) in getattr(processor, "target_application_types")):
-			export_hook_func = getattr(processor, "export_hook_func")
-			export_hook_func(object_ctx, application_object)
-
-def export_components(self, application_object: any, object_ctx: any):
-	pass
+	external = 2
 
 
 class STF_ExportState:
-	_processors: list[STF_Processor]
+	"""Hold all the data from an export run. Each context must have access to the same STF_ExportState instance"""
+	_processors: list[STF_Processor] = []
+	_component_processors: list[STF_ExportComponentHook] = []
+	_hook_processors: list[STF_ExportHook] = []
 
 	_root_id: str = None
 	_resources: dict[any, str] = {} # original application object -> ID of exported STF Json resource
@@ -44,6 +37,11 @@ class STF_ExportState:
 		self._profiles = profiles
 		self._asset_info = asset_info
 		self._get_components_from_resource = get_components_from_resource
+		for processor in self._processors:
+			if(hasattr(processor, "export_component_func")):
+				self._component_processors.append(processor)
+			if(hasattr(processor, "target_application_types") and hasattr(processor, "export_hook_func")):
+				self._hook_processors.append(processor)
 
 	def determine_processor(self, application_object: any) -> STF_Processor:
 		for processor in self._processors:
@@ -52,7 +50,14 @@ class STF_ExportState:
 		return None
 
 	def get_components(self, application_object: any) -> list[any]:
-		return self._get_components_from_resource(application_object)
+		return self._get_components_from_resource(application_object, self._component_processors)
+
+	def get_hook_processors(self, application_object: any) -> list[STF_ExportHook]:
+		ret = []
+		for hook in self._hook_processors:
+			if(type(application_object) in getattr(hook, "target_application_types")):
+				ret.append(hook)
+		return ret
 
 	def get_resource_id(self, application_object: any) -> str:
 		if(application_object in self._resources):
@@ -81,25 +86,25 @@ class STF_ExportState:
 		return self._root_id
 
 
-def create_stf_definition(context: STF_ExportState, generator: str = "libstf_python") -> STF_JsonDefinition:
-	import datetime
+	def create_stf_definition(self, generator: str = "libstf_python") -> STF_JsonDefinition:
+		import datetime
 
-	ret = STF_JsonDefinition()
-	ret.stf.version_major = 0
-	ret.stf.version_minor = 0
-	ret.stf.root = context.get_root_id()
-	ret.stf.generator = generator
-	ret.stf.timestamp = datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat()
-	ret.stf.asset_info = context._asset_info
-	ret.stf.profiles = context._profiles
-	ret.resources = context._exported_resources
-	ret.buffers = context._exported_buffers
-	return ret
+		ret = STF_JsonDefinition()
+		ret.stf.version_major = 0
+		ret.stf.version_minor = 0
+		ret.stf.root = self._root_id
+		ret.stf.generator = generator
+		ret.stf.timestamp = datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat()
+		ret.stf.asset_info = self._asset_info
+		ret.stf.profiles = self._profiles
+		ret.resources = self._exported_resources
+		ret.buffers = self._exported_buffers
+		return ret
 
 
-def create_stf_binary_file(context: STF_ExportState, generator: str = "libstf_python") -> STF_File:
-	ret = STF_File()
-	ret.binary_version_major = 0
-	ret.binary_version_minor = 0
-	ret.definition = create_stf_definition(context, generator)
-	return ret
+	def create_stf_binary_file(self, generator: str = "libstf_python") -> STF_File:
+		ret = STF_File()
+		ret.binary_version_major = 0
+		ret.binary_version_minor = 0
+		ret.definition = self.create_stf_definition(generator)
+		return ret

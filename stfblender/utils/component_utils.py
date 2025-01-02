@@ -19,21 +19,6 @@ class STF_Blender_Component(STF_Processor):
 	draw_component_func: Callable
 
 
-def get_components_from_object(application_object: any) -> list:
-	modules = get_component_modules()
-
-	ret = []
-	if(hasattr(application_object, "stf_components")):
-		for component_ref in application_object.stf_components:
-			module = find_component_module(modules, component_ref.stf_type)
-			if(module):
-				components = getattr(application_object, module.blender_property_name)
-				for component in components:
-					if(component.stf_id == component_ref.stf_id):
-						ret.append(component)
-	return ret
-
-
 class STFAddComponentOperatorBase:
 	"""Base class to add an STF component to a Blender object"""
 	bl_label = "Add Component"
@@ -107,6 +92,19 @@ def get_component_modules(filter = None) -> list[STF_Blender_Component]:
 					continue
 			else:
 				ret.append(processor)
+	return ret
+
+
+def get_components_from_object(application_object: any, modules = get_component_modules()) -> list:
+	ret = []
+	if(hasattr(application_object, "stf_components")):
+		for component_ref in application_object.stf_components:
+			module = find_component_module(modules, component_ref.stf_type)
+			if(module):
+				components = getattr(application_object, module.blender_property_name)
+				for component in components:
+					if(component.stf_id == component_ref.stf_id):
+						ret.append(component)
 	return ret
 
 
