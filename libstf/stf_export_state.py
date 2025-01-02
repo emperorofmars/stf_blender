@@ -37,7 +37,7 @@ class STF_ExportState:
 		self._profiles = profiles
 		self._asset_info = asset_info
 		self._get_components_from_resource = get_components_from_resource
-		for processor in self._processors:
+		for processor in processors:
 			if(hasattr(processor, "export_component_func")):
 				self._component_processors.append(processor)
 			if(hasattr(processor, "target_application_types") and hasattr(processor, "export_hook_func")):

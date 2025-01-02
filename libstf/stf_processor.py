@@ -2,7 +2,7 @@ from typing import Callable
 
 
 class STF_Processor:
-	"""Represents the functionality of a module to process an STF type"""
+	"""Represents the functionality to process an STF type"""
 	stf_type: str
 	stf_kind: str
 
@@ -42,3 +42,16 @@ class STF_ExportComponentHook(STF_Processor):
 	"""Hook to export components on an application-native object"""
 	# (Export Context, The targeted Application Object, the Application Component Object) -> (Json Dict, ID, Export Context)
 	export_component_func: Callable[[any, any, any], tuple[dict, str, any]]
+
+
+class STF_ImportHook(STF_Processor):
+	"""
+		Hook to import a resource based on custom logic.
+
+		For example, in Blender, an object that has a mesh, must be created with the mesh data block at once.
+		When a 'stf.node.spatial' contains a 'stf.instance.mesh' component, an 'STF_ImportHook' must target 'stf.node.spatial' and run its import logic, otherwise defer to the regular import logic.
+	"""
+	target_stf_type: str
+
+	# (Import Context, json resource) -> (imported resource, list of IDs to ignore)
+	import_resource_func: Callable[[any, dict], tuple[any, list[str]]]

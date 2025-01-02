@@ -121,7 +121,7 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 
 
 def export_button(self, context):
-	self.layout.operator(ExportSTF.bl_idname, text="STF (.stf/.stf.json)")
+	self.layout.operator(ExportSTF.bl_idname, text="STF (.stf)")
 
 
 def register():
