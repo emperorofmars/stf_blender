@@ -9,6 +9,7 @@ from .stf_util import run_tasks
 
 
 class STF_RootExportContext:
+	"""Context for top level resource export"""
 
 	def __init__(self, state: STF_ExportState):
 		self._state = state
@@ -75,6 +76,11 @@ class STF_RootExportContext:
 
 
 class STF_ResourceExportContext(STF_RootExportContext):
+	"""
+		Context for the export of sub-resources.
+
+		Extend this class if you need a custom context for sub-resources.
+	"""
 
 	def __init__(self, parent_context: STF_RootExportContext, json_resource: dict):
 		super().__init__(parent_context._state)

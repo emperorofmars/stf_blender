@@ -2,7 +2,9 @@ import sys
 from types import ModuleType
 from .stf_processor import STF_Processor
 
-""" Utils to retrieve all existing STF processors. """
+"""
+	Utils to retrieve all existing STF processors.
+"""
 
 def get_stf_processors_from_module(module: ModuleType) -> dict[str, STF_Processor]:
 	ret = {}

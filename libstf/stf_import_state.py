@@ -7,6 +7,10 @@ from .stf_definition import STF_Meta_AssetInfo, STF_Profile
 
 
 class STF_ImportState:
+	"""
+		Hold all the data from a file for an import run.
+		Each context must have access to the same STF_ImportState instance.
+	"""
 
 	def __init__(self, file: STF_File, processors: list[STF_Processor]):
 		self._file = file

@@ -1,6 +1,6 @@
 import bpy
 
-from ....libstf.stf_import_context import STF_ImportContext
+from ....libstf.stf_import_context import STF_RootImportContext
 from ....libstf.stf_processor import STF_Processor
 from ...utils.component_utils import STF_Component
 from ...utils.id_utils import ensure_stf_id
@@ -11,7 +11,7 @@ from ..stf_prefab.stf_prefab import STF_BlenderNodeExportContext
 _stf_type = "stf.node.spatial"
 
 
-def _stf_import(context: STF_ImportContext, json: dict, id: str) -> any:
+def _stf_import(context: STF_RootImportContext, json: dict, id: str) -> any:
 	pass
 
 

@@ -6,7 +6,9 @@ from .stf_report import STFReport
 from .stf_util import run_tasks
 
 
-class STF_ImportContext:
+class STF_RootImportContext:
+	"""Context for top level resource import"""
+
 	def __init__(self, state: STF_ImportState):
 		self._state: STF_ImportState = state
 		self._tasks: list[Callable] = []

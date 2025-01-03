@@ -1,7 +1,7 @@
 import bpy
 
 from ....libstf.stf_export_context import STF_RootExportContext
-from ....libstf.stf_import_context import STF_ImportContext
+from ....libstf.stf_import_context import STF_RootImportContext
 from ....libstf.stf_processor import STF_Processor
 from ...utils.component_utils import STF_Blender_Component
 
@@ -20,7 +20,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 	layout.prop(component, "weight")
 
 
-def _stf_import(context: STF_ImportContext, json: dict, id: str) -> any:
+def _stf_import(context: STF_RootImportContext, json: dict, id: str) -> any:
 	pass
 
 def _stf_export_component_func(context: STF_RootExportContext, object: any, component: AVA_Constraint_Twist) -> tuple[dict, str, any]:

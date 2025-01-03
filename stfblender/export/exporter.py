@@ -5,8 +5,6 @@ from bpy_extras.io_utils import ExportHelper
 from ...libstf.stf_registry import get_stf_processors
 from ...libstf.stf_export_state import STF_ExportState
 from ...libstf.stf_export_context import STF_RootExportContext
-from ...libstf.stf_report import STFException
-from ...libstf.stf_definition import STF_Meta_AssetInfo
 
 from ..utils.component_utils import get_components_from_object
 

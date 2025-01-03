@@ -15,7 +15,10 @@ class STF_Buffer_Mode(Enum):
 
 
 class STF_ExportState:
-	"""Hold all the data from an export run. Each context must have access to the same STF_ExportState instance"""
+	"""
+		Hold all the data from an export run.
+		Each context must have access to the same STF_ExportState instance.
+	"""
 
 	def __init__(self, profiles: list[STF_Profile], asset_info: STF_Meta_AssetInfo, processors: list[STF_Processor], get_components_from_resource: Callable[[any], list[any]]):
 		# original application object -> ID of exported STF Json resource

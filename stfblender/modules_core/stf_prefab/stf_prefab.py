@@ -1,6 +1,6 @@
 import bpy
 
-from ....libstf.stf_import_context import STF_ImportContext
+from ....libstf.stf_import_context import STF_RootImportContext
 from ....libstf.stf_export_context import STF_ResourceExportContext, STF_RootExportContext
 from ....libstf.stf_processor import STF_Processor
 from ...utils.component_utils import STF_Component
@@ -32,7 +32,7 @@ class STF_BlenderNodeExportContext(STF_ResourceExportContext):
 			super().register_serialized_resource(application_object, json_resource, id)
 
 
-def _stf_import(context: STF_ImportContext, json: dict, id: str) -> any:
+def _stf_import(context: STF_RootImportContext, json: dict, id: str) -> any:
 	print("IMPORTING STF PREFAB!")
 
 def _stf_export(context: STF_RootExportContext, application_object: any) -> tuple[dict, str, any]:

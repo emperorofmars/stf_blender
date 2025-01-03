@@ -4,7 +4,7 @@ from bpy_extras.io_utils import ImportHelper
 from ...libstf.stf_registry import get_stf_processors
 from ...libstf.stf_import_state import STF_ImportState
 from ...libstf.stf_report import STFException
-from ...libstf.stf_import_context import STF_ImportContext
+from ...libstf.stf_import_context import STF_RootImportContext
 from ...libstf.stf_file import STF_File
 
 
@@ -31,7 +31,7 @@ class ImportSTF(bpy.types.Operator, ImportHelper):
 			stf_file = STF_File.parse(file)
 
 			stf_state = STF_ImportState(stf_file, processors)
-			stf_context = STF_ImportContext(stf_state)
+			stf_context = STF_RootImportContext(stf_state)
 			root = stf_context.import_resource(stf_context.get_root_id())
 			stf_context.run_tasks()
 
