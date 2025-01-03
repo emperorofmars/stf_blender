@@ -1,8 +1,8 @@
 import bpy
-import uuid
 
 from ...utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
 from ...utils.component_utils import STFAddComponentOperatorBase, STFRemoveComponentOperatorBase, draw_components_ui, set_stf_component_filter
+from ...root_properties import draw_meta_editor
 
 
 class STFSetCollectionAsRootOperator(bpy.types.Operator):
@@ -67,6 +67,12 @@ class STFCollectionPanel(bpy.types.Panel):
 		else:
 			self.layout.operator(STFSetCollectionAsRootOperator.bl_idname)
 			self.layout.operator(operator=ExportSTF.bl_idname, text="Export this Collection as STF root prefab").current_collection_as_root = True
+
+		self.layout.separator(factor=1, type="SPACE")
+
+		box = self.layout.box()
+		box.label(text="Asset Meta")
+		draw_meta_editor(box, context.collection)
 
 		self.layout.separator(factor=1, type="SPACE")
 

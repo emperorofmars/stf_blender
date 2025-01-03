@@ -12,7 +12,7 @@ class STF_Meta_AssetInfo:
 	asset_documentation: str
 	asset_documentation_url: str
 
-	custom_values: dict[str, str] = {}
+	custom_properties: dict[str, str] = {}
 
 	@staticmethod
 	def from_dict(dict: dict):
@@ -26,27 +26,14 @@ class STF_Meta_AssetInfo:
 				case "asset_license_url": ret.asset_license_url = value
 				case "asset_documentation": ret.asset_documentation = value
 				case "asset_documentation_url": ret.asset_documentation_url = value
-				case "generator": ret.generator = value
-				case "timestamp": ret.timestamp = value
-				case _: ret.custom_values.key = value
+				case _: ret.custom_properties.key = value
 
 		return ret
 
 	def to_dict(self):
-		"""ret = {
-			"asset_name": self.asset_name,
-			"asset_author": self.asset_author,
-			"asset_version": self.asset_version,
-			"asset_license": self.asset_license,
-			"asset_license_url": self.asset_license_url,
-			"asset_documentation": self.asset_documentation,
-			"asset_documentation_url": self.asset_documentation_url,
-			"generator": self.generator,
-			"timestamp": self.timestamp,
-		}"""
 		ret = vars(self)
-		if("custom_values" in ret): del ret["custom_values"]
-		for key, value in self.custom_values.items():
+		if("custom_properties" in ret): del ret["custom_properties"]
+		for key, value in self.custom_properties.items():
 			ret[key] = value
 		return ret
 

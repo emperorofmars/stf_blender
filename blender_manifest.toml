@@ -4,8 +4,8 @@ schema_version = "1.0.0"
 # Change the values according to your extension
 id = "stf_blender"
 version = "0.0.0"
-name = "Stf_blender"
-tagline = "This is another extension"
+name = "Squirrel Transfer Format"
+tagline = "Modular 3D Interchange Format"
 maintainer = "Mars (https://squirrelbite.com)"
 # Supported types: "add-on", "theme"
 type = "add-on"
@@ -65,7 +65,7 @@ license = [
 # clipboard = "Copy and paste bone transforms"
 [permissions]
 files = "Import/export STF from/to disk"
-clipboard = "Copy and paste resources and definitions between different tools"
+clipboard = "Copy and paste STF resources and definitions between different tools"
 
 # Optional: build settings.
 # https://docs.blender.org/manual/en/dev/advanced/extensions/command_line_arguments.html#command-line-args-extension-build

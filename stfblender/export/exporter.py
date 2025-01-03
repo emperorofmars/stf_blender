@@ -43,7 +43,7 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 
 			# TODO: configure profiles, generate asset info
 
-			stf_state = STF_ExportState(profiles=[], asset_info=STF_Meta_AssetInfo(), processors=processors, get_components_from_resource=get_components_from_object)
+			stf_state = STF_ExportState(profiles=[], asset_info=collection.stf_meta.to_stf_meta_assetInfo(), processors=processors, get_components_from_resource=get_components_from_object)
 			stf_context = STF_RootExportContext(stf_state)
 			root_id = stf_context.serialize_resource(collection)
 			stf_context.run_tasks()

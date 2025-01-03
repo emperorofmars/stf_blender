@@ -33,8 +33,7 @@ class STF_RootExportContext:
 
 				# Export components from application native constructs
 				for processor in self._state.get_hook_processors(application_object):
-					export_hook_func = getattr(processor, "export_hook_func")
-					export_hook_func(ctx, application_object)
+					processor.export_hook_func(ctx, application_object)
 
 				# Export components explicitely defined by this application
 				components = self._state.get_components(application_object)
