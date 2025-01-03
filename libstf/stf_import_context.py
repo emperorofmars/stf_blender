@@ -7,12 +7,9 @@ from .stf_util import run_tasks
 
 
 class STF_ImportContext:
-	_state: STF_ImportState
-
-	_tasks: list[Callable] = []
-
 	def __init__(self, state: STF_ImportState):
-		self._state = state
+		self._state: STF_ImportState = state
+		self._tasks: list[Callable] = []
 
 	def import_resource(self, id: str) -> any:
 		if(id in self._state._imported_resources.keys()): return self._state._imported_resources[id]

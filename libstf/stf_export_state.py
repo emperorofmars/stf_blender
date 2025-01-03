@@ -16,32 +16,31 @@ class STF_Buffer_Mode(Enum):
 
 class STF_ExportState:
 	"""Hold all the data from an export run. Each context must have access to the same STF_ExportState instance"""
-	_processors: list[STF_Processor] = []
-	_component_processors: list[STF_ExportComponentHook] = []
-	_hook_processors: list[STF_ExportHook] = []
-
-	_root_id: str = None
-	_resources: dict[any, str] = {} # original application object -> ID of exported STF Json resource
-	_exported_resources: dict[str, dict] = {} # ID -> exported STF Json resource
-	_exported_buffers: dict[str, io.BytesIO] = {} # ID -> exported STF Json buffer
-
-	_profiles: list[STF_Profile]
-	_asset_info: STF_Meta_AssetInfo
-
-	_reports: list[STFReport] = []
-
-	_get_components_from_resource: Callable[[any], list[any]]
 
 	def __init__(self, profiles: list[STF_Profile], asset_info: STF_Meta_AssetInfo, processors: list[STF_Processor], get_components_from_resource: Callable[[any], list[any]]):
-		self._processors = processors
-		self._profiles = profiles
-		self._asset_info = asset_info
-		self._get_components_from_resource = get_components_from_resource
+		# original application object -> ID of exported STF Json resource
+		self._processors: list[STF_Processor] = processors
+		# ID -> exported STF Json resource
+		self._component_processors: list[STF_ExportComponentHook] = []
+		# ID -> exported STF Json buffer
+		self._hook_processors: list[STF_ExportHook] = []
+
 		for processor in processors:
 			if(hasattr(processor, "export_component_func")):
 				self._component_processors.append(processor)
 			if(hasattr(processor, "target_application_types") and hasattr(processor, "export_hook_func")):
 				self._hook_processors.append(processor)
+
+		self._resources: dict[any, str] = {} # original application object -> ID of exported STF Json resource
+		self._exported_resources: dict[str, dict] = {} # ID -> exported STF Json resource
+		self._exported_buffers: dict[str, io.BytesIO] = {} # ID -> exported STF Json buffer
+
+		self._get_components_from_resource = get_components_from_resource
+
+		self._profiles = profiles
+		self._asset_info = asset_info
+		self._reports: list[STFReport] = []
+		self._root_id: str = None
 
 	def determine_processor(self, application_object: any) -> STF_Processor:
 		for processor in self._processors:

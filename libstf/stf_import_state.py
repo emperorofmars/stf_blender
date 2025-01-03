@@ -7,24 +7,23 @@ from .stf_definition import STF_Meta_AssetInfo, STF_Profile
 
 
 class STF_ImportState:
-	_file: STF_File
-	_processors: list[STF_Processor] = []
-	_hook_processors: list[STF_ImportHook] = []
-
-	_imported_resources: dict[str, any] = {} # ID -> imported object
-
-	_profiles: list[STF_Profile]
-	_asset_info: STF_Meta_AssetInfo
-
-	_reports: list[STFReport] = []
 
 	def __init__(self, file: STF_File, processors: list[STF_Processor]):
 		self._file = file
+
+		self._processors: list[STF_Processor] = []
+		self._hook_processors: list[STF_ImportHook] = []
+
 		for processor in processors:
 			if(hasattr(processor, "import_func")):
 				self._processors.append(processor)
 			if(hasattr(processor, "import_resource_func") and hasattr(processor, "target_stf_type")):
 				self._hook_processors.append(processor)
+
+		self._imported_resources: dict[str, any] = {} # ID -> imported object
+		self._profiles: list[STF_Profile]
+		self._asset_info: STF_Meta_AssetInfo
+		self._reports: list[STFReport] = []
 
 	def determine_hooks(self, json_resource: dict) -> list[STF_ImportHook]:
 		ret = []

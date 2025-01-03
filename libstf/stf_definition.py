@@ -1,18 +1,20 @@
 import io
 
 class STF_Profile:
-	name: str
+	def __init__(self):
+		self.name: str
 
 class STF_Meta_AssetInfo:
-	asset_name: str
-	asset_author: str
-	asset_version: str
-	asset_license: str
-	asset_license_url: str
-	asset_documentation: str
-	asset_documentation_url: str
+	def __init__(self):
+		self.asset_name: str
+		self.asset_author: str
+		self.asset_version: str
+		self.asset_license: str
+		self.asset_license_url: str
+		self.asset_documentation: str
+		self.asset_documentation_url: str
 
-	custom_properties: dict[str, str] = {}
+		self.custom_properties: dict[str, str] = {}
 
 	@staticmethod
 	def from_dict(dict: dict):
@@ -39,13 +41,14 @@ class STF_Meta_AssetInfo:
 
 
 class STF_Meta:
-	version_major: int = 0
-	version_minor: int = 0
-	generator: str
-	timestamp: str
-	root: str
-	profiles: list[STF_Profile] = []
-	asset_info: STF_Meta_AssetInfo = STF_Meta_AssetInfo()
+	def __init__(self):
+		self.version_major: int = 0
+		self.version_minor: int = 0
+		self.generator: str
+		self.timestamp: str
+		self.root: str
+		self.profiles: list[STF_Profile] = []
+		self.asset_info: STF_Meta_AssetInfo = STF_Meta_AssetInfo()
 
 	@staticmethod
 	def from_dict(dict: dict):
@@ -68,8 +71,9 @@ class STF_Meta:
 
 
 class STF_Buffer_Included:
-	type: str = "stf.buffer.included"
-	index: int
+	def __init__(self):
+		self.type: str = "stf.buffer.included"
+		self.index: int
 
 	@staticmethod
 	def from_dict(dict: dict):
@@ -85,8 +89,9 @@ class STF_Buffer_Included:
 
 
 class STF_Buffer_File:
-	type: str = "stf.buffer.file"
-	path: str
+	def __init__(self):
+		self.type: str = "stf.buffer.file"
+		self.path: str
 
 	@staticmethod
 	def from_dict(dict: dict):
@@ -102,8 +107,9 @@ class STF_Buffer_File:
 
 
 class STF_Buffer_JsonArray:
-	type: str = "stf.buffer.json_array"
-	data: list[io.BytesIO]
+	def __init__(self):
+		self.type: str = "stf.buffer.json_array"
+		self.data: list[io.BytesIO]
 
 	@staticmethod
 	def from_dict(dict: dict):
@@ -120,9 +126,11 @@ class STF_Buffer_JsonArray:
 
 class STF_JsonDefinition:
 	""" Represents the STF Json definition's top level object. """
-	stf: STF_Meta = STF_Meta()
-	resources: dict[str, dict] = dict()
-	buffers: dict[str, STF_Buffer_Included | STF_Buffer_File | STF_Buffer_JsonArray] = dict()
+
+	def __init__(self):
+		self.stf: STF_Meta = STF_Meta()
+		self.resources: dict[str, dict] = dict()
+		self.buffers: dict[str, STF_Buffer_Included | STF_Buffer_File | STF_Buffer_JsonArray] = dict()
 
 	@staticmethod
 	def from_dict(dict):

@@ -9,12 +9,10 @@ from .stf_util import run_tasks
 
 
 class STF_RootExportContext:
-	_state: STF_ExportState
-
-	_tasks: list[Callable] = []
 
 	def __init__(self, state: STF_ExportState):
 		self._state = state
+		self._tasks: list[Callable] = []
 
 	def get_resource_id(self, application_object: any) -> str | None:
 		return self._state.get_resource_id(application_object)
@@ -77,8 +75,6 @@ class STF_RootExportContext:
 
 
 class STF_ResourceExportContext(STF_RootExportContext):
-	_json_resource: dict
-	_parent_context: STF_RootExportContext
 
 	def __init__(self, parent_context: STF_RootExportContext, json_resource: dict):
 		super().__init__(parent_context._state)
