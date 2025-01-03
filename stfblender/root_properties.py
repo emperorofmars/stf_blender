@@ -58,15 +58,20 @@ def draw_meta_editor(layout: bpy.types.UILayout, blender_scene_or_collection: bp
 	layout.prop(blender_scene_or_collection.stf_meta, "custom_properties")
 
 
+class STF_FileHandler(bpy.types.FileHandler):
+	bl_idname = "IO_FH_stf"
+	bl_label = "STF"
+	bl_import_operator = "stf.import"
+	bl_export_operator = "stf.export"
+	bl_file_extensions = ".stf;.stf.json"
+
+
 def register():
 	bpy.types.Scene.stf_root_collection = bpy.props.PointerProperty(type=bpy.types.Collection, name="Root Collection") # type: ignore
-	bpy.types.Scene.stf_meta = bpy.props.PointerProperty(type=STF_Meta, name="STF Meta") # type: ignore
 	bpy.types.Collection.stf_meta = bpy.props.PointerProperty(type=STF_Meta, name="STF Meta") # type: ignore
 
 def unregister():
 	if hasattr(bpy.types.Scene, "stf_root_collection"):
 		del bpy.types.Scene.stf_root_collection
-	if hasattr(bpy.types.Scene, "stf_meta"):
-		del bpy.types.Scene.stf_meta
 	if hasattr(bpy.types.Collection, "stf_meta"):
 		del bpy.types.Collection.stf_meta

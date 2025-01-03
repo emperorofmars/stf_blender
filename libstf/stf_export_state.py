@@ -61,8 +61,7 @@ class STF_ExportState:
 
 	def get_resource_id(self, application_object: any) -> str:
 		if(application_object in self._resources):
-			id = self._resources[application_object]
-			return self._exported_resources[id]
+			return self._resources[application_object]
 		else:
 			return None
 

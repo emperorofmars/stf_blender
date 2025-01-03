@@ -28,6 +28,7 @@ class STF_RootExportContext:
 
 		if(selected_processor := self._state.determine_processor(application_object)):
 			json_resource, id, ctx = selected_processor.export_func(self, application_object)
+
 			if(json_resource and id and ctx):
 				self.register_serialized_resource(application_object, json_resource, id)
 

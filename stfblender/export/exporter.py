@@ -15,7 +15,7 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 	"""Export as STF file (.stf/.stf.json)"""
 	bl_idname = "stf.export"
 	bl_label = "Export STF"
-	bl_options = {'PRESET'}
+	bl_options = {"PRESET", "BLOCKING"}
 	bl_category = "STF"
 
 	filename_ext = ""
@@ -41,15 +41,17 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 
 			processors = get_stf_processors(bpy.context.preferences.addons.keys())
 
-			# TODO: configure profiles, generate asset info
+			# TODO: configure profiles
 
 			stf_state = STF_ExportState(profiles=[], asset_info=collection.stf_meta.to_stf_meta_assetInfo(), processors=processors, get_components_from_resource=get_components_from_object)
 			stf_context = STF_RootExportContext(stf_state)
 			root_id = stf_context.serialize_resource(collection)
 			stf_context.run_tasks()
+			#stf_state._root_id = root_id
 
-			if(not stf_state.get_root_id() and not self.debug):
-				raise Exception("Export Failed")
+			if(not stf_state.get_root_id() and type(stf_state.get_root_id()) is not str):
+				print("\nExport Failed, invalid root ID:\n\n" + str(stf_state.get_root_id()))
+				raise Exception("Export Failed, invalid root ID")
 
 			if(self.format == "binary"):
 				export_filepath: str = self.filepath
@@ -97,13 +99,11 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 			if(len(stf_state._reports) > 0):
 				self.report({'WARNING'}, "STF asset exported with reports!")
 				for report in stf_state._reports:
+					# TODO report this in a more legit manner
 					print(report.to_string())
 			else:
 				self.report({'INFO'}, "STF asset exported successfully!")
 			return {"FINISHED"}
-		except STFException as error:
-			self.report({'ERROR'}, str(error))
-			return {"CANCELLED"}
 		finally:
 			for file in files:
 				if(file is not None and not file.closed): file.close()
