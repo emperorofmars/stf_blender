@@ -3,7 +3,7 @@ from enum import Enum
 from typing import Callable
 
 from .stf_definition import STF_JsonDefinition, STF_Meta_AssetInfo, STF_Profile
-from .stf_report import STF_Report_Severity, STFReport
+from .stf_report import STF_Report_Severity, STFException, STFReport
 from .stf_processor import STF_ExportComponentHook, STF_ExportHook, STF_Processor
 from .stf_file import STF_File
 
@@ -61,13 +61,16 @@ class STF_ExportState:
 
 	def get_resource_id(self, application_object: any) -> str:
 		if(application_object in self._resources):
-			return self._exported_resources[self._resources[application_object]]
+			id = self._resources[application_object]
+			return self._exported_resources[id]
 		else:
 			return None
 
 	def register_serialized_resource(self, application_object: any, json_resource: dict, id: str):
-		#print("\nRegistering Resource: \n" + id + "\n" + str(application_object) + "\n" + str(json_resource) + "\n")
-		self._resources[application_object] = json_resource
+		#print("\nRegistering Resource: \n" + id + "\n" + str(application_object) + "\n" + str(json_resource) + "\n", flush=True)
+		if(type(id) is not str):
+			self.report(STFReport(message="Invalid Resource ID", severity=STF_Report_Severity.Error, stf_id=id, application_object=application_object))
+		self._resources[application_object] = id
 		self._exported_resources[id] = json_resource
 		if(not self._root_id): # First exported resource is the root
 			self._root_id = id
@@ -79,8 +82,10 @@ class STF_ExportState:
 		return id
 
 	def report(self, report: STFReport):
-		# handle severety
 		self._reports.append(report)
+		if(report.severity == STF_Report_Severity.Error):
+			print(report.to_string(), flush=True)
+			raise STFException(report)
 
 	def get_root_id(self):
 		return self._root_id

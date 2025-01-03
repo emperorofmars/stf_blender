@@ -30,6 +30,9 @@ def _stf_export(context: STF_BlenderNodeExportContext, object: any) -> tuple[dic
 		"children": children
 	}
 
+	if(blender_object.hide_render):
+		node["enabled"] = False
+
 	# TODO: handle: blender_object.parent_type
 	"""if(blender_object.parent):
 		def set_parent():

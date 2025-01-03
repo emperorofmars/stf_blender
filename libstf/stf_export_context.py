@@ -44,6 +44,7 @@ class STF_RootExportContext:
 						if(selected_processor := self._state.determine_processor(component)):
 							component_json_resource, component_id, _ = selected_processor.export_component_func(ctx, application_object, component)
 							json_resource["components"][component_id] = component_json_resource
+						# TODO else warn user about unsupported component
 
 				return id
 			else:

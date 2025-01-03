@@ -1,6 +1,6 @@
 import io
 
-from .stf_report import STFReport
+from .stf_report import STF_Report_Severity, STFException, STFReport
 from .stf_file import STF_File
 from .stf_processor import STF_ImportHook, STF_Processor
 from .stf_definition import STF_Meta_AssetInfo, STF_Profile
@@ -62,6 +62,8 @@ class STF_ImportState:
 		return self._file.definition.stf.root
 
 	def report(self, report: STFReport):
-		# handle severety
 		self._reports.append(report)
+		if(report.severity == STF_Report_Severity.Error):
+			print(report.to_string(), flush=True)
+			raise STFException(report)
 

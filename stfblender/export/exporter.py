@@ -48,7 +48,7 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 			root_id = stf_context.serialize_resource(collection)
 			stf_context.run_tasks()
 
-			if(not stf_state.get_root_id()):
+			if(not stf_state.get_root_id() and not self.debug):
 				raise Exception("Export Failed")
 
 			if(self.format == "binary"):
@@ -62,7 +62,7 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 				stf_file.serialize(files[len(files) - 1])
 
 				if(self.debug):
-					# Also write out the json itself for debugging purposes
+					# Write out the json itself for debugging purposes
 					json_string = json.dumps(stf_file.definition.to_dict(), indent="\t").encode(encoding="utf-8")
 					files.append(open(export_filepath + ".json", "wb"))
 					files[len(files) - 1].write(json_string)
