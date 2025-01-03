@@ -33,7 +33,7 @@ class STF_BlenderNodeExportContext(STF_ResourceExportContext):
 
 
 def _stf_import(context: STF_ImportContext, json: dict, id: str) -> any:
-	pass
+	print("IMPORTING STF PREFAB!")
 
 def _stf_export(context: STF_RootExportContext, application_object: any) -> tuple[dict, str, any]:
 	collection: bpy.types.Collection = application_object
@@ -50,16 +50,6 @@ def _stf_export(context: STF_RootExportContext, application_object: any) -> tupl
 	for blender_object in collection.all_objects:
 		if(blender_object.parent == None):
 			root_nodes.append(node_export_context.serialize_resource(blender_object))
-
-	"""if(len(collection.stf_components) > 0):
-		components = ret["components"] = {}
-		for component in collection.stf_components:
-			print(str(component))
-			print(str(component.stf_id))
-			print(str(component.stf_type))
-			# TODO export components
-
-			#context.serialize_resource()"""
 
 	return ret, collection.stf_id, node_export_context
 

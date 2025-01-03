@@ -11,7 +11,7 @@ class STF_ImportState:
 	_processors: list[STF_Processor] = []
 	_hook_processors: list[STF_ImportHook] = []
 
-	_imported_resources: dict[str, any] # ID -> imported object
+	_imported_resources: dict[str, any] = {} # ID -> imported object
 
 	_profiles: list[STF_Profile]
 	_asset_info: STF_Meta_AssetInfo
@@ -39,6 +39,9 @@ class STF_ImportState:
 				return processor
 		return None
 
+	def register_imported_resource(self, id: str, application_object: any):
+		self._imported_resources[id] = application_object
+
 	def import_buffer(self, id: str) -> io.BytesIO:
 		buffer = self._file.definition.buffers.get(id)
 		match(buffer.type):
@@ -53,7 +56,7 @@ class STF_ImportState:
 		return None
 
 	def get_json_resource(self, id: int) -> dict:
-		self._file.definition.resources.get(id)
+		return self._file.definition.resources.get(id)
 
 	def get_root_id(self) -> str:
 		return self._file.definition.stf.root
