@@ -31,6 +31,9 @@ class STF_RootImportContext:
 	def import_buffer(self, id: str) -> io.BytesIO:
 		return self._state.import_buffer(id)
 
+	def add_task(self, task: Callable):
+		self._state._tasks.append(task)
+
 	def get_json_resource(self, id: int) -> dict:
 		return self._state.get_json_resource(id)
 
@@ -39,7 +42,4 @@ class STF_RootImportContext:
 
 	def report(self, report: STFReport):
 		self._state.report(report)
-
-	def run_tasks(self):
-		run_tasks(self)
 

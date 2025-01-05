@@ -6,6 +6,7 @@ from .stf_definition import STF_JsonDefinition, STF_Meta_AssetInfo, STF_Profile
 from .stf_report import STF_Report_Severity, STFException, STFReport
 from .stf_processor import STF_ExportHook, STF_Processor
 from .stf_file import STF_File
+from .stf_util import run_tasks
 
 
 class STF_Buffer_Mode(Enum):
@@ -38,6 +39,8 @@ class STF_ExportState:
 		self._asset_info = asset_info
 		self._reports: list[STFReport] = []
 		self._root_id: str = None
+
+		self._tasks: list[Callable] = []
 
 	def determine_processor(self, application_object: any) -> STF_Processor:
 		for processor in self._processors:
@@ -72,6 +75,12 @@ class STF_ExportState:
 		id = uuid.uuid4()
 		self._exported_buffers[id] = data
 		return id
+
+	def add_task(self, task: Callable):
+		self._tasks.append(task)
+
+	def run_tasks(self):
+		run_tasks(self)
 
 	def report(self, report: STFReport):
 		self._reports.append(report)

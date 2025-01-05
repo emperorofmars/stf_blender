@@ -1,7 +1,8 @@
 import bpy
 
 from ...utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
-from ...utils.component_utils import STFAddComponentOperatorBase, STFRemoveComponentOperatorBase, draw_components_ui, set_stf_component_filter
+from ...utils.component_utils import STFAddComponentOperatorBase, STFRemoveComponentOperatorBase
+from ...utils.component_ui_utils import draw_components_ui, set_stf_component_filter
 from ...root_properties import draw_meta_editor
 
 

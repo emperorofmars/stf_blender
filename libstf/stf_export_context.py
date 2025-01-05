@@ -13,7 +13,6 @@ class STF_RootExportContext:
 
 	def __init__(self, state: STF_ExportState):
 		self._state = state
-		self._tasks: list[Callable] = []
 
 	def get_resource_id(self, application_object: any) -> str | None:
 		return self._state.get_resource_id(application_object)
@@ -58,10 +57,7 @@ class STF_RootExportContext:
 		return self._state.serialize_buffer(data)
 
 	def add_task(self, task: Callable):
-		self._tasks.append(task)
-
-	def run_tasks(self):
-		run_tasks(self)
+		self._state._tasks.append(task)
 
 	def report(self, report: STFReport):
 		self._state.report(report)

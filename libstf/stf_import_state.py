@@ -1,9 +1,11 @@
 import io
+from typing import Callable
 
 from .stf_report import STF_Report_Severity, STFException, STFReport
 from .stf_file import STF_File
 from .stf_processor import STF_ImportHook, STF_Processor
 from .stf_definition import STF_Meta_AssetInfo, STF_Profile
+from .stf_util import run_tasks
 
 
 class STF_ImportState:
@@ -28,6 +30,8 @@ class STF_ImportState:
 		self._profiles: list[STF_Profile]
 		self._asset_info: STF_Meta_AssetInfo
 		self._reports: list[STFReport] = []
+
+		self._tasks: list[Callable] = []
 
 	def determine_hooks(self, json_resource: dict) -> list[STF_ImportHook]:
 		ret = []
@@ -57,6 +61,12 @@ class STF_ImportState:
 			case _:
 				self.report(STFReport("Invalid buffer type: " + buffer.type, severity=STF_Report_Severity.Error))
 		return None
+
+	def add_task(self, task: Callable):
+		self._tasks.append(task)
+
+	def run_tasks(self):
+		run_tasks(self)
 
 	def get_json_resource(self, id: int) -> dict:
 		return self._file.definition.resources.get(id)
