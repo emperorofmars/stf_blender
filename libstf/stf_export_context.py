@@ -37,7 +37,7 @@ class STF_RootExportContext:
 
 				# Export components explicitely defined by this application
 				if(hasattr(selected_processor, "get_components_func")):
-					components = selected_processor.get_components_func(self, application_object)
+					components = selected_processor.get_components_func(application_object)
 					if(len(components) > 0):
 						if(not hasattr(json_resource, "components")):
 							json_resource["components"] = {}

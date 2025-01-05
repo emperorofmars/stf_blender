@@ -129,7 +129,7 @@ class STF_Buffer_JsonArray:
 
 
 class STF_JsonDefinition:
-	""" Represents the STF Json definition's top level object. """
+	"""Represents the STF Json definition's top level object"""
 
 	def __init__(self):
 		self.stf: STF_Meta = STF_Meta()

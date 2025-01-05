@@ -21,8 +21,9 @@ class STF_Processor:
 	export_func: Callable[[any, any, any], tuple[dict, str, any]]
 
 	# Get a list of application-components on the application object.
-	# (Export Context, Application Object) -> List[Application Object]
-	get_components_func: Callable[[any, any], list[any]]
+	# (Application Object) -> List[Application Component Object]
+	get_components_func: Callable[[any], list[any]]
+
 
 
 class STF_ExportHook(STF_Processor):

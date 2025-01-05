@@ -62,7 +62,7 @@ class STF_Module_STF_Prefab(STF_Processor):
 	understood_application_types = [bpy.types.Collection]
 	import_func = _stf_import
 	export_func = _stf_export
-	get_components_func: get_components_from_object
+	get_components_func = get_components_from_object
 
 
 register_stf_processors = [

@@ -43,7 +43,6 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 			stf_context = STF_RootExportContext(stf_state)
 			root_id = stf_context.serialize_resource(collection)
 			stf_context.run_tasks()
-			#stf_state._root_id = root_id
 
 			if(not stf_state.get_root_id() and type(stf_state.get_root_id()) is not str):
 				print("\nExport Failed, invalid root ID:\n\n" + str(stf_state.get_root_id()))

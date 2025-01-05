@@ -15,8 +15,8 @@ def _stf_import(context: STF_RootImportContext, json: dict, id: str, parent_appl
 	pass
 
 
-def _stf_export(context: STF_BlenderNodeExportContext, object: any, parent_application_object: any = None) -> tuple[dict, str, any]:
-	blender_object: bpy.types.Object = object
+def _stf_export(context: STF_BlenderNodeExportContext, application_object: any, parent_application_object: any = None) -> tuple[dict, str, any]:
+	blender_object: bpy.types.Object = application_object
 	ensure_stf_id(blender_object)
 
 	children = []
@@ -48,7 +48,7 @@ class STF_Module_STF_Node_Spatial(STF_Processor):
 	understood_application_types = [bpy.types.Object]
 	import_func = _stf_import
 	export_func = _stf_export
-	get_components_func: get_components_from_object
+	get_components_func = get_components_from_object
 
 
 register_stf_processors = [

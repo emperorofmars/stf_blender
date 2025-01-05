@@ -95,7 +95,8 @@ def get_component_modules(filter = None) -> list[STF_Blender_Component]:
 	return ret
 
 
-def get_components_from_object(application_object: any, modules = get_component_modules()) -> list:
+def get_components_from_object(application_object: any) -> list:
+	modules = get_component_modules()
 	ret = []
 	if(hasattr(application_object, "stf_components")):
 		for component_ref in application_object.stf_components:
