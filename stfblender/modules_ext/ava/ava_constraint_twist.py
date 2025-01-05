@@ -2,7 +2,6 @@ import bpy
 
 from ....libstf.stf_export_context import STF_RootExportContext
 from ....libstf.stf_import_context import STF_RootImportContext
-from ....libstf.stf_processor import STF_Processor
 from ...utils.component_utils import STF_Blender_Component
 
 
@@ -16,29 +15,29 @@ class AVA_Constraint_Twist(bpy.types.PropertyGroup):
 	weight: bpy.props.FloatProperty(name="Weight", default=0.5) # type: ignore
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Blender_Component, object: any, component: AVA_Constraint_Twist):
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Blender_Component, parent_application_object: any, component: AVA_Constraint_Twist):
 	layout.prop(component, "weight")
 
 
-def _stf_import(context: STF_RootImportContext, json: dict, id: str) -> any:
+def _stf_import(context: STF_RootImportContext, json: dict, id: str, parent_application_object: any) -> any:
 	pass
 
-def _stf_export_component_func(context: STF_RootExportContext, object: any, component: AVA_Constraint_Twist) -> tuple[dict, str, any]:
+def _stf_export(context: STF_RootExportContext, application_object: AVA_Constraint_Twist, parent_application_object: any) -> tuple[dict, str, any]:
 	ret = {
 		"type": _stf_type,
 		"name": "",
-		"weight": component.weight
+		"weight": application_object.weight
 	}
-	return ret, component.stf_id, context
+	return ret, application_object.stf_id, context
 
 
-class STF_Module_AVA_Constraint_Twist(STF_Blender_Component, STF_Processor):
+class STF_Module_AVA_Constraint_Twist(STF_Blender_Component):
 	stf_type = _stf_type
 	stf_kind = "component"
-	understood_types = [AVA_Constraint_Twist]
+	like_types = ["constraint.rotation", "constraint"]
+	understood_application_types = [AVA_Constraint_Twist]
 	import_func = _stf_import
-
-	export_component_func = _stf_export_component_func
+	export_func = _stf_export
 
 	blender_property_name = "stf_ava_constraint_twist"
 	single = True

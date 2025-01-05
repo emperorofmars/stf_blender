@@ -3,7 +3,7 @@ import bpy
 from ....libstf.stf_import_context import STF_RootImportContext
 from ....libstf.stf_export_context import STF_ResourceExportContext, STF_RootExportContext
 from ....libstf.stf_processor import STF_Processor
-from ...utils.component_utils import STF_Component
+from ...utils.component_utils import STF_Component, get_components_from_object
 from ...utils.id_utils import ensure_stf_id
 
 
@@ -32,10 +32,10 @@ class STF_BlenderNodeExportContext(STF_ResourceExportContext):
 			super().register_serialized_resource(application_object, json_resource, id)
 
 
-def _stf_import(context: STF_RootImportContext, json: dict, id: str) -> any:
+def _stf_import(context: STF_RootImportContext, json: dict, id: str, parent_application_object: any = None) -> any:
 	print("IMPORTING STF PREFAB!")
 
-def _stf_export(context: STF_RootExportContext, application_object: any) -> tuple[dict, str, any]:
+def _stf_export(context: STF_RootExportContext, application_object: any, parent_application_object: any = None) -> tuple[dict, str, any]:
 	collection: bpy.types.Collection = application_object
 	ensure_stf_id(collection)
 
@@ -44,6 +44,7 @@ def _stf_export(context: STF_RootExportContext, application_object: any) -> tupl
 		"type": _stf_type,
 		"name": collection.name,
 		"root_nodes": root_nodes,
+		"metric_multiplier": 1,
 	}
 
 	node_export_context = STF_BlenderNodeExportContext(context, ret)
@@ -57,9 +58,11 @@ def _stf_export(context: STF_RootExportContext, application_object: any) -> tupl
 class STF_Module_STF_Prefab(STF_Processor):
 	stf_type = _stf_type
 	stf_kind = "data"
-	understood_types = [bpy.types.Collection]
+	like_types = ["prefab"]
+	understood_application_types = [bpy.types.Collection]
 	import_func = _stf_import
 	export_func = _stf_export
+	get_components_func: get_components_from_object
 
 
 register_stf_processors = [

@@ -6,8 +6,6 @@ from ...libstf.stf_registry import get_stf_processors
 from ...libstf.stf_export_state import STF_ExportState
 from ...libstf.stf_export_context import STF_RootExportContext
 
-from ..utils.component_utils import get_components_from_object
-
 
 class ExportSTF(bpy.types.Operator, ExportHelper):
 	"""Export as STF file (.stf/.stf.json)"""
@@ -41,7 +39,7 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 
 			# TODO: configure profiles
 
-			stf_state = STF_ExportState(profiles=[], asset_info=collection.stf_meta.to_stf_meta_assetInfo(), processors=processors, get_components_from_resource=get_components_from_object)
+			stf_state = STF_ExportState(profiles=[], asset_info=collection.stf_meta.to_stf_meta_assetInfo(), processors=processors)
 			stf_context = STF_RootExportContext(stf_state)
 			root_id = stf_context.serialize_resource(collection)
 			stf_context.run_tasks()

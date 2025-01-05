@@ -26,25 +26,26 @@ class STF_RootExportContext:
 		if(id := self.get_resource_id(application_object)): return id
 
 		if(selected_processor := self._state.determine_processor(application_object)):
-			json_resource, id, ctx = selected_processor.export_func(self, application_object)
+			json_resource, id, ctx = selected_processor.export_func(self, application_object, None)
 
 			if(json_resource and id and ctx):
 				self.register_serialized_resource(application_object, json_resource, id)
 
 				# Export components from application native constructs
-				for processor in self._state.get_hook_processors(application_object):
-					processor.export_hook_func(ctx, application_object)
+				for processor in self._state.determine_hooks(application_object):
+					processor.export_func(ctx, application_object, None)
 
 				# Export components explicitely defined by this application
-				components = self._state.get_components(application_object)
-				if(len(components) > 0):
-					if(not hasattr(json_resource, "components")):
-						json_resource["components"] = {}
-					for component in components:
-						if(selected_processor := self._state.determine_processor(component)):
-							component_json_resource, component_id, _ = selected_processor.export_component_func(ctx, application_object, component)
-							json_resource["components"][component_id] = component_json_resource
-						# TODO else warn user about unsupported component
+				if(hasattr(selected_processor, "get_components_func")):
+					components = selected_processor.get_components_func(self, application_object)
+					if(len(components) > 0):
+						if(not hasattr(json_resource, "components")):
+							json_resource["components"] = {}
+						for component in components:
+							if(selected_processor := self._state.determine_processor(component)):
+								component_json_resource, component_id, _ = selected_processor.export_func(ctx, component, application_object)
+								json_resource["components"][component_id] = component_json_resource
+							# TODO else warn user about unsupported component
 
 				return id
 			else:

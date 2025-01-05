@@ -3,7 +3,7 @@ from types import ModuleType
 from .stf_processor import STF_Processor
 
 """
-	Utils to retrieve all existing STF processors.
+Utils to retrieve all existing STF processors.
 """
 
 def get_stf_processors_from_module(module: ModuleType) -> dict[str, STF_Processor]:
@@ -16,7 +16,7 @@ def get_stf_processors_from_module(module: ModuleType) -> dict[str, STF_Processo
 
 
 def _merge_entries(base: dict[str, STF_Processor], merge: dict[str, STF_Processor]) -> dict[str, STF_Processor]:
-	return base | merge
+	return base | merge # TODO actually compare priority
 
 
 def get_stf_processors(modules: list[ModuleType]) -> list[STF_Processor]:

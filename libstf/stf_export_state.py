@@ -4,7 +4,7 @@ from typing import Callable
 
 from .stf_definition import STF_JsonDefinition, STF_Meta_AssetInfo, STF_Profile
 from .stf_report import STF_Report_Severity, STFException, STFReport
-from .stf_processor import STF_ExportComponentHook, STF_ExportHook, STF_Processor
+from .stf_processor import STF_ExportHook, STF_Processor
 from .stf_file import STF_File
 
 
@@ -16,29 +16,23 @@ class STF_Buffer_Mode(Enum):
 
 class STF_ExportState:
 	"""
-		Hold all the data from an export run.
-		Each context must have access to the same STF_ExportState instance.
+	Hold all the data from an export run.
+	Each context must have access to the same STF_ExportState instance.
 	"""
 
-	def __init__(self, profiles: list[STF_Profile], asset_info: STF_Meta_AssetInfo, processors: list[STF_Processor], get_components_from_resource: Callable[[any], list[any]]):
-		# original application object -> ID of exported STF Json resource
-		self._processors: list[STF_Processor] = processors
-		# ID -> exported STF Json resource
-		self._component_processors: list[STF_ExportComponentHook] = []
-		# ID -> exported STF Json buffer
+	def __init__(self, profiles: list[STF_Profile], asset_info: STF_Meta_AssetInfo, processors: list[STF_Processor]):
+		self._processors: list[STF_Processor] = []
 		self._hook_processors: list[STF_ExportHook] = []
 
 		for processor in processors:
-			if(hasattr(processor, "export_component_func")):
-				self._component_processors.append(processor)
-			if(hasattr(processor, "target_application_types") and hasattr(processor, "export_hook_func")):
+			if(hasattr(processor, "hook_target_application_types")): #and hasattr(processor, "export_hook_func")
 				self._hook_processors.append(processor)
+			else:
+				self._processors.append(processor)
 
 		self._resources: dict[any, str] = {} # original application object -> ID of exported STF Json resource
 		self._exported_resources: dict[str, dict] = {} # ID -> exported STF Json resource
 		self._exported_buffers: dict[str, io.BytesIO] = {} # ID -> exported STF Json buffer
-
-		self._get_components_from_resource = get_components_from_resource
 
 		self._profiles = profiles
 		self._asset_info = asset_info
@@ -47,17 +41,14 @@ class STF_ExportState:
 
 	def determine_processor(self, application_object: any) -> STF_Processor:
 		for processor in self._processors:
-			if(type(application_object) in processor.understood_types):
+			if(type(application_object) in processor.understood_application_types):
 				return processor
 		return None
 
-	def get_components(self, application_object: any) -> list[any]:
-		return self._get_components_from_resource(application_object, self._component_processors)
-
-	def get_hook_processors(self, application_object: any) -> list[STF_ExportHook]:
+	def determine_hooks(self, application_object: any) -> list[STF_ExportHook]:
 		ret = []
 		for hook in self._hook_processors:
-			if(type(application_object) in getattr(hook, "target_application_types")):
+			if(type(application_object) in hook.hook_target_application_types):
 				ret.append(hook)
 		return ret
 
@@ -91,7 +82,6 @@ class STF_ExportState:
 	def get_root_id(self):
 		return self._root_id
 
-
 	def create_stf_definition(self, generator: str = "libstf_python") -> STF_JsonDefinition:
 		import datetime
 
@@ -106,7 +96,6 @@ class STF_ExportState:
 		ret.resources = self._exported_resources
 		ret.buffers = self._exported_buffers
 		return ret
-
 
 	def create_stf_binary_file(self, generator: str = "libstf_python") -> STF_File:
 		ret = STF_File()

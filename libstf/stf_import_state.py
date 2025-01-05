@@ -8,8 +8,8 @@ from .stf_definition import STF_Meta_AssetInfo, STF_Profile
 
 class STF_ImportState:
 	"""
-		Hold all the data from a file for an import run.
-		Each context must have access to the same STF_ImportState instance.
+	Hold all the data from a file for an import run.
+	Each context must have access to the same STF_ImportState instance.
 	"""
 
 	def __init__(self, file: STF_File, processors: list[STF_Processor]):
@@ -19,10 +19,10 @@ class STF_ImportState:
 		self._hook_processors: list[STF_ImportHook] = []
 
 		for processor in processors:
-			if(hasattr(processor, "import_func")):
-				self._processors.append(processor)
-			if(hasattr(processor, "import_resource_func") and hasattr(processor, "target_stf_type")):
+			if(hasattr(processor, "hook_target_stf_type")):
 				self._hook_processors.append(processor)
+			else:
+				self._processors.append(processor)
 
 		self._imported_resources: dict[str, any] = {} # ID -> imported object
 		self._profiles: list[STF_Profile]
@@ -32,7 +32,7 @@ class STF_ImportState:
 	def determine_hooks(self, json_resource: dict) -> list[STF_ImportHook]:
 		ret = []
 		for processor in self._hook_processors:
-			if(json_resource["type"] == processor.target_stf_type):
+			if(json_resource["type"] == processor.hook_target_stf_type):
 				ret.append(processor)
 		return ret
 
@@ -51,11 +51,11 @@ class STF_ImportState:
 			case "stf.buffer.included":
 				return self._file.buffers_included[buffer.index]
 			case "stf.buffer.file":
-				pass
+				pass # TODO
 			case "stf.buffer.json_array":
-				pass
+				pass # TODO
 			case _:
-				self.report(STFReport("Invalid buffer type: " + buffer.type))
+				self.report(STFReport("Invalid buffer type: " + buffer.type, severity=STF_Report_Severity.Error))
 		return None
 
 	def get_json_resource(self, id: int) -> dict:

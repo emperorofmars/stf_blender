@@ -2,7 +2,7 @@ import bpy
 
 from ....libstf.stf_import_context import STF_RootImportContext
 from ....libstf.stf_processor import STF_Processor
-from ...utils.component_utils import STF_Component
+from ...utils.component_utils import STF_Component, get_components_from_object
 from ...utils.id_utils import ensure_stf_id
 from ...utils.trs_utils import to_trs
 from ..stf_prefab.stf_prefab import STF_BlenderNodeExportContext
@@ -11,11 +11,11 @@ from ..stf_prefab.stf_prefab import STF_BlenderNodeExportContext
 _stf_type = "stf.node.spatial"
 
 
-def _stf_import(context: STF_RootImportContext, json: dict, id: str) -> any:
+def _stf_import(context: STF_RootImportContext, json: dict, id: str, parent_application_object: any = None) -> any:
 	pass
 
 
-def _stf_export(context: STF_BlenderNodeExportContext, object: any) -> tuple[dict, str, any]:
+def _stf_export(context: STF_BlenderNodeExportContext, object: any, parent_application_object: any = None) -> tuple[dict, str, any]:
 	blender_object: bpy.types.Object = object
 	ensure_stf_id(blender_object)
 
@@ -44,9 +44,11 @@ def _stf_export(context: STF_BlenderNodeExportContext, object: any) -> tuple[dic
 class STF_Module_STF_Node_Spatial(STF_Processor):
 	stf_type = _stf_type
 	stf_kind = "node"
-	understood_types = [bpy.types.Object]
+	like_types = ["node", "node.spatial"]
+	understood_application_types = [bpy.types.Object]
 	import_func = _stf_import
 	export_func = _stf_export
+	get_components_func: get_components_from_object
 
 
 register_stf_processors = [

@@ -6,17 +6,23 @@ class STF_Processor:
 	stf_type: str
 	stf_kind: str
 
-	# List of application types this processor can export
-	understood_types: list = []
-
-	# (Import Context, Json Dict, ID) -> The Application Object
-	import_func: Callable[[any, dict, str], any]
-
-	# (Export Context, The Application Object) -> (Json Dict, ID, Export Context)
-	export_func: Callable[[any, any], tuple[dict, str, any]]
+	priority: int = 0
 
 	# Behaves like this type. For example a 'my.custom.super_fancy_mesh' can be like 'stf.mesh'.
-	like_stf_type: str | None
+	like_types: list[str] = []
+
+	# List of application types this processor can export
+	understood_application_types: list = []
+
+	# (Import Context, Json Dict, ID, Optional Parent Application Object) -> The Application Object
+	import_func: Callable[[any, dict, str, any], any]
+
+	# (Export Context, Application Object, Optional Parent Application Object) -> (Json Dict, ID, Export Context)
+	export_func: Callable[[any, any, any], tuple[dict, str, any]]
+
+	# Get a list of application-components on the application object.
+	# (Export Context, Application Object) -> List[Application Object]
+	get_components_func: Callable[[any, any], list[any]]
 
 
 class STF_ExportHook(STF_Processor):
@@ -32,16 +38,7 @@ class STF_ExportHook(STF_Processor):
 		It's 'export_hook_func' checks if the model has split normals definitions, and creates a 'stf.mesh.split_normals' component on the underlying 'stf.mesh' resource.
 	"""
 	# List of application types this processor can hook into
-	target_application_types: list = []
-
-	# (Export Context, The targeted Application Object) -> (Json Dict, ID, Export Context)
-	export_hook_func: Callable[[any, any], tuple[dict, str, any]]
-
-
-class STF_ExportComponentHook(STF_Processor):
-	"""Hook to export components on an application-native object"""
-	# (Export Context, The targeted Application Object, the Application Component Object) -> (Json Dict, ID, Export Context)
-	export_component_func: Callable[[any, any, any], tuple[dict, str, any]]
+	hook_target_application_types: list = []
 
 
 class STF_ImportHook(STF_Processor):
@@ -51,7 +48,4 @@ class STF_ImportHook(STF_Processor):
 		For example, in Blender, an object that has a mesh, must be created with the mesh data block at once.
 		When a 'stf.node.spatial' contains a 'stf.instance.mesh' component, an 'STF_ImportHook' must target 'stf.node.spatial' and run its import logic, otherwise defer to the regular import logic.
 	"""
-	target_stf_type: str
-
-	# (Import Context, json resource) -> (imported resource, list of IDs to ignore)
-	import_resource_func: Callable[[any, dict], tuple[any, list[str]]]
+	hook_target_stf_type: str
