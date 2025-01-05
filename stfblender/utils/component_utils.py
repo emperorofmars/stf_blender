@@ -10,6 +10,7 @@ class STF_Component(bpy.types.PropertyGroup):
 	"""This property defines the type and ID, from which the appropriate registered function can handle the correct object"""
 	stf_type: bpy.props.StringProperty(name="Type") # type: ignore
 	stf_id: bpy.props.StringProperty(name="ID") # type: ignore
+	blender_property_name: bpy.props.StringProperty(name="Blender Property Name") # type: ignore
 
 
 class STF_Blender_Component(STF_Processor):
@@ -33,6 +34,7 @@ class STFAddComponentOperatorBase:
 		component_ref: STF_Component = target.stf_components.add()
 		component_ref.stf_id = str(uuid.uuid4())
 		component_ref.stf_type = self.stf_type
+		component_ref.blender_property_name = self.property_name
 
 		new_component = getattr(target, self.property_name).add()
 		new_component.stf_id = component_ref.stf_id
@@ -96,16 +98,13 @@ def get_component_modules(filter = None) -> list[STF_Blender_Component]:
 
 
 def get_components_from_object(application_object: any) -> list:
-	modules = get_component_modules()
 	ret = []
 	if(hasattr(application_object, "stf_components")):
 		for component_ref in application_object.stf_components:
-			module = find_component_module(modules, component_ref.stf_type)
-			if(module):
-				components = getattr(application_object, module.blender_property_name)
-				for component in components:
-					if(component.stf_id == component_ref.stf_id):
-						ret.append(component)
+			components = getattr(application_object, component_ref.blender_property_name)
+			for component in components:
+				if(component.stf_id == component_ref.stf_id):
+					ret.append(component)
 	return ret
 
 
@@ -125,6 +124,7 @@ def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, compo
 		selected_module.draw_component_func(box, context, component_ref, object, component)
 	else:
 		box.label(text="Unknown Type")
+		box.label(text="Blender Property Name: " + component_ref.blender_property_name)
 
 
 def find_component_module(modules: list[STF_Blender_Component], stf_type: str) -> STF_Blender_Component:
@@ -156,12 +156,11 @@ def draw_components_ui(
 		if(len(object.stf_components) > object.stf_active_component_index):
 			component_ref = object.stf_components[object.stf_active_component_index]
 
-			selected_module = find_component_module(modules, component_ref.stf_type)
 			remove_button = row.operator(remove_component_op, icon="X", text="")
 			remove_button.index = object.stf_active_component_index
-			remove_button.property_name = selected_module.blender_property_name
+			remove_button.property_name = component_ref.blender_property_name
 
-			for component in getattr(object, selected_module.blender_property_name):
+			for component in getattr(object, component_ref.blender_property_name):
 				if(component.stf_id == component_ref.stf_id):
 					draw_component(layout, context, component_ref, object, component)
 					break
