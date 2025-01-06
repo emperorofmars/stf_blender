@@ -1,12 +1,11 @@
 import io
 from enum import Enum
-from typing import Callable
 
 from .stf_definition import STF_JsonDefinition, STF_Meta_AssetInfo, STF_Profile
-from .stf_report import STF_Report_Severity, STFException, STFReport
+from .stf_report import STF_Report_Severity, STFReport
 from .stf_module import STF_ExportHook, STF_Module
 from .stf_file import STF_File
-from .stf_util import run_tasks
+from .stf_util import StateUtil
 
 
 class STF_Buffer_Mode(Enum):
@@ -15,13 +14,15 @@ class STF_Buffer_Mode(Enum):
 	external = 2
 
 
-class STF_ExportState:
+class STF_ExportState(StateUtil):
 	"""
 	Hold all the data from an export run.
 	Each context must have access to the same STF_ExportState instance.
 	"""
 
 	def __init__(self, profiles: list[STF_Profile], asset_info: STF_Meta_AssetInfo, modules: tuple[dict[any, STF_Module], dict[any, list[STF_ExportHook]]]):
+		super.__init__()
+
 		self._modules: dict[any, STF_Module] = modules[0]
 		self._hooks: dict[any, list[STF_ExportHook]] = modules[1]
 
@@ -31,10 +32,7 @@ class STF_ExportState:
 
 		self._profiles = profiles
 		self._asset_info = asset_info
-		self._reports: list[STFReport] = []
 		self._root_id: str = None
-
-		self._tasks: list[Callable] = []
 
 	def determine_module(self, application_object: any) -> STF_Module:
 		return self._modules.get(type(application_object))
@@ -62,18 +60,6 @@ class STF_ExportState:
 		id = uuid.uuid4()
 		self._exported_buffers[id] = data
 		return id
-
-	def add_task(self, task: Callable):
-		self._tasks.append(task)
-
-	def run_tasks(self):
-		run_tasks(self)
-
-	def report(self, report: STFReport):
-		self._reports.append(report)
-		if(report.severity == STF_Report_Severity.Error):
-			print(report.to_string(), flush=True)
-			raise STFException(report)
 
 	def get_root_id(self):
 		return self._root_id

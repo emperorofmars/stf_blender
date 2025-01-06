@@ -1,20 +1,21 @@
 import io
-from typing import Callable
 
-from .stf_report import STF_Report_Severity, STFException, STFReport
+from .stf_report import STF_Report_Severity, STFReport
 from .stf_file import STF_File
 from .stf_module import STF_ImportHook, STF_Module
 from .stf_definition import STF_Meta_AssetInfo, STF_Profile
-from .stf_util import run_tasks
+from .stf_util import StateUtil
 
 
-class STF_ImportState:
+class STF_ImportState(StateUtil):
 	"""
 	Hold all the data from a file for an import run.
 	Each context must have access to the same STF_ImportState instance.
 	"""
 
 	def __init__(self, file: STF_File, modules: tuple[dict[str, STF_Module], dict[str, list[STF_ImportHook]]]):
+		super.__init__()
+
 		self._file = file
 
 		self._modules: dict[str, STF_Module] = modules[0]
@@ -23,9 +24,6 @@ class STF_ImportState:
 		self._imported_resources: dict[str, any] = {} # ID -> imported object
 		self._profiles: list[STF_Profile]
 		self._asset_info: STF_Meta_AssetInfo
-		self._reports: list[STFReport] = []
-
-		self._tasks: list[Callable] = []
 
 	def determine_module(self, json_resource: dict) -> STF_Module:
 		return self._modules.get(json_resource["type"])
@@ -49,21 +47,9 @@ class STF_ImportState:
 				self.report(STFReport("Invalid buffer type: " + buffer.type, severity=STF_Report_Severity.Error))
 		return None
 
-	def add_task(self, task: Callable):
-		self._tasks.append(task)
-
-	def run_tasks(self):
-		run_tasks(self)
-
 	def get_json_resource(self, id: int) -> dict:
 		return self._file.definition.resources.get(id)
 
 	def get_root_id(self) -> str:
 		return self._file.definition.stf.root
-
-	def report(self, report: STFReport):
-		self._reports.append(report)
-		if(report.severity == STF_Report_Severity.Error):
-			print(report.to_string(), flush=True)
-			raise STFException(report)
 

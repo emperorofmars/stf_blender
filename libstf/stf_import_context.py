@@ -3,7 +3,6 @@ from typing import Callable
 
 from .stf_import_state import STF_ImportState
 from .stf_report import STFReport
-from .stf_util import run_tasks
 
 
 class STF_RootImportContext:
@@ -39,6 +38,9 @@ class STF_RootImportContext:
 
 	def get_filename(self) -> str:
 		return self._state._file.filename
+
+	def get_root_context(self) -> any:
+		return self
 
 	def report(self, report: STFReport):
 		self._state.report(report)

@@ -1,11 +1,9 @@
 import io
 from typing import Callable
 
-
 from .stf_export_state import STF_ExportState
 from .stf_definition import STF_Meta_AssetInfo, STF_Profile
 from .stf_report import STF_Report_Severity, STFReport
-from .stf_util import run_tasks
 
 
 class STF_RootExportContext:
@@ -61,6 +59,9 @@ class STF_RootExportContext:
 	def add_task(self, task: Callable):
 		self._state._tasks.append(task)
 
+	def get_root_context(self) -> any:
+		return self
+
 	def report(self, report: STFReport):
 		self._state.report(report)
 
@@ -105,4 +106,7 @@ class STF_ResourceExportContext(STF_RootExportContext):
 
 	def add_task(self, task):
 		return self._parent_context.add_task(task)
+
+	def get_root_context(self) -> any:
+		return self._parent_context.get_root_context()
 
