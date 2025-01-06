@@ -21,15 +21,9 @@ class STF_ExportState:
 	Each context must have access to the same STF_ExportState instance.
 	"""
 
-	def __init__(self, profiles: list[STF_Profile], asset_info: STF_Meta_AssetInfo, processors: list[STF_Module]):
-		self._processors: list[STF_Module] = []
-		self._hook_processors: list[STF_ExportHook] = []
-
-		for processor in processors:
-			if(hasattr(processor, "hook_target_application_types")): #and hasattr(processor, "export_hook_func")
-				self._hook_processors.append(processor)
-			else:
-				self._processors.append(processor)
+	def __init__(self, profiles: list[STF_Profile], asset_info: STF_Meta_AssetInfo, modules: tuple[dict[any, STF_Module], dict[any, list[STF_ExportHook]]]):
+		self._modules: dict[any, STF_Module] = modules[0]
+		self._hooks: dict[any, list[STF_ExportHook]] = modules[1]
 
 		self._resources: dict[any, str] = {} # original application object -> ID of exported STF Json resource
 		self._exported_resources: dict[str, dict] = {} # ID -> exported STF Json resource
@@ -42,18 +36,11 @@ class STF_ExportState:
 
 		self._tasks: list[Callable] = []
 
-	def determine_processor(self, application_object: any) -> STF_Module:
-		for processor in self._processors:
-			if(type(application_object) in processor.understood_application_types):
-				return processor
-		return None
+	def determine_module(self, application_object: any) -> STF_Module:
+		return self._modules.get(type(application_object))
 
 	def determine_hooks(self, application_object: any) -> list[STF_ExportHook]:
-		ret = []
-		for hook in self._hook_processors:
-			if(type(application_object) in hook.hook_target_application_types):
-				ret.append(hook)
-		return ret
+		return self._hooks.get(type(application_object))
 
 	def get_resource_id(self, application_object: any) -> str:
 		if(application_object in self._resources):

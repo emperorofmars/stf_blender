@@ -17,15 +17,12 @@ class STF_RootImportContext:
 		if(id in self._state._imported_resources.keys()): return self._state._imported_resources[id]
 
 		json_resource = self.get_json_resource(id)
-		hooks = self._state.determine_hooks(json_resource)
-		if(len(hooks) > 0):
+		if(hooks := self._state.determine_hooks(json_resource)):
 			pass
+		elif(module := self._state.determine_module(json_resource)):
+			return module.import_func(self, json_resource, id)
 		else:
-			processor = self._state.determine_processor(json_resource)
-			if(processor):
-				return processor.import_func(self, json_resource, id)
-			else:
-				pass # TODO json fallback
+			pass # TODO json fallback
 		return None
 
 	def import_buffer(self, id: str) -> io.BytesIO:

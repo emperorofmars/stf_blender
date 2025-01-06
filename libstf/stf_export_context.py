@@ -24,31 +24,33 @@ class STF_RootExportContext:
 		if(application_object == None): return None
 		if(id := self.get_resource_id(application_object)): return id
 
-		if(selected_processor := self._state.determine_processor(application_object)):
-			json_resource, id, ctx = selected_processor.export_func(self, application_object, None)
+		if(selected_module := self._state.determine_module(application_object)):
+			json_resource, id, ctx = selected_module.export_func(self, application_object, None)
 
 			if(json_resource and id and ctx):
 				self.register_serialized_resource(application_object, json_resource, id)
 
 				# Export components from application native constructs
-				for processor in self._state.determine_hooks(application_object):
-					processor.export_func(ctx, application_object, None)
+				if(hooks := self._state.determine_hooks(application_object)):
+					for hook in hooks:
+						hook.export_func(ctx, application_object, None)
 
 				# Export components explicitely defined by this application
-				if(hasattr(selected_processor, "get_components_func")):
-					components = selected_processor.get_components_func(application_object)
+				if(hasattr(selected_module, "get_components_func")):
+					components = selected_module.get_components_func(application_object)
 					if(len(components) > 0):
 						if(not hasattr(json_resource, "components")):
 							json_resource["components"] = {}
 						for component in components:
-							if(selected_processor := self._state.determine_processor(component)):
-								component_json_resource, component_id, _ = selected_processor.export_func(ctx, component, application_object)
+							if(selected_module := self._state.determine_module(component)):
+								component_json_resource, component_id, _ = selected_module.export_func(ctx, component, application_object)
 								json_resource["components"][component_id] = component_json_resource
-							# TODO else warn user about unsupported component
+							else:
+								self.report("Unsupported Component", severity=STF_Report_Severity.Warn, stf_type=selected_module.stf_type, application_object=application_object, selected_module=selected_module)
 
 				return id
 			else:
-				self.report(STFReport(message="Resource Export Failed", severity=STF_Report_Severity.Error, stf_id=id, stf_type=selected_processor.stf_type, application_object=application_object))
+				self.report(STFReport(message="Resource Export Failed", severity=STF_Report_Severity.Error, stf_id=id, stf_type=selected_module.stf_type, application_object=application_object))
 		else:
 			self.report(STFReport(message="NO Processor Found", severity=STF_Report_Severity.Error, application_object=application_object))
 		return None

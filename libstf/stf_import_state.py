@@ -14,17 +14,11 @@ class STF_ImportState:
 	Each context must have access to the same STF_ImportState instance.
 	"""
 
-	def __init__(self, file: STF_File, processors: list[STF_Module]):
+	def __init__(self, file: STF_File, modules: tuple[dict[str, STF_Module], dict[str, list[STF_ImportHook]]]):
 		self._file = file
 
-		self._processors: list[STF_Module] = []
-		self._hook_processors: list[STF_ImportHook] = []
-
-		for processor in processors:
-			if(hasattr(processor, "hook_target_stf_type")):
-				self._hook_processors.append(processor)
-			else:
-				self._processors.append(processor)
+		self._modules: dict[str, STF_Module] = modules[0]
+		self._hooks: dict[str, list[STF_ImportHook]] = modules[1]
 
 		self._imported_resources: dict[str, any] = {} # ID -> imported object
 		self._profiles: list[STF_Profile]
@@ -33,18 +27,11 @@ class STF_ImportState:
 
 		self._tasks: list[Callable] = []
 
-	def determine_hooks(self, json_resource: dict) -> list[STF_ImportHook]:
-		ret = []
-		for processor in self._hook_processors:
-			if(json_resource["type"] == processor.hook_target_stf_type):
-				ret.append(processor)
-		return ret
+	def determine_module(self, json_resource: dict) -> STF_Module:
+		return self._modules.get(json_resource["type"])
 
-	def determine_processor(self, json_resource: dict) -> STF_Module:
-		for processor in self._processors:
-			if(json_resource["type"] == processor.stf_type):
-				return processor
-		return None
+	def determine_hooks(self, json_resource: dict) -> list[STF_ImportHook]:
+		return self._hooks.get(json_resource["type"])
 
 	def register_imported_resource(self, id: str, application_object: any):
 		self._imported_resources[id] = application_object

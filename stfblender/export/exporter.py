@@ -2,7 +2,7 @@ import json
 import bpy
 from bpy_extras.io_utils import ExportHelper
 
-from ...libstf.stf_registry import get_stf_modules
+from ...libstf.stf_registry import get_export_modules
 from ...libstf.stf_export_state import STF_ExportState
 from ...libstf.stf_export_context import STF_RootExportContext
 
@@ -35,11 +35,9 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 		try:
 			collection = context.scene.stf_collection_selector if context.scene.stf_collection_selector else context.scene.collection
 
-			processors = get_stf_modules(bpy.context.preferences.addons.keys())
-
 			# TODO: configure profiles
 
-			stf_state = STF_ExportState(profiles=[], asset_info=collection.stf_meta.to_stf_meta_assetInfo(), processors=processors)
+			stf_state = STF_ExportState([], collection.stf_meta.to_stf_meta_assetInfo(), get_export_modules(bpy.context.preferences.addons.keys()))
 			stf_context = STF_RootExportContext(stf_state)
 			root_id = stf_context.serialize_resource(collection)
 			stf_state.run_tasks()

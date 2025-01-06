@@ -8,7 +8,7 @@ class STF_Module:
 
 	priority: int = 0
 
-	# Behaves like this type. For example a 'my.custom.super_fancy_mesh' can be like 'stf.mesh'.
+	# Behaves like this type. For example a 'my.custom.super_fancy_mesh' is be like 'mesh'.
 	like_types: list[str] = []
 
 	# List of application types this processor can export
@@ -25,6 +25,16 @@ class STF_Module:
 	get_components_func: Callable[[any], list[any]]
 
 
+class STF_ImportHook(STF_Module):
+	"""
+		Hook to import a resource based on custom logic.
+
+		For example, in Blender, an object that has a mesh, must be created with the mesh data block at once.
+		When a 'stf.node.spatial' contains a 'stf.instance.mesh' component, an 'STF_ImportHook' must target 'stf.node.spatial' and run its import logic, otherwise defer to the regular import logic.
+	"""
+	hook_target_stf_type: str
+
+
 class STF_ExportHook(STF_Module):
 	"""
 		Provides a way to export an application-native 'thing' into STF, after a target processor has run.
@@ -39,13 +49,3 @@ class STF_ExportHook(STF_Module):
 	"""
 	# List of application types this processor can hook into
 	hook_target_application_types: list = []
-
-
-class STF_ImportHook(STF_Module):
-	"""
-		Hook to import a resource based on custom logic.
-
-		For example, in Blender, an object that has a mesh, must be created with the mesh data block at once.
-		When a 'stf.node.spatial' contains a 'stf.instance.mesh' component, an 'STF_ImportHook' must target 'stf.node.spatial' and run its import logic, otherwise defer to the regular import logic.
-	"""
-	hook_target_stf_type: str
