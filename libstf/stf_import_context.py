@@ -37,6 +37,9 @@ class STF_RootImportContext:
 	def get_root_id(self) -> str:
 		return self._state._file.definition.stf.root
 
+	def get_filename(self) -> str:
+		return self._state._file.filename
+
 	def report(self, report: STFReport):
 		self._state.report(report)
 

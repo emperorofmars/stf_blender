@@ -15,10 +15,14 @@ class STF_File:
 		self.binary_version_minor: int = 0
 		self.definition: STF_JsonDefinition = STF_JsonDefinition()
 		self.buffers_included: list[io.BytesIO] = []
+		self.filename: str = ""
 
 	@staticmethod
 	def parse(buffer: io.BytesIO):
 		ret = STF_File()
+		ret.filename = buffer.name
+		print(ret.filename)
+
 		# Read and check magic number
 		magic_number = buffer.read(4)
 		if(magic_number.decode("ascii") != "STF0"):

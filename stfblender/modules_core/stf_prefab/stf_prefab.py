@@ -33,7 +33,12 @@ class STF_BlenderNodeExportContext(STF_ResourceExportContext):
 
 
 def _stf_import(context: STF_RootImportContext, json: dict, id: str, parent_application_object: any = None) -> any:
-	print("IMPORTING STF PREFAB!")
+	collection = bpy.data.collections.new(json.get("name", context.get_filename()))
+	bpy.context.scene.collection.children.link(collection)
+
+	# TODO import nodes
+
+	return collection
 
 def _stf_export(context: STF_RootExportContext, application_object: any, parent_application_object: any = None) -> tuple[dict, str, any]:
 	collection: bpy.types.Collection = application_object
