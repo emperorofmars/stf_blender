@@ -1,7 +1,7 @@
 import bpy
 from bpy_extras.io_utils import ImportHelper
 
-from ...libstf.stf_registry import get_stf_processors
+from ...libstf.stf_registry import get_stf_modules
 from ...libstf.stf_import_state import STF_ImportState
 from ...libstf.stf_report import STFException
 from ...libstf.stf_import_context import STF_RootImportContext
@@ -24,7 +24,7 @@ class ImportSTF(bpy.types.Operator, ImportHelper):
 		context.window.cursor_set('WAIT')
 		file = None
 		try:
-			processors = get_stf_processors(bpy.context.preferences.addons.keys())
+			processors = get_stf_modules(bpy.context.preferences.addons.keys())
 
 			# Read and parse stf_file from disk
 			file = open(self.filepath, "rb")

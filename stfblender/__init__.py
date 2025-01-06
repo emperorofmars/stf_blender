@@ -18,10 +18,10 @@ class STF_File_Handler(bpy.types.FileHandler):
 from . import modules_core
 from . import modules_ext
 
-register_stf_processors = modules_core.register_stf_processors + modules_ext.register_stf_processors
+register_stf_modules = modules_core.register_stf_modules + modules_ext.register_stf_modules
 
 """
-print("Registered STF processors:")
-for processor in register_stf_processors:
-	print(processor.stf_type)
+print("Registered STF Modules:")
+for module in register_stf_modules:
+	print(module.stf_type)
 """

@@ -1,7 +1,7 @@
 from typing import Callable
 
 
-class STF_Processor:
+class STF_Module:
 	"""Represents the functionality to process an STF type"""
 	stf_type: str
 	stf_kind: str
@@ -25,8 +25,7 @@ class STF_Processor:
 	get_components_func: Callable[[any], list[any]]
 
 
-
-class STF_ExportHook(STF_Processor):
+class STF_ExportHook(STF_Module):
 	"""
 		Provides a way to export an application-native 'thing' into STF, after a target processor has run.
 
@@ -42,7 +41,7 @@ class STF_ExportHook(STF_Processor):
 	hook_target_application_types: list = []
 
 
-class STF_ImportHook(STF_Processor):
+class STF_ImportHook(STF_Module):
 	"""
 		Hook to import a resource based on custom logic.
 

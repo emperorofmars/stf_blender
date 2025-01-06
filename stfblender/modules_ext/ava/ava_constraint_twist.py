@@ -45,7 +45,7 @@ class STF_Module_AVA_Constraint_Twist(STF_Blender_Component):
 	draw_component_func = _draw_component
 
 
-register_stf_processors = [
+register_stf_modules = [
 	STF_Module_AVA_Constraint_Twist
 ]
 

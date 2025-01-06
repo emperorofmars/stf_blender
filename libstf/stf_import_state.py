@@ -3,7 +3,7 @@ from typing import Callable
 
 from .stf_report import STF_Report_Severity, STFException, STFReport
 from .stf_file import STF_File
-from .stf_processor import STF_ImportHook, STF_Processor
+from .stf_module import STF_ImportHook, STF_Module
 from .stf_definition import STF_Meta_AssetInfo, STF_Profile
 from .stf_util import run_tasks
 
@@ -14,10 +14,10 @@ class STF_ImportState:
 	Each context must have access to the same STF_ImportState instance.
 	"""
 
-	def __init__(self, file: STF_File, processors: list[STF_Processor]):
+	def __init__(self, file: STF_File, processors: list[STF_Module]):
 		self._file = file
 
-		self._processors: list[STF_Processor] = []
+		self._processors: list[STF_Module] = []
 		self._hook_processors: list[STF_ImportHook] = []
 
 		for processor in processors:
@@ -40,7 +40,7 @@ class STF_ImportState:
 				ret.append(processor)
 		return ret
 
-	def determine_processor(self, json_resource: dict) -> STF_Processor:
+	def determine_processor(self, json_resource: dict) -> STF_Module:
 		for processor in self._processors:
 			if(json_resource["type"] == processor.stf_type):
 				return processor

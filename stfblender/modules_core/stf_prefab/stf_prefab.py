@@ -2,7 +2,7 @@ import bpy
 
 from ....libstf.stf_import_context import STF_RootImportContext
 from ....libstf.stf_export_context import STF_ResourceExportContext, STF_RootExportContext
-from ....libstf.stf_processor import STF_Processor
+from ....libstf.stf_module import STF_Module
 from ...utils.component_utils import STF_Component, get_components_from_object
 from ...utils.id_utils import ensure_stf_id
 
@@ -55,7 +55,7 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 	return ret, collection.stf_id, node_export_context
 
 
-class STF_Module_STF_Prefab(STF_Processor):
+class STF_Module_STF_Prefab(STF_Module):
 	stf_type = _stf_type
 	stf_kind = "data"
 	like_types = ["prefab"]
@@ -65,7 +65,7 @@ class STF_Module_STF_Prefab(STF_Processor):
 	get_components_func = get_components_from_object
 
 
-register_stf_processors = [
+register_stf_modules = [
 	STF_Module_STF_Prefab
 ]
 

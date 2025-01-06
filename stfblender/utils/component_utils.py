@@ -2,7 +2,7 @@ from typing import Callable
 import uuid
 import bpy
 
-from ...libstf.stf_processor import STF_Processor
+from ...libstf.stf_module import STF_Module
 
 
 class STF_Component(bpy.types.PropertyGroup):
@@ -12,7 +12,7 @@ class STF_Component(bpy.types.PropertyGroup):
 	blender_property_name: bpy.props.StringProperty(name="Blender Property Name") # type: ignore
 
 
-class STF_Blender_Component(STF_Processor):
+class STF_Blender_Component(STF_Module):
 	"""Extension to STF_Processor which also associates a function to draw the component in Blender's UI"""
 	blender_property_name: str
 	filter: list

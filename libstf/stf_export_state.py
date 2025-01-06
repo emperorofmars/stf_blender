@@ -4,7 +4,7 @@ from typing import Callable
 
 from .stf_definition import STF_JsonDefinition, STF_Meta_AssetInfo, STF_Profile
 from .stf_report import STF_Report_Severity, STFException, STFReport
-from .stf_processor import STF_ExportHook, STF_Processor
+from .stf_module import STF_ExportHook, STF_Module
 from .stf_file import STF_File
 from .stf_util import run_tasks
 
@@ -21,8 +21,8 @@ class STF_ExportState:
 	Each context must have access to the same STF_ExportState instance.
 	"""
 
-	def __init__(self, profiles: list[STF_Profile], asset_info: STF_Meta_AssetInfo, processors: list[STF_Processor]):
-		self._processors: list[STF_Processor] = []
+	def __init__(self, profiles: list[STF_Profile], asset_info: STF_Meta_AssetInfo, processors: list[STF_Module]):
+		self._processors: list[STF_Module] = []
 		self._hook_processors: list[STF_ExportHook] = []
 
 		for processor in processors:
@@ -42,7 +42,7 @@ class STF_ExportState:
 
 		self._tasks: list[Callable] = []
 
-	def determine_processor(self, application_object: any) -> STF_Processor:
+	def determine_processor(self, application_object: any) -> STF_Module:
 		for processor in self._processors:
 			if(type(application_object) in processor.understood_application_types):
 				return processor

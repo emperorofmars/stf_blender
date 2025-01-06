@@ -1,6 +1,6 @@
 import bpy
 
-from ...libstf.stf_registry import get_stf_processors
+from ...libstf.stf_registry import get_stf_modules
 from .component_utils import STF_Blender_Component, STF_Component
 
 
@@ -14,7 +14,7 @@ class STFDrawComponentList(bpy.types.UIList):
 
 def get_component_modules(filter = None) -> list[STF_Blender_Component]:
 	ret = []
-	for processor in get_stf_processors(bpy.context.preferences.addons.keys()):
+	for processor in get_stf_modules(bpy.context.preferences.addons.keys()):
 		if(isinstance(processor, STF_Blender_Component) or hasattr(processor, "draw_component_func")):
 			if(hasattr(processor, "filter") and filter):
 				if(filter in getattr(processor, "filter")):

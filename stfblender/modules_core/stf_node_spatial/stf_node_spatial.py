@@ -1,7 +1,7 @@
 import bpy
 
 from ....libstf.stf_import_context import STF_RootImportContext
-from ....libstf.stf_processor import STF_Processor
+from ....libstf.stf_module import STF_Module
 from ...utils.component_utils import STF_Component, get_components_from_object
 from ...utils.id_utils import ensure_stf_id
 from ...utils.trs_utils import to_trs
@@ -41,7 +41,7 @@ def _stf_export(context: STF_BlenderNodeExportContext, application_object: any, 
 	return node, blender_object.stf_id, context
 
 
-class STF_Module_STF_Node_Spatial(STF_Processor):
+class STF_Module_STF_Node_Spatial(STF_Module):
 	stf_type = _stf_type
 	stf_kind = "node"
 	like_types = ["node", "node.spatial"]
@@ -51,7 +51,7 @@ class STF_Module_STF_Node_Spatial(STF_Processor):
 	get_components_func = get_components_from_object
 
 
-register_stf_processors = [
+register_stf_modules = [
 	STF_Module_STF_Node_Spatial
 ]
 

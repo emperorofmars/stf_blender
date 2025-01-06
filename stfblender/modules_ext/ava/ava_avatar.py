@@ -46,7 +46,7 @@ class STF_Module_AVA_Avatar(STF_Blender_Component):
 	like_types = []
 
 
-register_stf_processors = [
+register_stf_modules = [
 	STF_Module_AVA_Avatar
 ]
 
