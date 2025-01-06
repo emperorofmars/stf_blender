@@ -52,7 +52,7 @@ def is_priority_higher(a: STF_Module, b: STF_Module) -> bool:
 def get_import_modules(search_modules: list[ModuleType | str] | None = None) -> tuple[dict[str, STF_Module], dict[str, list[STF_ImportHook]]]:
 	stf_modules = get_stf_modules(search_modules)
 
-	registered_hooks = {}
+	tmp_registered_hooks = {}
 
 	ret_modules = {}
 	ret_hooks = {}
@@ -63,8 +63,8 @@ def get_import_modules(search_modules: list[ModuleType | str] | None = None) -> 
 				if(not ret_modules.get(stf_module.stf_type) or is_priority_higher(ret_modules[stf_module.stf_type], stf_module)):
 					ret_modules[stf_module.stf_type] = stf_module
 			else:
-				if(not registered_hooks.get(stf_module.stf_type) or is_priority_higher(registered_hooks[stf_module.stf_type], stf_module)):
-					registered_hooks[stf_module.stf_type] = stf_module
+				if(not tmp_registered_hooks.get(stf_module.stf_type) or is_priority_higher(tmp_registered_hooks[stf_module.stf_type], stf_module)):
+					tmp_registered_hooks[stf_module.stf_type] = stf_module
 
 					if(not ret_hooks.get(stf_module.hook_target_stf_type)):
 						ret_hooks[stf_module.hook_target_stf_type] = [stf_module]
@@ -77,7 +77,7 @@ def get_import_modules(search_modules: list[ModuleType | str] | None = None) -> 
 def get_export_modules(search_modules: list[ModuleType | str] | None = None) -> tuple[dict[any, STF_Module], dict[any, list[STF_ExportHook]]]:
 	stf_modules = get_stf_modules(search_modules)
 
-	registered_hooks = {}
+	tmp_registered_hooks = {}
 
 	ret_modules = {}
 	ret_hooks = {}
@@ -90,8 +90,8 @@ def get_export_modules(search_modules: list[ModuleType | str] | None = None) -> 
 						ret_modules[understood_type] = stf_module
 			else:
 				for understood_type in stf_module.understood_application_types:
-					if(not registered_hooks.get(understood_type) or is_priority_higher(registered_hooks[understood_type], stf_module)):
-						registered_hooks[understood_type] = stf_module
+					if(not tmp_registered_hooks.get(understood_type) or is_priority_higher(tmp_registered_hooks[understood_type], stf_module)):
+						tmp_registered_hooks[understood_type] = stf_module
 
 						if(not ret_hooks.get(understood_type)):
 							ret_hooks[understood_type] = [stf_module]
