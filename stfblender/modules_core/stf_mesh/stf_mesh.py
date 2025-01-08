@@ -1,3 +1,5 @@
+from io import BytesIO
+import struct
 import bpy
 
 from ....libstf.stf_export_context import STF_RootExportContext
@@ -23,6 +25,13 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 		"type": _stf_type,
 		"name": blender_mesh.name
 	}
+
+	data = BytesIO()
+	data.write(struct.pack("<f", 0.23))
+	data.write(struct.pack("<f", 0.534))
+	data.write(struct.pack("<f", 1.953))
+
+	stf_mesh["mesh"] = context.serialize_buffer(data)
 
 	return stf_mesh, blender_mesh.stf_id, context
 

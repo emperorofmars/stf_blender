@@ -4,7 +4,7 @@ from ....libstf.stf_import_context import STF_RootImportContext
 from ....libstf.stf_module import STF_Module
 from ...utils.component_utils import STF_Component, get_components_from_object
 from ...utils.id_utils import ensure_stf_id
-from ...utils.trs_utils import to_trs
+from ...utils.trs_utils import blender_object_to_trs
 from ..stf_prefab.stf_prefab import STF_BlenderNodeExportContext
 
 
@@ -26,7 +26,7 @@ def _stf_export(context: STF_BlenderNodeExportContext, application_object: any, 
 	node = {
 		"type": _stf_type,
 		"name": blender_object.name,
-		"trs": to_trs(blender_object.location, blender_object.rotation_quaternion, blender_object.scale),
+		"trs": blender_object_to_trs(blender_object),
 		"children": children
 	}
 

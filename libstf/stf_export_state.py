@@ -1,7 +1,7 @@
 import io
 from enum import Enum
 
-from .stf_definition import STF_JsonDefinition, STF_Meta_AssetInfo, STF_Profile
+from .stf_definition import STF_Buffer_Included, STF_JsonDefinition, STF_Meta_AssetInfo, STF_Profile
 from .stf_report import STF_Report_Severity, STFReport
 from .stf_module import STF_ExportHook, STF_Module
 from .stf_file import STF_File
@@ -55,7 +55,7 @@ class STF_ExportState(StateUtil):
 
 	def serialize_buffer(self, data: io.BytesIO) -> str:
 		import uuid
-		id = uuid.uuid4()
+		id = str(uuid.uuid4())
 		self._exported_buffers[id] = data
 		return id
 
@@ -65,7 +65,7 @@ class STF_ExportState(StateUtil):
 	def get_root_id(self):
 		return self._root_id
 
-	def create_stf_definition(self, generator: str = "libstf_python") -> STF_JsonDefinition:
+	def create_stf_definition(self, buffer_mode: STF_Buffer_Mode = STF_Buffer_Mode.included_binary, generator: str = "libstf_python") -> STF_JsonDefinition:
 		import datetime
 
 		ret = STF_JsonDefinition()
@@ -77,12 +77,22 @@ class STF_ExportState(StateUtil):
 		ret.stf.asset_info = self._asset_info
 		ret.stf.profiles = self._profiles
 		ret.resources = self._exported_resources
-		ret.buffers = self._exported_buffers
+		ret.buffers = {}
+		if(buffer_mode == STF_Buffer_Mode.included_binary):
+			buffer_index = 0
+			for id, buffer in self._exported_buffers.items():
+				json_buffer_def = STF_Buffer_Included()
+				json_buffer_def.index = buffer_index
+				ret.buffers[id] = json_buffer_def
+				buffer_index += 1
+		# TODO handle other buffer types
 		return ret
 
 	def create_stf_binary_file(self, generator: str = "libstf_python") -> STF_File:
 		ret = STF_File()
 		ret.binary_version_major = 0
 		ret.binary_version_minor = 0
-		ret.definition = self.create_stf_definition(generator)
+		ret.definition = self.create_stf_definition(STF_Buffer_Mode.included_binary, generator)
+		for _, buffer in self._exported_buffers.items():
+			ret.buffers_included.append(buffer)
 		return ret

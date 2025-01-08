@@ -79,7 +79,8 @@ class STF_File:
 
 		# Serialize length of all other buffers
 		for buffer_idx in range(0, num_buffers):
-			buffer_len = len(self.buffers_included[buffer_idx])
+			included_buffer = self.buffers_included[buffer_idx].getvalue()
+			buffer_len = len(included_buffer)
 			buffer.write(buffer_len.to_bytes(length=8, byteorder="little"))
 
 		# Serialize Json definition buffer
@@ -87,4 +88,4 @@ class STF_File:
 
 		# Serialize all other buffers
 		for buffer_idx in range(0, num_buffers):
-			buffer.write(self.buffers_included[buffer_idx])
+			buffer.write(self.buffers_included[buffer_idx].getvalue())

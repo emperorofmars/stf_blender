@@ -6,7 +6,6 @@ from ...libstf.stf_registry import get_export_modules
 from ...libstf.stf_export_state import STF_ExportState
 from ...libstf.stf_export_context import STF_RootExportContext
 
-
 class ExportSTF(bpy.types.Operator, ExportHelper):
 	"""Export as STF file (.stf/.stf.json)"""
 	bl_idname = "stf.export"

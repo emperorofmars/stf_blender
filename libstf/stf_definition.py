@@ -11,7 +11,6 @@ class STF_Meta_AssetInfo:
 		self.asset_version: str
 		self.asset_license: str
 		self.asset_license_url: str
-		self.asset_documentation: str
 		self.asset_documentation_url: str
 
 		self.custom_properties: dict[str, str] = {}
@@ -26,7 +25,6 @@ class STF_Meta_AssetInfo:
 				case "asset_version": ret.asset_version = value
 				case "asset_license": ret.asset_license = value
 				case "asset_license_url": ret.asset_license_url = value
-				case "asset_documentation": ret.asset_documentation = value
 				case "asset_documentation_url": ret.asset_documentation_url = value
 				case _: ret.custom_properties.key = value
 
