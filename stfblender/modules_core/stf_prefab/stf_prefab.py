@@ -1,8 +1,10 @@
 import bpy
 
+
 from ....libstf.stf_import_context import STF_RootImportContext
 from ....libstf.stf_export_context import STF_ResourceExportContext, STF_RootExportContext
 from ....libstf.stf_module import STF_Module
+from ....libstf.stf_report import STFReport
 from ...utils.component_utils import STF_Component, get_components_from_object
 from ...utils.id_utils import ensure_stf_id
 
@@ -36,7 +38,11 @@ def _stf_import(context: STF_RootImportContext, json: dict, id: str, parent_appl
 	collection = bpy.data.collections.new(json.get("name", context.get_filename()))
 	bpy.context.scene.collection.children.link(collection)
 
-	# TODO import nodes
+	collection.metric_multiplier = json.get("metric_multiplier", 1)
+	for node_id in json.get("root_nodes", []):
+		blender_object: bpy.types.Object = context.import_resource(node_id)
+		if(blender_object):
+			collection.objects.link(blender_object)
 
 	return collection
 
@@ -49,7 +55,7 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 		"type": _stf_type,
 		"name": collection.name,
 		"root_nodes": root_nodes,
-		"metric_multiplier": 1,
+		"metric_multiplier": collection.metric_multiplier,
 	}
 
 	node_export_context = STF_BlenderNodeExportContext(context, ret)
@@ -77,12 +83,15 @@ register_stf_modules = [
 
 def register():
 	bpy.types.Collection.stf_id = bpy.props.StringProperty(name="ID") # type: ignore
+	bpy.types.Collection.metric_multiplier = bpy.props.FloatProperty(name="Metric Multiplier", default=1, min=0.00000001) # type: ignore
 	bpy.types.Collection.stf_components = bpy.props.CollectionProperty(type=STF_Component, name="Components") # type: ignore
 	bpy.types.Collection.stf_active_component_index = bpy.props.IntProperty()
 
 def unregister():
 	if hasattr(bpy.types.Collection, "stf_id"):
 		del bpy.types.Collection.stf_id
+	if hasattr(bpy.types.Collection, "metric_multiplier"):
+		del bpy.types.Collection.metric_multiplier
 	if hasattr(bpy.types.Collection, "stf_components"):
 		del bpy.types.Collection.stf_components
 	if hasattr(bpy.types.Collection, "stf_active_component_index"):

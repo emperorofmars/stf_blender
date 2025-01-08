@@ -38,7 +38,7 @@ class STF_ExportState(StateUtil):
 		return self._modules.get(type(application_object))
 
 	def determine_hooks(self, application_object: any) -> list[STF_ExportHook]:
-		return self._hooks.get(type(application_object))
+		return self._hooks.get(type(application_object), [])
 
 	def get_resource_id(self, application_object: any) -> str:
 		if(application_object in self._resources):

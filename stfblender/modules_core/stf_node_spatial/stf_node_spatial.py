@@ -11,11 +11,11 @@ from ..stf_prefab.stf_prefab import STF_BlenderNodeExportContext
 _stf_type = "stf.node.spatial"
 
 
-def _stf_import(context: STF_RootImportContext, json: dict, id: str, parent_application_object: any = None) -> any:
+def _stf_import(context: STF_RootImportContext, json: dict, id: str, parent_application_object: any) -> any:
 	pass
 
 
-def _stf_export(context: STF_BlenderNodeExportContext, application_object: any, parent_application_object: any = None) -> tuple[dict, str, any]:
+def _stf_export(context: STF_BlenderNodeExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:
 	blender_object: bpy.types.Object = application_object
 	ensure_stf_id(blender_object)
 

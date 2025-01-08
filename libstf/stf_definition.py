@@ -145,8 +145,8 @@ class STF_JsonDefinition:
 		ret = STF_JsonDefinition()
 		ret.stf = STF_Meta.from_dict(dict["stf"])
 		ret.resources = dict["resources"]
-		for key, value in dict["buffers"]:
-			match value.type:
+		for key, value in dict["buffers"].items():
+			match value["type"]:
 				case "stf.buffer.included": ret.buffers[key] = STF_Buffer_Included.from_dict(value)
 				case "stf.buffer.file": ret.buffers[key] = STF_Buffer_File.from_dict(value)
 				case "stf.buffer.json_array": ret.buffers[key] = STF_Buffer_JsonArray.from_dict(value)

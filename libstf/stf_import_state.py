@@ -29,7 +29,7 @@ class STF_ImportState(StateUtil):
 		return self._modules.get(json_resource["type"])
 
 	def determine_hooks(self, json_resource: dict) -> list[STF_ImportHook]:
-		return self._hooks.get(json_resource["type"])
+		return self._hooks.get(json_resource["type"], [])
 
 	def register_imported_resource(self, id: str, application_object: any):
 		self._imported_resources[id] = application_object

@@ -1,6 +1,7 @@
 from io import BytesIO
 import struct
 import bpy
+import bmesh
 
 from ....libstf.stf_export_context import STF_RootExportContext
 from ....libstf.stf_import_context import STF_RootImportContext
@@ -8,16 +9,17 @@ from ....libstf.stf_module import STF_Module
 from ....libstf.stf_report import STF_Report_Severity, STFReport
 from ...utils.component_utils import STF_Component, get_components_from_object
 from ...utils.id_utils import ensure_stf_id
+from ...utils.trs_utils import blender_translation_to_stf
 
 
 _stf_type = "stf.mesh"
 
 
-def _stf_import(context: STF_RootImportContext, json: dict, id: str, parent_application_object: any = None) -> any:
+def _stf_import(context: STF_RootImportContext, json: dict, id: str, parent_application_object: any) -> any:
 	pass
 
 
-def _stf_export(context: STF_RootExportContext, application_object: any, parent_application_object: any = None) -> tuple[dict, str, any]:
+def _stf_export(context: STF_RootExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:
 	blender_mesh: bpy.types.Mesh = application_object
 	ensure_stf_id(blender_mesh)
 
@@ -26,12 +28,39 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 		"name": blender_mesh.name
 	}
 
-	data = BytesIO()
-	data.write(struct.pack("<f", 0.23))
-	data.write(struct.pack("<f", 0.534))
-	data.write(struct.pack("<f", 1.953))
+	bm = bmesh.new()
+	bm.from_mesh(blender_mesh)
 
-	stf_mesh["mesh"] = context.serialize_buffer(data)
+	buffer_vertices = BytesIO()
+	for v in bm.verts:
+		position = blender_translation_to_stf(v.co)
+		buffer_vertices.write(struct.pack("<f", position.x))
+		buffer_vertices.write(struct.pack("<f", position.y))
+		buffer_vertices.write(struct.pack("<f", position.z))
+
+	buffer_virtual_vertices = BytesIO()
+	buffer_normals = BytesIO()
+	buffer_tangents = BytesIO()
+	buffer_colors = BytesIO()
+
+	buffer_lines = BytesIO()
+
+	buffer_tris = BytesIO()
+	buffer_faces = BytesIO()
+
+	# for each weight channel
+	buffer_weights_indices = BytesIO()
+	buffer_weights_target = BytesIO()
+	buffer_weights = BytesIO()
+
+	# for each blendshape
+	buffer_blendshape_indices = BytesIO()
+	buffer_blendshape_translation = BytesIO()
+	buffer_blendshape_normal = BytesIO()
+	buffer_blendshape_tangent = BytesIO()
+
+
+	stf_mesh["mesh"] = context.serialize_buffer(buffer_vertices)
 
 	return stf_mesh, blender_mesh.stf_id, context
 

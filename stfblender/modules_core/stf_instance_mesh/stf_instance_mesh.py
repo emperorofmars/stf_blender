@@ -15,26 +15,21 @@ def _hook_can_handle_stf_object_func(json_resource: dict) -> bool:
 	for _, component in json_resource.get("components", {}):
 		# TODO also chack 'likeness'
 		if(component.get("type") == "stf.mesh"):
-			print("TRUE\n")
 			return True
 	return False
 
-def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, parent_application_object: any = None) -> any:
+def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, parent_application_object: any) -> any:
 	print("\nHOOK\n")
 
 
 def _hook_can_handle_application_object_func(application_object: any) -> bool:
 	return type(application_object.data) == bpy.types.Mesh
 
-def _stf_export(context: STF_RootExportContext, application_object: any, parent_application_object: any = None) -> tuple[dict, str, any]:
+def _stf_export(context: STF_RootExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:
 	blender_object: bpy.types.Object = application_object
 	ensure_stf_id(blender_object)
 
-	print(application_object)
-	print(parent_application_object)
-
 	blender_mesh: bpy.types.Mesh = application_object.data
-
 	mesh_id = context.serialize_resource(blender_mesh)
 
 	blender_armatures = []
