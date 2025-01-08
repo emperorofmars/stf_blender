@@ -15,8 +15,10 @@ from ...utils.trs_utils import blender_translation_to_stf
 _stf_type = "stf.mesh"
 
 
-def _stf_import(context: STF_RootImportContext, json: dict, id: str, parent_application_object: any) -> any:
-	pass
+def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, parent_application_object: any) -> any:
+	blender_mesh = bpy.data.meshes.new(json_resource.get("name", "STF Mesh"))
+	blender_mesh.stf_id = id
+	return blender_mesh
 
 
 def _stf_export(context: STF_RootExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:

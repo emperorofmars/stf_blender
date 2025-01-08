@@ -42,12 +42,13 @@ class STF_BlenderNodeImportContext(STF_ResourceImportContext):
 			return super().get_json_resource(id)
 
 
-def _stf_import(context: STF_RootImportContext, json: dict, id: str, parent_application_object: any = None) -> any:
+def _stf_import(context: STF_RootImportContext, json: dict, id: str, parent_application_object: any) -> any:
 	collection = bpy.data.collections.new(json.get("name", context.get_filename()))
+	collection.stf_id = id
 	bpy.context.scene.collection.children.link(collection)
 	collection.metric_multiplier = json.get("metric_multiplier", 1)
 
-	node_import_context = STF_BlenderNodeImportContext(context, json)
+	node_import_context = STF_BlenderNodeImportContext(context, json, collection)
 	for node_id in json.get("root_nodes", []):
 		blender_object: bpy.types.Object = node_import_context.import_resource(node_id)
 		if(blender_object):
@@ -55,7 +56,7 @@ def _stf_import(context: STF_RootImportContext, json: dict, id: str, parent_appl
 
 	return collection
 
-def _stf_export(context: STF_RootExportContext, application_object: any, parent_application_object: any = None) -> tuple[dict, str, any]:
+def _stf_export(context: STF_RootExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:
 	collection: bpy.types.Collection = application_object
 	ensure_stf_id(collection)
 

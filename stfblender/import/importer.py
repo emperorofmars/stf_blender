@@ -43,7 +43,13 @@ class ImportSTF(bpy.types.Operator, ImportHelper):
 			print(stf_file.definition.to_dict())"""
 
 
-			self.report({'INFO'}, "STF asset imported successfully!")
+			if(len(stf_state._reports) > 0):
+				self.report({'WARNING'}, "STF asset exported with reports!")
+				for report in stf_state._reports:
+					# TODO report this in a more legit manner
+					print(report.to_string())
+			else:
+				self.report({'INFO'}, "STF asset imported successfully!")
 			return {'FINISHED'}
 		except STFException as error:
 			self.report({'ERROR'}, str(error))

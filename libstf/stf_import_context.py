@@ -3,6 +3,7 @@ from typing import Callable
 
 from .stf_import_state import STF_ImportState
 from .stf_report import STF_Report_Severity, STFReport
+from .stf_module import STF_ImportHook
 
 
 class STF_RootImportContext:
@@ -12,6 +13,12 @@ class STF_RootImportContext:
 		self._state: STF_ImportState = state
 		self._tasks: list[Callable] = []
 
+	def get_json_resource(self, id: str) -> dict:
+		return self._state.get_json_resource(id)
+
+	def get_parent_application_object(self) -> any:
+		return None
+
 	def import_resource(self, id: str) -> any:
 		if(id in self._state._imported_resources.keys()): return self._state._imported_resources[id]
 
@@ -19,12 +26,28 @@ class STF_RootImportContext:
 		if(not json_resource or type(json_resource) is not dict or "type" not in json_resource):
 			self.report(STFReport("Invalid JSON resource", STF_Report_Severity.FatalError, id))
 
+		accepted_hooks: list[tuple[STF_ImportHook, dict]] = []
 		if(hooks := self._state.determine_hooks(json_resource)):
-			pass
-		elif(module := self._state.determine_module(json_resource)):
-			return module.import_func(self, json_resource, id)
+			for hook in hooks:
+				can_handle, hook_json_resource = hook.hook_can_handle_stf_object_func(json_resource)
+				if(can_handle):
+					accepted_hooks.append((hook, hook_json_resource))
+
+		if(len(accepted_hooks) > 1):
+			# TODO actually handle this properly
+			self.report(STFReport("More Than One Hook!", STF_Report_Severity.FatalError, id, json_resource["type"]))
+		elif(len(accepted_hooks) == 1):
+			accepted_hooks[0][0].import_func(self, accepted_hooks[0][1], id, json_resource)
 		else:
-			pass # TODO json fallback
+			if(module := self._state.determine_module(json_resource)):
+				print("module: " + str(module))
+				return module.import_func(self, json_resource, id, self.get_parent_application_object())
+			else:
+				# TODO json fallback
+				self.report(STFReport("No STF_Module registered", STF_Report_Severity.Warn, id, json_resource["type"]))
+
+		# TODO components
+
 		return None
 
 	def import_buffer(self, id: str) -> io.BytesIO:
@@ -32,9 +55,6 @@ class STF_RootImportContext:
 
 	def add_task(self, task: Callable):
 		self._state._tasks.append(task)
-
-	def get_json_resource(self, id: str) -> dict:
-		return self._state.get_json_resource(id)
 
 	def get_root_id(self) -> str:
 		return self._state._file.definition.stf.root
@@ -56,13 +76,14 @@ class STF_ResourceImportContext(STF_RootImportContext):
 		Extend this class if you need a custom context for sub-resources.
 	"""
 
-	def __init__(self, parent_context: STF_RootImportContext, json_resource: dict):
+	def __init__(self, parent_context: STF_RootImportContext, json_resource: dict, parent_application_object: any):
 		super().__init__(parent_context._state)
 		self._parent_context = parent_context
 		self._json_resource = json_resource
+		self._parent_application_object = parent_application_object
 
-	def add_task(self, task):
-		return self._parent_context.add_task(task)
+	def get_parent_application_object(self) -> any:
+		return self._parent_application_object
 
 	def get_root_context(self) -> any:
 		return self._parent_context.get_root_context()

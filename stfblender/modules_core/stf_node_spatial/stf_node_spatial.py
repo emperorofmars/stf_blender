@@ -1,18 +1,31 @@
 import bpy
 
-from ....libstf.stf_import_context import STF_RootImportContext
+from ....libstf.stf_report import STF_Report_Severity, STFReport
 from ....libstf.stf_module import STF_Module
 from ...utils.component_utils import STF_Component, get_components_from_object
 from ...utils.id_utils import ensure_stf_id
-from ...utils.trs_utils import blender_object_to_trs
-from ..stf_prefab.stf_prefab import STF_BlenderNodeExportContext
+from ...utils.trs_utils import blender_object_to_trs, trs_to_blender_object
+from ..stf_prefab.stf_prefab import STF_BlenderNodeExportContext, STF_BlenderNodeImportContext
 
 
 _stf_type = "stf.node.spatial"
 
 
-def _stf_import(context: STF_RootImportContext, json: dict, id: str, parent_application_object: any) -> any:
-	print("\n\nWOOOOOOOOOOOOOOOOOO\n\n")
+def _stf_import(context: STF_BlenderNodeImportContext, json_resource: dict, id: str, parent_application_object: any) -> any:
+	blender_object: bpy.types.Object = bpy.data.objects.new(json_resource.get("name", "STF Node"), None)
+	blender_object.stf_id = id
+
+	trs_to_blender_object(json_resource["trs"], blender_object)
+
+	for child_id in json_resource.get("children", []):
+		child: bpy.types.Object = context.import_resource(child_id)
+		if(child):
+			child.parent_type = "OBJECT"
+			child.parent = blender_object
+		else:
+			context.report(STFReport("Invalid Child: " + str(child_id), STF_Report_Severity.Error, id, _stf_type, blender_object))
+
+	return blender_object
 
 
 def _stf_export(context: STF_BlenderNodeExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:

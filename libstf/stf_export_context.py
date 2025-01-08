@@ -22,8 +22,9 @@ class STF_RootExportContext:
 		# Export components from application native constructs
 		if(hooks := self._state.determine_hooks(application_object)):
 			for hook in hooks:
-				if(hook.hook_can_handle_application_object_func(application_object)):
-					hook_json_resource, hook_id, hook_ctx = hook.export_func(object_ctx, application_object, None)
+				can_handle, hook_object = hook.hook_can_handle_application_object_func(application_object)
+				if(can_handle):
+					hook_json_resource, hook_id, hook_ctx = hook.export_func(object_ctx, hook_object, application_object)
 					if(hook.stf_kind == "component"):
 						if("components" not in json_resource): json_resource["components"] = {}
 						json_resource["components"][hook_id] = hook_json_resource
