@@ -30,3 +30,7 @@ def draw_stf_id_ui(layout: bpy.types.UILayout, context: bpy.types.Context, objec
 def ensure_stf_id(object: any):
 	if(not object.stf_id):
 		object.stf_id = str(uuid.uuid4())
+
+def ensure_stf_object_data_id(object: bpy.types.Object):
+	if(not object.data_stf_id):
+		object.data_stf_id = str(uuid.uuid4())

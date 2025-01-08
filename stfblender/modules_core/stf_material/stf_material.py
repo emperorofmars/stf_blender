@@ -12,7 +12,7 @@ from ...utils.id_utils import ensure_stf_id
 _stf_type = "stf.material"
 
 
-def _stf_import(context: STF_RootImportContext, json: dict, id: str, parent_application_object: any) -> any:
+def _stf_import(context: STF_RootImportContext, json: dict, id: str, parent_application_object: any, import_hook_results: list[any]) -> any:
 	pass
 
 

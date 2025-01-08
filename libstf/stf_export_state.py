@@ -47,7 +47,6 @@ class STF_ExportState(StateUtil):
 			return None
 
 	def register_serialized_resource(self, application_object: any, json_resource: dict, id: str):
-		#print("\nRegistering Resource: \n" + id + "\n" + str(application_object) + "\n" + str(json_resource) + "\n", flush=True)
 		if(type(id) is not str):
 			self.report(STFReport(message="Invalid Resource ID", severity=STF_Report_Severity.Error, stf_id=id, application_object=application_object))
 		self._resources[application_object] = id

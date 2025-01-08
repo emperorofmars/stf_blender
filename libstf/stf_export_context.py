@@ -118,9 +118,6 @@ class STF_ResourceExportContext(STF_RootExportContext):
 		self._json_resource["referenced_buffers"].append(id)
 		return id
 
-	def add_task(self, task):
-		return self._parent_context.add_task(task)
-
 	def get_root_context(self) -> any:
 		return self._parent_context.get_root_context()
 

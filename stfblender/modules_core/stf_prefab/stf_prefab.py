@@ -42,7 +42,7 @@ class STF_BlenderNodeImportContext(STF_ResourceImportContext):
 			return super().get_json_resource(id)
 
 
-def _stf_import(context: STF_RootImportContext, json: dict, id: str, parent_application_object: any) -> any:
+def _stf_import(context: STF_RootImportContext, json: dict, id: str, parent_application_object: any, import_hook_results: list[any]) -> any:
 	collection = bpy.data.collections.new(json.get("name", context.get_filename()))
 	collection.stf_id = id
 	bpy.context.scene.collection.children.link(collection)
@@ -50,10 +50,7 @@ def _stf_import(context: STF_RootImportContext, json: dict, id: str, parent_appl
 
 	node_import_context = STF_BlenderNodeImportContext(context, json, collection)
 	for node_id in json.get("root_nodes", []):
-		blender_object: bpy.types.Object = node_import_context.import_resource(node_id)
-		if(blender_object):
-			collection.objects.link(blender_object)
-
+		node_import_context.import_resource(node_id)
 	return collection
 
 def _stf_export(context: STF_RootExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:

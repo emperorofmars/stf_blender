@@ -26,28 +26,30 @@ class STF_RootImportContext:
 		if(not json_resource or type(json_resource) is not dict or "type" not in json_resource):
 			self.report(STFReport("Invalid JSON resource", STF_Report_Severity.FatalError, id))
 
-		accepted_hooks: list[tuple[STF_ImportHook, dict]] = []
-		if(hooks := self._state.determine_hooks(json_resource)):
-			for hook in hooks:
-				can_handle, hook_json_resource = hook.hook_can_handle_stf_object_func(json_resource)
-				if(can_handle):
-					accepted_hooks.append((hook, hook_json_resource))
+		if(module := self._state.determine_module(json_resource)):
+			accepted_hooks: list[tuple[STF_ImportHook, dict, str]] = []
+			if(hooks := self._state.determine_hooks(json_resource)):
+				for hook in hooks:
+					can_handle, hook_json_resource, hook_resource_id = hook.hook_can_handle_stf_object_func(json_resource)
+					if(can_handle):
+						accepted_hooks.append((hook, hook_json_resource, hook_resource_id))
 
-		if(len(accepted_hooks) > 1):
-			# TODO actually handle this properly
-			self.report(STFReport("More Than One Hook!", STF_Report_Severity.FatalError, id, json_resource["type"]))
-		elif(len(accepted_hooks) == 1):
-			accepted_hooks[0][0].import_func(self, accepted_hooks[0][1], id, json_resource)
+			hook_results = []
+			for hook, hook_json_resource, hook_resource_id in accepted_hooks:
+				hook_result = hook.import_func(self, hook_json_resource, hook_resource_id, None, None)
+				if(hook_result):
+					hook_results.append(hook_result)
+				else:
+					self.report(STFReport("Hook execution error", STF_Report_Severity.Error, hook_resource_id, hook.stf_type))
+
+			application_object = module.import_func(self, json_resource, id, self.get_parent_application_object(), hook_results)
+
+			# TODO components
+
+			return application_object
 		else:
-			if(module := self._state.determine_module(json_resource)):
-				print("module: " + str(module))
-				return module.import_func(self, json_resource, id, self.get_parent_application_object())
-			else:
-				# TODO json fallback
-				self.report(STFReport("No STF_Module registered", STF_Report_Severity.Warn, id, json_resource["type"]))
-
-		# TODO components
-
+			# TODO json fallback
+			self.report(STFReport("No STF_Module registered", STF_Report_Severity.Warn, id, json_resource["type"]))
 		return None
 
 	def import_buffer(self, id: str) -> io.BytesIO:

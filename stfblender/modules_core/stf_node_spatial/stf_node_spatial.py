@@ -11,9 +11,18 @@ from ..stf_prefab.stf_prefab import STF_BlenderNodeExportContext, STF_BlenderNod
 _stf_type = "stf.node.spatial"
 
 
-def _stf_import(context: STF_BlenderNodeImportContext, json_resource: dict, id: str, parent_application_object: any) -> any:
-	blender_object: bpy.types.Object = bpy.data.objects.new(json_resource.get("name", "STF Node"), None)
+def _stf_import(context: STF_BlenderNodeImportContext, json_resource: dict, id: str, parent_application_object: any, import_hook_results: list[any]) -> any:
+	blender_object: bpy.types.Object = None
+	if(import_hook_results and len(import_hook_results) == 1):
+		blender_object: bpy.types.Object = import_hook_results[0]
+		blender_object.name = json_resource.get("name", "STF Node")
+	else:
+		blender_object: bpy.types.Object = bpy.data.objects.new(json_resource.get("name", "STF Node"), None)
 	blender_object.stf_id = id
+
+	if(import_hook_results and len(import_hook_results) > 1):
+		for hook_result in import_hook_results:
+			hook_result.parent = blender_object
 
 	trs_to_blender_object(json_resource["trs"], blender_object)
 
@@ -25,6 +34,7 @@ def _stf_import(context: STF_BlenderNodeImportContext, json_resource: dict, id: 
 		else:
 			context.report(STFReport("Invalid Child: " + str(child_id), STF_Report_Severity.Error, id, _stf_type, blender_object))
 
+	parent_application_object.objects.link(blender_object)
 	return blender_object
 
 
@@ -71,12 +81,15 @@ register_stf_modules = [
 
 def register():
 	bpy.types.Object.stf_id = bpy.props.StringProperty(name="ID") # type: ignore
+	bpy.types.Object.data_stf_id = bpy.props.StringProperty(name="Data Component ID") # type: ignore
 	bpy.types.Object.stf_components = bpy.props.CollectionProperty(type=STF_Component, name="Components") # type: ignore
 	bpy.types.Object.stf_active_component_index = bpy.props.IntProperty()
 
 def unregister():
 	if hasattr(bpy.types.Object, "stf_id"):
 		del bpy.types.Object.stf_id
+	if hasattr(bpy.types.Object, "data_stf_id"):
+		del bpy.types.Object.data_stf_id
 	if hasattr(bpy.types.Object, "stf_components"):
 		del bpy.types.Object.stf_components
 	if hasattr(bpy.types.Object, "stf_active_component_index"):
