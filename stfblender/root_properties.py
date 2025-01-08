@@ -14,7 +14,6 @@ class STF_Meta(bpy.types.PropertyGroup):
 	asset_version: bpy.props.StringProperty(name="Version") # type: ignore
 	asset_license: bpy.props.StringProperty(name="License") # type: ignore
 	asset_license_url: bpy.props.StringProperty(name="License URL") # type: ignore
-	asset_documentation: bpy.props.StringProperty(name="Documentation") # type: ignore
 	asset_documentation_url: bpy.props.StringProperty(name="Documentation URL") # type: ignore
 
 	custom_properties: bpy.props.CollectionProperty(type=STF_KV, name="Type") # type: ignore
@@ -26,7 +25,6 @@ class STF_Meta(bpy.types.PropertyGroup):
 		if(self.asset_version): ret.asset_version = self.asset_version
 		if(self.asset_license): ret.asset_license = self.asset_license
 		if(self.asset_license_url): ret.asset_license_url = self.asset_license_url
-		if(self.asset_documentation): ret.asset_documentation = self.asset_documentation
 		if(self.asset_documentation_url): ret.asset_documentation_url = self.asset_documentation_url
 		ret.custom_properties = {}
 		for custom_property in self.custom_properties:
@@ -39,7 +37,6 @@ class STF_Meta(bpy.types.PropertyGroup):
 		self.asset_version = meta.asset_version
 		self.asset_license = meta.asset_license
 		self.asset_license_url = meta.asset_license_url
-		self.asset_documentation = meta.asset_documentation
 		self.asset_documentation_url = meta.asset_documentation_url
 		for key, value in meta.custom_properties:
 			new_prop = self.custom_properties.add()
@@ -53,7 +50,6 @@ def draw_meta_editor(layout: bpy.types.UILayout, blender_scene_or_collection: bp
 	layout.prop(blender_scene_or_collection.stf_meta, "asset_version")
 	layout.prop(blender_scene_or_collection.stf_meta, "asset_license")
 	layout.prop(blender_scene_or_collection.stf_meta, "asset_license_url")
-	layout.prop(blender_scene_or_collection.stf_meta, "asset_documentation")
 	layout.prop(blender_scene_or_collection.stf_meta, "asset_documentation_url")
 	layout.prop(blender_scene_or_collection.stf_meta, "custom_properties")
 

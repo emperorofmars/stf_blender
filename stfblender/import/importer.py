@@ -30,9 +30,13 @@ class ImportSTF(bpy.types.Operator, ImportHelper):
 
 			stf_state = STF_ImportState(stf_file, get_import_modules(bpy.context.preferences.addons.keys()))
 			stf_context = STF_RootImportContext(stf_state)
-			root = stf_context.import_resource(stf_context.get_root_id())
+			root: bpy.types.Collection = stf_context.import_resource(stf_context.get_root_id())
 			stf_state.run_tasks()
 
+			if(not root or type(root) != bpy.types.Collection):
+				raise Exception("Import Failed, invalid root!")
+
+			root.stf_meta.from_stf_meta_assetInfo(stf_file.definition.stf.asset_info)
 
 			print("\nstf_file")
 			print(root)
