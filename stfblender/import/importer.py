@@ -38,9 +38,9 @@ class ImportSTF(bpy.types.Operator, ImportHelper):
 
 			root.stf_meta.from_stf_meta_assetInfo(stf_file.definition.stf.asset_info)
 
-			print("\nstf_file")
+			"""print("\nstf_file")
 			print(root)
-			print(stf_file.definition.to_dict())
+			print(stf_file.definition.to_dict())"""
 
 
 			self.report({'INFO'}, "STF asset imported successfully!")

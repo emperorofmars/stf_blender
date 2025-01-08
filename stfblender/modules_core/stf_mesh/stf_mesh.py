@@ -96,6 +96,8 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 	for face_len in face_lens:
 		buffer_faces.write(face_len.to_bytes(length=4, byteorder="little"))
 
+	# TODO export edges
+
 	# for each weight channel and vertex
 	buffer_weights_indices = BytesIO()
 	buffer_weights_target = BytesIO()

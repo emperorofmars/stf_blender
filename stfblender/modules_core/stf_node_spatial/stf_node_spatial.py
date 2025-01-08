@@ -12,7 +12,7 @@ _stf_type = "stf.node.spatial"
 
 
 def _stf_import(context: STF_RootImportContext, json: dict, id: str, parent_application_object: any) -> any:
-	pass
+	print("\n\nWOOOOOOOOOOOOOOOOOO\n\n")
 
 
 def _stf_export(context: STF_BlenderNodeExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:

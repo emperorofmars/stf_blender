@@ -33,7 +33,7 @@ class STF_RootImportContext:
 	def add_task(self, task: Callable):
 		self._state._tasks.append(task)
 
-	def get_json_resource(self, id: int) -> dict:
+	def get_json_resource(self, id: str) -> dict:
 		return self._state.get_json_resource(id)
 
 	def get_root_id(self) -> str:
@@ -49,7 +49,7 @@ class STF_RootImportContext:
 		self._state.report(report)
 
 
-class STF_ResourceExportContext(STF_RootImportContext):
+class STF_ResourceImportContext(STF_RootImportContext):
 	"""
 		Context for the import of sub-resources.
 
@@ -60,16 +60,6 @@ class STF_ResourceExportContext(STF_RootImportContext):
 		super().__init__(parent_context._state)
 		self._parent_context = parent_context
 		self._json_resource = json_resource
-
-	"""def register_serialized_resource(self, application_object: any, json_resource: dict, id: str):
-		super().register_serialized_resource(application_object, json_resource, id)
-		if(id and id not in self._json_resource["referenced_resources"]):
-			self._json_resource["referenced_resources"].append(id)
-
-	def serialize_buffer(self, data: io.BytesIO) -> str:
-		id = super().serialize_buffer(data)
-		self._json_resource["referenced_buffers"].append(id)
-		return id"""
 
 	def add_task(self, task):
 		return self._parent_context.add_task(task)

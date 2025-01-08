@@ -1,7 +1,7 @@
 import bpy
 
 
-from ....libstf.stf_import_context import STF_RootImportContext
+from ....libstf.stf_import_context import STF_ResourceImportContext, STF_RootImportContext
 from ....libstf.stf_export_context import STF_ResourceExportContext, STF_RootExportContext
 from ....libstf.stf_module import STF_Module
 from ....libstf.stf_report import STFReport
@@ -34,13 +34,22 @@ class STF_BlenderNodeExportContext(STF_ResourceExportContext):
 			super().register_serialized_resource(application_object, json_resource, id)
 
 
+class STF_BlenderNodeImportContext(STF_ResourceImportContext):
+	def get_json_resource(self, id: str) -> dict:
+		if(id in self._json_resource["nodes"]):
+			return self._json_resource["nodes"][id]
+		else:
+			return super().get_json_resource(id)
+
+
 def _stf_import(context: STF_RootImportContext, json: dict, id: str, parent_application_object: any = None) -> any:
 	collection = bpy.data.collections.new(json.get("name", context.get_filename()))
 	bpy.context.scene.collection.children.link(collection)
-
 	collection.metric_multiplier = json.get("metric_multiplier", 1)
+
+	node_import_context = STF_BlenderNodeImportContext(context, json)
 	for node_id in json.get("root_nodes", []):
-		blender_object: bpy.types.Object = context.import_resource(node_id)
+		blender_object: bpy.types.Object = node_import_context.import_resource(node_id)
 		if(blender_object):
 			collection.objects.link(blender_object)
 

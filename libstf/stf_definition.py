@@ -2,16 +2,16 @@ import io
 
 class STF_Profile:
 	def __init__(self):
-		self.name: str
+		self.name: str = None
 
 class STF_Meta_AssetInfo:
 	def __init__(self):
-		self.asset_name: str
-		self.asset_author: str
-		self.asset_version: str
-		self.asset_license: str
-		self.asset_license_url: str
-		self.asset_documentation_url: str
+		self.asset_name: str = None
+		self.asset_author: str = None
+		self.asset_version: str = None
+		self.asset_license: str = None
+		self.asset_license_url: str = None
+		self.asset_documentation_url: str = None
 
 		self.custom_properties: dict[str, str] = {}
 
@@ -50,7 +50,7 @@ class STF_Meta:
 		self.version_minor: int = 0
 		self.generator: str = "libstf_python"
 		self.timestamp: str = datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat()
-		self.root: str
+		self.root: str = None
 		self.profiles: list[STF_Profile] = []
 		self.asset_info: STF_Meta_AssetInfo = STF_Meta_AssetInfo()
 

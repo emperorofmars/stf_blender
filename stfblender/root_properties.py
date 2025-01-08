@@ -32,16 +32,18 @@ class STF_Meta(bpy.types.PropertyGroup):
 		return ret
 
 	def from_stf_meta_assetInfo(self, meta: STF_Meta_AssetInfo):
-		self.asset_name = meta.asset_name
-		self.asset_author = meta.asset_author
-		self.asset_version = meta.asset_version
-		self.asset_license = meta.asset_license
-		self.asset_license_url = meta.asset_license_url
-		self.asset_documentation_url = meta.asset_documentation_url
+		if(meta.asset_name): self.asset_name = meta.asset_name
+		if(meta.asset_author): self.asset_author = meta.asset_author
+		if(meta.asset_version): self.asset_version = meta.asset_version
+		if(meta.asset_license): self.asset_license = meta.asset_license
+		if(meta.asset_license_url): self.asset_license_url = meta.asset_license_url
+		if(meta.asset_documentation_url): self.asset_documentation_url = meta.asset_documentation_url
 		for key, value in meta.custom_properties:
-			new_prop = self.custom_properties.add()
-			new_prop.name = key
-			new_prop.value = value
+			if(key):
+				new_prop = self.custom_properties.add()
+				new_prop.name = key
+				if(value):
+					new_prop.value = value
 
 
 def draw_meta_editor(layout: bpy.types.UILayout, blender_scene_or_collection: bpy.types.Scene | bpy.types.Collection):

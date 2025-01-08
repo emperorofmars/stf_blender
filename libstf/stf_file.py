@@ -46,8 +46,6 @@ class STF_File:
 		for buffer_idx in range(0, num_buffers):
 			buffer_lens.append(int.from_bytes(buffer.read(8), byteorder="little"))
 
-			print(buffer_lens[len(buffer_lens) - 1])
-
 		# Read the Json definition buffer
 		ret.definition = STF_JsonDefinition.from_dict(json.loads(buffer.read(json_buffer_len).decode("utf-8")))
 
