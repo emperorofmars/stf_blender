@@ -20,8 +20,8 @@ class STF_ExportState(StateUtil):
 	Each context must have access to the same STF_ExportState instance.
 	"""
 
-	def __init__(self, profiles: list[STF_Profile], asset_info: STF_Meta_AssetInfo, modules: tuple[dict[any, STF_Module], dict[any, list[STF_ExportHook]]]):
-		super.__init__()
+	def __init__(self, profiles: list[STF_Profile], asset_info: STF_Meta_AssetInfo, modules: tuple[dict[any, STF_Module], dict[any, list[STF_ExportHook]]], fail_on_severity: STF_Report_Severity = STF_Report_Severity.FatalError):
+		super().__init__(fail_on_severity)
 
 		self._modules: dict[any, STF_Module] = modules[0]
 		self._hooks: dict[any, list[STF_ExportHook]] = modules[1]
@@ -52,14 +52,15 @@ class STF_ExportState(StateUtil):
 			self.report(STFReport(message="Invalid Resource ID", severity=STF_Report_Severity.Error, stf_id=id, application_object=application_object))
 		self._resources[application_object] = id
 		self._exported_resources[id] = json_resource
-		if(not self._root_id): # First exported resource is the root
-			self._root_id = id
 
 	def serialize_buffer(self, data: io.BytesIO) -> str:
 		import uuid
 		id = uuid.uuid4()
 		self._exported_buffers[id] = data
 		return id
+
+	def set_root_id(self, id: str):
+		self._root_id = id
 
 	def get_root_id(self):
 		return self._root_id
@@ -72,7 +73,7 @@ class STF_ExportState(StateUtil):
 		ret.stf.version_minor = 0
 		ret.stf.root = self._root_id
 		ret.stf.generator = generator
-		ret.stf.timestamp = datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat()
+		ret.stf.timestamp = datetime.datetime.now(datetime.timezone.utc).isoformat()
 		ret.stf.asset_info = self._asset_info
 		ret.stf.profiles = self._profiles
 		ret.resources = self._exported_resources

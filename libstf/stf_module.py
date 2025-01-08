@@ -47,6 +47,8 @@ class STF_ImportHook(STF_Module):
 	"""
 	hook_target_stf_type: str
 
+	hook_can_handle_stf_object_func: Callable[[dict], bool]
+
 
 class STF_ExportHook(STF_Module):
 	"""
@@ -62,3 +64,5 @@ class STF_ExportHook(STF_Module):
 	"""
 	# List of application types this processor can hook into
 	hook_target_application_types: list = []
+
+	hook_can_handle_application_object_func: Callable[[any], bool]

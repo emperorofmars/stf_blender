@@ -27,6 +27,7 @@ blender_version_min = "4.2.0"
 license = [
   "SPDX:MIT",
   "SPDX:Apache-2.0",
+  "SPDX:GPL-3.0-or-later",
 ]
 # Optional: required by some licenses.
 # copyright = [
@@ -81,6 +82,8 @@ paths_exclude_pattern = [
 	"__pycache__/",
 	"/.git/",
 	"/*.zip",
+	"/.vscode/",
+	"/stf_module_template",
 	"/examples",
 	"/assets",
 ]

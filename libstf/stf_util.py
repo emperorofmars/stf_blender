@@ -3,13 +3,14 @@ from .stf_report import STF_Report_Severity, STFException, STFReport
 
 
 class StateUtil:
-	def __init__(self):
+	def __init__(self, fail_on_severity = STF_Report_Severity.FatalError):
 		self._tasks: list[Callable] = []
 		self._reports: list[STFReport] = []
+		self._fail_on_severity = fail_on_severity
 
 	def report(self, report: STFReport):
 		self._reports.append(report)
-		if(report.severity == STF_Report_Severity.Error):
+		if(report.severity.value >= self._fail_on_severity.value):
 			print(report.to_string(), flush=True)
 			raise STFException(report)
 

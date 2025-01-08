@@ -40,6 +40,7 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 			stf_state = STF_ExportState([], collection.stf_meta.to_stf_meta_assetInfo(), get_export_modules(bpy.context.preferences.addons.keys()))
 			stf_context = STF_RootExportContext(stf_state)
 			root_id = stf_context.serialize_resource(collection)
+			stf_state.set_root_id(root_id)
 			stf_state.run_tasks()
 
 			if(not stf_state.get_root_id() and type(stf_state.get_root_id()) is not str):
@@ -52,7 +53,7 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 					export_filepath += ".stf"
 
 				# Create and write stf_file to disk
-				stf_file = stf_state.create_stf_binary_file()
+				stf_file = stf_state.create_stf_binary_file(generator="stfblender")
 				files.append(open(export_filepath, "wb"))
 				stf_file.serialize(files[len(files) - 1])
 
@@ -70,7 +71,7 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 					else:
 						export_filepath += ".stf.json"
 
-				stf_definition = stf_state.create_stf_definition(self.format)
+				stf_definition = stf_state.create_stf_definition(generator="stfblender")
 				json_string = json.dumps(stf_definition.to_dict()).encode(encoding="utf-8")
 				files.append(open(export_filepath, "wb"))
 				files[len(files) - 1].write(json_string)
@@ -83,7 +84,7 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 					else:
 						export_filepath += ".stf.json"
 
-				stf_definition = stf_state.create_stf_definition(self.format)
+				stf_definition = stf_state.create_stf_definition(generator="stfblender")
 				# TODO generate all buffers as files as well
 				json_string = json.dumps(stf_definition.to_dict()).encode(encoding="utf-8")
 				files.append(open(export_filepath, "wb"))

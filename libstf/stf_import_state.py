@@ -13,8 +13,8 @@ class STF_ImportState(StateUtil):
 	Each context must have access to the same STF_ImportState instance.
 	"""
 
-	def __init__(self, file: STF_File, modules: tuple[dict[str, STF_Module], dict[str, list[STF_ImportHook]]]):
-		super.__init__()
+	def __init__(self, file: STF_File, modules: tuple[dict[str, STF_Module], dict[str, list[STF_ImportHook]]], fail_on_severity: STF_Report_Severity = STF_Report_Severity.FatalError):
+		super().__init__(fail_on_severity)
 
 		self._file = file
 

@@ -18,33 +18,46 @@ class STF_RootExportContext:
 	def register_serialized_resource(self, application_object: any, json_resource: dict, id: str):
 		self._state.register_serialized_resource(application_object, json_resource, id)
 
+	def run_hooks(self, application_object: any, object_ctx: any, json_resource: dict, id: str):
+		# Export components from application native constructs
+		if(hooks := self._state.determine_hooks(application_object)):
+			for hook in hooks:
+				if(hook.hook_can_handle_application_object_func(application_object)):
+					hook_json_resource, hook_id, hook_ctx = hook.export_func(object_ctx, application_object, None)
+					if(hook.stf_kind == "component"):
+						if("components" not in json_resource): json_resource["components"] = {}
+						json_resource["components"][hook_id] = hook_json_resource
+					else:
+						self.register_serialized_resource(hook_json_resource, hook_id, hook_ctx)
+
+	def run_components(self, application_object: any, object_ctx: any, json_resource: dict, id: str, components: list):
+		# Export components explicitely defined by this application
+		if(len(components) > 0):
+			if("components" not in json_resource): json_resource["components"] = {}
+			for component in components:
+				if(selected_module := self._state.determine_module(component)):
+					component_json_resource, component_id, _ = selected_module.export_func(object_ctx, component, application_object)
+					json_resource["components"][component_id] = component_json_resource
+				else:
+					self.report("Unsupported Component", severity=STF_Report_Severity.Warn, stf_type=selected_module.stf_type, application_object=application_object, selected_module=selected_module)
+
 	def serialize_resource(self, application_object: any) -> str | None:
 		if(application_object == None): return None
 		if(id := self.get_resource_id(application_object)): return id
 
 		if(selected_module := self._state.determine_module(application_object)):
-			json_resource, id, ctx = selected_module.export_func(self, application_object, None)
+			json_resource, id, ctx = selected_module.export_func(self.get_root_context() if selected_module.stf_kind == "data" else self, application_object, None)
 
 			if(json_resource and id and ctx):
 				self.register_serialized_resource(application_object, json_resource, id)
 
 				# Export components from application native constructs
-				if(hooks := self._state.determine_hooks(application_object)):
-					for hook in hooks:
-						hook.export_func(ctx, application_object, None)
+				self.run_hooks(application_object, ctx, json_resource, id)
 
 				# Export components explicitely defined by this application
-				if(hasattr(selected_module, "get_components_func")):
+				if(selected_module.stf_kind != "component" and hasattr(selected_module, "get_components_func")):
 					components = selected_module.get_components_func(application_object)
-					if(len(components) > 0):
-						if(not hasattr(json_resource, "components")):
-							json_resource["components"] = {}
-						for component in components:
-							if(selected_module := self._state.determine_module(component)):
-								component_json_resource, component_id, _ = selected_module.export_func(ctx, component, application_object)
-								json_resource["components"][component_id] = component_json_resource
-							else:
-								self.report("Unsupported Component", severity=STF_Report_Severity.Warn, stf_type=selected_module.stf_type, application_object=application_object, selected_module=selected_module)
+					self.run_components(application_object, ctx, json_resource, id, components)
 
 				return id
 			else:

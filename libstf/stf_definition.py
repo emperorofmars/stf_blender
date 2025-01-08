@@ -46,10 +46,12 @@ class STF_Meta_AssetInfo:
 
 class STF_Meta:
 	def __init__(self):
+		import datetime
+
 		self.version_major: int = 0
 		self.version_minor: int = 0
-		self.generator: str
-		self.timestamp: str
+		self.generator: str = "libstf_python"
+		self.timestamp: str = datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat()
 		self.root: str
 		self.profiles: list[STF_Profile] = []
 		self.asset_info: STF_Meta_AssetInfo = STF_Meta_AssetInfo()
@@ -62,6 +64,8 @@ class STF_Meta:
 		ret.root = dict["root"]
 		ret.profiles = dict["profiles"]
 		ret.asset_info = STF_Meta_AssetInfo.from_dict(dict["asset_info"])
+		ret.generator = dict["generator"]
+		ret.timestamp = dict["timestamp"]
 		return ret
 
 	def to_dict(self):
@@ -71,6 +75,8 @@ class STF_Meta:
 			"root": self.root,
 			"profiles": self.profiles,
 			"asset_info": self.asset_info.to_dict(),
+			"generator": self.generator,
+			"timestamp": self.timestamp,
 		}
 
 
