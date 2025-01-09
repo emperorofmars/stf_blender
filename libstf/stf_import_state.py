@@ -34,6 +34,9 @@ class STF_ImportState(StateUtil):
 	def register_imported_resource(self, id: str, application_object: any):
 		self._imported_resources[id] = application_object
 
+	def get_imported_resource(self, id: str):
+		return self._imported_resources.get(id, None)
+
 	def import_buffer(self, id: str) -> io.BytesIO:
 		buffer = self._file.definition.buffers.get(id)
 		match(buffer.type):

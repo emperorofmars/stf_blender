@@ -19,6 +19,9 @@ class STF_RootImportContext:
 	def get_parent_application_object(self) -> any:
 		return None
 
+	def get_imported_resource(self, id: str):
+		return self._state.get_imported_resource(id)
+
 	def import_resource(self, id: str) -> any:
 		if(id in self._state._imported_resources.keys()): return self._state._imported_resources[id]
 
@@ -46,6 +49,7 @@ class STF_RootImportContext:
 
 			# TODO components
 
+			self._state.register_imported_resource(id, application_object)
 			return application_object
 		else:
 			# TODO json fallback

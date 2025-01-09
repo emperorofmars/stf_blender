@@ -21,9 +21,9 @@ def _stf_import(context: STF_BlenderBoneImportContext, json_resource: dict, id: 
 	# Once Blender enters into edit-mode, the Bone references will be invalidated. Store the child-names as string.
 	children = []
 	for child_id in json_resource.get("children", []):
-		child: bpy.types.Bone = context.import_resource(child_id)
+		child: ArmatureBone = context.import_resource(child_id)
 		if(child):
-			children.append(child.name)
+			children.append(child.get_name())
 		else:
 			context.report(STFReport("Invalid Child: " + str(child_id), STF_Report_Severity.Error, id, _stf_type, blender_object))
 
@@ -46,7 +46,7 @@ def _stf_import(context: STF_BlenderBoneImportContext, json_resource: dict, id: 
 
 	bpy.ops.object.mode_set(mode="OBJECT", toggle=False)
 
-	blender_bone = blender_armature.bones[blender_bone_name]
+	blender_bone = ArmatureBone(blender_armature, blender_bone_name)
 	bone_context = STF_ResourceImportContext(context, json_resource, blender_bone)
 
 	return blender_bone, bone_context

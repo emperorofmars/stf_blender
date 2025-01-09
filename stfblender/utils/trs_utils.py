@@ -23,7 +23,9 @@ def to_trs(t: mathutils.Vector, r: mathutils.Quaternion, s: mathutils.Vector) ->
 	]
 
 def blender_object_to_trs(blender_object: bpy.types.Object) -> list[list[float]]:
-	return to_trs(blender_object.location, blender_object.rotation_quaternion, blender_object.scale)
+	t, r, s = blender_object.matrix_local.decompose()
+	return to_trs(t, r, s)
+	#return to_trs(blender_object.location, blender_object.rotation_quaternion, blender_object.scale)
 
 
 def stf_translation_to_blender(vec: list[float]) -> mathutils.Vector:
@@ -42,7 +44,8 @@ def from_trs(trs: list[list[float]]) -> tuple[mathutils.Vector, mathutils.Quater
 	return (stf_translation_to_blender(trs[0]), stf_rotation_to_blender(trs[1]), stf_scale_to_blender(trs[2]))
 
 def trs_to_blender_object(trs: list[list[float]], blender_object: bpy.types.Object):
-	blender_object.location = stf_translation_to_blender(trs[0])
+	blender_object.matrix_local = mathutils.Matrix.LocRotScale(stf_translation_to_blender(trs[0]), stf_rotation_to_blender(trs[1]), stf_scale_to_blender(trs[2]))
+	#blender_object.location = stf_translation_to_blender(trs[0])
 	blender_object.rotation_mode = "QUATERNION"
-	blender_object.rotation_quaternion = stf_rotation_to_blender(trs[1])
-	blender_object.scale = stf_scale_to_blender(trs[2])
+	#blender_object.rotation_quaternion = stf_rotation_to_blender(trs[1])
+	#blender_object.scale = stf_scale_to_blender(trs[2])
