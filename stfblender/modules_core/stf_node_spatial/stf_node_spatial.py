@@ -1,4 +1,5 @@
 import bpy
+import mathutils
 
 from ....libstf.stf_report import STF_Report_Severity, STFReport
 from ....libstf.stf_module import STF_Module
@@ -34,13 +35,14 @@ def _stf_import(context: STF_BlenderNodeImportContext, json_resource: dict, id: 
 			hook_result.parent = blender_object
 			parent_application_object.objects.link(hook_result)
 
-	trs_utils.trs_to_blender_object(json_resource["trs"], blender_object)
+	#trs_utils.trs_to_blender_object(json_resource["trs"], blender_object)
 
 	for child_id in json_resource.get("children", []):
 		child: bpy.types.Object = context.import_resource(child_id)
 		if(child):
 			child.parent_type = "OBJECT"
 			child.parent = blender_object
+			child.matrix_parent_inverse = mathutils.Matrix()
 		else:
 			context.report(STFReport("Invalid Child: " + str(child_id), STF_Report_Severity.Error, id, _stf_type, blender_object))
 
@@ -52,12 +54,17 @@ def _stf_import(context: STF_BlenderNodeImportContext, json_resource: dict, id: 
 				if(armature_bone):
 					blender_object.parent_type = "BONE"
 					blender_object.parent_bone = armature_bone.get_name()
+					blender_object.matrix_parent_inverse = mathutils.Matrix()
 				else:
 					context.report(STFReport("Invalid Parent Binding Target: " + json_resource["parent_binding"], STF_Report_Severity.Error, id, _stf_type, blender_object))
 			else:
 				context.report(STFReport("Invalid Parent Binding Parent: " + json_resource["parent_binding"], STF_Report_Severity.Error, id, _stf_type, blender_object))
-
 		context.add_task(_parent_binding_callback)
+
+	def _trs_callback():
+		trs_utils.trs_to_blender_object(json_resource["trs"], blender_object)
+	context.add_task(_trs_callback)
+
 
 	return blender_object, context #node_context
 

@@ -23,7 +23,15 @@ def to_trs(t: mathutils.Vector, r: mathutils.Quaternion, s: mathutils.Vector) ->
 	]
 
 def blender_object_to_trs(blender_object: bpy.types.Object) -> list[list[float]]:
-	t, r, s = blender_object.matrix_local.decompose()
+	#t, r, s = blender_object.matrix_local.decompose()
+	if(blender_object.parent):
+		match(blender_object.parent_type):
+			case "OBJECT":
+				t, r, s = (blender_object.parent.matrix_world.inverted_safe() @ blender_object.matrix_world).decompose()
+			case "BONE":
+				t, r, s = (blender_object.parent.matrix_world.inverted_safe() @ blender_object.parent.data.bones[blender_object.parent_bone].matrix_local.inverted_safe() @ blender_object.matrix_world).decompose()
+	else:
+		t, r, s = blender_object.matrix_world.decompose()
 	return to_trs(t, r, s)
 	#return to_trs(blender_object.location, blender_object.rotation_quaternion, blender_object.scale)
 
@@ -44,8 +52,30 @@ def from_trs(trs: list[list[float]]) -> tuple[mathutils.Vector, mathutils.Quater
 	return (stf_translation_to_blender(trs[0]), stf_rotation_to_blender(trs[1]), stf_scale_to_blender(trs[2]))
 
 def trs_to_blender_object(trs: list[list[float]], blender_object: bpy.types.Object):
-	blender_object.matrix_local = mathutils.Matrix.LocRotScale(stf_translation_to_blender(trs[0]), stf_rotation_to_blender(trs[1]), stf_scale_to_blender(trs[2]))
+	matrix_local = mathutils.Matrix.LocRotScale(stf_translation_to_blender(trs[0]), stf_rotation_to_blender(trs[1]), stf_scale_to_blender(trs[2]))
+	if(blender_object.parent):
+		match(blender_object.parent_type):
+			case "OBJECT":
+				blender_object.matrix_world = blender_object.parent.matrix_world @ matrix_local
+				pass
+			case "BONE":
+				matrix_bone = blender_object.parent.data.bones[blender_object.parent_bone].matrix_local
+				blender_object.matrix_world = blender_object.parent.matrix_world @ matrix_bone @ matrix_local
+		# TODO handle parent binding
+	else:
+		blender_object.matrix_world = matrix_local
+
+	blender_object.matrix_parent_inverse = mathutils.Matrix()
+
+	#blender_object.rotation_mode = "QUATERNION"
+
+
+"""
+def trs_to_blender_object(trs: list[list[float]], blender_object: bpy.types.Object):
+	#blender_object.matrix_local = mathutils.Matrix.LocRotScale(stf_translation_to_blender(trs[0]), stf_rotation_to_blender(trs[1]), stf_scale_to_blender(trs[2]))
+	blender_object.matrix_world = mathutils.Matrix.LocRotScale(stf_translation_to_blender(trs[0]), stf_rotation_to_blender(trs[1]), stf_scale_to_blender(trs[2]))
 	#blender_object.location = stf_translation_to_blender(trs[0])
 	blender_object.rotation_mode = "QUATERNION"
 	#blender_object.rotation_quaternion = stf_rotation_to_blender(trs[1])
 	#blender_object.scale = stf_scale_to_blender(trs[2])
+"""
