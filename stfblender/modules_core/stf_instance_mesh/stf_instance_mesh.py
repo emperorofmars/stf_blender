@@ -21,7 +21,7 @@ def _hook_can_handle_stf_object_func(json_resource: dict) -> tuple[bool, dict, s
 def _stf_import(context: STF_ResourceImportContext, json_resource: dict, id: str, parent_application_object: any, import_hook_results: list[any]) -> tuple[any, any]:
 	blender_object = context.import_resource(json_resource["mesh"])
 
-	if(not blender_object or type(blender_object) is not bpy.types.Mesh):
+	if(not blender_object or type(blender_object) is not bpy.types.Object):
 		context.report(STFReport("Failed to import mesh: " + str(json_resource.get("mesh")), STF_Report_Severity.Error, id, _stf_type, parent_application_object))
 
 	blender_object.stf_data_id = id
