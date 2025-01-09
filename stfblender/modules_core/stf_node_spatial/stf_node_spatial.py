@@ -50,7 +50,18 @@ def _stf_export(context: STF_BlenderNodeExportContext, application_object: any, 
 
 	children = []
 	for child in blender_object.children:
-		children.append(context.serialize_resource(child))
+		# Child objects can be part of different collections. However, if none of its collections are enabled, do not export it.
+		object_exists = False
+		for collection in child.users_collection:
+			for layer_collection in bpy.context.view_layer.layer_collection.children:
+				if(collection.name == layer_collection.name):
+					if(not layer_collection.exclude):
+						object_exists = True
+						break
+			if(object_exists): break
+
+		if(object_exists):
+			children.append(context.serialize_resource(child))
 
 	node = {
 		"type": _stf_type,
