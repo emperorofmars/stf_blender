@@ -14,7 +14,7 @@ _stf_type = "stf.instance.prefab"
 def _hook_can_handle_stf_object_func(json_resource: dict) -> tuple[bool, dict, str]:
 	for id, component in json_resource.get("components", {}).items():
 		# TODO also check 'likeness'
-		if(component.get("type") == "stf.instance.prefab"):
+		if(component.get("type") == _stf_type):
 			return (True, component, id)
 	return (False, None, None)
 
