@@ -24,12 +24,16 @@ class STF_RootExportContext:
 			for hook in hooks:
 				can_handle, hook_object = hook.hook_can_handle_application_object_func(application_object)
 				if(can_handle):
-					hook_json_resource, hook_id, hook_ctx = hook.export_func(object_ctx, hook_object, application_object)
-					if(hook.stf_kind == "component"):
-						if("components" not in json_resource): json_resource["components"] = {}
-						json_resource["components"][hook_id] = hook_json_resource
+					hook_ret = hook.export_func(object_ctx, hook_object, application_object)
+					if(hook_ret):
+						hook_json_resource, hook_id, hook_ctx = hook_ret
+						if(hook.stf_kind == "component"):
+							if("components" not in json_resource): json_resource["components"] = {}
+							json_resource["components"][hook_id] = hook_json_resource
+						else:
+							self.register_serialized_resource(hook_json_resource, hook_id, hook_ctx)
 					else:
-						self.register_serialized_resource(hook_json_resource, hook_id, hook_ctx)
+						self.report(STFReport("Export Hook Failed", STF_Report_Severity.Error, id, hook.stf_type, application_object=application_object))
 
 	def run_components(self, application_object: any, object_ctx: any, json_resource: dict, id: str, components: list):
 		# Export components explicitely defined by this application
@@ -40,7 +44,7 @@ class STF_RootExportContext:
 					component_json_resource, component_id, _ = selected_module.export_func(object_ctx, component, application_object)
 					json_resource["components"][component_id] = component_json_resource
 				else:
-					self.report("Unsupported Component", severity=STF_Report_Severity.Warn, stf_type=selected_module.stf_type, application_object=application_object, selected_module=selected_module)
+					self.report(STFReport("Unsupported Component", STF_Report_Severity.Warn, selected_module.stf_type, application_object=application_object))
 
 	def serialize_resource(self, application_object: any) -> str | None:
 		if(application_object == None): return None
