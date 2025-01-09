@@ -26,8 +26,6 @@ class STF_BlenderBoneExportContext(STF_ResourceExportContext):
 			return super().get_resource_id(application_object)
 
 	def register_serialized_resource(self, application_object: any, json_resource: dict, id: str):
-		#print("Registering: " + application_object.name + " :: " + str(type(application_object)) + " :: " + str(id))
-
 		if(type(application_object) is bpy.types.Bone):
 			self._json_resource["bones"][id] = json_resource
 		else:

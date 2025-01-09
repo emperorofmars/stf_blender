@@ -12,11 +12,13 @@ class STF_RootExportContext:
 	def __init__(self, state: STF_ExportState):
 		self._state = state
 
+
 	def get_resource_id(self, application_object: any) -> str | None:
 		return self._state.get_resource_id(application_object)
 
 	def register_serialized_resource(self, application_object: any, json_resource: dict, id: str):
 		self._state.register_serialized_resource(application_object, json_resource, id)
+
 
 	def run_hooks(self, application_object: any, object_ctx: any, json_resource: dict, id: str):
 		# Export components from application native constructs
@@ -33,7 +35,8 @@ class STF_RootExportContext:
 						else:
 							self.register_serialized_resource(hook_json_resource, hook_id, hook_ctx)
 					else:
-						self.report(STFReport("Export Hook Failed", STF_Report_Severity.Error, id, hook.stf_type, application_object=application_object))
+						self.report(STFReport("Export Hook Failed", STF_Report_Severity.Error, id, hook.stf_type, application_object))
+
 
 	def run_components(self, application_object: any, object_ctx: any, json_resource: dict, id: str, components: list):
 		# Export components explicitely defined by this application
@@ -41,19 +44,24 @@ class STF_RootExportContext:
 			if("components" not in json_resource): json_resource["components"] = {}
 			for component in components:
 				if(selected_module := self._state.determine_module(component)):
-					component_json_resource, component_id, _ = selected_module.export_func(object_ctx, component, application_object)
-					json_resource["components"][component_id] = component_json_resource
+					component_ret = selected_module.export_func(object_ctx, component, application_object)
+					if(component_ret):
+						component_json_resource, component_id, _ = component_ret
+						json_resource["components"][component_id] = component_json_resource
+					else:
+						self.report(STFReport("Export Component Failed", STF_Report_Severity.Error, id, selected_module.stf_type, application_object))
 				else:
-					self.report(STFReport("Unsupported Component", STF_Report_Severity.Warn, selected_module.stf_type, application_object=application_object))
+					self.report(STFReport("Unsupported Component", STF_Report_Severity.Warn, None, None, application_object))
+
 
 	def serialize_resource(self, application_object: any) -> str | None:
 		if(application_object == None): return None
 		if(id := self.get_resource_id(application_object)): return id
 
 		if(selected_module := self._state.determine_module(application_object)):
-			json_resource, id, ctx = selected_module.export_func(self.get_root_context() if selected_module.stf_kind == "data" else self, application_object, None)
-
-			if(json_resource and id and ctx):
+			module_ret = selected_module.export_func(self.get_root_context() if selected_module.stf_kind == "data" else self, application_object, None)
+			if(module_ret):
+				json_resource, id, ctx = module_ret
 				self.register_serialized_resource(application_object, json_resource, id)
 
 				# Export components from application native constructs
@@ -66,10 +74,11 @@ class STF_RootExportContext:
 
 				return id
 			else:
-				self.report(STFReport(message="Resource Export Failed", severity=STF_Report_Severity.Error, stf_id=id, stf_type=selected_module.stf_type, application_object=application_object))
+				self.report(STFReport("Resource Export Failed", STF_Report_Severity.Error, None, selected_module.stf_type, application_object))
 		else:
-			self.report(STFReport(message="NO Processor Found", severity=STF_Report_Severity.Error, application_object=application_object))
+			self.report(STFReport("NO Processor Found", STF_Report_Severity.Error, None, application_object))
 		return None
+
 
 	def serialize_buffer(self, data: io.BytesIO) -> str:
 		return self._state.serialize_buffer(data)
@@ -82,6 +91,7 @@ class STF_RootExportContext:
 
 	def report(self, report: STFReport):
 		self._state.report(report)
+
 
 	def get_root_id(self) -> str | None:
 		return self._state._root_id
