@@ -19,7 +19,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 	layout.prop(component, "weight")
 
 
-def _stf_import(context: STF_RootImportContext, json: dict, id: str, parent_application_object: any, import_hook_results: list[any]) -> any:
+def _stf_import(context: STF_RootImportContext, json: dict, id: str, parent_application_object: any, import_hook_results: list[any]) -> tuple[any, any]:
 	pass
 
 def _stf_export(context: STF_RootExportContext, application_object: AVA_Constraint_Twist, parent_application_object: any) -> tuple[dict, str, any]:

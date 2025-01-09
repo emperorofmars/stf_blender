@@ -40,35 +40,39 @@ class STF_BlenderBoneImportContext(STF_ResourceImportContext):
 			return super().get_json_resource(id)
 
 
-def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, parent_application_object: any, import_hook_results: list[any]) -> any:
-	armature = bpy.data.armatures.new(json_resource.get("name", "STF Armature"))
-	armature.stf_id = id
-	armature.stf_name = json_resource.get("name", "")
+def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, parent_application_object: any, import_hook_results: list[any]) -> tuple[any, any]:
+	blender_armature = bpy.data.armatures.new(json_resource.get("name", "STF Armature"))
+	blender_armature.stf_id = id
+	blender_armature.stf_name = json_resource.get("name", "")
 
-	node_import_context = STF_BlenderBoneImportContext(context, json_resource, armature)
+	node_import_context = STF_BlenderBoneImportContext(context, json_resource, blender_armature)
 	for bone_id in json_resource.get("root_bones", []):
 		node_import_context.import_resource(bone_id)
 
-	return armature
+	return blender_armature, node_import_context
 
 
 def _stf_export(context: STF_RootExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:
-	armature: bpy.types.Armature = application_object
-	ensure_stf_id(armature)
+	blender_armature: bpy.types.Armature = application_object
+	ensure_stf_id(blender_armature)
 
 	root_bones = []
 	ret = {
 		"type": _stf_type,
-		"name": armature.stf_name if armature.stf_name else armature.name,
+		"name": blender_armature.stf_name if blender_armature.stf_name else blender_armature.name,
 		"root_bones": root_bones,
 	}
 
-	bone_export_context = STF_BlenderBoneExportContext(context, ret)
-	for blender_bone in armature.bones:
+	original_pose_position = blender_armature.pose_position
+	blender_armature.pose_position = "REST"
+
+	bone_export_context = STF_BlenderBoneExportContext(context, ret, blender_armature)
+	for blender_bone in blender_armature.bones:
 		if(blender_bone.parent == None):
 			root_bones.append(bone_export_context.serialize_resource(blender_bone))
 
-	return ret, armature.stf_id, bone_export_context
+	blender_armature.pose_position = original_pose_position
+	return ret, blender_armature.stf_id, bone_export_context
 
 
 class STF_Module_STF_Armature(STF_Module):

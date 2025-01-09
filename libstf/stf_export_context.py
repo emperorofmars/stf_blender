@@ -16,6 +16,9 @@ class STF_RootExportContext:
 	def get_resource_id(self, application_object: any) -> str | None:
 		return self._state.get_resource_id(application_object)
 
+	def get_parent_application_object(self) -> any:
+		return None
+
 	def register_serialized_resource(self, application_object: any, json_resource: dict, id: str):
 		self._state.register_serialized_resource(application_object, json_resource, id)
 
@@ -59,7 +62,7 @@ class STF_RootExportContext:
 		if(id := self.get_resource_id(application_object)): return id
 
 		if(selected_module := self._state.determine_module(application_object)):
-			module_ret = selected_module.export_func(self.get_root_context() if selected_module.stf_kind == "data" else self, application_object, None)
+			module_ret = selected_module.export_func(self.get_root_context() if selected_module.stf_kind == "data" else self, application_object, self.get_parent_application_object())
 			if(module_ret):
 				json_resource, id, ctx = module_ret
 				self.register_serialized_resource(application_object, json_resource, id)
@@ -110,11 +113,15 @@ class STF_ResourceExportContext(STF_RootExportContext):
 		Extend this class if you need a custom context for sub-resources.
 	"""
 
-	def __init__(self, parent_context: STF_RootExportContext, json_resource: dict):
+	def __init__(self, parent_context: STF_RootExportContext, json_resource: dict, parent_application_object: any):
 		super().__init__(parent_context._state)
 		self._parent_context = parent_context
 		self._json_resource = json_resource
+		self._parent_application_object = parent_application_object
 		self.ensure_resource_properties()
+
+	def get_parent_application_object(self) -> any:
+		return self._parent_application_object
 
 	def ensure_resource_properties(self):
 		if(not hasattr(self._json_resource, "referenced_resources")):

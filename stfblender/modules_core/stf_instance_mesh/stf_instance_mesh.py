@@ -1,7 +1,7 @@
 import bpy
 
 from ....libstf.stf_export_context import STF_RootExportContext
-from ....libstf.stf_import_context import STF_RootImportContext
+from ....libstf.stf_import_context import STF_ResourceImportContext
 from ....libstf.stf_module import STF_ExportHook, STF_ImportHook
 from ....libstf.stf_report import STF_Report_Severity, STFReport
 from ...utils.component_utils import get_components_from_object
@@ -18,7 +18,7 @@ def _hook_can_handle_stf_object_func(json_resource: dict) -> tuple[bool, dict, s
 			return (True, component, id)
 	return (False, None, None)
 
-def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, parent_application_object: any, import_hook_results: list[any]) -> any:
+def _stf_import(context: STF_ResourceImportContext, json_resource: dict, id: str, parent_application_object: any, import_hook_results: list[any]) -> tuple[any, any]:
 	blender_mesh = context.import_resource(json_resource["mesh"])
 
 	if(not blender_mesh or type(blender_mesh) is not bpy.types.Mesh):
@@ -30,7 +30,7 @@ def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, pa
 
 	# TODO handle materials, armatures, blendshape values
 
-	return blender_object
+	return blender_object, context
 
 
 def _hook_can_handle_application_object_func(application_object: any) -> tuple[bool, any]:

@@ -3,6 +3,7 @@ import mathutils
 
 from ....libstf.stf_report import STF_Report_Severity, STFReport
 from ....libstf.stf_module import STF_Module
+from ....libstf.stf_import_context import STF_ResourceImportContext
 from ...utils.component_utils import STF_Component, get_components_from_object
 from ...utils.id_utils import ensure_stf_id
 from ...utils.trs_utils import blender_object_to_trs, to_trs, trs_to_blender_object
@@ -12,7 +13,7 @@ from ..stf_armature.stf_armature import STF_BlenderBoneExportContext, STF_Blende
 _stf_type = "stf.bone"
 
 
-def _stf_import(context: STF_BlenderBoneImportContext, json_resource: dict, id: str, parent_application_object: any, import_hook_results: list[any]) -> any:
+def _stf_import(context: STF_BlenderBoneImportContext, json_resource: dict, id: str, parent_application_object: any, import_hook_results: list[any]) -> tuple[any, any]:
 	blender_armature: bpy.types.Armature = parent_application_object
 
 	if(bpy.context.mode != "OBJECT"): bpy.ops.object.mode_set(mode="OBJECT")
@@ -20,6 +21,7 @@ def _stf_import(context: STF_BlenderBoneImportContext, json_resource: dict, id: 
 	bpy.ops.object.mode_set(mode="EDIT")
 
 	blender_bone = blender_armature.edit_bones.new(json_resource.get("name", "STF Bone"))
+	bone_context = STF_ResourceImportContext(context, json_resource, blender_bone)
 
 	bpy.ops.object.mode_set(mode="OBJECT")
 
@@ -47,25 +49,36 @@ def _stf_import(context: STF_BlenderBoneImportContext, json_resource: dict, id: 
 			child.parent = blender_object
 		else:
 			context.report(STFReport("Invalid Child: " + str(child_id), STF_Report_Severity.Error, id, _stf_type, blender_object))"""
-	return blender_bone
+	return blender_bone, bone_context
 
 
 def _stf_export(context: STF_BlenderBoneExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:
 	blender_bone: bpy.types.Bone = application_object
+	blender_armature: bpy.types.Armature = parent_application_object
 	ensure_stf_id(blender_bone)
+
 
 	children = []
 	for child in blender_bone.children:
 		children.append(context.serialize_resource(child))
 
-	bone = {
+	parent_matrix = blender_bone.parent.matrix_local if blender_bone.parent else mathutils.Matrix()
+
+	blender_armature.pose_position = "REST"
+	rest_t, rest_r, rest_s = (parent_matrix.inverted_safe() @ blender_bone.matrix_local).decompose()
+
+	blender_armature.pose_position = "POSE"
+	pose_t, pose_r, pose_s = (parent_matrix.inverted_safe() @ blender_bone.matrix_local).decompose()
+
+	ret = {
 		"type": _stf_type,
 		"name": blender_bone.stf_name if blender_bone.stf_name else blender_bone.name,
-		#"trs": to_trs(blender_bone.head, blender_bone.matrix_local),
+		"binding_trs": to_trs(rest_t, rest_r, rest_s),
+		"trs": to_trs(pose_t, pose_r, pose_s),
 		"children": children,
 	}
 
-	return bone, blender_bone.stf_id, context
+	return ret, blender_bone.stf_id, context
 
 
 class STF_Module_STF_Bone(STF_Module):

@@ -18,7 +18,7 @@ def _hook_can_handle_stf_object_func(json_resource: dict) -> tuple[bool, dict, s
 			return (True, component, id)
 	return (False, None, None)
 
-def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, parent_application_object: any, import_hook_results: list[any]) -> any:
+def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, parent_application_object: any, import_hook_results: list[any]) -> tuple[any, any]:
 	blender_armature = context.import_resource(json_resource["armature"])
 
 	if(not blender_armature or type(blender_armature) is not bpy.types.Collection):
@@ -28,7 +28,7 @@ def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, pa
 	blender_object.stf_data_id = id
 	blender_object.stf_data_name = json_resource.get("name", "")
 
-	return blender_object
+	return blender_object, context
 
 
 def _hook_can_handle_application_object_func(application_object: any) -> tuple[bool, any]:

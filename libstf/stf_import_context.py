@@ -38,11 +38,11 @@ class STF_RootImportContext:
 			for hook, hook_json_resource, hook_resource_id in accepted_hooks:
 				hook_result = hook.import_func(self, hook_json_resource, hook_resource_id, None, None)
 				if(hook_result):
-					hook_results.append(hook_result)
+					hook_results.append(hook_result[0])
 				else:
 					self.report(STFReport("Hook execution error", STF_Report_Severity.Error, hook_resource_id, hook.stf_type))
 
-			application_object = module.import_func(self, json_resource, id, self.get_parent_application_object(), hook_results)
+			application_object, context = module.import_func(self, json_resource, id, self.get_parent_application_object(), hook_results)
 
 			# TODO components
 

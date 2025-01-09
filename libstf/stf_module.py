@@ -27,8 +27,8 @@ class STF_Module:
 	# List of application types this processor can export
 	understood_application_types: list = []
 
-	# (Import Context, Json Dict, ID, Optional Parent Application Object, Optional List of Immport Hook Results) -> The Application Object
-	import_func: Callable[[any, dict, str, any, list[any]], any]
+	# (Import Context, Json Dict, ID, Optional Parent Application Object, Optional List of Immport Hook Results) -> (The Application Object, Import Context)
+	import_func: Callable[[any, dict, str, any, list[any]], tuple[any, any]]
 
 	# (Export Context, Application Object, Optional Parent Application Object) -> (Json Dict, ID, Export Context)
 	export_func: Callable[[any, any, any], tuple[dict, str, any]]

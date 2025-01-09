@@ -3,8 +3,8 @@ import struct
 import bpy
 import bmesh
 
-from ....libstf.stf_export_context import STF_RootExportContext
-from ....libstf.stf_import_context import STF_RootImportContext
+from ....libstf.stf_export_context import STF_ResourceExportContext, STF_RootExportContext
+from ....libstf.stf_import_context import STF_ResourceImportContext, STF_RootImportContext
 from ....libstf.stf_module import STF_Module
 from ....libstf.stf_report import STF_Report_Severity, STFReport
 from ...utils.component_utils import STF_Component, get_components_from_object
@@ -16,10 +16,13 @@ from ...utils.buffer_utils import serialize_float, serialize_uint
 _stf_type = "stf.mesh"
 
 
-def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, parent_application_object: any, import_hook_results: list[any]) -> any:
+def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, parent_application_object: any, import_hook_results: list[any]) -> tuple[any, any]:
 	blender_mesh = bpy.data.meshes.new(json_resource.get("name", "STF Mesh"))
 	blender_mesh.stf_id = id
-	return blender_mesh
+
+	mesh_context = STF_ResourceImportContext(context, json_resource, blender_mesh)
+
+	return blender_mesh, mesh_context
 
 
 def _stf_export(context: STF_RootExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:
@@ -47,6 +50,8 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 		"split_indices_width": split_indices_width,
 		"vertex_pos_width": float_width,
 	}
+
+	mesh_context = STF_ResourceExportContext(context, stf_mesh, blender_mesh)
 
 	buffer_vertices = BytesIO()
 	# The vertex only stores the position. Normals, uv's, etc... are stored by split vertices. The vertex is here to inform the application that these many split vertices are actually the same point.
@@ -134,23 +139,23 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 	buffer_blendshape_tangent = BytesIO()
 
 
-	stf_mesh["vertices"] = context.serialize_buffer(buffer_vertices)
-	stf_mesh["splits"] = context.serialize_buffer(buffer_split_vertices)
-	stf_mesh["normals"] = context.serialize_buffer(buffer_normals)
-	stf_mesh["tangents"] = context.serialize_buffer(buffer_tangents)
-	stf_mesh["tris"] = context.serialize_buffer(buffer_tris)
-	stf_mesh["buffer_tris_material_index"] = context.serialize_buffer(buffer_tris_material_index)
-	stf_mesh["faces"] = context.serialize_buffer(buffer_faces)
+	stf_mesh["vertices"] = mesh_context.serialize_buffer(buffer_vertices)
+	stf_mesh["splits"] = mesh_context.serialize_buffer(buffer_split_vertices)
+	stf_mesh["normals"] = mesh_context.serialize_buffer(buffer_normals)
+	stf_mesh["tangents"] = mesh_context.serialize_buffer(buffer_tangents)
+	stf_mesh["tris"] = mesh_context.serialize_buffer(buffer_tris)
+	stf_mesh["buffer_tris_material_index"] = mesh_context.serialize_buffer(buffer_tris_material_index)
+	stf_mesh["faces"] = mesh_context.serialize_buffer(buffer_faces)
 
 	stf_mesh["uvs"] = []
 	for buffer_uv in buffers_uv:
-		stf_mesh["uvs"].append(context.serialize_buffer(buffer_uv))
+		stf_mesh["uvs"].append(mesh_context.serialize_buffer(buffer_uv))
 
 	stf_mesh["colors"] = []
 	for color_buffer in buffers_color:
-		stf_mesh["colors"].append(context.serialize_buffer(color_buffer))
+		stf_mesh["colors"].append(mesh_context.serialize_buffer(color_buffer))
 
-	return stf_mesh, blender_mesh.stf_id, context
+	return stf_mesh, blender_mesh.stf_id, mesh_context
 
 
 class STF_Module_STF_Mesh(STF_Module):

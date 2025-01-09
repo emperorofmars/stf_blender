@@ -42,7 +42,7 @@ class STF_BlenderNodeImportContext(STF_ResourceImportContext):
 			return super().get_json_resource(id)
 
 
-def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, parent_application_object: any, import_hook_results: list[any]) -> any:
+def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, parent_application_object: any, import_hook_results: list[any]) -> tuple[any, any]:
 	collection = bpy.data.collections.new(json_resource.get("name", context.get_filename()))
 	collection.stf_id = id
 	collection.stf_name = json_resource.get("name", "")
@@ -52,7 +52,7 @@ def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, pa
 	node_import_context = STF_BlenderNodeImportContext(context, json_resource, collection)
 	for node_id in json_resource.get("root_nodes", []):
 		node_import_context.import_resource(node_id)
-	return collection
+	return collection, node_import_context
 
 def _stf_export(context: STF_RootExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:
 	collection: bpy.types.Collection = application_object
@@ -66,7 +66,7 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 		"metric_multiplier": collection.metric_multiplier,
 	}
 
-	node_export_context = STF_BlenderNodeExportContext(context, ret)
+	node_export_context = STF_BlenderNodeExportContext(context, ret, collection)
 	for blender_object in collection.all_objects:
 		if(blender_object.parent == None):
 			root_nodes.append(node_export_context.serialize_resource(blender_object))

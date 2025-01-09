@@ -1,7 +1,9 @@
 import bpy
 
+
 from ....libstf.stf_report import STF_Report_Severity, STFReport
 from ....libstf.stf_module import STF_Module
+from ....libstf.stf_import_context import STF_ResourceImportContext
 from ...utils.component_utils import STF_Component, get_components_from_object
 from ...utils.id_utils import ensure_stf_id
 from ...utils.trs_utils import blender_object_to_trs, trs_to_blender_object
@@ -11,7 +13,7 @@ from ..stf_prefab.stf_prefab import STF_BlenderNodeExportContext, STF_BlenderNod
 _stf_type = "stf.node.spatial"
 
 
-def _stf_import(context: STF_BlenderNodeImportContext, json_resource: dict, id: str, parent_application_object: any, import_hook_results: list[any]) -> any:
+def _stf_import(context: STF_BlenderNodeImportContext, json_resource: dict, id: str, parent_application_object: any, import_hook_results: list[any]) -> tuple[any, any]:
 	blender_object: bpy.types.Object = None
 	if(import_hook_results and len(import_hook_results) == 1):
 		blender_object: bpy.types.Object = import_hook_results[0]
@@ -21,6 +23,8 @@ def _stf_import(context: STF_BlenderNodeImportContext, json_resource: dict, id: 
 	blender_object.stf_id = id
 	blender_object.stf_name = json_resource.get("name", "")
 	parent_application_object.objects.link(blender_object)
+
+	node_context = STF_ResourceImportContext(context, json_resource, blender_object)
 
 	if(import_hook_results and len(import_hook_results) > 1):
 		for hook_result in import_hook_results:
@@ -37,7 +41,7 @@ def _stf_import(context: STF_BlenderNodeImportContext, json_resource: dict, id: 
 			child.parent = blender_object
 		else:
 			context.report(STFReport("Invalid Child: " + str(child_id), STF_Report_Severity.Error, id, _stf_type, blender_object))
-	return blender_object
+	return blender_object, node_context
 
 
 def _stf_export(context: STF_BlenderNodeExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:
