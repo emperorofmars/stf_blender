@@ -33,11 +33,17 @@ class STF_BlenderBoneExportContext(STF_ResourceExportContext):
 
 
 class STF_BlenderBoneImportContext(STF_ResourceImportContext):
+	def __init__(self, parent_context, json_resource, parent_application_object):
+		super().__init__(parent_context, json_resource, parent_application_object)
+
 	def get_json_resource(self, id: str) -> dict:
 		if(id in self._json_resource["bones"]):
 			return self._json_resource["bones"][id]
 		else:
 			return super().get_json_resource(id)
+
+	def get_parent_blender_object(self) -> bpy.types.Object:
+		return self._parent_blender_trash_object
 
 
 def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, parent_application_object: any, import_hook_results: list[any]) -> tuple[any, any]:
@@ -45,11 +51,14 @@ def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, pa
 	blender_armature.stf_id = id
 	blender_armature.stf_name = json_resource.get("name", "")
 
-	node_import_context = STF_BlenderBoneImportContext(context, json_resource, blender_armature)
+	hook_object: bpy.types.Object = bpy.data.objects.new(json_resource.get("name", "STF Node"), blender_armature)
+	bpy.context.scene.collection.objects.link(hook_object)
+
+	node_import_context = STF_BlenderBoneImportContext(context, json_resource, hook_object)
 	for bone_id in json_resource.get("root_bones", []):
 		node_import_context.import_resource(bone_id)
 
-	return blender_armature, node_import_context
+	return hook_object, node_import_context
 
 
 def _stf_export(context: STF_RootExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:

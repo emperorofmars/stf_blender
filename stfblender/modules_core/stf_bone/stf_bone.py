@@ -6,7 +6,7 @@ from ....libstf.stf_module import STF_Module
 from ....libstf.stf_import_context import STF_ResourceImportContext
 from ...utils.component_utils import STF_Component, get_components_from_object
 from ...utils.id_utils import ensure_stf_id
-from ...utils.trs_utils import blender_object_to_trs, to_trs, trs_to_blender_object
+from ...utils.trs_utils import to_trs
 from ..stf_armature.stf_armature import STF_BlenderBoneExportContext, STF_BlenderBoneImportContext
 
 
@@ -14,41 +14,39 @@ _stf_type = "stf.bone"
 
 
 def _stf_import(context: STF_BlenderBoneImportContext, json_resource: dict, id: str, parent_application_object: any, import_hook_results: list[any]) -> tuple[any, any]:
-	blender_armature: bpy.types.Armature = parent_application_object
+	blender_armature: bpy.types.Armature = parent_application_object.data
+	blender_object: bpy.types.Object = parent_application_object
 
-	if(bpy.context.mode != "OBJECT"): bpy.ops.object.mode_set(mode="OBJECT")
-	bpy.context.view_layer.objects.active = blender_armature
-	bpy.ops.object.mode_set(mode="EDIT")
-
-	blender_bone = blender_armature.edit_bones.new(json_resource.get("name", "STF Bone"))
-	bone_context = STF_ResourceImportContext(context, json_resource, blender_bone)
-
-	bpy.ops.object.mode_set(mode="OBJECT")
-
-	"""if(import_hook_results and len(import_hook_results) == 1):
-		blender_object: bpy.types.Bone = import_hook_results[0]
-		blender_object.name = json_resource.get("name", "STF Bone")
-	else:
-		blender_object: bpy.types.Bone = bpy.data.objects.new(json_resource.get("name", "STF Bone"), None)
-	blender_object.stf_id = id
-	blender_object.stf_name = json_resource.get("name", "")
-	parent_application_object.objects.link(blender_object)
-
-	if(import_hook_results and len(import_hook_results) > 1):
-		for hook_result in import_hook_results:
-			hook_result.stf_is_component_stand_in = True
-			hook_result.parent = blender_object
-			parent_application_object.objects.link(hook_result)"""
-
-	#trs_to_blender_object(json_resource["trs"], blender_object)
-
-	"""for child_id in json_resource.get("children", []):
+	children = []
+	for child_id in json_resource.get("children", []):
 		child: bpy.types.Bone = context.import_resource(child_id)
 		if(child):
-			child.parent_type = "Bone"
-			child.parent = blender_object
+			children.append(child)
 		else:
-			context.report(STFReport("Invalid Child: " + str(child_id), STF_Report_Severity.Error, id, _stf_type, blender_object))"""
+			context.report(STFReport("Invalid Child: " + str(child_id), STF_Report_Severity.Error, id, _stf_type, blender_object))
+
+	if(bpy.context.mode != "OBJECT"): bpy.ops.object.mode_set(mode="OBJECT", toggle=False)
+	bpy.context.view_layer.objects.active = blender_object
+	bpy.ops.object.mode_set(mode="EDIT", toggle=False)
+
+	blender_edit_bone = blender_armature.edit_bones.new(json_resource.get("name", "STF Bone"))
+	blender_bone_name = blender_edit_bone.name
+
+	blender_edit_bone.head = mathutils.Vector((0, 0, 0))
+	blender_edit_bone.tail = mathutils.Vector((0, 0, 1))
+
+	for child in children:
+		child = blender_armature.edit_bones[child.name]
+		child.parent = blender_edit_bone
+		# TODO handle bone connection
+
+	bpy.ops.object.mode_set(mode="OBJECT", toggle=False)
+
+	blender_bone = blender_armature.bones[blender_bone_name]
+	bone_context = STF_ResourceImportContext(context, json_resource, blender_bone)
+
+	# TODO pose trs
+
 	return blender_bone, bone_context
 
 
@@ -56,7 +54,6 @@ def _stf_export(context: STF_BlenderBoneExportContext, application_object: any, 
 	blender_bone: bpy.types.Bone = application_object
 	blender_armature: bpy.types.Armature = parent_application_object
 	ensure_stf_id(blender_bone)
-
 
 	children = []
 	for child in blender_bone.children:
@@ -75,6 +72,7 @@ def _stf_export(context: STF_BlenderBoneExportContext, application_object: any, 
 		"name": blender_bone.stf_name if blender_bone.stf_name else blender_bone.name,
 		"binding_trs": to_trs(rest_t, rest_r, rest_s),
 		"trs": to_trs(pose_t, pose_r, pose_s),
+		"length": blender_bone.length,
 		"children": children,
 	}
 
