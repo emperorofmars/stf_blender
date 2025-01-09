@@ -7,8 +7,9 @@ class STF_Profile:
 class STF_Meta_AssetInfo:
 	def __init__(self):
 		self.asset_name: str = None
-		self.asset_author: str = None
 		self.asset_version: str = None
+		self.asset_url: str = None
+		self.asset_author: str = None
 		self.asset_license: str = None
 		self.asset_license_url: str = None
 		self.asset_documentation_url: str = None
@@ -21,8 +22,9 @@ class STF_Meta_AssetInfo:
 		for key, value in dict.items():
 			match key:
 				case "asset_name": ret.asset_name = value
-				case "asset_author": ret.asset_author = value
 				case "asset_version": ret.asset_version = value
+				case "asset_url": ret.asset_url = value
+				case "asset_author": ret.asset_author = value
 				case "asset_license": ret.asset_license = value
 				case "asset_license_url": ret.asset_license_url = value
 				case "asset_documentation_url": ret.asset_documentation_url = value

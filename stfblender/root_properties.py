@@ -10,8 +10,9 @@ class STF_KV(bpy.types.PropertyGroup):
 
 class STF_Meta(bpy.types.PropertyGroup):
 	asset_name: bpy.props.StringProperty(name="Asset Name") # type: ignore
-	asset_author: bpy.props.StringProperty(name="Author(s)") # type: ignore
 	asset_version: bpy.props.StringProperty(name="Version") # type: ignore
+	asset_url: bpy.props.StringProperty(name="Asset Link") # type: ignore
+	asset_author: bpy.props.StringProperty(name="Author(s)") # type: ignore
 	asset_license: bpy.props.StringProperty(name="License") # type: ignore
 	asset_license_url: bpy.props.StringProperty(name="License URL") # type: ignore
 	asset_documentation_url: bpy.props.StringProperty(name="Documentation URL") # type: ignore
@@ -21,8 +22,9 @@ class STF_Meta(bpy.types.PropertyGroup):
 	def to_stf_meta_assetInfo(self) -> STF_Meta_AssetInfo:
 		ret = STF_Meta_AssetInfo()
 		if(self.asset_name): ret.asset_name = self.asset_name
-		if(self.asset_author): ret.asset_author = self.asset_author
 		if(self.asset_version): ret.asset_version = self.asset_version
+		if(self.asset_url): ret.asset_url = self.asset_url
+		if(self.asset_author): ret.asset_author = self.asset_author
 		if(self.asset_license): ret.asset_license = self.asset_license
 		if(self.asset_license_url): ret.asset_license_url = self.asset_license_url
 		if(self.asset_documentation_url): ret.asset_documentation_url = self.asset_documentation_url
@@ -33,8 +35,9 @@ class STF_Meta(bpy.types.PropertyGroup):
 
 	def from_stf_meta_assetInfo(self, meta: STF_Meta_AssetInfo):
 		if(meta.asset_name): self.asset_name = meta.asset_name
-		if(meta.asset_author): self.asset_author = meta.asset_author
 		if(meta.asset_version): self.asset_version = meta.asset_version
+		if(meta.asset_url): self.asset_url = meta.asset_url
+		if(meta.asset_author): self.asset_author = meta.asset_author
 		if(meta.asset_license): self.asset_license = meta.asset_license
 		if(meta.asset_license_url): self.asset_license_url = meta.asset_license_url
 		if(meta.asset_documentation_url): self.asset_documentation_url = meta.asset_documentation_url
@@ -48,8 +51,9 @@ class STF_Meta(bpy.types.PropertyGroup):
 
 def draw_meta_editor(layout: bpy.types.UILayout, blender_scene_or_collection: bpy.types.Scene | bpy.types.Collection):
 	layout.prop(blender_scene_or_collection.stf_meta, "asset_name")
-	layout.prop(blender_scene_or_collection.stf_meta, "asset_author")
 	layout.prop(blender_scene_or_collection.stf_meta, "asset_version")
+	layout.prop(blender_scene_or_collection.stf_meta, "asset_url")
+	layout.prop(blender_scene_or_collection.stf_meta, "asset_author")
 	layout.prop(blender_scene_or_collection.stf_meta, "asset_license")
 	layout.prop(blender_scene_or_collection.stf_meta, "asset_license_url")
 	layout.prop(blender_scene_or_collection.stf_meta, "asset_documentation_url")
