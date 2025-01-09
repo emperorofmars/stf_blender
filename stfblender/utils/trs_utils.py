@@ -43,5 +43,6 @@ def from_trs(trs: list[list[float]]) -> tuple[mathutils.Vector, mathutils.Quater
 
 def trs_to_blender_object(trs: list[list[float]], blender_object: bpy.types.Object):
 	blender_object.location = stf_translation_to_blender(trs[0])
+	blender_object.rotation_mode = "QUATERNION"
 	blender_object.rotation_quaternion = stf_rotation_to_blender(trs[1])
 	blender_object.scale = stf_scale_to_blender(trs[2])

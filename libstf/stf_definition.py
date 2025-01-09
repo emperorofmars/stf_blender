@@ -33,12 +33,13 @@ class STF_Meta_AssetInfo:
 	def to_dict(self):
 		ret = {}
 		for key, value in vars(self).items():
-			match key:
-				case "custom_properties":
-					for key, value in self.custom_properties.items():
+			if(value):
+				match key:
+					case "custom_properties":
+						for key, value in self.custom_properties.items():
+							ret[key] = value
+					case _:
 						ret[key] = value
-				case _:
-					ret[key] = value
 		return ret
 
 

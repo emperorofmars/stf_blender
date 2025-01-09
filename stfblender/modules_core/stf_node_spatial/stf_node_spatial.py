@@ -20,10 +20,12 @@ def _stf_import(context: STF_BlenderNodeImportContext, json_resource: dict, id: 
 		blender_object: bpy.types.Object = bpy.data.objects.new(json_resource.get("name", "STF Node"), None)
 	blender_object.stf_id = id
 	blender_object.stf_name = json_resource.get("name", "")
+	parent_application_object.objects.link(blender_object)
 
 	if(import_hook_results and len(import_hook_results) > 1):
 		for hook_result in import_hook_results:
 			hook_result.parent = blender_object
+			parent_application_object.objects.link(hook_result)
 
 	trs_to_blender_object(json_resource["trs"], blender_object)
 
@@ -34,8 +36,6 @@ def _stf_import(context: STF_BlenderNodeImportContext, json_resource: dict, id: 
 			child.parent = blender_object
 		else:
 			context.report(STFReport("Invalid Child: " + str(child_id), STF_Report_Severity.Error, id, _stf_type, blender_object))
-
-	parent_application_object.objects.link(blender_object)
 	return blender_object
 
 
