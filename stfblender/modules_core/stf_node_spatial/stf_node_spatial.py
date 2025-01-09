@@ -26,7 +26,7 @@ def _stf_import(context: STF_BlenderNodeImportContext, json_resource: dict, id: 
 		collection.objects.unlink(blender_object)
 	parent_application_object.objects.link(blender_object)
 
-	node_context = STF_ResourceImportContext(context, json_resource, blender_object)
+	#node_context = STF_ResourceImportContext(context, json_resource, blender_object)
 
 	if(import_hook_results and len(import_hook_results) > 1):
 		for hook_result in import_hook_results:
@@ -43,7 +43,7 @@ def _stf_import(context: STF_BlenderNodeImportContext, json_resource: dict, id: 
 			child.parent = blender_object
 		else:
 			context.report(STFReport("Invalid Child: " + str(child_id), STF_Report_Severity.Error, id, _stf_type, blender_object))
-	return blender_object, node_context
+	return blender_object, context #node_context
 
 
 def _stf_export(context: STF_BlenderNodeExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:

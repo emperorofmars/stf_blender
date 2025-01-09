@@ -57,12 +57,12 @@ class STF_RootExportContext:
 					self.report(STFReport("Unsupported Component", STF_Report_Severity.Warn, None, None, application_object))
 
 
-	def serialize_resource(self, application_object: any) -> str | None:
+	def serialize_resource(self, application_object: any, parent_application_object: any = None) -> str | None:
 		if(application_object == None): return None
 		if(id := self.get_resource_id(application_object)): return id
 
 		if(selected_module := self._state.determine_module(application_object)):
-			module_ret = selected_module.export_func(self.get_root_context() if selected_module.stf_kind == "data" else self, application_object, self.get_parent_application_object())
+			module_ret = selected_module.export_func(self.get_root_context() if selected_module.stf_kind == "data" else self, application_object, parent_application_object if parent_application_object else self.get_parent_application_object())
 			if(module_ret):
 				json_resource, id, ctx = module_ret
 				self.register_serialized_resource(application_object, json_resource, id)
@@ -79,7 +79,7 @@ class STF_RootExportContext:
 			else:
 				self.report(STFReport("Resource Export Failed", STF_Report_Severity.Error, None, selected_module.stf_type, application_object))
 		else:
-			self.report(STFReport("NO Processor Found", STF_Report_Severity.Error, None, application_object))
+			self.report(STFReport("NO Processor Found", STF_Report_Severity.Error, None, None, application_object))
 		return None
 
 

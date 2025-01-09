@@ -41,7 +41,8 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 	ensure_stf_object_data_id(parent_blender_object)
 
 	blender_armature: bpy.types.Armature = application_object
-	armature_id = context.serialize_resource(blender_armature)
+
+	armature_id = context.serialize_resource(blender_armature, parent_blender_object)
 
 	ret = {
 		"type": _stf_type,
