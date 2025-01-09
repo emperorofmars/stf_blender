@@ -22,6 +22,8 @@ def _stf_import(context: STF_BlenderNodeImportContext, json_resource: dict, id: 
 		blender_object: bpy.types.Object = bpy.data.objects.new(json_resource.get("name", "STF Node"), None)
 	blender_object.stf_id = id
 	blender_object.stf_name = json_resource.get("name", "")
+	for collection in blender_object.users_collection:
+		collection.objects.unlink(blender_object)
 	parent_application_object.objects.link(blender_object)
 
 	node_context = STF_ResourceImportContext(context, json_resource, blender_object)

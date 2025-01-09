@@ -21,7 +21,7 @@ def _stf_import(context: STF_BlenderBoneImportContext, json_resource: dict, id: 
 	for child_id in json_resource.get("children", []):
 		child: bpy.types.Bone = context.import_resource(child_id)
 		if(child):
-			children.append(child)
+			children.append(child.name)
 		else:
 			context.report(STFReport("Invalid Child: " + str(child_id), STF_Report_Severity.Error, id, _stf_type, blender_object))
 
@@ -35,8 +35,8 @@ def _stf_import(context: STF_BlenderBoneImportContext, json_resource: dict, id: 
 	blender_edit_bone.head = mathutils.Vector((0, 0, 0))
 	blender_edit_bone.tail = mathutils.Vector((0, 0, 1))
 
-	for child in children:
-		child = blender_armature.edit_bones[child.name]
+	for child_name in children:
+		child = blender_armature.edit_bones[child_name]
 		child.parent = blender_edit_bone
 		# TODO handle bone connection
 
