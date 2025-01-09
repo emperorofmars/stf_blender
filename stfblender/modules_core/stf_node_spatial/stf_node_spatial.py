@@ -24,6 +24,7 @@ def _stf_import(context: STF_BlenderNodeImportContext, json_resource: dict, id: 
 
 	if(import_hook_results and len(import_hook_results) > 1):
 		for hook_result in import_hook_results:
+			hook_result.stf_is_component_stand_in = True
 			hook_result.parent = blender_object
 			parent_application_object.objects.link(hook_result)
 

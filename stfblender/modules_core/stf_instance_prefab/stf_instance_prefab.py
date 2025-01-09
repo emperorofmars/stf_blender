@@ -19,11 +19,25 @@ def _hook_can_handle_stf_object_func(json_resource: dict) -> tuple[bool, dict, s
 	return (False, None, None)
 
 def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, parent_application_object: any, import_hook_results: list[any]) -> any:
-	pass
+	blender_collection = context.import_resource(json_resource["prefab"])
+
+	if(not blender_collection or type(blender_collection) is not bpy.types.Collection):
+		context.report(STFReport("Failed to import prefab: " + str(json_resource.get("prefab")), STF_Report_Severity.Error, id, _stf_type, parent_application_object))
+
+	blender_object: bpy.types.Object = bpy.data.objects.new(json_resource.get("name", "STF Node"), None)
+	blender_object.stf_data_id = id
+	blender_object.stf_data_name = json_resource.get("name", "")
+
+	blender_object.instance_type = "COLLECTION"
+	blender_object.instance_collection = blender_collection
+
+	# TODO handle prefab instance modifications
+
+	return blender_object
 
 
 def _hook_can_handle_application_object_func(application_object: any) -> tuple[bool, any]:
-	if(application_object.instance_collection):
+	if(application_object.instance_collection and application_object.instance_type == "COLLECTION"):
 		return (True, application_object.instance_collection)
 	else:
 		return (False, None)

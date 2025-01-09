@@ -10,6 +10,7 @@ from ....libstf.stf_report import STF_Report_Severity, STFReport
 from ...utils.component_utils import STF_Component, get_components_from_object
 from ...utils.id_utils import ensure_stf_id
 from ...utils.trs_utils import blender_translation_to_stf
+from ...utils.buffer_utils import serialize_float, serialize_uint
 
 
 _stf_type = "stf.mesh"
@@ -33,8 +34,8 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 
 	bm_tris: list[tuple[bmesh.types.BMLoop, bmesh.types.BMLoop, bmesh.types.BMLoop]] = bm.calc_loop_triangles()
 
-	vertex_indices_width = 4 if len(bm.verts) * 3 < 2**31 else 8
-	split_indices_width = 4 if len(bm_tris) * 3 < 2**31 else 8
+	vertex_indices_width = 4 if len(bm.verts) * 3 < 2**32 else 8
+	split_indices_width = 4 if len(bm_tris) * 3 < 2**32 else 8
 	float_width = 4
 
 	stf_mesh = {
@@ -51,9 +52,9 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 	# The vertex only stores the position. Normals, uv's, etc... are stored by split vertices. The vertex is here to inform the application that these many split vertices are actually the same point.
 	for vertex in bm.verts:
 		position = blender_translation_to_stf(vertex.co)
-		buffer_vertices.write(struct.pack("<f", position[0]))
-		buffer_vertices.write(struct.pack("<f", position[1]))
-		buffer_vertices.write(struct.pack("<f", position[2]))
+		buffer_vertices.write(serialize_float(position[0], float_width))
+		buffer_vertices.write(serialize_float(position[1], float_width))
+		buffer_vertices.write(serialize_float(position[2], float_width))
 
 	buffer_split_vertices = BytesIO()
 	buffer_normals = BytesIO()
@@ -81,24 +82,24 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 			buffer_split_vertices.write(loop.vert.index.to_bytes(length=vertex_indices_width, byteorder="little"))
 
 			normal = blender_translation_to_stf(loop.calc_normal())
-			buffer_normals.write(struct.pack("<f", normal[0]))
-			buffer_normals.write(struct.pack("<f", normal[1]))
-			buffer_normals.write(struct.pack("<f", normal[2]))
+			buffer_normals.write(serialize_float(normal[0], float_width))
+			buffer_normals.write(serialize_float(normal[1], float_width))
+			buffer_normals.write(serialize_float(normal[2], float_width))
 
 			tangent = blender_translation_to_stf(loop.calc_tangent())
-			buffer_tangents.write(struct.pack("<f", tangent[0]))
-			buffer_tangents.write(struct.pack("<f", tangent[1]))
-			buffer_tangents.write(struct.pack("<f", tangent[2]))
+			buffer_tangents.write(serialize_float(tangent[0], float_width))
+			buffer_tangents.write(serialize_float(tangent[1], float_width))
+			buffer_tangents.write(serialize_float(tangent[2], float_width))
 
 			for index, color_layer in enumerate(bm_color_layers):
-				buffers_color[index].write(struct.pack("<f", loop[color_layer].color[0]))
-				buffers_color[index].write(struct.pack("<f", loop[color_layer].color[1]))
-				buffers_color[index].write(struct.pack("<f", loop[color_layer].color[2]))
-				buffers_color[index].write(struct.pack("<f", loop[color_layer].color[3]))
+				buffers_color[index].write(serialize_float(loop[color_layer].color[0], float_width))
+				buffers_color[index].write(serialize_float(loop[color_layer].color[1], float_width))
+				buffers_color[index].write(serialize_float(loop[color_layer].color[2], float_width))
+				buffers_color[index].write(serialize_float(loop[color_layer].color[3], float_width))
 
 			for index, uv_layer in enumerate(bm_uv_layers):
-				buffers_uv[index].write(struct.pack("<f", loop[uv_layer].uv[0]))
-				buffers_uv[index].write(struct.pack("<f", loop[uv_layer].uv[1]))
+				buffers_uv[index].write(serialize_float(loop[uv_layer].uv[0], float_width))
+				buffers_uv[index].write(serialize_float(loop[uv_layer].uv[1], float_width))
 
 	# The face length buffer defines how many tris are actually the same face.
 	face_lens: list[int] = [0]
@@ -109,16 +110,15 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 		else:
 			face_lens.append(1)
 
-		buffer_tris.write(tri[0].index.to_bytes(length=split_indices_width, byteorder="little"))
-		buffer_tris.write(tri[1].index.to_bytes(length=split_indices_width, byteorder="little"))
-		buffer_tris.write(tri[2].index.to_bytes(length=split_indices_width, byteorder="little"))
+		buffer_tris.write(serialize_uint(tri[0].index, split_indices_width))
+		buffer_tris.write(serialize_uint(tri[1].index, split_indices_width))
+		buffer_tris.write(serialize_uint(tri[2].index, split_indices_width))
 
-		buffer_tris_material_index.write(tri[0].face.material_index.to_bytes(length=split_indices_width, byteorder="little"))
-
+		buffer_tris_material_index.write(serialize_uint(tri[0].face.material_index, split_indices_width))
 		last_face_index = tri[0].face.index
 
 	for face_len in face_lens:
-		buffer_faces.write(face_len.to_bytes(length=4, byteorder="little"))
+		buffer_faces.write(serialize_uint(face_len, 4))
 
 	# TODO export edges
 
