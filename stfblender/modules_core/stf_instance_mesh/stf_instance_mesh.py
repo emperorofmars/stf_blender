@@ -25,7 +25,8 @@ def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, pa
 		context.report(STFReport("Failed to import mesh: " + str(json_resource.get("mesh")), STF_Report_Severity.Error, id, _stf_type, parent_application_object))
 
 	blender_object: bpy.types.Object = bpy.data.objects.new(json_resource.get("name", "STF Node"), blender_mesh)
-	blender_object.data_stf_id = id
+	blender_object.stf_data_id = id
+	blender_object.stf_data_name = json_resource.get("name", "")
 
 	# TODO handle materials, armatures, blendshape values
 
@@ -70,14 +71,14 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 
 	ret = {
 		"type": _stf_type,
-		"name": parent_blender_object.name,
+		"name": parent_blender_object.stf_data_name if parent_blender_object.stf_data_name else parent_blender_object.name,
 		"mesh": mesh_id,
 		"armature_instance": armature_instance_id,
 		"material_slots": material_slots,
 		"blendshape_values": blendshape_values
 	}
 
-	return ret, parent_blender_object.stf_id, context
+	return ret, parent_blender_object.stf_data_id, context
 
 
 class STF_Module_STF_Instance_Mesh(STF_ImportHook, STF_ExportHook):

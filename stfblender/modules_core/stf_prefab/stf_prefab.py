@@ -42,14 +42,15 @@ class STF_BlenderNodeImportContext(STF_ResourceImportContext):
 			return super().get_json_resource(id)
 
 
-def _stf_import(context: STF_RootImportContext, json: dict, id: str, parent_application_object: any, import_hook_results: list[any]) -> any:
-	collection = bpy.data.collections.new(json.get("name", context.get_filename()))
+def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, parent_application_object: any, import_hook_results: list[any]) -> any:
+	collection = bpy.data.collections.new(json_resource.get("name", context.get_filename()))
 	collection.stf_id = id
+	collection.stf_name = json_resource.get("name", "")
 	bpy.context.scene.collection.children.link(collection)
-	collection.metric_multiplier = json.get("metric_multiplier", 1)
+	collection.metric_multiplier = json_resource.get("metric_multiplier", 1)
 
-	node_import_context = STF_BlenderNodeImportContext(context, json, collection)
-	for node_id in json.get("root_nodes", []):
+	node_import_context = STF_BlenderNodeImportContext(context, json_resource, collection)
+	for node_id in json_resource.get("root_nodes", []):
 		node_import_context.import_resource(node_id)
 	return collection
 
@@ -60,7 +61,7 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 	root_nodes = []
 	ret = {
 		"type": _stf_type,
-		"name": collection.name,
+		"name": collection.stf_name if collection.stf_name else collection.name,
 		"root_nodes": root_nodes,
 		"metric_multiplier": collection.metric_multiplier,
 	}
@@ -90,6 +91,7 @@ register_stf_modules = [
 
 def register():
 	bpy.types.Collection.stf_id = bpy.props.StringProperty(name="ID") # type: ignore
+	bpy.types.Collection.stf_name = bpy.props.StringProperty(name="Name") # type: ignore
 	bpy.types.Collection.metric_multiplier = bpy.props.FloatProperty(name="Metric Multiplier", default=1, min=0.00000001) # type: ignore
 	bpy.types.Collection.stf_components = bpy.props.CollectionProperty(type=STF_Component, name="Components") # type: ignore
 	bpy.types.Collection.stf_active_component_index = bpy.props.IntProperty()
@@ -97,6 +99,8 @@ def register():
 def unregister():
 	if hasattr(bpy.types.Collection, "stf_id"):
 		del bpy.types.Collection.stf_id
+	if hasattr(bpy.types.Collection, "stf_name"):
+		del bpy.types.Collection.stf_name
 	if hasattr(bpy.types.Collection, "metric_multiplier"):
 		del bpy.types.Collection.metric_multiplier
 	if hasattr(bpy.types.Collection, "stf_components"):

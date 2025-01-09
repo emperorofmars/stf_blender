@@ -19,6 +19,7 @@ def _stf_import(context: STF_BlenderNodeImportContext, json_resource: dict, id: 
 	else:
 		blender_object: bpy.types.Object = bpy.data.objects.new(json_resource.get("name", "STF Node"), None)
 	blender_object.stf_id = id
+	blender_object.stf_name = json_resource.get("name", "")
 
 	if(import_hook_results and len(import_hook_results) > 1):
 		for hook_result in import_hook_results:
@@ -48,7 +49,7 @@ def _stf_export(context: STF_BlenderNodeExportContext, application_object: any, 
 
 	node = {
 		"type": _stf_type,
-		"name": blender_object.name,
+		"name": blender_object.stf_name if blender_object.stf_name else blender_object.name,
 		"trs": blender_object_to_trs(blender_object),
 		"children": children
 	}
@@ -81,15 +82,24 @@ register_stf_modules = [
 
 def register():
 	bpy.types.Object.stf_id = bpy.props.StringProperty(name="ID") # type: ignore
-	bpy.types.Object.data_stf_id = bpy.props.StringProperty(name="Data Component ID") # type: ignore
+	bpy.types.Object.stf_name = bpy.props.StringProperty(name="Name") # type: ignore
+	bpy.types.Object.stf_is_component_stand_in = bpy.props.BoolProperty(name="Object Represents Component", default=False) # type: ignore
+	bpy.types.Object.stf_data_id = bpy.props.StringProperty(name="Data Component ID") # type: ignore
+	bpy.types.Object.stf_data_name = bpy.props.StringProperty(name="Data Component Name") # type: ignore
 	bpy.types.Object.stf_components = bpy.props.CollectionProperty(type=STF_Component, name="Components") # type: ignore
 	bpy.types.Object.stf_active_component_index = bpy.props.IntProperty()
 
 def unregister():
 	if hasattr(bpy.types.Object, "stf_id"):
 		del bpy.types.Object.stf_id
-	if hasattr(bpy.types.Object, "data_stf_id"):
-		del bpy.types.Object.data_stf_id
+	if hasattr(bpy.types.Object, "stf_name"):
+		del bpy.types.Object.stf_name
+	if hasattr(bpy.types.Object, "stf_is_component_stand_in"):
+		del bpy.types.Object.stf_is_component_stand_in
+	if hasattr(bpy.types.Object, "stf_data_id"):
+		del bpy.types.Object.stf_data_id
+	if hasattr(bpy.types.Object, "stf_data_name"):
+		del bpy.types.Object.stf_data_name
 	if hasattr(bpy.types.Object, "stf_components"):
 		del bpy.types.Object.stf_components
 	if hasattr(bpy.types.Object, "stf_active_component_index"):
