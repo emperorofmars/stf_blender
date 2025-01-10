@@ -22,6 +22,45 @@ class STF_RootImportContext:
 	def get_imported_resource(self, id: str):
 		return self._state.get_imported_resource(id)
 
+	def register_imported_resource(self, id: str, application_object: any):
+		self._state.register_imported_resource(id, application_object)
+
+
+	def __run_hooks(self, json_resource) -> list[any]:
+		accepted_hooks: list[tuple[STF_ImportHook, dict, str]] = []
+		if(hooks := self._state.determine_hooks(json_resource)):
+			for hook in hooks:
+				can_handle, hook_json_resource, hook_resource_id = hook.hook_can_handle_stf_object_func(json_resource)
+				if(can_handle):
+					accepted_hooks.append((hook, hook_json_resource, hook_resource_id))
+
+		hook_results = []
+		for hook, hook_json_resource, hook_resource_id in accepted_hooks:
+			hook_result = hook.import_func(self, hook_json_resource, hook_resource_id, None, None)
+			if(hook_result):
+				hook_results.append(hook_result[0])
+			else:
+				self.report(STFReport("Hook execution error", STF_Report_Severity.Error, hook_resource_id, hook.stf_type))
+
+		return hook_results
+
+
+	def __run_components(self, json_resource: dict, application_object: any, context: any):
+		if("components" in json_resource):
+			for component_id, json_component in json_resource["components"].items():
+				if(not self._state.should_module_run(json_component)):
+					continue
+				if(component_module := self._state.determine_module(json_component)):
+					component_result = component_module.import_func(context, json_component, component_id, application_object, None)
+					if(component_result):
+						application_component_object, _ = component_result
+						self.register_imported_resource(component_id, application_component_object)
+					else:
+						self.report(STFReport("Component import error", STF_Report_Severity.Error, component_id, json_component.get("type"), application_object))
+				else:
+					self.report(STFReport("No STF_Module registered for component", STF_Report_Severity.Warn, component_id, json_component.get("type")))
+
+
 	def import_resource(self, id: str) -> any:
 		if(id in self._state._imported_resources.keys()): return self._state._imported_resources[id]
 
@@ -30,34 +69,27 @@ class STF_RootImportContext:
 			self.report(STFReport("Invalid JSON resource", STF_Report_Severity.FatalError, id))
 
 		if(module := self._state.determine_module(json_resource)):
-			accepted_hooks: list[tuple[STF_ImportHook, dict, str]] = []
-			if(hooks := self._state.determine_hooks(json_resource)):
-				for hook in hooks:
-					can_handle, hook_json_resource, hook_resource_id = hook.hook_can_handle_stf_object_func(json_resource)
-					if(can_handle):
-						accepted_hooks.append((hook, hook_json_resource, hook_resource_id))
+			hook_results = self.__run_hooks(json_resource)
 
-			hook_results = []
-			for hook, hook_json_resource, hook_resource_id in accepted_hooks:
-				hook_result = hook.import_func(self, hook_json_resource, hook_resource_id, None, None)
-				if(hook_result):
-					hook_results.append(hook_result[0])
-				else:
-					self.report(STFReport("Hook execution error", STF_Report_Severity.Error, hook_resource_id, hook.stf_type))
+			module_ret = module.import_func(self, json_resource, id, self.get_parent_application_object(), hook_results)
+			if(module_ret):
+				application_object, context = module_ret
+			else:
+				self.report(STFReport("Resource import error", STF_Report_Severity.Error, id, module.stf_type, None))
 
-			application_object, context = module.import_func(self, json_resource, id, self.get_parent_application_object(), hook_results)
+			self.__run_components(json_resource, application_object, context)
 
-			# TODO components
-
-			self._state.register_imported_resource(id, application_object)
+			self.register_imported_resource(id, application_object)
 			return application_object
 		else:
 			# TODO json fallback
-			self.report(STFReport("No STF_Module registered", STF_Report_Severity.Warn, id, json_resource["type"]))
+			self.report(STFReport("No STF_Module registered", STF_Report_Severity.Warn, id, json_resource.get("type")))
 		return None
+
 
 	def import_buffer(self, id: str) -> io.BytesIO:
 		return self._state.import_buffer(id)
+
 
 	def add_task(self, task: Callable):
 		self._state._tasks.append(task)

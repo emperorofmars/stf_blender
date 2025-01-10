@@ -19,6 +19,17 @@ class STF_Blender_Component(STF_Module):
 	draw_component_func: Callable
 
 
+def add_component(application_object: any, blender_property_name: str, stf_id: str, stf_type: str) -> tuple[STF_Component, any]:
+	component_ref: STF_Component = application_object.stf_components.add()
+	component_ref.stf_id = stf_id
+	component_ref.stf_type = stf_type
+	component_ref.blender_property_name = blender_property_name
+
+	new_component = getattr(application_object, blender_property_name).add()
+	new_component.stf_id = component_ref.stf_id
+
+	return (component_ref, new_component)
+
 class STFAddComponentOperatorBase:
 	"""Base class to add an STF component to a Blender object"""
 	bl_label = "Add Component"
@@ -29,15 +40,7 @@ class STFAddComponentOperatorBase:
 	property_name: bpy.props.StringProperty() # type: ignore
 
 	def execute(self, context):
-		target = self.get_property(context)
-		component_ref: STF_Component = target.stf_components.add()
-		component_ref.stf_id = str(uuid.uuid4())
-		component_ref.stf_type = self.stf_type
-		component_ref.blender_property_name = self.property_name
-
-		new_component = getattr(target, self.property_name).add()
-		new_component.stf_id = component_ref.stf_id
-		return {"FINISHED"}
+		component_ref, new_component = add_component(self.get_property(context), self.property_name, str(uuid.uuid4()), self.stf_type)
 
 	def get_property(self, context) -> any:
 		pass

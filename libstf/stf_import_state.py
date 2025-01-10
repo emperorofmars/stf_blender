@@ -20,10 +20,19 @@ class STF_ImportState(StateUtil):
 
 		self._modules: dict[str, STF_Module] = modules[0]
 		self._hooks: dict[str, list[STF_ImportHook]] = modules[1]
+		self._hook_stf_types: list[str] = []
+		for _, hook_list in self._hooks.items():
+			for hook in hook_list:
+				self._hook_stf_types.append(hook.stf_type)
+
+		print(self._hook_stf_types)
 
 		self._imported_resources: dict[str, any] = {} # ID -> imported object
 		self._profiles: list[STF_Profile]
 		self._asset_info: STF_Meta_AssetInfo
+
+	def should_module_run(self, json_resource: dict) -> bool:
+		return not json_resource.get("type") in self._hook_stf_types
 
 	def determine_module(self, json_resource: dict) -> STF_Module:
 		return self._modules.get(json_resource["type"])

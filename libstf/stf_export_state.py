@@ -49,6 +49,12 @@ class STF_ExportState(StateUtil):
 	def register_serialized_resource(self, application_object: any, json_resource: dict, id: str):
 		if(type(id) is not str):
 			self.report(STFReport(message="Invalid Resource ID", severity=STF_Report_Severity.Error, stf_id=id, application_object=application_object))
+		if(used_resources := json_resource.get("used_resources") and id in used_resources):
+			self.report(STFReport("Resource recursion detected!", STF_Report_Severity.FatalError, id, json_resource.get("type"), application_object))
+			return
+
+		# TODO check for resource loops
+
 		self._resources[application_object] = id
 		self._exported_resources[id] = json_resource
 

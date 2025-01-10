@@ -23,7 +23,7 @@ class STF_RootExportContext:
 		self._state.register_serialized_resource(application_object, json_resource, id)
 
 
-	def run_hooks(self, application_object: any, object_ctx: any, json_resource: dict, id: str):
+	def __run_hooks(self, application_object: any, object_ctx: any, json_resource: dict, id: str):
 		# Export components from application native constructs
 		if(hooks := self._state.determine_hooks(application_object)):
 			for hook in hooks:
@@ -41,7 +41,7 @@ class STF_RootExportContext:
 						self.report(STFReport("Export Hook Failed", STF_Report_Severity.Error, id, hook.stf_type, application_object))
 
 
-	def run_components(self, application_object: any, object_ctx: any, json_resource: dict, id: str, components: list):
+	def __run_components(self, application_object: any, object_ctx: any, json_resource: dict, id: str, components: list):
 		# Export components explicitely defined by this application
 		if(len(components) > 0):
 			if("components" not in json_resource): json_resource["components"] = {}
@@ -68,12 +68,12 @@ class STF_RootExportContext:
 				self.register_serialized_resource(application_object, json_resource, id)
 
 				# Export components from application native constructs
-				self.run_hooks(application_object, ctx, json_resource, id)
+				self.__run_hooks(application_object, ctx, json_resource, id)
 
 				# Export components explicitely defined by this application
 				if(selected_module.stf_kind != "component" and hasattr(selected_module, "get_components_func")):
 					components = selected_module.get_components_func(application_object)
-					self.run_components(application_object, ctx, json_resource, id, components)
+					self.__run_components(application_object, ctx, json_resource, id, components)
 
 				return id
 			else:
