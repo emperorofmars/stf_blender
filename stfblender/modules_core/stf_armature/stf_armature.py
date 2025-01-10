@@ -60,11 +60,13 @@ def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, pa
 	hook_object: bpy.types.Object = bpy.data.objects.new(json_resource.get("name", "STF Node"), blender_armature)
 	bpy.context.scene.collection.objects.link(hook_object)
 
-	node_import_context = STF_BlenderBoneImportContext(context, json_resource, hook_object)
+	bone_import_context = STF_BlenderBoneImportContext(context, json_resource, hook_object)
 	for bone_id in json_resource.get("root_bones", []):
-		node_import_context.import_resource(bone_id)
+		bone_import_context.import_resource(bone_id)
 
-	return hook_object, node_import_context
+	bpy.data.objects.remove(hook_object)
+
+	return blender_armature, bone_import_context
 
 
 def _stf_export(context: STF_RootExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:

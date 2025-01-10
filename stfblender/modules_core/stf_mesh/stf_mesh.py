@@ -21,12 +21,12 @@ def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, pa
 	blender_mesh.stf_id = id
 	blender_mesh.stf_name = json_resource.get("name", "STF Mesh")
 
+	#hook_object: bpy.types.Object = bpy.data.objects.new(json_resource.get("name", "STF Node"), blender_mesh)
+
 	mesh_context = STF_ResourceImportContext(context, json_resource, blender_mesh)
 
 	# TODO
-
-	hook_object: bpy.types.Object = bpy.data.objects.new(json_resource.get("name", "STF Node"), blender_mesh)
-	return hook_object, mesh_context
+	return blender_mesh, mesh_context
 
 
 def _stf_export(context: STF_RootExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:

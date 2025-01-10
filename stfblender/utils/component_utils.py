@@ -40,7 +40,8 @@ class STFAddComponentOperatorBase:
 	property_name: bpy.props.StringProperty() # type: ignore
 
 	def execute(self, context):
-		component_ref, new_component = add_component(self.get_property(context), self.property_name, str(uuid.uuid4()), self.stf_type)
+		add_component(self.get_property(context), self.property_name, str(uuid.uuid4()), self.stf_type)
+		return {"FINISHED"}
 
 	def get_property(self, context) -> any:
 		pass

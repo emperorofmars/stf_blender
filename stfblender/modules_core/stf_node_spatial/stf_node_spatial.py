@@ -18,13 +18,17 @@ def _stf_import(context: STF_BlenderNodeImportContext, json_resource: dict, id: 
 	blender_object: bpy.types.Object = None
 	if(import_hook_results and len(import_hook_results) == 1):
 		blender_object: bpy.types.Object = import_hook_results[0]
+		#blender_object = bpy.data.objects.new(json_resource.get("name", "STF Node"), import_hook_results[0])
 		blender_object.name = json_resource.get("name", "STF Node")
 	else:
 		blender_object: bpy.types.Object = bpy.data.objects.new(json_resource.get("name", "STF Node"), None)
+		if(import_hook_results and len(import_hook_results) > 1):
+			pass # create child objects per hook object
 	blender_object.stf_id = id
 	blender_object.stf_name = json_resource.get("name", "")
 	for collection in blender_object.users_collection:
 		collection.objects.unlink(blender_object)
+
 	parent_application_object.objects.link(blender_object)
 
 	#node_context = STF_ResourceImportContext(context, json_resource, blender_object)
@@ -62,7 +66,6 @@ def _stf_import(context: STF_BlenderNodeImportContext, json_resource: dict, id: 
 	def _trs_callback():
 		trs_utils.trs_to_blender_object(json_resource["trs"], blender_object)
 	context.add_task(_trs_callback)
-
 
 	return blender_object, context #node_context
 
