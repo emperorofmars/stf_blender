@@ -57,25 +57,9 @@ def trs_to_blender_object(trs: list[list[float]], blender_object: bpy.types.Obje
 		match(blender_object.parent_type):
 			case "OBJECT":
 				blender_object.matrix_world = blender_object.parent.matrix_world @ matrix_local
-				pass
 			case "BONE":
 				matrix_bone = blender_object.parent.data.bones[blender_object.parent_bone].matrix_local
 				blender_object.matrix_world = blender_object.parent.matrix_world @ matrix_bone @ matrix_local
 		# TODO handle parent binding
 	else:
 		blender_object.matrix_world = matrix_local
-
-	blender_object.matrix_parent_inverse = mathutils.Matrix()
-
-	#blender_object.rotation_mode = "QUATERNION"
-
-
-"""
-def trs_to_blender_object(trs: list[list[float]], blender_object: bpy.types.Object):
-	#blender_object.matrix_local = mathutils.Matrix.LocRotScale(stf_translation_to_blender(trs[0]), stf_rotation_to_blender(trs[1]), stf_scale_to_blender(trs[2]))
-	blender_object.matrix_world = mathutils.Matrix.LocRotScale(stf_translation_to_blender(trs[0]), stf_rotation_to_blender(trs[1]), stf_scale_to_blender(trs[2]))
-	#blender_object.location = stf_translation_to_blender(trs[0])
-	blender_object.rotation_mode = "QUATERNION"
-	#blender_object.rotation_quaternion = stf_rotation_to_blender(trs[1])
-	#blender_object.scale = stf_scale_to_blender(trs[2])
-"""
