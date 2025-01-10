@@ -44,7 +44,7 @@ class ImportSTF(bpy.types.Operator, ImportHelper):
 
 
 			if(len(stf_state._reports) > 0):
-				self.report({'WARNING'}, "STF asset exported with reports!")
+				self.report({'WARNING'}, "STF asset imported with reports!")
 				for report in stf_state._reports:
 					# TODO report this in a more legit manner
 					print(report.to_string())

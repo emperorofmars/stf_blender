@@ -6,6 +6,7 @@ from ....libstf.stf_module import STF_ExportHook, STF_ImportHook
 from ....libstf.stf_report import STF_Report_Severity, STFReport
 from ...utils.component_utils import get_components_from_object
 from ...utils.id_utils import ensure_stf_object_data_id
+from ...utils.id_binding_resolver import STF_Blender_BindingResolver
 
 
 _stf_type = "stf.instance.armature"
@@ -53,7 +54,11 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 	return ret, parent_blender_object.stf_data_id, context
 
 
-class STF_Module_STF_Instance_Armature(STF_ImportHook, STF_ExportHook):
+def _resolve_id_binding_func(blender_object: any, id: str) -> any:
+	return blender_object.data if blender_object.stf_data_id == id else None
+
+
+class STF_Module_STF_Instance_Armature(STF_ImportHook, STF_ExportHook, STF_Blender_BindingResolver):
 	stf_type = _stf_type
 	stf_kind = "component"
 	like_types = ["instance.armature", "instance.prefab", "instance"]
@@ -67,6 +72,9 @@ class STF_Module_STF_Instance_Armature(STF_ImportHook, STF_ExportHook):
 
 	hook_target_application_types = [bpy.types.Object]
 	hook_can_handle_application_object_func = _hook_can_handle_application_object_func
+
+	target_blender_binding_types = [bpy.types.Object]
+	resolve_id_binding_func = _resolve_id_binding_func
 
 
 register_stf_modules = [

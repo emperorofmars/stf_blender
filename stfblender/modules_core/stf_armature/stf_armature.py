@@ -6,6 +6,7 @@ from ....libstf.stf_module import STF_Module
 from ...utils.component_utils import STF_Component, get_components_from_object
 from ...utils.id_utils import ensure_stf_id
 from ...utils.armature_bone import ArmatureBone
+from ...utils.id_binding_resolver import STF_Blender_BindingResolver
 
 
 _stf_type = "stf.armature"
@@ -18,16 +19,17 @@ class STF_BlenderBoneExportContext(STF_ResourceExportContext):
 			self._json_resource["bones"] = {}
 
 	def get_resource_id(self, application_object: any) -> str | None:
-		if(type(application_object) is bpy.types.Bone):
-			if(application_object.stf_id and application_object.stf_id in self._json_resource["bones"].keys()):
-				return application_object.stf_id
+		if(type(application_object) is ArmatureBone):
+			bone = application_object.armature.bones[application_object.bone]
+			if(bone.stf_id and bone.stf_id in self._json_resource["bones"].keys()):
+				return bone.stf_id
 			else:
 				return None
 		else:
 			return super().get_resource_id(application_object)
 
 	def register_serialized_resource(self, application_object: any, json_resource: dict, id: str):
-		if(type(application_object) is bpy.types.Bone):
+		if(type(application_object) is ArmatureBone):
 			self._json_resource["bones"][id] = json_resource
 		else:
 			super().register_serialized_resource(application_object, json_resource, id)
@@ -43,8 +45,11 @@ class STF_BlenderBoneImportContext(STF_ResourceImportContext):
 		else:
 			return super().get_json_resource(id)
 
-	def get_parent_blender_object(self) -> bpy.types.Object:
-		return self._parent_blender_trash_object
+	def register_imported_resource(self, id: str, application_object: any):
+		if(type(application_object) is ArmatureBone):
+			pass
+		else:
+			super().register_imported_resource(application_object, id)
 
 
 def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, parent_application_object: any, import_hook_results: list[any]) -> tuple[any, any]:
@@ -90,7 +95,15 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 	return ret, blender_armature.stf_id, bone_export_context
 
 
-class STF_Module_STF_Armature(STF_Module):
+def _resolve_id_binding_func(blender_object: any, id: str) -> any:
+	armature: bpy.types.Armature = blender_object
+	for bone in armature.bones:
+		if(bone.stf_id == id):
+			return bone
+	return None
+
+
+class STF_Module_STF_Armature(STF_Blender_BindingResolver, STF_Module):
 	stf_type = _stf_type
 	stf_kind = "data"
 	like_types = ["armature", "prefab"]
@@ -98,6 +111,9 @@ class STF_Module_STF_Armature(STF_Module):
 	import_func = _stf_import
 	export_func = _stf_export
 	get_components_func = get_components_from_object
+
+	target_blender_binding_types = [bpy.types.Armature]
+	resolve_id_binding_func = _resolve_id_binding_func
 
 
 register_stf_modules = [

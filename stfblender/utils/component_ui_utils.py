@@ -14,15 +14,15 @@ class STFDrawComponentList(bpy.types.UIList):
 
 def get_component_modules(filter = None) -> list[STF_Blender_Component]:
 	ret = []
-	for processor in get_stf_modules(bpy.context.preferences.addons.keys()):
-		if(isinstance(processor, STF_Blender_Component) or hasattr(processor, "draw_component_func")):
-			if(hasattr(processor, "filter") and filter):
-				if(filter in getattr(processor, "filter")):
-					ret.append(processor)
+	for module in get_stf_modules(bpy.context.preferences.addons.keys()):
+		if(isinstance(module, STF_Blender_Component) or hasattr(module, "draw_component_func")):
+			if(hasattr(module, "filter") and filter):
+				if(filter in getattr(module, "filter")):
+					ret.append(module)
 				else:
 					continue
 			else:
-				ret.append(processor)
+				ret.append(module)
 	return ret
 
 

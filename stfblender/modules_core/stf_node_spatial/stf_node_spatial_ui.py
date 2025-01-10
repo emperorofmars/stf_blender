@@ -1,6 +1,4 @@
-
 import bpy
-import uuid
 
 from ...utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
 from ...utils.component_utils import STFAddComponentOperatorBase, STFRemoveComponentOperatorBase
@@ -34,6 +32,10 @@ class STFNodeSpatialPanel(bpy.types.Panel):
 	bl_space_type = "PROPERTIES"
 	bl_category = "STF"
 	bl_context = "object"
+
+	@classmethod
+	def poll(cls, context):
+		return (context.object is not None)
 
 	def draw(self, context):
 		set_stf_component_filter(bpy.types.Object)

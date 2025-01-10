@@ -27,7 +27,7 @@ class STF_ImportState(StateUtil):
 
 		print(self._hook_stf_types)
 
-		self._imported_resources: dict[str, any] = {} # ID -> imported object
+		self._imported_resources: dict[str, any] = {} # ID | list of IDs -> imported object
 		self._profiles: list[STF_Profile]
 		self._asset_info: STF_Meta_AssetInfo
 
@@ -40,10 +40,10 @@ class STF_ImportState(StateUtil):
 	def determine_hooks(self, json_resource: dict) -> list[STF_ImportHook]:
 		return self._hooks.get(json_resource["type"], [])
 
-	def register_imported_resource(self, id: str, application_object: any):
+	def register_imported_resource(self, id: str | list[str], application_object: any):
 		self._imported_resources[id] = application_object
 
-	def get_imported_resource(self, id: str):
+	def get_imported_resource(self, id: str | list[str]):
 		return self._imported_resources.get(id, None)
 
 	def import_buffer(self, id: str) -> io.BytesIO:

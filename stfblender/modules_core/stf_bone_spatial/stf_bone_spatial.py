@@ -11,7 +11,7 @@ from ...utils.armature_bone import ArmatureBone
 from ..stf_armature.stf_armature import STF_BlenderBoneExportContext, STF_BlenderBoneImportContext
 
 
-_stf_type = "stf.bone"
+_stf_type = "stf.bone.spatial"
 
 
 def _stf_import(context: STF_BlenderBoneImportContext, json_resource: dict, id: str, parent_application_object: any, import_hook_results: list[any]) -> tuple[any, any]:
@@ -47,6 +47,8 @@ def _stf_import(context: STF_BlenderBoneImportContext, json_resource: dict, id: 
 	bpy.ops.object.mode_set(mode="OBJECT", toggle=False)
 
 	blender_bone = ArmatureBone(blender_armature, blender_bone_name)
+	blender_armature.bones[blender_bone_name].stf_id = id
+
 	bone_context = STF_ResourceImportContext(context, json_resource, blender_bone)
 
 	return blender_bone, bone_context
@@ -89,7 +91,7 @@ def _stf_export(context: STF_BlenderBoneExportContext, application_object: any, 
 	return ret, stf_id, context
 
 
-class STF_Module_STF_Bone(STF_Module):
+class STF_Module_STF_Bone_Spatial(STF_Module):
 	stf_type = _stf_type
 	stf_kind = "node"
 	like_types = ["bone", "node"]
@@ -100,7 +102,7 @@ class STF_Module_STF_Bone(STF_Module):
 
 
 register_stf_modules = [
-	STF_Module_STF_Bone
+	STF_Module_STF_Bone_Spatial
 ]
 
 

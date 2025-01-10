@@ -5,18 +5,18 @@ import bpy
 from ...libstf.stf_module import STF_Module
 
 
+class STF_Blender_Component(STF_Module):
+	"""Extension to STF_Module which also associates a function to draw the component in Blender's UI"""
+	blender_property_name: str
+	filter: list
+	draw_component_func: Callable
+
+
 class STF_Component(bpy.types.PropertyGroup):
 	"""This property defines the type and ID, from which the appropriate registered function can handle the correct object"""
 	stf_type: bpy.props.StringProperty(name="Type") # type: ignore
 	stf_id: bpy.props.StringProperty(name="ID") # type: ignore
 	blender_property_name: bpy.props.StringProperty(name="Blender Property Name") # type: ignore
-
-
-class STF_Blender_Component(STF_Module):
-	"""Extension to STF_Processor which also associates a function to draw the component in Blender's UI"""
-	blender_property_name: str
-	filter: list
-	draw_component_func: Callable
 
 
 def add_component(application_object: any, blender_property_name: str, stf_id: str, stf_type: str) -> tuple[STF_Component, any]:

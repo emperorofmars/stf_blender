@@ -7,7 +7,7 @@ from .stf_material import stf_material
 from .stf_instance_prefab import stf_instance_prefab
 from .stf_armature import stf_armature
 from .stf_armature_instance import stf_instance_armature
-from .stf_bone import stf_bone
+from .stf_bone_spatial import stf_bone_spatial
 
 register_stf_modules = \
 	stf_prefab.register_stf_modules \
@@ -18,4 +18,4 @@ register_stf_modules = \
 	+ stf_instance_prefab.register_stf_modules \
 	+ stf_armature.register_stf_modules \
 	+ stf_instance_armature.register_stf_modules \
-	+ stf_bone.register_stf_modules \
+	+ stf_bone_spatial.register_stf_modules \

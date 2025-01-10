@@ -52,6 +52,10 @@ class STFCollectionPanel(bpy.types.Panel):
 	bl_category = "STF"
 	bl_context = "collection"
 
+	@classmethod
+	def poll(cls, context):
+		return (context.collection is not None)
+
 	def draw_header(self, context):
 		if(context.scene.stf_root_collection == context.collection):
 			self.layout.label(text="Root")

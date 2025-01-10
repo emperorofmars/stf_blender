@@ -13,17 +13,19 @@ class AVA_Avatar(bpy.types.PropertyGroup):
 	stf_id: bpy.props.StringProperty(name="ID") # type: ignore
 	stf_name: bpy.props.StringProperty(name="Name") # type: ignore
 
-	viewport: bpy.props.StringProperty(name="Viewport") # type: ignore
+	automap: bpy.props.BoolProperty(name="Automap", default=True) # type: ignore
+	viewport: bpy.props.PointerProperty(type=bpy.types.Object, name="Viewport") # type: ignore
 
 
 def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Blender_Component, parent_application_object: any, component: AVA_Avatar):
+	layout.prop(component, "automap")
 	layout.prop(component, "viewport")
 
 
 def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, parent_application_object: any, import_hook_results: list[any]) -> tuple[any, any]:
 	component_ref, component = add_component(parent_application_object, _blender_property_name, id, _stf_type)
 
-	component.viewport = json_resource.get("viewport")
+	component.automap = json_resource.get("automap")
 
 	return component, context
 
@@ -32,7 +34,7 @@ def _stf_export(context: STF_RootExportContext, application_object: AVA_Avatar, 
 	ret = {
 		"type": _stf_type,
 		"name": "",
-		"viewport": application_object.viewport
+		"automap": application_object.automap
 	}
 	return ret, application_object.stf_id, context
 

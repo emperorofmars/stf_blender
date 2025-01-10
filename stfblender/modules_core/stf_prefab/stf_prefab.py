@@ -41,6 +41,12 @@ class STF_BlenderNodeImportContext(STF_ResourceImportContext):
 		else:
 			return super().get_json_resource(id)
 
+	def register_imported_resource(self, id: str, application_object: any):
+		if(type(application_object) is bpy.types.Object):
+			pass
+		else:
+			super().register_imported_resource(application_object, id)
+
 
 def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, parent_application_object: any, import_hook_results: list[any]) -> tuple[any, any]:
 	collection = bpy.data.collections.new(json_resource.get("name", context.get_filename()))

@@ -3,11 +3,11 @@ import mathutils
 
 from ....libstf.stf_report import STF_Report_Severity, STFReport
 from ....libstf.stf_module import STF_Module
-from ....libstf.stf_import_context import STF_ResourceImportContext
 from ...utils.component_utils import STF_Component, get_components_from_object
 from ...utils.id_utils import ensure_stf_id
 from ...utils.armature_bone import ArmatureBone
 from ...utils import trs_utils
+from ...utils.id_binding_resolver import resolve_id_binding
 from ..stf_prefab.stf_prefab import STF_BlenderNodeExportContext, STF_BlenderNodeImportContext
 
 
@@ -35,8 +35,6 @@ def _stf_import(context: STF_BlenderNodeImportContext, json_resource: dict, id: 
 			hook_result.parent = blender_object
 			parent_application_object.objects.link(hook_result)
 
-	#trs_utils.trs_to_blender_object(json_resource["trs"], blender_object)
-
 	for child_id in json_resource.get("children", []):
 		child: bpy.types.Object = context.import_resource(child_id)
 		if(child):
@@ -48,17 +46,17 @@ def _stf_import(context: STF_BlenderNodeImportContext, json_resource: dict, id: 
 
 	if("parent_binding" in json_resource and json_resource["parent_binding"]):
 		def _parent_binding_callback():
-			# actually determine binding
+			# TODO handle prefab instances also
 			if(type(blender_object.parent.data) == bpy.types.Armature):
-				armature_bone: ArmatureBone = context.get_imported_resource(json_resource["parent_binding"])
-				if(armature_bone):
+				bone = resolve_id_binding(context, blender_object.parent, json_resource["parent_binding"])
+				if(bone):
 					blender_object.parent_type = "BONE"
-					blender_object.parent_bone = armature_bone.get_name()
+					blender_object.parent_bone = bone.name
 					blender_object.matrix_parent_inverse = mathutils.Matrix()
 				else:
-					context.report(STFReport("Invalid Parent Binding Target: " + json_resource["parent_binding"], STF_Report_Severity.Error, id, _stf_type, blender_object))
+					context.report(STFReport("Invalid Parent Binding Target: " + str(json_resource["parent_binding"]), STF_Report_Severity.Error, id, _stf_type, blender_object))
 			else:
-				context.report(STFReport("Invalid Parent Binding Parent: " + json_resource["parent_binding"], STF_Report_Severity.Error, id, _stf_type, blender_object))
+				context.report(STFReport("Invalid Parent Binding Parent: " + str(json_resource["parent_binding"]), STF_Report_Severity.Error, id, _stf_type, blender_object))
 		context.add_task(_parent_binding_callback)
 
 	def _trs_callback():
@@ -102,7 +100,7 @@ def _stf_export(context: STF_BlenderNodeExportContext, application_object: any, 
 			case "BONE":
 				#t, r, s = ((blender_object.parent.matrix_world() @ blender_object.parent.bones[blender_object.parent_bone].matrix_local).inverted_safe() @ blender_object.matrix_world).decompose()
 				#t, r, s = blender_object.matrix_local.decompose()
-				ret["parent_binding"] = blender_object.parent.data.bones[blender_object.parent_bone].stf_id
+				ret["parent_binding"] = [blender_object.parent.stf_data_id, blender_object.parent.data.bones[blender_object.parent_bone].stf_id]
 			case _:
 				context.report(STFReport("Unsupported object parent_type: " + str(blender_object.parent_type), STF_Report_Severity.Error, blender_object.stf_id, _stf_type, blender_object))
 
