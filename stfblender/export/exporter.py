@@ -93,7 +93,8 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 				self.report({'WARNING'}, "STF asset exported with reports!")
 				for report in stf_state._reports:
 					# TODO report this in a more legit manner
-					print(report.to_string())
+					#print(report.to_string() + "\n")
+					self.report({'WARNING'}, report.to_string())
 			else:
 				self.report({'INFO'}, "STF asset exported successfully!")
 			return {"FINISHED"}

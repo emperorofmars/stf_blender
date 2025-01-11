@@ -18,9 +18,13 @@ class STF_BlenderBoneExportContext(STF_ResourceExportContext):
 		if(not hasattr(self._json_resource, "bones")):
 			self._json_resource["bones"] = {}
 
+	def id_exists(self, id: str) -> bool:
+		if(id in self._json_resource["bones"].keys()): return True
+		else: return self._state.id_exists(id)
+
 	def get_resource_id(self, application_object: any) -> str | None:
 		if(type(application_object) is ArmatureBone):
-			bone = application_object.armature.bones[application_object.bone]
+			bone = application_object.armature.bones[application_object.name]
 			if(bone.stf_id and bone.stf_id in self._json_resource["bones"].keys()):
 				return bone.stf_id
 			else:
@@ -31,6 +35,7 @@ class STF_BlenderBoneExportContext(STF_ResourceExportContext):
 	def register_serialized_resource(self, application_object: any, json_resource: dict, id: str):
 		if(type(application_object) is ArmatureBone):
 			self._json_resource["bones"][id] = json_resource
+			super().register_serialized_resource(application_object, json_resource, id)
 		else:
 			super().register_serialized_resource(application_object, json_resource, id)
 
@@ -45,11 +50,11 @@ class STF_BlenderBoneImportContext(STF_ResourceImportContext):
 		else:
 			return super().get_json_resource(id)
 
-	def register_imported_resource(self, id: str, application_object: any):
+	"""def register_imported_resource(self, id: str, application_object: any):
 		if(type(application_object) is ArmatureBone):
 			pass
 		else:
-			super().register_imported_resource(application_object, id)
+			super().register_imported_resource(application_object, id)"""
 
 
 def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, parent_application_object: any, import_hook_results: list[any]) -> tuple[any, any]:
@@ -71,7 +76,7 @@ def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, pa
 
 def _stf_export(context: STF_RootExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:
 	blender_armature: bpy.types.Armature = application_object
-	ensure_stf_id(blender_armature)
+	ensure_stf_id(context, blender_armature)
 	blender_armature_object: bpy.types.Object = parent_application_object
 
 	root_bones = []

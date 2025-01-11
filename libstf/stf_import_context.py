@@ -2,7 +2,7 @@ import io
 from typing import Callable
 
 from .stf_import_state import STF_ImportState
-from .stf_report import STF_Report_Severity, STFReport
+from .stf_report import STFReportSeverity, STFReport
 from .stf_module import STF_ImportHook
 
 
@@ -39,8 +39,9 @@ class STF_RootImportContext:
 			hook_result = hook.import_func(self, hook_json_resource, hook_resource_id, None, None)
 			if(hook_result):
 				hook_results.append(hook_result[0])
+				self.register_imported_resource(hook_resource_id, hook_result[0])
 			else:
-				self.report(STFReport("Hook execution error", STF_Report_Severity.Error, hook_resource_id, hook.stf_type))
+				self.report(STFReport("Hook execution error", STFReportSeverity.Error, hook_resource_id, hook.stf_type))
 
 		return hook_results
 
@@ -56,9 +57,9 @@ class STF_RootImportContext:
 						application_component_object, _ = component_result
 						self.register_imported_resource(component_id, application_component_object)
 					else:
-						self.report(STFReport("Component import error", STF_Report_Severity.Error, component_id, json_component.get("type"), application_object))
+						self.report(STFReport("Component import error", STFReportSeverity.Error, component_id, json_component.get("type"), application_object))
 				else:
-					self.report(STFReport("No STF_Module registered for component", STF_Report_Severity.Warn, component_id, json_component.get("type")))
+					self.report(STFReport("No STF_Module registered for component", STFReportSeverity.Warn, component_id, json_component.get("type")))
 
 
 	def import_resource(self, id: str) -> any:
@@ -66,7 +67,7 @@ class STF_RootImportContext:
 
 		json_resource = self.get_json_resource(id)
 		if(not json_resource or type(json_resource) is not dict or "type" not in json_resource):
-			self.report(STFReport("Invalid JSON resource", STF_Report_Severity.FatalError, id))
+			self.report(STFReport("Invalid JSON resource", STFReportSeverity.FatalError, id))
 
 		if(module := self._state.determine_module(json_resource)):
 			hook_results = self.__run_hooks(json_resource)
@@ -75,7 +76,7 @@ class STF_RootImportContext:
 			if(module_ret):
 				application_object, context = module_ret
 			else:
-				self.report(STFReport("Resource import error", STF_Report_Severity.Error, id, module.stf_type, None))
+				self.report(STFReport("Resource import error", STFReportSeverity.Error, id, module.stf_type, None))
 
 			self.__run_components(json_resource, application_object, context)
 
@@ -83,7 +84,7 @@ class STF_RootImportContext:
 			return application_object
 		else:
 			# TODO json fallback
-			self.report(STFReport("No STF_Module registered", STF_Report_Severity.Warn, id, json_resource.get("type")))
+			self.report(STFReport("No STF_Module registered", STFReportSeverity.Warn, id, json_resource.get("type")))
 		return None
 
 

@@ -1,9 +1,9 @@
 import bpy
 
-from ....libstf.stf_export_context import STF_RootExportContext
+from ....libstf.stf_export_context import STF_ResourceExportContext
 from ....libstf.stf_import_context import STF_RootImportContext
 from ....libstf.stf_module import STF_ExportHook, STF_ImportHook
-from ....libstf.stf_report import STF_Report_Severity, STFReport
+from ....libstf.stf_report import STFReportSeverity, STFReport
 from ...utils.component_utils import get_components_from_object
 from ...utils.id_utils import ensure_stf_object_data_id
 from ...utils.id_binding_resolver import STF_Blender_BindingResolver
@@ -24,7 +24,7 @@ def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, pa
 	blender_object = bpy.data.objects.new(json_resource.get("name", "STF Node"), blender_armature_object)
 
 	if(not blender_armature_object or type(blender_armature_object) is not bpy.types.Armature):
-		context.report(STFReport("Failed to import armature: " + str(json_resource.get("armature")), STF_Report_Severity.Error, id, _stf_type, parent_application_object))
+		context.report(STFReport("Failed to import armature: " + str(json_resource.get("armature")), STFReportSeverity.Error, id, _stf_type, parent_application_object))
 
 	blender_object.stf_data_id = id
 	blender_object.stf_data_name = json_resource.get("name", "")
@@ -38,19 +38,19 @@ def _hook_can_handle_application_object_func(application_object: any) -> tuple[b
 	else:
 		return (False, None)
 
-def _stf_export(context: STF_RootExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:
+def _stf_export(context: STF_ResourceExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:
 	parent_blender_object: bpy.types.Object = parent_application_object
-	ensure_stf_object_data_id(parent_blender_object)
+	ensure_stf_object_data_id(context, parent_blender_object)
 
 	blender_armature: bpy.types.Armature = application_object
-
-	armature_id = context.serialize_resource(blender_armature, parent_blender_object)
 
 	ret = {
 		"type": _stf_type,
 		"name": parent_blender_object.stf_data_name if parent_blender_object.stf_data_name else parent_blender_object.name,
-		"armature": armature_id,
 	}
+	context = STF_ResourceExportContext(context, ret, application_object)
+
+	ret["armature"] = context.serialize_resource(blender_armature, parent_blender_object)
 
 	return ret, parent_blender_object.stf_data_id, context
 

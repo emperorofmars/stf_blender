@@ -21,7 +21,6 @@ class STF_File:
 	def parse(buffer: io.BytesIO):
 		ret = STF_File()
 		ret.filename = buffer.name
-		print(ret.filename)
 
 		# Read and check magic number
 		magic_number = buffer.read(4)

@@ -6,7 +6,7 @@ import bmesh
 from ....libstf.stf_export_context import STF_ResourceExportContext, STF_RootExportContext
 from ....libstf.stf_import_context import STF_ResourceImportContext, STF_RootImportContext
 from ....libstf.stf_module import STF_Module
-from ....libstf.stf_report import STF_Report_Severity, STFReport
+from ....libstf.stf_report import STFReportSeverity, STFReport
 from ...utils.component_utils import STF_Component, get_components_from_object
 from ...utils.id_utils import ensure_stf_id
 from ...utils.trs_utils import blender_translation_to_stf
@@ -31,7 +31,7 @@ def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, pa
 
 def _stf_export(context: STF_RootExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:
 	blender_mesh: bpy.types.Mesh = application_object
-	ensure_stf_id(blender_mesh)
+	ensure_stf_id(context, blender_mesh)
 
 	bm = bmesh.new()
 	bm.from_mesh(blender_mesh)

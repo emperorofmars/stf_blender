@@ -38,16 +38,12 @@ class ImportSTF(bpy.types.Operator, ImportHelper):
 
 			root.stf_meta.from_stf_meta_assetInfo(stf_file.definition.stf.asset_info)
 
-			"""print("\nstf_file")
-			print(root)
-			print(stf_file.definition.to_dict())"""
-
-
 			if(len(stf_state._reports) > 0):
 				self.report({'WARNING'}, "STF asset imported with reports!")
 				for report in stf_state._reports:
 					# TODO report this in a more legit manner
-					print(report.to_string())
+					#print(report.to_string() + "\n")
+					self.report({'WARNING'}, report.to_string())
 			else:
 				self.report({'INFO'}, "STF asset imported successfully!")
 			return {'FINISHED'}

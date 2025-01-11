@@ -4,7 +4,7 @@ import bpy
 from ....libstf.stf_export_context import STF_ResourceExportContext, STF_RootExportContext
 from ....libstf.stf_import_context import STF_RootImportContext
 from ....libstf.stf_module import STF_Module
-from ....libstf.stf_report import STF_Report_Severity, STFReport
+from ....libstf.stf_report import STFReportSeverity, STFReport
 from ...utils.component_utils import STF_Component, get_components_from_object
 from ...utils.id_utils import ensure_stf_id
 
@@ -18,7 +18,7 @@ def _stf_import(context: STF_RootImportContext, json: dict, id: str, parent_appl
 
 def _stf_export(context: STF_RootExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:
 	blender_material: bpy.types.Material = application_object
-	ensure_stf_id(blender_material)
+	ensure_stf_id(context, blender_material)
 
 	ret = {
 		"type": _stf_type,

@@ -18,6 +18,10 @@ class STF_BlenderNodeExportContext(STF_ResourceExportContext):
 		if(not hasattr(self._json_resource, "nodes")):
 			self._json_resource["nodes"] = {}
 
+	def id_exists(self, id: str) -> bool:
+		if(id in self._json_resource["nodes"].keys()): return True
+		else: return self._state.id_exists(id)
+
 	def get_resource_id(self, application_object: any) -> str | None:
 		if(type(application_object) is bpy.types.Object):
 			if(application_object.stf_id and application_object.stf_id in self._json_resource["nodes"].keys()):
@@ -30,6 +34,7 @@ class STF_BlenderNodeExportContext(STF_ResourceExportContext):
 	def register_serialized_resource(self, application_object: any, json_resource: dict, id: str):
 		if(type(application_object) is bpy.types.Object):
 			self._json_resource["nodes"][id] = json_resource
+			super().register_serialized_resource(application_object, json_resource, id)
 		else:
 			super().register_serialized_resource(application_object, json_resource, id)
 
@@ -41,11 +46,11 @@ class STF_BlenderNodeImportContext(STF_ResourceImportContext):
 		else:
 			return super().get_json_resource(id)
 
-	def register_imported_resource(self, id: str, application_object: any):
+	"""def register_imported_resource(self, id: str, application_object: any):
 		if(type(application_object) is bpy.types.Object):
 			pass
 		else:
-			super().register_imported_resource(application_object, id)
+			super().register_imported_resource(application_object, id)"""
 
 
 def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, parent_application_object: any, import_hook_results: list[any]) -> tuple[any, any]:
@@ -62,7 +67,7 @@ def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, pa
 
 def _stf_export(context: STF_RootExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:
 	collection: bpy.types.Collection = application_object
-	ensure_stf_id(collection)
+	ensure_stf_id(context, collection)
 
 	root_nodes = []
 	ret = {

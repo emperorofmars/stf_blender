@@ -1,9 +1,9 @@
 import bpy
 
-from ....libstf.stf_export_context import STF_RootExportContext
+from ....libstf.stf_export_context import STF_ResourceExportContext
 from ....libstf.stf_import_context import STF_ResourceImportContext
 from ....libstf.stf_module import STF_ExportHook, STF_ImportHook
-from ....libstf.stf_report import STF_Report_Severity, STFReport
+from ....libstf.stf_report import STFReportSeverity, STFReport
 from ...utils.component_utils import get_components_from_object
 from ...utils.id_utils import ensure_stf_object_data_id
 
@@ -22,7 +22,7 @@ def _stf_import(context: STF_ResourceImportContext, json_resource: dict, id: str
 	blender_collection = context.import_resource(json_resource["prefab"])
 
 	if(not blender_collection or type(blender_collection) is not bpy.types.Collection):
-		context.report(STFReport("Failed to import prefab: " + str(json_resource.get("prefab")), STF_Report_Severity.Error, id, _stf_type, parent_application_object))
+		context.report(STFReport("Failed to import prefab: " + str(json_resource.get("prefab")), STFReportSeverity.Error, id, _stf_type, parent_application_object))
 
 	blender_object: bpy.types.Object = bpy.data.objects.new(json_resource.get("name", "STF Node"), None)
 	blender_object.stf_data_id = id
@@ -42,18 +42,18 @@ def _hook_can_handle_application_object_func(application_object: any) -> tuple[b
 	else:
 		return (False, None)
 
-def _stf_export(context: STF_RootExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:
+def _stf_export(context: STF_ResourceExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:
 	parent_blender_object: bpy.types.Object = parent_application_object
-	ensure_stf_object_data_id(parent_blender_object)
-
-	prefab_id = context.serialize_resource(application_object)
+	ensure_stf_object_data_id(context, parent_blender_object)
 
 	ret = {
 		"type": _stf_type,
 		"name": parent_blender_object.stf_data_name if parent_blender_object.stf_data_name else parent_blender_object.name,
-		"prefab": prefab_id,
-		# TODO prefab instance modifications
 	}
+	context = STF_ResourceExportContext(context, ret, application_object)
+	ret["prefab"] = context.serialize_resource(application_object)
+
+	# TODO prefab instance modifications
 
 	return ret, parent_blender_object.stf_data_id, context
 

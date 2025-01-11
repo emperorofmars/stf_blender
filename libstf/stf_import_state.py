@@ -1,6 +1,6 @@
 import io
 
-from .stf_report import STF_Report_Severity, STFReport
+from .stf_report import STFReportSeverity, STFReport
 from .stf_file import STF_File
 from .stf_module import STF_ImportHook, STF_Module
 from .stf_definition import STF_Meta_AssetInfo, STF_Profile
@@ -13,7 +13,7 @@ class STF_ImportState(StateUtil):
 	Each context must have access to the same STF_ImportState instance.
 	"""
 
-	def __init__(self, file: STF_File, modules: tuple[dict[str, STF_Module], dict[str, list[STF_ImportHook]]], fail_on_severity: STF_Report_Severity = STF_Report_Severity.FatalError):
+	def __init__(self, file: STF_File, modules: tuple[dict[str, STF_Module], dict[str, list[STF_ImportHook]]], fail_on_severity: STFReportSeverity = STFReportSeverity.FatalError):
 		super().__init__(fail_on_severity)
 
 		self._file = file
@@ -24,8 +24,6 @@ class STF_ImportState(StateUtil):
 		for _, hook_list in self._hooks.items():
 			for hook in hook_list:
 				self._hook_stf_types.append(hook.stf_type)
-
-		print(self._hook_stf_types)
 
 		self._imported_resources: dict[str, any] = {} # ID | list of IDs -> imported object
 		self._profiles: list[STF_Profile]
@@ -56,7 +54,7 @@ class STF_ImportState(StateUtil):
 			case "stf.buffer.json_array":
 				pass # TODO
 			case _:
-				self.report(STFReport("Invalid buffer type: " + buffer.type, severity=STF_Report_Severity.Error))
+				self.report(STFReport("Invalid buffer type: " + buffer.type, severity=STFReportSeverity.Error))
 		return None
 
 	def get_json_resource(self, id: int) -> dict:

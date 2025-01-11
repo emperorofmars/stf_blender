@@ -19,9 +19,3 @@ from . import modules_core
 from . import modules_ext
 
 register_stf_modules = modules_core.register_stf_modules + modules_ext.register_stf_modules
-
-"""
-print("Registered STF Modules:")
-for module in register_stf_modules:
-	print(module.stf_type)
-"""

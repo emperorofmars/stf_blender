@@ -2,7 +2,7 @@
 from enum import Enum
 
 
-class STF_Report_Severity(Enum):
+class STFReportSeverity(Enum):
 	Debug = 0
 	Info = 1
 	Warn = 2
@@ -11,7 +11,7 @@ class STF_Report_Severity(Enum):
 
 
 class STFReport:
-	def __init__(self, message: str, severity: STF_Report_Severity = STF_Report_Severity.Error, stf_id: str = None, stf_type: str = None, application_object: any = None):
+	def __init__(self, message: str, severity: STFReportSeverity = STFReportSeverity.Error, stf_id: str = None, stf_type: str = None, application_object: any = None):
 		self.message = message
 		self.severity = severity
 		self.stf_id = stf_id

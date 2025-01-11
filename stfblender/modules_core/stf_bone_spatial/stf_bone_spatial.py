@@ -1,7 +1,7 @@
 import bpy
 
 
-from ....libstf.stf_report import STF_Report_Severity, STFReport
+from ....libstf.stf_report import STFReportSeverity, STFReport
 from ....libstf.stf_module import STF_Module
 from ....libstf.stf_import_context import STF_ResourceImportContext
 from ...utils.component_utils import STF_Component, get_components_from_object
@@ -23,9 +23,9 @@ def _stf_import(context: STF_BlenderBoneImportContext, json_resource: dict, id: 
 	for child_id in json_resource.get("children", []):
 		child: ArmatureBone = context.import_resource(child_id)
 		if(child):
-			children.append(child.get_name())
+			children.append(child.name)
 		else:
-			context.report(STFReport("Invalid Child: " + str(child_id), STF_Report_Severity.Error, id, _stf_type, blender_object))
+			context.report(STFReport("Invalid Child: " + str(child_id), STFReportSeverity.Error, id, _stf_type, blender_object))
 
 	if(bpy.context.mode != "OBJECT"): bpy.ops.object.mode_set(mode="OBJECT", toggle=False)
 	bpy.context.view_layer.objects.active = blender_object
@@ -56,13 +56,13 @@ def _stf_import(context: STF_BlenderBoneImportContext, json_resource: dict, id: 
 
 def _stf_export(context: STF_BlenderBoneExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:
 	blender_bone_def: ArmatureBone = application_object
-	ensure_stf_id(blender_bone_def.get_bone())
+	ensure_stf_id(context, blender_bone_def.get_bone())
 
 	blender_armature_object: bpy.types.Object = parent_application_object
 	blender_armature: bpy.types.Armature = parent_application_object.data
 
 	# Once Blender enters into edit-mode, the Bone reference will be invalidated. Access by name instead.
-	blender_bone_name = blender_bone_def.get_name()
+	blender_bone_name = blender_bone_def.name
 	blender_child_bones = [ArmatureBone(blender_armature, child.name) for child in blender_bone_def.get_bone().children]
 	stf_id = blender_bone_def.get_bone().stf_id
 

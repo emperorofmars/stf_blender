@@ -1,7 +1,7 @@
 import bpy
 import mathutils
 
-from ....libstf.stf_report import STF_Report_Severity, STFReport
+from ....libstf.stf_report import STFReportSeverity, STFReport
 from ....libstf.stf_module import STF_Module
 from ...utils.component_utils import STF_Component, get_components_from_object
 from ...utils.id_utils import ensure_stf_id
@@ -22,7 +22,7 @@ def _stf_import(context: STF_BlenderNodeImportContext, json_resource: dict, id: 
 	else:
 		blender_object: bpy.types.Object = bpy.data.objects.new(json_resource.get("name", "STF Node"), None)
 		if(import_hook_results and len(import_hook_results) > 1):
-			pass # create child objects per hook object
+			pass # TODO create child objects per hook object
 	blender_object.stf_id = id
 	blender_object.stf_name = json_resource.get("name", "")
 	for collection in blender_object.users_collection:
@@ -43,20 +43,21 @@ def _stf_import(context: STF_BlenderNodeImportContext, json_resource: dict, id: 
 			child.parent = blender_object
 			child.matrix_parent_inverse = mathutils.Matrix()
 		else:
-			context.report(STFReport("Invalid Child: " + str(child_id), STF_Report_Severity.Error, id, _stf_type, blender_object))
+			context.report(STFReport("Invalid Child: " + str(child_id), STFReportSeverity.Error, id, _stf_type, blender_object))
 
 	if("parent_binding" in json_resource and json_resource["parent_binding"]):
 		def _parent_binding_callback():
 			# TODO handle prefab instances also
-			if(type(blender_object.parent.data) == bpy.types.Armature):
-				bone = resolve_id_binding(context, blender_object.parent, json_resource["parent_binding"])
-				if(bone):
-					blender_object.parent_type = "BONE"
-					blender_object.parent_bone = bone.name
-				else:
-					context.report(STFReport("Invalid Parent Binding Target: " + str(json_resource["parent_binding"]), STF_Report_Severity.Error, id, _stf_type, blender_object))
+			parent_bindings = []
+			for id_binding in json_resource["parent_binding"]:
+				parent_bindings.append(context.get_imported_resource(id_binding))
+
+			if(len(parent_bindings) == 2 and (hasattr(parent_bindings[0], "stf_data_id") and parent_bindings[0].stf_data_id == json_resource["parent_binding"][0])):
+				blender_object.parent = parent_bindings[0]
+				blender_object.parent_type = "BONE"
+				blender_object.parent_bone = parent_bindings[1].name
 			else:
-				context.report(STFReport("Invalid Parent Binding Parent: " + str(json_resource["parent_binding"]), STF_Report_Severity.Error, id, _stf_type, blender_object))
+				context.report(STFReport("Invalid Parent Binding Target: " + str(json_resource["parent_binding"]), STFReportSeverity.Error, id, _stf_type, blender_object))
 		context.add_task(_parent_binding_callback)
 
 	def _trs_callback():
@@ -68,7 +69,7 @@ def _stf_import(context: STF_BlenderNodeImportContext, json_resource: dict, id: 
 
 def _stf_export(context: STF_BlenderNodeExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:
 	blender_object: bpy.types.Object = application_object
-	ensure_stf_id(blender_object)
+	ensure_stf_id(context, blender_object)
 
 	children = []
 	for child in blender_object.children:
@@ -99,7 +100,7 @@ def _stf_export(context: STF_BlenderNodeExportContext, application_object: any, 
 				ret["parent_binding"] = [blender_object.parent.stf_data_id, blender_object.parent.data.bones[blender_object.parent_bone].stf_id]
 			# TODO handle prefab instances
 			case _:
-				context.report(STFReport("Unsupported object parent_type: " + str(blender_object.parent_type), STF_Report_Severity.Error, blender_object.stf_id, _stf_type, blender_object))
+				context.report(STFReport("Unsupported object parent_type: " + str(blender_object.parent_type), STFReportSeverity.Error, blender_object.stf_id, _stf_type, blender_object))
 
 	ret["trs"] = trs_utils.blender_object_to_trs(blender_object)
 

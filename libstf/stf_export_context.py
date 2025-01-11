@@ -3,7 +3,7 @@ from typing import Callable
 
 from .stf_export_state import STF_ExportState
 from .stf_definition import STF_Meta_AssetInfo, STF_Profile
-from .stf_report import STF_Report_Severity, STFReport
+from .stf_report import STFReportSeverity, STFReport
 
 
 class STF_RootExportContext:
@@ -18,6 +18,10 @@ class STF_RootExportContext:
 
 	def get_parent_application_object(self) -> any:
 		return None
+
+
+	def register_id(self, id: str):
+		self._state.register_id(id)
 
 	def register_serialized_resource(self, application_object: any, json_resource: dict, id: str):
 		self._state.register_serialized_resource(application_object, json_resource, id)
@@ -38,7 +42,7 @@ class STF_RootExportContext:
 						else:
 							self.register_serialized_resource(hook_json_resource, hook_id, hook_ctx)
 					else:
-						self.report(STFReport("Export Hook Failed", STF_Report_Severity.Error, id, hook.stf_type, application_object))
+						self.report(STFReport("Export Hook Failed", STFReportSeverity.Error, id, hook.stf_type, application_object))
 
 
 	def __run_components(self, application_object: any, object_ctx: any, json_resource: dict, id: str, components: list):
@@ -52,9 +56,9 @@ class STF_RootExportContext:
 						component_json_resource, component_id, _ = component_ret
 						json_resource["components"][component_id] = component_json_resource
 					else:
-						self.report(STFReport("Export Component Failed", STF_Report_Severity.Error, id, selected_module.stf_type, application_object))
+						self.report(STFReport("Export Component Failed", STFReportSeverity.Error, id, selected_module.stf_type, application_object))
 				else:
-					self.report(STFReport("Unsupported Component", STF_Report_Severity.Warn, None, None, application_object))
+					self.report(STFReport("Unsupported Component", STFReportSeverity.Warn, None, None, application_object))
 
 
 	def serialize_resource(self, application_object: any, parent_application_object: any = None) -> str | None:
@@ -77,9 +81,9 @@ class STF_RootExportContext:
 
 				return id
 			else:
-				self.report(STFReport("Resource Export Failed", STF_Report_Severity.Error, None, selected_module.stf_type, application_object))
+				self.report(STFReport("Resource Export Failed", STFReportSeverity.Error, None, selected_module.stf_type, application_object))
 		else:
-			self.report(STFReport("NO Processor Found", STF_Report_Severity.Error, None, None, application_object))
+			self.report(STFReport("NO Processor Found", STFReportSeverity.Error, None, None, application_object))
 		return None
 
 
@@ -95,6 +99,9 @@ class STF_RootExportContext:
 	def report(self, report: STFReport):
 		self._state.report(report)
 
+
+	def id_exists(self, id: str) -> bool:
+		return self._state.id_exists(id)
 
 	def get_root_id(self) -> str | None:
 		return self._state._root_id

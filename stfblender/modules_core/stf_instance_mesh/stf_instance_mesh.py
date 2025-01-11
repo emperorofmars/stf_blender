@@ -1,9 +1,9 @@
 import bpy
 
-from ....libstf.stf_export_context import STF_RootExportContext
+from ....libstf.stf_export_context import STF_ResourceExportContext
 from ....libstf.stf_import_context import STF_ResourceImportContext
 from ....libstf.stf_module import STF_ExportHook, STF_ImportHook
-from ....libstf.stf_report import STF_Report_Severity, STFReport
+from ....libstf.stf_report import STFReportSeverity, STFReport
 from ...utils.component_utils import get_components_from_object
 from ...utils.id_utils import ensure_stf_object_data_id
 
@@ -23,7 +23,7 @@ def _stf_import(context: STF_ResourceImportContext, json_resource: dict, id: str
 	blender_object = bpy.data.objects.new(json_resource.get("name", "STF Node"), blender_resource)
 
 	if(not blender_object or type(blender_object) is not bpy.types.Object):
-		context.report(STFReport("Failed to import mesh: " + str(json_resource.get("mesh")), STF_Report_Severity.Error, id, _stf_type, parent_application_object))
+		context.report(STFReport("Failed to import mesh: " + str(json_resource.get("mesh")), STFReportSeverity.Error, id, _stf_type, parent_application_object))
 
 	blender_object.stf_data_id = id
 	blender_object.stf_data_name = json_resource.get("name", "")
@@ -39,23 +39,31 @@ def _hook_can_handle_application_object_func(application_object: any) -> tuple[b
 	else:
 		return (False, None)
 
-def _stf_export(context: STF_RootExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:
+def _stf_export(context: STF_ResourceExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:
 	parent_blender_object: bpy.types.Object = parent_application_object
-	ensure_stf_object_data_id(parent_blender_object)
+	ensure_stf_object_data_id(context, parent_blender_object)
+
+	ret = {
+		"type": _stf_type,
+		"name": parent_blender_object.stf_data_name if parent_blender_object.stf_data_name else parent_blender_object.name,
+	}
+	context = STF_ResourceExportContext(context, ret, application_object)
 
 	blender_mesh: bpy.types.Mesh = application_object
-	mesh_id = context.serialize_resource(blender_mesh)
+	ret["mesh"] = context.serialize_resource(blender_mesh)
 
-	blender_armatures = []
+	blender_armatures: list[bpy.types.ArmatureModifier] = []
 	for _, modifier in parent_blender_object.modifiers.items():
 		if(type(modifier) is bpy.types.ArmatureModifier):
 			blender_armatures.append(modifier)
 
-	armature_instance_id = None
 	if(len(blender_armatures) == 1):
-		armature_instance_id = context.serialize_resource(blender_mesh)
+		if(blender_armatures[0].object.stf_data_id):
+			ret["armature_instance"] = blender_armatures[0].object.stf_data_id
+		else:
+			context.report(STFReport("Invalid armature: " + str(blender_armatures[0].object), severity=STFReportSeverity.FatalError, stf_id=parent_blender_object.stf_id, stf_type=_stf_type, application_object=parent_blender_object))
 	elif(len(blender_armatures) > 1):
-		context.report(STFReport("More than one Armature per mesh is not supported!", severity=STF_Report_Severity.FatalError, stf_id=parent_blender_object.stf_id, stf_type=_stf_type, application_object=parent_blender_object))
+		context.report(STFReport("More than one Armature per mesh is not supported!", severity=STFReportSeverity.FatalError, stf_id=parent_blender_object.stf_id, stf_type=_stf_type, application_object=parent_blender_object))
 
 	material_slots = []
 	for blender_slot in parent_blender_object.material_slots:
@@ -63,20 +71,13 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 			"name": blender_slot.name,
 			"material": context.serialize_resource(blender_slot.material) if blender_slot.material else None,
 		})
+	ret["material_slots"] = material_slots
 
 	blendshape_values = []
 	if(blender_mesh.shape_keys):
 		for blendshape in blender_mesh.shape_keys.key_blocks:
 			blendshape_values.append(blendshape.value)
-
-	ret = {
-		"type": _stf_type,
-		"name": parent_blender_object.stf_data_name if parent_blender_object.stf_data_name else parent_blender_object.name,
-		"mesh": mesh_id,
-		"armature_instance": armature_instance_id,
-		"material_slots": material_slots,
-		"blendshape_values": blendshape_values
-	}
+	ret["blendshape_values"] = blendshape_values
 
 	return ret, parent_blender_object.stf_data_id, context
 
