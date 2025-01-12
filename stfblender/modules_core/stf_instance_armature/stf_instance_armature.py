@@ -2,74 +2,65 @@ import bpy
 
 from ....libstf.stf_export_context import STF_ResourceExportContext
 from ....libstf.stf_import_context import STF_RootImportContext
-from ....libstf.stf_module import STF_ExportHook, STF_ImportHook
+from ....libstf.stf_module import STF_ExportHook
 from ....libstf.stf_report import STFReportSeverity, STFReport
+from ...utils.node_spatial_base import export_node_spatial_base, import_node_spatial_base
 from ...utils.component_utils import get_components_from_object
-from ...utils.id_utils import ensure_stf_object_data_id
+from ...utils.id_utils import ensure_stf_id
 from ...utils.id_binding_resolver import STF_Blender_BindingResolver
 
 
 _stf_type = "stf.instance.armature"
 
 
-def _hook_can_handle_stf_object_func(json_resource: dict) -> tuple[bool, dict, str]:
-	for id, component in json_resource.get("components", {}).items():
-		# TODO also check 'likeness'
-		if(component.get("type") == _stf_type):
-			return (True, component, id)
-	return (False, None, None)
-
-def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, parent_application_object: any, import_hook_results: list[any]) -> tuple[any, any]:
+def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, parent_application_object: any) -> tuple[any, any]:
 	blender_armature_object = context.import_resource(json_resource["armature"])
 	blender_object = bpy.data.objects.new(json_resource.get("name", "STF Node"), blender_armature_object)
 
 	if(not blender_armature_object or type(blender_armature_object) is not bpy.types.Armature):
 		context.report(STFReport("Failed to import armature: " + str(json_resource.get("armature")), STFReportSeverity.Error, id, _stf_type, parent_application_object))
 
-	blender_object.stf_data_id = id
-	blender_object.stf_data_name = json_resource.get("name", "")
+	blender_object.stf_id = id
+	blender_object.stf_name = json_resource.get("name", "")
 
-	return blender_object, context
+	return import_node_spatial_base(context, json_resource, id, parent_application_object, blender_object)
 
 
-def _hook_can_handle_application_object_func(application_object: any) -> tuple[bool, any]:
+def _hook_can_handle_application_object_func(application_object: any) -> bool:
 	if(type(application_object.data) == bpy.types.Armature):
-		return (True, application_object.data)
+		return True
 	else:
-		return (False, None)
+		return False
 
 def _stf_export(context: STF_ResourceExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:
-	parent_blender_object: bpy.types.Object = parent_application_object
-	ensure_stf_object_data_id(context, parent_blender_object)
+	blender_object: bpy.types.Object = application_object
+	ensure_stf_id(context, blender_object)
 
 	blender_armature: bpy.types.Armature = application_object
 
 	ret = {
 		"type": _stf_type,
-		"name": parent_blender_object.stf_data_name if parent_blender_object.stf_data_name else parent_blender_object.name,
+		"name": blender_object.stf_data_name if blender_object.stf_data_name else blender_object.name,
 	}
-	context = STF_ResourceExportContext(context, ret, application_object)
+	context = STF_ResourceExportContext(context, ret, blender_object)
 
-	ret["armature"] = context.serialize_resource(blender_armature, parent_blender_object)
+	ret["armature"] = context.serialize_resource(blender_armature, blender_object.data)
 
-	return ret, parent_blender_object.stf_data_id, context
+	return export_node_spatial_base(context, blender_object, parent_application_object, ret)
 
 
 def _resolve_id_binding_func(blender_object: any, id: str) -> any:
 	return blender_object.data if blender_object.stf_data_id == id else None
 
 
-class STF_Module_STF_Instance_Armature(STF_ImportHook, STF_ExportHook, STF_Blender_BindingResolver):
+class STF_Module_STF_Instance_Armature(STF_ExportHook, STF_Blender_BindingResolver):
 	stf_type = _stf_type
-	stf_kind = "component"
+	stf_kind = "node"
 	like_types = ["instance.armature", "instance.prefab", "instance"]
 	understood_application_types = [bpy.types.Object]
 	import_func = _stf_import
 	export_func = _stf_export
 	get_components_func = get_components_from_object
-
-	hook_target_stf_type = "stf.node.spatial"
-	hook_can_handle_stf_object_func = _hook_can_handle_stf_object_func
 
 	hook_target_application_types = [bpy.types.Object]
 	hook_can_handle_application_object_func = _hook_can_handle_application_object_func

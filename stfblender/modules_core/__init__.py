@@ -6,7 +6,7 @@ from .stf_mesh import stf_mesh
 from .stf_material import stf_material
 from .stf_instance_prefab import stf_instance_prefab
 from .stf_armature import stf_armature
-from .stf_armature_instance import stf_instance_armature
+from .stf_instance_armature import stf_instance_armature
 from .stf_bone_spatial import stf_bone_spatial
 
 register_stf_modules = \

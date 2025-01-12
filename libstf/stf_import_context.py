@@ -3,7 +3,6 @@ from typing import Callable
 
 from .stf_import_state import STF_ImportState
 from .stf_report import STFReportSeverity, STFReport
-from .stf_module import STF_ImportHook
 
 
 class STF_RootImportContext:
@@ -26,31 +25,9 @@ class STF_RootImportContext:
 		self._state.register_imported_resource(id, application_object)
 
 
-	def __run_hooks(self, json_resource) -> list[any]:
-		accepted_hooks: list[tuple[STF_ImportHook, dict, str]] = []
-		if(hooks := self._state.determine_hooks(json_resource)):
-			for hook in hooks:
-				can_handle, hook_json_resource, hook_resource_id = hook.hook_can_handle_stf_object_func(json_resource)
-				if(can_handle):
-					accepted_hooks.append((hook, hook_json_resource, hook_resource_id))
-
-		hook_results = []
-		for hook, hook_json_resource, hook_resource_id in accepted_hooks:
-			hook_result = hook.import_func(self, hook_json_resource, hook_resource_id, None, None)
-			if(hook_result):
-				hook_results.append(hook_result[0])
-				self.register_imported_resource(hook_resource_id, hook_result[0])
-			else:
-				self.report(STFReport("Hook execution error", STFReportSeverity.Error, hook_resource_id, hook.stf_type))
-
-		return hook_results
-
-
 	def __run_components(self, json_resource: dict, application_object: any, context: any):
 		if("components" in json_resource):
 			for component_id, json_component in json_resource["components"].items():
-				if(not self._state.should_module_run(json_component)):
-					continue
 				if(component_module := self._state.determine_module(json_component)):
 					component_result = component_module.import_func(context, json_component, component_id, application_object, None)
 					if(component_result):
@@ -70,9 +47,7 @@ class STF_RootImportContext:
 			self.report(STFReport("Invalid JSON resource", STFReportSeverity.FatalError, id))
 
 		if(module := self._state.determine_module(json_resource)):
-			hook_results = self.__run_hooks(json_resource)
-
-			module_ret = module.import_func(self, json_resource, id, self.get_parent_application_object(), hook_results)
+			module_ret = module.import_func(self, json_resource, id, self.get_parent_application_object())
 			if(module_ret):
 				application_object, context = module_ret
 			else:

@@ -1,6 +1,6 @@
 import sys
 from types import ModuleType
-from .stf_module import STF_ExportHook, STF_ImportHook, STF_Module
+from .stf_module import STF_ExportHook, STF_Module
 
 """
 Utils to retrieve all existing STF processors.
@@ -49,29 +49,18 @@ def is_priority_higher(a: STF_Module, b: STF_Module) -> bool:
 
 
 
-def get_import_modules(search_modules: list[ModuleType | str] | None = None) -> tuple[dict[str, STF_Module], dict[str, list[STF_ImportHook]]]:
+def get_import_modules(search_modules: list[ModuleType | str] | None = None) -> dict[str, STF_Module]:
 	stf_modules = get_stf_modules(search_modules)
 
-	tmp_registered_hooks = {}
-
 	ret_modules = {}
-	ret_hooks = {}
 
 	for stf_module in stf_modules:
 		if(hasattr(stf_module, "stf_type") and hasattr(stf_module, "import_func")):
 			if(not hasattr(stf_module, "hook_target_stf_type")):
 				if(not ret_modules.get(stf_module.stf_type) or is_priority_higher(ret_modules[stf_module.stf_type], stf_module)):
 					ret_modules[stf_module.stf_type] = stf_module
-			else:
-				if(not tmp_registered_hooks.get(stf_module.stf_type) or is_priority_higher(tmp_registered_hooks[stf_module.stf_type], stf_module)):
-					tmp_registered_hooks[stf_module.stf_type] = stf_module
 
-					if(not ret_hooks.get(stf_module.hook_target_stf_type)):
-						ret_hooks[stf_module.hook_target_stf_type] = [stf_module]
-					else:
-						ret_hooks[stf_module.hook_target_stf_type].append(stf_module)
-
-	return (ret_modules, ret_hooks)
+	return ret_modules
 
 
 def get_export_modules(search_modules: list[ModuleType | str] | None = None) -> tuple[dict[any, STF_Module], dict[any, list[STF_ExportHook]]]:

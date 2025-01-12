@@ -2,7 +2,7 @@ import io
 
 from .stf_report import STFReportSeverity, STFReport
 from .stf_file import STF_File
-from .stf_module import STF_ImportHook, STF_Module
+from .stf_module import STF_Module
 from .stf_definition import STF_Meta_AssetInfo, STF_Profile
 from .stf_util import StateUtil
 
@@ -13,30 +13,19 @@ class STF_ImportState(StateUtil):
 	Each context must have access to the same STF_ImportState instance.
 	"""
 
-	def __init__(self, file: STF_File, modules: tuple[dict[str, STF_Module], dict[str, list[STF_ImportHook]]], fail_on_severity: STFReportSeverity = STFReportSeverity.FatalError):
+	def __init__(self, file: STF_File, modules: dict[str, STF_Module], fail_on_severity: STFReportSeverity = STFReportSeverity.FatalError):
 		super().__init__(fail_on_severity)
 
 		self._file = file
 
-		self._modules: dict[str, STF_Module] = modules[0]
-		self._hooks: dict[str, list[STF_ImportHook]] = modules[1]
-		self._hook_stf_types: list[str] = []
-		for _, hook_list in self._hooks.items():
-			for hook in hook_list:
-				self._hook_stf_types.append(hook.stf_type)
+		self._modules: dict[str, STF_Module] = modules
 
 		self._imported_resources: dict[str, any] = {} # ID | list of IDs -> imported object
 		self._profiles: list[STF_Profile]
 		self._asset_info: STF_Meta_AssetInfo
 
-	def should_module_run(self, json_resource: dict) -> bool:
-		return not json_resource.get("type") in self._hook_stf_types
-
 	def determine_module(self, json_resource: dict) -> STF_Module:
 		return self._modules.get(json_resource["type"])
-
-	def determine_hooks(self, json_resource: dict) -> list[STF_ImportHook]:
-		return self._hooks.get(json_resource["type"], [])
 
 	def register_imported_resource(self, id: str | list[str], application_object: any):
 		self._imported_resources[id] = application_object

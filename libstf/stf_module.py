@@ -27,8 +27,8 @@ class STF_Module:
 	# List of application types this processor can export
 	understood_application_types: list = []
 
-	# (Import Context, Json Dict, ID, Optional Parent Application Object, Optional List of Immport Hook Results) -> (The Application Object, Import Context)
-	import_func: Callable[[any, dict, str, any, list[any]], tuple[any, any]]
+	# (Import Context, Json Dict, ID, Optional Parent Application Object) -> (The Application Object, Import Context)
+	import_func: Callable[[any, dict, str, any], tuple[any, any]]
 
 	# (Export Context, Application Object, Optional Parent Application Object) -> (Json Dict, ID, Export Context)
 	export_func: Callable[[any, any, any], tuple[dict, str, any]]
@@ -36,18 +36,6 @@ class STF_Module:
 	# Get a list of application-components on the application object.
 	# (Application Object) -> List[Application Component Object]
 	get_components_func: Callable[[any], list[any]]
-
-
-class STF_ImportHook(STF_Module):
-	"""
-	Hook to import a resource based on custom logic.
-
-	For example, in Blender, an object that has a mesh, must be created with the mesh data block at once.
-	When a 'stf.node.spatial' contains a 'stf.instance.mesh' component, an 'STF_ImportHook' must target 'stf.node.spatial' and run its import logic, otherwise defer to the regular import logic.
-	"""
-	hook_target_stf_type: str
-
-	hook_can_handle_stf_object_func: Callable[[dict], tuple[bool, dict, str]]
 
 
 class STF_ExportHook(STF_Module):
@@ -65,4 +53,4 @@ class STF_ExportHook(STF_Module):
 	# List of application types this processor can hook into
 	hook_target_application_types: list = []
 
-	hook_can_handle_application_object_func: Callable[[any], tuple[bool, any]]
+	hook_can_handle_application_object_func: Callable[[any], bool]

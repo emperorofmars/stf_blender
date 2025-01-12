@@ -53,7 +53,7 @@ class STF_BlenderNodeImportContext(STF_ResourceImportContext):
 			super().register_imported_resource(application_object, id)"""
 
 
-def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, parent_application_object: any, import_hook_results: list[any]) -> tuple[any, any]:
+def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, parent_application_object: any) -> tuple[any, any]:
 	collection = bpy.data.collections.new(json_resource.get("name", context.get_filename()))
 	collection.stf_id = id
 	collection.stf_name = json_resource.get("name", "")
@@ -103,18 +103,18 @@ register_stf_modules = [
 def register():
 	bpy.types.Collection.stf_id = bpy.props.StringProperty(name="ID") # type: ignore
 	bpy.types.Collection.stf_name = bpy.props.StringProperty(name="Name") # type: ignore
-	bpy.types.Collection.metric_multiplier = bpy.props.FloatProperty(name="Metric Multiplier", default=1, min=0.00000001) # type: ignore
 	bpy.types.Collection.stf_components = bpy.props.CollectionProperty(type=STF_Component, name="Components") # type: ignore
 	bpy.types.Collection.stf_active_component_index = bpy.props.IntProperty()
+	bpy.types.Collection.metric_multiplier = bpy.props.FloatProperty(name="Metric Multiplier", default=1, min=0.00000001) # type: ignore
 
 def unregister():
 	if hasattr(bpy.types.Collection, "stf_id"):
 		del bpy.types.Collection.stf_id
 	if hasattr(bpy.types.Collection, "stf_name"):
 		del bpy.types.Collection.stf_name
-	if hasattr(bpy.types.Collection, "metric_multiplier"):
-		del bpy.types.Collection.metric_multiplier
 	if hasattr(bpy.types.Collection, "stf_components"):
 		del bpy.types.Collection.stf_components
 	if hasattr(bpy.types.Collection, "stf_active_component_index"):
 		del bpy.types.Collection.stf_active_component_index
+	if hasattr(bpy.types.Collection, "metric_multiplier"):
+		del bpy.types.Collection.metric_multiplier

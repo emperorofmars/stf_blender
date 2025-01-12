@@ -14,7 +14,7 @@ from ..stf_armature.stf_armature import STF_BlenderBoneExportContext, STF_Blende
 _stf_type = "stf.bone.spatial"
 
 
-def _stf_import(context: STF_BlenderBoneImportContext, json_resource: dict, id: str, parent_application_object: any, import_hook_results: list[any]) -> tuple[any, any]:
+def _stf_import(context: STF_BlenderBoneImportContext, json_resource: dict, id: str, parent_application_object: any) -> tuple[any, any]:
 	blender_armature: bpy.types.Armature = parent_application_object.data
 	blender_object: bpy.types.Object = parent_application_object
 
