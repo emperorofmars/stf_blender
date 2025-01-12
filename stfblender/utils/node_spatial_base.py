@@ -30,7 +30,7 @@ def import_node_spatial_base(context: STF_BlenderNodeImportContext, json_resourc
 			for id_binding in json_resource["parent_binding"]:
 				parent_bindings.append(context.get_imported_resource(id_binding))
 
-			if(len(parent_bindings) == 2 and (hasattr(parent_bindings[0], "stf_data_id") and parent_bindings[0].stf_data_id == json_resource["parent_binding"][0])):
+			if(len(parent_bindings) == 2 and (hasattr(parent_bindings[0], "stf_id") and parent_bindings[0].stf_id == json_resource["parent_binding"][0])):
 				# TODO deal with arbitrary depths of parent bindings and prefab instance bindings at that
 				blender_object.parent = parent_bindings[0]
 				blender_object.parent_type = "BONE"
@@ -74,7 +74,7 @@ def export_node_spatial_base(context: STF_BlenderNodeExportContext, blender_obje
 				# TODO check if object is a prefab instance and deal with that
 				pass
 			case "BONE":
-				json_resource["parent_binding"] = [blender_object.parent.stf_data_id, blender_object.parent.data.bones[blender_object.parent_bone].stf_id]
+				json_resource["parent_binding"] = [blender_object.parent.stf_id, blender_object.parent.data.bones[blender_object.parent_bone].stf_id]
 			case _:
 				context.report(STFReport("Unsupported object parent_type: " + str(blender_object.parent_type), STFReportSeverity.Error, blender_object.stf_id, json_resource.get("type"), blender_object))
 

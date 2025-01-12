@@ -35,15 +35,14 @@ def _can_handle_application_object_func(application_object: any) -> int:
 def _stf_export(context: STF_ResourceExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:
 	blender_object: bpy.types.Object = application_object
 
-	blender_armature: bpy.types.Armature = application_object
+	blender_armature: bpy.types.Armature = application_object.data
 
 	ret = {
 		"type": _stf_type,
-		"name": blender_object.stf_data_name if blender_object.stf_data_name else blender_object.name,
 	}
 	armature_context = STF_ResourceExportContext(context, ret, blender_object)
 
-	ret["armature"] = armature_context.serialize_resource(blender_armature, blender_object.data)
+	ret["armature"] = armature_context.serialize_resource(blender_armature, blender_object)
 
 	return export_node_spatial_base(context, blender_object, parent_application_object, ret)
 

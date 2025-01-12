@@ -28,6 +28,7 @@ class STF_RootExportContext:
 		#self._state.register_serialized_resource(application_object, json_resource, id)
 		pass
 
+
 	def __run_hooks(self, application_object: any, object_ctx: any, json_resource: dict, id: str):
 		# Export components from application native constructs
 		if(hooks := self._state.determine_hooks(application_object)):
@@ -68,9 +69,11 @@ class STF_RootExportContext:
 		if(id := self.get_resource_id(application_object)): return id
 
 		if(selected_module := self._state.determine_module(application_object)):
-			print("Exporting: " + str(application_object) + " :: " + selected_module.stf_kind)
+			module_ret = selected_module.export_func(
+				self.get_root_context() if selected_module.stf_kind == "data" else self,
+				application_object,
+				parent_application_object if parent_application_object else self.get_parent_application_object())
 
-			module_ret = selected_module.export_func(self.get_root_context() if selected_module.stf_kind == "data" else self, application_object, parent_application_object if parent_application_object else self.get_parent_application_object())
 			if(module_ret):
 				json_resource, id, ctx = module_ret
 				self.register_serialized_resource(application_object, json_resource, id)
@@ -97,11 +100,14 @@ class STF_RootExportContext:
 	def serialize_buffer(self, data: io.BytesIO) -> str:
 		return self._state.serialize_buffer(data)
 
+
 	def add_task(self, task: Callable):
 		self._state._tasks.append(task)
 
+
 	def get_root_context(self) -> any:
 		return self
+
 
 	def report(self, report: STFReport):
 		self._state.report(report)
@@ -109,6 +115,7 @@ class STF_RootExportContext:
 
 	def id_exists(self, id: str) -> bool:
 		return self._state.id_exists(id)
+
 
 	def get_root_id(self) -> str | None:
 		return self._state._root_id

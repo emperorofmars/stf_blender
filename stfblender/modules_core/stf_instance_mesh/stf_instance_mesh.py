@@ -49,7 +49,9 @@ def _stf_export(context: STF_ResourceExportContext, application_object: any, par
 	if(len(blender_armatures) == 1):
 		if(blender_armatures[0].object.stf_id):
 			# TODO check if the armature is in the export
+			#ret["armature_instance"] = mesh_context.serialize_resource(blender_armatures[0].object)
 			ret["armature_instance"] = blender_armatures[0].object.stf_id
+			ret["referenced_resources"].append(blender_armatures[0].object.stf_id)
 		else:
 			mesh_context.report(STFReport("Invalid armature: " + str(blender_armatures[0].object), severity=STFReportSeverity.FatalError, stf_id=blender_object.stf_id, stf_type=_stf_type, application_object=blender_object))
 	elif(len(blender_armatures) > 1):
