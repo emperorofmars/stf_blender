@@ -33,18 +33,19 @@ class STF_RootExportContext:
 		# Export components from application native constructs
 		if(hooks := self._state.determine_hooks(application_object)):
 			for hook in hooks:
-				can_handle, hook_object = hook.hook_can_handle_application_object_func(application_object)
-				if(hook.hook_can_handle_application_object_func(application_object)):
-					hook_ret = hook.export_func(object_ctx, hook_object, application_object)
-					if(hook_ret):
-						hook_json_resource, hook_id, hook_ctx = hook_ret
-						if(hook.stf_kind == "component"):
-							if("components" not in json_resource): json_resource["components"] = {}
-							json_resource["components"][hook_id] = hook_json_resource
+				can_handle, hook_objects = hook.hook_can_handle_application_object_func(application_object)
+				if(can_handle and hook_objects and len(hook_objects) > 0):
+					for hook_object in hook_objects:
+						hook_ret = hook.export_func(object_ctx, hook_object, application_object)
+						if(hook_ret):
+							hook_json_resource, hook_id, hook_ctx = hook_ret
+							if(hook.stf_kind == "component"):
+								if("components" not in json_resource): json_resource["components"] = {}
+								json_resource["components"][hook_id] = hook_json_resource
+							else:
+								self.register_serialized_resource(application_object, hook_json_resource, hook_id)
 						else:
-							self.register_serialized_resource(application_object, hook_json_resource, hook_id)
-					else:
-						self.report(STFReport("Export Hook Failed", STFReportSeverity.Error, id, hook.stf_type, application_object))
+							self.report(STFReport("Export Hook Failed", STFReportSeverity.Error, id, hook.stf_type, application_object))
 
 
 	def __run_components(self, application_object: any, object_ctx: any, json_resource: dict, id: str, components: list):
