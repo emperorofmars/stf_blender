@@ -47,12 +47,12 @@ def _stf_import(context: STF_BlenderNodeImportContext, json_resource: dict, id: 
 
 	if("parent_binding" in json_resource and json_resource["parent_binding"]):
 		def _parent_binding_callback():
-			# TODO handle prefab instances also
 			parent_bindings = []
 			for id_binding in json_resource["parent_binding"]:
 				parent_bindings.append(context.get_imported_resource(id_binding))
 
 			if(len(parent_bindings) == 2 and (hasattr(parent_bindings[0], "stf_data_id") and parent_bindings[0].stf_data_id == json_resource["parent_binding"][0])):
+				# TODO deal with arbitrary depths of parent bindings and prefab instance bindings at that
 				blender_object.parent = parent_bindings[0]
 				blender_object.parent_type = "BONE"
 				blender_object.parent_bone = parent_bindings[1].name
@@ -92,13 +92,14 @@ def _stf_export(context: STF_BlenderNodeExportContext, application_object: any, 
 		"children": children
 	}
 
+	# TODO do this in a callback and check if the referenced resources are within the exported file
 	if(blender_object.parent):
 		match(blender_object.parent_type):
 			case "OBJECT":
+				# TODO check if object is a prefab instance and deal with that
 				pass
 			case "BONE":
 				ret["parent_binding"] = [blender_object.parent.stf_data_id, blender_object.parent.data.bones[blender_object.parent_bone].stf_id]
-			# TODO handle prefab instances
 			case _:
 				context.report(STFReport("Unsupported object parent_type: " + str(blender_object.parent_type), STFReportSeverity.Error, blender_object.stf_id, _stf_type, blender_object))
 

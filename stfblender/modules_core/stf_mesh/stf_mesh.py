@@ -1,5 +1,4 @@
 from io import BytesIO
-import struct
 import bpy
 import bmesh
 
@@ -16,12 +15,16 @@ from ...utils.buffer_utils import serialize_float, serialize_uint
 _stf_type = "stf.mesh"
 
 
+export_options: dict = {
+	"export_colors": True,
+	"optimize_mesh": False,
+}
+
+
 def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, parent_application_object: any, import_hook_results: list[any]) -> tuple[any, any]:
 	blender_mesh = bpy.data.meshes.new(json_resource.get("name", "STF Mesh"))
 	blender_mesh.stf_id = id
 	blender_mesh.stf_name = json_resource.get("name", "STF Mesh")
-
-	#hook_object: bpy.types.Object = bpy.data.objects.new(json_resource.get("name", "STF Node"), blender_mesh)
 
 	mesh_context = STF_ResourceImportContext(context, json_resource, blender_mesh)
 
@@ -57,13 +60,16 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 
 	mesh_context = STF_ResourceExportContext(context, stf_mesh, blender_mesh)
 
+	# The vertices only store the position. Normals, uv's, etc... are stored in splits. The vertex is here to inform the application that these many splits are actually the same point.
+	# Vertices get targeted by weights and blendshapes.
+	# Splits get targeted by polygons/faces.
 	buffer_vertices = BytesIO()
-	# The vertex only stores the position. Normals, uv's, etc... are stored by split vertices. The vertex is here to inform the application that these many split vertices are actually the same point.
 	for vertex in bm.verts:
 		position = blender_translation_to_stf(vertex.co)
 		buffer_vertices.write(serialize_float(position[0], float_width))
 		buffer_vertices.write(serialize_float(position[1], float_width))
 		buffer_vertices.write(serialize_float(position[2], float_width))
+
 
 	buffer_split_vertices = BytesIO()
 	buffer_normals = BytesIO()
@@ -75,19 +81,16 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 	buffer_tris_material_index = BytesIO()
 	buffer_faces = BytesIO()
 
-	bm_color_layers = bm.loops.layers.color
-	buffers_color: list[BytesIO] = []
-	for _ in bm_color_layers:
-		buffers_color.append(BytesIO())
-
 	bm_uv_layers = bm.loops.layers.uv
-	buffers_uv: list[BytesIO] = []
-	for _ in bm_uv_layers:
-		buffers_uv.append(BytesIO())
+	buffers_uv: list[BytesIO] = [BytesIO()] * len(bm_uv_layers)
+
+	bm_color_layers = bm.loops.layers.color
+	buffers_color: list[BytesIO] = [BytesIO()] * len(bm_color_layers)
+
 
 	for face in bm.faces:
 		for loop in face.loops:
-			# Splits vertices reference the 'real' vertex by index. The normal, tangent, uv, etc... indices correspond to the split vertices index.
+			# Splits reference the 'real' vertex by index. The normal, tangent, uv, etc... indices correspond to the split vertices index.
 			buffer_split_vertices.write(loop.vert.index.to_bytes(length=vertex_indices_width, byteorder="little"))
 
 			normal = blender_translation_to_stf(loop.calc_normal())
@@ -110,9 +113,11 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 				buffers_uv[index].write(serialize_float(loop[uv_layer].uv[0], float_width))
 				buffers_uv[index].write(serialize_float(loop[uv_layer].uv[1], float_width))
 
+
 	# The face length buffer defines how many tris are actually the same face.
 	face_lens: list[int] = [0]
 	last_face_index = 0
+
 	for tri in bm_tris:
 		if(last_face_index == tri[0].face.index):
 			face_lens[len(face_lens) - 1] += 1
@@ -128,6 +133,7 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 
 	for face_len in face_lens:
 		buffer_faces.write(serialize_uint(face_len, 4))
+
 
 	# TODO export edges
 
