@@ -14,6 +14,15 @@ def _stf_import(context: STF_BlenderNodeImportContext, json_resource: dict, id: 
 	return import_node_spatial_base(context, json_resource, id, parent_application_object, blender_object)
 
 
+def _can_handle_application_object_func(application_object: any) -> int:
+	if(type(application_object) == bpy.types.Object):
+		if(not application_object.instance_collection and not application_object.data):
+			return 1000
+		else:
+			return 0
+	else:
+		return -1
+
 def _stf_export(context: STF_BlenderNodeExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:
 	ret = { "type": _stf_type, }
 	return export_node_spatial_base(context, application_object, parent_application_object, ret)
@@ -26,6 +35,7 @@ class STF_Module_STF_Node_Spatial(STF_Module):
 	understood_application_types = [bpy.types.Object]
 	import_func = _stf_import
 	export_func = _stf_export
+	can_handle_application_object_func = _can_handle_application_object_func
 	get_components_func = get_components_from_object
 
 

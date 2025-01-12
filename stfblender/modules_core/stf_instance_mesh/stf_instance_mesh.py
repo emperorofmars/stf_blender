@@ -2,11 +2,10 @@ import bpy
 
 from ....libstf.stf_export_context import STF_ResourceExportContext
 from ....libstf.stf_import_context import STF_ResourceImportContext
-from ....libstf.stf_module import STF_ExportHook
+from ....libstf.stf_module import STF_Module
 from ....libstf.stf_report import STFReportSeverity, STFReport
 from ...utils.node_spatial_base import export_node_spatial_base, import_node_spatial_base
 from ...utils.component_utils import get_components_from_object
-from ...utils.id_utils import ensure_stf_id
 
 
 _stf_type = "stf.instance.mesh"
@@ -27,20 +26,20 @@ def _stf_import(context: STF_ResourceImportContext, json_resource: dict, id: str
 	return import_node_spatial_base(context, json_resource, id, parent_application_object, blender_object)
 
 
-def _hook_can_handle_application_object_func(application_object: any) -> tuple[bool, any]:
-	if(type(application_object.data) == bpy.types.Mesh):
-		return True
+def _can_handle_application_object_func(application_object: any) -> int:
+	if(type(application_object) == bpy.types.Object and type(application_object.data) == bpy.types.Mesh):
+		return 1000
 	else:
-		return False
+		return -1
 
 def _stf_export(context: STF_ResourceExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:
 	blender_object: bpy.types.Object = application_object
 
 	ret = { "type": _stf_type, }
-	context = STF_ResourceExportContext(context, ret, application_object)
+	mesh_context = STF_ResourceExportContext(context, ret, application_object)
 
 	blender_mesh: bpy.types.Mesh = application_object.data
-	ret["mesh"] = context.serialize_resource(blender_mesh)
+	ret["mesh"] = mesh_context.serialize_resource(blender_mesh)
 
 	blender_armatures: list[bpy.types.ArmatureModifier] = []
 	for _, modifier in blender_object.modifiers.items():
@@ -52,15 +51,15 @@ def _stf_export(context: STF_ResourceExportContext, application_object: any, par
 			# TODO check if the armature is in the export
 			ret["armature_instance"] = blender_armatures[0].object.stf_id
 		else:
-			context.report(STFReport("Invalid armature: " + str(blender_armatures[0].object), severity=STFReportSeverity.FatalError, stf_id=blender_object.stf_id, stf_type=_stf_type, application_object=blender_object))
+			mesh_context.report(STFReport("Invalid armature: " + str(blender_armatures[0].object), severity=STFReportSeverity.FatalError, stf_id=blender_object.stf_id, stf_type=_stf_type, application_object=blender_object))
 	elif(len(blender_armatures) > 1):
-		context.report(STFReport("More than one Armature per mesh is not supported!", severity=STFReportSeverity.FatalError, stf_id=blender_object.stf_id, stf_type=_stf_type, application_object=blender_object))
+		mesh_context.report(STFReport("More than one Armature per mesh is not supported!", severity=STFReportSeverity.FatalError, stf_id=blender_object.stf_id, stf_type=_stf_type, application_object=blender_object))
 
 	material_slots = []
 	for blender_slot in blender_object.material_slots:
 		material_slots.append({
 			"name": blender_slot.name,
-			"material": context.serialize_resource(blender_slot.material) if blender_slot.material else None,
+			"material": mesh_context.serialize_resource(blender_slot.material) if blender_slot.material else None,
 		})
 	ret["material_slots"] = material_slots
 
@@ -73,17 +72,15 @@ def _stf_export(context: STF_ResourceExportContext, application_object: any, par
 	return export_node_spatial_base(context, blender_object, parent_application_object, ret)
 
 
-class STF_Module_STF_Instance_Mesh(STF_ExportHook):
+class STF_Module_STF_Instance_Mesh(STF_Module):
 	stf_type = _stf_type
 	stf_kind = "node"
 	like_types = ["instance.mesh", "instance"]
 	understood_application_types = [bpy.types.Object]
 	import_func = _stf_import
 	export_func = _stf_export
+	can_handle_application_object_func = _can_handle_application_object_func
 	get_components_func = get_components_from_object
-
-	hook_target_application_types = [bpy.types.Object]
-	hook_can_handle_application_object_func = _hook_can_handle_application_object_func
 
 
 register_stf_modules = [

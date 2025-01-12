@@ -3,7 +3,7 @@ from enum import Enum
 
 from .stf_definition import STF_Buffer_Included, STF_JsonDefinition, STF_Meta_AssetInfo, STF_Profile
 from .stf_report import STFReportSeverity, STFReport
-from .stf_module import STF_ExportHook, STF_Module
+from .stf_module import STF_ExportComponentHook, STF_Module
 from .stf_file import STF_File
 from .stf_util import StateUtil
 
@@ -20,11 +20,11 @@ class STF_ExportState(StateUtil):
 	Each context must have access to the same STF_ExportState instance.
 	"""
 
-	def __init__(self, profiles: list[STF_Profile], asset_info: STF_Meta_AssetInfo, modules: tuple[dict[any, STF_Module], dict[any, list[STF_ExportHook]]], fail_on_severity: STFReportSeverity = STFReportSeverity.FatalError, permit_id_reassignment: bool = True):
+	def __init__(self, profiles: list[STF_Profile], asset_info: STF_Meta_AssetInfo, modules: tuple[dict[any, list[STF_Module]], dict[any, list[STF_ExportComponentHook]]], fail_on_severity: STFReportSeverity = STFReportSeverity.FatalError, permit_id_reassignment: bool = True):
 		super().__init__(fail_on_severity)
 
-		self._modules: dict[any, STF_Module] = modules[0]
-		self._hooks: dict[any, list[STF_ExportHook]] = modules[1]
+		self._modules: dict[any, list[STF_Module]] = modules[0]
+		self._hooks: dict[any, list[STF_ExportComponentHook]] = modules[1]
 
 		self._registered_ids: set[str] = set()
 
@@ -38,9 +38,20 @@ class STF_ExportState(StateUtil):
 		self._root_id: str = None
 
 	def determine_module(self, application_object: any) -> STF_Module:
-		return self._modules.get(type(application_object))
+		selected_module = None
+		selected_priority = -1
+		for module in self._modules.get(type(application_object), []):
+			if(hasattr(module, "can_handle_application_object_func")):
+				prio = module.can_handle_application_object_func(application_object)
+				if(prio > selected_priority):
+					selected_module = module
+					selected_priority = prio
+			elif(1 > selected_priority):
+				selected_module = module
+				selected_priority = 1
+		return selected_module
 
-	def determine_hooks(self, application_object: any) -> list[STF_ExportHook]:
+	def determine_hooks(self, application_object: any) -> list[STF_ExportComponentHook]:
 		return self._hooks.get(type(application_object), [])
 
 	def get_resource_id(self, application_object: any) -> str:
@@ -61,7 +72,6 @@ class STF_ExportState(StateUtil):
 		if("referenced_resources" in json_resource and id in json_resource["referenced_resources"]):
 			self.report(STFReport("Resource recursion detected!", STFReportSeverity.FatalError, id, json_resource.get("type"), application_object))
 			return
-
 		# TODO check for resource loops
 
 		self._resources[application_object] = id

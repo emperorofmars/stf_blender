@@ -1,9 +1,7 @@
 from typing import Callable
 
-from ...libstf.stf_module import STF_Module
 
-
-class STF_Blender_BindingResolver(STF_Module):
+class STF_Blender_BindingResolver():
 	"""Extension to STF_Module which also associates a function to draw the component in Blender's UI"""
 	target_blender_binding_types = list[any]
 	resolve_id_binding_func: Callable[[any, str], any]

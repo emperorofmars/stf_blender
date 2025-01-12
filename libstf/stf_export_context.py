@@ -1,7 +1,7 @@
 import io
 from typing import Callable
 
-from .stf_module import STF_ExportHook
+from .stf_module import STF_ExportComponentHook
 from .stf_export_state import STF_ExportState
 from .stf_definition import STF_Meta_AssetInfo, STF_Profile
 from .stf_report import STFReportSeverity, STFReport
@@ -25,21 +25,14 @@ class STF_RootExportContext:
 		self._state.register_id(id)
 
 	def register_serialized_resource(self, application_object: any, json_resource: dict, id: str):
-		self._state.register_serialized_resource(application_object, json_resource, id)
-
-
-	def __determine_node_hook(self, application_object: any, object_ctx: any) -> STF_ExportHook:
-		if(hooks := self._state.determine_hooks(application_object)):
-			for hook in hooks:
-				if(hook.stf_kind == "node" and hook.hook_can_handle_application_object_func(application_object)):
-					return hook
-		return None
+		#self._state.register_serialized_resource(application_object, json_resource, id)
+		pass
 
 	def __run_hooks(self, application_object: any, object_ctx: any, json_resource: dict, id: str):
 		# Export components from application native constructs
-		"""if(hooks := self._state.determine_hooks(application_object)):
+		if(hooks := self._state.determine_hooks(application_object)):
 			for hook in hooks:
-				can_handle, hook_objects = hook.hook_can_handle_application_object_func(application_object)
+				can_handle, hook_object = hook.hook_can_handle_application_object_func(application_object)
 				if(hook.hook_can_handle_application_object_func(application_object)):
 					hook_ret = hook.export_func(object_ctx, hook_object, application_object)
 					if(hook_ret):
@@ -50,7 +43,7 @@ class STF_RootExportContext:
 						else:
 							self.register_serialized_resource(application_object, hook_json_resource, hook_id)
 					else:
-						self.report(STFReport("Export Hook Failed", STFReportSeverity.Error, id, hook.stf_type, application_object))"""
+						self.report(STFReport("Export Hook Failed", STFReportSeverity.Error, id, hook.stf_type, application_object))
 
 
 	def __run_components(self, application_object: any, object_ctx: any, json_resource: dict, id: str, components: list):
@@ -74,32 +67,31 @@ class STF_RootExportContext:
 		if(application_object == None): return None
 		if(id := self.get_resource_id(application_object)): return id
 
-		selected_module = self.__determine_node_hook(application_object, self)
-		if(not selected_module):
-			selected_module = self._state.determine_module(application_object)
+		if(selected_module := self._state.determine_module(application_object)):
+			print("Exporting: " + str(application_object) + " :: " + selected_module.stf_kind)
 
-		if(selected_module):
 			module_ret = selected_module.export_func(self.get_root_context() if selected_module.stf_kind == "data" else self, application_object, parent_application_object if parent_application_object else self.get_parent_application_object())
 			if(module_ret):
 				json_resource, id, ctx = module_ret
 				self.register_serialized_resource(application_object, json_resource, id)
+				if(selected_module.stf_kind == "data"):
+					# actually register as root resource
+					self._state.register_serialized_resource(application_object, json_resource, id)
+
+				if(selected_module.stf_kind != "component"):
+					# Export components from application native constructs
+					self.__run_hooks(application_object, ctx, json_resource, id)
+
+					if(hasattr(selected_module, "get_components_func")):
+						# Export components explicitely defined by this application
+						components = selected_module.get_components_func(application_object)
+						self.__run_components(application_object, ctx, json_resource, id, components)
+				return id
 			else:
 				self.report(STFReport("Resource Export Failed", STFReportSeverity.Error, None, selected_module.stf_type, application_object))
-				return None
 		else:
 			self.report(STFReport("NO Module Found", STFReportSeverity.Error, None, None, application_object))
-			return None
-
-		# Export components explicitely defined by this application
-		if(selected_module.stf_kind != "component"):
-			# Export components from application native constructs
-			self.__run_hooks(application_object, ctx, json_resource, id)
-
-			if(hasattr(selected_module, "get_components_func")):
-				components = selected_module.get_components_func(application_object)
-				self.__run_components(application_object, ctx, json_resource, id, components)
-
-		return id
+		return None
 
 
 	def serialize_buffer(self, data: io.BytesIO) -> str:

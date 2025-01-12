@@ -1,6 +1,6 @@
 import sys
 from types import ModuleType
-from .stf_module import STF_ExportHook, STF_Module
+from .stf_module import STF_ExportComponentHook, STF_Module
 
 """
 Utils to retrieve all existing STF processors.
@@ -56,16 +56,16 @@ def get_import_modules(search_modules: list[ModuleType | str] | None = None) -> 
 
 	for stf_module in stf_modules:
 		if(hasattr(stf_module, "stf_type") and hasattr(stf_module, "import_func")):
-			if(not hasattr(stf_module, "hook_target_stf_type")):
-				if(not ret_modules.get(stf_module.stf_type) or is_priority_higher(ret_modules[stf_module.stf_type], stf_module)):
-					ret_modules[stf_module.stf_type] = stf_module
+			if(not ret_modules.get(stf_module.stf_type) or is_priority_higher(ret_modules[stf_module.stf_type], stf_module)):
+				ret_modules[stf_module.stf_type] = stf_module
 
 	return ret_modules
 
 
-def get_export_modules(search_modules: list[ModuleType | str] | None = None) -> tuple[dict[any, STF_Module], dict[any, list[STF_ExportHook]]]:
+def get_export_modules(search_modules: list[ModuleType | str] | None = None) -> tuple[dict[any, list[STF_Module]], dict[any, list[STF_ExportComponentHook]]]:
 	stf_modules = get_stf_modules(search_modules)
 
+	tmp_registered_modules = {}
 	tmp_registered_hooks = {}
 
 	ret_modules = {}
@@ -73,10 +73,19 @@ def get_export_modules(search_modules: list[ModuleType | str] | None = None) -> 
 
 	for stf_module in stf_modules:
 		if(hasattr(stf_module, "understood_application_types") and hasattr(stf_module, "export_func")):
-			if(not hasattr(stf_module, "hook_target_application_types")):
+			"""if(not hasattr(stf_module, "hook_target_application_types")):
 				for understood_type in stf_module.understood_application_types:
 					if(not ret_modules.get(understood_type) or is_priority_higher(ret_modules[understood_type], stf_module)):
-						ret_modules[understood_type] = stf_module
+						ret_modules[understood_type] = stf_module"""
+			if(not hasattr(stf_module, "hook_target_application_types")):
+				for understood_type in stf_module.understood_application_types:
+					if(not tmp_registered_modules.get(understood_type) or is_priority_higher(tmp_registered_modules[understood_type], stf_module)):
+						tmp_registered_modules[understood_type] = stf_module
+
+						if(not ret_modules.get(understood_type)):
+							ret_modules[understood_type] = [stf_module]
+						else:
+							ret_modules[understood_type].append(stf_module)
 			else:
 				for understood_type in stf_module.understood_application_types:
 					if(not tmp_registered_hooks.get(understood_type) or is_priority_higher(tmp_registered_hooks[understood_type], stf_module)):
