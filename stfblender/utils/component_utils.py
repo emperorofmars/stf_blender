@@ -5,11 +5,16 @@ import bpy
 from ...libstf.stf_module import STF_Module
 
 
-class STF_Blender_Component(STF_Module):
+class STF_BlenderComponentModule(STF_Module):
 	"""Extension to STF_Module which also associates a function to draw the component in Blender's UI"""
 	blender_property_name: str
 	filter: list
 	draw_component_func: Callable
+
+
+class STF_BlenderComponentBase(bpy.types.PropertyGroup):
+	stf_id: bpy.props.StringProperty(name="ID") # type: ignore
+	stf_name: bpy.props.StringProperty(name="Name") # type: ignore
 
 
 class STF_Component(bpy.types.PropertyGroup):

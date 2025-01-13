@@ -1,7 +1,7 @@
 import bpy
 
 from ...libstf.stf_registry import get_stf_modules
-from .component_utils import STF_Blender_Component, STF_Component
+from .component_utils import STF_BlenderComponentModule, STF_Component
 
 
 class STFDrawComponentList(bpy.types.UIList):
@@ -12,10 +12,10 @@ class STFDrawComponentList(bpy.types.UIList):
 		layout.label(text=item.stf_id)
 
 
-def get_component_modules(filter = None) -> list[STF_Blender_Component]:
+def get_component_modules(filter = None) -> list[STF_BlenderComponentModule]:
 	ret = []
 	for module in get_stf_modules(bpy.context.preferences.addons.keys()):
-		if(isinstance(module, STF_Blender_Component) or hasattr(module, "draw_component_func")):
+		if(isinstance(module, STF_BlenderComponentModule) or hasattr(module, "draw_component_func")):
 			if(hasattr(module, "filter") and filter):
 				if(filter in getattr(module, "filter")):
 					ret.append(module)
@@ -45,7 +45,7 @@ def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, compo
 		box.label(text="Blender Property Name: " + component_ref.blender_property_name)
 
 
-def find_component_module(modules: list[STF_Blender_Component], stf_type: str) -> STF_Blender_Component:
+def find_component_module(modules: list[STF_BlenderComponentModule], stf_type: str) -> STF_BlenderComponentModule:
 	for module in modules:
 		if(module.stf_type == stf_type):
 			return module

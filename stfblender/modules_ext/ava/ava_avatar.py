@@ -2,27 +2,58 @@ import bpy
 
 from ....libstf.stf_export_context import STF_RootExportContext
 from ....libstf.stf_import_context import STF_RootImportContext
-from ...utils.component_utils import STF_Blender_Component, add_component
+from ...utils.component_utils import STF_BlenderComponentBase, STF_BlenderComponentModule, add_component
+from ...utils.op_utils import SetActiveObjectOperator
 
 
 _stf_type = "ava.avatar"
 _blender_property_name = "stf_ava_avatar"
 
 
-class AVA_Avatar(bpy.types.PropertyGroup):
-	stf_id: bpy.props.StringProperty(name="ID") # type: ignore
-	stf_name: bpy.props.StringProperty(name="Name") # type: ignore
-
+class AVA_Avatar(STF_BlenderComponentBase):
 	automap: bpy.props.BoolProperty(name="Automap", default=True) # type: ignore
 	viewport: bpy.props.PointerProperty(type=bpy.types.Object, name="Viewport") # type: ignore
+	delete_viewport_object_on_consuming_import: bpy.props.BoolProperty(name="Delete Viewport on consuming import", default=True) # type: ignore
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Blender_Component, parent_application_object: any, component: AVA_Avatar):
+class CreateViewportObjectOperator(bpy.types.Operator):
+	"""Create a viewport object"""
+	bl_idname = "ava.ava_avatar_create_viewport_object"
+	bl_label = "Create Viewport Object"
+	bl_options = {"REGISTER", "UNDO"}
+
+	blender_collection: bpy.props.StringProperty() # type: ignore
+	component_id: bpy.props.StringProperty() # type: ignore
+
+	def execute(self, context):
+		if("$ViewportFirstPerson" in bpy.data.objects):
+			viewport_object = bpy.data.objects["$ViewportFirstPerson"]
+		else:
+			viewport_object = bpy.data.objects.new("$ViewportFirstPerson")
+		target_object = bpy.data.collections[self.blender_collection]
+		for avatar_component in target_object.stf_ava_avatar:
+			if(avatar_component.stf_id == self.component_id):
+				avatar_component.viewport = viewport_object
+				break
+		return {"FINISHED"}
+
+
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_BlenderComponentModule, parent_application_object: any, component: AVA_Avatar):
 	layout.prop(component, "automap")
-	layout.prop(component, "viewport")
+	if(component.viewport):
+		layout.prop(component, "viewport")
+		layout.prop(component, "delete_viewport_object_on_consuming_import")
+		layout.operator(SetActiveObjectOperator.bl_idname, text="Select Viewport Object").target_name = "$ViewportFirstPerson"
+	else:
+		#if("$ViewportFirstPerson" in bpy.data.objects):
+		#	component.viewport = bpy.data.objects["$ViewportFirstPerson"]
+		create_viewport_button = layout.operator(CreateViewportObjectOperator.bl_idname, text="Create Viewport Object")
+		create_viewport_button.blender_collection = parent_application_object.name
+		create_viewport_button.component_id = component.stf_id
 
 
-def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, parent_application_object: any, import_hook_results: list[any]) -> tuple[any, any]:
+
+def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, parent_application_object: any) -> tuple[any, any]:
 	component_ref, component = add_component(parent_application_object, _blender_property_name, id, _stf_type)
 
 	component.automap = json_resource.get("automap")
@@ -39,7 +70,7 @@ def _stf_export(context: STF_RootExportContext, application_object: AVA_Avatar, 
 	return ret, application_object.stf_id, context
 
 
-class STF_Module_AVA_Avatar(STF_Blender_Component):
+class STF_Module_AVA_Avatar(STF_BlenderComponentModule):
 	stf_type = _stf_type
 	stf_kind = "component"
 	understood_application_types = [AVA_Avatar]
