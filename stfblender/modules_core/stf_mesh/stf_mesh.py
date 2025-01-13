@@ -179,6 +179,7 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 
 	buffer_vertices = BytesIO()
 
+	# Vertex positions
 	for vertex in blender_mesh.vertices:
 		position = blender_translation_to_stf(vertex.co)
 		buffer_vertices.write(serialize_float(position[0], float_width))
@@ -186,6 +187,7 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 		buffer_vertices.write(serialize_float(position[2], float_width))
 	stf_mesh["vertices"] = mesh_context.serialize_buffer(buffer_vertices.getvalue())
 
+	# Vertex normals
 	stf_mesh["vertex_normal_width"] = float_width
 	buffer_vertex_normals = BytesIO()
 	for vertex in blender_mesh.vertices:
@@ -195,6 +197,7 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 		buffer_vertex_normals.write(serialize_float(normal[2], float_width))
 	stf_mesh["vertex_normals"] = mesh_context.serialize_buffer(buffer_vertex_normals.getvalue())
 
+	# Vertex color channels
 	stf_mesh["vertex_color_width"] = float_width
 	buffers_color: list[BytesIO] = []
 	for index, color_layer in enumerate(blender_mesh.color_attributes):
@@ -278,9 +281,9 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 
 	buffer_lines = BytesIO()
 	buffer_tris = BytesIO()
-	buffer_face_material_indices = BytesIO()
 	buffer_faces = BytesIO()
 
+	# Loop through triangles, and also store how many belong to the same face
 	face_lens: list[int] = [0]
 	last_face_index = 0
 	blender_mesh.calc_loop_triangles()
@@ -294,12 +297,14 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 		last_face_index = tris.polygon_index
 
 	stf_mesh["tris"] = mesh_context.serialize_buffer(buffer_tris.getvalue())
-	stf_mesh["faces"] = mesh_context.serialize_buffer(buffer_faces.getvalue())
 
+	# Material indices
 	material_indices_width = stf_mesh["material_indices_width"] = 4
+	buffer_face_material_indices = BytesIO()
 	for index, polygon in enumerate(blender_mesh.polygons):
 		buffer_faces.write(serialize_uint(face_lens[index], face_width))
 		buffer_face_material_indices.write(serialize_uint(polygon.material_index, material_indices_width))
+	stf_mesh["faces"] = mesh_context.serialize_buffer(buffer_faces.getvalue())
 	stf_mesh["buffer_face_material_indices"] = mesh_context.serialize_buffer(buffer_face_material_indices.getvalue())
 
 
@@ -309,6 +314,8 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 	# Weightpaint
 	if(armature):
 		stf_mesh["armature"] = mesh_context.serialize_resource(armature)
+
+		# Index of the bone id corresponds to the bone index in every individual weight
 		weight_bone_map = []
 		for bone in armature.bones:
 			weight_bone_map.append(bone.stf_id)
@@ -319,6 +326,7 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 
 		max_weight_group_count = 0
 		weight_channels = []
+		# For each vertex and each group of the vertex
 		for vertex_index, vertex in enumerate(blender_mesh.vertices):
 			if(len(vertex.groups) > max_weight_group_count): max_weight_group_count = len(vertex.groups)
 			for group_index, group in enumerate(vertex.groups):
@@ -331,6 +339,7 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 					while(len(weight_channels) <= group_index): weight_channels.append([])
 					weight_channels[group_index].append((vertex_index, bone_index, group.weight))
 
+		# Convert weight arrays to buffers
 		buffers_weights = []
 		for group, weight_channel in enumerate(weight_channels):
 			buffer_weights = BytesIO()
