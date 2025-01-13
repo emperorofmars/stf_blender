@@ -34,11 +34,12 @@ def _can_handle_application_object_func(application_object: any) -> int:
 
 def _stf_export(context: STF_ResourceExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:
 	blender_object: bpy.types.Object = application_object
+	blender_object.update_from_editmode()
 
 	ret = { "type": _stf_type, }
-	mesh_context = STF_ResourceExportContext(context, ret, application_object)
+	mesh_context = STF_ResourceExportContext(context, ret, None)
 
-	blender_mesh: bpy.types.Mesh = application_object.data
+	blender_mesh: bpy.types.Mesh = blender_object.data
 	#ret["mesh"] = mesh_context.serialize_resource(blender_mesh, blender_armatures[0].object)
 
 	blender_armatures: list[bpy.types.ArmatureModifier] = []
@@ -48,7 +49,7 @@ def _stf_export(context: STF_ResourceExportContext, application_object: any, par
 
 	if(len(blender_armatures) == 1):
 		if(blender_armatures[0].object.stf_id):
-			ret["mesh"] = mesh_context.serialize_resource(blender_mesh, blender_armatures[0].object.data)
+			ret["mesh"] = mesh_context.serialize_resource(blender_mesh, (blender_armatures[0].object.data, blender_object))
 			# TODO check if the armature is in the export
 			#ret["armature_instance"] = mesh_context.serialize_resource(blender_armatures[0].object)
 			ret["armature_instance"] = blender_armatures[0].object.stf_id
@@ -58,7 +59,7 @@ def _stf_export(context: STF_ResourceExportContext, application_object: any, par
 	elif(len(blender_armatures) > 1):
 		mesh_context.report(STFReport("More than one Armature per mesh is not supported!", severity=STFReportSeverity.FatalError, stf_id=blender_object.stf_id, stf_type=_stf_type, application_object=blender_object))
 	else:
-		ret["mesh"] = mesh_context.serialize_resource(blender_mesh)
+		ret["mesh"] = mesh_context.serialize_resource(blender_mesh, (blender_object, None))
 
 	material_slots = []
 	for blender_slot in blender_object.material_slots:

@@ -1,5 +1,6 @@
 from io import BytesIO
 import bpy
+import bmesh
 
 from ....libstf.stf_export_context import STF_ResourceExportContext, STF_RootExportContext
 from ...utils.id_utils import ensure_stf_id
@@ -21,7 +22,10 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 	blender_mesh: bpy.types.Mesh = application_object
 	ensure_stf_id(context, blender_mesh)
 
-	armature: bpy.types.Armature = parent_application_object
+	if(parent_application_object and len(parent_application_object) == 2):
+		armature: bpy.types.Armature = parent_application_object[0]
+		blender_mesh_object: bpy.types.Object = parent_application_object[1]
+
 
 	stf_mesh = {
 		"type": _stf_type,
@@ -182,13 +186,19 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 
 
 	# Weightpaint
-	if(armature):
+	if(armature and blender_mesh_object):
 		stf_mesh["armature"] = mesh_context.serialize_resource(armature)
 
-		# Index of the bone id corresponds to the bone index in every individual weight
-		weight_bone_map = []
-		for bone in armature.bones:
-			weight_bone_map.append(bone.stf_id)
+		# Reference: https://blender.stackexchange.com/a/28273
+		# Create vertex group lookup dictionary for names
+		vgroup_names = {vgroup.index: vgroup.name for vgroup in blender_mesh_object.vertex_groups}
+
+		# Create vertex group lookup dictionary for stf_ids from the previous name lookup dict
+		weight_bone_map = {}
+		for index, vgroup_name in vgroup_names.items():
+			if(vgroup_name in armature.bones):
+				bone = armature.bones[vgroup_name]
+				weight_bone_map[index] = bone.stf_id
 		stf_mesh["bones"] = weight_bone_map
 
 		bone_weight_width = stf_mesh["bone_weight_width"] = 4
@@ -201,13 +211,12 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 			if(len(vertex.groups) > max_weight_group_count): max_weight_group_count = len(vertex.groups)
 			for group_index, group in enumerate(vertex.groups):
 				try:
-					bone_index = group.group
 					bone_from_map = weight_bone_map[group.group]
 				except Exception:
 					continue
 				if(bone_from_map):
 					while(len(weight_channels) <= group_index): weight_channels.append([])
-					weight_channels[group_index].append((vertex_index, bone_index, group.weight))
+					weight_channels[group_index].append((vertex_index, group.group, group.weight))
 
 		# Convert weight arrays to buffers
 		buffers_weights = []

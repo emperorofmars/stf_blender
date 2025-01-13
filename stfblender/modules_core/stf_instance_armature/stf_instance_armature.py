@@ -23,6 +23,8 @@ def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, pa
 	blender_object.stf_id = id
 	blender_object.stf_name = json_resource.get("name", "")
 
+	# TODO pose
+
 	return import_node_spatial_base(context, json_resource, id, parent_application_object, blender_object)
 
 
@@ -43,6 +45,8 @@ def _stf_export(context: STF_ResourceExportContext, application_object: any, par
 	armature_context = STF_ResourceExportContext(context, ret, blender_object)
 
 	ret["armature"] = armature_context.serialize_resource(blender_armature, blender_object)
+
+	# TODO pose
 
 	return export_node_spatial_base(context, blender_object, parent_application_object, ret)
 
