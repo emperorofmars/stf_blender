@@ -77,7 +77,7 @@ class STF_ExportState(StateUtil):
 		self._resources[application_object] = id
 		self._exported_resources[id] = json_resource
 
-	def serialize_buffer(self, data: io.BytesIO) -> str:
+	def serialize_buffer(self, data: bytes) -> str:
 		import uuid
 		id = str(uuid.uuid4())
 		self._exported_buffers[id] = data

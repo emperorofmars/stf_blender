@@ -120,7 +120,7 @@ class STF_Buffer_File:
 class STF_Buffer_JsonArray:
 	def __init__(self):
 		self.type: str = "stf.buffer.json_array"
-		self.data: list[io.BytesIO]
+		self.data: list[any]
 
 	@staticmethod
 	def from_dict(dict: dict):

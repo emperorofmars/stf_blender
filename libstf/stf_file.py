@@ -14,7 +14,7 @@ class STF_File:
 		self.binary_version_major: int = 0
 		self.binary_version_minor: int = 0
 		self.definition: STF_JsonDefinition = STF_JsonDefinition()
-		self.buffers_included: list[io.BytesIO] = []
+		self.buffers_included: list[bytes] = []
 		self.filename: str = ""
 
 	@staticmethod
@@ -76,7 +76,7 @@ class STF_File:
 
 		# Serialize length of all other buffers
 		for buffer_idx in range(0, num_buffers):
-			included_buffer = self.buffers_included[buffer_idx].getvalue()
+			included_buffer = self.buffers_included[buffer_idx]
 			buffer_len = len(included_buffer)
 			buffer.write(buffer_len.to_bytes(length=8, byteorder="little"))
 
@@ -85,4 +85,4 @@ class STF_File:
 
 		# Serialize all other buffers
 		for buffer_idx in range(0, num_buffers):
-			buffer.write(self.buffers_included[buffer_idx].getvalue())
+			buffer.write(self.buffers_included[buffer_idx])

@@ -26,15 +26,19 @@ class CreateViewportObjectOperator(bpy.types.Operator):
 	component_id: bpy.props.StringProperty() # type: ignore
 
 	def execute(self, context):
+		target_object = bpy.data.collections[self.blender_collection]
 		if("$ViewportFirstPerson" in bpy.data.objects):
 			viewport_object = bpy.data.objects["$ViewportFirstPerson"]
 		else:
-			viewport_object = bpy.data.objects.new("$ViewportFirstPerson")
-		target_object = bpy.data.collections[self.blender_collection]
+			viewport_object = bpy.data.objects.new("$ViewportFirstPerson", None)
+			viewport_object.empty_display_size = 0.1
+			viewport_object.empty_display_type = "SINGLE_ARROW"
+			target_object.objects.link(viewport_object)
 		for avatar_component in target_object.stf_ava_avatar:
 			if(avatar_component.stf_id == self.component_id):
 				avatar_component.viewport = viewport_object
 				break
+
 		return {"FINISHED"}
 
 

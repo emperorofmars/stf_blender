@@ -8,8 +8,8 @@ from ....libstf.stf_module import STF_Module
 from ....libstf.stf_report import STFReportSeverity, STFReport
 from ...utils.component_utils import STF_Component, get_components_from_object
 from ...utils.id_utils import ensure_stf_id
-from ...utils.trs_utils import blender_translation_to_stf
-from ...utils.buffer_utils import serialize_float, serialize_uint
+from ...utils.trs_utils import blender_translation_to_stf, stf_translation_to_blender
+from ...utils.buffer_utils import parse_float, serialize_float, serialize_uint
 
 
 _stf_type = "stf.mesh"
@@ -27,6 +27,22 @@ def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, pa
 	blender_mesh.stf_name = json_resource.get("name", "STF Mesh")
 
 	mesh_context = STF_ResourceImportContext(context, json_resource, blender_mesh)
+
+	bm = bmesh.new()
+	vertex_count = json_resource["vertex_count"]
+	vertex_indices_width = json_resource.get("vertex_indices_width", 4)
+	vertex_width = json_resource.get("vertex_width", 4)
+
+	vertex_buffer = BytesIO(mesh_context.import_buffer(json_resource["vertices"]))
+
+	print(type(vertex_buffer))
+	for index in range(vertex_count):
+		p1 = parse_float(vertex_buffer, vertex_width)
+		p2 = parse_float(vertex_buffer, vertex_width)
+		p3 = parse_float(vertex_buffer, vertex_width)
+		bm.verts.new(stf_translation_to_blender([p1, p2, p3]))
+
+	bm.to_mesh(blender_mesh)
 
 	# TODO
 	return blender_mesh, mesh_context
@@ -52,10 +68,15 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 		"type": _stf_type,
 		"name": blender_mesh.stf_name if blender_mesh.stf_name else blender_mesh.name,
 		"vertex_count": len(bm.verts),
+		"vertex_width": float_width,
 		"vertex_indices_width": vertex_indices_width,
 		"split_count": len(bm_tris) * 3,
 		"split_indices_width": split_indices_width,
-		"vertex_pos_width": float_width,
+		"split_position_width": float_width,
+		"split_normal_width": float_width,
+		"split_tangent_width": float_width,
+		"split_color_width": float_width,
+		"split_uv_width": float_width,
 	}
 
 	mesh_context = STF_ResourceExportContext(context, stf_mesh, blender_mesh)
@@ -149,21 +170,21 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 	buffer_blendshape_tangent = BytesIO()
 
 
-	stf_mesh["vertices"] = mesh_context.serialize_buffer(buffer_vertices)
-	stf_mesh["splits"] = mesh_context.serialize_buffer(buffer_split_vertices)
-	stf_mesh["normals"] = mesh_context.serialize_buffer(buffer_normals)
-	stf_mesh["tangents"] = mesh_context.serialize_buffer(buffer_tangents)
-	stf_mesh["tris"] = mesh_context.serialize_buffer(buffer_tris)
-	stf_mesh["buffer_tris_material_index"] = mesh_context.serialize_buffer(buffer_tris_material_index)
-	stf_mesh["faces"] = mesh_context.serialize_buffer(buffer_faces)
+	stf_mesh["vertices"] = mesh_context.serialize_buffer(buffer_vertices.getvalue())
+	stf_mesh["splits"] = mesh_context.serialize_buffer(buffer_split_vertices.getvalue())
+	stf_mesh["normals"] = mesh_context.serialize_buffer(buffer_normals.getvalue())
+	stf_mesh["tangents"] = mesh_context.serialize_buffer(buffer_tangents.getvalue())
+	stf_mesh["tris"] = mesh_context.serialize_buffer(buffer_tris.getvalue())
+	stf_mesh["buffer_tris_material_index"] = mesh_context.serialize_buffer(buffer_tris_material_index.getvalue())
+	stf_mesh["faces"] = mesh_context.serialize_buffer(buffer_faces.getvalue())
 
 	stf_mesh["uvs"] = []
 	for buffer_uv in buffers_uv:
-		stf_mesh["uvs"].append(mesh_context.serialize_buffer(buffer_uv))
+		stf_mesh["uvs"].append(mesh_context.serialize_buffer(buffer_uv.getvalue()))
 
 	stf_mesh["colors"] = []
 	for color_buffer in buffers_color:
-		stf_mesh["colors"].append(mesh_context.serialize_buffer(color_buffer))
+		stf_mesh["colors"].append(mesh_context.serialize_buffer(color_buffer.getvalue()))
 
 	return stf_mesh, blender_mesh.stf_id, mesh_context
 

@@ -29,7 +29,7 @@ class STF_RootImportContext:
 		if("components" in json_resource):
 			for component_id, json_component in json_resource["components"].items():
 				if(component_module := self._state.determine_module(json_component)):
-					component_result = component_module.import_func(context, json_component, component_id, application_object, None)
+					component_result = component_module.import_func(context, json_component, component_id, application_object)
 					if(component_result):
 						application_component_object, _ = component_result
 						self.register_imported_resource(component_id, application_component_object)
@@ -63,7 +63,7 @@ class STF_RootImportContext:
 		return None
 
 
-	def import_buffer(self, id: str) -> io.BytesIO:
+	def import_buffer(self, id: str) -> bytes:
 		return self._state.import_buffer(id)
 
 

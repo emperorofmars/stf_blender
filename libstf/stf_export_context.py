@@ -98,7 +98,7 @@ class STF_RootExportContext:
 		return None
 
 
-	def serialize_buffer(self, data: io.BytesIO) -> str:
+	def serialize_buffer(self, data: bytes) -> str:
 		return self._state.serialize_buffer(data)
 
 
@@ -156,7 +156,7 @@ class STF_ResourceExportContext(STF_RootExportContext):
 		if(id and id not in self._json_resource["referenced_resources"]):
 			self._json_resource["referenced_resources"].append(id)
 
-	def serialize_buffer(self, data: io.BytesIO) -> str:
+	def serialize_buffer(self, data: bytes) -> str:
 		id = super().serialize_buffer(data)
 		self._json_resource["referenced_buffers"].append(id)
 		return id

@@ -33,7 +33,7 @@ class STF_ImportState(StateUtil):
 	def get_imported_resource(self, id: str | list[str]):
 		return self._imported_resources.get(id, None)
 
-	def import_buffer(self, id: str) -> io.BytesIO:
+	def import_buffer(self, id: str) -> bytes:
 		buffer = self._file.definition.buffers.get(id)
 		match(buffer.type):
 			case "stf.buffer.included":
