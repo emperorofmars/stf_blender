@@ -35,5 +35,5 @@ def parse_int(buffer: BytesIO, width: int = 4) -> int:
 def parse_uint(buffer: BytesIO, width: int = 4) -> int:
 	return int.from_bytes(buffer.read(width), byteorder="little", signed=False)
 
-def parse_float(buffer: BytesIO, width: int = 4) -> int:
+def parse_float(buffer: BytesIO, width: int = 4) -> float:
 	return struct.unpack(determine_pack_format_float(width), buffer.read(width))[0]
