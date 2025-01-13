@@ -39,21 +39,15 @@ def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, pa
 		p0 = parse_float(buffer_vertices, vertex_width)
 		p1 = parse_float(buffer_vertices, vertex_width)
 		p2 = parse_float(buffer_vertices, vertex_width)
-		#bm.verts.new(stf_translation_to_blender([p0, p1, p2]))
 		py_vertices.append(stf_translation_to_blender([p0, p1, p2]))
 
 	split_count = json_resource.get("split_count", 0)
 	split_indices_width = json_resource.get("split_indices_width", 4)
 
-	split_color_width = json_resource.get("split_color_width", 4)
-	split_uv_width = json_resource.get("split_uv_width", 4)
-
 	py_splits = []
 	if(split_count > 0 and "splits" in json_resource):
 		buffer_split = BytesIO(mesh_context.import_buffer(json_resource["splits"]))
-		#blender_mesh.loops.add(split_count)
 		for index in range(split_count):
-			#loop.vertex_index = parse_uint(buffer_split, vertex_indices_width)
 			py_splits.append(parse_uint(buffer_split, vertex_indices_width))
 
 	py_faces = []
@@ -76,7 +70,6 @@ def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, pa
 			for split_index in sorted(face_splits):
 				face_indices.append(py_splits[split_index])
 			py_faces.append(face_indices)
-
 	elif(tris_count > 0):
 		buffer_tris = BytesIO(mesh_context.import_buffer(json_resource["tris"]))
 		for index in range(tris_count):
@@ -93,7 +86,8 @@ def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, pa
 
 
 	blender_mesh.from_pydata(py_vertices, [], py_faces)
-	# TODO validate
+	if(blender_mesh.validate(verbose=True)): # return is True if errors found
+		context.report(STFReport("Invalid mesh", STFReportSeverity.Error, id, _stf_type, blender_mesh))
 
 
 	if("normals" in json_resource):
@@ -107,13 +101,9 @@ def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, pa
 
 	if("colors" in json_resource):
 		vertex_color_width = json_resource.get("vertex_color_width", 4)
-		print(json_resource["colors"])
-		print("vertex_color_width: " + str(vertex_color_width))
-
-		color_attribute = blender_mesh.color_attributes.new("Color", "FLOAT_COLOR", "POINT")
 		for index in range(len(json_resource["colors"])):
+			color_attribute = blender_mesh.color_attributes.new("Color", "FLOAT_COLOR", "POINT")
 			buffer_vertex_colors = BytesIO(mesh_context.import_buffer(json_resource["colors"][index]))
-			print(len(buffer_vertex_colors.getvalue()))
 			for index, vertex in enumerate(blender_mesh.vertices):
 				r = parse_float(buffer_vertex_colors, vertex_color_width)
 				g = parse_float(buffer_vertex_colors, vertex_color_width)
@@ -132,14 +122,27 @@ def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, pa
 				py_split_normals.append(normal)
 			blender_mesh.normals_split_custom_set(py_split_normals)
 
-		"""if("split_tangents" in json_resource):
-			split_tangent_width = json_resource.get("split_tangent_width", 4)
-			buffer_split_tangents = BytesIO(mesh_context.import_buffer(json_resource["split_tangents"]))
-			for index, loop in enumerate(blender_mesh.loops):
-				pass"""
+		if("uvs" in json_resource):
+			split_uv_width = json_resource.get("split_uv_width", 4)
+			for uv_layer_index in range(len(json_resource["uvs"])):
+				uv_layer = blender_mesh.uv_layers.new(name=json_resource["uvs"][uv_layer_index].get("name", "UVMap"))
+				buffer_uv = BytesIO(mesh_context.import_buffer(json_resource["uvs"][uv_layer_index]["uv"]))
+				for index, loop in enumerate(blender_mesh.loops):
+					# TODO convert uv from gltf uv coordinate space
+					uv = [parse_float(buffer_uv, split_uv_width), parse_float(buffer_uv, split_uv_width)]
+					uv_layer.uv[index].vector = uv
 
-		# TODO uvs, colors"""
-
+		if("split_colors" in json_resource):
+			split_color_width = json_resource.get("split_color_width", 4)
+			for index in range(len(json_resource["colors"])):
+				color_attribute = blender_mesh.color_attributes.new("Color", "FLOAT_COLOR", "POINT")
+				buffer_split_colors = BytesIO(mesh_context.import_buffer(json_resource["split_colors"][index]))
+				for index, vertex in enumerate(blender_mesh.vertices):
+					r = parse_float(buffer_split_colors, split_color_width)
+					g = parse_float(buffer_split_colors, split_color_width)
+					b = parse_float(buffer_split_colors, split_color_width)
+					a = parse_float(buffer_split_colors, split_color_width)
+					color_attribute.data[index].color = (r, g, b, a)
 
 	return blender_mesh, mesh_context
 
@@ -208,6 +211,7 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 				color_buffer.write(serialize_float(color_layer.data[vertex.index].color[3], float_width))
 		# TODO other data types
 
+	uv_names = []
 	for loop in blender_mesh.loops:
 		loop: bpy.types.MeshLoop = loop
 		buffer_split_vertices.write(serialize_uint(loop.vertex_index, vertex_indices_width))
@@ -223,6 +227,7 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 		buffer_split_tangents.write(serialize_float(tangent[2], float_width))
 
 		for index, uv_layer in enumerate(blender_mesh.uv_layers):
+			uv_names.append(uv_layer.name)
 			buffers_uv[index].write(serialize_float(uv_layer.uv[loop.index].vector[0], float_width))
 			buffers_uv[index].write(serialize_float(uv_layer.uv[loop.index].vector[1], float_width))
 
@@ -290,8 +295,11 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 	stf_mesh["split_normals"] = mesh_context.serialize_buffer(buffer_split_normals.getvalue())
 	stf_mesh["split_tangents"] = mesh_context.serialize_buffer(buffer_split_tangents.getvalue())
 	stf_mesh["uvs"] = []
-	for buffer_uv in buffers_uv:
-		stf_mesh["uvs"].append(mesh_context.serialize_buffer(buffer_uv.getvalue()))
+	for index, buffer_uv in enumerate(buffers_uv):
+		stf_mesh["uvs"].append({
+				"name": uv_names[index],
+				"uv": mesh_context.serialize_buffer(buffer_uv.getvalue()),
+			})
 	stf_mesh["split_colors"] = []
 	for split_color_buffer in buffers_split_color:
 		stf_mesh["split_colors"].append(mesh_context.serialize_buffer(split_color_buffer.getvalue()))
