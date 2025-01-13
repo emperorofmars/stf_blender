@@ -67,7 +67,9 @@ class STF_RootExportContext:
 
 	def serialize_resource(self, application_object: any, parent_application_object: any = None) -> str | None:
 		if(application_object == None): return None
-		if(id := self.get_resource_id(application_object)): return id
+		if(id := self.get_resource_id(application_object)):
+			self.register_serialized_resource(application_object, self._state._exported_resources[id], id)
+			return id
 
 		if(selected_module := self._state.determine_module(application_object)):
 			module_ret = selected_module.export_func(
