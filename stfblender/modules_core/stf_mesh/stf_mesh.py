@@ -9,7 +9,7 @@ from ....libstf.stf_report import STFReportSeverity, STFReport
 from ...utils.component_utils import STF_Component, get_components_from_object
 from ...utils.id_utils import ensure_stf_id
 from ...utils.trs_utils import blender_translation_to_stf, stf_translation_to_blender
-from ...utils.buffer_utils import parse_float, serialize_float, serialize_uint
+from ...utils.buffer_utils import parse_float, parse_uint, serialize_float, serialize_uint
 
 
 _stf_type = "stf.mesh"
@@ -34,13 +34,45 @@ def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, pa
 	vertex_width = json_resource.get("vertex_width", 4)
 
 	vertex_buffer = BytesIO(mesh_context.import_buffer(json_resource["vertices"]))
-
-	print(type(vertex_buffer))
-	for index in range(vertex_count):
+	for _ in range(vertex_count):
 		p1 = parse_float(vertex_buffer, vertex_width)
 		p2 = parse_float(vertex_buffer, vertex_width)
 		p3 = parse_float(vertex_buffer, vertex_width)
 		bm.verts.new(stf_translation_to_blender([p1, p2, p3]))
+
+	bm.verts.index_update()
+	bm.verts.ensure_lookup_table()
+
+	split_count = json_resource.get("split_count", 0)
+	split_indices_width = json_resource.get("split_indices_width", 0)
+	split_normal_width = json_resource.get("split_normal_width", 0)
+	split_tangent_width = json_resource.get("split_tangent_width", 0)
+	split_color_width = json_resource.get("split_color_width", 0)
+	split_uv_width = json_resource.get("split_uv_width", 0)
+	tris_count = json_resource.get("tris_count", 0)
+	face_count = json_resource.get("face_count", 0)
+
+	if(split_count > 0 and "splits" in json_resource):
+		split_buffer = BytesIO(mesh_context.import_buffer(json_resource["splits"]))
+	if(split_count > 0 and "normals" in json_resource):
+		normals_buffer = BytesIO(mesh_context.import_buffer(json_resource["normals"]))
+	if(split_count > 0 and "tangents" in json_resource):
+		tangents_buffer = BytesIO(mesh_context.import_buffer(json_resource["tangents"]))
+	if(split_count > 0 and "tris" in json_resource):
+		tris_buffer = BytesIO(mesh_context.import_buffer(json_resource["tris"]))
+
+	splits = []
+	for _ in range(split_count):
+		splits.append(parse_uint(split_buffer, vertex_indices_width))
+
+	for _ in range(tris_count):
+		p1 = parse_uint(tris_buffer, vertex_indices_width)
+		p2 = parse_uint(tris_buffer, vertex_indices_width)
+		p3 = parse_uint(tris_buffer, vertex_indices_width)
+		bm.faces.new([bm.verts[splits[p1]], bm.verts[splits[p2]], bm.verts[splits[p3]]])
+
+	bm.edges.index_update()
+	bm.faces.index_update()
 
 	bm.to_mesh(blender_mesh)
 
@@ -70,13 +102,12 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 		"vertex_count": len(bm.verts),
 		"vertex_width": float_width,
 		"vertex_indices_width": vertex_indices_width,
-		"split_count": len(bm_tris) * 3,
 		"split_indices_width": split_indices_width,
-		"split_position_width": float_width,
 		"split_normal_width": float_width,
 		"split_tangent_width": float_width,
 		"split_color_width": float_width,
 		"split_uv_width": float_width,
+		"tris_count": len(bm_tris),
 	}
 
 	mesh_context = STF_ResourceExportContext(context, stf_mesh, blender_mesh)
@@ -108,9 +139,14 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 	bm_color_layers = bm.loops.layers.color
 	buffers_color: list[BytesIO] = [BytesIO()] * len(bm_color_layers)
 
+	serialized_loops_indices = set()
 
+	split_count = 0
 	for face in bm.faces:
 		for loop in face.loops:
+			if(loop.index in serialized_loops_indices):
+				continue
+
 			# Splits reference the 'real' vertex by index. The normal, tangent, uv, etc... indices correspond to the split vertices index.
 			buffer_split_vertices.write(loop.vert.index.to_bytes(length=vertex_indices_width, byteorder="little"))
 
@@ -134,6 +170,10 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 				buffers_uv[index].write(serialize_float(loop[uv_layer].uv[0], float_width))
 				buffers_uv[index].write(serialize_float(loop[uv_layer].uv[1], float_width))
 
+			split_count += 1
+			serialized_loops_indices.add(loop.index)
+
+	stf_mesh["split_count"] = split_count
 
 	# The face length buffer defines how many tris are actually the same face.
 	face_lens: list[int] = [0]
@@ -169,6 +209,7 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 	buffer_blendshape_normal = BytesIO()
 	buffer_blendshape_tangent = BytesIO()
 
+	stf_mesh["face_count"] = len(face_lens)
 
 	stf_mesh["vertices"] = mesh_context.serialize_buffer(buffer_vertices.getvalue())
 	stf_mesh["splits"] = mesh_context.serialize_buffer(buffer_split_vertices.getvalue())
