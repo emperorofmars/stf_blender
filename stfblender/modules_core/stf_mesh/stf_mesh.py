@@ -10,13 +10,6 @@ from .mesh_export import export_stf_mesh
 _stf_type = "stf.mesh"
 
 
-export_options: dict = {
-	"export_normals": True,
-	"export_tangents": True,
-	"export_colors": True,
-}
-
-
 class STF_Module_STF_Mesh(STF_Module):
 	stf_type = _stf_type
 	stf_kind = "data"

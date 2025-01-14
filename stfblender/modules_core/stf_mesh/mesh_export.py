@@ -15,6 +15,7 @@ export_options: dict = {
 	"export_normals": True,
 	"export_tangents": True,
 	"export_colors": True,
+	"float_treshhold_blendshape": 0.00001,
 }
 
 
@@ -310,11 +311,18 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 			if(shape_key == shape_key.relative_key or shape_key.mute or blender_mesh.shape_keys.key_blocks[0].name == shape_key.name):
 				continue
 
+			vertex_normals = shape_key.normals_vertex_get()
+			print(vertex_normals[0:3])
 			for vertex in blender_mesh.vertices:
-				point = shape_key.data[vertex.index]
+				point: bpy.types.ShapeKeyPoint = shape_key.data[vertex.index]
+
 				if((vertex.co - point.co).length > 0.00001): sk_full += 1
-				#if(point.co.length > 0.00001): sk_full += 1
 				else: sk_empty += 1
+
+			split_normals = shape_key.normals_split_get()
+			print(split_normals[0:3])
+			for loop in blender_mesh.loops:
+				pass
 
 			buffer_blendshape_indices = BytesIO()
 			buffer_blendshape_translation = BytesIO()
