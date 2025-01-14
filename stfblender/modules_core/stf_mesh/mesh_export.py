@@ -33,13 +33,13 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 	}
 	mesh_context = STF_ResourceExportContext(context, stf_mesh, blender_mesh)
 
-	default_materials = []
+	material_slots = []
 	for material in blender_mesh.materials:
 		if(material):
-			default_materials.append(mesh_context.serialize_resource(material))
+			material_slots.append(mesh_context.serialize_resource(material))
 		else:
-			default_materials.append(None)
-	stf_mesh["default_materials"] = default_materials
+			material_slots.append(None)
+	stf_mesh["material_slots"] = material_slots
 
 	float_width = 4
 	vertex_indices_width = 4 if len(blender_mesh.vertices) * 3 < 2**32 else 8
@@ -179,7 +179,7 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 		buffer_faces.write(serialize_uint(face_lens[index], face_width))
 		buffer_face_material_indices.write(serialize_uint(polygon.material_index, material_indices_width))
 	stf_mesh["faces"] = mesh_context.serialize_buffer(buffer_faces.getvalue())
-	stf_mesh["buffer_face_material_indices"] = mesh_context.serialize_buffer(buffer_face_material_indices.getvalue())
+	stf_mesh["material_indices"] = mesh_context.serialize_buffer(buffer_face_material_indices.getvalue())
 
 
 	# TODO also export edges if wanted

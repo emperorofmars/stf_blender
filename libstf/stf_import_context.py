@@ -50,13 +50,13 @@ class STF_RootImportContext:
 			module_ret = module.import_func(self, json_resource, id, self.get_parent_application_object())
 			if(module_ret):
 				application_object, context = module_ret
+
+				self.__run_components(json_resource, application_object, context)
+
+				self.register_imported_resource(id, application_object)
+				return application_object
 			else:
 				self.report(STFReport("Resource import error", STFReportSeverity.Error, id, module.stf_type, None))
-
-			self.__run_components(json_resource, application_object, context)
-
-			self.register_imported_resource(id, application_object)
-			return application_object
 		else:
 			# TODO json fallback
 			self.report(STFReport("No STF_Module registered", STFReportSeverity.Warn, id, json_resource.get("type")))

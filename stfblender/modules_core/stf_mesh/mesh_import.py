@@ -73,6 +73,7 @@ def import_stf_mesh(context: STF_RootImportContext, json_resource: dict, id: str
 			py_faces.append(face_indices)
 
 
+	# Construct the topology
 	blender_mesh.from_pydata(py_vertices, [], py_faces)
 	if(blender_mesh.validate(verbose=True)): # return is True if errors found
 		context.report(STFReport("Invalid mesh", STFReportSeverity.Error, id, _stf_type, blender_mesh))
@@ -131,5 +132,43 @@ def import_stf_mesh(context: STF_RootImportContext, json_resource: dict, id: str
 					b = parse_float(buffer_split_colors, split_color_width)
 					a = parse_float(buffer_split_colors, split_color_width)
 					color_attribute.data[index].color = (r, g, b, a)
+
+	if("material_slots" in json_resource):
+		for material_slot in json_resource["material_slots"]:
+			material = None
+			if(material_slot):
+				material = mesh_context.import_resource(material_slot)
+			blender_mesh.materials.append(material)
+
+	material_indices_count = face_count if face_count > 0 else tris_count
+	if("material_indices" in json_resource and material_indices_count > 0):
+		material_indices_width = json_resource.get("material_indices_width", 4)
+		buffer_material_indices = BytesIO(mesh_context.import_buffer(json_resource["material_indices"]))
+		for polygon in blender_mesh.polygons:
+			polygon.material_index = parse_uint(buffer_material_indices, material_indices_width)
+
+	if("armature" in json_resource and "bones" in json_resource and "weights" in json_resource):
+		armature: bpy.types.Armature = mesh_context.import_resource(json_resource["armature"])
+		if(not armature):
+			mesh_context.report(STFReport("Invalid Armature (armature id: " + json_resource["armature"] + " )", STFReportSeverity.Error, id, _stf_type, blender_mesh))
+		else:
+			blender_bone_mappings = {}
+			bones = json_resource["bones"]
+			for index, bone_id in bones.items():
+				bone = None
+				for blender_bone in armature.bones:
+					if(blender_bone.stf_id == bone_id):
+						bone = blender_bone
+						break
+				if(not bone):
+					mesh_context.report(STFReport("Invalid Bone Mapping (bone_id: " + bone_id + " )", STFReportSeverity.Error, id, _stf_type, blender_mesh))
+				else:
+					blender_bone_mappings[index] = bone.name
+
+			print(blender_bone_mappings)
+			for weight_channel in json_resource["weights"]:
+				print(weight_channel)
+
+
 
 	return blender_mesh, mesh_context
