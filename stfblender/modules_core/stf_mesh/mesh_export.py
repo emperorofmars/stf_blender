@@ -204,7 +204,6 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 					groups[group_to_bone_index[group.group]][vertex.index] = group.weight
 
 		bone_weight_width = stf_mesh["bone_weight_width"] = 4
-		bone_indices_width = stf_mesh["bone_indices_width"] = 4
 		buffers_weights = []
 		for bone_index, group in groups.items():
 			indexed = len(group) < (len(blender_mesh.vertices) / 2)
@@ -219,7 +218,6 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 						buffer_weights.write(serialize_float(group[vertex.index], bone_weight_width)) # bone weight
 					else:
 						buffer_weights.write(serialize_float(0, bone_weight_width)) # bone weight
-					pass
 
 			buffers_weights.append({
 				"target_bone": weight_bone_map[bone_index],
