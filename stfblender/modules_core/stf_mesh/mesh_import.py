@@ -170,11 +170,14 @@ def import_stf_mesh(context: STF_RootImportContext, json_resource: dict, id: str
 				if(not bone):
 					mesh_context.report(STFReport("Invalid Bone Mapping (bone_id: " + bone_id + " )", STFReportSeverity.Error, id, _stf_type, blender_mesh))
 				else:
-					blender_bone_mappings[int(index)] = bone.name
+					blender_bone_mappings[index] = bone.name
 
 			vertex_groups: dict[int, bpy.types.VertexGroup] = {}
 			for stf_bone_index, bone_name in blender_bone_mappings.items():
 				vertex_groups[stf_bone_index] = blender_object_tmp.vertex_groups.new(name=bone_name)
+
+
+
 
 			bone_indices_width = json_resource.get("bone_indices_width", 4)
 			bone_weight_width = json_resource.get("bone_weight_width", 4)

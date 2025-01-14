@@ -189,19 +189,13 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 	if(armature and blender_mesh_object):
 		stf_mesh["armature"] = mesh_context.serialize_resource(armature)
 
-		# Reference: https://blender.stackexchange.com/a/28273
-		# Create vertex group lookup dictionary for names
-		vgroup_names = {vgroup.index: vgroup.name for vgroup in blender_mesh_object.vertex_groups}
-
 		# Create vertex group lookup dictionary for stf_ids from the previous name lookup dict
 		weight_bone_map = []
 		group_to_bone_index = {}
-		for index, vgroup_name in vgroup_names.items():
-			if(vgroup_name in armature.bones):
-				bone = armature.bones[vgroup_name]
-				weight_bone_map.append(bone.stf_id)
-				group_to_bone_index[index] = len(weight_bone_map) - 1
-		stf_mesh["bones"] = weight_bone_map
+		for group in blender_mesh_object.vertex_groups:
+			if(group.name in armature.bones):
+				weight_bone_map.append(armature.bones[group.name].stf_id)
+				group_to_bone_index[group.index] = len(weight_bone_map) - 1
 
 		groups: dict[int, dict[int, float]] = {index: {} for index, _ in enumerate(weight_bone_map)}
 		for vertex in blender_mesh.vertices:
@@ -228,9 +222,10 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 					pass
 
 			buffers_weights.append({
+				"target_bone": weight_bone_map[bone_index],
 				"indexed": indexed,
 				"count": len(group) if indexed else len(blender_mesh.vertices),
-				"buffer": mesh_context.serialize_buffer(buffer_weights.getvalue())
+				"buffer": mesh_context.serialize_buffer(buffer_weights.getvalue()),
 			})
 
 		stf_mesh["weights"] = buffers_weights
