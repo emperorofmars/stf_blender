@@ -1,11 +1,13 @@
 import bpy
 
+
 from ....libstf.stf_export_context import STF_ResourceExportContext
 from ....libstf.stf_import_context import STF_ResourceImportContext
 from ....libstf.stf_module import STF_Module
 from ....libstf.stf_report import STFReportSeverity, STFReport
 from ...utils.node_spatial_base import export_node_spatial_base, import_node_spatial_base
 from ...utils.component_utils import get_components_from_object
+from ...utils.id_utils import ensure_stf_id
 
 
 _stf_type = "stf.instance.prefab"
@@ -37,6 +39,7 @@ def _can_handle_application_object_func(application_object: any) -> int:
 
 def _stf_export(context: STF_ResourceExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:
 	blender_object: bpy.types.Object = application_object
+	ensure_stf_id(context, blender_object)
 
 	ret = { "type": _stf_type, }
 	prefab_context = STF_ResourceExportContext(context, ret, application_object)

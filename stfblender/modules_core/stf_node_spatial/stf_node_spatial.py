@@ -1,5 +1,6 @@
 import bpy
 
+from ...utils.id_utils import ensure_stf_id
 from ...utils.node_spatial_base import export_node_spatial_base, import_node_spatial_base
 from ....libstf.stf_module import STF_Module
 from ...utils.component_utils import STF_Component, get_components_from_object
@@ -25,6 +26,7 @@ def _can_handle_application_object_func(application_object: any) -> int:
 
 def _stf_export(context: STF_BlenderNodeExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:
 	ret = { "type": _stf_type, }
+	ensure_stf_id(context, application_object)
 	return export_node_spatial_base(context, application_object, parent_application_object, ret)
 
 

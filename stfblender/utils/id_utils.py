@@ -32,4 +32,4 @@ def ensure_stf_id(stf_context: any, blender_object: any):
 		original_id = blender_object.stf_id
 		blender_object.stf_id = str(uuid.uuid4())
 		stf_context.report(STFReport("Changed duplicate ID", STFReportSeverity.Warn, original_id, None, blender_object))
-	stf_context.register_id(blender_object.stf_id)
+	stf_context.register_id(blender_object, blender_object.stf_id)

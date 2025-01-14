@@ -1,9 +1,10 @@
 import bpy
 
+
 from ....libstf.stf_export_context import STF_ResourceExportContext
-from ....libstf.stf_import_context import STF_RootImportContext
 from ....libstf.stf_module import STF_Module
 from ....libstf.stf_report import STFReportSeverity, STFReport
+from ..stf_prefab.stf_prefab import STF_BlenderNodeExportContext, STF_BlenderNodeImportContext
 from ...utils.node_spatial_base import export_node_spatial_base, import_node_spatial_base
 from ...utils.component_utils import get_components_from_object
 from ...utils.id_utils import ensure_stf_id
@@ -13,7 +14,7 @@ from ...utils.id_binding_resolver import STF_Blender_BindingResolver
 _stf_type = "stf.instance.armature"
 
 
-def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, parent_application_object: any) -> tuple[any, any]:
+def _stf_import(context: STF_BlenderNodeImportContext, json_resource: dict, id: str, parent_application_object: any) -> tuple[any, any]:
 	blender_armature_object = context.import_resource(json_resource["armature"])
 	blender_object = bpy.data.objects.new(json_resource.get("name", "STF Node"), blender_armature_object)
 
@@ -34,21 +35,21 @@ def _can_handle_application_object_func(application_object: any) -> int:
 	else:
 		return -1
 
-def _stf_export(context: STF_ResourceExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:
+def _stf_export(context: STF_BlenderNodeExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:
 	blender_object: bpy.types.Object = application_object
-
-	blender_armature: bpy.types.Armature = application_object.data
-
+	ensure_stf_id(context, blender_object)
 	ret = {
 		"type": _stf_type,
 	}
-	armature_context = STF_ResourceExportContext(context, ret, blender_object)
 
-	ret["armature"] = armature_context.serialize_resource(blender_armature, blender_object)
+	blender_armature: bpy.types.Armature = application_object.data
+	armature_instance_context = STF_ResourceExportContext(context, ret, blender_object)
+
+	ret["armature"] = armature_instance_context.serialize_resource(blender_armature, blender_object)
 
 	# TODO pose
 
-	return export_node_spatial_base(context, blender_object, parent_application_object, ret)
+	return export_node_spatial_base(context, application_object, parent_application_object, ret)
 
 
 def _resolve_id_binding_func(blender_object: any, id: str) -> any:

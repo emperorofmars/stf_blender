@@ -26,7 +26,8 @@ class STF_ExportState(StateUtil):
 		self._modules: dict[any, list[STF_Module]] = modules[0]
 		self._hooks: dict[any, list[STF_ExportComponentHook]] = modules[1]
 
-		self._registered_ids: set[str] = set()
+		#self._registered_ids: set[str] = set()
+		#self._registered_application_objects: dict[any, str] = {}
 
 		self._resources: dict[any, str] = {} # original application object -> ID of exported STF Json resource
 		self._exported_resources: dict[str, dict] = {} # ID -> exported STF Json resource
@@ -60,8 +61,8 @@ class STF_ExportState(StateUtil):
 		else:
 			return None
 
-	def register_id(self, id: str):
-		self._registered_ids.add(id)
+	def register_id(self, application_object: any, id: str):
+		self._resources[application_object] = id
 
 	def register_serialized_resource(self, application_object: any, json_resource: dict, id: str):
 		if(type(id) is not str):
@@ -74,7 +75,6 @@ class STF_ExportState(StateUtil):
 			return
 		# TODO check for resource loops
 
-		self._resources[application_object] = id
 		self._exported_resources[id] = json_resource
 
 	def serialize_buffer(self, data: bytes) -> str:
@@ -84,7 +84,7 @@ class STF_ExportState(StateUtil):
 		return id
 
 	def id_exists(self, id: str) -> bool:
-		return id in self._registered_ids
+		return id in self._resources
 
 	def set_root_id(self, id: str):
 		self._root_id = id

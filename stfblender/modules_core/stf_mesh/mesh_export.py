@@ -23,7 +23,8 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 	ensure_stf_id(context, blender_mesh)
 
 	if(parent_application_object and len(parent_application_object) == 2):
-		armature: bpy.types.Armature = parent_application_object[0]
+		armature_object: bpy.types.Armature = parent_application_object[0]
+		armature: bpy.types.Armature = parent_application_object[0].data
 		blender_mesh_object: bpy.types.Object = parent_application_object[1]
 
 
@@ -209,7 +210,7 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 
 	# Weightpaint
 	if(armature and blender_mesh_object):
-		stf_mesh["armature"] = mesh_context.serialize_resource(armature)
+		stf_mesh["armature"] = mesh_context.serialize_resource(armature, armature_object)
 
 		# Create vertex group lookup dictionary for stf_ids from the previous name lookup dict
 		weight_bone_map = []
@@ -283,7 +284,7 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 							buffer_weights.write(serialize_float(0, vertex_weight_width)) # vertex weight
 
 				buffers_vertex_groups.append({
-					"target_bone": weight_bone_map[bone_index],
+					"name": vertex_group_name,
 					"indexed": indexed,
 					"count": len(group) if indexed else len(blender_mesh.vertices),
 					"buffer": mesh_context.serialize_buffer(buffer_weights.getvalue()),
