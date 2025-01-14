@@ -183,7 +183,7 @@ def import_stf_mesh(context: STF_RootImportContext, json_resource: dict, id: str
 				weights_count = weight_channel["count"]
 				buffer = BytesIO(mesh_context.import_buffer(weight_channel["buffer"]))
 
-				print(str(weights_count) + " :: " + str(len(blender_mesh.vertices)))
+				print(str(weight_channel) + " :: " + str(indexed) + " :: " + str(weights_count) + " :: " + str(len(blender_mesh.vertices)))
 
 				for index in range(weights_count):
 					if(indexed):
