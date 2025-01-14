@@ -22,12 +22,14 @@ def _stf_import(context: STF_ResourceImportContext, json_resource: dict, id: str
 	blender_object.stf_name = json_resource.get("name", "")
 
 	if("armature_instance" in json_resource):
-		armature_instance: bpy.types.Object = context.get_imported_resource(json_resource["armature_instance"])
-		if(not armature_instance):
-			context.report(STFReport("Invalid armature instance: " + str(json_resource["armature_instance"]), STFReportSeverity.Error, id, _stf_type, parent_application_object))
-		else:
-			modifier: bpy.types.ArmatureModifier = blender_object.modifiers.new("Armature", "ARMATURE")
-			modifier.object = armature_instance
+		def _setup_armature_instance():
+			armature_instance: bpy.types.Object = context.get_imported_resource(json_resource["armature_instance"])
+			if(not armature_instance):
+				context.report(STFReport("Invalid armature instance: " + str(json_resource["armature_instance"]), STFReportSeverity.Error, id, _stf_type, parent_application_object))
+			else:
+				modifier: bpy.types.ArmatureModifier = blender_object.modifiers.new("Armature", "ARMATURE")
+				modifier.object = armature_instance
+		context.add_task(_setup_armature_instance)
 
 	# TODO handle materials, blendshape values
 
