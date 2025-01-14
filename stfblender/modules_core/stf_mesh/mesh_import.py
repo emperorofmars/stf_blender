@@ -4,7 +4,7 @@ import bpy
 from ....libstf.stf_import_context import STF_ResourceImportContext, STF_RootImportContext
 from ....libstf.stf_report import STFReportSeverity, STFReport
 from ...utils.trs_utils import stf_translation_to_blender
-from ...utils.buffer_utils import parse_float, parse_uint
+from ...utils.buffer_utils import parse_float, parse_int, parse_uint
 
 
 _stf_type = "stf.mesh"
@@ -16,6 +16,9 @@ def import_stf_mesh(context: STF_RootImportContext, json_resource: dict, id: str
 	blender_mesh.stf_name = json_resource.get("name", "STF Mesh")
 
 	blender_object_tmp = bpy.data.objects.new("STF TMP throw away", blender_mesh)
+	def _clean_tmp_mesh_object():
+		bpy.data.objects.remove(blender_object_tmp)
+	context.add_task(_clean_tmp_mesh_object)
 
 	mesh_context = STF_ResourceImportContext(context, json_resource, blender_mesh)
 
@@ -171,27 +174,24 @@ def import_stf_mesh(context: STF_RootImportContext, json_resource: dict, id: str
 
 			vertex_groups: dict[int, bpy.types.VertexGroup] = {}
 			for stf_bone_index, bone_name in blender_bone_mappings.items():
-				vertex_groups[stf_bone_index] = blender_object_tmp.vertex_groups.new(name=bone_name)
+				vertex_groups[int(stf_bone_index)] = blender_object_tmp.vertex_groups.new(name=bone_name)
 
 			bone_indices_width = json_resource.get("bone_indices_width", 4)
 			bone_weight_width = json_resource.get("bone_weight_width", 4)
 			for weight_channel in json_resource["weights"]:
-				print(weight_channel)
-
 				indexed = weight_channel["indexed"]
 				weights_count = weight_channel["count"]
 				buffer = BytesIO(mesh_context.import_buffer(weight_channel["buffer"]))
 				for index in range(weights_count):
-					if(indexed): vertex_index = parse_uint(buffer, vertex_indices_width)
-					else: vertex_index = index
-					bone_index = parse_uint(buffer, bone_indices_width)
+					if(indexed):
+						vertex_index = parse_uint(buffer, vertex_indices_width)
+						bone_index = parse_int(buffer, bone_indices_width)
+					else:
+						vertex_index = index
+						bone_index = parse_int(buffer, bone_indices_width)
 					weight = parse_float(buffer, bone_weight_width)
-					vertex = blender_mesh.vertices[vertex_index]
-					vertex_groups[bone_index].add(vertex_index, weight, "ADD")
-
-
-
-
+					if(bone_index >= 0):
+						vertex_groups[bone_index].add([vertex_index], weight, "ADD")
 
 
 	return blender_mesh, mesh_context

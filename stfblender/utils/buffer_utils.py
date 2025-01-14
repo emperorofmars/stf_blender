@@ -30,10 +30,10 @@ def serialize_float(value: float, width: int = 4) -> bytes:
 
 
 def parse_int(buffer: BytesIO, width: int = 4) -> int:
-	return int.from_bytes(buffer.read(width), byteorder="little", signed=True)
+	return struct.unpack(determine_pack_format_int(width), buffer.read(width))[0]
 
 def parse_uint(buffer: BytesIO, width: int = 4) -> int:
-	return int.from_bytes(buffer.read(width), byteorder="little", signed=False)
+	return struct.unpack(determine_pack_format_uint(width), buffer.read(width))[0]
 
 def parse_float(buffer: BytesIO, width: int = 4) -> float:
 	return struct.unpack(determine_pack_format_float(width), buffer.read(width))[0]

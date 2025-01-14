@@ -21,6 +21,10 @@ def _stf_import(context: STF_ResourceImportContext, json_resource: dict, id: str
 	blender_object.stf_id = id
 	blender_object.stf_name = json_resource.get("name", "")
 
+	if("armature_instance" in json_resource):
+		print("armature_instance")
+		print(json_resource["armature_instance"])
+
 	# TODO handle materials, armatures, blendshape values
 
 	return import_node_spatial_base(context, json_resource, id, parent_application_object, blender_object)

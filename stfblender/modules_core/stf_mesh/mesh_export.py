@@ -202,6 +202,8 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 				weight_bone_map[index] = bone.stf_id
 		stf_mesh["bones"] = weight_bone_map
 
+		print(weight_bone_map.keys())
+
 		bone_weight_width = stf_mesh["bone_weight_width"] = 4
 		bone_indices_width = stf_mesh["bone_indices_width"] = 4
 
@@ -233,6 +235,9 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 					if(weight_channel[weight_pos][0] == vertex_index):
 						buffer_weights.write(serialize_int(weight_channel[weight_pos][1], bone_indices_width)) # bone index
 						buffer_weights.write(serialize_float(weight_channel[weight_pos][2], bone_weight_width)) # bone weight
+
+						if(weight_channel[weight_pos][1] > 1000): print(weight_channel[weight_pos][1])
+
 						weight_pos += 1
 					else:
 						buffer_weights.write(serialize_int(-1, bone_indices_width)) # bone index
@@ -240,9 +245,10 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 			else:
 				for weight in weight_channel:
 					buffer_weights.write(serialize_uint(weight[0], vertex_indices_width)) # vertex index
-					buffer_weights.write(serialize_uint(weight[1], bone_indices_width)) # bone index
+					buffer_weights.write(serialize_int(weight[1], bone_indices_width)) # bone index
 					buffer_weights.write(serialize_float(weight[2], bone_weight_width)) # bone weight
 
+					if(weight[1] > 1000): print(weight[1])
 			buffers_weights.append({
 				"indexed": indexed,
 				"count": len(weight_channel),
