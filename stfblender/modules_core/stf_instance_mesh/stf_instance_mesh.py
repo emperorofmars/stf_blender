@@ -22,10 +22,14 @@ def _stf_import(context: STF_ResourceImportContext, json_resource: dict, id: str
 	blender_object.stf_name = json_resource.get("name", "")
 
 	if("armature_instance" in json_resource):
-		print("armature_instance")
-		print(json_resource["armature_instance"])
+		armature_instance: bpy.types.Object = context.get_imported_resource(json_resource["armature_instance"])
+		if(not armature_instance):
+			context.report(STFReport("Invalid armature instance: " + str(json_resource["armature_instance"]), STFReportSeverity.Error, id, _stf_type, parent_application_object))
+		else:
+			modifier: bpy.types.ArmatureModifier = blender_object.modifiers.new("Armature", "ARMATURE")
+			modifier.object = armature_instance
 
-	# TODO handle materials, armatures, blendshape values
+	# TODO handle materials, blendshape values
 
 	return import_node_spatial_base(context, json_resource, id, parent_application_object, blender_object)
 
@@ -54,7 +58,8 @@ def _stf_export(context: STF_ResourceExportContext, application_object: any, par
 	if(len(blender_armatures) == 1):
 		if(blender_armatures[0].object.stf_id):
 			ret["mesh"] = mesh_context.serialize_resource(blender_mesh, (blender_armatures[0].object.data, blender_object))
-			# TODO check if the armature is in the export
+
+			# TODO check if the armature is in the export and within the same hierarchy, otherwise check if its in an instanced hierarchy
 			#ret["armature_instance"] = mesh_context.serialize_resource(blender_armatures[0].object)
 			ret["armature_instance"] = blender_armatures[0].object.stf_id
 			ret["referenced_resources"].append(blender_armatures[0].object.stf_id)

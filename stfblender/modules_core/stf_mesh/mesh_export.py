@@ -202,8 +202,6 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 				weight_bone_map[index] = bone.stf_id
 		stf_mesh["bones"] = weight_bone_map
 
-		print(weight_bone_map.keys())
-
 		bone_weight_width = stf_mesh["bone_weight_width"] = 4
 		bone_indices_width = stf_mesh["bone_indices_width"] = 4
 
