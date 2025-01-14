@@ -47,12 +47,12 @@ def import_stf_mesh(context: STF_RootImportContext, json_resource: dict, id: str
 	tris_count = json_resource.get("tris_count", 0)
 	face_count = json_resource.get("face_count", 0)
 	if(face_count > 0):
-		face_width = json_resource.get("face_width", 0)
+		face_indices_width = json_resource.get("face_indices_width", 4)
 		buffer_faces = BytesIO(mesh_context.import_buffer(json_resource["faces"]))
 		buffer_tris = BytesIO(mesh_context.import_buffer(json_resource["tris"]))
 
 		for index in range(face_count):
-			face_len = parse_uint(buffer_faces, face_width)
+			face_len = parse_uint(buffer_faces, face_indices_width)
 			face_splits = set()
 			for _ in range(face_len):
 				face_splits.add(parse_uint(buffer_tris, split_indices_width))
@@ -83,6 +83,15 @@ def import_stf_mesh(context: STF_RootImportContext, json_resource: dict, id: str
 	if(blender_mesh.validate(verbose=True)): # return is True if errors found
 		context.report(STFReport("Invalid mesh", STFReportSeverity.Error, id, _stf_type, blender_mesh))
 
+
+	# Face smooth setting
+	if("face_smooth_indices" in json_resource and "face_smooth_indices_len" in json_resource):
+		face_smooth_indices_len = json_resource["face_smooth_indices_len"]
+		face_indices_width = json_resource.get("face_indices_width", 4)
+		buffer_face_smooth_indices = BytesIO(mesh_context.import_buffer(json_resource["face_smooth_indices"]))
+		for _ in range(face_smooth_indices_len):
+			smooth_index = parse_uint(buffer_face_smooth_indices, face_indices_width)
+			blender_mesh.polygons[smooth_index].use_smooth = True
 
 	if("normals" in json_resource):
 		vertex_normals_width = json_resource.get("vertex_normals_width", 4)

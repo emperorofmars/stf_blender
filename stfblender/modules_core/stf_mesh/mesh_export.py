@@ -151,11 +151,9 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 	# Triangles, faces, and their material indices
 	stf_mesh["tris_count"] = len(blender_mesh.loop_triangles)
 	stf_mesh["face_count"] = len(blender_mesh.polygons)
-	face_width = stf_mesh["face_width"] = 4
+	face_indices_width = stf_mesh["face_indices_width"] = 4
 
-	buffer_lines = BytesIO()
 	buffer_tris = BytesIO()
-	buffer_faces = BytesIO()
 
 	# Loop through triangles, and also store how many belong to the same face
 	face_lens: list[int] = [0]
@@ -173,16 +171,26 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 	stf_mesh["tris"] = mesh_context.serialize_buffer(buffer_tris.getvalue())
 
 	# Material indices
+	buffer_face_smooth_indices = BytesIO()
+	face_smooth_indices_len = 0
+	buffer_faces = BytesIO()
+
 	material_indices_width = stf_mesh["material_indices_width"] = 4
 	buffer_face_material_indices = BytesIO()
-	for index, polygon in enumerate(blender_mesh.polygons):
-		buffer_faces.write(serialize_uint(face_lens[index], face_width))
+	for polygon in blender_mesh.polygons:
+		buffer_faces.write(serialize_uint(face_lens[polygon.index], face_indices_width))
 		buffer_face_material_indices.write(serialize_uint(polygon.material_index, material_indices_width))
+		if(polygon.use_smooth):
+			face_smooth_indices_len += 1
+			buffer_face_smooth_indices.write(serialize_uint(polygon.index, face_indices_width))
+
 	stf_mesh["faces"] = mesh_context.serialize_buffer(buffer_faces.getvalue())
 	stf_mesh["material_indices"] = mesh_context.serialize_buffer(buffer_face_material_indices.getvalue())
-
+	stf_mesh["face_smooth_indices_len"] = face_smooth_indices_len
+	stf_mesh["face_smooth_indices"] = mesh_context.serialize_buffer(buffer_face_smooth_indices.getvalue())
 
 	# TODO also export edges if wanted
+	buffer_lines = BytesIO()
 
 
 	# Weightpaint
