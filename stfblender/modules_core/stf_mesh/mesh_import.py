@@ -162,25 +162,26 @@ def import_stf_mesh(context: STF_RootImportContext, json_resource: dict, id: str
 		for polygon in blender_mesh.polygons:
 			polygon.material_index = parse_uint(buffer_material_indices, material_indices_width)
 
+
 	# Weight paint
-	if("armature" in json_resource and "weights" in json_resource):
+	if("armature" in json_resource and "weights" in json_resource and "bones" in json_resource):
 		armature: bpy.types.Armature = mesh_context.import_resource(json_resource["armature"])
 		if(not armature):
 			mesh_context.report(STFReport("Invalid Armature (armature id: " + json_resource["armature"] + " )", STFReportSeverity.Error, id, _stf_type, blender_mesh))
 		else:
 			bone_weight_width = json_resource.get("bone_weight_width", 4)
-			for weight_channel in json_resource["weights"]:
-				bone_id = weight_channel["target_bone"]
-				bone = None
+			bones = []
+			vertex_groups = []
+			for bone_id in json_resource["bones"]:
 				for blender_bone in armature.bones:
 					if(blender_bone.stf_id == bone_id):
-						bone = blender_bone
+						bones.append(blender_bone.name)
+						vertex_groups.append(blender_object_tmp.vertex_groups.new(name=blender_bone.name))
 						break
-				if(not bone):
-					mesh_context.report(STFReport("Invalid Bone Mapping (bone_id: " + bone_id + " )", STFReportSeverity.Error, id, _stf_type, blender_mesh))
-					continue
+			if(len(vertex_groups) < len(json_resource["bones"])):
+				mesh_context.report(STFReport("Invalid Bone Mapping", STFReportSeverity.Error, id, _stf_type, blender_mesh))
 
-				vertex_group = blender_object_tmp.vertex_groups.new(name=bone.name)
+			for weight_channel in json_resource["weights"]:
 				indexed = weight_channel["indexed"]
 				weights_count = weight_channel["count"]
 				buffer = BytesIO(mesh_context.import_buffer(weight_channel["buffer"]))
@@ -190,8 +191,9 @@ def import_stf_mesh(context: STF_RootImportContext, json_resource: dict, id: str
 						vertex_index = parse_uint(buffer, vertex_indices_width)
 					else:
 						vertex_index = index
+					bone_index = parse_int(buffer, vertex_indices_width)
 					weight = parse_float(buffer, bone_weight_width)
-					if(weight > 0):
-						vertex_group.add([vertex_index], weight, "REPLACE")
+					if(weight > 0 and bone_index >= 0):
+						vertex_groups[bone_index].add([vertex_index], weight, "REPLACE")
 
 	return blender_mesh, mesh_context

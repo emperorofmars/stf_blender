@@ -219,37 +219,46 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 			if(group.name in armature.bones):
 				weight_bone_map.append(armature.bones[group.name].stf_id)
 				group_to_bone_index[group.index] = len(weight_bone_map) - 1
+		stf_mesh["bones"] = weight_bone_map
 
-		bone_groups: dict[int, dict[int, float]] = {index: {} for index, _ in enumerate(weight_bone_map)}
+		# dict[channel_index, dict[vertex_index, tuple[bone_index, weight]]]
+		bone_channels: dict[int, dict[int, tuple[int, float]]] = {}
 		for vertex in blender_mesh.vertices:
-			for group in vertex.groups:
+			for channel, group in enumerate(vertex.groups):
 				if(group.group in group_to_bone_index):
-					bone_groups[group_to_bone_index[group.group]][vertex.index] = group.weight
+					if(channel not in bone_channels): bone_channels[channel] = {}
+					bone_channels[channel][vertex.index] = (group_to_bone_index[group.group], group.weight)
 
 		bone_weight_width = stf_mesh["bone_weight_width"] = 4
 		buffers_weights = []
-		for bone_index, group in bone_groups.items():
-			indexed = len(group) < (len(blender_mesh.vertices) / 2)
+
+		for channel_index, channel in bone_channels.items():
+			indexed = len(channel) < (len(blender_mesh.vertices) / 3)
 			buffer_weights = BytesIO()
 			if(indexed):
-				for vertex_index, weight in group.items():
+				for vertex_index, data in channel.items():
 					buffer_weights.write(serialize_uint(vertex_index, vertex_indices_width)) # vertex index
-					buffer_weights.write(serialize_float(weight, bone_weight_width)) # bone weight
+					buffer_weights.write(serialize_int(data[0], vertex_indices_width)) # bone index
+					buffer_weights.write(serialize_float(data[1], bone_weight_width)) # bone weight
 			else:
 				for vertex in blender_mesh.vertices:
-					if(vertex.index in group):
-						buffer_weights.write(serialize_float(group[vertex.index], bone_weight_width)) # bone weight
+					if(vertex.index in channel):
+						buffer_weights.write(serialize_int(channel[vertex.index][0], vertex_indices_width)) # bone index
+						buffer_weights.write(serialize_float(channel[vertex.index][1], bone_weight_width)) # bone weight
 					else:
+						buffer_weights.write(serialize_int(-1, vertex_indices_width)) # bone index
 						buffer_weights.write(serialize_float(0, bone_weight_width)) # bone weight
 
+
 			buffers_weights.append({
-				"target_bone": weight_bone_map[bone_index],
 				"indexed": indexed,
-				"count": len(group) if indexed else len(blender_mesh.vertices),
+				"count": len(channel) if indexed else len(blender_mesh.vertices),
 				"buffer": mesh_context.serialize_buffer(buffer_weights.getvalue()),
 			})
 
 		stf_mesh["weights"] = buffers_weights
+
+
 
 	# Vertex groups that are not weightpaint
 	if(blender_mesh_object):
@@ -292,14 +301,27 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 			stf_mesh["buffers_groups"] = buffers_vertex_groups
 
 
-	# for each blendshape and vertex
-	buffer_blendshape_indices = BytesIO()
-	buffer_blendshape_translation = BytesIO()
-	buffer_blendshape_normal = BytesIO()
-	buffer_blendshape_tangent = BytesIO()
-	#for shape_key in blender_mesh.shape_keys.key_blocks:
-	#	pass
+	# Blendshapes
+	sk_empty = 0
+	sk_full = 0
+	if(blender_mesh.shape_keys):
+		shape_keys = []
+		for shape_key in blender_mesh.shape_keys.key_blocks:
+			if(shape_key == shape_key.relative_key or shape_key.mute or blender_mesh.shape_keys.key_blocks[0].name == shape_key.name):
+				continue
 
+			for vertex in blender_mesh.vertices:
+				point = shape_key.data[vertex.index]
+				if((vertex.co - point.co).length > 0.00001): sk_full += 1
+				#if(point.co.length > 0.00001): sk_full += 1
+				else: sk_empty += 1
+
+			buffer_blendshape_indices = BytesIO()
+			buffer_blendshape_translation = BytesIO()
+			buffer_blendshape_normal = BytesIO()
+			buffer_blendshape_tangent = BytesIO()
+
+	print(blender_mesh.name + " : " + str(sk_full) + " : " + str(sk_empty))
 
 	return stf_mesh, blender_mesh.stf_id, mesh_context
 
