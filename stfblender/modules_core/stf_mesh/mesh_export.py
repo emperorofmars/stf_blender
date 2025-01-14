@@ -82,7 +82,14 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 				color_buffer.write(serialize_float(color_layer.data[vertex.index].color[1], float_width))
 				color_buffer.write(serialize_float(color_layer.data[vertex.index].color[2], float_width))
 				color_buffer.write(serialize_float(color_layer.data[vertex.index].color[3], float_width))
-		# TODO other data types
+		elif(color_layer.data_type == "BYTE_COLOR" and color_layer.domain == "POINT"): # TODO deal with byte_color vs float_color actually
+			color_buffer = BytesIO()
+			buffers_color.append(color_buffer)
+			for vertex in blender_mesh.vertices:
+				color_buffer.write(serialize_float(color_layer.data[vertex.index].color[0], float_width))
+				color_buffer.write(serialize_float(color_layer.data[vertex.index].color[1], float_width))
+				color_buffer.write(serialize_float(color_layer.data[vertex.index].color[2], float_width))
+				color_buffer.write(serialize_float(color_layer.data[vertex.index].color[3], float_width))
 	stf_mesh["colors"] = []
 	for color_buffer in buffers_color:
 		stf_mesh["colors"].append(mesh_context.serialize_buffer(color_buffer.getvalue()))
@@ -127,12 +134,19 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 		if(color_layer.data_type == "FLOAT_COLOR" and color_layer.domain == "CORNER"):
 			color_buffer = BytesIO()
 			buffers_split_color.append(color_buffer)
-			for vertex in blender_mesh.vertices:
-				color_buffer.write(serialize_float(color_layer.data[vertex.index].color[0], float_width))
-				color_buffer.write(serialize_float(color_layer.data[vertex.index].color[1], float_width))
-				color_buffer.write(serialize_float(color_layer.data[vertex.index].color[2], float_width))
-				color_buffer.write(serialize_float(color_layer.data[vertex.index].color[3], float_width))
-		# TODO other data types
+			for loop in blender_mesh.loops:
+				color_buffer.write(serialize_float(color_layer.data[loop.index].color[0], float_width))
+				color_buffer.write(serialize_float(color_layer.data[loop.index].color[1], float_width))
+				color_buffer.write(serialize_float(color_layer.data[loop.index].color[2], float_width))
+				color_buffer.write(serialize_float(color_layer.data[loop.index].color[3], float_width))
+		elif(color_layer.data_type == "BYTE_COLOR" and color_layer.domain == "CORNER"): # TODO deal with byte_color vs float_color actually
+			color_buffer = BytesIO()
+			buffers_split_color.append(color_buffer)
+			for loop in blender_mesh.loops:
+				color_buffer.write(serialize_float(color_layer.data[loop.index].color[0], float_width))
+				color_buffer.write(serialize_float(color_layer.data[loop.index].color[1], float_width))
+				color_buffer.write(serialize_float(color_layer.data[loop.index].color[2], float_width))
+				color_buffer.write(serialize_float(color_layer.data[loop.index].color[3], float_width))
 
 	stf_mesh["splits"] = mesh_context.serialize_buffer(buffer_split_vertices.getvalue())
 	stf_mesh["split_normals"] = mesh_context.serialize_buffer(buffer_split_normals.getvalue())
@@ -205,15 +219,15 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 				weight_bone_map.append(armature.bones[group.name].stf_id)
 				group_to_bone_index[group.index] = len(weight_bone_map) - 1
 
-		groups: dict[int, dict[int, float]] = {index: {} for index, _ in enumerate(weight_bone_map)}
+		bone_groups: dict[int, dict[int, float]] = {index: {} for index, _ in enumerate(weight_bone_map)}
 		for vertex in blender_mesh.vertices:
 			for group in vertex.groups:
 				if(group.group in group_to_bone_index):
-					groups[group_to_bone_index[group.group]][vertex.index] = group.weight
+					bone_groups[group_to_bone_index[group.group]][vertex.index] = group.weight
 
 		bone_weight_width = stf_mesh["bone_weight_width"] = 4
 		buffers_weights = []
-		for bone_index, group in groups.items():
+		for bone_index, group in bone_groups.items():
 			indexed = len(group) < (len(blender_mesh.vertices) / 2)
 			buffer_weights = BytesIO()
 			if(indexed):
@@ -236,10 +250,45 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 
 		stf_mesh["weights"] = buffers_weights
 
+	# Vertex groups that are not weightpaint
+	if(blender_mesh_object):
+		group_index_to_group_name: dict[int, str] = {}
+		vertex_groups: dict[str, dict[int, float]] = {}
+		for group in blender_mesh_object.vertex_groups:
+			if(not armature or group.name not in armature.bones): # don't include weight paint groups
+				vertex_groups[group.name] = {}
+				group_index_to_group_name[group.index] = group.name
 
+		if(len(vertex_groups) > 0):
+			for vertex in blender_mesh.vertices:
+				for group in vertex.groups:
+					if(group.group in group_index_to_group_name):
+						vertex_groups[group_index_to_group_name[group.group]][vertex.index] = group.weight
 
-	groups = []
-	# TODO vertex groups
+			vertex_weight_width = stf_mesh["vertex_weight_width"] = 4
+			buffers_vertex_groups = []
+
+			for vertex_group_name, group in vertex_groups.items():
+				indexed = len(group) < (len(blender_mesh.vertices) / 2)
+				buffer_weights = BytesIO()
+				if(indexed):
+					for vertex_index, weight in group.items():
+						buffer_weights.write(serialize_uint(vertex_index, vertex_indices_width)) # vertex index
+						buffer_weights.write(serialize_float(weight, vertex_weight_width)) # vertex weight
+				else:
+					for vertex in blender_mesh.vertices:
+						if(vertex.index in group):
+							buffer_weights.write(serialize_float(group[vertex.index], vertex_weight_width)) # vertex weight
+						else:
+							buffer_weights.write(serialize_float(0, vertex_weight_width)) # vertex weight
+
+				buffers_vertex_groups.append({
+					"target_bone": weight_bone_map[bone_index],
+					"indexed": indexed,
+					"count": len(group) if indexed else len(blender_mesh.vertices),
+					"buffer": mesh_context.serialize_buffer(buffer_weights.getvalue()),
+				})
+			stf_mesh["buffers_groups"] = buffers_vertex_groups
 
 
 	# for each blendshape and vertex
