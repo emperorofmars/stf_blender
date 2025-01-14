@@ -5,7 +5,7 @@ import bmesh
 from ....libstf.stf_export_context import STF_ResourceExportContext, STF_RootExportContext
 from ...utils.id_utils import ensure_stf_id
 from ...utils.trs_utils import blender_translation_to_stf
-from ...utils.buffer_utils import serialize_float, serialize_uint
+from ...utils.buffer_utils import serialize_float, serialize_int, serialize_uint
 
 
 _stf_type = "stf.mesh"
@@ -88,7 +88,7 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 	for color_buffer in buffers_color:
 		stf_mesh["colors"].append(mesh_context.serialize_buffer(color_buffer.getvalue()))
 
-	# Splits
+	# Face corners (Splits)
 	stf_mesh["split_count"] = len(blender_mesh.loops)
 	stf_mesh["split_indices_width"] = split_indices_width
 	stf_mesh["split_normal_width"] = float_width
@@ -106,6 +106,7 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 	uv_names = []
 	for loop in blender_mesh.loops:
 		loop: bpy.types.MeshLoop = loop
+		# Split to vertex indices
 		buffer_split_vertices.write(serialize_uint(loop.vertex_index, vertex_indices_width))
 
 		normal = blender_translation_to_stf(loop.normal)
@@ -205,7 +206,7 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 		bone_indices_width = stf_mesh["bone_indices_width"] = 4
 
 		max_weight_group_count = 0
-		weight_channels = []
+		weight_channels: list[list[tuple[int, int, float]]] = []
 		# For each vertex and each group of the vertex
 		for vertex_index, vertex in enumerate(blender_mesh.vertices):
 			if(len(vertex.groups) > max_weight_group_count): max_weight_group_count = len(vertex.groups)
@@ -223,10 +224,25 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 		for group, weight_channel in enumerate(weight_channels):
 			buffer_weights = BytesIO()
 			indexed = len(weight_channel) < (len(blender_mesh.vertices) / 2)
-			for weight in weight_channel:
-				if(indexed): buffer_weights.write(serialize_uint(weight[0], vertex_indices_width)) # vertex index
-				buffer_weights.write(serialize_uint(weight[1], bone_indices_width)) # bone index
-				buffer_weights.write(serialize_float(weight[2], bone_weight_width)) # bone weight
+
+			weight_pos = 0
+			if(not indexed):
+				for vertex_index in range(len(blender_mesh.vertices)):
+					if(weight_pos >= len(weight_channel)): break
+
+					if(weight_channel[weight_pos][0] == vertex_index):
+						buffer_weights.write(serialize_int(weight_channel[weight_pos][1], bone_indices_width)) # bone index
+						buffer_weights.write(serialize_float(weight_channel[weight_pos][2], bone_weight_width)) # bone weight
+						weight_pos += 1
+					else:
+						buffer_weights.write(serialize_int(-1, bone_indices_width)) # bone index
+						buffer_weights.write(serialize_float(0, bone_weight_width)) # bone weight
+			else:
+				for weight in weight_channel:
+					buffer_weights.write(serialize_uint(weight[0], vertex_indices_width)) # vertex index
+					buffer_weights.write(serialize_uint(weight[1], bone_indices_width)) # bone index
+					buffer_weights.write(serialize_float(weight[2], bone_weight_width)) # bone weight
+
 			buffers_weights.append({
 				"indexed": indexed,
 				"count": len(weight_channel),

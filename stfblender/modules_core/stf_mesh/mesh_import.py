@@ -15,6 +15,8 @@ def import_stf_mesh(context: STF_RootImportContext, json_resource: dict, id: str
 	blender_mesh.stf_id = id
 	blender_mesh.stf_name = json_resource.get("name", "STF Mesh")
 
+	blender_object_tmp = bpy.data.objects.new("STF TMP throw away", blender_mesh)
+
 	mesh_context = STF_ResourceImportContext(context, json_resource, blender_mesh)
 
 	vertex_count = json_resource["vertex_count"]
@@ -100,7 +102,7 @@ def import_stf_mesh(context: STF_RootImportContext, json_resource: dict, id: str
 				a = parse_float(buffer_vertex_colors, vertex_color_width)
 				color_attribute.data[index].color = (r, g, b, a)
 
-
+	# Face corners (Splits)
 	if(split_count > 0 and "splits" in json_resource):
 		if("split_normals" in json_resource):
 			split_normal_width = json_resource.get("split_normal_width", 4)
@@ -133,6 +135,7 @@ def import_stf_mesh(context: STF_RootImportContext, json_resource: dict, id: str
 					a = parse_float(buffer_split_colors, split_color_width)
 					color_attribute.data[index].color = (r, g, b, a)
 
+	# Material slots and material slot indices
 	if("material_slots" in json_resource):
 		for material_slot in json_resource["material_slots"]:
 			material = None
@@ -147,6 +150,7 @@ def import_stf_mesh(context: STF_RootImportContext, json_resource: dict, id: str
 		for polygon in blender_mesh.polygons:
 			polygon.material_index = parse_uint(buffer_material_indices, material_indices_width)
 
+	# Weight paint
 	if("armature" in json_resource and "bones" in json_resource and "weights" in json_resource):
 		armature: bpy.types.Armature = mesh_context.import_resource(json_resource["armature"])
 		if(not armature):
@@ -165,9 +169,28 @@ def import_stf_mesh(context: STF_RootImportContext, json_resource: dict, id: str
 				else:
 					blender_bone_mappings[index] = bone.name
 
-			print(blender_bone_mappings)
+			vertex_groups: dict[int, bpy.types.VertexGroup] = {}
+			for stf_bone_index, bone_name in blender_bone_mappings.items():
+				vertex_groups[stf_bone_index] = blender_object_tmp.vertex_groups.new(name=bone_name)
+
+			bone_indices_width = json_resource.get("bone_indices_width", 4)
+			bone_weight_width = json_resource.get("bone_weight_width", 4)
 			for weight_channel in json_resource["weights"]:
 				print(weight_channel)
+
+				indexed = weight_channel["indexed"]
+				weights_count = weight_channel["count"]
+				buffer = BytesIO(mesh_context.import_buffer(weight_channel["buffer"]))
+				for index in range(weights_count):
+					if(indexed): vertex_index = parse_uint(buffer, vertex_indices_width)
+					else: vertex_index = index
+					bone_index = parse_uint(buffer, bone_indices_width)
+					weight = parse_float(buffer, bone_weight_width)
+					vertex = blender_mesh.vertices[vertex_index]
+					vertex_groups[bone_index].add(vertex_index, weight, "ADD")
+
+
+
 
 
 
