@@ -45,7 +45,6 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 	vertex_indices_width = 4 if len(blender_mesh.vertices) * 3 < 2**32 else 8
 	split_indices_width = 4 if len(blender_mesh.loops) * 3 < 2**32 else 8
 
-
 	# vertices
 	stf_mesh["vertex_count"] = len(blender_mesh.vertices)
 	stf_mesh["vertex_width"] = float_width
@@ -195,11 +194,13 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 		vgroup_names = {vgroup.index: vgroup.name for vgroup in blender_mesh_object.vertex_groups}
 
 		# Create vertex group lookup dictionary for stf_ids from the previous name lookup dict
-		weight_bone_map = {}
+		weight_bone_map = []
+		group_to_bone_index = {}
 		for index, vgroup_name in vgroup_names.items():
 			if(vgroup_name in armature.bones):
 				bone = armature.bones[vgroup_name]
-				weight_bone_map[index] = bone.stf_id
+				weight_bone_map.append(bone.stf_id)
+				group_to_bone_index[index] = len(weight_bone_map) - 1
 		stf_mesh["bones"] = weight_bone_map
 
 		bone_weight_width = stf_mesh["bone_weight_width"] = 4
@@ -211,21 +212,30 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 		for vertex_index, vertex in enumerate(blender_mesh.vertices):
 			if(len(vertex.groups) > max_weight_group_count): max_weight_group_count = len(vertex.groups)
 			for group_index, group in enumerate(vertex.groups):
-				try:
-					bone_from_map = weight_bone_map[group.group]
-				except Exception:
-					continue
-				if(bone_from_map):
-					while(len(weight_channels) <= group_index): weight_channels.append([])
-					weight_channels[group_index].append((vertex_index, group.group, group.weight))
+				while(len(weight_channels) <= group_index): weight_channels.append([])
+				if(group.group in group_to_bone_index):
+					weight_channels[group_index].append((vertex_index, group_to_bone_index[group.group], group.weight))
+				else:
+					weight_channels[group_index].append(None)
 
 		# Convert weight arrays to buffers
 		buffers_weights = []
-		for group, weight_channel in enumerate(weight_channels):
+		for weight_channel in weight_channels:
 			buffer_weights = BytesIO()
 			indexed = len(weight_channel) < (len(blender_mesh.vertices) / 2)
 
-			weight_pos = 0
+			for weight in weight_channel:
+				if(weight):
+					if(indexed): buffer_weights.write(serialize_uint(weight[0], vertex_indices_width)) # vertex index
+					buffer_weights.write(serialize_int(weight[1], bone_indices_width)) # bone index
+					buffer_weights.write(serialize_float(weight[2], bone_weight_width)) # bone weight
+				else:
+					if(indexed): buffer_weights.write(serialize_uint(0, vertex_indices_width)) # vertex index
+					buffer_weights.write(serialize_int(-1, bone_indices_width)) # bone index
+					buffer_weights.write(serialize_float(0, bone_weight_width)) # bone weight
+
+
+			"""weight_pos = 0
 			if(not indexed):
 				for vertex_index in range(len(blender_mesh.vertices)):
 					if(weight_pos >= len(weight_channel)): break
@@ -233,9 +243,6 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 					if(weight_channel[weight_pos][0] == vertex_index):
 						buffer_weights.write(serialize_int(weight_channel[weight_pos][1], bone_indices_width)) # bone index
 						buffer_weights.write(serialize_float(weight_channel[weight_pos][2], bone_weight_width)) # bone weight
-
-						if(weight_channel[weight_pos][1] > 1000): print(weight_channel[weight_pos][1])
-
 						weight_pos += 1
 					else:
 						buffer_weights.write(serialize_int(-1, bone_indices_width)) # bone index
@@ -244,9 +251,7 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 				for weight in weight_channel:
 					buffer_weights.write(serialize_uint(weight[0], vertex_indices_width)) # vertex index
 					buffer_weights.write(serialize_int(weight[1], bone_indices_width)) # bone index
-					buffer_weights.write(serialize_float(weight[2], bone_weight_width)) # bone weight
-
-					if(weight[1] > 1000): print(weight[1])
+					buffer_weights.write(serialize_float(weight[2], bone_weight_width)) # bone weight"""
 			buffers_weights.append({
 				"indexed": indexed,
 				"count": len(weight_channel),
