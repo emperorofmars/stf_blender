@@ -1,10 +1,10 @@
 from io import BytesIO
 import bpy
-import bmesh
+import mathutils
 
 from ....libstf.stf_export_context import STF_ResourceExportContext, STF_RootExportContext
 from ...utils.id_utils import ensure_stf_id
-from ...utils.trs_utils import blender_translation_to_stf
+from ...utils.trs_utils import blender_translation_to_stf, blender_uv_to_stf
 from ...utils.buffer_utils import serialize_float, serialize_int, serialize_uint
 
 
@@ -129,8 +129,9 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 
 		for index, uv_layer in enumerate(blender_mesh.uv_layers):
 			uv_names.append(uv_layer.name)
-			buffers_uv[index].write(serialize_float(uv_layer.uv[loop.index].vector[0], float_width))
-			buffers_uv[index].write(serialize_float(uv_layer.uv[loop.index].vector[1], float_width))
+			uv = blender_uv_to_stf(uv_layer.uv[loop.index].vector)
+			buffers_uv[index].write(serialize_float(uv[0], float_width))
+			buffers_uv[index].write(serialize_float(uv[1], float_width))
 
 	for index, color_layer in enumerate(blender_mesh.color_attributes):
 		if(color_layer.data_type == "FLOAT_COLOR" and color_layer.domain == "CORNER"):
@@ -311,18 +312,21 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 			if(shape_key == shape_key.relative_key or shape_key.mute or blender_mesh.shape_keys.key_blocks[0].name == shape_key.name):
 				continue
 
-			vertex_normals = shape_key.normals_vertex_get()
-			print(vertex_normals[0:3])
+			vertex_normals_flat = shape_key.normals_vertex_get()
+			vertex_normals: list[mathutils.Vector] = []
+			for flat_normal_base_index in range(int(len(vertex_normals_flat) / 3)):
+				vertex_normals.append(blender_translation_to_stf(mathutils.Vector(vertex_normals_flat[flat_normal_base_index * 3 : flat_normal_base_index * 3 + 3])))
+
 			for vertex in blender_mesh.vertices:
 				point: bpy.types.ShapeKeyPoint = shape_key.data[vertex.index]
 
 				if((vertex.co - point.co).length > 0.00001): sk_full += 1
 				else: sk_empty += 1
 
-			split_normals = shape_key.normals_split_get()
-			print(split_normals[0:3])
-			for loop in blender_mesh.loops:
-				pass
+			split_normals_flat = shape_key.normals_split_get()
+			split_normals: list[mathutils.Vector] = []
+			for flat_normal_base_index in range(int(len(split_normals_flat) / 3)):
+				split_normals.append(blender_translation_to_stf(mathutils.Vector(split_normals_flat[flat_normal_base_index * 3 : flat_normal_base_index * 3 + 3])))
 
 			buffer_blendshape_indices = BytesIO()
 			buffer_blendshape_translation = BytesIO()

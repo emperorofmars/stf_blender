@@ -22,6 +22,11 @@ def to_trs(t: mathutils.Vector, r: mathutils.Quaternion, s: mathutils.Vector) ->
 		blender_scale_to_stf(s)
 	]
 
+def blender_uv_to_stf(blender_vec: mathutils.Vector) -> list[float]:
+	# x,y,z -> x,z,-y
+	return [blender_vec.x, 1 - blender_vec.y]
+
+
 def blender_object_to_trs(blender_object: bpy.types.Object) -> list[list[float]]:
 	#t, r, s = blender_object.matrix_local.decompose()
 	if(blender_object.parent):
@@ -63,3 +68,7 @@ def trs_to_blender_object(trs: list[list[float]], blender_object: bpy.types.Obje
 		# TODO handle parent binding
 	else:
 		blender_object.matrix_world = matrix_local
+
+def stf_uv_to_blender(stf_uv: list[float]) -> list[float]:
+	# x,y,z -> x,z,-y
+	return mathutils.Vector((stf_uv[0], 1 - stf_uv[1]))

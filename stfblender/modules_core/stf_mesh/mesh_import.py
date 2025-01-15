@@ -3,7 +3,7 @@ import bpy
 
 from ....libstf.stf_import_context import STF_ResourceImportContext, STF_RootImportContext
 from ....libstf.stf_report import STFReportSeverity, STFReport
-from ...utils.trs_utils import stf_translation_to_blender
+from ...utils.trs_utils import stf_translation_to_blender, stf_uv_to_blender
 from ...utils.buffer_utils import parse_float, parse_int, parse_uint
 
 
@@ -132,7 +132,7 @@ def import_stf_mesh(context: STF_RootImportContext, json_resource: dict, id: str
 				buffer_uv = BytesIO(mesh_context.import_buffer(json_resource["uvs"][uv_layer_index]["uv"]))
 				for index, loop in enumerate(blender_mesh.loops):
 					# TODO convert uv from gltf uv coordinate space
-					uv = [parse_float(buffer_uv, split_uv_width), parse_float(buffer_uv, split_uv_width)]
+					uv = stf_uv_to_blender([parse_float(buffer_uv, split_uv_width), parse_float(buffer_uv, split_uv_width)])
 					uv_layer.uv[index].vector = uv
 
 		if("split_colors" in json_resource):
