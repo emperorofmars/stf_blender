@@ -313,9 +313,9 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 				continue
 
 			vertex_normals_flat = shape_key.normals_vertex_get()
-			vertex_normals: list[mathutils.Vector] = []
+			vertex_normals: list[list[float]] = []
 			for flat_normal_base_index in range(int(len(vertex_normals_flat) / 3)):
-				vertex_normals.append(blender_translation_to_stf(mathutils.Vector(vertex_normals_flat[flat_normal_base_index * 3 : flat_normal_base_index * 3 + 3])))
+				vertex_normals.append(blender_translation_to_stf(vertex_normals_flat[flat_normal_base_index * 3 : flat_normal_base_index * 3 + 3]))
 
 			for vertex in blender_mesh.vertices:
 				point: bpy.types.ShapeKeyPoint = shape_key.data[vertex.index]
@@ -324,9 +324,9 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 				else: sk_empty += 1
 
 			split_normals_flat = shape_key.normals_split_get()
-			split_normals: list[mathutils.Vector] = []
+			split_normals: list[list[float]] = []
 			for flat_normal_base_index in range(int(len(split_normals_flat) / 3)):
-				split_normals.append(blender_translation_to_stf(mathutils.Vector(split_normals_flat[flat_normal_base_index * 3 : flat_normal_base_index * 3 + 3])))
+				split_normals.append(blender_translation_to_stf(split_normals_flat[flat_normal_base_index * 3 : flat_normal_base_index * 3 + 3]))
 
 			buffer_blendshape_indices = BytesIO()
 			buffer_blendshape_translation = BytesIO()

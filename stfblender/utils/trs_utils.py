@@ -5,15 +5,15 @@ import mathutils
 
 def blender_translation_to_stf(blender_vec: mathutils.Vector) -> list[float]:
 	# x,y,z -> x,z,-y
-	return [blender_vec.x, blender_vec.z, -blender_vec.y]
+	return [blender_vec[0], blender_vec[2], -blender_vec[1]]
 
 def blender_rotation_to_stf(blender_quat: mathutils.Quaternion) -> list[float]:
 	# w,x,y,z -> x,z,-y,w
-	return [blender_quat.x, blender_quat.z, -blender_quat.y, blender_quat.w]
+	return [blender_quat[1], blender_quat[3], -blender_quat[2], blender_quat[0]]
 
-def blender_scale_to_stf(blender_vec: mathutils.Vector) -> list[float]:
+def blender_scale_to_stf(blender_vec: list[float]) -> list[float]:
 	# x,y,z -> x,z,y
-	return [blender_vec.x, blender_vec.z, blender_vec.y]
+	return [blender_vec[0], blender_vec[2], blender_vec[1]]
 
 def to_trs(t: mathutils.Vector, r: mathutils.Quaternion, s: mathutils.Vector) -> list[list[float]]:
 	return [
@@ -22,9 +22,9 @@ def to_trs(t: mathutils.Vector, r: mathutils.Quaternion, s: mathutils.Vector) ->
 		blender_scale_to_stf(s)
 	]
 
-def blender_uv_to_stf(blender_vec: mathutils.Vector) -> list[float]:
+def blender_uv_to_stf(blender_vec: list[float]) -> list[float]:
 	# x,y,z -> x,z,-y
-	return [blender_vec.x, 1 - blender_vec.y]
+	return [blender_vec[0], 1 - blender_vec[1]]
 
 
 def blender_object_to_trs(blender_object: bpy.types.Object) -> list[list[float]]:
