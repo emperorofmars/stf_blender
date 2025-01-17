@@ -200,7 +200,7 @@ def import_stf_mesh(context: STF_RootImportContext, json_resource: dict, id: str
 	# Vertex groups
 
 
-	# Blendshapes
+	# Blendshapes | Morphtargets | Shapekeys
 
 
 	return blender_mesh, mesh_context
