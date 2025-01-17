@@ -63,7 +63,7 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 		buffer_vertices.write(serialize_float(position[2], float_width))
 	stf_mesh["vertices"] = mesh_context.serialize_buffer(buffer_vertices.getvalue())
 
-	# Vertex normals
+	"""# Vertex normals
 	stf_mesh["vertex_normal_width"] = float_width
 	buffer_vertex_normals = BytesIO()
 	for vertex in blender_mesh.vertices:
@@ -71,7 +71,7 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 		buffer_vertex_normals.write(serialize_float(normal[0], float_width))
 		buffer_vertex_normals.write(serialize_float(normal[1], float_width))
 		buffer_vertex_normals.write(serialize_float(normal[2], float_width))
-	stf_mesh["vertex_normals"] = mesh_context.serialize_buffer(buffer_vertex_normals.getvalue())
+	stf_mesh["vertex_normals"] = mesh_context.serialize_buffer(buffer_vertex_normals.getvalue())"""
 
 	# Vertex color channels
 	stf_mesh["vertex_color_width"] = float_width
@@ -189,8 +189,8 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 	stf_mesh["tris"] = mesh_context.serialize_buffer(buffer_tris.getvalue())
 
 	# Material indices and face smoothness
-	buffer_face_smooth_indices = BytesIO()
-	face_smooth_indices_len = 0
+	buffer_flat_face_indices = BytesIO()
+	flat_face_indices_len = 0
 	buffer_faces = BytesIO()
 
 	material_indices_width = stf_mesh["material_indices_width"] = 4
@@ -198,14 +198,14 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 	for polygon in blender_mesh.polygons:
 		buffer_faces.write(serialize_uint(face_lens[polygon.index], face_indices_width))
 		buffer_face_material_indices.write(serialize_uint(polygon.material_index, material_indices_width))
-		if(polygon.use_smooth):
-			face_smooth_indices_len += 1
-			buffer_face_smooth_indices.write(serialize_uint(polygon.index, face_indices_width)) # this could be done better
+		if(not polygon.use_smooth):
+			flat_face_indices_len += 1
+			buffer_flat_face_indices.write(serialize_uint(polygon.index, face_indices_width)) # this could be done better
 
 	stf_mesh["faces"] = mesh_context.serialize_buffer(buffer_faces.getvalue())
 	stf_mesh["material_indices"] = mesh_context.serialize_buffer(buffer_face_material_indices.getvalue())
-	stf_mesh["face_smooth_indices_len"] = face_smooth_indices_len
-	stf_mesh["face_smooth_indices"] = mesh_context.serialize_buffer(buffer_face_smooth_indices.getvalue())
+	stf_mesh["flat_face_indices_len"] = flat_face_indices_len
+	stf_mesh["flat_face_indices"] = mesh_context.serialize_buffer(buffer_flat_face_indices.getvalue())
 
 	# TODO also export edges if wanted
 	buffer_lines = BytesIO()
@@ -263,7 +263,7 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 
 
 
-	# Vertex groups that are not weightpaint
+	# Vertex groups
 	if(blender_mesh_object):
 		group_index_to_group_name: dict[int, str] = {}
 		vertex_groups: dict[str, dict[int, float]] = {}
@@ -308,33 +308,65 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 	sk_empty = 0
 	sk_full = 0
 	if(blender_mesh.shape_keys):
-		shape_keys = []
+		blendshapes = []
 		for shape_key in blender_mesh.shape_keys.key_blocks:
 			if(shape_key == shape_key.relative_key or shape_key.mute or blender_mesh.shape_keys.key_blocks[0].name == shape_key.name):
 				continue
 
-			for vertex in blender_mesh.vertices:
-				point: bpy.types.ShapeKeyPoint = shape_key.data[vertex.index]
-
-				if((vertex.co - point.co).length > 0.00001): sk_full += 1
-				else: sk_empty += 1
+			# TODO deal with vertex group multiplication
 
 			vertex_normals_flat: list[float] = shape_key.normals_vertex_get() # Blender why
-			vertex_normals: list[list[float]] = []
-			for flat_normal_base_index in range(int(len(vertex_normals_flat) / 3)):
-				vertex_normals.append(blender_translation_to_stf(vertex_normals_flat[flat_normal_base_index * 3 : flat_normal_base_index * 3 + 3]))
 
-			"""split_normals_flat = shape_key.normals_split_get() # Blender why
-			split_normals: list[list[float]] = []
-			for flat_normal_base_index in range(int(len(split_normals_flat) / 3)):
-				split_normals.append(blender_translation_to_stf(split_normals_flat[flat_normal_base_index * 3 : flat_normal_base_index * 3 + 3]))"""
+			blendshape_offsets: dict[int, tuple[list[float], list[float]]] = {}
+			for vertex in blender_mesh.vertices:
+				point: bpy.types.ShapeKeyPoint = shape_key.data[vertex.index]
+				offset = vertex.co - point.co
+				if(offset.length > 0.00001):
+					blendshape_offsets[vertex.index] = (blender_translation_to_stf(offset), blender_translation_to_stf(vertex_normals_flat[vertex.index * 3 : vertex.index * 3 + 3]))
+
+			indexed = len(blendshape_offsets) < len(blender_mesh.vertices) * 0.833
 
 			buffer_blendshape_indices = BytesIO()
-			buffer_blendshape_position_offset = BytesIO()
-			buffer_blendshape_normal_offset = BytesIO()
-			buffer_blendshape_tangent_offset = BytesIO()
+			buffer_blendshape_position_offsets = BytesIO()
+			buffer_blendshape_normal_offsets = BytesIO()
+			buffer_blendshape_tangent_offsets = BytesIO() # TODO calculate tangents
 
-	print(blender_mesh.name + " : " + str(sk_full) + " : " + str(sk_empty))
+			if(indexed):
+				for index, offset in blendshape_offsets.items():
+					buffer_blendshape_indices.write(serialize_uint(index, vertex_indices_width))
+					buffer_blendshape_position_offsets.write(serialize_float(offset[0][0], float_width))
+					buffer_blendshape_position_offsets.write(serialize_float(offset[0][1], float_width))
+					buffer_blendshape_position_offsets.write(serialize_float(offset[0][2], float_width))
+					buffer_blendshape_normal_offsets.write(serialize_float(offset[1][0], float_width))
+					buffer_blendshape_normal_offsets.write(serialize_float(offset[1][1], float_width))
+					buffer_blendshape_normal_offsets.write(serialize_float(offset[1][2], float_width))
+			else:
+				for vertex in blender_mesh.vertices:
+					if(vertex.index in blendshape_offsets):
+						buffer_blendshape_position_offsets.write(serialize_float(blendshape_offsets[vertex.index][0][0], float_width))
+						buffer_blendshape_position_offsets.write(serialize_float(blendshape_offsets[vertex.index][0][1], float_width))
+						buffer_blendshape_position_offsets.write(serialize_float(blendshape_offsets[vertex.index][0][2], float_width))
+						buffer_blendshape_normal_offsets.write(serialize_float(blendshape_offsets[vertex.index][1][0], float_width))
+						buffer_blendshape_normal_offsets.write(serialize_float(blendshape_offsets[vertex.index][1][1], float_width))
+						buffer_blendshape_normal_offsets.write(serialize_float(blendshape_offsets[vertex.index][1][2], float_width))
+					else:
+						buffer_blendshape_position_offsets.write(serialize_float(0, float_width))
+						buffer_blendshape_position_offsets.write(serialize_float(0, float_width))
+						buffer_blendshape_position_offsets.write(serialize_float(0, float_width))
+						buffer_blendshape_normal_offsets.write(serialize_float(0, float_width))
+						buffer_blendshape_normal_offsets.write(serialize_float(0, float_width))
+						buffer_blendshape_normal_offsets.write(serialize_float(0, float_width))
+
+			blendshape = {
+				"name": shape_key.name,
+				"indexed": indexed,
+			}
+			if(indexed): blendshape["indices"] = mesh_context.serialize_buffer(buffer_blendshape_indices.getvalue())
+			blendshape["position_offsets"] = mesh_context.serialize_buffer(buffer_blendshape_position_offsets.getvalue())
+			blendshape["normal_offsets"] = mesh_context.serialize_buffer(buffer_blendshape_normal_offsets.getvalue())
+			blendshapes.append(blendshape)
+		stf_mesh["blendshapes"] = blendshapes
+
 
 	return stf_mesh, blender_mesh.stf_id, mesh_context
 

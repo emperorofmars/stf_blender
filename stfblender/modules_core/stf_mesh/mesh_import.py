@@ -79,20 +79,21 @@ def import_stf_mesh(context: STF_RootImportContext, json_resource: dict, id: str
 
 
 	# Construct the topology
-	blender_mesh.from_pydata(py_vertices, [], py_faces)
+	blender_mesh.from_pydata(py_vertices, [], py_faces, False)
 	if(blender_mesh.validate(verbose=True)): # return is True if errors found
 		context.report(STFReport("Invalid mesh", STFReportSeverity.Error, id, _stf_type, blender_mesh))
 
 
 	# Face smooth setting
-	if("face_smooth_indices" in json_resource and "face_smooth_indices_len" in json_resource):
-		face_smooth_indices_len = json_resource["face_smooth_indices_len"]
+	if("flat_face_indices" in json_resource and "flat_face_indices_len" in json_resource):
+		flat_face_indices_len = json_resource["flat_face_indices_len"]
 		face_indices_width = json_resource.get("face_indices_width", 4)
-		buffer_face_smooth_indices = BytesIO(mesh_context.import_buffer(json_resource["face_smooth_indices"]))
-		for _ in range(face_smooth_indices_len):
-			smooth_index = parse_uint(buffer_face_smooth_indices, face_indices_width)
-			blender_mesh.polygons[smooth_index].use_smooth = True
+		buffer_flat_face_indices = BytesIO(mesh_context.import_buffer(json_resource["flat_face_indices"]))
+		for _ in range(flat_face_indices_len):
+			smooth_index = parse_uint(buffer_flat_face_indices, face_indices_width)
+			blender_mesh.polygons[smooth_index].use_smooth = False
 
+	"""# Vertex Normals
 	if("normals" in json_resource):
 		vertex_normals_width = json_resource.get("vertex_normals_width", 4)
 		buffer_vertex_normals = BytesIO(mesh_context.import_buffer(json_resource["normals"]))
@@ -100,7 +101,7 @@ def import_stf_mesh(context: STF_RootImportContext, json_resource: dict, id: str
 			p0 = parse_float(buffer_vertex_normals, vertex_normals_width)
 			p1 = parse_float(buffer_vertex_normals, vertex_normals_width)
 			p2 = parse_float(buffer_vertex_normals, vertex_normals_width)
-			vertex.normal = stf_translation_to_blender([p0, p1, p2])
+			vertex.normal = stf_translation_to_blender([p0, p1, p2])"""
 
 	if("colors" in json_resource):
 		vertex_color_width = json_resource.get("vertex_color_width", 4)
@@ -195,5 +196,11 @@ def import_stf_mesh(context: STF_RootImportContext, json_resource: dict, id: str
 					weight = parse_float(buffer, bone_weight_width)
 					if(weight > 0 and bone_index >= 0):
 						vertex_groups[bone_index].add([vertex_index], weight, "REPLACE")
+
+	# Vertex groups
+
+
+	# Blendshapes
+
 
 	return blender_mesh, mesh_context
