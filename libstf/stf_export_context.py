@@ -8,7 +8,7 @@ from .stf_report import STFReportSeverity, STFReport
 
 
 class STF_RootExportContext:
-	"""Context for top level resource export"""
+	"""Context for top level resource export. An instance of this will be passed to each STF_Module's export func."""
 
 	def __init__(self, state: STF_ExportState):
 		self._state = state
@@ -25,12 +25,11 @@ class STF_RootExportContext:
 		self._state.register_id(application_object, id)
 
 	def register_serialized_resource(self, application_object: any, json_resource: dict, id: str):
-		#self._state.register_serialized_resource(application_object, json_resource, id)
 		pass
 
 
 	def __run_hooks(self, application_object: any, object_ctx: any, json_resource: dict, id: str):
-		# Export components from application native constructs
+		"""Export components from application native constructs"""
 		if(hooks := self._state.determine_hooks(application_object)):
 			for hook in hooks:
 				can_handle, hook_objects = hook.hook_can_handle_application_object_func(application_object)
@@ -49,7 +48,7 @@ class STF_RootExportContext:
 
 
 	def __run_components(self, application_object: any, object_ctx: any, json_resource: dict, id: str, components: list):
-		# Export components explicitely defined by this application
+		"""Export components explicitely defined by this application"""
 		if(len(components) > 0):
 			if("components" not in json_resource): json_resource["components"] = {}
 			for component in components:
@@ -66,9 +65,9 @@ class STF_RootExportContext:
 
 
 	def serialize_resource(self, application_object: any, parent_application_object: any = None) -> str | None:
+		"""Run all logic to serialize an application resource. If it already has been serialized, return the existing ID."""
 		if(application_object == None): return None
 		if(existing_id := self.get_resource_id(application_object)): return existing_id
-			#self.register_serialized_resource(application_object, self._state._exported_resources[existing_id], existing_id)
 
 		if(selected_module := self._state.determine_module(application_object)):
 			module_ret = selected_module.export_func(
@@ -104,6 +103,7 @@ class STF_RootExportContext:
 
 
 	def add_task(self, task: Callable):
+		"""Add a task which will be execuded after everything else."""
 		self._state._tasks.append(task)
 
 

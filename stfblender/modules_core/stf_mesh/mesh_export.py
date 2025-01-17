@@ -188,7 +188,7 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 
 	stf_mesh["tris"] = mesh_context.serialize_buffer(buffer_tris.getvalue())
 
-	# Material indices
+	# Material indices and face smoothness
 	buffer_face_smooth_indices = BytesIO()
 	face_smooth_indices_len = 0
 	buffer_faces = BytesIO()
@@ -200,7 +200,7 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 		buffer_face_material_indices.write(serialize_uint(polygon.material_index, material_indices_width))
 		if(polygon.use_smooth):
 			face_smooth_indices_len += 1
-			buffer_face_smooth_indices.write(serialize_uint(polygon.index, face_indices_width))
+			buffer_face_smooth_indices.write(serialize_uint(polygon.index, face_indices_width)) # this could be done better
 
 	stf_mesh["faces"] = mesh_context.serialize_buffer(buffer_faces.getvalue())
 	stf_mesh["material_indices"] = mesh_context.serialize_buffer(buffer_face_material_indices.getvalue())
@@ -213,7 +213,7 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 
 	# Weightpaint
 	if(armature and blender_mesh_object):
-		stf_mesh["armature"] = mesh_context.serialize_resource(armature, armature_object)
+		stf_mesh["armature"] = mesh_context.serialize_resource(armature, armature_object) # Because blender, you have to also pass an object which instantiates the armature :/
 
 		# Create vertex group lookup dictionary for stf_ids from the previous name lookup dict
 		weight_bone_map = []
@@ -313,26 +313,26 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 			if(shape_key == shape_key.relative_key or shape_key.mute or blender_mesh.shape_keys.key_blocks[0].name == shape_key.name):
 				continue
 
-			vertex_normals_flat = shape_key.normals_vertex_get()
-			vertex_normals: list[list[float]] = []
-			for flat_normal_base_index in range(int(len(vertex_normals_flat) / 3)):
-				vertex_normals.append(blender_translation_to_stf(vertex_normals_flat[flat_normal_base_index * 3 : flat_normal_base_index * 3 + 3]))
-
 			for vertex in blender_mesh.vertices:
 				point: bpy.types.ShapeKeyPoint = shape_key.data[vertex.index]
 
 				if((vertex.co - point.co).length > 0.00001): sk_full += 1
 				else: sk_empty += 1
 
-			split_normals_flat = shape_key.normals_split_get()
+			vertex_normals_flat: list[float] = shape_key.normals_vertex_get() # Blender why
+			vertex_normals: list[list[float]] = []
+			for flat_normal_base_index in range(int(len(vertex_normals_flat) / 3)):
+				vertex_normals.append(blender_translation_to_stf(vertex_normals_flat[flat_normal_base_index * 3 : flat_normal_base_index * 3 + 3]))
+
+			"""split_normals_flat = shape_key.normals_split_get() # Blender why
 			split_normals: list[list[float]] = []
 			for flat_normal_base_index in range(int(len(split_normals_flat) / 3)):
-				split_normals.append(blender_translation_to_stf(split_normals_flat[flat_normal_base_index * 3 : flat_normal_base_index * 3 + 3]))
+				split_normals.append(blender_translation_to_stf(split_normals_flat[flat_normal_base_index * 3 : flat_normal_base_index * 3 + 3]))"""
 
 			buffer_blendshape_indices = BytesIO()
-			buffer_blendshape_translation = BytesIO()
-			buffer_blendshape_normal = BytesIO()
-			buffer_blendshape_tangent = BytesIO()
+			buffer_blendshape_position_offset = BytesIO()
+			buffer_blendshape_normal_offset = BytesIO()
+			buffer_blendshape_tangent_offset = BytesIO()
 
 	print(blender_mesh.name + " : " + str(sk_full) + " : " + str(sk_empty))
 

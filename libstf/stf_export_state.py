@@ -39,6 +39,7 @@ class STF_ExportState(StateUtil):
 		self._root_id: str = None
 
 	def determine_module(self, application_object: any) -> STF_Module:
+		"""Find the best suited registered STF_Module for the type of this object"""
 		selected_module = None
 		selected_priority = -1
 		for module in self._modules.get(type(application_object), []):
@@ -56,15 +57,18 @@ class STF_ExportState(StateUtil):
 		return self._hooks.get(type(application_object), [])
 
 	def get_resource_id(self, application_object: any) -> str:
+		"""Get the ID this object will be referenced by. The object may not be fully serialized yet."""
 		if(application_object in self._resources):
 			return self._resources[application_object]
 		else:
 			return None
 
 	def register_id(self, application_object: any, id: str):
+		"""Register the ID for this object. The object has not been serialized yet."""
 		self._resources[application_object] = id
 
 	def register_serialized_resource(self, application_object: any, json_resource: dict, id: str):
+		"""Now register the fully serialized object."""
 		if(type(id) is not str):
 			self.report(STFReport("Invalid Resource ID", STFReportSeverity.Error, id, json_resource.get("type"), application_object))
 		if(id in self._exported_resources):
@@ -78,6 +82,7 @@ class STF_ExportState(StateUtil):
 		self._exported_resources[id] = json_resource
 
 	def serialize_buffer(self, data: bytes) -> str:
+		"""Register a serialized buffer."""
 		import uuid
 		id = str(uuid.uuid4())
 		self._exported_buffers[id] = data
