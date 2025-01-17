@@ -1,6 +1,5 @@
 from io import BytesIO
 import bpy
-import mathutils
 
 from ....libstf.stf_export_context import STF_ResourceExportContext, STF_RootExportContext
 from ...utils.id_utils import ensure_stf_id
@@ -18,6 +17,8 @@ export_options: dict = {
 	"float_treshhold_blendshape": 0.00001,
 }
 
+
+# This needs a lot of acceleration with numpy or something like that
 
 def export_stf_mesh(context: STF_RootExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:
 	blender_mesh: bpy.types.Mesh = application_object
@@ -127,13 +128,13 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 		buffer_split_tangents.write(serialize_float(tangent[1], float_width))
 		buffer_split_tangents.write(serialize_float(tangent[2], float_width))
 
-		for index, uv_layer in enumerate(blender_mesh.uv_layers):
+		for uv_index, uv_layer in enumerate(blender_mesh.uv_layers):
 			uv_names.append(uv_layer.name)
 			uv = blender_uv_to_stf(uv_layer.uv[loop.index].vector)
-			buffers_uv[index].write(serialize_float(uv[0], float_width))
-			buffers_uv[index].write(serialize_float(uv[1], float_width))
+			buffers_uv[uv_index].write(serialize_float(uv[0], float_width))
+			buffers_uv[uv_index].write(serialize_float(uv[1], float_width))
 
-	for index, color_layer in enumerate(blender_mesh.color_attributes):
+	for color_layer in blender_mesh.color_attributes:
 		if(color_layer.data_type == "FLOAT_COLOR" and color_layer.domain == "CORNER"):
 			color_buffer = BytesIO()
 			buffers_split_color.append(color_buffer)

@@ -14,8 +14,9 @@ endif::[]
 **Squirrel Transfer Format - Modular 3D Interchange Format**
 Intended for (not only) game development use-cases.
 
-Documentation: https://github.com/emperorofmars/stf[]
+**WIP implementation for Blender 4.4+. Do not use productively!**
 
+**https://github.com/emperorofmars/stf_documentation[Read the Documentation!]**
 
 == License
 All source-code in this repository, except when noted in individual files and/or directories, is licensed under either:
