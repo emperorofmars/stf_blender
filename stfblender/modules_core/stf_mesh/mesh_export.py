@@ -309,6 +309,10 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 	sk_full = 0
 	if(blender_mesh.shape_keys):
 		blendshapes = []
+		blendshape_pos_width = stf_mesh["blendshape_pos_width"] = 4
+		blendshape_normal_width = stf_mesh["blendshape_normal_width"] = 4
+		blendshape_tangent_width = stf_mesh["blendshape_tangent_width"] = 4
+
 		for shape_key in blender_mesh.shape_keys.key_blocks:
 			if(shape_key == shape_key.relative_key or shape_key.mute or blender_mesh.shape_keys.key_blocks[0].name == shape_key.name):
 				continue
@@ -320,7 +324,7 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 			blendshape_offsets: dict[int, tuple[list[float], list[float]]] = {}
 			for vertex in blender_mesh.vertices:
 				point: bpy.types.ShapeKeyPoint = shape_key.data[vertex.index]
-				offset = vertex.co - point.co
+				offset = point.co - vertex.co
 				if(offset.length > 0.00001):
 					blendshape_offsets[vertex.index] = (blender_translation_to_stf(offset), blender_translation_to_stf(vertex_normals_flat[vertex.index * 3 : vertex.index * 3 + 3]))
 
@@ -334,28 +338,28 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 			if(indexed):
 				for index, offset in blendshape_offsets.items():
 					buffer_blendshape_indices.write(serialize_uint(index, vertex_indices_width))
-					buffer_blendshape_position_offsets.write(serialize_float(offset[0][0], float_width))
-					buffer_blendshape_position_offsets.write(serialize_float(offset[0][1], float_width))
-					buffer_blendshape_position_offsets.write(serialize_float(offset[0][2], float_width))
-					buffer_blendshape_normal_offsets.write(serialize_float(offset[1][0], float_width))
-					buffer_blendshape_normal_offsets.write(serialize_float(offset[1][1], float_width))
-					buffer_blendshape_normal_offsets.write(serialize_float(offset[1][2], float_width))
+					buffer_blendshape_position_offsets.write(serialize_float(offset[0][0], blendshape_pos_width))
+					buffer_blendshape_position_offsets.write(serialize_float(offset[0][1], blendshape_pos_width))
+					buffer_blendshape_position_offsets.write(serialize_float(offset[0][2], blendshape_pos_width))
+					buffer_blendshape_normal_offsets.write(serialize_float(offset[1][0], blendshape_normal_width))
+					buffer_blendshape_normal_offsets.write(serialize_float(offset[1][1], blendshape_normal_width))
+					buffer_blendshape_normal_offsets.write(serialize_float(offset[1][2], blendshape_normal_width))
 			else:
 				for vertex in blender_mesh.vertices:
 					if(vertex.index in blendshape_offsets):
-						buffer_blendshape_position_offsets.write(serialize_float(blendshape_offsets[vertex.index][0][0], float_width))
-						buffer_blendshape_position_offsets.write(serialize_float(blendshape_offsets[vertex.index][0][1], float_width))
-						buffer_blendshape_position_offsets.write(serialize_float(blendshape_offsets[vertex.index][0][2], float_width))
-						buffer_blendshape_normal_offsets.write(serialize_float(blendshape_offsets[vertex.index][1][0], float_width))
-						buffer_blendshape_normal_offsets.write(serialize_float(blendshape_offsets[vertex.index][1][1], float_width))
-						buffer_blendshape_normal_offsets.write(serialize_float(blendshape_offsets[vertex.index][1][2], float_width))
+						buffer_blendshape_position_offsets.write(serialize_float(blendshape_offsets[vertex.index][0][0], blendshape_pos_width))
+						buffer_blendshape_position_offsets.write(serialize_float(blendshape_offsets[vertex.index][0][1], blendshape_pos_width))
+						buffer_blendshape_position_offsets.write(serialize_float(blendshape_offsets[vertex.index][0][2], blendshape_pos_width))
+						buffer_blendshape_normal_offsets.write(serialize_float(blendshape_offsets[vertex.index][1][0], blendshape_normal_width))
+						buffer_blendshape_normal_offsets.write(serialize_float(blendshape_offsets[vertex.index][1][1], blendshape_normal_width))
+						buffer_blendshape_normal_offsets.write(serialize_float(blendshape_offsets[vertex.index][1][2], blendshape_normal_width))
 					else:
-						buffer_blendshape_position_offsets.write(serialize_float(0, float_width))
-						buffer_blendshape_position_offsets.write(serialize_float(0, float_width))
-						buffer_blendshape_position_offsets.write(serialize_float(0, float_width))
-						buffer_blendshape_normal_offsets.write(serialize_float(0, float_width))
-						buffer_blendshape_normal_offsets.write(serialize_float(0, float_width))
-						buffer_blendshape_normal_offsets.write(serialize_float(0, float_width))
+						buffer_blendshape_position_offsets.write(serialize_float(0, blendshape_pos_width))
+						buffer_blendshape_position_offsets.write(serialize_float(0, blendshape_pos_width))
+						buffer_blendshape_position_offsets.write(serialize_float(0, blendshape_pos_width))
+						buffer_blendshape_normal_offsets.write(serialize_float(0, blendshape_normal_width))
+						buffer_blendshape_normal_offsets.write(serialize_float(0, blendshape_normal_width))
+						buffer_blendshape_normal_offsets.write(serialize_float(0, blendshape_normal_width))
 
 			blendshape = {
 				"name": shape_key.name,
