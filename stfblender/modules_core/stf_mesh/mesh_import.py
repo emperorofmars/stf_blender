@@ -10,6 +10,8 @@ from ...utils.buffer_utils import parse_float, parse_int, parse_uint
 _stf_type = "stf.mesh"
 
 
+# Mesh import and export are the lowest hanging fruits for performance improvements.
+
 def import_stf_mesh(context: STF_RootImportContext, json_resource: dict, id: str, parent_application_object: any) -> tuple[any, any]:
 	blender_mesh = bpy.data.meshes.new(json_resource.get("name", "STF Mesh"))
 	blender_mesh.stf_id = id

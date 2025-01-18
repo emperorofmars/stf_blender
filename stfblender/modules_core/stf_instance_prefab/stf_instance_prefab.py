@@ -13,6 +13,10 @@ from ...utils.id_utils import ensure_stf_id
 _stf_type = "stf.instance.prefab"
 
 
+# NOTE this 'works', but doing this in a proper manner would be a bit more involved, since Blender's 'Collection Instance' feature is very meh and mostly pointless.
+# This is not part of the MVP. The code is here, but not visible to the STF_Registry.
+
+
 def _stf_import(context: STF_ResourceImportContext, json_resource: dict, id: str, parent_application_object: any) -> tuple[any, any]:
 	blender_collection = context.import_resource(json_resource["prefab"])
 

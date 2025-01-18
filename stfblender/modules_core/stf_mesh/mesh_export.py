@@ -18,7 +18,7 @@ export_options: dict = {
 }
 
 
-# This needs a lot of acceleration with numpy or something like that
+# Mesh import and export are the lowest hanging fruits for performance improvements.
 
 def export_stf_mesh(context: STF_RootExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:
 	blender_mesh: bpy.types.Mesh = application_object
