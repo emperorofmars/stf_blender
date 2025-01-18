@@ -240,4 +240,8 @@ def import_stf_mesh(context: STF_RootImportContext, json_resource: dict, id: str
 				pos_z = parse_float(buffer_blendshape_pos_offset, blendshape_pos_width)
 				shape_key.data[vertex_index].co = blender_mesh.vertices[vertex_index].co + stf_translation_to_blender([pos_x, pos_y, pos_z])
 
+			shape_key.value = json_blendshape.get("default_value", 0)
+			shape_key.slider_max = json_blendshape.get("limit_upper", 1)
+			shape_key.slider_min = json_blendshape.get("limit_lower", 0)
+
 	return blender_mesh, mesh_context

@@ -19,6 +19,7 @@ def determine_pack_format_float(width: int) -> str:
 	elif(width <= 4): return "<f"
 	elif(width <= 8): return "<d"
 
+
 def serialize_int(value: int, width: int = 4) -> bytes:
 	return struct.pack(determine_pack_format_int(width), value)
 

@@ -365,6 +365,9 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 				"name": shape_key.name,
 				"indexed": indexed,
 				"count": len(blendshape_offsets) if indexed else len(blender_mesh.vertices),
+				"default_value": shape_key.value,
+				"limit_upper": shape_key.slider_max,
+				"limit_lower": shape_key.slider_min,
 			}
 			if(indexed): blendshape["indices"] = mesh_context.serialize_buffer(buffer_blendshape_indices.getvalue())
 			blendshape["position_offsets"] = mesh_context.serialize_buffer(buffer_blendshape_position_offsets.getvalue())
