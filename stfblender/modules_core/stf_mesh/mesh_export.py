@@ -368,6 +368,4 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 			blendshapes.append(blendshape)
 		stf_mesh["blendshapes"] = blendshapes
 
-
 	return stf_mesh, blender_mesh.stf_id, mesh_context
-

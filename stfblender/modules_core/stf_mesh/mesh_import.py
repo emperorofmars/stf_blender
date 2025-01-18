@@ -198,7 +198,21 @@ def import_stf_mesh(context: STF_RootImportContext, json_resource: dict, id: str
 						vertex_groups[bone_index].add([vertex_index], weight, "REPLACE")
 
 	# Vertex groups
-
+	if("vertex_groups" in json_resource):
+		for vertex_group_index, json_vertex_group in enumerate(json_resource["vertex_groups"]):
+			indexed = json_vertex_group["indexed"]
+			count = json_vertex_group["count"]
+			vertex_weight_width = json_resource.get("vertex_weight_width", 4)
+			buffer = BytesIO(mesh_context.import_buffer(json_vertex_group["buffer"]))
+			vertex_group = blender_object_tmp.vertex_groups.new(name=json_vertex_group.get("name", "STF Vertex Group " + str(vertex_group_index)))
+			for vertex_index in range(count):
+				if(indexed):
+					vertex_index = parse_uint(buffer, vertex_indices_width)
+				else:
+					vertex_index = index
+				weight = parse_float(buffer, vertex_weight_width)
+				if(weight > 0):
+					vertex_group.add([vertex_index], weight, "REPLACE")
 
 	# Blendshapes | Morphtargets | Shapekeys
 
