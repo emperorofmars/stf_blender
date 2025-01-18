@@ -1,7 +1,9 @@
 import io
 import json
 
+
 from .stf_definition import STF_JsonDefinition
+from . import buffer_utils
 
 
 class STF_File:
@@ -28,22 +30,22 @@ class STF_File:
 			raise ImportError("Invalid magic number, not an STF file! (" + str(magic_number) + ")")
 
 		# Read and check STF binary version
-		ret.binary_version_major = int.from_bytes(buffer.read(4), byteorder="little")
-		ret.binary_version_minor = int.from_bytes(buffer.read(4), byteorder="little")
+		ret.binary_version_major = buffer_utils.parse_uint(buffer, 4)
+		ret.binary_version_minor = buffer_utils.parse_uint(buffer, 4)
 
 		# Read the number of buffers
-		num_buffers_with_json = int.from_bytes(buffer.read(4), byteorder="little")
+		num_buffers_with_json = buffer_utils.parse_uint(buffer, 4)
 		num_buffers = num_buffers_with_json - 1
 		if(num_buffers_with_json < 1):
 			raise ImportError("Invalid number of buffers, at least one must be present!")
 
 		# Read the length of the Json definition buffer
-		json_buffer_len = int.from_bytes(buffer.read(8), byteorder="little")
+		json_buffer_len = buffer_utils.parse_uint(buffer, 8)
 
 		# Read the length of all other buffers
 		buffer_lens = []
 		for buffer_idx in range(0, num_buffers):
-			buffer_lens.append(int.from_bytes(buffer.read(8), byteorder="little"))
+			buffer_lens.append(buffer_utils.parse_uint(buffer, 8))
 
 		# Read the Json definition buffer
 		ret.definition = STF_JsonDefinition.from_dict(json.loads(buffer.read(json_buffer_len).decode("utf-8")))
@@ -59,26 +61,22 @@ class STF_File:
 		buffer.write("STF0".encode("ascii"))
 
 		# Serialize STF binary version
-		buffer.write(self.binary_version_major.to_bytes(length=4, byteorder="little"))
-		buffer.write(self.binary_version_minor.to_bytes(length=4, byteorder="little"))
+		buffer.write(buffer_utils.serialize_uint(self.binary_version_major, 4))
+		buffer.write(buffer_utils.serialize_uint(self.binary_version_minor, 4))
 
 		# Serialize Number of buffers
 		num_buffers = len(self.buffers_included)
-		num_buffers_with_json = num_buffers + 1
-		buffer.write(num_buffers_with_json.to_bytes(length=4, byteorder="little"))
+		buffer.write(buffer_utils.serialize_uint(num_buffers + 1, 4)) # +1 for the Json definition buffer
 
 		# Convert Json definition to buffer
 		definition_buffer = json.dumps(self.definition.to_dict()).encode(encoding="utf-8")
 
 		# Serialize length of Json definition buffer
-		buffer_len = len(definition_buffer)
-		buffer.write(buffer_len.to_bytes(length=8, byteorder="little"))
+		buffer.write(buffer_utils.serialize_uint(len(definition_buffer), 8))
 
 		# Serialize length of all other buffers
 		for buffer_idx in range(0, num_buffers):
-			included_buffer = self.buffers_included[buffer_idx]
-			buffer_len = len(included_buffer)
-			buffer.write(buffer_len.to_bytes(length=8, byteorder="little"))
+			buffer.write(buffer_utils.serialize_uint(len(self.buffers_included[buffer_idx]), 8))
 
 		# Serialize Json definition buffer
 		buffer.write(definition_buffer)

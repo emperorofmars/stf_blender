@@ -4,7 +4,7 @@ import bpy
 from ....libstf.stf_export_context import STF_ResourceExportContext, STF_RootExportContext
 from ...utils.id_utils import ensure_stf_id
 from ...utils.trs_utils import blender_translation_to_stf, blender_uv_to_stf
-from ...utils.buffer_utils import serialize_float, serialize_int, serialize_uint
+from ....libstf.buffer_utils import serialize_float, serialize_int, serialize_uint
 
 
 _stf_type = "stf.mesh"

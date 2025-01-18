@@ -4,7 +4,7 @@ import bpy
 from ....libstf.stf_import_context import STF_ResourceImportContext, STF_RootImportContext
 from ....libstf.stf_report import STFReportSeverity, STFReport
 from ...utils.trs_utils import stf_translation_to_blender, stf_uv_to_blender
-from ...utils.buffer_utils import parse_float, parse_int, parse_uint
+from ....libstf.buffer_utils import parse_float, parse_int, parse_uint
 
 
 _stf_type = "stf.mesh"
