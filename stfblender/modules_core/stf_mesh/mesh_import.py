@@ -87,12 +87,12 @@ def import_stf_mesh(context: STF_RootImportContext, json_resource: dict, id: str
 
 
 	# Face smooth setting
-	if("flat_face_indices" in json_resource and "flat_face_indices_len" in json_resource):
-		flat_face_indices_len = json_resource["flat_face_indices_len"]
+	if("sharp_face_indices" in json_resource and "sharp_face_indices_len" in json_resource):
+		sharp_face_indices_len = json_resource["sharp_face_indices_len"]
 		face_indices_width = json_resource.get("face_indices_width", 4)
-		buffer_flat_face_indices = BytesIO(mesh_context.import_buffer(json_resource["flat_face_indices"]))
-		for _ in range(flat_face_indices_len):
-			smooth_index = parse_uint(buffer_flat_face_indices, face_indices_width)
+		buffer_sharp_face_indices = BytesIO(mesh_context.import_buffer(json_resource["sharp_face_indices"]))
+		for _ in range(sharp_face_indices_len):
+			smooth_index = parse_uint(buffer_sharp_face_indices, face_indices_width)
 			blender_mesh.polygons[smooth_index].use_smooth = False
 
 	"""# Vertex Normals

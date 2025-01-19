@@ -204,11 +204,20 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 
 	stf_mesh["faces"] = mesh_context.serialize_buffer(buffer_faces.getvalue())
 	stf_mesh["material_indices"] = mesh_context.serialize_buffer(buffer_face_material_indices.getvalue())
-	stf_mesh["flat_face_indices_len"] = flat_face_indices_len
-	stf_mesh["flat_face_indices"] = mesh_context.serialize_buffer(buffer_flat_face_indices.getvalue())
+	stf_mesh["sharp_face_indices_len"] = flat_face_indices_len
+	stf_mesh["sharp_face_indices"] = mesh_context.serialize_buffer(buffer_flat_face_indices.getvalue())
 
 	# TODO also export edges if wanted
 	buffer_lines = BytesIO()
+
+
+	buffer_sharp_edges = BytesIO()
+	# Edge smoothness
+	for edge in blender_mesh.edges:
+		if(not edge.use_edge_sharp):
+			pass
+
+	# Single vertex smoothness
 
 
 	# Weightpaint
