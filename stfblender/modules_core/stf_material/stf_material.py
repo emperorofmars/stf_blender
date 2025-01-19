@@ -1,4 +1,3 @@
-import struct
 import bpy
 
 from ....libstf.stf_export_context import STF_ResourceExportContext, STF_RootExportContext
