@@ -82,6 +82,8 @@ def draw_components_ui(
 				if(component.stf_id == component_ref.stf_id):
 					draw_component(layout, context, component_ref, object, component)
 					break
+	else:
+		layout.label(text="No Components For This Type Available")
 
 
 stf_component_filter = None

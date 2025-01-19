@@ -28,7 +28,7 @@ def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, pa
 def _stf_export(context: STF_RootExportContext, application_object: AVA_Constraint_Twist, parent_application_object: any) -> tuple[dict, str, any]:
 	ret = {
 		"type": _stf_type,
-		"name": "",
+		"name": application_object.stf_name,
 		"weight": application_object.weight
 	}
 	return ret, application_object.stf_id, context

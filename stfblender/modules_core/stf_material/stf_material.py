@@ -15,6 +15,7 @@ def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, pa
 	blender_material = bpy.data.materials.new(json_resource.get("name", "STF Material"))
 	blender_material.stf_id = id
 	blender_material.stf_name = json_resource.get("name", "STF Material")
+	blender_material.stf_is_source_of_truth = True
 
 	material_context = STF_ResourceImportContext(context, json_resource, blender_material)
 
@@ -55,6 +56,8 @@ def register():
 	bpy.types.Material.stf_components = bpy.props.CollectionProperty(type=STF_Component, name="Components") # type: ignore
 	bpy.types.Material.stf_active_component_index = bpy.props.IntProperty()
 
+	bpy.types.Material.stf_is_source_of_truth = bpy.props.BoolProperty(name="STF Material Is Source Of Truth", default=False) # type: ignore
+
 def unregister():
 	if hasattr(bpy.types.Material, "stf_id"):
 		del bpy.types.Material.stf_id
@@ -64,3 +67,6 @@ def unregister():
 		del bpy.types.Material.stf_components
 	if hasattr(bpy.types.Material, "stf_active_component_index"):
 		del bpy.types.Material.stf_active_component_index
+
+	if hasattr(bpy.types.Material, "stf_is_source_of_truth"):
+		del bpy.types.Material.stf_is_source_of_truth

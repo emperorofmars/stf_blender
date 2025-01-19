@@ -3,7 +3,6 @@ import bpy
 from ....libstf.stf_export_context import STF_RootExportContext
 from ....libstf.stf_import_context import STF_RootImportContext
 from ...utils.component_utils import STF_BlenderComponentBase, STF_BlenderComponentModule, add_component
-from ...utils.op_utils import SetActiveObjectOperator
 
 
 _stf_type = "stf.texture"
@@ -37,7 +36,7 @@ def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, pa
 def _stf_export(context: STF_RootExportContext, application_object: STF_Texture, parent_application_object: any) -> tuple[dict, str, any]:
 	ret = {
 		"type": _stf_type,
-		"name": "",
+		"name": application_object.stf_name,
 		"width": application_object.width,
 		"height": application_object.height,
 		"downscale_priority": application_object.downscale_priority,
@@ -71,4 +70,3 @@ def register():
 def unregister():
 	if hasattr(bpy.types.Image, "stf_texture"):
 		del bpy.types.Image.stf_texture
-

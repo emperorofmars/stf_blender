@@ -51,7 +51,7 @@ def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, pa
 	collection.stf_id = id
 	collection.stf_name = json_resource.get("name", "")
 	bpy.context.scene.collection.children.link(collection)
-	collection.metric_multiplier = json_resource.get("metric_multiplier", 1)
+	collection.stf_use_collection_as_prefab = True
 
 	node_import_context = STF_BlenderNodeImportContext(context, json_resource, collection)
 	for node_id in json_resource.get("root_nodes", []):
@@ -67,7 +67,6 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 		"type": _stf_type,
 		"name": collection.stf_name if collection.stf_name else collection.name,
 		"root_nodes": root_nodes,
-		"metric_multiplier": collection.metric_multiplier,
 	}
 
 	node_export_context = STF_BlenderNodeExportContext(context, ret, collection)
@@ -98,7 +97,8 @@ def register():
 	bpy.types.Collection.stf_name = bpy.props.StringProperty(name="Name") # type: ignore
 	bpy.types.Collection.stf_components = bpy.props.CollectionProperty(type=STF_Component, name="Components") # type: ignore
 	bpy.types.Collection.stf_active_component_index = bpy.props.IntProperty()
-	bpy.types.Collection.metric_multiplier = bpy.props.FloatProperty(name="Metric Multiplier", default=1, min=0.00000001) # type: ignore
+
+	bpy.types.Collection.stf_use_collection_as_prefab = bpy.props.BoolProperty(name="Use As STF Prefab", default=False)
 
 def unregister():
 	if hasattr(bpy.types.Collection, "stf_id"):
@@ -109,5 +109,6 @@ def unregister():
 		del bpy.types.Collection.stf_components
 	if hasattr(bpy.types.Collection, "stf_active_component_index"):
 		del bpy.types.Collection.stf_active_component_index
-	if hasattr(bpy.types.Collection, "metric_multiplier"):
-		del bpy.types.Collection.metric_multiplier
+
+	if hasattr(bpy.types.Collection, "stf_use_collection_as_prefab"):
+		del bpy.types.Collection.stf_use_collection_as_prefab

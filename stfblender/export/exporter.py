@@ -2,6 +2,8 @@ import json
 import bpy
 from bpy_extras.io_utils import ExportHelper
 
+from ..root_properties import draw_meta_editor
+
 from ...libstf.stf_registry import get_export_modules
 from ...libstf.stf_export_state import STF_ExportState
 from ...libstf.stf_export_context import STF_RootExportContext
@@ -16,13 +18,16 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 	filename_ext = ""
 	filter_glob: bpy.props.StringProperty(default="*.stf;*.stf.json") # type: ignore
 
-	current_collection_as_root: bpy.props.BoolProperty(default=False, name="Current Collection as Export Root") # type: ignore
+	current_collection_as_root: bpy.props.BoolProperty(default=False, name="Scene Collection as Export Root") # type: ignore
+	scene_collection_as_root: bpy.props.BoolProperty(default=False, name="Current Collection as Export Root") # type: ignore
 
 	format: bpy.props.EnumProperty(items=[("binary", "Binary", ""), ("json_contained", "Json (self contained)", ""), ("json_seperate", "Json (seperate buffers)", "")], default="binary", name="Format") # type: ignore
 	debug: bpy.props.BoolProperty(name="Export Debug Json File", default=True) # type: ignore
 
 	def invoke(self, context, event):
-		if(self.current_collection_as_root):
+		if(self.scene_collection_as_root):
+			context.scene.stf_collection_selector = None
+		elif(self.current_collection_as_root):
 			context.scene.stf_collection_selector = context.collection
 		elif(context.scene.stf_root_collection):
 			context.scene.stf_collection_selector = context.scene.stf_root_collection
@@ -92,8 +97,7 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 			if(len(stf_state._reports) > 0):
 				self.report({'WARNING'}, "STF asset exported with reports!")
 				for report in stf_state._reports:
-					# TODO report this in a more legit manner
-					#print(report.to_string() + "\n")
+					print(report.to_string() + "\n")
 					self.report({'WARNING'}, report.to_string())
 			else:
 				self.report({'INFO'}, "STF asset exported successfully!")
@@ -105,23 +109,31 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 
 	def draw(self, context):
 		self.layout.separator(factor=1, type="SPACE")
+		self.layout.prop_search(bpy.context.scene, "stf_collection_selector", bpy.data, "collections", text="Root")
+		self.layout.label(text="Remove Collection to export full scene")
+
+		self.layout.separator(factor=2, type="LINE")
 		self.layout.prop(self, property="format")
 		if(self.format == "binary"):
 			self.layout.prop(self, property="debug")
 
-		self.layout.separator(factor=1, type="SPACE")
-		self.layout.prop_search(bpy.context.scene, "stf_collection_selector", bpy.data, "collections", text="Root")
-		self.layout.label(text="Remove Collection to export full scene")
+		self.layout.separator(factor=2, type="LINE")
+		box = self.layout.box()
+		box.label(text="Asset Meta")
+		draw_meta_editor(box, context.scene.stf_collection_selector if context.scene.stf_collection_selector else context.scene.collection)
 
 
 def export_button(self, context):
 	self.layout.operator(ExportSTF.bl_idname, text="STF (.stf)")
 
 
+def __poll_collection(self, object) -> bool:
+	return object.stf_use_collection_as_prefab
+
 def register():
 	bpy.types.TOPBAR_MT_file_export.append(export_button)
 
-	bpy.types.Scene.stf_collection_selector = bpy.props.PointerProperty(type=bpy.types.Collection, name="Collection", options={"SKIP_SAVE"}) # type: ignore
+	bpy.types.Scene.stf_collection_selector = bpy.props.PointerProperty(type=bpy.types.Collection, poll=__poll_collection, name="Collection", options={"SKIP_SAVE"}) # type: ignore
 
 def unregister():
 	bpy.types.TOPBAR_MT_file_export.remove(export_button)

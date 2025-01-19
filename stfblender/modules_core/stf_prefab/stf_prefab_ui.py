@@ -19,8 +19,9 @@ class STFSetCollectionAsRootOperator(bpy.types.Operator):
 
 	def execute(self, context):
 		context.scene.stf_root_collection = context.collection
-		import uuid
-		context.collection.stf_id = str(uuid.uuid4())
+		if(not context.collection.stf_id):
+			import uuid
+			context.collection.stf_id = str(uuid.uuid4())
 		return {"FINISHED"}
 
 
@@ -63,28 +64,30 @@ class STFCollectionPanel(bpy.types.Panel):
 	def draw(self, context):
 		from ...export.exporter import ExportSTF
 		set_stf_component_filter(bpy.types.Collection)
+		self.layout.prop(context.collection, "stf_use_collection_as_prefab")
 
-		self.layout.label(text="stf.prefab")
+		if(context.collection.stf_use_collection_as_prefab):
+			self.layout.label(text="stf.prefab")
 
-		# Export Functionality
-		if(context.scene.stf_root_collection == context.collection):
-			self.layout.operator(operator=ExportSTF.bl_idname, text="Export as STF")
-		else:
-			self.layout.operator(STFSetCollectionAsRootOperator.bl_idname)
-			self.layout.operator(operator=ExportSTF.bl_idname, text="Export this Collection as STF root prefab").current_collection_as_root = True
+			# Export Functionality
+			if(context.scene.stf_root_collection == context.collection):
+				self.layout.operator(operator=ExportSTF.bl_idname, text="Export as STF")
+			else:
+				self.layout.operator(STFSetCollectionAsRootOperator.bl_idname)
+				self.layout.operator(operator=ExportSTF.bl_idname, text="Export this Collection as STF root prefab").current_collection_as_root = True
 
-		self.layout.separator(factor=1, type="SPACE")
+			self.layout.separator(factor=1, type="SPACE")
 
-		box = self.layout.box()
-		box.label(text="Asset Meta")
-		draw_meta_editor(box, context.collection)
+			box = self.layout.box()
+			box.label(text="Asset Meta")
+			draw_meta_editor(box, context.collection)
 
-		self.layout.separator(factor=1, type="SPACE")
+			self.layout.separator(factor=1, type="SPACE")
 
-		# Set ID
-		draw_stf_id_ui(self.layout, context, context.collection, STFSetCollectionIDOperator.bl_idname)
+			# Set ID
+			draw_stf_id_ui(self.layout, context, context.collection, STFSetCollectionIDOperator.bl_idname)
 
-		self.layout.separator(factor=2, type="LINE")
+			self.layout.separator(factor=2, type="LINE")
 
-		# Components
-		draw_components_ui(self.layout, context, context.collection, STFAddCollectionComponentOperator.bl_idname, STFRemoveCollectionComponentOperator.bl_idname)
+			# Components
+			draw_components_ui(self.layout, context, context.collection, STFAddCollectionComponentOperator.bl_idname, STFRemoveCollectionComponentOperator.bl_idname)
