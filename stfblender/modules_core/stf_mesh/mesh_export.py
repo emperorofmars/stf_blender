@@ -217,7 +217,7 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 		if(not edge.use_edge_sharp):
 			pass
 
-	# Single vertex smoothness
+	# Single vertex smoothness at some point Blender plz
 
 
 	# Weightpaint

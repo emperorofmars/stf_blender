@@ -5,7 +5,7 @@ from ....libstf.stf_export_context import STF_ResourceExportContext
 from ....libstf.stf_import_context import STF_ResourceImportContext
 from ....libstf.stf_module import STF_Module
 from ....libstf.stf_report import STFReportSeverity, STFReport
-from ...utils.node_spatial_base import export_node_spatial_base, import_node_spatial_base
+from ..stf_node_spatial.node_spatial_base import export_node_spatial_base, import_node_spatial_base
 from ...utils.component_utils import get_components_from_object
 from ...utils.id_utils import ensure_stf_id
 

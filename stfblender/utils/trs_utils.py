@@ -15,7 +15,7 @@ def blender_scale_to_stf(blender_vec: list[float]) -> list[float]:
 	# x,y,z -> x,z,y
 	return [blender_vec[0], blender_vec[2], blender_vec[1]]
 
-def to_trs(t: mathutils.Vector, r: mathutils.Quaternion, s: mathutils.Vector) -> list[list[float]]:
+def blender_to_trs(t: mathutils.Vector, r: mathutils.Quaternion, s: mathutils.Vector) -> list[list[float]]:
 	return [
 		blender_translation_to_stf(t),
 		blender_rotation_to_stf(r),
@@ -37,7 +37,7 @@ def blender_object_to_trs(blender_object: bpy.types.Object) -> list[list[float]]
 				t, r, s = (blender_object.parent.matrix_world.inverted_safe() @ blender_object.parent.data.bones[blender_object.parent_bone].matrix_local.inverted_safe() @ blender_object.matrix_world).decompose()
 	else:
 		t, r, s = blender_object.matrix_world.decompose()
-	return to_trs(t, r, s)
+	return blender_to_trs(t, r, s)
 	#return to_trs(blender_object.location, blender_object.rotation_quaternion, blender_object.scale)
 
 
@@ -53,11 +53,14 @@ def stf_scale_to_blender(vec: list[float]) -> mathutils.Vector:
 	# x,z,y -> x,y,z
 	return mathutils.Vector((vec[0], vec[2], vec[1]))
 
-def from_trs(trs: list[list[float]]) -> tuple[mathutils.Vector, mathutils.Quaternion, mathutils.Vector]:
+def stf_to_blender(trs: list[list[float]]) -> tuple[mathutils.Vector, mathutils.Quaternion, mathutils.Vector]:
 	return (stf_translation_to_blender(trs[0]), stf_rotation_to_blender(trs[1]), stf_scale_to_blender(trs[2]))
 
+def stf_to_blender_matrix(trs: list[list[float]]) -> mathutils.Matrix:
+	return mathutils.Matrix.LocRotScale(stf_translation_to_blender(trs[0]), stf_rotation_to_blender(trs[1]), stf_scale_to_blender(trs[2]))
+
 def trs_to_blender_object(trs: list[list[float]], blender_object: bpy.types.Object):
-	matrix_local = mathutils.Matrix.LocRotScale(stf_translation_to_blender(trs[0]), stf_rotation_to_blender(trs[1]), stf_scale_to_blender(trs[2]))
+	matrix_local = stf_to_blender_matrix(trs)
 	if(blender_object.parent):
 		match(blender_object.parent_type):
 			case "OBJECT":

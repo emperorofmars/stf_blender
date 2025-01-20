@@ -1,7 +1,7 @@
 import bpy
 
 from ...utils.id_utils import ensure_stf_id
-from ...utils.node_spatial_base import export_node_spatial_base, import_node_spatial_base
+from .node_spatial_base import export_node_spatial_base, import_node_spatial_base
 from ....libstf.stf_module import STF_Module
 from ...utils.component_utils import STF_Component, get_components_from_object
 from ..stf_prefab.stf_prefab import STF_BlenderNodeExportContext, STF_BlenderNodeImportContext

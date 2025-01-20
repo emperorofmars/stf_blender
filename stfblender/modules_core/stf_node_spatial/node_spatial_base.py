@@ -1,10 +1,10 @@
 import bpy
 import mathutils
 
-from ...libstf.stf_report import STFReport, STFReportSeverity
-from ..modules_core.stf_prefab.stf_prefab import STF_BlenderNodeExportContext, STF_BlenderNodeImportContext
-from . import trs_utils
-from .id_utils import ensure_stf_id
+from ....libstf.stf_report import STFReport, STFReportSeverity
+from ..stf_prefab.stf_prefab import STF_BlenderNodeExportContext, STF_BlenderNodeImportContext
+from ...utils import trs_utils
+from ...utils.id_utils import ensure_stf_id
 
 
 def import_node_spatial_base(context: STF_BlenderNodeImportContext, json_resource: dict, id: str, parent_application_object: any, blender_object: bpy.types.Object) -> tuple[any, any]:
