@@ -53,7 +53,7 @@ class STF_BlenderBoneImportContext(STF_ResourceImportContext):
 def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, parent_application_object: any) -> tuple[any, any]:
 	blender_armature = bpy.data.armatures.new(json_resource.get("name", "STF Armature"))
 	blender_armature.stf_id = id
-	blender_armature.stf_name = json_resource.get("name", "")
+	blender_armature.stf_name = json_resource.get("name")
 
 	hook_object: bpy.types.Object = bpy.data.objects.new(json_resource.get("name", "STF Node"), blender_armature)
 	bpy.context.scene.collection.objects.link(hook_object)

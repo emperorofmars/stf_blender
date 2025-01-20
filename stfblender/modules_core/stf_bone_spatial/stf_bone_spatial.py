@@ -34,22 +34,23 @@ def _stf_import(context: STF_BlenderBoneImportContext, json_resource: dict, id: 
 	blender_edit_bone = blender_armature.edit_bones.new(json_resource.get("name", "STF Bone"))
 	blender_bone_name = blender_edit_bone.name
 
-	# TODO use actual values
 	blender_edit_bone.head = trs_utils.stf_translation_to_blender(json_resource["head"])
 	blender_edit_bone.tail = trs_utils.stf_translation_to_blender(json_resource["tail"])
 	blender_edit_bone.roll = json_resource["roll"]
 
+	if("connected" in json_resource): blender_edit_bone.use_connect = json_resource["connected"]
+
 	for child_name in children:
 		child = blender_armature.edit_bones[child_name]
 		child.parent = blender_edit_bone
-		# TODO handle bone connection
 
 	bpy.ops.object.mode_set(mode="OBJECT", toggle=False)
 
 	blender_bone = ArmatureBone(blender_armature, blender_bone_name)
-	blender_armature.bones[blender_bone_name].stf_id = id
-
 	bone_context = STF_ResourceImportContext(context, json_resource, blender_bone)
+
+	blender_armature.bones[blender_bone_name].stf_id = id
+	blender_armature.bones[blender_bone_name].stf_name = json_resource.get("name")
 
 	return blender_bone, bone_context
 
@@ -72,6 +73,8 @@ def _stf_export(context: STF_BlenderBoneExportContext, application_object: any, 
 		"name": blender_bone_def.get_bone().stf_name if blender_bone_def.get_bone().stf_name else blender_bone_def.get_bone().name,
 		"children": children,
 	}
+	if(blender_armature.bones[blender_bone_name].parent):
+		ret["connected"] = blender_armature.bones[blender_bone_name].use_connect
 
 	for child in blender_child_bones:
 		children.append(context.serialize_resource(child))
