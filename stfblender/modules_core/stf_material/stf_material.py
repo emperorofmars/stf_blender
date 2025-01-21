@@ -1,9 +1,12 @@
 import bpy
 
+
 from ....libstf.stf_export_context import STF_ResourceExportContext, STF_RootExportContext
 from ....libstf.stf_import_context import STF_ResourceImportContext, STF_RootImportContext
 from ....libstf.stf_module import STF_Module
 from ....libstf.stf_report import STFReportSeverity, STFReport
+from .stf_material_definition import STF_Material_Definition, STF_Material_Property, STF_Material_Value_Ref
+from .blender_material_to_stf import blender_material_to_stf
 from ...utils.component_utils import STF_Component, get_components_from_object
 from ...utils.id_utils import ensure_stf_id
 
@@ -32,6 +35,18 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 	}
 	material_context = STF_ResourceExportContext(context, ret, blender_material)
 
+	if(not blender_material.stf_is_source_of_truth):
+		blender_material_to_stf(blender_material)
+
+
+	#for()
+
+	print()
+	print(blender_material.name)
+	print(blender_material.use_nodes)
+	print(blender_material.diffuse_color)
+
+
 	return ret, blender_material.stf_id, material_context
 
 
@@ -56,8 +71,6 @@ def register():
 	bpy.types.Material.stf_components = bpy.props.CollectionProperty(type=STF_Component, name="Components") # type: ignore
 	bpy.types.Material.stf_active_component_index = bpy.props.IntProperty()
 
-	bpy.types.Material.stf_is_source_of_truth = bpy.props.BoolProperty(name="STF Material Is Source Of Truth", default=False) # type: ignore
-
 def unregister():
 	if hasattr(bpy.types.Material, "stf_id"):
 		del bpy.types.Material.stf_id
@@ -67,6 +80,3 @@ def unregister():
 		del bpy.types.Material.stf_components
 	if hasattr(bpy.types.Material, "stf_active_component_index"):
 		del bpy.types.Material.stf_active_component_index
-
-	if hasattr(bpy.types.Material, "stf_is_source_of_truth"):
-		del bpy.types.Material.stf_is_source_of_truth

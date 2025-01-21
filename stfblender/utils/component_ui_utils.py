@@ -54,7 +54,7 @@ def find_component_module(modules: list[STF_BlenderComponentModule], stf_type: s
 def draw_components_ui(
 		layout: bpy.types.UILayout,
 		context: bpy.types.Context,
-		object: any,
+		object_type: any,
 		add_component_op: str,
 		remove_component_op: str
 		):
@@ -70,17 +70,17 @@ def draw_components_ui(
 			add_button.property_name = selected_add_module.blender_property_name
 
 		row = layout.row()
-		row.template_list(STFDrawComponentList.bl_idname, "", object, "stf_components", object, "stf_active_component_index")
-		if(len(object.stf_components) > object.stf_active_component_index):
-			component_ref = object.stf_components[object.stf_active_component_index]
+		row.template_list(STFDrawComponentList.bl_idname, "", object_type, "stf_components", object_type, "stf_active_component_index")
+		if(len(object_type.stf_components) > object_type.stf_active_component_index):
+			component_ref = object_type.stf_components[object_type.stf_active_component_index]
 
 			remove_button = row.operator(remove_component_op, icon="X", text="")
-			remove_button.index = object.stf_active_component_index
+			remove_button.index = object_type.stf_active_component_index
 			remove_button.property_name = component_ref.blender_property_name
 
-			for component in getattr(object, component_ref.blender_property_name):
+			for component in getattr(object_type, component_ref.blender_property_name):
 				if(component.stf_id == component_ref.stf_id):
-					draw_component(layout, context, component_ref, object, component)
+					draw_component(layout, context, component_ref, object_type, component)
 					break
 	else:
 		layout.label(text="No Components For This Type Available")
