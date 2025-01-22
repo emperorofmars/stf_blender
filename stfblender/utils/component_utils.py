@@ -17,7 +17,7 @@ class STF_BlenderComponentBase(bpy.types.PropertyGroup):
 	stf_name: bpy.props.StringProperty(name="Name") # type: ignore
 
 
-class STF_Component(bpy.types.PropertyGroup):
+class STF_Component(bpy.types.PropertyGroup): # Bringing polymorphism to Blender
 	"""This property defines the type and ID, from which the appropriate registered function can handle the correct object"""
 	stf_type: bpy.props.StringProperty(name="Type") # type: ignore
 	stf_id: bpy.props.StringProperty(name="ID") # type: ignore
