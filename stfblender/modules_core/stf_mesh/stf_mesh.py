@@ -28,6 +28,7 @@ register_stf_modules = [
 def register():
 	bpy.types.Mesh.stf_id = bpy.props.StringProperty(name="ID") # type: ignore
 	bpy.types.Mesh.stf_name = bpy.props.StringProperty(name="Name") # type: ignore
+	bpy.types.Mesh.stf_name_source_of_truth = bpy.props.BoolProperty(name="STF Name Is Source Of Truth") # type: ignore
 	bpy.types.Mesh.stf_components = bpy.props.CollectionProperty(type=STF_Component, name="Components") # type: ignore
 	bpy.types.Mesh.stf_active_component_index = bpy.props.IntProperty()
 
@@ -36,6 +37,8 @@ def unregister():
 		del bpy.types.Mesh.stf_id
 	if hasattr(bpy.types.Mesh, "stf_name"):
 		del bpy.types.Mesh.stf_name
+	if hasattr(bpy.types.Mesh, "stf_name_source_of_truth"):
+		del bpy.types.Mesh.stf_name_source_of_truth
 	if hasattr(bpy.types.Mesh, "stf_components"):
 		del bpy.types.Mesh.stf_components
 	if hasattr(bpy.types.Mesh, "stf_active_component_index"):

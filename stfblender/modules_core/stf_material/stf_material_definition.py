@@ -9,6 +9,11 @@ class STF_Material_Value_Base(bpy.types.PropertyGroup):
 	value_id: bpy.props.IntProperty() # type: ignore
 
 
+class STF_Blender_Material_Value_Module_Base:
+	property_name: str
+	multi_value: bool
+
+
 class STF_Material_Value_Ref(bpy.types.PropertyGroup): # Bringing polymorphism to Blender
 	value_property_name: bpy.props.StringProperty(name="Type") # type: ignore
 	value_id: bpy.props.IntProperty() # type: ignore
