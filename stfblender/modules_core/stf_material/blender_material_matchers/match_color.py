@@ -1,6 +1,7 @@
 import bpy
 
-from .blender_material_matcher_base import Blender_Material_Property_Matcher_Module_Base, add_property, add_value_to_property
+from .blender_material_matcher_base import Blender_Material_Property_Matcher_Module_Base
+from ..stf_material_definition import add_property
 from ..stf_blender_material_values.color_value import STF_Blender_Material_Value_Module_Color
 
 
