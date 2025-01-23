@@ -47,10 +47,10 @@ def add_property(blender_material: bpy.types.Material, property_type: str, value
 def add_value_to_property(blender_material: bpy.types.Material, property: STF_Material_Property) -> tuple[STF_Material_Value_Ref, STF_Blender_Material_Value_Module_Base]:
 	value_ref = property.values.add()
 	max_id = 0
-	for value in blender_material[property.value_property_name]:
+	for value in getattr(blender_material, property.value_property_name):
 		if(value.value_id > max_id): max_id = value.value_id + 1
 	value_ref.value_id = max_id
-	value = blender_material[property.value_property_name].add()
+	value = getattr(blender_material, property.value_property_name).add()
 	value.value_id = max_id
 	return value_ref, value
 
