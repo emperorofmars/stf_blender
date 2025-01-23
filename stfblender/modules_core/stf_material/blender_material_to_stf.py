@@ -13,11 +13,11 @@ def blender_material_to_stf(blender_material: bpy.types.Material) -> stfmat.STF_
 
 def clear_stf_material(blender_material: bpy.types.Material):
 	blender_material.stf_material.style_hints.clear()
-	blender_material.stf_material_properties.clear()
-	for mat_value in blender_material.stf_material_property_values:
-		if(hasattr(blender_material, mat_value.value_property_name)):
-			blender_material[mat_value.value_property_name].clear()
-	blender_material.stf_material_property_values.clear()
+	for mat_property in blender_material.stf_material_properties:
+		if(hasattr(blender_material, mat_property.value_property_name)):
+			blender_material[mat_property.value_property_name].clear()
+	blender_material.stf_material_property_value_refs.clear()
 	blender_material.stf_active_material_property_index = 0
+	blender_material.stf_material_properties.clear()
 
 

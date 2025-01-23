@@ -4,14 +4,14 @@ from ..libstf.stf_definition import STF_Meta_AssetInfo
 
 
 class STF_KV(bpy.types.PropertyGroup):
-	name: bpy.props.StringProperty(name="Property Name") # type: ignore
-	value: bpy.props.StringProperty(name="Property value") # type: ignore
+	name: bpy.props.StringProperty(name="Name") # type: ignore
+	value: bpy.props.StringProperty(name="Value") # type: ignore
 
 
 class STF_Meta(bpy.types.PropertyGroup):
 	asset_name: bpy.props.StringProperty(name="Asset Name") # type: ignore
 	asset_version: bpy.props.StringProperty(name="Version") # type: ignore
-	asset_url: bpy.props.StringProperty(name="Asset Link") # type: ignore
+	asset_url: bpy.props.StringProperty(name="Asset URL") # type: ignore
 	asset_author: bpy.props.StringProperty(name="Author(s)") # type: ignore
 	asset_license: bpy.props.StringProperty(name="License") # type: ignore
 	asset_license_url: bpy.props.StringProperty(name="License URL") # type: ignore
@@ -49,15 +49,87 @@ class STF_Meta(bpy.types.PropertyGroup):
 					new_prop.value = value
 
 
-def draw_meta_editor(layout: bpy.types.UILayout, blender_scene_or_collection: bpy.types.Scene | bpy.types.Collection):
-	layout.prop(blender_scene_or_collection.stf_meta, "asset_name")
-	layout.prop(blender_scene_or_collection.stf_meta, "asset_version")
-	layout.prop(blender_scene_or_collection.stf_meta, "asset_url")
-	layout.prop(blender_scene_or_collection.stf_meta, "asset_author")
-	layout.prop(blender_scene_or_collection.stf_meta, "asset_license")
-	layout.prop(blender_scene_or_collection.stf_meta, "asset_license_url")
-	layout.prop(blender_scene_or_collection.stf_meta, "asset_documentation_url")
-	layout.prop(blender_scene_or_collection.stf_meta, "custom_properties")
+class STFAddMetaPropertyCollection(bpy.types.Operator):
+	bl_idname = "stf.add_meta_property_collection"
+	bl_label = "Add Property"
+	bl_category = "STF"
+	bl_options = {"REGISTER", "UNDO"}
+
+	@classmethod
+	def poll(cls, context): return context.collection is not None
+
+	def execute(self, context):
+		context.collection.stf_meta.custom_properties.add()
+		return {"FINISHED"}
+
+class STFAddMetaPropertyScene(bpy.types.Operator):
+	bl_idname = "stf.add_meta_property_scene"
+	bl_label = "Add Property"
+	bl_category = "STF"
+	bl_options = {"REGISTER", "UNDO"}
+
+	@classmethod
+	def poll(cls, context): return context.scene is not None and context.scene.collection is not None
+
+	def execute(self, context):
+		context.scene.collection.stf_meta.custom_properties.add()
+		return {"FINISHED"}
+
+
+class STFRemoveMetaPropertyCollection(bpy.types.Operator):
+	bl_idname = "stf.remove_meta_property_collection"
+	bl_label = "Remove"
+	bl_category = "STF"
+	bl_options = {"REGISTER", "UNDO"}
+
+	index: bpy.props.IntProperty(name="Index") # type: ignore
+
+	@classmethod
+	def poll(cls, context): return context.collection is not None
+
+	def execute(self, context):
+		context.collection.stf_meta.custom_properties.remove(self.index)
+		return {"FINISHED"}
+
+
+class STFRemoveMetaPropertyScene(bpy.types.Operator):
+	bl_idname = "stf.remove_meta_property_scene"
+	bl_label = "Remove"
+	bl_category = "STF"
+	bl_options = {"REGISTER", "UNDO"}
+
+	index: bpy.props.IntProperty(name="Index") # type: ignore
+
+	@classmethod
+	def poll(cls, context): return context.scene is not None and context.scene.collection is not None
+
+	def execute(self, context):
+		context.scene.collection.stf_meta.custom_properties.remove(self.index)
+		return {"FINISHED"}
+
+
+def draw_meta_editor(layout: bpy.types.UILayout, collection: bpy.types.Collection, is_scene: bool):
+	layout.prop(collection.stf_meta, "asset_name")
+	layout.prop(collection.stf_meta, "asset_version")
+	layout.prop(collection.stf_meta, "asset_url")
+	layout.prop(collection.stf_meta, "asset_author")
+	layout.prop(collection.stf_meta, "asset_license")
+	layout.prop(collection.stf_meta, "asset_license_url")
+	layout.prop(collection.stf_meta, "asset_documentation_url")
+
+	for custom_property in collection.stf_meta.custom_properties:
+		row = layout.split(factor=0.4)
+		row.prop(custom_property, "name")
+		row.prop(custom_property, "value")
+		if(not is_scene):
+			row.operator(STFRemoveMetaPropertyCollection.bl_idname)
+		else:
+			row.operator(STFRemoveMetaPropertyScene.bl_idname)
+
+	if(not is_scene):
+		layout.operator(STFAddMetaPropertyCollection.bl_idname)
+	else:
+		layout.operator(STFAddMetaPropertyScene.bl_idname)
 
 
 class STF_FileHandler(bpy.types.FileHandler):

@@ -80,7 +80,7 @@ class STFSceneCollectionPanel(bpy.types.Panel):
 
 			box = self.layout.box()
 			box.label(text="Asset Meta")
-			draw_meta_editor(box, context.scene.collection)
+			draw_meta_editor(box, context.scene.collection, True)
 
 			self.layout.separator(factor=1, type="SPACE")
 

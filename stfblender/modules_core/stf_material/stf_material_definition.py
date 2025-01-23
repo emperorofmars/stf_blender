@@ -1,3 +1,4 @@
+from typing import Callable
 import bpy
 
 
@@ -11,18 +12,19 @@ class STF_Material_Value_Base(bpy.types.PropertyGroup):
 
 class STF_Blender_Material_Value_Module_Base:
 	property_name: str
-	multi_value: bool
+	value_import_func: Callable[[any, bpy.types.Material], None]
+	value_export_func: Callable[[any, dict, str, bpy.types.Material], dict]
 
 
 class STF_Material_Value_Ref(bpy.types.PropertyGroup): # Bringing polymorphism to Blender
-	value_property_name: bpy.props.StringProperty(name="Type") # type: ignore
 	value_id: bpy.props.IntProperty() # type: ignore
 
 
 class STF_Material_Property(bpy.types.PropertyGroup):
 	property_type: bpy.props.StringProperty(name="Type") # type: ignore
-	multi_value: bpy.props.BoolProperty(name="Allows Multiple Values", default=False) # type: ignore
+	value_property_name: bpy.props.StringProperty(name="Type") # type: ignore
 	values: bpy.props.CollectionProperty(type=STF_Material_Value_Ref, name="Value(s)") # type: ignore
+	multi_value: bpy.props.BoolProperty(name="Allows Multiple Values", default=False) # type: ignore
 	active_value_index: bpy.props.IntProperty() # type: ignore
 
 
@@ -37,7 +39,7 @@ def register():
 	bpy.types.Material.stf_material = bpy.props.PointerProperty(type=STF_Material_Definition, name="STF Material")
 	bpy.types.Material.stf_material_properties = bpy.props.CollectionProperty(type=STF_Material_Property, name="STF Material Properties")
 	bpy.types.Material.stf_active_material_property_index = bpy.props.IntProperty()
-	bpy.types.Material.stf_material_property_values = bpy.props.CollectionProperty(type=STF_Material_Value_Ref, name="STF Material Values")
+	bpy.types.Material.stf_material_property_value_refs = bpy.props.CollectionProperty(type=STF_Material_Value_Ref, name="STF Material Values")
 
 def unregister():
 	if hasattr(bpy.types.Material, "stf_is_source_of_truth"):
