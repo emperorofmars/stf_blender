@@ -29,9 +29,7 @@ class STFRemoveMaterialComponentOperator(bpy.types.Operator, STFRemoveComponentO
 class STFDrawMaterialPropertyList(bpy.types.UIList):
 	bl_idname = "COLLECTION_UL_stf_material_list"
 	def draw_item(self, context, layout, data, item, icon, active_data, active_propname):
-		layout.label(text=item.stf_material_type)
-		layout.label(text=item.multi_value)
-		layout.label(text=item.values)
+		layout.label(text=item.property_type)
 
 
 class STFMaterialSpatialPanel(bpy.types.Panel):

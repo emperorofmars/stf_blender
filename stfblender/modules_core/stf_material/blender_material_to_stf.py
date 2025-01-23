@@ -17,10 +17,10 @@ def blender_material_to_stf(blender_material: bpy.types.Material) -> stfmat.STF_
 	blender_material.stf_active_material_property_index = 0
 
 	color_prop = blender_material.stf_material_properties.add()
-	color_prop.type = "stf.material.albedo.color"
+	color_prop.property_type = "color"
 	color_value_ref = color_prop.values.add()
 	color_value_ref.value_property_name = "stf_material_value_color"
 	color_value_ref.value_id = 0 # TODO determine current ID and add 1 to it
 	color_value = blender_material.stf_material_value_color.add()
 	color_value.id = color_value_ref.value_id
-	color_value.color = blender_material.diffuse_color # TODO convert to vector
+	color_value.color = blender_material.diffuse_color[:3] # TODO convert to vector
