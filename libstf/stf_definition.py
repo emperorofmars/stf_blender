@@ -56,6 +56,7 @@ class STF_Meta:
 		self.root: str = None
 		self.profiles: list[STF_Profile] = []
 		self.asset_info: STF_Meta_AssetInfo = STF_Meta_AssetInfo()
+		self.metric_multiplier: float = 1
 
 	@staticmethod
 	def from_dict(dict: dict):
@@ -67,6 +68,7 @@ class STF_Meta:
 		ret.asset_info = STF_Meta_AssetInfo.from_dict(dict["asset_info"])
 		ret.generator = dict["generator"]
 		ret.timestamp = dict["timestamp"]
+		ret.metric_multiplier = dict["metric_multiplier"]
 		return ret
 
 	def to_dict(self):
@@ -78,6 +80,7 @@ class STF_Meta:
 			"asset_info": self.asset_info.to_dict(),
 			"generator": self.generator,
 			"timestamp": self.timestamp,
+			"metric_multiplier": self.metric_multiplier,
 		}
 
 

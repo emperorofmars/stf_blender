@@ -20,7 +20,7 @@ class STF_ExportState(StateUtil):
 	Each context must have access to the same STF_ExportState instance.
 	"""
 
-	def __init__(self, profiles: list[STF_Profile], asset_info: STF_Meta_AssetInfo, modules: tuple[dict[any, list[STF_Module]], dict[any, list[STF_ExportComponentHook]]], fail_on_severity: STFReportSeverity = STFReportSeverity.FatalError, permit_id_reassignment: bool = True):
+	def __init__(self, profiles: list[STF_Profile], asset_info: STF_Meta_AssetInfo, modules: tuple[dict[any, list[STF_Module]], dict[any, list[STF_ExportComponentHook]]], fail_on_severity: STFReportSeverity = STFReportSeverity.FatalError, permit_id_reassignment: bool = True, metric_multiplier: float = 1):
 		super().__init__(fail_on_severity)
 
 		self._modules: dict[any, list[STF_Module]] = modules[0]
@@ -37,6 +37,7 @@ class STF_ExportState(StateUtil):
 		self._asset_info = asset_info
 		self._permit_id_reassignment = permit_id_reassignment
 		self._root_id: str = None
+		self._metric_multiplier = metric_multiplier
 
 	def determine_module(self, application_object: any) -> STF_Module:
 		"""Find the best suited registered STF_Module for the type of this object"""
@@ -108,6 +109,7 @@ class STF_ExportState(StateUtil):
 		ret.stf.timestamp = datetime.datetime.now(datetime.timezone.utc).isoformat()
 		ret.stf.asset_info = self._asset_info
 		ret.stf.profiles = self._profiles
+		ret.stf.metric_multiplier = self._metric_multiplier
 		ret.resources = self._exported_resources
 		ret.buffers = {}
 		if(buffer_mode == STF_Buffer_Mode.included_binary):

@@ -9,16 +9,6 @@ class STF_Material_Value_Base(bpy.types.PropertyGroup):
 	value_id: bpy.props.IntProperty() # type: ignore
 
 
-class STF_Material_Value_RawJson(STF_Material_Value_Base):
-	json_text: bpy.props.StringProperty(name="Raw Json Text") # type: ignore
-	# todo references to blender objects
-
-
-class STF_Material_Value_Color(STF_Material_Value_Base):
-	color: bpy.props.FloatVectorProperty(name="Color") # type: ignore
-	# todo references to blender objects
-
-
 class STF_Material_Value_Ref(bpy.types.PropertyGroup): # Bringing polymorphism to Blender
 	value_property_name: bpy.props.StringProperty(name="Type") # type: ignore
 	value_id: bpy.props.IntProperty() # type: ignore
@@ -44,9 +34,6 @@ def register():
 	bpy.types.Material.stf_active_material_property_index = bpy.props.IntProperty()
 	bpy.types.Material.stf_material_property_values = bpy.props.CollectionProperty(type=STF_Material_Value_Ref, name="STF Material Values")
 
-	bpy.types.Material.stf_material_value_raw_json = bpy.props.CollectionProperty(type=STF_Material_Value_RawJson, name="Raw Json Value")
-	bpy.types.Material.stf_material_value_color = bpy.props.CollectionProperty(type=STF_Material_Value_Color, name="Color Value")
-
 def unregister():
 	if hasattr(bpy.types.Material, "stf_is_source_of_truth"):
 		del bpy.types.Material.stf_is_source_of_truth
@@ -59,9 +46,3 @@ def unregister():
 		del bpy.types.Material.stf_active_material_property_index
 	if hasattr(bpy.types.Material, "stf_material_property_values"):
 		del bpy.types.Material.stf_material_property_values
-
-	if hasattr(bpy.types.Material, "stf_material_value_raw_json"):
-		del bpy.types.Material.stf_material_value_raw_json
-
-	if hasattr(bpy.types.Material, "stf_material_value_color"):
-		del bpy.types.Material.stf_material_value_color
