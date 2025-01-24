@@ -1,6 +1,6 @@
 import bpy
 
-from .stf_material_definition import STF_Material_Property
+from .stf_material_definition import STF_Material_Property, STF_Material_Value_Base
 from ...utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
 from ...utils.component_utils import STFAddComponentOperatorBase, STFRemoveComponentOperatorBase
 from ...utils.component_ui_utils import draw_components_ui, set_stf_component_filter
@@ -78,9 +78,20 @@ class STFMaterialSpatialPanel(bpy.types.Panel):
 			prop: STF_Material_Property = context.material.stf_material_properties[context.material.stf_active_material_property_index]
 			self.layout.prop(prop, "property_type")
 
-			self.layout.template_list(STFDrawMaterialPropertyValueList.bl_idname, "", context.material, prop.value_property_name, context.material, "stf_active_material_property_value_index")
-			if(len(getattr(context.material, prop.value_property_name)) > context.material.stf_active_material_property_value_index):
-				for mat_module in blender_material_value_modules:
-					if(mat_module.property_name == prop.value_property_name):
-						mat_module.draw_func(self.layout, context, context.material, getattr(context.material, prop.value_property_name)[context.material.stf_active_material_property_value_index])
+			if(prop.multi_value):
+				self.layout.template_list(STFDrawMaterialPropertyValueList.bl_idname, "", prop, "values", prop, "active_value_index")
+				for value in getattr(context.material, prop.value_property_name):
+					if(value.value_id == prop.values[prop.active_value_index].value_id):
+						draw_value(self.layout, context, prop, value)
 						break
+			elif(len(prop.values) > 0):
+				for value in getattr(context.material, prop.value_property_name):
+					if(value.value_id == prop.values[0].value_id):
+						draw_value(self.layout, context, prop, value)
+						break
+
+def draw_value(layout: bpy.types.UILayout, context: bpy.types.Context, prop: STF_Material_Property, value: STF_Material_Value_Base):
+	for mat_module in blender_material_value_modules:
+		if(mat_module.property_name == prop.value_property_name):
+			mat_module.draw_func(layout, context, context.material, value)
+			break

@@ -31,6 +31,11 @@ class STF_Material_Value_Ref(bpy.types.PropertyGroup): # Bringing polymorphism t
 
 
 class STF_Material_Property(bpy.types.PropertyGroup):
+	"""
+	A material in STF consists of a dict of properties.
+	The property type must be unique within a material.
+	A property can have one or more values. Available value types are contained in './stf_blender_material_values'. Maybe these could become hot-loadable at some point.
+	"""
 	property_type: bpy.props.StringProperty(name="Type") # type: ignore
 	value_property_name: bpy.props.StringProperty(name="Type") # type: ignore
 	values: bpy.props.CollectionProperty(type=STF_Material_Value_Ref, name="Value(s)") # type: ignore
@@ -39,6 +44,7 @@ class STF_Material_Property(bpy.types.PropertyGroup):
 
 
 class STF_Material_Definition(bpy.types.PropertyGroup):
+	"""This object merely holds all the meta information for a material"""
 	style_hints: bpy.props.CollectionProperty(type=StringProperty, name="Style Hints") # type: ignore
 	shader_targets: bpy.props.CollectionProperty(type=ShaderTarget, name="Shader Targets") # type: ignore
 
@@ -74,7 +80,6 @@ def register():
 	bpy.types.Material.stf_material_properties = bpy.props.CollectionProperty(type=STF_Material_Property, name="STF Material Properties")
 	bpy.types.Material.stf_active_material_property_index = bpy.props.IntProperty()
 	bpy.types.Material.stf_material_property_value_refs = bpy.props.CollectionProperty(type=STF_Material_Value_Ref, name="STF Material Values")
-	bpy.types.Material.stf_active_material_property_value_index = bpy.props.IntProperty()
 
 def unregister():
 	if hasattr(bpy.types.Material, "stf_is_source_of_truth"):
@@ -88,5 +93,3 @@ def unregister():
 		del bpy.types.Material.stf_active_material_property_index
 	if hasattr(bpy.types.Material, "stf_material_property_values"):
 		del bpy.types.Material.stf_material_property_values
-	if hasattr(bpy.types.Material, "stf_active_material_property_value_index"):
-		del bpy.types.Material.stf_active_material_property_value_index
