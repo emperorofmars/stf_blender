@@ -9,6 +9,7 @@ from .stf_material_definition import STF_Material_Definition, STF_Material_Prope
 from .blender_material_to_stf import blender_material_to_stf
 from ...utils.component_utils import STF_Component, get_components_from_object
 from ...utils.id_utils import ensure_stf_id
+from .stf_blender_material_values import blender_material_value_modules
 
 
 _stf_type = "stf.material"
@@ -31,7 +32,8 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 
 	ret = {
 		"type": _stf_type,
-		"name": blender_material.name
+		"name": blender_material.name,
+		"properties": {},
 	}
 	material_context = STF_ResourceExportContext(context, ret, blender_material)
 
@@ -39,12 +41,37 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 		blender_material_to_stf(blender_material)
 
 
-	#for()
+	ret["style_hints"] = blender_material.stf_material.style_hints
+	ret["shader_targets"] = {}
+	for target in blender_material.stf_material.shader_targets:
+		ret["shader_targets"][target.target] = []
+		for shader in target.shaders:
+			ret["shader_targets"][target.target].append(shader.value)
+
+
+	for property in blender_material.stf_material_properties:
+		property: STF_Material_Property = property
+		json_prop = {}
+
+		values = []
+		for value_ref in property.values:
+			for mat_module in blender_material_value_modules:
+				if(mat_module.property_name == property.value_property_name):
+					for property_value in getattr(blender_material, property.value_property_name):
+						if(property_value.value_id == value_ref.value_id):
+							values.append(mat_module.value_export_func(material_context, blender_material, getattr(blender_material, property.value_property_name)[0]))
+							break
+
+		if(property.multi_value):
+			json_prop["values"] = values
+		elif(len(values) > 0):
+			json_prop["value"] = values[0]
+
+		ret["properties"][property.property_type] = json_prop
 
 	print()
 	print(blender_material.name)
-	print(blender_material.use_nodes)
-	print(blender_material.diffuse_color)
+	print(str(ret))
 
 
 	return ret, blender_material.stf_id, material_context

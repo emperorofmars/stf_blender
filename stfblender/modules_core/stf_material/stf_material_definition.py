@@ -5,6 +5,10 @@ import bpy
 class StringProperty(bpy.types.PropertyGroup):
 	value: bpy.props.StringProperty() # type: ignore
 
+class ShaderTarget(bpy.types.PropertyGroup):
+	target: bpy.props.StringProperty() # type: ignore
+	shaders: bpy.props.CollectionProperty(type=StringProperty) # type: ignore
+
 
 class STF_Material_Value_Base(bpy.types.PropertyGroup):
 	value_id: bpy.props.IntProperty() # type: ignore
@@ -12,8 +16,14 @@ class STF_Material_Value_Base(bpy.types.PropertyGroup):
 
 class STF_Blender_Material_Value_Module_Base:
 	property_name: str
-	value_import_func: Callable[[any, bpy.types.Material], None]
-	value_export_func: Callable[[any, dict, str, bpy.types.Material], dict]
+
+	# (STF Context, Blender Material, STF Value Json)
+	value_import_func: Callable[[any, dict, bpy.types.Material], None]
+
+	# (STF Context, Blender Material, Blender STF Material Value) -> Json Value
+	value_export_func: Callable[[any, bpy.types.Material, STF_Material_Value_Base], any]
+
+	draw_func: Callable[[bpy.types.UILayout, bpy.types.Context, bpy.types.Material, STF_Material_Value_Base], None]
 
 
 class STF_Material_Value_Ref(bpy.types.PropertyGroup): # Bringing polymorphism to Blender
@@ -30,8 +40,7 @@ class STF_Material_Property(bpy.types.PropertyGroup):
 
 class STF_Material_Definition(bpy.types.PropertyGroup):
 	style_hints: bpy.props.CollectionProperty(type=StringProperty, name="Style Hints") # type: ignore
-	# TODO shader targets
-
+	shader_targets: bpy.props.CollectionProperty(type=ShaderTarget, name="Shader Targets") # type: ignore
 
 
 
@@ -65,6 +74,7 @@ def register():
 	bpy.types.Material.stf_material_properties = bpy.props.CollectionProperty(type=STF_Material_Property, name="STF Material Properties")
 	bpy.types.Material.stf_active_material_property_index = bpy.props.IntProperty()
 	bpy.types.Material.stf_material_property_value_refs = bpy.props.CollectionProperty(type=STF_Material_Value_Ref, name="STF Material Values")
+	bpy.types.Material.stf_active_material_property_value_index = bpy.props.IntProperty()
 
 def unregister():
 	if hasattr(bpy.types.Material, "stf_is_source_of_truth"):
@@ -78,3 +88,5 @@ def unregister():
 		del bpy.types.Material.stf_active_material_property_index
 	if hasattr(bpy.types.Material, "stf_material_property_values"):
 		del bpy.types.Material.stf_material_property_values
+	if hasattr(bpy.types.Material, "stf_active_material_property_value_index"):
+		del bpy.types.Material.stf_active_material_property_value_index

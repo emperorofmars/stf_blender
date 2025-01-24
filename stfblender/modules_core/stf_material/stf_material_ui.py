@@ -4,6 +4,7 @@ from .stf_material_definition import STF_Material_Property
 from ...utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
 from ...utils.component_utils import STFAddComponentOperatorBase, STFRemoveComponentOperatorBase
 from ...utils.component_ui_utils import draw_components_ui, set_stf_component_filter
+from .stf_blender_material_values import blender_material_value_modules
 
 
 class STFSetMaterialIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
@@ -30,6 +31,12 @@ class STFDrawMaterialPropertyList(bpy.types.UIList):
 	bl_idname = "COLLECTION_UL_stf_material_list"
 	def draw_item(self, context, layout, data, item, icon, active_data, active_propname):
 		layout.label(text=item.property_type)
+
+class STFDrawMaterialPropertyValueList(bpy.types.UIList):
+	bl_idname = "COLLECTION_UL_stf_material_value_list"
+	def draw_item(self, context, layout, data, item, icon, active_data, active_propname):
+		layout.label(text="ID: " + str(item.value_id))
+
 
 
 class STFMaterialSpatialPanel(bpy.types.Panel):
@@ -66,3 +73,14 @@ class STFMaterialSpatialPanel(bpy.types.Panel):
 		self.layout.prop(context.material.stf_material, "style_hints")
 
 		self.layout.template_list(STFDrawMaterialPropertyList.bl_idname, "", context.material, "stf_material_properties", context.material, "stf_active_material_property_index")
+
+		if(len(context.material.stf_material_properties) > context.material.stf_active_material_property_index):
+			prop: STF_Material_Property = context.material.stf_material_properties[context.material.stf_active_material_property_index]
+			self.layout.prop(prop, "property_type")
+
+			self.layout.template_list(STFDrawMaterialPropertyValueList.bl_idname, "", context.material, prop.value_property_name, context.material, "stf_active_material_property_value_index")
+			if(len(getattr(context.material, prop.value_property_name)) > context.material.stf_active_material_property_value_index):
+				for mat_module in blender_material_value_modules:
+					if(mat_module.property_name == prop.value_property_name):
+						mat_module.draw_func(self.layout, context, context.material, getattr(context.material, prop.value_property_name)[context.material.stf_active_material_property_value_index])
+						break
