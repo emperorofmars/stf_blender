@@ -22,6 +22,7 @@ def _draw_func(layout: bpy.types.UILayout, context: bpy.types.Context, blender_m
 
 
 class STF_Blender_Material_Value_Module_Color(STF_Blender_Material_Value_Module_Base):
+	value_type = "color"
 	property_name = "stf_material_value_color"
 	value_import_func = _value_import_func
 	value_export_func = _value_export_func

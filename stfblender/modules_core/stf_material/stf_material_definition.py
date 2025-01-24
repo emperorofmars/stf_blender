@@ -15,6 +15,7 @@ class STF_Material_Value_Base(bpy.types.PropertyGroup):
 
 
 class STF_Blender_Material_Value_Module_Base:
+	value_type: str
 	property_name: str
 
 	# (STF Context, Blender Material, STF Value Json)
@@ -27,6 +28,7 @@ class STF_Blender_Material_Value_Module_Base:
 
 
 class STF_Material_Value_Ref(bpy.types.PropertyGroup): # Bringing polymorphism to Blender
+	"""References the 'value_id' of the actual value property, whose property-name is unknown by this piece of code."""
 	value_id: bpy.props.IntProperty() # type: ignore
 
 
@@ -57,6 +59,20 @@ def add_property(blender_material: bpy.types.Material, property_type: str, value
 
 	value_ref, value = add_value_to_property(blender_material, prop)
 	return prop, value_ref, value
+
+
+def remove_property(blender_material: bpy.types.Material, index: int):
+	property: STF_Material_Property = blender_material.stf_material_properties[index]
+	for value_ref in property.values:
+		blender_value_collection = getattr(blender_material, property.value_property_name)
+		for value_index, value in enumerate(blender_value_collection):
+			if(value.value_id == value_ref.value_id):
+				blender_value_collection.remove(value_index)
+				break
+	for property_index, property_candidate in enumerate(blender_material.stf_material_properties):
+		if(property_candidate == property):
+			blender_material.stf_material_properties.remove(property_index)
+			break
 
 
 def add_value_to_property(blender_material: bpy.types.Material, property: STF_Material_Property) -> tuple[STF_Material_Value_Ref, STF_Blender_Material_Value_Module_Base]:

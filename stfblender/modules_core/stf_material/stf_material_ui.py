@@ -1,6 +1,6 @@
 import bpy
 
-from .stf_material_definition import STF_Material_Property, STF_Material_Value_Base
+from .stf_material_definition import STF_Material_Property, STF_Material_Value_Base, add_property, remove_property
 from ...utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
 from ...utils.component_utils import STFAddComponentOperatorBase, STFRemoveComponentOperatorBase
 from ...utils.component_ui_utils import draw_components_ui, set_stf_component_filter
@@ -38,6 +38,33 @@ class STFDrawMaterialPropertyValueList(bpy.types.UIList):
 		layout.label(text="ID: " + str(item.value_id))
 
 
+class STFAddMaterialProperty(bpy.types.Operator):
+	bl_idname = "stf.add_material_property"
+	bl_label = "Add"
+	bl_category = "STF"
+	bl_options = {"REGISTER", "UNDO"}
+
+	def execute(self, context):
+		for mat_module in blender_material_value_modules:
+			if(mat_module.value_type == context.scene.stf_material_value_modules):
+				add_property(context.material, "", mat_module)
+				return {"FINISHED"}
+		self.report({'ERROR'}, "Invalid material value module!")
+		return {"CANCELLED"}
+
+
+class STFRemoveMaterialProperty(bpy.types.Operator):
+	bl_idname = "stf.remove_material_property"
+	bl_label = "Remove"
+	bl_category = "STF"
+	bl_options = {"REGISTER", "UNDO"}
+
+	index: bpy.props.IntProperty() # type: ignore
+
+	def execute(self, context):
+		remove_property(context.material, self.index)
+		return {"FINISHED"}
+
 
 class STFMaterialSpatialPanel(bpy.types.Panel):
 	"""STF options & export helper"""
@@ -69,12 +96,20 @@ class STFMaterialSpatialPanel(bpy.types.Panel):
 
 		# STF Material Properties
 		self.layout.prop(context.material, "stf_is_source_of_truth")
-
 		self.layout.prop(context.material.stf_material, "style_hints")
 
-		self.layout.template_list(STFDrawMaterialPropertyList.bl_idname, "", context.material, "stf_material_properties", context.material, "stf_active_material_property_index")
+		row_property_list = self.layout.row()
+		row_property_list.template_list(STFDrawMaterialPropertyList.bl_idname, "", context.material, "stf_material_properties", context.material, "stf_active_material_property_index")
+
+		row = self.layout.row(align=True)
+		row.prop(context.scene, "stf_material_value_modules", text="")
+		row.operator(STFAddMaterialProperty.bl_idname, icon="ADD")
+
+		self.layout.separator(factor=2, type="SPACE")
 
 		if(len(context.material.stf_material_properties) > context.material.stf_active_material_property_index):
+			row_property_list.operator(STFRemoveMaterialProperty.bl_idname, text="", icon="X").index = context.material.stf_active_material_property_index
+
 			prop: STF_Material_Property = context.material.stf_material_properties[context.material.stf_active_material_property_index]
 			self.layout.prop(prop, "property_type")
 
@@ -82,15 +117,15 @@ class STFMaterialSpatialPanel(bpy.types.Panel):
 				self.layout.template_list(STFDrawMaterialPropertyValueList.bl_idname, "", prop, "values", prop, "active_value_index")
 				for value in getattr(context.material, prop.value_property_name):
 					if(value.value_id == prop.values[prop.active_value_index].value_id):
-						draw_value(self.layout, context, prop, value)
+						_draw_value(self.layout, context, prop, value)
 						break
 			elif(len(prop.values) > 0):
 				for value in getattr(context.material, prop.value_property_name):
 					if(value.value_id == prop.values[0].value_id):
-						draw_value(self.layout, context, prop, value)
+						_draw_value(self.layout, context, prop, value)
 						break
 
-def draw_value(layout: bpy.types.UILayout, context: bpy.types.Context, prop: STF_Material_Property, value: STF_Material_Value_Base):
+def _draw_value(layout: bpy.types.UILayout, context: bpy.types.Context, prop: STF_Material_Property, value: STF_Material_Value_Base):
 	for mat_module in blender_material_value_modules:
 		if(mat_module.property_name == prop.value_property_name):
 			mat_module.draw_func(layout, context, context.material, value)
