@@ -57,7 +57,7 @@ def add_property(blender_material: bpy.types.Material, property_type: str, value
 	prop.property_type = property_type
 	prop.value_property_name = value_module.property_name
 
-	value_ref, value = add_value_to_property(blender_material, prop)
+	value_ref, value = add_value_to_property(blender_material, len(blender_material.stf_material_properties) - 1)
 	return prop, value_ref, value
 
 
@@ -75,7 +75,8 @@ def remove_property(blender_material: bpy.types.Material, index: int):
 			break
 
 
-def add_value_to_property(blender_material: bpy.types.Material, property: STF_Material_Property) -> tuple[STF_Material_Value_Ref, STF_Blender_Material_Value_Module_Base]:
+def add_value_to_property(blender_material: bpy.types.Material, index: int) -> tuple[STF_Material_Value_Ref, STF_Blender_Material_Value_Module_Base]:
+	property: STF_Material_Property = blender_material.stf_material_properties[index]
 	value_ref = property.values.add()
 	max_id = 0
 	for value in getattr(blender_material, property.value_property_name):
@@ -85,7 +86,15 @@ def add_value_to_property(blender_material: bpy.types.Material, property: STF_Ma
 	value.value_id = max_id
 	return value_ref, value
 
-# TODO remove and move value
+def remove_property_value(blender_material: bpy.types.Material, index: int):
+	property: STF_Material_Property = blender_material.stf_material_properties[index]
+	value_ref = property.values[property.active_value_index]
+	blender_value_collection = getattr(blender_material, property.value_property_name)
+	for value_index, value in enumerate(blender_value_collection):
+		if(value.value_id == value_ref.value_id):
+			blender_value_collection.remove(value_index)
+			break
+	property.values.remove(property.active_value_index)
 
 
 

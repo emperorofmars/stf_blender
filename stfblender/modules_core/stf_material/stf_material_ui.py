@@ -1,6 +1,6 @@
 import bpy
 
-from .stf_material_definition import STF_Material_Property, STF_Material_Value_Base, add_property, remove_property
+from .stf_material_definition import STF_Material_Property, STF_Material_Value_Base, add_property, add_value_to_property, remove_property, remove_property_value
 from ...utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
 from ...utils.component_utils import STFAddComponentOperatorBase, STFRemoveComponentOperatorBase
 from ...utils.component_ui_utils import draw_components_ui, set_stf_component_filter
@@ -40,7 +40,7 @@ class STFDrawMaterialPropertyValueList(bpy.types.UIList):
 
 class STFAddMaterialProperty(bpy.types.Operator):
 	bl_idname = "stf.add_material_property"
-	bl_label = "Add"
+	bl_label = "Add Property"
 	bl_category = "STF"
 	bl_options = {"REGISTER", "UNDO"}
 
@@ -62,6 +62,31 @@ class STFRemoveMaterialProperty(bpy.types.Operator):
 
 	def execute(self, context):
 		remove_property(context.material, self.index)
+		return {"FINISHED"}
+
+
+class STFAddMaterialPropertyValue(bpy.types.Operator):
+	bl_idname = "stf.add_material_property_value"
+	bl_label = "Add Value"
+	bl_category = "STF"
+	bl_options = {"REGISTER", "UNDO"}
+
+	index: bpy.props.IntProperty() # type: ignore
+
+	def execute(self, context):
+		add_value_to_property(context.material, self.index)
+		return {"FINISHED"}
+
+class STFRemoveMaterialPropertyValue(bpy.types.Operator):
+	bl_idname = "stf.remove_material_property_value"
+	bl_label = "Remove"
+	bl_category = "STF"
+	bl_options = {"REGISTER", "UNDO"}
+
+	index: bpy.props.IntProperty() # type: ignore
+
+	def execute(self, context):
+		remove_property_value(context.material, self.index)
 		return {"FINISHED"}
 
 
@@ -112,13 +137,20 @@ class STFMaterialSpatialPanel(bpy.types.Panel):
 
 				# Draw property
 				prop: STF_Material_Property = context.material.stf_material_properties[context.material.stf_active_material_property_index]
-				self.layout.prop(prop, "property_type")
+				self.layout.prop(prop, "property_type") # TODO handle understood property types
 				self.layout.prop(prop, "multi_value")
 
 				# Draw property value(s)
 				if(prop.multi_value):
-					self.layout.template_list(STFDrawMaterialPropertyValueList.bl_idname, "", prop, "values", prop, "active_value_index")
+					self.layout.separator(factor=1, type="SPACE")
+					row_value_list = self.layout.row()
+					row_value_list.template_list(STFDrawMaterialPropertyValueList.bl_idname, "", prop, "values", prop, "active_value_index")
 				if(value := _find_value(context, prop)):
+					if(prop.multi_value):
+						row_value_list.operator(STFRemoveMaterialPropertyValue.bl_idname, text="", icon="X").index = context.material.stf_active_material_property_index
+						self.layout.operator(STFAddMaterialPropertyValue.bl_idname).index = context.material.stf_active_material_property_index
+
+					self.layout.separator(factor=1, type="SPACE")
 					_draw_value(self.layout, context, prop, value)
 				else:
 					self.layout.label(text="Invalid Value")

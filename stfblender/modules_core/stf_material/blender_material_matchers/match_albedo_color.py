@@ -5,7 +5,7 @@ from ..stf_material_definition import add_property
 from ..stf_blender_material_values.color_value import STF_Blender_Material_Value_Module_Color
 
 
-_property_type = "color"
+_property_type = "albedo_color"
 
 
 def _match(blender_material: bpy.types.Material) -> bool:
