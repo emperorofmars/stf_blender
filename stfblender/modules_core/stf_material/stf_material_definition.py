@@ -79,7 +79,7 @@ def add_value_to_property(blender_material: bpy.types.Material, property: STF_Ma
 	value_ref = property.values.add()
 	max_id = 0
 	for value in getattr(blender_material, property.value_property_name):
-		if(value.value_id > max_id): max_id = value.value_id + 1
+		if(value.value_id >= max_id): max_id = value.value_id + 1
 	value_ref.value_id = max_id
 	value = getattr(blender_material, property.value_property_name).add()
 	value.value_id = max_id
