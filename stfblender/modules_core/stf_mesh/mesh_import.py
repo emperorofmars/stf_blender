@@ -28,6 +28,8 @@ def import_stf_mesh(context: STF_RootImportContext, json_resource: dict, id: str
 	vertex_indices_width = json_resource.get("vertex_indices_width", 4)
 	vertex_width = json_resource.get("vertex_width", 4)
 
+
+	# Vertices
 	buffer_vertices = BytesIO(mesh_context.import_buffer(json_resource["vertices"]))
 	py_vertices = []
 	for _ in range(vertex_count):
@@ -39,12 +41,16 @@ def import_stf_mesh(context: STF_RootImportContext, json_resource: dict, id: str
 	split_count = json_resource.get("split_count", 0)
 	split_indices_width = json_resource.get("split_indices_width", 4)
 
+
+	# Splits
 	py_splits = []
 	if(split_count > 0 and "splits" in json_resource):
 		buffer_split = BytesIO(mesh_context.import_buffer(json_resource["splits"]))
 		for index in range(split_count):
 			py_splits.append(parse_uint(buffer_split, vertex_indices_width))
 
+
+	# Faces
 	py_faces = []
 	tris_count = json_resource.get("tris_count", 0)
 	face_count = json_resource.get("face_count", 0)
@@ -80,6 +86,13 @@ def import_stf_mesh(context: STF_RootImportContext, json_resource: dict, id: str
 			py_faces.append(face_indices)
 
 
+	# Lines (Edges not part of faces)
+	if("lines" in json_resource and "lines_len" in json_resource):
+		for line_index in range(json_resource["lines_len"]):
+			# TODO
+			pass
+
+
 	# Construct the topology
 	blender_mesh.from_pydata(py_vertices, [], py_faces, False)
 	if(blender_mesh.validate(verbose=True)): # return is True if errors found
@@ -95,6 +108,13 @@ def import_stf_mesh(context: STF_RootImportContext, json_resource: dict, id: str
 			smooth_index = parse_uint(buffer_sharp_face_indices, face_indices_width)
 			blender_mesh.polygons[smooth_index].use_smooth = False
 
+	# Explicit edge sharpness
+	if("sharp_edges" in json_resource and "sharp_edges_len" in json_resource):
+		for line_index in range(json_resource["sharp_edges_len"]):
+			# TODO
+			pass
+
+	# Are non-split vertex normals needed?
 	"""# Vertex Normals
 	if("normals" in json_resource):
 		vertex_normals_width = json_resource.get("vertex_normals_width", 4)

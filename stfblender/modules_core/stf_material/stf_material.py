@@ -41,7 +41,10 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 		blender_material_to_stf(blender_material)
 
 
-	ret["style_hints"] = blender_material.stf_material.style_hints
+	ret["style_hints"] = []
+	for style_hint in blender_material.stf_material.style_hints:
+		ret["style_hints"].append(style_hint.value)
+
 	ret["shader_targets"] = {}
 	for target in blender_material.stf_material.shader_targets:
 		ret["shader_targets"][target.target] = []
@@ -56,7 +59,7 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 		values = []
 		for value_ref in property.values:
 			for mat_module in blender_material_value_modules:
-				if(mat_module.property_type == property.value_property_name):
+				if(mat_module.property_name == property.value_property_name):
 					for property_value in getattr(blender_material, property.value_property_name):
 						if(property_value.value_id == value_ref.value_id):
 							values.append(mat_module.value_export_func(material_context, blender_material, getattr(blender_material, property.value_property_name)[0]))

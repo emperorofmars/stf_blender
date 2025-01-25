@@ -63,6 +63,7 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 		buffer_vertices.write(serialize_float(position[2], float_width))
 	stf_mesh["vertices"] = mesh_context.serialize_buffer(buffer_vertices.getvalue())
 
+	# Are non-split vertex normals needed?
 	"""# Vertex normals
 	stf_mesh["vertex_normal_width"] = float_width
 	buffer_vertex_normals = BytesIO()
@@ -210,23 +211,29 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 
 	# Lines (Edges not part of faces)
 	buffer_lines = BytesIO()
+	lines_len = 0
 	for edge in blender_mesh.edges:
 		if(edge.is_loose):
+			lines_len += 1
 			for edge_vertex_index in edge.vertices:
 				buffer_lines.write(serialize_uint(edge_vertex_index, vertex_indices_width))
+	stf_mesh["lines_len"] = lines_len
 	stf_mesh["lines"] = mesh_context.serialize_buffer(buffer_lines.getvalue())
 
 
-	# explicite edge sharpness
+	# explicit edge sharpness
 	buffer_sharp_edges = BytesIO()
+	shapr_edges_len = 0
 	for edge in blender_mesh.edges:
 		if(edge.use_edge_sharp and not edge.is_loose):
+			shapr_edges_len += 1
 			for edge_vertex_index in edge.vertices:
 				buffer_sharp_edges.write(serialize_uint(edge_vertex_index, vertex_indices_width))
-	stf_mesh["sharp_edge_vertex_indices"] = mesh_context.serialize_buffer(buffer_sharp_edges.getvalue())
+	stf_mesh["sharp_edges_len"] = shapr_edges_len
+	stf_mesh["sharp_edges"] = mesh_context.serialize_buffer(buffer_sharp_edges.getvalue())
 
 
-	# TODO explicite single vertex sharpness at some point Blender plz
+	# TODO explicit single vertex sharpness at some point Blender plz
 
 
 	# Weightpaint
