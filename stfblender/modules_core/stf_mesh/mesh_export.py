@@ -188,7 +188,7 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 
 	stf_mesh["tris"] = mesh_context.serialize_buffer(buffer_tris.getvalue())
 
-	# Material indices and face smoothness
+	# Material indices and face sharpness
 	buffer_flat_face_indices = BytesIO()
 	flat_face_indices_len = 0
 	buffer_faces = BytesIO()
@@ -207,17 +207,26 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 	stf_mesh["sharp_face_indices_len"] = flat_face_indices_len
 	stf_mesh["sharp_face_indices"] = mesh_context.serialize_buffer(buffer_flat_face_indices.getvalue())
 
-	# TODO also export edges if wanted
+
+	# Lines (Edges not part of faces)
 	buffer_lines = BytesIO()
-
-
-	buffer_sharp_edges = BytesIO()
-	# Edge smoothness
 	for edge in blender_mesh.edges:
-		if(not edge.use_edge_sharp):
-			pass
+		if(edge.is_loose):
+			for edge_vertex_index in edge.vertices:
+				buffer_lines.write(serialize_uint(edge_vertex_index, vertex_indices_width))
+	stf_mesh["lines"] = mesh_context.serialize_buffer(buffer_lines.getvalue())
 
-	# Single vertex smoothness at some point Blender plz
+
+	# explicite edge sharpness
+	buffer_sharp_edges = BytesIO()
+	for edge in blender_mesh.edges:
+		if(edge.use_edge_sharp and not edge.is_loose):
+			for edge_vertex_index in edge.vertices:
+				buffer_sharp_edges.write(serialize_uint(edge_vertex_index, vertex_indices_width))
+	stf_mesh["sharp_edge_vertex_indices"] = mesh_context.serialize_buffer(buffer_sharp_edges.getvalue())
+
+
+	# TODO explicite single vertex sharpness at some point Blender plz
 
 
 	# Weightpaint
