@@ -9,7 +9,10 @@ from ...utils.id_utils import ensure_stf_id
 
 def import_node_spatial_base(context: STF_BlenderNodeImportContext, json_resource: dict, id: str, parent_application_object: any, blender_object: bpy.types.Object) -> tuple[any, any]:
 	blender_object.stf_id = id
-	blender_object.stf_name = json_resource.get("name", "")
+	if(json_resource.get("name")):
+		blender_object.stf_name = json_resource["name"]
+		blender_object.stf_name_source_of_truth = True
+	blender_object.name = json_resource.get("name", "STF Node")
 	for collection in blender_object.users_collection:
 		collection.objects.unlink(blender_object)
 
@@ -48,6 +51,7 @@ def import_node_spatial_base(context: STF_BlenderNodeImportContext, json_resourc
 
 def export_node_spatial_base(context: STF_BlenderNodeExportContext, blender_object: bpy.types.Object, parent_application_object: any, json_resource: dict) -> tuple[dict, str, any]:
 	ensure_stf_id(context, blender_object)
+	json_resource["name"] = blender_object.stf_name if blender_object.stf_name_source_of_truth else blender_object.name,
 
 	children = []
 	for child in blender_object.children:
@@ -64,7 +68,6 @@ def export_node_spatial_base(context: STF_BlenderNodeExportContext, blender_obje
 		if(object_exists):
 			children.append(context.serialize_resource(child))
 
-	json_resource["name"] = blender_object.stf_name if blender_object.stf_name else blender_object.name
 	json_resource["children"] = children
 
 	# TODO do this in a callback and check if the referenced resources are within the exported file

@@ -50,7 +50,9 @@ def _stf_import(context: STF_BlenderBoneImportContext, json_resource: dict, id: 
 	bone_context = STF_ResourceImportContext(context, json_resource, blender_bone)
 
 	blender_armature.bones[blender_bone_name].stf_id = id
-	blender_armature.bones[blender_bone_name].stf_name = json_resource.get("name")
+	if(json_resource.get("name")):
+		blender_armature.bones[blender_bone_name].stf_name = json_resource["name"]
+		blender_armature.bones[blender_bone_name].stf_name_source_of_truth = True
 
 	return blender_bone, bone_context
 
@@ -70,7 +72,7 @@ def _stf_export(context: STF_BlenderBoneExportContext, application_object: any, 
 	children = []
 	ret = {
 		"type": _stf_type,
-		"name": blender_bone_def.get_bone().stf_name if blender_bone_def.get_bone().stf_name else blender_bone_def.get_bone().name,
+		"name": blender_bone_def.get_bone().stf_name if blender_bone_def.get_bone().stf_name_source_of_truth else blender_bone_def.get_bone().name,
 		"children": children,
 	}
 	if(blender_armature.bones[blender_bone_name].parent):

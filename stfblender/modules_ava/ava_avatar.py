@@ -1,9 +1,9 @@
 import bpy
 
-from ....libstf.stf_export_context import STF_RootExportContext
-from ....libstf.stf_import_context import STF_RootImportContext
-from ...utils.component_utils import STF_BlenderComponentBase, STF_BlenderComponentModule, add_component
-from ...utils.op_utils import SetActiveObjectOperator
+from ...libstf.stf_export_context import STF_RootExportContext
+from ...libstf.stf_import_context import STF_RootImportContext
+from ..utils.component_utils import STF_BlenderComponentBase, STF_BlenderComponentModule, add_component
+from ..utils.op_utils import SetActiveObjectOperator
 
 
 _stf_type = "ava.avatar"

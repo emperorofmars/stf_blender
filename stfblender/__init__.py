@@ -16,6 +16,7 @@ class STF_File_Handler(bpy.types.FileHandler):
 
 
 from . import modules_core
-from . import modules_ext
+from . import modules_expanded
+from . import modules_ava
 
-register_stf_modules = modules_core.register_stf_modules + modules_ext.register_stf_modules
+register_stf_modules = modules_core.register_stf_modules + modules_expanded.register_stf_modules + modules_ava.register_stf_modules

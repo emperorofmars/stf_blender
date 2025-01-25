@@ -53,7 +53,9 @@ class STF_BlenderBoneImportContext(STF_ResourceImportContext):
 def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, parent_application_object: any) -> tuple[any, any]:
 	blender_armature = bpy.data.armatures.new(json_resource.get("name", "STF Armature"))
 	blender_armature.stf_id = id
-	blender_armature.stf_name = json_resource.get("name")
+	if(json_resource.get("name")):
+		blender_armature.stf_name = json_resource["name"]
+		blender_armature.stf_name_source_of_truth = True
 
 	hook_object: bpy.types.Object = bpy.data.objects.new(json_resource.get("name", "STF Node"), blender_armature)
 	bpy.context.scene.collection.objects.link(hook_object)
@@ -75,6 +77,7 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 	root_bones = []
 	ret = {
 		"type": _stf_type,
+		"name": blender_armature.stf_name if blender_armature.stf_name_source_of_truth else blender_armature.name,
 		"root_bones": root_bones,
 	}
 

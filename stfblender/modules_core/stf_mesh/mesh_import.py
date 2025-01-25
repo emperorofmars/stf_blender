@@ -15,7 +15,9 @@ _stf_type = "stf.mesh"
 def import_stf_mesh(context: STF_RootImportContext, json_resource: dict, id: str, parent_application_object: any) -> tuple[any, any]:
 	blender_mesh = bpy.data.meshes.new(json_resource.get("name", "STF Mesh"))
 	blender_mesh.stf_id = id
-	blender_mesh.stf_name = json_resource.get("name", "STF Mesh")
+	if(json_resource.get("name")):
+		blender_mesh.stf_name = json_resource["name"]
+		blender_mesh.stf_name_source_of_truth = True
 
 	blender_object_tmp = bpy.data.objects.new("STF TMP throw away", blender_mesh)
 	def _clean_tmp_mesh_object():
@@ -87,14 +89,15 @@ def import_stf_mesh(context: STF_RootImportContext, json_resource: dict, id: str
 
 
 	# Lines (Edges not part of faces)
+	py_lines = []
 	if("lines" in json_resource and "lines_len" in json_resource):
+		buffer_lines = BytesIO(mesh_context.import_buffer(json_resource["lines"]))
 		for line_index in range(json_resource["lines_len"]):
-			# TODO
-			pass
+			py_lines.append([parse_uint(buffer_lines, vertex_indices_width), parse_uint(buffer_lines, vertex_indices_width)])
 
 
 	# Construct the topology
-	blender_mesh.from_pydata(py_vertices, [], py_faces, False)
+	blender_mesh.from_pydata(py_vertices, py_lines, py_faces, False)
 	if(blender_mesh.validate(verbose=True)): # return is True if errors found
 		context.report(STFReport("Invalid mesh", STFReportSeverity.Error, id, _stf_type, blender_mesh))
 

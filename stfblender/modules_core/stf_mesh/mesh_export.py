@@ -32,7 +32,7 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 
 	stf_mesh = {
 		"type": _stf_type,
-		"name": blender_mesh.stf_name if blender_mesh.stf_name else blender_mesh.name,
+		"name": blender_mesh.stf_name if blender_mesh.stf_name_source_of_truth else blender_mesh.name,
 	}
 	mesh_context = STF_ResourceExportContext(context, stf_mesh, blender_mesh)
 

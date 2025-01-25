@@ -49,7 +49,9 @@ class STF_BlenderNodeImportContext(STF_ResourceImportContext):
 def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, parent_application_object: any) -> tuple[any, any]:
 	collection = bpy.data.collections.new(json_resource.get("name", context.get_filename()))
 	collection.stf_id = id
-	collection.stf_name = json_resource.get("name", "")
+	if(json_resource.get("name")):
+		collection.stf_name = json_resource["name"]
+		collection.stf_name_source_of_truth = True
 	bpy.context.scene.collection.children.link(collection)
 	collection.stf_use_collection_as_prefab = True
 
@@ -65,7 +67,7 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 	root_nodes = []
 	ret = {
 		"type": _stf_type,
-		"name": collection.stf_name if collection.stf_name else collection.name,
+		"name": collection.stf_name if collection.stf_name_source_of_truth else collection.name,
 		"root_nodes": root_nodes,
 	}
 

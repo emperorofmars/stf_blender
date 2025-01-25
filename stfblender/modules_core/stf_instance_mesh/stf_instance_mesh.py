@@ -22,7 +22,6 @@ def _stf_import(context: STF_BlenderNodeImportContext, json_resource: dict, id: 
 		context.report(STFReport("Failed to import mesh: " + str(json_resource.get("mesh")), STFReportSeverity.Error, id, _stf_type, parent_application_object))
 
 	blender_object.stf_id = id
-	blender_object.stf_name = json_resource.get("name", "")
 
 	if("armature_instance" in json_resource):
 		def _setup_armature_instance():

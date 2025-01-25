@@ -22,7 +22,6 @@ def _stf_import(context: STF_BlenderNodeImportContext, json_resource: dict, stf_
 		context.report(STFReport("Failed to import armature: " + str(json_resource.get("armature")), STFReportSeverity.Error, stf_id, _stf_type, parent_application_object))
 
 	blender_object.stf_id = stf_id
-	blender_object.stf_name = json_resource.get("name", "")
 
 	def _set_poses():
 		if("pose" in json_resource and blender_object.pose):

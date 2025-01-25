@@ -14,7 +14,9 @@ _stf_type = "stf.image"
 def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, parent_application_object: any) -> tuple[any, any]:
 	blender_image = bpy.data.images.new(json_resource.get("name", "STF Image"), 1024, 1024)
 	blender_image.stf_id = id
-	blender_image.stf_name = json_resource.get("name", "STF Image")
+	if(json_resource.get("name")):
+		blender_image.stf_name = json_resource["name"]
+		blender_image.stf_name_source_of_truth = True
 
 	image_context = STF_ResourceImportContext(context, json_resource, blender_image)
 
@@ -27,7 +29,7 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 
 	ret = {
 		"type": _stf_type,
-		"name": blender_image.name
+		"name": blender_image.stf_name if blender_image.stf_name_source_of_truth else blender_image.name,
 	}
 	image_context = STF_ResourceExportContext(context, ret, blender_image)
 

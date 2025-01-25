@@ -1,16 +1,15 @@
 import bpy
 
-
 from ....libstf.stf_export_context import STF_ResourceExportContext
 from ....libstf.stf_import_context import STF_ResourceImportContext
 from ....libstf.stf_module import STF_Module
 from ....libstf.stf_report import STFReportSeverity, STFReport
-from ..stf_node_spatial.node_spatial_base import export_node_spatial_base, import_node_spatial_base
 from ...utils.component_utils import get_components_from_object
 from ...utils.id_utils import ensure_stf_id
+from ...modules_core.stf_node_spatial.node_spatial_base import export_node_spatial_base, import_node_spatial_base
 
 
-_stf_type = "stf.instance.prefab"
+_stf_type = "stfexp.instance.prefab"
 
 
 # NOTE this 'works', but doing this in a proper manner would be a bit more involved, since Blender's 'Collection Instance' feature is very meh and mostly pointless.
@@ -25,7 +24,9 @@ def _stf_import(context: STF_ResourceImportContext, json_resource: dict, id: str
 
 	blender_object: bpy.types.Object = bpy.data.objects.new(json_resource.get("name", "STF Node"), None)
 	blender_object.stf_id = id
-	blender_object.stf_name = json_resource.get("name", "")
+	if(json_resource.get("name")):
+		blender_object.stf_name = json_resource["name"]
+		blender_object.stf_name_source_of_truth = True
 
 	blender_object.instance_type = "COLLECTION"
 	blender_object.instance_collection = blender_collection
@@ -45,7 +46,10 @@ def _stf_export(context: STF_ResourceExportContext, application_object: any, par
 	blender_object: bpy.types.Object = application_object
 	ensure_stf_id(context, blender_object)
 
-	ret = { "type": _stf_type, }
+	ret = {
+		"type": _stf_type,
+		"name": blender_object.stf_name if blender_object.stf_name_source_of_truth else blender_object.name,
+	}
 	prefab_context = STF_ResourceExportContext(context, ret, application_object)
 	ret["prefab"] = prefab_context.serialize_resource(blender_object.instance_collection)
 
