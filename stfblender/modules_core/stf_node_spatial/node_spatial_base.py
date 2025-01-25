@@ -51,7 +51,7 @@ def import_node_spatial_base(context: STF_BlenderNodeImportContext, json_resourc
 
 def export_node_spatial_base(context: STF_BlenderNodeExportContext, blender_object: bpy.types.Object, parent_application_object: any, json_resource: dict) -> tuple[dict, str, any]:
 	ensure_stf_id(context, blender_object)
-	json_resource["name"] = blender_object.stf_name if blender_object.stf_name_source_of_truth else blender_object.name,
+	json_resource["name"] = blender_object.stf_name if blender_object.stf_name_source_of_truth else blender_object.name
 
 	children = []
 	for child in blender_object.children:

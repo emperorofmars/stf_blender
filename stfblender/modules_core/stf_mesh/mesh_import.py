@@ -113,9 +113,23 @@ def import_stf_mesh(context: STF_RootImportContext, json_resource: dict, id: str
 
 	# Explicit edge sharpness
 	if("sharp_edges" in json_resource and "sharp_edges_len" in json_resource):
+		buffer_sharp_edges = BytesIO(mesh_context.import_buffer(json_resource["sharp_edges"]))
+
+		edge_dict: dict[int, dict[int, bpy.types.MeshEdge]] = {}
+		for edge in blender_mesh.edges:
+			if(edge.vertices[0] not in edge_dict):
+				edge_dict[edge.vertices[0]] = {}
+			edge_dict[edge.vertices[0]][edge.vertices[1]] = edge
+
 		for line_index in range(json_resource["sharp_edges_len"]):
-			# TODO
-			pass
+			v0_index = parse_uint(buffer_sharp_edges, vertex_indices_width)
+			v1_index = parse_uint(buffer_sharp_edges, vertex_indices_width)
+			if(v0_index in edge_dict and v1_index in edge_dict[v0_index]):
+				edge_dict[v0_index][v1_index].use_edge_sharp = True
+			elif(v1_index in edge_dict and v0_index in edge_dict[v1_index]):
+				edge_dict[v1_index][v0_index].use_edge_sharp = True
+			else:
+				pass # TODO warn about invalid data
 
 	# Are non-split vertex normals needed?
 	"""# Vertex Normals
