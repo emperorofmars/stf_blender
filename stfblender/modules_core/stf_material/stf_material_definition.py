@@ -2,24 +2,16 @@ from typing import Callable
 import bpy
 
 
-class StringProperty(bpy.types.PropertyGroup):
-	value: bpy.props.StringProperty() # type: ignore
-
-class ShaderTarget(bpy.types.PropertyGroup):
-	target: bpy.props.StringProperty() # type: ignore
-	shaders: bpy.props.CollectionProperty(type=StringProperty) # type: ignore
-
-
 class STF_Material_Value_Base(bpy.types.PropertyGroup):
 	value_id: bpy.props.IntProperty() # type: ignore
 
 
-class STF_Blender_Material_Value_Module_Base:
+class STF_Material_Value_Module_Base:
 	value_type: str
 	property_name: str
 
-	# (STF Context, Blender Material, STF Value Json)
-	value_import_func: Callable[[any, dict, bpy.types.Material], None]
+	# (STF Context, Blender Material, STF Value Json, Blender STF Material Value)
+	value_import_func: Callable[[any, bpy.types.Material, any, STF_Material_Value_Base], None]
 
 	# (STF Context, Blender Material, Blender STF Material Value) -> Json Value
 	value_export_func: Callable[[any, bpy.types.Material, STF_Material_Value_Base], any]
@@ -39,11 +31,19 @@ class STF_Material_Property(bpy.types.PropertyGroup):
 	A property can have one or more values. Available value types are contained in './stf_blender_material_values'. Maybe these could become hot-loadable at some point.
 	"""
 	property_type: bpy.props.StringProperty(name="Type") # type: ignore
-	value_property_name: bpy.props.StringProperty(name="Type") # type: ignore
-	values: bpy.props.CollectionProperty(type=STF_Material_Value_Ref, name="Value(s)") # type: ignore
 	multi_value: bpy.props.BoolProperty(name="Allows Multiple Values", default=False) # type: ignore
+
+	value_property_name: bpy.props.StringProperty() # type: ignore
+	values: bpy.props.CollectionProperty(type=STF_Material_Value_Ref) # type: ignore
 	active_value_index: bpy.props.IntProperty() # type: ignore
 
+
+class StringProperty(bpy.types.PropertyGroup):
+	value: bpy.props.StringProperty() # type: ignore
+
+class ShaderTarget(bpy.types.PropertyGroup):
+	target: bpy.props.StringProperty() # type: ignore
+	shaders: bpy.props.CollectionProperty(type=StringProperty) # type: ignore
 
 class STF_Material_Definition(bpy.types.PropertyGroup):
 	"""This object merely holds all the meta information for a material"""
@@ -52,7 +52,7 @@ class STF_Material_Definition(bpy.types.PropertyGroup):
 
 
 
-def add_property(blender_material: bpy.types.Material, property_type: str, value_module: STF_Blender_Material_Value_Module_Base) -> tuple[STF_Material_Property, STF_Material_Value_Ref, STF_Blender_Material_Value_Module_Base]:
+def add_property(blender_material: bpy.types.Material, property_type: str, value_module: STF_Material_Value_Module_Base) -> tuple[STF_Material_Property, STF_Material_Value_Ref, STF_Material_Value_Module_Base]:
 	prop = blender_material.stf_material_properties.add()
 	prop.property_type = property_type
 	prop.value_property_name = value_module.property_name
@@ -75,7 +75,7 @@ def remove_property(blender_material: bpy.types.Material, index: int):
 			break
 
 
-def add_value_to_property(blender_material: bpy.types.Material, index: int) -> tuple[STF_Material_Value_Ref, STF_Blender_Material_Value_Module_Base]:
+def add_value_to_property(blender_material: bpy.types.Material, index: int) -> tuple[STF_Material_Value_Ref, STF_Material_Value_Module_Base]:
 	property: STF_Material_Property = blender_material.stf_material_properties[index]
 	value_ref = property.values.add()
 	max_id = 0
