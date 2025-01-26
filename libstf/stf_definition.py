@@ -28,7 +28,7 @@ class STF_Meta_AssetInfo:
 				case "license": ret.license = value
 				case "license_url": ret.license_url = value
 				case "documentation_url": ret.documentation_url = value
-				case _: ret.custom_properties.key = value
+				case _: ret.custom_properties[key] = value
 
 		return ret
 

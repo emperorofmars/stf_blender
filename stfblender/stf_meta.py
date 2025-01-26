@@ -41,7 +41,7 @@ class STF_Meta(bpy.types.PropertyGroup):
 		if(meta.license): self.license = meta.license
 		if(meta.license_url): self.license_url = meta.license_url
 		if(meta.documentation_url): self.documentation_url = meta.documentation_url
-		for key, value in meta.custom_properties:
+		for key, value in meta.custom_properties.items():
 			if(key):
 				new_prop = self.custom_properties.add()
 				new_prop.name = key
