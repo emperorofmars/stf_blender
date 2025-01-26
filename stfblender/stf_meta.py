@@ -10,24 +10,24 @@ class STF_KV(bpy.types.PropertyGroup):
 
 class STF_Meta(bpy.types.PropertyGroup):
 	asset_name: bpy.props.StringProperty(name="Asset Name") # type: ignore
-	asset_version: bpy.props.StringProperty(name="Version") # type: ignore
-	asset_url: bpy.props.StringProperty(name="Asset URL") # type: ignore
-	asset_author: bpy.props.StringProperty(name="Author(s)") # type: ignore
-	asset_license: bpy.props.StringProperty(name="License") # type: ignore
-	asset_license_url: bpy.props.StringProperty(name="License URL") # type: ignore
-	asset_documentation_url: bpy.props.StringProperty(name="Documentation URL") # type: ignore
+	version: bpy.props.StringProperty(name="Version") # type: ignore
+	url: bpy.props.StringProperty(name="Asset URL") # type: ignore
+	author: bpy.props.StringProperty(name="Author(s)") # type: ignore
+	license: bpy.props.StringProperty(name="License") # type: ignore
+	license_url: bpy.props.StringProperty(name="License URL") # type: ignore
+	documentation_url: bpy.props.StringProperty(name="Documentation URL") # type: ignore
 
 	custom_properties: bpy.props.CollectionProperty(type=STF_KV, name="Type") # type: ignore
 
 	def to_stf_meta_assetInfo(self) -> STF_Meta_AssetInfo:
 		ret = STF_Meta_AssetInfo()
 		if(self.asset_name): ret.asset_name = self.asset_name
-		if(self.asset_version): ret.asset_version = self.asset_version
-		if(self.asset_url): ret.asset_url = self.asset_url
-		if(self.asset_author): ret.asset_author = self.asset_author
-		if(self.asset_license): ret.asset_license = self.asset_license
-		if(self.asset_license_url): ret.asset_license_url = self.asset_license_url
-		if(self.asset_documentation_url): ret.asset_documentation_url = self.asset_documentation_url
+		if(self.version): ret.version = self.version
+		if(self.url): ret.url = self.url
+		if(self.author): ret.author = self.author
+		if(self.license): ret.license = self.license
+		if(self.license_url): ret.license_url = self.license_url
+		if(self.documentation_url): ret.documentation_url = self.documentation_url
 		ret.custom_properties = {}
 		for custom_property in self.custom_properties:
 			ret.custom_properties[custom_property.name] = custom_property.value
@@ -35,12 +35,12 @@ class STF_Meta(bpy.types.PropertyGroup):
 
 	def from_stf_meta_assetInfo(self, meta: STF_Meta_AssetInfo):
 		if(meta.asset_name): self.asset_name = meta.asset_name
-		if(meta.asset_version): self.asset_version = meta.asset_version
-		if(meta.asset_url): self.asset_url = meta.asset_url
-		if(meta.asset_author): self.asset_author = meta.asset_author
-		if(meta.asset_license): self.asset_license = meta.asset_license
-		if(meta.asset_license_url): self.asset_license_url = meta.asset_license_url
-		if(meta.asset_documentation_url): self.asset_documentation_url = meta.asset_documentation_url
+		if(meta.version): self.version = meta.version
+		if(meta.url): self.url = meta.url
+		if(meta.author): self.author = meta.author
+		if(meta.license): self.license = meta.license
+		if(meta.license_url): self.license_url = meta.license_url
+		if(meta.documentation_url): self.documentation_url = meta.documentation_url
 		for key, value in meta.custom_properties:
 			if(key):
 				new_prop = self.custom_properties.add()
@@ -110,34 +110,29 @@ class STFRemoveMetaPropertyScene(bpy.types.Operator):
 
 def draw_meta_editor(layout: bpy.types.UILayout, collection: bpy.types.Collection, is_scene: bool):
 	layout.prop(collection.stf_meta, "asset_name")
-	layout.prop(collection.stf_meta, "asset_version")
-	layout.prop(collection.stf_meta, "asset_url")
-	layout.prop(collection.stf_meta, "asset_author")
-	layout.prop(collection.stf_meta, "asset_license")
-	layout.prop(collection.stf_meta, "asset_license_url")
-	layout.prop(collection.stf_meta, "asset_documentation_url")
+	layout.prop(collection.stf_meta, "version")
+	layout.prop(collection.stf_meta, "url")
+	layout.prop(collection.stf_meta, "author")
+	layout.prop(collection.stf_meta, "license")
+	layout.prop(collection.stf_meta, "license_url")
+	layout.prop(collection.stf_meta, "documentation_url")
 
+	layout.separator(factor=1, type="LINE")
 	for custom_property in collection.stf_meta.custom_properties:
-		row = layout.split(factor=0.4)
+		row = layout.row()
 		row.prop(custom_property, "name")
+		row.separator(factor=5, type="SPACE")
 		row.prop(custom_property, "value")
+		row.separator(factor=2, type="SPACE")
 		if(not is_scene):
-			row.operator(STFRemoveMetaPropertyCollection.bl_idname)
+			row.operator(STFRemoveMetaPropertyCollection.bl_idname, text="", icon="X")
 		else:
-			row.operator(STFRemoveMetaPropertyScene.bl_idname)
+			row.operator(STFRemoveMetaPropertyScene.bl_idname, text="", icon="X")
 
 	if(not is_scene):
 		layout.operator(STFAddMetaPropertyCollection.bl_idname)
 	else:
 		layout.operator(STFAddMetaPropertyScene.bl_idname)
-
-
-class STF_FileHandler(bpy.types.FileHandler):
-	bl_idname = "IO_FH_stf"
-	bl_label = "STF"
-	bl_import_operator = "stf.import"
-	bl_export_operator = "stf.export"
-	bl_file_extensions = ".stf;.stf.json"
 
 
 def register():

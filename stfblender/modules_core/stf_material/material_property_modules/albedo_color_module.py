@@ -1,8 +1,8 @@
 import bpy
 
 from .material_property_module_base import Material_Property_Module_Base
-from ..stf_material_definition import add_property
 from ..material_value_modules.color_value import STF_Material_Value_Module_Color
+from ..stf_material_operators import add_property
 
 
 _property_type = "albedo_color"
@@ -18,3 +18,5 @@ class Blender_Material_Property_Matcher_Color(Material_Property_Module_Base):
 	property_type = _property_type
 	priority = 0
 	from_blender_func = _from_blender_func
+	to_blender_func = None
+	draw_func = None

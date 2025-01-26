@@ -1,11 +1,11 @@
 import bpy
 
+from .stf_material_operators import add_property, clear_stf_material
 from .material_value_modules.color_value import STF_Material_Value_Module_Color
-
 from . import stf_material_definition as stfmat
 
 
 def blender_material_to_stf(blender_material: bpy.types.Material) -> stfmat.STF_Material_Definition:
-	stfmat.clear_stf_material(blender_material)
+	clear_stf_material(blender_material)
 
-	stfmat.add_property(blender_material, "color", STF_Material_Value_Module_Color)
+	add_property(blender_material, "color", STF_Material_Value_Module_Color)

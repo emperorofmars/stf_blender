@@ -1,10 +1,11 @@
 import bpy
 
-from .stf_material_definition import STF_Material_Property, STF_Material_Value_Base, add_property, add_value_to_property, remove_property, remove_property_value
+from .stf_material_definition import STF_Material_Property, STF_Material_Value_Base
 from ...utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
 from ...utils.component_utils import STFAddComponentOperatorBase, STFRemoveComponentOperatorBase
 from ...utils.component_ui_utils import draw_components_ui, set_stf_component_filter
 from .material_value_modules import blender_material_value_modules
+from .stf_material_operators import STFAddMaterialProperty, STFAddMaterialPropertyValue, STFDrawMaterialPropertyList, STFDrawMaterialPropertyValueList, STFRemoveMaterialProperty, STFRemoveMaterialPropertyValue
 
 
 class STFSetMaterialIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
@@ -24,70 +25,6 @@ class STFAddMaterialComponentOperator(bpy.types.Operator, STFAddComponentOperato
 class STFRemoveMaterialComponentOperator(bpy.types.Operator, STFRemoveComponentOperatorBase):
 	bl_idname = "stf.remove_material_component"
 	def get_property(self, context): return context.material
-
-
-
-class STFDrawMaterialPropertyList(bpy.types.UIList):
-	bl_idname = "COLLECTION_UL_stf_material_list"
-	def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
-		layout.label(text="Property: " + item.property_type)
-
-class STFDrawMaterialPropertyValueList(bpy.types.UIList):
-	bl_idname = "COLLECTION_UL_stf_material_value_list"
-	def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
-		layout.label(text="Value " + str(index))
-
-
-class STFAddMaterialProperty(bpy.types.Operator):
-	bl_idname = "stf.add_material_property"
-	bl_label = "Add Property"
-	bl_category = "STF"
-	bl_options = {"REGISTER", "UNDO"}
-
-	def execute(self, context):
-		for mat_module in blender_material_value_modules:
-			if(mat_module.value_type == context.scene.stf_material_value_modules):
-				add_property(context.material, "", mat_module)
-				return {"FINISHED"}
-		self.report({'ERROR'}, "Invalid material value module!")
-		return {"CANCELLED"}
-
-class STFRemoveMaterialProperty(bpy.types.Operator):
-	bl_idname = "stf.remove_material_property"
-	bl_label = "Remove"
-	bl_category = "STF"
-	bl_options = {"REGISTER", "UNDO"}
-
-	index: bpy.props.IntProperty() # type: ignore
-
-	def execute(self, context):
-		remove_property(context.material, self.index)
-		return {"FINISHED"}
-
-
-class STFAddMaterialPropertyValue(bpy.types.Operator):
-	bl_idname = "stf.add_material_property_value"
-	bl_label = "Add Value"
-	bl_category = "STF"
-	bl_options = {"REGISTER", "UNDO"}
-
-	index: bpy.props.IntProperty() # type: ignore
-
-	def execute(self, context):
-		add_value_to_property(context.material, self.index)
-		return {"FINISHED"}
-
-class STFRemoveMaterialPropertyValue(bpy.types.Operator):
-	bl_idname = "stf.remove_material_property_value"
-	bl_label = "Remove"
-	bl_category = "STF"
-	bl_options = {"REGISTER", "UNDO"}
-
-	index: bpy.props.IntProperty() # type: ignore
-
-	def execute(self, context):
-		remove_property_value(context.material, self.index)
-		return {"FINISHED"}
 
 
 class STFMaterialSpatialPanel(bpy.types.Panel):

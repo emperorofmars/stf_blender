@@ -2,7 +2,7 @@ import json
 import bpy
 from bpy_extras.io_utils import ExportHelper
 
-from ..root_properties import draw_meta_editor
+from ..stf_meta import draw_meta_editor
 
 from ...libstf.stf_registry import get_export_modules
 from ...libstf.stf_export_state import STF_ExportState

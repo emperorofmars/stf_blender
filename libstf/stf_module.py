@@ -11,7 +11,7 @@ class STF_Kind(Enum):
 
 class STF_Module:
 	"""
-	Represents the functionality to import and export an STF resource
+	Represents the functionality to import and export an STF resource.
 	"""
 	stf_type: str
 
