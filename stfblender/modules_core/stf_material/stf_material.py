@@ -9,7 +9,7 @@ from .stf_material_definition import STF_Material_Definition, STF_Material_Prope
 from .blender_material_to_stf import blender_material_to_stf
 from ...utils.component_utils import STF_Component, get_components_from_object
 from ...utils.id_utils import ensure_stf_id
-from .stf_blender_material_values import blender_material_value_modules
+from .material_value_modules import blender_material_value_modules
 
 
 _stf_type = "stf.material"
@@ -56,7 +56,7 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 
 	for property in blender_material.stf_material_properties:
 		property: STF_Material_Property = property
-		json_prop = {}
+		json_prop = {"value_type": property.value_type}
 
 		values = []
 		for value_ref in property.values:

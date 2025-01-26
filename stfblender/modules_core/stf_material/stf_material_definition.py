@@ -34,6 +34,7 @@ class STF_Material_Property(bpy.types.PropertyGroup):
 	multi_value: bpy.props.BoolProperty(name="Allows Multiple Values", default=False) # type: ignore
 
 	value_property_name: bpy.props.StringProperty() # type: ignore
+	value_type: bpy.props.StringProperty() # type: ignore
 	values: bpy.props.CollectionProperty(type=STF_Material_Value_Ref) # type: ignore
 	active_value_index: bpy.props.IntProperty() # type: ignore
 
@@ -56,6 +57,7 @@ def add_property(blender_material: bpy.types.Material, property_type: str, value
 	prop = blender_material.stf_material_properties.add()
 	prop.property_type = property_type
 	prop.value_property_name = value_module.property_name
+	prop.value_type = value_module.value_type
 
 	value_ref, value = add_value_to_property(blender_material, len(blender_material.stf_material_properties) - 1)
 	return prop, value_ref, value
@@ -96,6 +98,15 @@ def remove_property_value(blender_material: bpy.types.Material, index: int):
 			break
 	property.values.remove(property.active_value_index)
 
+
+def clear_stf_material(blender_material: bpy.types.Material):
+	blender_material.stf_material.style_hints.clear()
+	for mat_property in blender_material.stf_material_properties:
+		if(hasattr(blender_material, mat_property.value_property_name)):
+			getattr(blender_material, mat_property.value_property_name).clear()
+	blender_material.stf_material_property_value_refs.clear()
+	blender_material.stf_active_material_property_index = 0
+	blender_material.stf_material_properties.clear()
 
 
 def register():

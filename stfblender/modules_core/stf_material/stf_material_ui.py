@@ -4,7 +4,7 @@ from .stf_material_definition import STF_Material_Property, STF_Material_Value_B
 from ...utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
 from ...utils.component_utils import STFAddComponentOperatorBase, STFRemoveComponentOperatorBase
 from ...utils.component_ui_utils import draw_components_ui, set_stf_component_filter
-from .stf_blender_material_values import blender_material_value_modules
+from .material_value_modules import blender_material_value_modules
 
 
 class STFSetMaterialIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
