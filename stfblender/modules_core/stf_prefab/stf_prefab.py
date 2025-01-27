@@ -58,7 +58,11 @@ def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, pa
 	node_import_context = STF_BlenderNodeImportContext(context, json_resource, collection)
 	for node_id in json_resource.get("root_nodes", []):
 		node_import_context.import_resource(node_id)
+
+	# TODO animations
+
 	return collection, node_import_context
+
 
 def _stf_export(context: STF_RootExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:
 	collection: bpy.types.Collection = application_object
@@ -75,6 +79,8 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 	for blender_object in collection.all_objects:
 		if(blender_object.parent == None):
 			root_nodes.append(node_export_context.serialize_resource(blender_object))
+
+	# TODO animations
 
 	return ret, collection.stf_id, node_export_context
 

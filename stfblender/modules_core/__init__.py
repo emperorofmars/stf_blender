@@ -3,6 +3,7 @@ from .stf_prefab import stf_prefab
 from .stf_node_spatial import stf_node_spatial
 from .stf_instance_mesh import stf_instance_mesh
 from .stf_mesh import stf_mesh
+from .stf_mesh_seams import stf_mesh_seams
 from .stf_material import stf_material
 from .stf_armature import stf_armature
 from .stf_instance_armature import stf_instance_armature
@@ -16,6 +17,7 @@ register_stf_modules = \
 	+ stf_node_spatial.register_stf_modules \
 	+ stf_instance_mesh.register_stf_modules \
 	+ stf_mesh.register_stf_modules \
+	+ stf_mesh_seams.register_stf_modules \
 	+ stf_material.register_stf_modules \
 	+ stf_armature.register_stf_modules \
 	+ stf_instance_armature.register_stf_modules \

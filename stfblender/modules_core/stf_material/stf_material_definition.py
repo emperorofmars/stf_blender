@@ -32,6 +32,7 @@ class STF_Material_Property(bpy.types.PropertyGroup):
 	"""
 	property_type: bpy.props.StringProperty(name="Type") # type: ignore
 	multi_value: bpy.props.BoolProperty(name="Allows Multiple Values", default=False) # type: ignore
+	property_group: bpy.props.StringProperty(name="Group") # type: ignore
 
 	value_property_name: bpy.props.StringProperty() # type: ignore
 	value_type: bpy.props.StringProperty() # type: ignore
