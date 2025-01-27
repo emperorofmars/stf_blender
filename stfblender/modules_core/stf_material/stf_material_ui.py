@@ -1,11 +1,11 @@
 import bpy
 
-from .stf_material_definition import STF_Material_Property, STF_Material_Value_Base
+from .stf_material_definition import STF_Material_Property, STF_Material_Value_Base, STF_Material_Value_Ref
 from ...utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
 from ...utils.component_utils import STFAddComponentOperatorBase, STFRemoveComponentOperatorBase
 from ...utils.component_ui_utils import draw_components_ui, set_stf_component_filter
 from .material_value_modules import blender_material_value_modules
-from .stf_material_operators import STFAddMaterialProperty, STFAddMaterialPropertyValue, STFDrawMaterialPropertyList, STFDrawMaterialPropertyValueList, STFRemoveMaterialProperty, STFRemoveMaterialPropertyValue
+from .stf_material_operators import STFAddMaterialProperty, STFAddMaterialPropertyValue, STFRemoveMaterialProperty, STFRemoveMaterialPropertyValue
 
 
 class STFSetMaterialIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
@@ -25,6 +25,18 @@ class STFAddMaterialComponentOperator(bpy.types.Operator, STFAddComponentOperato
 class STFRemoveMaterialComponentOperator(bpy.types.Operator, STFRemoveComponentOperatorBase):
 	bl_idname = "stf.remove_material_component"
 	def get_property(self, context): return context.material
+
+# TODO draw group list
+
+class STFDrawMaterialPropertyList(bpy.types.UIList):
+	bl_idname = "COLLECTION_UL_stf_material_list"
+	def draw_item(self, context, layout, data, item: STF_Material_Property, icon, active_data, active_propname, index: int):
+		layout.label(text=(item.property_group + ": " if item.property_group else "Custom Property: ") + item.property_type + " (" + item.value_type + ")")
+
+class STFDrawMaterialPropertyValueList(bpy.types.UIList):
+	bl_idname = "COLLECTION_UL_stf_material_value_list"
+	def draw_item(self, context, layout, data, item: STF_Material_Value_Ref, icon, active_data, active_propname, index: int):
+		layout.label(text="Value " + str(index))
 
 
 class STFMaterialSpatialPanel(bpy.types.Panel):
@@ -57,9 +69,14 @@ class STFMaterialSpatialPanel(bpy.types.Panel):
 
 		self.layout.prop(context.material, "stf_is_source_of_truth")
 		if(context.material.stf_is_source_of_truth):
+			# TODO buttons to clear the STF material, apply it to the Blender material, and to parse it from the Blender material
+
 			# STF Material Properties
 			self.layout.prop(context.material.stf_material, "style_hints")
 
+			# TODO list properties by group, allow for custom hot-loaded code to draw entire groups, only list properties like that which don't have a recognized group
+
+			# Draw List of ungrouped properties
 			row_property_list = self.layout.row()
 			row_property_list.template_list(STFDrawMaterialPropertyList.bl_idname, "", context.material, "stf_material_properties", context.material, "stf_active_material_property_index")
 
@@ -75,6 +92,7 @@ class STFMaterialSpatialPanel(bpy.types.Panel):
 				# Draw property
 				prop: STF_Material_Property = context.material.stf_material_properties[context.material.stf_active_material_property_index]
 				self.layout.prop(prop, "property_type") # TODO handle understood property types
+				self.layout.prop(prop, "property_group")
 				self.layout.prop(prop, "multi_value")
 
 				# Draw property value(s)

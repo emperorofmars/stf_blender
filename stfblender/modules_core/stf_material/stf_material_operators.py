@@ -4,11 +4,12 @@ from .stf_material_definition import STF_Material_Property, STF_Material_Value_M
 from .material_value_modules import blender_material_value_modules
 
 
-def add_property(blender_material: bpy.types.Material, property_type: str, value_module: STF_Material_Value_Module_Base) -> tuple[STF_Material_Property, STF_Material_Value_Ref, STF_Material_Value_Module_Base]:
+def add_property(blender_material: bpy.types.Material, property_type: str, value_module: STF_Material_Value_Module_Base, group: str = None) -> tuple[STF_Material_Property, STF_Material_Value_Ref, STF_Material_Value_Module_Base]:
 	prop = blender_material.stf_material_properties.add()
 	prop.property_type = property_type
 	prop.value_property_name = value_module.property_name
 	prop.value_type = value_module.value_type
+	if(group): prop.group = group
 
 	value_ref, value = add_value_to_property(blender_material, len(blender_material.stf_material_properties) - 1)
 	return prop, value_ref, value
@@ -58,17 +59,6 @@ def clear_stf_material(blender_material: bpy.types.Material):
 	blender_material.stf_material_property_value_refs.clear()
 	blender_material.stf_active_material_property_index = 0
 	blender_material.stf_material_properties.clear()
-
-
-class STFDrawMaterialPropertyList(bpy.types.UIList):
-	bl_idname = "COLLECTION_UL_stf_material_list"
-	def draw_item(self, context, layout, data, item: STF_Material_Property, icon, active_data, active_propname, index: int):
-		layout.label(text="Custom Property: " + item.property_type + " (" + item.value_type + ")")
-
-class STFDrawMaterialPropertyValueList(bpy.types.UIList):
-	bl_idname = "COLLECTION_UL_stf_material_value_list"
-	def draw_item(self, context, layout, data, item: STF_Material_Value_Ref, icon, active_data, active_propname, index: int):
-		layout.label(text="Value " + str(index))
 
 
 class STFAddMaterialProperty(bpy.types.Operator):
