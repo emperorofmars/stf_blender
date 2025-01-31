@@ -18,37 +18,24 @@ class STF_BlenderNodeExportContext(STF_ResourceExportContext):
 		if(not hasattr(self._json_resource, "nodes")):
 			self._json_resource["nodes"] = {}
 
-	def id_exists(self, id: str) -> bool:
-		if(id in self._json_resource["nodes"]): return True
-		else: return super().id_exists(id)
-
-	def get_resource_id(self, application_object: any) -> str | None:
+	def register_serialized_resource(self, application_object: any, json_resource: dict, stf_id: str):
 		if(type(application_object) is bpy.types.Object):
-			if(application_object.stf_id and application_object.stf_id in self._json_resource["nodes"]):
-				return application_object.stf_id
-			else:
-				return None
+			self._json_resource["nodes"][stf_id] = json_resource
 		else:
-			return super().get_resource_id(application_object)
-
-	def register_serialized_resource(self, application_object: any, json_resource: dict, id: str):
-		if(type(application_object) is bpy.types.Object):
-			self._json_resource["nodes"][id] = json_resource
-		else:
-			super().register_serialized_resource(application_object, json_resource, id)
+			super().register_serialized_resource(application_object, json_resource, stf_id)
 
 
 class STF_BlenderNodeImportContext(STF_ResourceImportContext):
-	def get_json_resource(self, id: str) -> dict:
-		if(id in self._json_resource["nodes"]):
-			return self._json_resource["nodes"][id]
+	def get_json_resource(self, stf_id: str) -> dict:
+		if(stf_id in self._json_resource["nodes"]):
+			return self._json_resource["nodes"][stf_id]
 		else:
-			return self._parent_context.get_json_resource(id)
+			return self._parent_context.get_json_resource(stf_id)
 
 
-def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, parent_application_object: any) -> tuple[any, any]:
+def _stf_import(context: STF_RootImportContext, json_resource: dict, stf_id: str, parent_application_object: any) -> tuple[any, any]:
 	collection = bpy.data.collections.new(json_resource.get("name", context.get_filename()))
-	collection.stf_id = id
+	collection.stf_id = stf_id
 	if(json_resource.get("name")):
 		collection.stf_name = json_resource["name"]
 		collection.stf_name_source_of_truth = True

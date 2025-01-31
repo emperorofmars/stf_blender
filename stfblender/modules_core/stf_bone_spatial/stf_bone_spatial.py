@@ -14,7 +14,7 @@ from ..stf_armature.stf_armature import STF_BlenderBoneExportContext, STF_Blende
 _stf_type = "stf.bone.spatial"
 
 
-def _stf_import(context: STF_BlenderBoneImportContext, json_resource: dict, id: str, parent_application_object: any) -> tuple[any, any]:
+def _stf_import(context: STF_BlenderBoneImportContext, json_resource: dict, stf_id: str, parent_application_object: any) -> tuple[any, any]:
 	blender_armature: bpy.types.Armature = parent_application_object.data
 	blender_object: bpy.types.Object = parent_application_object
 
@@ -25,7 +25,7 @@ def _stf_import(context: STF_BlenderBoneImportContext, json_resource: dict, id: 
 		if(child):
 			children.append(child.name)
 		else:
-			context.report(STFReport("Invalid Child: " + str(child_id), STFReportSeverity.Error, id, _stf_type, blender_object))
+			context.report(STFReport("Invalid Child: " + str(child_id), STFReportSeverity.Error, stf_id, _stf_type, blender_object))
 
 	if(bpy.context.mode != "OBJECT"): bpy.ops.object.mode_set(mode="OBJECT", toggle=False)
 	bpy.context.view_layer.objects.active = blender_object
@@ -48,8 +48,9 @@ def _stf_import(context: STF_BlenderBoneImportContext, json_resource: dict, id: 
 
 	blender_bone = ArmatureBone(blender_armature, blender_bone_name)
 	bone_context = STF_ResourceImportContext(context, json_resource, blender_bone)
+	context.register_imported_resource(stf_id, blender_bone)
 
-	blender_armature.bones[blender_bone_name].stf_id = id
+	blender_armature.bones[blender_bone_name].stf_id = stf_id
 	if(json_resource.get("name")):
 		blender_armature.bones[blender_bone_name].stf_name = json_resource["name"]
 		blender_armature.bones[blender_bone_name].stf_name_source_of_truth = True

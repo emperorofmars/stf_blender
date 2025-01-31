@@ -10,9 +10,10 @@ from ..stf_prefab.stf_prefab import STF_BlenderNodeExportContext, STF_BlenderNod
 _stf_type = "stf.node.spatial"
 
 
-def _stf_import(context: STF_BlenderNodeImportContext, json_resource: dict, id: str, parent_application_object: any) -> tuple[any, any]:
+def _stf_import(context: STF_BlenderNodeImportContext, json_resource: dict, stf_id: str, parent_application_object: any) -> tuple[any, any]:
 	blender_object: bpy.types.Object = bpy.data.objects.new(json_resource.get("name", "STF Node"), None)
-	return import_node_spatial_base(context, json_resource, id, parent_application_object, blender_object)
+	context.register_imported_resource(stf_id, blender_object)
+	return import_node_spatial_base(context, json_resource, stf_id, parent_application_object, blender_object)
 
 
 def _can_handle_application_object_func(application_object: any) -> int:

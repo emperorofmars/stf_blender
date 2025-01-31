@@ -10,7 +10,7 @@ from ....libstf.buffer_utils import parse_uint, serialize_uint
 _stf_type = "stf.mesh.seams"
 
 
-def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, parent_application_object: bpy.types.Mesh) -> tuple[any, any]:
+def _stf_import(context: STF_RootImportContext, json_resource: dict, stf_id: str, parent_application_object: bpy.types.Mesh) -> tuple[any, any]:
 	mesh_context = STF_ResourceImportContext(context, json_resource, parent_application_object)
 
 	buffer_seams = BytesIO(mesh_context.import_buffer(json_resource["seams"]))

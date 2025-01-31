@@ -24,6 +24,7 @@ class STF_ImportState(StateUtil):
 		self._profiles: list[STF_Profile]
 		self._asset_info: STF_Meta_AssetInfo
 
+
 	def determine_module(self, json_resource: dict) -> STF_Module:
 		return self._modules.get(json_resource["type"])
 

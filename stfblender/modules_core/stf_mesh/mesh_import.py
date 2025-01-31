@@ -12,16 +12,16 @@ _stf_type = "stf.mesh"
 
 # Mesh import and export are the lowest hanging fruits for performance improvements.
 
-def import_stf_mesh(context: STF_RootImportContext, json_resource: dict, id: str, parent_application_object: any) -> tuple[any, any]:
+def import_stf_mesh(context: STF_RootImportContext, json_resource: dict, stf_id: str, parent_application_object: any) -> tuple[any, any]:
 	blender_mesh = bpy.data.meshes.new(json_resource.get("name", "STF Mesh"))
-	blender_mesh.stf_id = id
+	blender_mesh.stf_id = stf_id
 	if(json_resource.get("name")):
 		blender_mesh.stf_name = json_resource["name"]
 		blender_mesh.stf_name_source_of_truth = True
 
-	blender_object_tmp = bpy.data.objects.new("STF TMP throw away", blender_mesh)
+	tmp_blender_mesh_object = bpy.data.objects.new("STF TMP throw away", blender_mesh)
 	def _clean_tmp_mesh_object():
-		bpy.data.objects.remove(blender_object_tmp)
+		bpy.data.objects.remove(tmp_blender_mesh_object)
 	context.add_task(_clean_tmp_mesh_object)
 
 	mesh_context = STF_ResourceImportContext(context, json_resource, blender_mesh)
@@ -99,7 +99,7 @@ def import_stf_mesh(context: STF_RootImportContext, json_resource: dict, id: str
 	# Construct the topology
 	blender_mesh.from_pydata(py_vertices, py_lines, py_faces, False)
 	if(blender_mesh.validate(verbose=True)): # return is True if errors found
-		context.report(STFReport("Invalid mesh", STFReportSeverity.Error, id, _stf_type, blender_mesh))
+		context.report(STFReport("Invalid mesh", STFReportSeverity.Error, stf_id, _stf_type, blender_mesh))
 
 
 	# Face smooth setting
@@ -207,7 +207,7 @@ def import_stf_mesh(context: STF_RootImportContext, json_resource: dict, id: str
 	if("armature" in json_resource and "weights" in json_resource and "bones" in json_resource):
 		armature: bpy.types.Armature = mesh_context.import_resource(json_resource["armature"])
 		if(not armature):
-			mesh_context.report(STFReport("Invalid Armature (armature id: " + json_resource["armature"] + " )", STFReportSeverity.Error, id, _stf_type, blender_mesh))
+			mesh_context.report(STFReport("Invalid Armature (armature id: " + json_resource["armature"] + " )", STFReportSeverity.Error, stf_id, _stf_type, blender_mesh))
 		else:
 			bone_weight_width = json_resource.get("bone_weight_width", 4)
 			bones = []
@@ -216,10 +216,10 @@ def import_stf_mesh(context: STF_RootImportContext, json_resource: dict, id: str
 				for blender_bone in armature.bones:
 					if(blender_bone.stf_id == bone_id):
 						bones.append(blender_bone.name)
-						vertex_groups.append(blender_object_tmp.vertex_groups.new(name=blender_bone.name))
+						vertex_groups.append(tmp_blender_mesh_object.vertex_groups.new(name=blender_bone.name))
 						break
 			if(len(vertex_groups) < len(json_resource["bones"])):
-				mesh_context.report(STFReport("Invalid Bone Mapping", STFReportSeverity.Error, id, _stf_type, blender_mesh))
+				mesh_context.report(STFReport("Invalid Bone Mapping", STFReportSeverity.Error, stf_id, _stf_type, blender_mesh))
 
 			for weight_channel in json_resource["weights"]:
 				indexed = weight_channel["indexed"]
@@ -243,7 +243,7 @@ def import_stf_mesh(context: STF_RootImportContext, json_resource: dict, id: str
 			indexed = json_vertex_group["indexed"]
 			count = json_vertex_group["count"]
 			buffer_vertex_weights = BytesIO(mesh_context.import_buffer(json_vertex_group["buffer"]))
-			vertex_group = blender_object_tmp.vertex_groups.new(name=json_vertex_group.get("name", "STF Vertex Group " + str(vertex_group_index)))
+			vertex_group = tmp_blender_mesh_object.vertex_groups.new(name=json_vertex_group.get("name", "STF Vertex Group " + str(vertex_group_index)))
 			for index in range(count):
 				if(indexed):
 					vertex_index = parse_uint(buffer_vertex_weights, vertex_indices_width)
@@ -256,7 +256,7 @@ def import_stf_mesh(context: STF_RootImportContext, json_resource: dict, id: str
 	# Blendshapes | Morphtargets | Shapekeys
 	if("blendshapes" in json_resource):
 		blendshape_pos_width = json_resource.get("blendshape_pos_width", 4)
-		blender_object_tmp.shape_key_add(name="Basis", from_mix=False)
+		tmp_blender_mesh_object.shape_key_add(name="Basis", from_mix=False)
 		for blendshape_index, json_blendshape in enumerate(json_resource["blendshapes"]):
 			indexed = json_blendshape["indexed"]
 			count = json_blendshape["count"]
@@ -265,7 +265,7 @@ def import_stf_mesh(context: STF_RootImportContext, json_resource: dict, id: str
 			buffer_blendshape_pos_offset = BytesIO(mesh_context.import_buffer(json_blendshape["position_offsets"]))
 			# Normals and Tangents are irrelevant to import into Blender
 
-			shape_key = blender_object_tmp.shape_key_add(name=json_blendshape.get("name", "STF Blendshape " + str(blendshape_index)), from_mix=False)
+			shape_key = tmp_blender_mesh_object.shape_key_add(name=json_blendshape.get("name", "STF Blendshape " + str(blendshape_index)), from_mix=False)
 
 			for index in range(count):
 				if(indexed):

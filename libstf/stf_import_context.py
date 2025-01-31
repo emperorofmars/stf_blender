@@ -40,7 +40,8 @@ class STF_RootImportContext:
 
 
 	def import_resource(self, id: str) -> any:
-		if(id in self._state._imported_resources.keys()): return self._state._imported_resources[id]
+		if(id in self._state._imported_resources):
+			return self._state._imported_resources[id]
 
 		json_resource = self.get_json_resource(id)
 		if(not json_resource or type(json_resource) is not dict or "type" not in json_resource):

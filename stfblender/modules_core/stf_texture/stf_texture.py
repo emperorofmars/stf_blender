@@ -3,6 +3,7 @@ import bpy
 from ....libstf.stf_export_context import STF_RootExportContext
 from ....libstf.stf_import_context import STF_RootImportContext
 from ...utils.component_utils import STF_BlenderComponentBase, STF_BlenderComponentModule, add_component
+from ...utils.id_utils import ensure_stf_id
 
 
 _stf_type = "stf.texture"
@@ -23,8 +24,8 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 	layout.prop(component, "downscale_priority")
 
 
-def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, parent_application_object: any) -> tuple[any, any]:
-	component_ref, component = add_component(parent_application_object, _blender_property_name, id, _stf_type)
+def _stf_import(context: STF_RootImportContext, json_resource: dict, stf_id: str, parent_application_object: any) -> tuple[any, any]:
+	component_ref, component = add_component(parent_application_object, _blender_property_name, stf_id, _stf_type)
 
 	component.width = json_resource.get("width", 1024)
 	component.height = json_resource.get("height", 1024)
@@ -34,6 +35,7 @@ def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, pa
 
 
 def _stf_export(context: STF_RootExportContext, application_object: STF_Texture, parent_application_object: any) -> tuple[dict, str, any]:
+	ensure_stf_id(context, application_object)
 	ret = {
 		"type": _stf_type,
 		"name": application_object.stf_name,

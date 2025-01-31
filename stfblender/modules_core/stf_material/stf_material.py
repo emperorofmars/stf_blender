@@ -15,13 +15,14 @@ from .material_value_modules import blender_material_value_modules
 _stf_type = "stf.material"
 
 
-def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, parent_application_object: any) -> tuple[any, any]:
+def _stf_import(context: STF_RootImportContext, json_resource: dict, stf_id: str, parent_application_object: any) -> tuple[any, any]:
 	blender_material = bpy.data.materials.new(json_resource.get("name", "STF Material"))
-	blender_material.stf_id = id
+	blender_material.stf_id = stf_id
 	if(json_resource.get("name")):
 		blender_material.stf_name = json_resource["name"]
 		blender_material.stf_name_source_of_truth = True
 	blender_material.stf_is_source_of_truth = True
+	context.register_imported_resource(stf_id, blender_material)
 
 	material_context = STF_ResourceImportContext(context, json_resource, blender_material)
 
@@ -73,11 +74,6 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 			json_prop["value"] = values[0]
 
 		ret["properties"][property.property_type] = json_prop
-
-	print()
-	print(blender_material.name)
-	print(str(ret))
-
 
 	return ret, blender_material.stf_id, material_context
 

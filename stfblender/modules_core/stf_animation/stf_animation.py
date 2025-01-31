@@ -11,9 +11,9 @@ from ...utils.id_utils import ensure_stf_id
 _stf_type = "stf.animation"
 
 
-def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, parent_application_object: any) -> tuple[any, any]:
+def _stf_import(context: STF_RootImportContext, json_resource: dict, stf_id: str, parent_application_object: any) -> tuple[any, any]:
 	blender_animation = bpy.data.actions.new(json_resource.get("name", "STF Animation"))
-	blender_animation.stf_id = id
+	blender_animation.stf_id = stf_id
 	if(json_resource.get("name")):
 		blender_animation.stf_name = json_resource["name"]
 		blender_animation.stf_name_source_of_truth = True

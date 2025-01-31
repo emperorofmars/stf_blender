@@ -18,53 +18,37 @@ class STF_BlenderBoneExportContext(STF_ResourceExportContext):
 		if(not hasattr(self._json_resource, "bones")):
 			self._json_resource["bones"] = {}
 
-	def id_exists(self, id: str) -> bool:
-		if(id in self._json_resource["bones"]): return True
-		else: return super().id_exists(id)
-
-	def get_resource_id(self, application_object: any) -> str | None:
+	def register_serialized_resource(self, application_object: any, json_resource: dict, stf_id: str):
 		if(type(application_object) is ArmatureBone):
-			bone = application_object.armature.bones[application_object.name]
-			if(bone.stf_id and bone.stf_id in self._json_resource["bones"]):
-				return bone.stf_id
-			else:
-				return None
+			self._json_resource["bones"][stf_id] = json_resource
 		else:
-			return super().get_resource_id(application_object)
-
-	def register_serialized_resource(self, application_object: any, json_resource: dict, id: str):
-		if(type(application_object) is ArmatureBone):
-			self._json_resource["bones"][id] = json_resource
-		else:
-			super().register_serialized_resource(application_object, json_resource, id)
+			super().register_serialized_resource(application_object, json_resource, stf_id)
 
 
 class STF_BlenderBoneImportContext(STF_ResourceImportContext):
-	def __init__(self, parent_context, json_resource, parent_application_object):
-		super().__init__(parent_context, json_resource, parent_application_object)
-
-	def get_json_resource(self, id: str) -> dict:
-		if(id in self._json_resource["bones"]):
-			return self._json_resource["bones"][id]
+	def get_json_resource(self, stf_id: str) -> dict:
+		if(stf_id in self._json_resource["bones"]):
+			return self._json_resource["bones"][stf_id]
 		else:
-			return super().get_json_resource(id)
+			return super().get_json_resource(stf_id)
 
 
-def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, parent_application_object: any) -> tuple[any, any]:
+def _stf_import(context: STF_RootImportContext, json_resource: dict, stf_id: str, parent_application_object: any) -> tuple[any, any]:
 	blender_armature = bpy.data.armatures.new(json_resource.get("name", "STF Armature"))
-	blender_armature.stf_id = id
+	blender_armature.stf_id = stf_id
 	if(json_resource.get("name")):
 		blender_armature.stf_name = json_resource["name"]
 		blender_armature.stf_name_source_of_truth = True
 
-	hook_object: bpy.types.Object = bpy.data.objects.new(json_resource.get("name", "STF Node"), blender_armature)
-	bpy.context.scene.collection.objects.link(hook_object)
+	tmp_hook_object: bpy.types.Object = bpy.data.objects.new("TRASH", blender_armature)
+	bpy.context.scene.collection.objects.link(tmp_hook_object)
+	def _clean_tmp_mesh_object():
+		bpy.data.objects.remove(tmp_hook_object)
+	context.add_task(_clean_tmp_mesh_object)
 
-	bone_import_context = STF_BlenderBoneImportContext(context, json_resource, hook_object)
+	bone_import_context = STF_BlenderBoneImportContext(context, json_resource, tmp_hook_object)
 	for bone_id in json_resource.get("root_bones", []):
 		bone_import_context.import_resource(bone_id)
-
-	bpy.data.objects.remove(hook_object)
 
 	return blender_armature, bone_import_context
 
@@ -72,7 +56,12 @@ def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, pa
 def _stf_export(context: STF_RootExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:
 	blender_armature: bpy.types.Armature = application_object
 	ensure_stf_id(context, blender_armature)
-	blender_armature_object: bpy.types.Object = parent_application_object
+
+	tmp_hook_object: bpy.types.Object = bpy.data.objects.new("TRASH", blender_armature)
+	bpy.context.scene.collection.objects.link(tmp_hook_object)
+	def _clean_tmp_mesh_object():
+		bpy.data.objects.remove(tmp_hook_object)
+	context.add_task(_clean_tmp_mesh_object)
 
 	root_bones = []
 	ret = {
@@ -81,7 +70,7 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 		"root_bones": root_bones,
 	}
 
-	bone_export_context = STF_BlenderBoneExportContext(context, ret, blender_armature_object)
+	bone_export_context = STF_BlenderBoneExportContext(context, ret, tmp_hook_object)
 	root_bone_definitions = []
 	for blender_bone in blender_armature.bones:
 		if(blender_bone.parent == None):
@@ -93,10 +82,10 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 	return ret, blender_armature.stf_id, bone_export_context
 
 
-def _resolve_id_binding_func(blender_object: any, id: str) -> any:
+def _resolve_id_binding_func(blender_object: any, stf_id: str) -> any:
 	armature: bpy.types.Armature = blender_object
 	for bone in armature.bones:
-		if(bone.stf_id == id):
+		if(bone.stf_id == stf_id):
 			return bone
 	return None
 

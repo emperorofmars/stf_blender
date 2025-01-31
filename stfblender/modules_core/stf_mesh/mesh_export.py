@@ -24,11 +24,13 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 	blender_mesh: bpy.types.Mesh = application_object
 	ensure_stf_id(context, blender_mesh)
 
-	if(parent_application_object and len(parent_application_object) == 2):
-		armature_object: bpy.types.Armature = parent_application_object[0]
-		armature: bpy.types.Armature = parent_application_object[0].data
-		blender_mesh_object: bpy.types.Object = parent_application_object[1]
+	armature: bpy.types.Armature = parent_application_object
 
+	tmp_blender_mesh_object: bpy.types.Object = bpy.data.objects.new("TRASH", blender_mesh)
+	bpy.context.scene.collection.objects.link(tmp_blender_mesh_object)
+	def _clean_tmp_mesh_object():
+		bpy.data.objects.remove(tmp_blender_mesh_object)
+	context.add_task(_clean_tmp_mesh_object)
 
 	stf_mesh = {
 		"type": _stf_type,
@@ -237,13 +239,13 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 
 
 	# Weightpaint
-	if(armature and blender_mesh_object):
-		stf_mesh["armature"] = mesh_context.serialize_resource(armature, armature_object) # Because blender, you have to also pass an object which instantiates the armature :/
+	if(armature and tmp_blender_mesh_object):
+		stf_mesh["armature"] = mesh_context.serialize_resource(armature)
 
 		# Create vertex group lookup dictionary for stf_ids from the previous name lookup dict
 		weight_bone_map = []
 		group_to_bone_index = {}
-		for group in blender_mesh_object.vertex_groups:
+		for group in tmp_blender_mesh_object.vertex_groups:
 			if(group.name in armature.bones):
 				weight_bone_map.append(armature.bones[group.name].stf_id)
 				group_to_bone_index[group.index] = len(weight_bone_map) - 1
@@ -289,10 +291,10 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 
 
 	# Vertex groups
-	if(blender_mesh_object):
+	if(tmp_blender_mesh_object):
 		group_index_to_group_name: dict[int, str] = {}
 		vertex_groups: dict[str, dict[int, float]] = {}
-		for group in blender_mesh_object.vertex_groups:
+		for group in tmp_blender_mesh_object.vertex_groups:
 			if(not armature or group.name not in armature.bones): # don't include weight paint groups
 				vertex_groups[group.name] = {}
 				group_index_to_group_name[group.index] = group.name
