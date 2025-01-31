@@ -3,7 +3,7 @@ import bpy
 from ...utils.id_utils import ensure_stf_id
 from .node_spatial_base import export_node_spatial_base, import_node_spatial_base
 from ....libstf.stf_module import STF_Module
-from ...utils.component_utils import STF_Component, get_components_from_object
+from ...utils.component_utils import STF_Component_Ref, get_components_from_object
 from ..stf_prefab.stf_prefab import STF_BlenderNodeExportContext, STF_BlenderNodeImportContext
 
 
@@ -50,7 +50,7 @@ def register():
 	bpy.types.Object.stf_id = bpy.props.StringProperty(name="ID") # type: ignore
 	bpy.types.Object.stf_name = bpy.props.StringProperty(name="Name") # type: ignore
 	bpy.types.Object.stf_name_source_of_truth = bpy.props.BoolProperty(name="STF Name Is Source Of Truth") # type: ignore
-	bpy.types.Object.stf_components = bpy.props.CollectionProperty(type=STF_Component, name="Components") # type: ignore
+	bpy.types.Object.stf_components = bpy.props.CollectionProperty(type=STF_Component_Ref, name="Components") # type: ignore
 	bpy.types.Object.stf_active_component_index = bpy.props.IntProperty()
 
 def unregister():

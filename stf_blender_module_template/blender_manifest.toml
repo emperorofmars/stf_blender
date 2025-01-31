@@ -2,16 +2,16 @@ schema_version = "1.0.0"
 
 # Example of manifest file for a Blender extension
 # Change the values according to your extension
-id = "stf_blender"
+id = "stf_blender_module_template"
 version = "0.0.0"
-name = "Squirrel Transfer Format"
-tagline = "Modular 3D Interchange Format"
-maintainer = "Mars (https://squirrelbite.com)"
+name = "My STF Module"
+tagline = "Superawesome new STF Blender Module"
+maintainer = "Awesome Person"
 # Supported types: "add-on", "theme"
 type = "add-on"
 
 # Optional link to documentation, support, source files, etc
-website = "https://github.com/emperorofmars/stf_blender"
+#website = "https://yourwebsitehere.com"
 
 # Optional list defined by Blender and server, see:
 # https://docs.blender.org/manual/en/dev/advanced/extensions/tags.html
@@ -59,31 +59,18 @@ license = [
 # For each permission it is important to also specify the reason why it is required.
 # Keep this a single short sentence without a period (.) at the end.
 # For longer explanations use the documentation or detail page.
-#
-# [permissions]
-# network = "Need to sync motion-capture data to server"
-# files = "Import/export FBX from/to disk"
-# clipboard = "Copy and paste bone transforms"
 [permissions]
 files = "Import/export STF from/to disk"
 clipboard = "Copy and paste STF resources and definitions between different tools"
 
 # Optional: build settings.
 # https://docs.blender.org/manual/en/dev/advanced/extensions/command_line_arguments.html#command-line-args-extension-build
-# [build]
-# paths_exclude_pattern = [
-#   "__pycache__/",
-#   "/.git/",
-#   "/*.zip",
-# ]
-
 [build]
 paths_exclude_pattern = [
 	"__pycache__/",
 	"/.git/",
 	"/*.zip",
 	"/.vscode/",
-	"/stf_blender_module_template",
 	"/examples",
 	"/assets",
 ]

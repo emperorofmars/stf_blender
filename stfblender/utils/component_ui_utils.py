@@ -1,7 +1,7 @@
 import bpy
 
 from ...libstf.stf_registry import get_stf_modules
-from .component_utils import STF_BlenderComponentModule, STF_Component
+from .component_utils import STF_BlenderComponentModule, STF_Component_Ref
 
 
 class STFDrawComponentList(bpy.types.UIList):
@@ -26,7 +26,7 @@ def get_component_modules(filter = None) -> list[STF_BlenderComponentModule]:
 	return ret
 
 
-def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component, object: any, component: any):
+def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, object: any, component: any):
 	box = layout.box()
 	box.label(text=component_ref.stf_type)
 	box.label(text=component_ref.stf_id)

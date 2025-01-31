@@ -3,7 +3,7 @@ import bpy
 from ....libstf.stf_import_context import STF_ResourceImportContext, STF_RootImportContext
 from ....libstf.stf_export_context import STF_ResourceExportContext, STF_RootExportContext
 from ....libstf.stf_module import STF_Module
-from ...utils.component_utils import STF_Component, get_components_from_object
+from ...utils.component_utils import STF_Component_Ref, get_components_from_object
 from ...utils.id_utils import ensure_stf_id
 from ...utils.armature_bone import ArmatureBone
 from ...utils.id_binding_resolver import STF_Blender_BindingResolver
@@ -123,7 +123,7 @@ def register():
 	bpy.types.Armature.stf_id = bpy.props.StringProperty(name="ID") # type: ignore
 	bpy.types.Armature.stf_name = bpy.props.StringProperty(name="Name") # type: ignore
 	bpy.types.Armature.stf_name_source_of_truth = bpy.props.BoolProperty(name="STF Name Is Source Of Truth") # type: ignore
-	bpy.types.Armature.stf_components = bpy.props.CollectionProperty(type=STF_Component, name="Components") # type: ignore
+	bpy.types.Armature.stf_components = bpy.props.CollectionProperty(type=STF_Component_Ref, name="Components") # type: ignore
 	bpy.types.Armature.stf_active_component_index = bpy.props.IntProperty()
 
 def unregister():

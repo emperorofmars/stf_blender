@@ -7,7 +7,7 @@ from ....libstf.stf_module import STF_Module
 from ....libstf.stf_report import STFReportSeverity, STFReport
 from .stf_material_definition import STF_Material_Definition, STF_Material_Property, STF_Material_Value_Ref
 from .blender_material_to_stf import blender_material_to_stf
-from ...utils.component_utils import STF_Component, get_components_from_object
+from ...utils.component_utils import STF_Component_Ref, get_components_from_object
 from ...utils.id_utils import ensure_stf_id
 from .material_value_modules import blender_material_value_modules
 
@@ -101,7 +101,7 @@ def register():
 	bpy.types.Material.stf_id = bpy.props.StringProperty(name="ID") # type: ignore
 	bpy.types.Material.stf_name = bpy.props.StringProperty(name="Name") # type: ignore
 	bpy.types.Material.stf_name_source_of_truth = bpy.props.BoolProperty(name="STF Name Is Source Of Truth") # type: ignore
-	bpy.types.Material.stf_components = bpy.props.CollectionProperty(type=STF_Component, name="Components") # type: ignore
+	bpy.types.Material.stf_components = bpy.props.CollectionProperty(type=STF_Component_Ref, name="Components") # type: ignore
 	bpy.types.Material.stf_active_component_index = bpy.props.IntProperty()
 
 def unregister():

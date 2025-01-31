@@ -17,15 +17,15 @@ class STF_BlenderComponentBase(bpy.types.PropertyGroup):
 	stf_name: bpy.props.StringProperty(name="Name") # type: ignore
 
 
-class STF_Component(bpy.types.PropertyGroup): # Bringing polymorphism to Blender
+class STF_Component_Ref(bpy.types.PropertyGroup): # Bringing polymorphism to Blender
 	"""This property defines the type and ID, from which the appropriate registered function can handle the correct object"""
 	stf_type: bpy.props.StringProperty(name="Type") # type: ignore
 	stf_id: bpy.props.StringProperty(name="ID") # type: ignore
 	blender_property_name: bpy.props.StringProperty(name="Blender Property Name") # type: ignore
 
 
-def add_component(application_object: any, blender_property_name: str, stf_id: str, stf_type: str) -> tuple[STF_Component, any]:
-	component_ref: STF_Component = application_object.stf_components.add()
+def add_component(application_object: any, blender_property_name: str, stf_id: str, stf_type: str) -> tuple[STF_Component_Ref, any]:
+	component_ref: STF_Component_Ref = application_object.stf_components.add()
 	component_ref.stf_id = stf_id
 	component_ref.stf_type = stf_type
 	component_ref.blender_property_name = blender_property_name
