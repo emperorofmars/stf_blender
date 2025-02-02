@@ -1,0 +1,53 @@
+import bpy
+
+from ...utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
+from ...utils.component_utils import STFAddComponentOperatorBase, STFRemoveComponentOperatorBase
+from ...utils.component_ui_utils import draw_components_ui, set_stf_component_filter
+
+
+class STFSetAnimationIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
+	"""Set STF-ID for Animation"""
+	bl_idname = "stf.set_animation_stf_id"
+	@classmethod
+	def poll(cls, context): return context.active_action is not None
+	def get_property(self, context): return context.active_action
+
+class STFAddAnimationComponentOperator(bpy.types.Operator, STFAddComponentOperatorBase):
+	"""Add Component to Animation"""
+	bl_idname = "stf.add_animation_component"
+	@classmethod
+	def poll(cls, context): return context.active_action is not None
+	def get_property(self, context): return context.active_action
+
+class STFRemoveAnimationComponentOperator(bpy.types.Operator, STFRemoveComponentOperatorBase):
+	bl_idname = "stf.remove_animation_component"
+	def get_property(self, context): return context.active_action
+
+
+class STFAnimationSpatialPanel(bpy.types.Panel):
+	"""STF options & export helper"""
+	bl_idname = "OBJECT_PT_stf_animation_spatial_editor"
+	bl_label = "STF Animation Editor"
+	bl_region_type = "UI"
+	bl_space_type = "DOPESHEET_EDITOR"
+	bl_category = "STF"
+	#bl_context = "action"
+
+	@classmethod
+	def poll(cls, context):
+		return (context.active_action is not None)
+
+	def draw(self, context):
+		set_stf_component_filter(bpy.types.Action)
+
+		self.layout.label(text="stf.animation")
+
+		# Set ID
+		draw_stf_id_ui(self.layout, context, context.active_action, STFSetAnimationIDOperator.bl_idname)
+
+		self.layout.prop(context.active_action, "stf_exclude")
+
+		self.layout.separator(factor=2, type="LINE")
+
+		# Components
+		draw_components_ui(self.layout, context, context.active_action, STFAddAnimationComponentOperator.bl_idname, STFRemoveAnimationComponentOperator.bl_idname)

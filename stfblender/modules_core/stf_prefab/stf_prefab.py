@@ -56,10 +56,12 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 	ensure_stf_id(context, collection)
 
 	root_nodes = []
+	animations = []
 	ret = {
 		"type": _stf_type,
 		"name": collection.stf_name if collection.stf_name_source_of_truth else collection.name,
 		"root_nodes": root_nodes,
+		"animations": animations,
 	}
 
 	node_export_context = STF_BlenderNodeExportContext(context, ret, collection)
@@ -68,6 +70,9 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 			root_nodes.append(node_export_context.serialize_resource(blender_object))
 
 	# TODO animations
+	for action in bpy.data.actions:
+		if(stf_animation_id := node_export_context.serialize_resource(action)):
+			animations.append(stf_animation_id)
 
 	return ret, collection.stf_id, node_export_context
 

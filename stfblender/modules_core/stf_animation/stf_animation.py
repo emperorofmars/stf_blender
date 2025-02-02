@@ -25,6 +25,8 @@ def _stf_import(context: STF_RootImportContext, json_resource: dict, stf_id: str
 
 def _stf_export(context: STF_RootExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:
 	blender_animation: bpy.types.Action = application_object
+	if(blender_animation.stf_exclude): return (None, None, None)
+
 	ensure_stf_id(context, blender_animation)
 
 	ret = {
@@ -32,6 +34,8 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 		"name": blender_animation.stf_name if blender_animation.stf_name_source_of_truth else blender_animation.name,
 	}
 	animation_context = STF_ResourceExportContext(context, ret, blender_animation)
+
+	print(ret)
 
 	return ret, blender_animation.stf_id, animation_context
 
@@ -58,6 +62,8 @@ def register():
 	bpy.types.Action.stf_components = bpy.props.CollectionProperty(type=STF_Component_Ref, name="Components") # type: ignore
 	bpy.types.Action.stf_active_component_index = bpy.props.IntProperty()
 
+	bpy.types.Action.stf_exclude = bpy.props.BoolProperty(name="Exclude from STF", default=False) # type: ignore
+
 def unregister():
 	if hasattr(bpy.types.Action, "stf_id"):
 		del bpy.types.Action.stf_id
@@ -69,3 +75,6 @@ def unregister():
 		del bpy.types.Action.stf_components
 	if hasattr(bpy.types.Action, "stf_active_component_index"):
 		del bpy.types.Action.stf_active_component_index
+
+	if hasattr(bpy.types.Action, "stf_exclude"):
+		del bpy.types.Action.stf_exclude
