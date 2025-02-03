@@ -1,13 +1,35 @@
 import bpy
+import re
 
 from ...utils.id_utils import ensure_stf_id
 from .node_spatial_base import export_node_spatial_base, import_node_spatial_base
-from ....libstf.stf_module import STF_Module
+from ....libstf.stf_module import STF_AnimationTranslationModule, STF_Module
 from ...utils.component_utils import STF_Component_Ref, get_components_from_object
 from ..stf_prefab.stf_prefab import STF_BlenderNodeExportContext, STF_BlenderNodeImportContext
 
 
 _stf_type = "stf.node.spatial"
+
+
+def _translate_property_to_stf_func(data_path: str, data_index: int) -> str:
+	match = re.search(r"", data_path)
+	return ""
+
+def _translate_key_to_stf_func(key_value: any) -> any:
+	return key_value
+
+def _translate_property_to_blender_func(stf_property: str) -> tuple[str, int]:
+	return (stf_property, 0)
+
+def _translate_key_to_blender_func(key_value: any) -> any:
+	return key_value
+
+class STF_Prefab_AnimationTranslationModule(STF_AnimationTranslationModule):
+	translate_property_to_stf_func = _translate_property_to_stf_func
+	translate_key_to_stf_func: _translate_key_to_stf_func
+
+	translate_property_to_blender_func: _translate_property_to_blender_func
+	translate_key_to_blender_func: _translate_key_to_blender_func
 
 
 def _stf_import(context: STF_BlenderNodeImportContext, json_resource: dict, stf_id: str, parent_application_object: any) -> tuple[any, any]:
@@ -40,6 +62,8 @@ class STF_Module_STF_Node_Spatial(STF_Module):
 	export_func = _stf_export
 	can_handle_application_object_func = _can_handle_application_object_func
 	get_components_func = get_components_from_object
+
+	animation_handlers = [STF_Prefab_AnimationTranslationModule]
 
 
 register_stf_modules = [

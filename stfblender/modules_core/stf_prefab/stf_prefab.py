@@ -3,7 +3,7 @@ import bpy
 
 from ....libstf.stf_import_context import STF_ResourceImportContext, STF_RootImportContext
 from ....libstf.stf_export_context import STF_ResourceExportContext, STF_RootExportContext
-from ....libstf.stf_module import STF_Module
+from ....libstf.stf_module import STF_AnimationTranslationModule, STF_Module
 from ....libstf.stf_report import STFReport
 from ...utils.component_utils import STF_Component_Ref, get_components_from_object
 from ...utils.id_utils import ensure_stf_id

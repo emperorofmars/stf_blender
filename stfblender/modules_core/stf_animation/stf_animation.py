@@ -26,16 +26,37 @@ def _stf_import(context: STF_RootImportContext, json_resource: dict, stf_id: str
 def _stf_export(context: STF_RootExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:
 	blender_animation: bpy.types.Action = application_object
 	if(blender_animation.stf_exclude): return (None, None, None)
+	if(blender_animation.is_action_legacy):
+		context.report(STFReport("Ignoring legacy animation: " + blender_animation.name, STFReportSeverity.Warn, blender_animation.stf_id, _stf_type, application_object))
+		return (None, None, None)
 
 	ensure_stf_id(context, blender_animation)
 
 	ret = {
 		"type": _stf_type,
 		"name": blender_animation.stf_name if blender_animation.stf_name_source_of_truth else blender_animation.name,
+		"loop": blender_animation.use_cyclic,
 	}
+	if(blender_animation.use_frame_range):
+		ret["range"] = [blender_animation.frame_start, blender_animation.frame_end]
+
 	animation_context = STF_ResourceExportContext(context, ret, blender_animation)
 
-	print(ret)
+	print(blender_animation.name)
+	print(blender_animation.is_action_legacy)
+	for slot in blender_animation.slots:
+		print(str(slot) + " :: " + str(slot.target_id_type) + " - " + str(slot.identifier) + " - ")
+
+	for layer in blender_animation.layers:
+		for strip in layer.strips:
+			if(strip.type == "KEYFRAME"):
+				strip: bpy.types.ActionKeyframeStrip = strip
+				for channelbag in strip.channelbags:
+					for fcurve in channelbag.fcurves:
+						#print(fcurve.data_path)
+						pass
+
+	print()
 
 	return ret, blender_animation.stf_id, animation_context
 

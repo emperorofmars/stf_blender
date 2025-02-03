@@ -9,6 +9,14 @@ class STF_Kind(Enum):
 	MODIFICATION = 3
 
 
+class STF_AnimationTranslationModule:
+	translate_property_to_stf_func: Callable[[str, int], str]
+	translate_key_to_stf_func: Callable[[any], any]
+
+	translate_property_to_blender_func: Callable[[str], tuple[str, int]]
+	translate_key_to_blender_func: Callable[[any], any]
+
+
 class STF_Module:
 	"""
 	Represents the functionality to import and export an STF resource.
@@ -36,6 +44,13 @@ class STF_Module:
 
 	# (Export Context, Application Object, Optional Parent Application Object) -> (Json Dict, ID, Export Context)
 	export_func: Callable[[any, any, any], tuple[dict, str, any]]
+
+
+	# dict[stf_property, handler]
+	import_animation_handlers: dict[str, STF_AnimationTranslationModule] = []
+	# dict[blender_object_property, handler]
+	export_animation_handlers: dict[str, STF_AnimationTranslationModule] = []
+
 
 	# Get a list of application-components on the application object.
 	# (Application Object) -> List[Application Component Object]
