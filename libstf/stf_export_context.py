@@ -67,11 +67,6 @@ class STF_RootExportContext:
 					self.report(STFReport("Unsupported Component", STFReportSeverity.Warn, None, None, application_object))
 
 
-	def __run_animations(self, application_object, object_ctx):
-		if(hasattr(application_object, "animation_data")):
-			print("Animation Data!!!")
-
-
 	def serialize_resource(self, application_object: any, parent_application_object: any = None) -> str | None:
 		"""Run all logic to serialize an application resource. If it already has been serialized, return the existing ID."""
 		if(application_object == None): return None
@@ -98,11 +93,6 @@ class STF_RootExportContext:
 						# Export components explicitely defined by this application
 						components = selected_module.get_components_func(application_object)
 						self.__run_components(application_object, ctx, json_resource, id, components)
-
-				if(selected_module.export_animation_handlers):
-					# TODO add animation handlers to state and run them from here
-					for animation_handler in selected_module.animation_handlers:
-						pass
 
 				return id
 			else:

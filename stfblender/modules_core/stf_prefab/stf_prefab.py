@@ -3,7 +3,7 @@ import bpy
 
 from ....libstf.stf_import_context import STF_ResourceImportContext, STF_RootImportContext
 from ....libstf.stf_export_context import STF_ResourceExportContext, STF_RootExportContext
-from ....libstf.stf_module import STF_AnimationTranslationModule, STF_Module
+from ....libstf.stf_module import STF_Module
 from ....libstf.stf_report import STFReport
 from ...utils.component_utils import STF_Component_Ref, get_components_from_object
 from ...utils.id_utils import ensure_stf_id
@@ -69,7 +69,6 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 		if(blender_object.parent == None):
 			root_nodes.append(node_export_context.serialize_resource(blender_object))
 
-	# TODO animations
 	for action in bpy.data.actions:
 		if(stf_animation_id := node_export_context.serialize_resource(action)):
 			animations.append(stf_animation_id)

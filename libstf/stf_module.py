@@ -9,14 +9,6 @@ class STF_Kind(Enum):
 	MODIFICATION = 3
 
 
-class STF_AnimationTranslationModule:
-	translate_property_to_stf_func: Callable[[str, int], str]
-	translate_key_to_stf_func: Callable[[any], any]
-
-	translate_property_to_blender_func: Callable[[str], tuple[str, int]]
-	translate_key_to_blender_func: Callable[[any], any]
-
-
 class STF_Module:
 	"""
 	Represents the functionality to import and export an STF resource.
@@ -29,7 +21,7 @@ class STF_Module:
 	# If a module for the same target stf or application type is registered, the priority will decide which is preferred.
 	priority: int = 0
 
-	# Behaves like this type. For example a 'my.custom.super_fancy_mesh' is be like 'mesh'.
+	# Behaves like this types. For example a 'my.custom.super_fancy_mesh' is like 'mesh'.
 	like_types: list[str] = []
 
 	# List of application types this module can export
@@ -46,10 +38,11 @@ class STF_Module:
 	export_func: Callable[[any, any, any], tuple[dict, str, any]]
 
 
-	# dict[stf_property, handler]
-	import_animation_handlers: dict[str, STF_AnimationTranslationModule] = []
-	# dict[blender_object_property, handler]
-	export_animation_handlers: dict[str, STF_AnimationTranslationModule] = []
+	translate_property_to_stf_func: Callable[[str, int], str]
+	translate_key_to_stf_func: Callable[[str, int, any], any]
+
+	translate_property_to_blender_func: Callable[[str], tuple[str, int]]
+	translate_key_to_blender_func: Callable[[str, any], any]
 
 
 	# Get a list of application-components on the application object.
