@@ -45,16 +45,26 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 	print(blender_animation.name)
 	print(blender_animation.is_action_legacy)
 	for slot in blender_animation.slots:
-		print(str(slot) + " :: " + str(slot.target_id_type) + " - " + str(slot.identifier) + " - ")
+		print(str(slot) + " handle: " + str(slot.handle) + " :: " + str(slot.target_id_type) + " - " + str(slot.identifier) + " - ")
+
+	for assignment in blender_animation.stf_target_assignment:
+		pass
 
 	for layer in blender_animation.layers:
 		for strip in layer.strips:
 			if(strip.type == "KEYFRAME"):
 				strip: bpy.types.ActionKeyframeStrip = strip
 				for channelbag in strip.channelbags:
-					for fcurve in channelbag.fcurves:
-						#print(fcurve.data_path)
-						pass
+					channelbag_slot = None
+					for slot in blender_animation.slots:
+						if(slot.handle == channelbag.slot_handle):
+							channelbag_slot = slot
+							break
+					for target_blender_object in channelbag_slot.stf_target_assignment:
+
+						for fcurve in channelbag.fcurves:
+							#print(fcurve.data_path)
+							pass
 
 	print()
 

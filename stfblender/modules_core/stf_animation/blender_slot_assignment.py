@@ -2,8 +2,8 @@ import bpy
 
 
 class SlotTargetAssignment(bpy.types.PropertyGroup):
-	slot_name: bpy.props.StringProperty(name="Slot Name") # type: ignore
-	target: bpy.props.PointerProperty(type=bpy.types.Object, name="Blender Target Things") # type: ignore
+	slot_handle: bpy.props.IntProperty(name="Slot Name", default=-1) # type: ignore
+	target: bpy.props.PointerProperty(type=bpy.types.Object, name="Target") # type: ignore
 
 
 class STFAddSlotAssignment(bpy.types.Operator):
@@ -16,7 +16,7 @@ class STFAddSlotAssignment(bpy.types.Operator):
 
 	def execute(self, context):
 		slot_assignment = context.active_action.stf_target_assignment.add()
-		slot_assignment.slot_name = context.active_action.slots[self.index].name_display
+		slot_assignment.slot_handle = context.active_action.slots[self.index].handle
 		return {"FINISHED"}
 
 
