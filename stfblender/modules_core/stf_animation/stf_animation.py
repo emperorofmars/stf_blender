@@ -47,6 +47,8 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 	for slot in blender_animation.slots:
 		print(str(slot) + " handle: " + str(slot.handle) + " :: " + str(slot.target_id_type) + " - " + str(slot.identifier) + " - ")
 
+	stf_tracks = []
+
 	for layer in blender_animation.layers:
 		for strip in layer.strips:
 			if(strip.type == "KEYFRAME"):
@@ -57,8 +59,14 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 						if(target_assignment.slot_handle == channelbag.slot_handle):
 							assignment = target_assignment
 							break
-					for fcurve in channelbag.fcurves:
-						#print(fcurve.data_path)
+					if(assignment):
+						# TODO get animation handler for this assignment target
+						for fcurve in channelbag.fcurves:
+							# TODO use animation handler to translate this property path and convert each keyframe
+							print(fcurve.data_path)
+							pass
+					else:
+						#context.report(STFReport("Invalid Animation Target", STFReportSeverity.Warn, id, _stf_type, blender_animation))
 						pass
 
 	print()
