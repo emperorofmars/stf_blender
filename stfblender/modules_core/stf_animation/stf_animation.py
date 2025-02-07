@@ -52,13 +52,14 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 			if(strip.type == "KEYFRAME"):
 				strip: bpy.types.ActionKeyframeStrip = strip
 				for channelbag in strip.channelbags:
+					assignment = None
 					for target_assignment in blender_animation.stf_target_assignment:
-						if(target_assignment.slot_handle != channelbag.slot_handle):
-							continue
-
-						for fcurve in channelbag.fcurves:
-							#print(fcurve.data_path)
-							pass
+						if(target_assignment.slot_handle == channelbag.slot_handle):
+							assignment = target_assignment
+							break
+					for fcurve in channelbag.fcurves:
+						#print(fcurve.data_path)
+						pass
 
 	print()
 

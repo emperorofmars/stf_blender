@@ -61,10 +61,11 @@ class STFAnimationSpatialPanel(bpy.types.Panel):
 		self.layout.label(text="In Blender, any given 'thing' can be targeted by only one Slot :(")
 		self.layout.label(text="This is not how the rest of the world works.")
 		self.layout.separator(factor=1, type="SPACE")
-		self.layout.label(text="Assign Slots with this UI instead, until Blender fixes this limit.")
-		self.layout.label(text="Using the Blender system of linking Slots to 'things'")
-		self.layout.label(text="is useful for creating animations only.")
-		self.layout.label(text="In a videogame context, one assignment per slot should suffice.")
+		self.layout.label(text="Assign Slots with this UI instead,")
+		self.layout.label(text="until Blender fixes this limitation.")
+		self.layout.separator(factor=1, type="SPACE")
+		self.layout.label(text="Use the Blender system of linking Slots to")
+		self.layout.label(text="'things' for creating animations only.")
 		self.layout.separator(factor=1, type="SPACE")
 		self.layout.label(text="Note: This workaround is jank and error-prone!")
 		self.layout.label(text="Good luck!")
@@ -74,14 +75,15 @@ class STFAnimationSpatialPanel(bpy.types.Panel):
 			box = self.layout.box()
 			box.label(text="Slot " + str(slot_index) + ": " + str(slot.name_display))
 
-			for assignment_index, assignment in enumerate(context.active_action.stf_target_assignment):
-				if(slot.handle != assignment.slot_handle):
-					continue
-				row = box.row()
-				row.prop(assignment, "target")
-				row.operator(STFRemoveSlotAssignment.bl_idname, text="", icon="X").assignment_index = assignment_index
-			box.operator(STFAddSlotAssignment.bl_idname).index = slot_index
+			slot_assignment = None
+			for assignment in context.active_action.stf_target_assignment:
+				if(assignment.slot_handle == slot.handle):
+					slot_assignment = assignment
+					break
+			if(slot_assignment):
+				box.prop(assignment, "target")
+			else:
+				box.operator(STFAddSlotAssignment.bl_idname).index = slot_index
 
 		# TODO deal with orphan assignment objects
-
 

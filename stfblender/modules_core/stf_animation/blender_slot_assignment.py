@@ -2,7 +2,7 @@ import bpy
 
 
 class SlotTargetAssignment(bpy.types.PropertyGroup):
-	slot_handle: bpy.props.IntProperty(name="Slot Name", default=-1) # type: ignore
+	slot_handle: bpy.props.IntProperty(name="Slot Handle", default=-1) # type: ignore
 	target: bpy.props.PointerProperty(type=bpy.types.Object, name="Target") # type: ignore
 
 
