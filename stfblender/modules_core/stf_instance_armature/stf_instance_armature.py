@@ -85,7 +85,7 @@ def _resolve_id_binding_func(blender_object: any, stf_id: str) -> any:
 
 class STF_Module_STF_Instance_Armature(STF_Module, STF_Blender_BindingResolver):
 	stf_type = _stf_type
-	stf_kind = "node"
+	stf_kind = "instance"
 	like_types = ["instance.armature", "instance.prefab", "instance"]
 	understood_application_types = [bpy.types.Object]
 	import_func = _stf_import

@@ -90,7 +90,7 @@ def _stf_export(context: STF_ResourceExportContext, application_object: any, par
 
 class STF_Module_STF_Instance_Mesh(STF_Module):
 	stf_type = _stf_type
-	stf_kind = "node"
+	stf_kind = "instance"
 	like_types = ["instance.mesh", "instance"]
 	understood_application_types = [bpy.types.Object]
 	import_func = _stf_import

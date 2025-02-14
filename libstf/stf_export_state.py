@@ -37,14 +37,14 @@ class STF_ExportState(StateUtil):
 		self._metric_multiplier = metric_multiplier
 
 
-	def determine_module(self, application_object: any) -> STF_Module:
+	def determine_module(self, application_object: any, kind: str = None) -> STF_Module:
 		"""Find the best suited registered STF_Module for the type of this object"""
 		selected_module = None
 		selected_priority = -1
 		for module in self._modules.get(type(application_object), []):
 			if(hasattr(module, "can_handle_application_object_func")):
 				prio = module.can_handle_application_object_func(application_object)
-				if(prio > selected_priority):
+				if(prio > selected_priority and (kind != None or module.stf_kind == kind)):
 					selected_module = module
 					selected_priority = prio
 			elif(1 > selected_priority):

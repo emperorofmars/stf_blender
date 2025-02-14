@@ -61,9 +61,10 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 							break
 					if(assignment):
 						# TODO get animation handler for this assignment target
+						print(assignment.target)
 						for fcurve in channelbag.fcurves:
 							# TODO use animation handler to translate this property path and convert each keyframe
-							#print(fcurve.data_path)
+							print(fcurve.data_path)
 							pass
 					else:
 						#context.report(STFReport("Invalid Animation Target", STFReportSeverity.Warn, id, _stf_type, blender_animation))
