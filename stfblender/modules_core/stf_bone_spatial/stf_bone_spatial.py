@@ -4,17 +4,17 @@ import bpy
 from ....libstf.stf_report import STFReportSeverity, STFReport
 from ....libstf.stf_module import STF_Module
 from ....libstf.stf_import_context import STF_ResourceImportContext
+from ....libstf.stf_export_context import STF_ResourceExportContext
 from ...utils.component_utils import STF_Component_Ref, get_components_from_object
 from ...utils.id_utils import ensure_stf_id
 from ...utils import trs_utils
 from ...utils.armature_bone import ArmatureBone
-from ..stf_armature.stf_armature import STF_BlenderBoneExportContext, STF_BlenderBoneImportContext
 
 
 _stf_type = "stf.bone.spatial"
 
 
-def _stf_import(context: STF_BlenderBoneImportContext, json_resource: dict, stf_id: str, parent_application_object: any) -> tuple[any, any]:
+def _stf_import(context: STF_ResourceImportContext, json_resource: dict, stf_id: str, parent_application_object: any) -> tuple[any, any]:
 	blender_armature: bpy.types.Armature = parent_application_object.data
 	blender_object: bpy.types.Object = parent_application_object
 
@@ -58,7 +58,7 @@ def _stf_import(context: STF_BlenderBoneImportContext, json_resource: dict, stf_
 	return blender_bone, bone_context
 
 
-def _stf_export(context: STF_BlenderBoneExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:
+def _stf_export(context: STF_ResourceExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:
 	blender_bone_def: ArmatureBone = application_object
 	ensure_stf_id(context, blender_bone_def.get_bone())
 

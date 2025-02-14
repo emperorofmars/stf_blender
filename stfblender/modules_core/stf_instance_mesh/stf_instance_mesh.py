@@ -5,7 +5,6 @@ from ....libstf.stf_export_context import STF_ResourceExportContext
 from ....libstf.stf_import_context import STF_ResourceImportContext
 from ....libstf.stf_module import STF_Module
 from ....libstf.stf_report import STFReportSeverity, STFReport
-from ..stf_prefab.stf_prefab import STF_BlenderNodeExportContext, STF_BlenderNodeImportContext
 from ..stf_node_spatial.node_spatial_base import export_node_spatial_base, import_node_spatial_base
 from ...utils.component_utils import get_components_from_object
 from ...utils.id_utils import ensure_stf_id
@@ -14,7 +13,7 @@ from ...utils.id_utils import ensure_stf_id
 _stf_type = "stf.instance.mesh"
 
 
-def _stf_import(context: STF_BlenderNodeImportContext, json_resource: dict, stf_id: str, parent_application_object: any) -> tuple[any, any]:
+def _stf_import(context: STF_ResourceImportContext, json_resource: dict, stf_id: str, parent_application_object: any) -> tuple[any, any]:
 	blender_resource = context.import_resource(json_resource["mesh"])
 	blender_object = bpy.data.objects.new(json_resource.get("name", "STF Node"), blender_resource)
 	context.register_imported_resource(stf_id, blender_object)
@@ -43,7 +42,7 @@ def _can_handle_application_object_func(application_object: any) -> int:
 	else:
 		return -1
 
-def _stf_export(context: STF_BlenderNodeExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:
+def _stf_export(context: STF_ResourceExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:
 	blender_object: bpy.types.Object = application_object
 	blender_object.update_from_editmode()
 	ensure_stf_id(context, blender_object)

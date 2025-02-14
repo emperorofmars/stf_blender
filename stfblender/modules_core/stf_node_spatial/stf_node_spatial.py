@@ -5,7 +5,8 @@ from ....libstf.stf_module import STF_Module
 from ...utils.id_utils import ensure_stf_id
 from .node_spatial_base import export_node_spatial_base, import_node_spatial_base
 from ...utils.component_utils import STF_Component_Ref, get_components_from_object
-from ..stf_prefab.stf_prefab import STF_BlenderNodeExportContext, STF_BlenderNodeImportContext
+from ....libstf.stf_import_context import STF_ResourceImportContext
+from ....libstf.stf_export_context import STF_ResourceExportContext
 
 
 _stf_type = "stf.node.spatial"
@@ -25,7 +26,7 @@ def _translate_key_to_blender_func(key_value: any) -> any:
 	return key_value
 
 
-def _stf_import(context: STF_BlenderNodeImportContext, json_resource: dict, stf_id: str, parent_application_object: any) -> tuple[any, any]:
+def _stf_import(context: STF_ResourceImportContext, json_resource: dict, stf_id: str, parent_application_object: any) -> tuple[any, any]:
 	blender_object: bpy.types.Object = bpy.data.objects.new(json_resource.get("name", "STF Node"), None)
 	context.register_imported_resource(stf_id, blender_object)
 	return import_node_spatial_base(context, json_resource, stf_id, parent_application_object, blender_object)
@@ -40,7 +41,7 @@ def _can_handle_application_object_func(application_object: any) -> int:
 	else:
 		return -1
 
-def _stf_export(context: STF_BlenderNodeExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:
+def _stf_export(context: STF_ResourceExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:
 	ret = { "type": _stf_type, }
 	ensure_stf_id(context, application_object)
 	return export_node_spatial_base(context, application_object, parent_application_object, ret)

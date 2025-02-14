@@ -12,27 +12,6 @@ from ...utils.id_binding_resolver import STF_Blender_BindingResolver
 _stf_type = "stf.armature"
 
 
-class STF_BlenderBoneExportContext(STF_ResourceExportContext):
-	def ensure_resource_properties(self):
-		super().ensure_resource_properties()
-		if(not hasattr(self._json_resource, "bones")):
-			self._json_resource["bones"] = {}
-
-	def register_serialized_resource(self, application_object: any, json_resource: dict, stf_id: str):
-		if(type(application_object) is ArmatureBone):
-			self._json_resource["bones"][stf_id] = json_resource
-		else:
-			super().register_serialized_resource(application_object, json_resource, stf_id)
-
-
-class STF_BlenderBoneImportContext(STF_ResourceImportContext):
-	def get_json_resource(self, stf_id: str) -> dict:
-		if(stf_id in self._json_resource["bones"]):
-			return self._json_resource["bones"][stf_id]
-		else:
-			return super().get_json_resource(stf_id)
-
-
 def _stf_import(context: STF_RootImportContext, json_resource: dict, stf_id: str, parent_application_object: any) -> tuple[any, any]:
 	blender_armature = bpy.data.armatures.new(json_resource.get("name", "STF Armature"))
 	blender_armature.stf_id = stf_id
@@ -46,7 +25,7 @@ def _stf_import(context: STF_RootImportContext, json_resource: dict, stf_id: str
 		bpy.data.objects.remove(tmp_hook_object)
 	context.add_task(_clean_tmp_mesh_object)
 
-	bone_import_context = STF_BlenderBoneImportContext(context, json_resource, tmp_hook_object)
+	bone_import_context = STF_ResourceImportContext(context, json_resource, tmp_hook_object)
 	for bone_id in json_resource.get("root_bones", []):
 		bone_import_context.import_resource(bone_id)
 
@@ -70,7 +49,7 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 		"root_bones": root_bones,
 	}
 
-	bone_export_context = STF_BlenderBoneExportContext(context, ret, tmp_hook_object)
+	bone_export_context = STF_ResourceExportContext(context, ret, tmp_hook_object)
 	root_bone_definitions = []
 	for blender_bone in blender_armature.bones:
 		if(blender_bone.parent == None):

@@ -13,9 +13,6 @@ class STF_RootExportContext:
 	def __init__(self, state: STF_ExportState):
 		self._state = state
 
-		# dict[target_id, dict[property, value]]
-		self._animation_data: dict[str, dict[str, any]] = {}
-
 
 	def get_resource_id(self, application_object: any) -> str | None:
 		return self._state.get_resource_id(application_object)
@@ -28,7 +25,7 @@ class STF_RootExportContext:
 		self._state.register_id(application_object, id)
 
 	def register_serialized_resource(self, application_object: any, json_resource: dict, id: str):
-		pass
+		self._state.register_serialized_resource(application_object, json_resource, id)
 
 
 	def __run_hooks(self, application_object: any, object_ctx: any, json_resource: dict, id: str):
@@ -59,8 +56,11 @@ class STF_RootExportContext:
 					component_ret = selected_module.export_func(object_ctx, component, application_object)
 					if(component_ret):
 						component_json_resource, component_id, _ = component_ret
-						json_resource["components"][component_id] = component_json_resource
-						self.register_serialized_resource(application_object, component_json_resource, component_id)
+						if(selected_module.stf_kind == "component"):
+							if("components" not in json_resource): json_resource["components"] = {}
+							json_resource["components"][component_id] = component_json_resource
+						else:
+							self.register_serialized_resource(application_object, component_json_resource, component_id)
 					else:
 						self.report(STFReport("Export Component Failed", STFReportSeverity.Error, id, selected_module.stf_type, application_object))
 				else:
@@ -80,10 +80,7 @@ class STF_RootExportContext:
 
 			if(module_ret):
 				json_resource, id, ctx = module_ret
-				self.register_serialized_resource(application_object, json_resource, id)
-				if(selected_module.stf_kind == "data"):
-					#self.register_serialized_resource(application_object, json_resource, id)
-					self._state.register_serialized_resource(application_object, json_resource, id)
+				self._state.register_serialized_resource(application_object, json_resource, id)
 
 				if(selected_module.stf_kind != "component"):
 					# Export components from application native constructs
@@ -163,12 +160,14 @@ class STF_ResourceExportContext(STF_RootExportContext):
 			self._json_resource["referenced_buffers"] = []
 
 	def register_serialized_resource(self, application_object: any, json_resource: dict, id: str):
-		self._parent_context.register_serialized_resource(application_object, json_resource, id)
+		#self._parent_context.register_serialized_resource(application_object, json_resource, id)
+		super().register_serialized_resource(application_object, json_resource, id)
 		if(id and id not in self._json_resource["referenced_resources"]):
 			self._json_resource["referenced_resources"].append(id)
 
 	def serialize_buffer(self, data: bytes) -> str:
-		id = self._parent_context.serialize_buffer(data)
+		#id = self._parent_context.serialize_buffer(data)
+		id = super().serialize_buffer(data)
 		self._json_resource["referenced_buffers"].append(id)
 		return id
 

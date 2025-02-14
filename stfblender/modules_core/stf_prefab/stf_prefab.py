@@ -12,27 +12,6 @@ from ...utils.id_utils import ensure_stf_id
 _stf_type = "stf.prefab"
 
 
-class STF_BlenderNodeExportContext(STF_ResourceExportContext):
-	def ensure_resource_properties(self):
-		super().ensure_resource_properties()
-		if(not hasattr(self._json_resource, "nodes")):
-			self._json_resource["nodes"] = {}
-
-	def register_serialized_resource(self, application_object: any, json_resource: dict, stf_id: str):
-		if(type(application_object) is bpy.types.Object):
-			self._json_resource["nodes"][stf_id] = json_resource
-		else:
-			super().register_serialized_resource(application_object, json_resource, stf_id)
-
-
-class STF_BlenderNodeImportContext(STF_ResourceImportContext):
-	def get_json_resource(self, stf_id: str) -> dict:
-		if(stf_id in self._json_resource["nodes"]):
-			return self._json_resource["nodes"][stf_id]
-		else:
-			return self._parent_context.get_json_resource(stf_id)
-
-
 def _stf_import(context: STF_RootImportContext, json_resource: dict, stf_id: str, parent_application_object: any) -> tuple[any, any]:
 	collection = bpy.data.collections.new(json_resource.get("name", context.get_filename()))
 	collection.stf_id = stf_id
@@ -42,7 +21,7 @@ def _stf_import(context: STF_RootImportContext, json_resource: dict, stf_id: str
 	bpy.context.scene.collection.children.link(collection)
 	collection.stf_use_collection_as_prefab = True
 
-	node_import_context = STF_BlenderNodeImportContext(context, json_resource, collection)
+	node_import_context = STF_ResourceImportContext(context, json_resource, collection)
 	for node_id in json_resource.get("root_nodes", []):
 		node_import_context.import_resource(node_id)
 
@@ -64,7 +43,7 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 		"animations": animations,
 	}
 
-	node_export_context = STF_BlenderNodeExportContext(context, ret, collection)
+	node_export_context = STF_ResourceExportContext(context, ret, collection)
 	for blender_object in collection.all_objects:
 		if(blender_object.parent == None):
 			root_nodes.append(node_export_context.serialize_resource(blender_object))
