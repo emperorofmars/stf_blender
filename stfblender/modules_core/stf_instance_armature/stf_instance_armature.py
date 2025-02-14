@@ -1,4 +1,5 @@
 import bpy
+import re
 
 from ....libstf.stf_module import STF_Module
 from ....libstf.stf_report import STFReportSeverity, STFReport
@@ -12,6 +13,23 @@ from ...utils import trs_utils
 
 
 _stf_type = "stf.instance.armature"
+
+
+def _translate_property_to_stf_func(blender_object: bpy.types.Object, data_path: str, data_index: int) -> list[str]:
+	match = re.search(r"^pose.bones\[\"(?P<bone_name>[\w]+)\"\].rotation_quaternion", data_path)
+	if(match and "bone_name" in match.groupdict()):
+		bone = blender_object.data.bones[match.groupdict()["bone_name"]]
+		return [bone.stf_id, "r"]
+	return None
+
+def _translate_key_to_stf_func(key_value: any) -> any:
+	return key_value
+
+def _translate_property_to_blender_func(stf_property: str) -> tuple[str, int]:
+	return (stf_property, 0)
+
+def _translate_key_to_blender_func(key_value: any) -> any:
+	return key_value
 
 
 def _stf_import(context: STF_ResourceImportContext, json_resource: dict, stf_id: str, parent_application_object: any) -> tuple[any, any]:
@@ -95,6 +113,12 @@ class STF_Module_STF_Instance_Armature(STF_Module, STF_Blender_BindingResolver):
 
 	target_blender_binding_types = [bpy.types.Object]
 	resolve_id_binding_func = _resolve_id_binding_func
+
+	translate_property_to_stf_func = _translate_property_to_stf_func
+	translate_key_to_stf_func: _translate_key_to_stf_func
+
+	translate_property_to_blender_func: _translate_property_to_blender_func
+	translate_key_to_blender_func: _translate_key_to_blender_func
 
 
 register_stf_modules = [

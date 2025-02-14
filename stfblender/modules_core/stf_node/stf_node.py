@@ -2,7 +2,6 @@ import bpy
 import re
 
 from ....libstf.stf_module import STF_Module
-from ...utils.id_utils import ensure_stf_id
 from .node_base import export_node_base, import_node_base
 from ...utils.component_utils import STF_Component_Ref, get_components_from_object
 from ....libstf.stf_import_context import STF_ResourceImportContext
@@ -12,8 +11,8 @@ from ....libstf.stf_export_context import STF_ResourceExportContext
 _stf_type = "stf.node"
 
 
-def _translate_property_to_stf_func(data_path: str, data_index: int) -> str:
-	match = re.search(r"", data_path)
+def _translate_property_to_stf_func(blender_object: bpy.types.Object, data_path: str, data_index: int) -> list[str]:
+	match = re.search(r"location", data_path)
 	return ""
 
 def _translate_key_to_stf_func(key_value: any) -> any:

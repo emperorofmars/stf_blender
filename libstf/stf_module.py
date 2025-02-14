@@ -38,7 +38,7 @@ class STF_Module:
 	export_func: Callable[[any, any, any], tuple[dict, str, any]]
 
 
-	translate_property_to_stf_func: Callable[[str, int], str]
+	translate_property_to_stf_func: Callable[[any, str, int], list[str]]
 	translate_key_to_stf_func: Callable[[str, int, any], any]
 
 	translate_property_to_blender_func: Callable[[str], tuple[str, int]]
