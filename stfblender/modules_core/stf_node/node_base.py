@@ -8,7 +8,7 @@ from ...utils import trs_utils
 from ...utils.id_utils import ensure_stf_id
 
 
-def import_node_spatial_base(context: STF_ResourceImportContext, json_resource: dict, id: str, parent_application_object: any, blender_object: bpy.types.Object) -> tuple[any, any]:
+def import_node_base(context: STF_ResourceImportContext, json_resource: dict, id: str, parent_application_object: any, blender_object: bpy.types.Object) -> tuple[any, any]:
 	blender_object.stf_id = id
 	if(json_resource.get("name")):
 		blender_object.stf_name = json_resource["name"]
@@ -50,7 +50,7 @@ def import_node_spatial_base(context: STF_ResourceImportContext, json_resource: 
 	return blender_object, context
 
 
-def export_node_spatial_base(context: STF_ResourceExportContext, blender_object: bpy.types.Object, parent_application_object: any, json_resource: dict) -> tuple[dict, str, any]:
+def export_node_base(context: STF_ResourceExportContext, blender_object: bpy.types.Object, parent_application_object: any, json_resource: dict) -> tuple[dict, str, any]:
 	ensure_stf_id(context, blender_object)
 	json_resource["name"] = blender_object.stf_name if blender_object.stf_name_source_of_truth else blender_object.name
 

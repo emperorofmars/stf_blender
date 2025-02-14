@@ -11,7 +11,7 @@ from ...utils import trs_utils
 from ...utils.armature_bone import ArmatureBone
 
 
-_stf_type = "stf.bone.spatial"
+_stf_type = "stf.bone"
 
 
 def _stf_import(context: STF_ResourceImportContext, json_resource: dict, stf_id: str, parent_application_object: any) -> tuple[any, any]:
@@ -97,7 +97,7 @@ def _stf_export(context: STF_ResourceExportContext, application_object: any, par
 	return ret, stf_id, context
 
 
-class STF_Module_STF_Bone_Spatial(STF_Module):
+class STF_Module_STF_Bone(STF_Module):
 	stf_type = _stf_type
 	stf_kind = "node"
 	like_types = ["bone", "node"]
@@ -108,7 +108,7 @@ class STF_Module_STF_Bone_Spatial(STF_Module):
 
 
 register_stf_modules = [
-	STF_Module_STF_Bone_Spatial
+	STF_Module_STF_Bone
 ]
 
 

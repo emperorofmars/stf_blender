@@ -5,7 +5,7 @@ from ....libstf.stf_export_context import STF_ResourceExportContext
 from ....libstf.stf_import_context import STF_ResourceImportContext
 from ....libstf.stf_module import STF_Module
 from ....libstf.stf_report import STFReportSeverity, STFReport
-from ..stf_node_spatial.node_spatial_base import export_node_spatial_base, import_node_spatial_base
+from ..stf_node.node_base import export_node_base, import_node_base
 from ...utils.component_utils import get_components_from_object
 from ...utils.id_utils import ensure_stf_id
 
@@ -33,7 +33,7 @@ def _stf_import(context: STF_ResourceImportContext, json_resource: dict, stf_id:
 
 	# TODO handle materials, blendshape values
 
-	return import_node_spatial_base(context, json_resource, stf_id, parent_application_object, blender_object)
+	return import_node_base(context, json_resource, stf_id, parent_application_object, blender_object)
 
 
 def _can_handle_application_object_func(application_object: any) -> int:
@@ -85,7 +85,7 @@ def _stf_export(context: STF_ResourceExportContext, application_object: any, par
 			blendshape_values.append(blendshape.value)
 	ret["blendshape_values"] = blendshape_values
 
-	return export_node_spatial_base(context, blender_object, parent_application_object, ret)
+	return export_node_base(context, blender_object, parent_application_object, ret)
 
 
 class STF_Module_STF_Instance_Mesh(STF_Module):

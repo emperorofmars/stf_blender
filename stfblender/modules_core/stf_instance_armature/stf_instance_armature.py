@@ -4,7 +4,7 @@ from ....libstf.stf_module import STF_Module
 from ....libstf.stf_report import STFReportSeverity, STFReport
 from ....libstf.stf_export_context import STF_ResourceExportContext
 from ....libstf.stf_import_context import STF_ResourceImportContext
-from ..stf_node_spatial.node_spatial_base import export_node_spatial_base, import_node_spatial_base
+from ..stf_node.node_base import export_node_base, import_node_base
 from ...utils.component_utils import get_components_from_object
 from ...utils.id_utils import ensure_stf_id
 from ...utils.id_binding_resolver import STF_Blender_BindingResolver
@@ -46,7 +46,7 @@ def _stf_import(context: STF_ResourceImportContext, json_resource: dict, stf_id:
 		else:
 			context.report(STFReport("Failed to import pose for armature: " + str(json_resource.get("armature")), STFReportSeverity.Error, stf_id, _stf_type, blender_armature))
 
-	return import_node_spatial_base(context, json_resource, stf_id, parent_application_object, blender_object)
+	return import_node_base(context, json_resource, stf_id, parent_application_object, blender_object)
 
 
 def _can_handle_application_object_func(application_object: any) -> int:
@@ -77,7 +77,7 @@ def _stf_export(context: STF_ResourceExportContext, application_object: any, par
 			stf_pose[blender_armature.bones[blender_pose.name].stf_id] = trs_utils.blender_to_trs(t, r, s)
 		ret["pose"] = stf_pose
 
-	return export_node_spatial_base(context, application_object, parent_application_object, ret)
+	return export_node_base(context, application_object, parent_application_object, ret)
 
 
 def _resolve_id_binding_func(blender_object: any, stf_id: str) -> any:
