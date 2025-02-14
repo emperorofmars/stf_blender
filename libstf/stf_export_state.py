@@ -44,7 +44,7 @@ class STF_ExportState(StateUtil):
 		for module in self._modules.get(type(application_object), []):
 			if(hasattr(module, "can_handle_application_object_func")):
 				prio = module.can_handle_application_object_func(application_object)
-				if(prio > selected_priority and (kind != None or module.stf_kind == kind)):
+				if(prio > selected_priority and (kind == None or module.stf_kind == kind)):
 					selected_module = module
 					selected_priority = prio
 			elif(1 > selected_priority):

@@ -42,8 +42,7 @@ def _can_handle_application_object_func(application_object: any) -> int:
 		return -1
 
 def _stf_export(context: STF_ResourceExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:
-	ret = { "type": _stf_type, }
-	ensure_stf_id(context, application_object)
+	ret = {"type": _stf_type}
 	return export_node_base(context, application_object, parent_application_object, ret)
 
 

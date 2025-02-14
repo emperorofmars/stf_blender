@@ -66,7 +66,7 @@ def export_node_base(context: STF_ResourceExportContext, blender_object: bpy.typ
 						break
 			if(object_exists): break
 
-		if(object_exists):
+		if(object_exists and type(child) is bpy.types.Object):
 			children.append(context.serialize_resource(child))
 
 	json_resource["children"] = children
