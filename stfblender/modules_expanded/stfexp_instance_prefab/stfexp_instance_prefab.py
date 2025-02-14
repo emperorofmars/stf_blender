@@ -17,16 +17,12 @@ _stf_type = "stfexp.instance.prefab"
 
 
 def _stf_import(context: STF_ResourceImportContext, json_resource: dict, id: str, parent_application_object: any) -> tuple[any, any]:
-	blender_collection = context.import_resource(json_resource["prefab"])
+	blender_collection = context.import_resource(json_resource["instance"]["prefab"])
 
 	if(not blender_collection or type(blender_collection) is not bpy.types.Collection):
-		context.report(STFReport("Failed to import prefab: " + str(json_resource.get("prefab")), STFReportSeverity.Error, id, _stf_type, parent_application_object))
+		context.report(STFReport("Failed to import prefab: " + str(json_resource.get("instance").get("prefab")), STFReportSeverity.Error, id, _stf_type, parent_application_object))
 
 	blender_object: bpy.types.Object = bpy.data.objects.new(json_resource.get("name", "STF Node"), None)
-	blender_object.stf_id = id
-	if(json_resource.get("name")):
-		blender_object.stf_name = json_resource["name"]
-		blender_object.stf_name_source_of_truth = True
 
 	blender_object.instance_type = "COLLECTION"
 	blender_object.instance_collection = blender_collection
@@ -44,14 +40,14 @@ def _can_handle_application_object_func(application_object: any) -> int:
 
 def _stf_export(context: STF_ResourceExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:
 	blender_object: bpy.types.Object = application_object
-	ensure_stf_id(context, blender_object)
+	ret = {"type": _stf_type}
+	ret, stf_id, context = export_node_base(context, blender_object, parent_application_object, ret)
 
-	ret = {
-		"type": _stf_type,
-		"name": blender_object.stf_name if blender_object.stf_name_source_of_truth else blender_object.name,
-	}
+	ret_instance = {"type": _stf_type}
+	ret["instance"] = ret_instance
+
 	prefab_context = STF_ResourceExportContext(context, ret, application_object)
-	ret["prefab"] = prefab_context.serialize_resource(blender_object.instance_collection)
+	ret_instance["prefab"] = prefab_context.serialize_resource(blender_object.instance_collection)
 
 	# TODO prefab instance modifications
 

@@ -15,17 +15,15 @@ _stf_type = "stf.instance.armature"
 
 
 def _stf_import(context: STF_ResourceImportContext, json_resource: dict, stf_id: str, parent_application_object: any) -> tuple[any, any]:
-	blender_armature = context.import_resource(json_resource["armature"])
+	blender_armature = context.import_resource(json_resource["instance"]["armature"])
 	if(not blender_armature or type(blender_armature) is not bpy.types.Armature):
-		context.report(STFReport("Failed to import armature: " + str(json_resource.get("armature")), STFReportSeverity.Error, stf_id, _stf_type, parent_application_object))
+		context.report(STFReport("Failed to import armature: " + str(json_resource.get("instance", {}).get("armature")), STFReportSeverity.Error, stf_id, _stf_type, parent_application_object))
 
 	blender_object = bpy.data.objects.new(json_resource.get("name", "STF Node"), blender_armature)
 	bpy.context.scene.collection.objects.link(blender_object)
 	context.register_imported_resource(stf_id, blender_object)
 
-	blender_object.stf_id = stf_id
-
-	if("pose" in json_resource):
+	if("pose" in json_resource["instance"]):
 		if(bpy.context.mode != "OBJECT"): bpy.ops.object.mode_set(mode="OBJECT", toggle=False)
 		bpy.context.view_layer.objects.active = blender_object
 		bpy.ops.object.mode_set(mode="POSE", toggle=False)
@@ -39,12 +37,12 @@ def _stf_import(context: STF_ResourceImportContext, json_resource: dict, stf_id:
 				for pose in root_poses:
 					bone_id = blender_armature.bones[pose.name].stf_id
 					if(pose.parent):
-						pose.matrix = pose.parent.matrix @ trs_utils.stf_to_blender_matrix(json_resource["pose"][bone_id])
+						pose.matrix = pose.parent.matrix @ trs_utils.stf_to_blender_matrix(json_resource["instance"]["pose"][bone_id])
 					else:
-						pose.matrix = trs_utils.stf_to_blender_matrix(json_resource["pose"][bone_id])
+						pose.matrix = trs_utils.stf_to_blender_matrix(json_resource["instance"]["pose"][bone_id])
 					next_poses += pose.children
 		else:
-			context.report(STFReport("Failed to import pose for armature: " + str(json_resource.get("armature")), STFReportSeverity.Error, stf_id, _stf_type, blender_armature))
+			context.report(STFReport("Failed to import pose for armature: " + str(json_resource.get("instance", {}).get("armature")), STFReportSeverity.Error, stf_id, _stf_type, blender_armature))
 
 	return import_node_base(context, json_resource, stf_id, parent_application_object, blender_object)
 
@@ -57,15 +55,16 @@ def _can_handle_application_object_func(application_object: any) -> int:
 
 def _stf_export(context: STF_ResourceExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:
 	blender_object: bpy.types.Object = application_object
-	ensure_stf_id(context, blender_object)
-	ret = {
-		"type": _stf_type,
-	}
+	ret = {"type": _stf_type}
+	ret, stf_id, context = export_node_base(context, blender_object, parent_application_object, ret)
+
+	ret_instance = {"type": _stf_type}
+	ret["instance"] = ret_instance
 
 	blender_armature: bpy.types.Armature = application_object.data
-	armature_instance_context = STF_ResourceExportContext(context, ret, blender_object)
+	armature_instance_context = STF_ResourceExportContext(context, ret_instance, blender_object)
 
-	ret["armature"] = armature_instance_context.serialize_resource(blender_armature)
+	ret_instance["armature"] = armature_instance_context.serialize_resource(blender_armature)
 
 	if(blender_object.pose):
 		stf_pose: dict[str, list[list[float]]] = {}
@@ -75,7 +74,7 @@ def _stf_export(context: STF_ResourceExportContext, application_object: any, par
 			else:
 				t, r, s = blender_pose.matrix.decompose()
 			stf_pose[blender_armature.bones[blender_pose.name].stf_id] = trs_utils.blender_to_trs(t, r, s)
-		ret["pose"] = stf_pose
+		ret_instance["pose"] = stf_pose
 
 	return export_node_base(context, application_object, parent_application_object, ret)
 
