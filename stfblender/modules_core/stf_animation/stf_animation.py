@@ -29,6 +29,8 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 	if(blender_animation.is_action_legacy):
 		context.report(STFReport("Ignoring legacy animation: " + blender_animation.name, STFReportSeverity.Warn, blender_animation.stf_id, _stf_type, application_object))
 		return (None, None, None)
+	if(not hasattr(blender_animation, "slot_links")):
+		context.report(STFReport("Slot Links are required to export animations!", STFReportSeverity.Warn, blender_animation.stf_id, _stf_type, application_object))
 
 	ensure_stf_id(context, blender_animation)
 
@@ -55,9 +57,9 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 				strip: bpy.types.ActionKeyframeStrip = strip
 				for channelbag in strip.channelbags:
 					assignment = None
-					for target_assignment in blender_animation.stf_target_assignment:
-						if(target_assignment.slot_handle == channelbag.slot_handle):
-							assignment = target_assignment
+					for slot_link in blender_animation.slot_links:
+						if(slot_link.slot_handle == channelbag.slot_handle):
+							assignment = slot_link
 							break
 					if(assignment):
 						# TODO get animation handler for this assignment target

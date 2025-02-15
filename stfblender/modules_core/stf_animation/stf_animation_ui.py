@@ -3,7 +3,6 @@ import bpy
 from ...utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
 from ...utils.component_utils import STFAddComponentOperatorBase, STFRemoveComponentOperatorBase
 from ...utils.component_ui_utils import draw_components_ui, set_stf_component_filter
-from .blender_slot_assignment import STFAddSlotAssignment, STFRemoveSlotAssignment
 
 
 class STFSetAnimationIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
@@ -25,14 +24,23 @@ class STFRemoveAnimationComponentOperator(bpy.types.Operator, STFRemoveComponent
 	def get_property(self, context): return context.active_action
 
 
+class OpenSlotLinkWebpage(bpy.types.Operator):
+	bl_idname = "stf.open_slot_link_webpage"
+	bl_label = "Open Slot Link Webpage"
+	def execute(self, context):
+		import webbrowser
+		webbrowser.open("https://github.com/emperorofmars/blender_slot_link")
+		return {"FINISHED"}
+
+
+
 class STFAnimationSpatialPanel(bpy.types.Panel):
 	"""STF options & export helper"""
 	bl_idname = "OBJECT_PT_stf_animation_spatial_editor"
 	bl_label = "STF Animation Editor"
 	bl_region_type = "UI"
 	bl_space_type = "DOPESHEET_EDITOR"
-	bl_category = "STF"
-	#bl_context = "action"
+	bl_category = "Action"
 
 	@classmethod
 	def poll(cls, context):
@@ -42,6 +50,12 @@ class STFAnimationSpatialPanel(bpy.types.Panel):
 		set_stf_component_filter(bpy.types.Action)
 
 		self.layout.label(text="stf.animation")
+
+		if(not hasattr(bpy.types.Action, "slot_links")):
+			self.layout.label(text="Note: the 'Slot Link' extension")
+			self.layout.label(text="is required to export animations!")
+			self.layout.operator(OpenSlotLinkWebpage.bl_idname)
+			return
 
 		self.layout.prop(context.active_action, "stf_exclude")
 		if(context.active_action.stf_exclude):
@@ -54,36 +68,3 @@ class STFAnimationSpatialPanel(bpy.types.Panel):
 
 		# Components
 		draw_components_ui(self.layout, context, context.active_action, STFAddAnimationComponentOperator.bl_idname, STFRemoveAnimationComponentOperator.bl_idname)
-
-		self.layout.separator(factor=2, type="LINE")
-
-		# Link slots to target objects to go around Blender limitations
-		self.layout.label(text="In Blender, any given 'thing' can be targeted by only one Slot :(")
-		self.layout.label(text="This is not how the rest of the world works.")
-		self.layout.separator(factor=1, type="SPACE")
-		self.layout.label(text="Assign Slots with this UI instead,")
-		self.layout.label(text="until Blender fixes this limitation.")
-		self.layout.separator(factor=1, type="SPACE")
-		self.layout.label(text="Use the Blender system of linking Slots to")
-		self.layout.label(text="'things' for creating animations only.")
-		self.layout.separator(factor=1, type="SPACE")
-		self.layout.label(text="Note: This workaround is jank and error-prone!")
-		self.layout.label(text="Good luck!")
-		self.layout.separator(factor=1, type="SPACE")
-
-		for slot_index, slot in enumerate(context.active_action.slots):
-			box = self.layout.box()
-			box.label(text="Slot " + str(slot_index) + ": " + str(slot.name_display))
-
-			slot_assignment = None
-			for assignment in context.active_action.stf_target_assignment:
-				if(assignment.slot_handle == slot.handle):
-					slot_assignment = assignment
-					break
-			if(slot_assignment):
-				box.prop(assignment, "target")
-			else:
-				box.operator(STFAddSlotAssignment.bl_idname).index = slot_index
-
-		# TODO deal with orphan assignment objects
-
