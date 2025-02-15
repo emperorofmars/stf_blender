@@ -45,7 +45,7 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 
 	node_export_context = STF_ResourceExportContext(context, ret, collection)
 
-	for blender_object in collection.all_objects:
+	for blender_object in collection.all_objects[:]:
 		if(type(blender_object) is bpy.types.Object and blender_object.parent == None):
 			root_nodes.append(node_export_context.serialize_resource(blender_object))
 
