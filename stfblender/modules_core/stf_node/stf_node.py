@@ -1,5 +1,6 @@
 import bpy
 import re
+from typing import Callable
 
 from ....libstf.stf_module import STF_Module
 from .node_base import export_node_base, import_node_base
@@ -11,18 +12,14 @@ from ....libstf.stf_export_context import STF_ResourceExportContext
 _stf_type = "stf.node"
 
 
-def _translate_property_to_stf_func(blender_object: bpy.types.Object, data_path: str, data_index: int) -> list[str]:
+def _translate_property_to_stf_func(blender_object: bpy.types.Object, data_path: str, data_index: int) -> tuple[list[str], Callable[[any], any]]:
 	match = re.search(r"location", data_path)
-	return ""
+	return [], None
 
-def _translate_key_to_stf_func(key_value: any) -> any:
-	return key_value
 
-def _translate_property_to_blender_func(stf_property: str) -> tuple[str, int]:
-	return (stf_property, 0)
+def _translate_property_to_blender_func(blender_object: bpy.types.Object, stf_property: str) -> tuple[str, int, Callable[[any], any]]:
+	return stf_property, 0, None
 
-def _translate_key_to_blender_func(key_value: any) -> any:
-	return key_value
 
 
 def _stf_import(context: STF_ResourceImportContext, json_resource: dict, stf_id: str, parent_application_object: any) -> tuple[any, any]:
@@ -56,10 +53,7 @@ class STF_Module_STF_Node(STF_Module):
 	get_components_func = get_components_from_object
 
 	translate_property_to_stf_func = _translate_property_to_stf_func
-	translate_key_to_stf_func: _translate_key_to_stf_func
-
 	translate_property_to_blender_func: _translate_property_to_blender_func
-	translate_key_to_blender_func: _translate_key_to_blender_func
 
 
 register_stf_modules = [

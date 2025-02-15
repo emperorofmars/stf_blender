@@ -1,5 +1,7 @@
 import bpy
 import re
+from typing import Callable
+import mathutils
 
 from ....libstf.stf_module import STF_Module
 from ....libstf.stf_report import STFReportSeverity, STFReport
@@ -15,21 +17,36 @@ from ...utils import trs_utils
 _stf_type = "stf.instance.armature"
 
 
-def _translate_property_to_stf_func(blender_object: bpy.types.Object, data_path: str, data_index: int) -> list[str]:
+def __get_rotation_to_stf_translation_func(index: int) -> Callable[[any], any]:
+	def __func(value: float) -> float:
+		match(index):
+			case 0: return value
+			case 1: return value
+			case 2: return -value
+			case 3: return value
+	return __func
+
+
+def __translate_rotation_property_to_stf(index: int) -> str:
+	match(index):
+			case 0: return "x"
+			case 1: return "z"
+			case 2: return "y"
+			case 3: return "w"
+	return None
+
+
+def _translate_property_to_stf_func(blender_object: bpy.types.Object, data_path: str, data_index: int) -> tuple[list[str], Callable[[any], any]]:
 	match = re.search(r"^pose.bones\[\"(?P<bone_name>[\w]+)\"\].rotation_quaternion", data_path)
 	if(match and "bone_name" in match.groupdict()):
 		bone = blender_object.data.bones[match.groupdict()["bone_name"]]
-		return [bone.stf_id, "r"]
-	return None
+		return [bone.stf_id, "r", __translate_rotation_property_to_stf(data_index)], __get_rotation_to_stf_translation_func(data_index)
+	return [], None
 
-def _translate_key_to_stf_func(key_value: any) -> any:
-	return key_value
 
-def _translate_property_to_blender_func(stf_property: str) -> tuple[str, int]:
-	return (stf_property, 0)
+def _translate_property_to_blender_func(blender_object: bpy.types.Object, stf_property: str) -> tuple[str, int, Callable[[any], any]]:
+	return stf_property, 0, None
 
-def _translate_key_to_blender_func(key_value: any) -> any:
-	return key_value
 
 
 def _stf_import(context: STF_ResourceImportContext, json_resource: dict, stf_id: str, parent_application_object: any) -> tuple[any, any]:
@@ -115,10 +132,7 @@ class STF_Module_STF_Instance_Armature(STF_Module, STF_Blender_BindingResolver):
 	resolve_id_binding_func = _resolve_id_binding_func
 
 	translate_property_to_stf_func = _translate_property_to_stf_func
-	translate_key_to_stf_func: _translate_key_to_stf_func
-
 	translate_property_to_blender_func: _translate_property_to_blender_func
-	translate_key_to_blender_func: _translate_key_to_blender_func
 
 
 register_stf_modules = [

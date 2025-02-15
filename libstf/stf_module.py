@@ -37,12 +37,11 @@ class STF_Module:
 	# (Export Context, Application Object, Optional Parent Application Object) -> (Json Dict, ID, Export Context)
 	export_func: Callable[[any, any, any], tuple[dict, str, any]]
 
+	# (Target Application Node, Application Path, Property Index) -> (List of STF Path Elements, Function to Application translate animation keys to STF)
+	translate_property_to_stf_func: Callable[[any, str, int], tuple[list[str], Callable[[any], any]]]
 
-	translate_property_to_stf_func: Callable[[any, str, int], list[str]]
-	translate_key_to_stf_func: Callable[[str, int, any], any]
-
-	translate_property_to_blender_func: Callable[[str], tuple[str, int]]
-	translate_key_to_blender_func: Callable[[str, any], any]
+	# (Target Application Node, List of STF Path Elements) -> (Application Path, Property Index, Function to translate STF animation keys to the Application)
+	translate_property_to_blender_func: Callable[[any, list[str]], tuple[str, int, Callable[[any], any]]]
 
 
 	# Get a list of application-components on the application object.
