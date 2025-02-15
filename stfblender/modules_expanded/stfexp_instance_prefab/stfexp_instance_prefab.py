@@ -43,7 +43,7 @@ def _stf_export(context: STF_ResourceExportContext, application_object: any, par
 	ret = {"type": _stf_type}
 	ret, stf_id, context = export_node_base(context, blender_object, parent_application_object, ret)
 
-	ret_instance = {"type": _stf_type}
+	ret_instance = {}
 	ret["instance"] = ret_instance
 
 	prefab_context = STF_ResourceExportContext(context, ret, application_object)
@@ -56,8 +56,8 @@ def _stf_export(context: STF_ResourceExportContext, application_object: any, par
 
 class STF_Module_STF_Instance_Prefab(STF_Module):
 	stf_type = _stf_type
-	stf_kind = "instance"
-	like_types = ["instance.prefab", "instance"]
+	stf_kind = "node"
+	like_types = ["instance.prefab", "instance", "stf.node", "node"]
 	understood_application_types = [bpy.types.Object]
 	import_func = _stf_import
 	export_func = _stf_export

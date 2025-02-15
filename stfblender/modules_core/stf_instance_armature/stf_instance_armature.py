@@ -76,11 +76,11 @@ def _stf_export(context: STF_ResourceExportContext, application_object: any, par
 	ret = {"type": _stf_type}
 	ret, stf_id, context = export_node_base(context, blender_object, parent_application_object, ret)
 
-	ret_instance = {"type": _stf_type}
+	ret_instance = {}
 	ret["instance"] = ret_instance
 
 	blender_armature: bpy.types.Armature = application_object.data
-	armature_instance_context = STF_ResourceExportContext(context, ret_instance, blender_object)
+	armature_instance_context = STF_ResourceExportContext(context, ret, blender_object)
 
 	ret_instance["armature"] = armature_instance_context.serialize_resource(blender_armature)
 
@@ -103,8 +103,8 @@ def _resolve_id_binding_func(blender_object: any, stf_id: str) -> any:
 
 class STF_Module_STF_Instance_Armature(STF_Module, STF_Blender_BindingResolver):
 	stf_type = _stf_type
-	stf_kind = "instance"
-	like_types = ["instance.armature", "instance.prefab", "instance"]
+	stf_kind = "node"
+	like_types = ["instance.armature", "instance.prefab", "instance", "stf.node", "node"]
 	understood_application_types = [bpy.types.Object]
 	import_func = _stf_import
 	export_func = _stf_export

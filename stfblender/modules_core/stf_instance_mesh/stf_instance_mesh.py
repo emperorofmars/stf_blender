@@ -48,9 +48,9 @@ def _stf_export(context: STF_ResourceExportContext, application_object: any, par
 	blender_object.update_from_editmode()
 	blender_mesh: bpy.types.Mesh = blender_object.data
 
-	ret_instance = {"type": _stf_type}
+	ret_instance = {}
 	ret["instance"] = ret_instance
-	mesh_instance_context = STF_ResourceExportContext(context, ret_instance, blender_mesh)
+	mesh_instance_context = STF_ResourceExportContext(context, ret, blender_mesh)
 
 	blender_armatures: list[bpy.types.ArmatureModifier] = []
 	for _, modifier in blender_object.modifiers.items():
@@ -90,8 +90,8 @@ def _stf_export(context: STF_ResourceExportContext, application_object: any, par
 
 class STF_Module_STF_Instance_Mesh(STF_Module):
 	stf_type = _stf_type
-	stf_kind = "instance"
-	like_types = ["instance.mesh", "instance"]
+	stf_kind = "node"
+	like_types = ["instance.mesh", "instance", "stf.node", "node"]
 	understood_application_types = [bpy.types.Object]
 	import_func = _stf_import
 	export_func = _stf_export
