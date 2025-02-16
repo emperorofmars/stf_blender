@@ -103,6 +103,15 @@ class STF_RootExportContext:
 		return self._state.serialize_buffer(data)
 
 
+	def translate_application_property(self, application_object: any, application_property: str, property_index: int) -> any:
+		if(application_object == None): return None
+
+		if(selected_module := self._state.determine_module(application_object)):
+			return selected_module.translate_property_to_stf_func(application_object, application_property, property_index)
+		else:
+			return None
+
+
 	def add_task(self, task: Callable):
 		"""Add a task which will be execuded after everything else."""
 		self._state._tasks.append(task)
