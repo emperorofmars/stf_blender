@@ -79,10 +79,8 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 							property_translation = context.translate_application_property(slot_link.target, fcurve.data_path, fcurve.array_index)
 							if(property_translation):
 								target, conversion_func = property_translation
-								print(target)
-								print(conversion_func)
-
-								print(fcurve.extrapolation)
+								print(property_translation)
+								print(fcurve.data_path)
 					else:
 						#context.report(STFReport("Invalid Animation Target", STFReportSeverity.Warn, id, _stf_type, blender_animation))
 						pass

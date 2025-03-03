@@ -17,6 +17,23 @@ from ...utils import trs_utils
 _stf_type = "stf.instance.armature"
 
 
+def __get_location_to_stf_translation_func(index: int) -> Callable[[any], any]:
+	def __func(value: float) -> float:
+		match(index):
+			case 0: return value
+			case 1: return -value
+			case 2: return value
+	return __func
+
+
+def __translate_location_property_to_stf(index: int) -> str:
+	match(index):
+			case 0: return "x"
+			case 1: return "z"
+			case 2: return "y"
+	return None
+
+
 def __get_rotation_to_stf_translation_func(index: int) -> Callable[[any], any]:
 	def __func(value: float) -> float:
 		match(index):
@@ -37,10 +54,19 @@ def __translate_rotation_property_to_stf(index: int) -> str:
 
 
 def _translate_property_to_stf_func(blender_object: bpy.types.Object, data_path: str, data_index: int) -> tuple[list[str], Callable[[any], any]]:
+
+	match = re.search(r"^pose.bones\[\"(?P<bone_name>[\w]+)\"\].location", data_path)
+	if(match and "bone_name" in match.groupdict()):
+		bone = blender_object.data.bones[match.groupdict()["bone_name"]]
+		return [bone.stf_id, "r", __translate_location_property_to_stf(data_index)], __get_location_to_stf_translation_func(data_index)
+
 	match = re.search(r"^pose.bones\[\"(?P<bone_name>[\w]+)\"\].rotation_quaternion", data_path)
 	if(match and "bone_name" in match.groupdict()):
 		bone = blender_object.data.bones[match.groupdict()["bone_name"]]
 		return [bone.stf_id, "r", __translate_rotation_property_to_stf(data_index)], __get_rotation_to_stf_translation_func(data_index)
+
+	# TODO scale
+
 	return [], None
 
 
