@@ -106,8 +106,14 @@ class STF_RootExportContext:
 	def translate_application_property(self, application_object: any, application_property: str, property_index: int) -> any:
 		if(application_object == None): return None
 
-		if(selected_module := self._state.determine_module(application_object)):
+		selected_module = self._state.determine_module(application_object)
+		if(selected_module and hasattr(selected_module, "translate_property_to_stf_func")):
 			return selected_module.translate_property_to_stf_func(application_object, application_property, property_index)
+
+		selected_hooks = self._state.determine_hooks(application_object)
+		if(selected_hooks and hasattr(selected_module, "translate_property_to_stf_func")):
+			for hook in selected_hooks:
+				pass
 		else:
 			return None
 

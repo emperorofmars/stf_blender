@@ -62,12 +62,27 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 							assignment = slot_link
 							break
 					if(assignment):
+
 						# TODO get animation handler for this assignment target
+						print()
 						print(assignment.target)
+
+						selected_slot = None
+						for slot in blender_animation.slots:
+							if(slot.handle == slot_link.slot_handle):
+								selected_slot = slot
+						print(selected_slot)
+						if(selected_slot): print(selected_slot.target_id_type)
+
 						for fcurve in channelbag.fcurves:
 							# TODO use animation handler to translate this property path and convert each keyframe
-							print(fcurve.data_path)
-							pass
+							property_translation = context.translate_application_property(slot_link.target, fcurve.data_path, fcurve.array_index)
+							if(property_translation):
+								target, conversion_func = property_translation
+								print(target)
+								print(conversion_func)
+
+								print(fcurve.extrapolation)
 					else:
 						#context.report(STFReport("Invalid Animation Target", STFReportSeverity.Warn, id, _stf_type, blender_animation))
 						pass
