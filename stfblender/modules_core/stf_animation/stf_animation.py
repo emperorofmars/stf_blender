@@ -62,28 +62,28 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 							assignment = slot_link
 							break
 					if(assignment):
-
-						# TODO get animation handler for this assignment target
-						print()
-						print(assignment.target)
-
-						selected_slot = None
-						for slot in blender_animation.slots:
-							if(slot.handle == slot_link.slot_handle):
-								selected_slot = slot
-						print(selected_slot)
-						if(selected_slot): print(selected_slot.target_id_type)
-
 						for fcurve in channelbag.fcurves:
-							# TODO use animation handler to translate this property path and convert each keyframe
+							# Get bezier export import done first, then deal with interpolation and whatever else
 							property_translation = context.translate_application_property(slot_link.target, fcurve.data_path, fcurve.array_index)
 							if(property_translation):
 								target, conversion_func = property_translation
-								print(property_translation)
-								print(fcurve.data_path)
+
+								track = []
+
+								for keyframe in fcurve.keyframe_points:
+									track.append([keyframe.co.x, keyframe.co.y, keyframe.handle_left.x, keyframe.handle_left.y, keyframe.handle_right.x, keyframe.handle_right.y])
+
+								stf_tracks.append({
+									"target": target,
+									"keyframes": track
+								})
+							else:
+								pass
 					else:
 						#context.report(STFReport("Invalid Animation Target", STFReportSeverity.Warn, id, _stf_type, blender_animation))
 						pass
+
+	ret["tracks"] = stf_tracks
 
 	#print()
 

@@ -58,12 +58,12 @@ def _translate_property_to_stf_func(blender_object: bpy.types.Object, data_path:
 	match = re.search(r"^pose.bones\[\"(?P<bone_name>[\w]+)\"\].location", data_path)
 	if(match and "bone_name" in match.groupdict()):
 		bone = blender_object.data.bones[match.groupdict()["bone_name"]]
-		return [bone.stf_id, "r", __translate_location_property_to_stf(data_index)], __get_location_to_stf_translation_func(data_index)
+		return [blender_object.stf_id, bone.stf_id, "t", __translate_location_property_to_stf(data_index)], __get_location_to_stf_translation_func(data_index)
 
 	match = re.search(r"^pose.bones\[\"(?P<bone_name>[\w]+)\"\].rotation_quaternion", data_path)
 	if(match and "bone_name" in match.groupdict()):
 		bone = blender_object.data.bones[match.groupdict()["bone_name"]]
-		return [bone.stf_id, "r", __translate_rotation_property_to_stf(data_index)], __get_rotation_to_stf_translation_func(data_index)
+		return [blender_object.stf_id, bone.stf_id, "r", __translate_rotation_property_to_stf(data_index)], __get_rotation_to_stf_translation_func(data_index)
 
 	# TODO scale
 
