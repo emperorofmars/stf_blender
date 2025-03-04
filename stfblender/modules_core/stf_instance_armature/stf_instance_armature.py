@@ -1,7 +1,6 @@
 import bpy
 import re
 from typing import Callable
-import mathutils
 
 from ....libstf.stf_module import STF_Module
 from ....libstf.stf_report import STFReportSeverity, STFReport
@@ -12,45 +11,10 @@ from ...utils.component_utils import get_components_from_object
 from ...utils.id_utils import ensure_stf_id
 from ...utils.id_binding_resolver import STF_Blender_BindingResolver
 from ...utils import trs_utils
+from ...utils.animation_conversion_utils import get_rotation_to_stf_translation_func, get_scale_to_stf_translation_func, get_translation_to_stf_translation_func, translate_rotation_property_to_stf, translate_scale_property_to_stf, translate_translation_property_to_stf
 
 
 _stf_type = "stf.instance.armature"
-
-
-def __get_location_to_stf_translation_func(index: int) -> Callable[[any], any]:
-	def __func(value: float) -> float:
-		match(index):
-			case 0: return value
-			case 1: return -value
-			case 2: return value
-	return __func
-
-
-def __translate_location_property_to_stf(index: int) -> str:
-	match(index):
-			case 0: return "x"
-			case 1: return "z"
-			case 2: return "y"
-	return None
-
-
-def __get_rotation_to_stf_translation_func(index: int) -> Callable[[any], any]:
-	def __func(value: float) -> float:
-		match(index):
-			case 0: return value
-			case 1: return value
-			case 2: return -value
-			case 3: return value
-	return __func
-
-
-def __translate_rotation_property_to_stf(index: int) -> str:
-	match(index):
-			case 0: return "x"
-			case 1: return "z"
-			case 2: return "y"
-			case 3: return "w"
-	return None
 
 
 def _translate_property_to_stf_func(blender_object: bpy.types.Object, data_path: str, data_index: int) -> tuple[list[str], Callable[[any], any]]:
@@ -58,14 +22,19 @@ def _translate_property_to_stf_func(blender_object: bpy.types.Object, data_path:
 	match = re.search(r"^pose.bones\[\"(?P<bone_name>[\w]+)\"\].location", data_path)
 	if(match and "bone_name" in match.groupdict()):
 		bone = blender_object.data.bones[match.groupdict()["bone_name"]]
-		return [blender_object.stf_id, bone.stf_id, "t", __translate_location_property_to_stf(data_index)], __get_location_to_stf_translation_func(data_index)
+		return [blender_object.stf_id, bone.stf_id, "t", translate_translation_property_to_stf(data_index)], get_translation_to_stf_translation_func(data_index)
 
 	match = re.search(r"^pose.bones\[\"(?P<bone_name>[\w]+)\"\].rotation_quaternion", data_path)
 	if(match and "bone_name" in match.groupdict()):
 		bone = blender_object.data.bones[match.groupdict()["bone_name"]]
-		return [blender_object.stf_id, bone.stf_id, "r", __translate_rotation_property_to_stf(data_index)], __get_rotation_to_stf_translation_func(data_index)
+		return [blender_object.stf_id, bone.stf_id, "r", translate_rotation_property_to_stf(data_index)], get_rotation_to_stf_translation_func(data_index)
 
-	# TODO scale
+	match = re.search(r"^pose.bones\[\"(?P<bone_name>[\w]+)\"\].scale", data_path)
+	if(match and "bone_name" in match.groupdict()):
+		bone = blender_object.data.bones[match.groupdict()["bone_name"]]
+		return [blender_object.stf_id, bone.stf_id, "t", translate_scale_property_to_stf(data_index)], get_scale_to_stf_translation_func(data_index)
+
+	# TODO trs of the armature instance node itself
 
 	return [], None
 
