@@ -56,6 +56,7 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 			if(strip.type == "KEYFRAME"):
 				strip: bpy.types.ActionKeyframeStrip = strip
 				for channelbag in strip.channelbags:
+					# Get the target for this set of animation tracks from the Slot Link extension. (Why can't you be normal Blender?)
 					assignment = None
 					for slot_link in blender_animation.slot_links:
 						if(slot_link.slot_handle == channelbag.slot_handle):
@@ -71,7 +72,8 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 								track = []
 
 								for keyframe in fcurve.keyframe_points:
-									track.append([keyframe.co.x, keyframe.co.y, keyframe.handle_left.x, keyframe.handle_left.y, keyframe.handle_right.x, keyframe.handle_right.y])
+									# TODO handles likely need to be converted from coordinates to normalized angle and weight
+									track.append([keyframe.co.x, conversion_func(keyframe.co.y), keyframe.handle_left.x, keyframe.handle_left.y, keyframe.handle_right.x, keyframe.handle_right.y])
 
 								stf_tracks.append({
 									"target": target,
