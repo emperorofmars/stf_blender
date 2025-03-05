@@ -114,8 +114,8 @@ class STF_RootExportContext:
 		if(selected_hooks and hasattr(selected_module, "translate_property_to_stf_func")):
 			for hook in selected_hooks:
 				pass
-		else:
-			return None
+
+		return None
 
 
 	def add_task(self, task: Callable):

@@ -51,6 +51,9 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 
 	stf_tracks = []
 
+	print()
+	if(blender_animation): print("ANIM: " + blender_animation.name)
+
 	for layer in blender_animation.layers:
 		for strip in layer.strips:
 			if(strip.type == "KEYFRAME"):
@@ -66,6 +69,11 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 						for fcurve in channelbag.fcurves:
 							# Get bezier export import done first, then deal with interpolation and whatever else
 							property_translation = context.translate_application_property(slot_link.target, fcurve.data_path, fcurve.array_index)
+
+							print()
+							print(slot_link.target)
+							print(fcurve.data_path)
+
 							if(property_translation):
 								target, conversion_func = property_translation
 
@@ -73,7 +81,7 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 
 								for keyframe in fcurve.keyframe_points:
 									# TODO handles likely need to be converted from coordinates to normalized angle and weight
-									track.append([keyframe.co.x, conversion_func(keyframe.co.y), keyframe.handle_left.x, keyframe.handle_left.y, keyframe.handle_right.x, keyframe.handle_right.y])
+									track.append([keyframe.co.x, keyframe.co.y if not conversion_func else conversion_func(keyframe.co.y), keyframe.handle_left.x, keyframe.handle_left.y, keyframe.handle_right.x, keyframe.handle_right.y])
 
 								stf_tracks.append({
 									"target": target,

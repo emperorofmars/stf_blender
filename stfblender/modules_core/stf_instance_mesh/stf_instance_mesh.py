@@ -1,5 +1,6 @@
+import re
+from typing import Callable
 import bpy
-
 
 from ....libstf.stf_export_context import STF_ResourceExportContext
 from ....libstf.stf_import_context import STF_ResourceImportContext
@@ -7,10 +8,28 @@ from ....libstf.stf_module import STF_Module
 from ....libstf.stf_report import STFReportSeverity, STFReport
 from ..stf_node.node_base import export_node_base, import_node_base
 from ...utils.component_utils import get_components_from_object
-from ...utils.id_utils import ensure_stf_id
+from ..stf_node.node_base_properties_conversion import stf_node_base_translate_property_to_stf_func, stf_node_base_translate_property_to_blender_func
 
 
 _stf_type = "stf.instance.mesh"
+
+
+def _translate_property_to_stf_func(blender_object: bpy.types.Object, data_path: str, data_index: int) -> tuple[list[str], Callable[[any], any]]:
+	if(node_base_result := stf_node_base_translate_property_to_stf_func(blender_object, data_path, data_index)):
+		return node_base_result
+
+	match = re.search(r"^key_blocks\[\"(?P<blendshape_name>[\w]+)\"\].value", data_path)
+	if(match and "blendshape_name" in match.groupdict()):
+		return [blender_object.stf_id, "instance", "blendshape", match.groupdict()["blendshape_name"], "value"], None
+
+	return None
+
+
+def _translate_property_to_blender_func(blender_object: bpy.types.Object, stf_property: str) -> tuple[str, int, Callable[[any], any]]:
+	if(node_base_result := stf_node_base_translate_property_to_blender_func(blender_object, stf_property)):
+		return node_base_result
+
+	return stf_property, 0, None
 
 
 def _stf_import(context: STF_ResourceImportContext, json_resource: dict, stf_id: str, parent_application_object: any) -> tuple[any, any]:
@@ -97,6 +116,9 @@ class STF_Module_STF_Instance_Mesh(STF_Module):
 	export_func = _stf_export
 	can_handle_application_object_func = _can_handle_application_object_func
 	get_components_func = get_components_from_object
+
+	translate_property_to_stf_func = _translate_property_to_stf_func
+	translate_property_to_blender_func: _translate_property_to_blender_func
 
 
 register_stf_modules = [
