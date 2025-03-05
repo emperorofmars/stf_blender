@@ -61,14 +61,6 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 	return ret, blender_armature.stf_id, bone_export_context
 
 
-def _resolve_id_binding_func(blender_object: any, path_part: str) -> any:
-	armature: bpy.types.Armature = blender_object
-	for bone in armature.bones:
-		if(bone.stf_id == path_part):
-			return bone
-	return None
-
-
 class STF_Module_STF_Armature(STF_Blender_BindingResolver, STF_Module):
 	stf_type = _stf_type
 	stf_kind = "data"
@@ -77,9 +69,6 @@ class STF_Module_STF_Armature(STF_Blender_BindingResolver, STF_Module):
 	import_func = _stf_import
 	export_func = _stf_export
 	get_components_func = get_components_from_object
-
-	target_blender_binding_types = [bpy.types.Armature]
-	resolve_id_binding_func = _resolve_id_binding_func
 
 
 register_stf_modules = [

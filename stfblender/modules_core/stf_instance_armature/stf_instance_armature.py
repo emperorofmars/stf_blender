@@ -117,7 +117,11 @@ def _stf_export(context: STF_ResourceExportContext, application_object: any, par
 
 
 def _resolve_id_binding_func(blender_object: any, path_part: str) -> any:
-	return blender_object.data if path_part == "instance" else None
+	armature: bpy.types.Armature = blender_object.data
+	for bone in armature.bones:
+		if(bone.stf_id == path_part):
+			return bone
+	return None
 
 
 class STF_Module_STF_Instance_Armature(STF_Module, STF_Blender_BindingResolver):

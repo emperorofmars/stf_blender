@@ -115,6 +115,8 @@ class STF_RootExportContext:
 			for hook in selected_hooks:
 				pass
 
+		# TODO components
+
 		return None
 
 
