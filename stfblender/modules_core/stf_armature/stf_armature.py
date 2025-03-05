@@ -61,10 +61,10 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 	return ret, blender_armature.stf_id, bone_export_context
 
 
-def _resolve_id_binding_func(blender_object: any, stf_id: str) -> any:
+def _resolve_id_binding_func(blender_object: any, path_part: str) -> any:
 	armature: bpy.types.Armature = blender_object
 	for bone in armature.bones:
-		if(bone.stf_id == stf_id):
+		if(bone.stf_id == path_part):
 			return bone
 	return None
 

@@ -23,10 +23,10 @@ def resolve_id_binding(context: any, blender_object: any, id_binding: list[str])
 				resolver_modules[app_type].append(module)
 
 	cur_object = blender_object
-	for id in id_binding:
+	for path_part in id_binding:
 		resolved = False
 		for resolver in resolver_modules[type(cur_object)]:
-			resolver_ret = resolver.resolve_id_binding_func(cur_object, id)
+			resolver_ret = resolver.resolve_id_binding_func(cur_object, path_part)
 			if(resolver_ret):
 				cur_object = resolver_ret
 				resolved = True

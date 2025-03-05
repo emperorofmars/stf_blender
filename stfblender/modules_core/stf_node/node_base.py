@@ -35,7 +35,7 @@ def import_node_base(context: STF_ResourceImportContext, json_resource: dict, id
 				parent_bindings.append(context.get_imported_resource(id_binding))
 
 			if(len(parent_bindings) == 2 and (hasattr(parent_bindings[0], "stf_id") and parent_bindings[0].stf_id == json_resource["parent_binding"][0])):
-				# TODO deal with arbitrary depths of parent bindings and prefab instance bindings at that
+				# TODO deal with arbitrary depths of parent bindings and prefab instance bindings eventually
 				blender_object.parent = parent_bindings[0]
 				blender_object.parent_type = "BONE"
 				blender_object.parent_bone = parent_bindings[1].name
@@ -78,6 +78,7 @@ def export_node_base(context: STF_ResourceExportContext, blender_object: bpy.typ
 				# TODO check if object is a prefab instance and deal with that
 				pass
 			case "BONE":
+				# TODO make this the same as animation property targets
 				json_resource["parent_binding"] = [blender_object.parent.stf_id, blender_object.parent.data.bones[blender_object.parent_bone].stf_id]
 			case _:
 				context.report(STFReport("Unsupported object parent_type: " + str(blender_object.parent_type), STFReportSeverity.Error, blender_object.stf_id, json_resource.get("type"), blender_object))

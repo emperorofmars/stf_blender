@@ -116,8 +116,8 @@ def _stf_export(context: STF_ResourceExportContext, application_object: any, par
 	return export_node_base(context, application_object, parent_application_object, ret)
 
 
-def _resolve_id_binding_func(blender_object: any, stf_id: str) -> any:
-	return blender_object.data if blender_object.stf_data_id == stf_id else None
+def _resolve_id_binding_func(blender_object: any, path_part: str) -> any:
+	return blender_object.data if path_part == "instance" else None
 
 
 class STF_Module_STF_Instance_Armature(STF_Module, STF_Blender_BindingResolver):
