@@ -52,7 +52,7 @@ class STF_RootExportContext:
 		if(len(components) > 0):
 			if("components" not in json_resource): json_resource["components"] = {}
 			for component in components:
-				if(selected_module := self._state.determine_module(component)):
+				if(selected_module := self._state.determine_module(component, "component")):
 					component_ret = selected_module.export_func(object_ctx, component, application_object)
 					if(component_ret):
 						component_json_resource, component_id, _ = component_ret
@@ -67,12 +67,13 @@ class STF_RootExportContext:
 					self.report(STFReport("Unsupported Component", STFReportSeverity.Warn, None, None, application_object))
 
 
-	def serialize_resource(self, application_object: any, parent_application_object: any = None) -> str | None:
+	def serialize_resource(self, application_object: any, parent_application_object: any = None, module_kind = None) -> str | None:
 		"""Run all logic to serialize an application resource. If it already has been serialized, return the existing ID."""
+
 		if(application_object == None): return None
 		if(existing_id := self.get_resource_id(application_object)): return existing_id
 
-		if(selected_module := self._state.determine_module(application_object)):
+		if(selected_module := self._state.determine_module(application_object, module_kind)):
 			module_ret = selected_module.export_func(
 				self.get_root_context() if selected_module.stf_kind == "data" else self,
 				application_object,

@@ -78,19 +78,19 @@ def _stf_import(context: STF_ResourceImportContext, json_resource: dict, stf_id:
 
 
 def _can_handle_application_object_func(application_object: any) -> int:
-	if(type(application_object) == bpy.types.Object and type(application_object.data) == bpy.types.Armature):
+	if(type(application_object) == tuple and type(application_object[0]) == bpy.types.Object and type(application_object[1]) == bpy.types.Armature):
 		return 1000
 	else:
 		return -1
 
 def _stf_export(context: STF_ResourceExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:
-	blender_object: bpy.types.Object = application_object
+	blender_object: bpy.types.Object = application_object[0]
+	blender_armature: bpy.types.Armature = application_object[1]
 	ret = {"type": _stf_type}
 
-	blender_armature: bpy.types.Armature = application_object.data
 	armature_instance_context = STF_ResourceExportContext(context, ret, blender_object)
 
-	ret["armature"] = armature_instance_context.serialize_resource(blender_armature)
+	ret["armature"] = armature_instance_context.serialize_resource(blender_armature, module_kind="data")
 
 	if(blender_object.pose):
 		stf_pose: dict[str, list[list[float]]] = {}
@@ -116,8 +116,8 @@ def _resolve_id_binding_func(blender_object: any, path_part: str) -> any:
 class STF_Module_STF_Instance_Armature(STF_Module, STF_Blender_BindingResolver):
 	stf_type = _stf_type
 	stf_kind = "instance"
-	like_types = ["instance.armature", "instance.prefab", "instance"]
-	understood_application_types = [bpy.types.Object]
+	like_types = ["instance.armature", "instance"]
+	understood_application_types = [tuple]
 	import_func = _stf_import
 	export_func = _stf_export
 	can_handle_application_object_func = _can_handle_application_object_func

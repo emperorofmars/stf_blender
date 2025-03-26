@@ -73,10 +73,6 @@ def get_export_modules(search_modules: list[ModuleType | str] | None = None) -> 
 
 	for stf_module in stf_modules:
 		if(hasattr(stf_module, "understood_application_types") and hasattr(stf_module, "export_func")):
-			"""if(not hasattr(stf_module, "hook_target_application_types")):
-				for understood_type in stf_module.understood_application_types:
-					if(not ret_modules.get(understood_type) or is_priority_higher(ret_modules[understood_type], stf_module)):
-						ret_modules[understood_type] = stf_module"""
 			if(not hasattr(stf_module, "hook_target_application_types")):
 				for understood_type in stf_module.understood_application_types:
 					if(not tmp_registered_modules.get(understood_type) or is_priority_higher(tmp_registered_modules[understood_type], stf_module)):

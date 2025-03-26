@@ -93,7 +93,7 @@ def _stf_export(context: STF_ResourceExportContext, blender_object: any, parent_
 			if(object_exists): break
 
 		if(object_exists and type(child) is bpy.types.Object):
-			children.append(context.serialize_resource(child))
+			children.append(context.serialize_resource(child, module_kind="node"))
 
 	json_resource["children"] = children
 
@@ -114,12 +114,8 @@ def _stf_export(context: STF_ResourceExportContext, blender_object: any, parent_
 	if(blender_object.hide_render):
 		json_resource["enabled"] = False
 
-	print()
-	print(blender_object)
 	if(blender_object.data):
-		print(blender_object.data)
-		instance_id = context.serialize_resource(blender_object)
-		print(instance_id)
+		instance_id = context.serialize_resource((blender_object, blender_object.data), module_kind="instance")
 		if(instance_id):
 			json_resource["instance"] = instance_id
 

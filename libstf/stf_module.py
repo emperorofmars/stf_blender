@@ -5,8 +5,8 @@ from typing import Callable
 class STF_Kind(Enum):
 	DATA = 0
 	NODE = 1
-	COMPONENT = 2
-	MODIFICATION = 3
+	INSTANCE = 2
+	COMPONENT = 3
 
 
 class STF_Module:
