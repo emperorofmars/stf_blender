@@ -10,8 +10,7 @@ def unregister():
 
 
 from .stfblender import modules_core
-from .stfblender import modules_expanded
 from .stfblender import modules_ava
 
-register_stf_modules = modules_core.register_stf_modules + modules_expanded.register_stf_modules + modules_ava.register_stf_modules
+register_stf_modules = modules_core.register_stf_modules + modules_ava.register_stf_modules
 

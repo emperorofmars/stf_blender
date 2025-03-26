@@ -1,23 +1,19 @@
 import re
 from typing import Callable
+import uuid
 import bpy
 
 from ....libstf.stf_export_context import STF_ResourceExportContext
 from ....libstf.stf_import_context import STF_ResourceImportContext
 from ....libstf.stf_module import STF_Module
 from ....libstf.stf_report import STFReportSeverity, STFReport
-from ..stf_node.node_base import export_node_base, import_node_base
 from ...utils.component_utils import get_components_from_object
-from ..stf_node.node_base_properties_conversion import stf_node_base_translate_property_to_stf_func, stf_node_base_translate_property_to_blender_func
 
 
 _stf_type = "stf.instance.mesh"
 
 
 def _translate_property_to_stf_func(blender_object: bpy.types.Object, data_path: str, data_index: int) -> tuple[list[str], Callable[[any], any]]:
-	if(node_base_result := stf_node_base_translate_property_to_stf_func(blender_object, data_path, data_index)):
-		return node_base_result
-
 	match = re.search(r"^key_blocks\[\"(?P<blendshape_name>[\w]+)\"\].value", data_path)
 	if(match and "blendshape_name" in match.groupdict()):
 		return [blender_object.stf_id, "instance", "blendshape", match.groupdict()["blendshape_name"], "value"], None
@@ -26,31 +22,28 @@ def _translate_property_to_stf_func(blender_object: bpy.types.Object, data_path:
 
 
 def _translate_property_to_blender_func(blender_object: bpy.types.Object, stf_property: str) -> tuple[str, int, Callable[[any], any]]:
-	if(node_base_result := stf_node_base_translate_property_to_blender_func(blender_object, stf_property)):
-		return node_base_result
-
 	return stf_property, 0, None
 
 
 def _stf_import(context: STF_ResourceImportContext, json_resource: dict, stf_id: str, parent_application_object: any) -> tuple[any, any]:
-	blender_resource = context.import_resource(json_resource["instance"]["mesh"])
+	blender_resource = context.import_resource(json_resource["mesh"])
 	blender_object = bpy.data.objects.new(json_resource.get("name", "STF Node"), blender_resource)
 	context.register_imported_resource(stf_id, blender_object)
 
 	if(not blender_object or type(blender_object) is not bpy.types.Object):
 		context.report(STFReport("Failed to import mesh: " + str(json_resource.get("instance", {}).get("mesh")), STFReportSeverity.Error, stf_id, _stf_type, parent_application_object))
 
-	if("armature_instance" in json_resource["instance"]):
-		armature_instance: bpy.types.Object = context.import_resource(json_resource["instance"]["armature_instance"])
+	if("armature_instance" in json_resource):
+		armature_instance: bpy.types.Object = context.import_resource(json_resource["armature_instance"])
 		if(not armature_instance):
-			context.report(STFReport("Invalid armature instance: " + str(json_resource["instance"]["armature_instance"]), STFReportSeverity.Error, stf_id, _stf_type, parent_application_object))
+			context.report(STFReport("Invalid armature instance: " + str(json_resource["armature_instance"]), STFReportSeverity.Error, stf_id, _stf_type, parent_application_object))
 		else:
 			modifier: bpy.types.ArmatureModifier = blender_object.modifiers.new("Armature", "ARMATURE")
 			modifier.object = armature_instance
 
 	# TODO handle materials, blendshape values
 
-	return import_node_base(context, json_resource, stf_id, parent_application_object, blender_object)
+	return blender_object, context
 
 
 def _can_handle_application_object_func(application_object: any) -> int:
@@ -62,13 +55,10 @@ def _can_handle_application_object_func(application_object: any) -> int:
 def _stf_export(context: STF_ResourceExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:
 	blender_object: bpy.types.Object = application_object
 	ret = {"type": _stf_type}
-	ret, stf_id, context = export_node_base(context, blender_object, parent_application_object, ret)
 
 	blender_object.update_from_editmode()
 	blender_mesh: bpy.types.Mesh = blender_object.data
 
-	ret_instance = {}
-	ret["instance"] = ret_instance
 	mesh_instance_context = STF_ResourceExportContext(context, ret, blender_mesh)
 
 	blender_armatures: list[bpy.types.ArmatureModifier] = []
@@ -81,14 +71,14 @@ def _stf_export(context: STF_ResourceExportContext, application_object: any, par
 			# TODO check if the armature is in the export and within the same hierarchy, otherwise check if its in an instanced hierarchy
 
 			# The armature has to be passed, because in Blenders datamodel the relationship between mesh and armature loose.
-			ret_instance["mesh"] = mesh_instance_context.serialize_resource(blender_mesh, blender_armatures[0].object.data)
-			ret_instance["armature_instance"] = mesh_instance_context.serialize_resource(blender_armatures[0].object)
+			ret["mesh"] = mesh_instance_context.serialize_resource(blender_mesh, blender_armatures[0].object.data)
+			ret["armature_instance"] = mesh_instance_context.serialize_resource(blender_armatures[0].object)
 		else:
 			mesh_instance_context.report(STFReport("Invalid armature: " + str(blender_armatures[0].object), severity=STFReportSeverity.FatalError, stf_id=blender_object.stf_id, stf_type=_stf_type, application_object=blender_object))
 	elif(len(blender_armatures) > 1):
 		mesh_instance_context.report(STFReport("More than one Armature per mesh is not supported!", severity=STFReportSeverity.FatalError, stf_id=blender_object.stf_id, stf_type=_stf_type, application_object=blender_object))
 	else:
-		ret_instance["mesh"] = mesh_instance_context.serialize_resource(blender_mesh)
+		ret["mesh"] = mesh_instance_context.serialize_resource(blender_mesh)
 
 	material_slots = []
 	for blender_slot in blender_object.material_slots:
@@ -96,21 +86,21 @@ def _stf_export(context: STF_ResourceExportContext, application_object: any, par
 			"name": blender_slot.name,
 			"material": mesh_instance_context.serialize_resource(blender_slot.material) if blender_slot.material else None,
 		})
-	ret_instance["material_slots"] = material_slots
+	ret["material_slots"] = material_slots
 
 	blendshape_values = []
 	if(blender_mesh.shape_keys):
 		for blendshape in blender_mesh.shape_keys.key_blocks:
 			blendshape_values.append(blendshape.value)
-	ret_instance["blendshape_values"] = blendshape_values
+	ret["blendshape_values"] = blendshape_values
 
-	return export_node_base(context, blender_object, parent_application_object, ret)
+	return ret, str(uuid.uuid4()), mesh_instance_context
 
 
 class STF_Module_STF_Instance_Mesh(STF_Module):
 	stf_type = _stf_type
-	stf_kind = "node"
-	like_types = ["instance.mesh", "instance", "stf.node", "node"]
+	stf_kind = "instance"
+	like_types = ["instance.mesh", "instance"]
 	understood_application_types = [bpy.types.Object]
 	import_func = _stf_import
 	export_func = _stf_export

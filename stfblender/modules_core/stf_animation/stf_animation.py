@@ -51,8 +51,8 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 
 	stf_tracks = []
 
-	print()
-	if(blender_animation): print("ANIM: " + blender_animation.name)
+	#print()
+	#if(blender_animation): print("ANIM: " + blender_animation.name)
 
 	for layer in blender_animation.layers:
 		for strip in layer.strips:
@@ -70,9 +70,9 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 							# Get bezier export import done first, then deal with interpolation and whatever else
 							property_translation = context.translate_application_property(slot_link.target, fcurve.data_path, fcurve.array_index)
 
-							print()
+							"""print()
 							print(slot_link.target)
-							print(fcurve.data_path)
+							print(fcurve.data_path)"""
 
 							if(property_translation):
 								target, conversion_func = property_translation

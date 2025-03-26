@@ -82,12 +82,12 @@ class STF_RootExportContext:
 				json_resource, id, ctx = module_ret
 				self._state.register_serialized_resource(application_object, json_resource, id)
 
-				if(selected_module.stf_kind != "component"):
+				if(selected_module.stf_kind not in ["component", "instance"]):
 					# Export components from application native constructs
 					self.__run_hooks(application_object, ctx, json_resource, id)
 
 					if(hasattr(selected_module, "get_components_func")):
-						# Export components explicitely defined by this application
+						# Export components explicitely defined
 						components = selected_module.get_components_func(application_object)
 						self.__run_components(application_object, ctx, json_resource, id, components)
 
