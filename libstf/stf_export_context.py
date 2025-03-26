@@ -111,11 +111,15 @@ class STF_RootExportContext:
 			return selected_module.translate_property_to_stf_func(application_object, application_property, property_index)
 
 		selected_hooks = self._state.determine_hooks(application_object)
-		if(selected_hooks and hasattr(selected_module, "translate_property_to_stf_func")):
-			for hook in selected_hooks:
-				pass
+		for hook in selected_hooks:
+			if(hook and hasattr(hook, "translate_property_to_stf_func")):
+				return hook.translate_property_to_stf_func(application_object, application_property, property_index)
 
-		# TODO components
+		if(hasattr(selected_module, "get_components_func")):
+			components = selected_module.get_components_func(application_object)
+			for component in components:
+				if(component and hasattr(component, "translate_property_to_stf_func")):
+					return component.translate_property_to_stf_func(application_object, application_property, property_index)
 
 		return None
 
