@@ -1,8 +1,8 @@
 import bpy
 
 
-from ....libstf.stf_export_context import STF_ResourceExportContext, STF_RootExportContext
-from ....libstf.stf_import_context import STF_ResourceImportContext, STF_RootImportContext
+from ....libstf.stf_export_context import STF_ExportContext
+from ....libstf.stf_import_context import STF_ImportContext
 from ....libstf.stf_module import STF_Module
 from ....libstf.stf_report import STFReportSeverity, STFReport
 from .stf_material_definition import STF_Material_Definition, STF_Material_Property, STF_Material_Value_Ref
@@ -15,7 +15,7 @@ from .material_value_modules import blender_material_value_modules
 _stf_type = "stf.material"
 
 
-def _stf_import(context: STF_RootImportContext, json_resource: dict, stf_id: str, parent_application_object: any) -> tuple[any, any]:
+def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
 	blender_material = bpy.data.materials.new(json_resource.get("name", "STF Material"))
 	blender_material.stf_id = stf_id
 	if(json_resource.get("name")):
@@ -24,12 +24,10 @@ def _stf_import(context: STF_RootImportContext, json_resource: dict, stf_id: str
 	blender_material.stf_is_source_of_truth = True
 	context.register_imported_resource(stf_id, blender_material)
 
-	material_context = STF_ResourceImportContext(context, json_resource, blender_material)
-
-	return blender_material, material_context
+	return blender_material
 
 
-def _stf_export(context: STF_RootExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:
+def _stf_export(context: STF_ExportContext, application_object: any, context_object: any) -> tuple[dict, str]:
 	blender_material: bpy.types.Material = application_object
 	ensure_stf_id(context, blender_material)
 
@@ -38,7 +36,6 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 		"name": blender_material.stf_name if blender_material.stf_name_source_of_truth else blender_material.name,
 		"properties": {},
 	}
-	material_context = STF_ResourceExportContext(context, ret, blender_material)
 
 	if(not blender_material.stf_is_source_of_truth):
 		blender_material_to_stf(blender_material)
@@ -65,7 +62,7 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 				if(mat_module.property_name == property.value_property_name):
 					for property_value in getattr(blender_material, property.value_property_name):
 						if(property_value.value_id == value_ref.value_id):
-							values.append(mat_module.value_export_func(material_context, blender_material, getattr(blender_material, property.value_property_name)[0]))
+							values.append(mat_module.value_export_func(context, blender_material, getattr(blender_material, property.value_property_name)[0]))
 							break
 
 		if(property.multi_value):
@@ -75,7 +72,7 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 
 		ret["properties"][property.property_type] = json_prop
 
-	return ret, blender_material.stf_id, material_context
+	return ret, blender_material.stf_id
 
 
 class STF_Module_STF_Material(STF_Module):

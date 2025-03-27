@@ -1,24 +1,23 @@
 from io import BytesIO
+import uuid
 import bpy
 
 from ....libstf.stf_module import STF_ExportComponentHook
-from ....libstf.stf_export_context import STF_ResourceExportContext, STF_RootExportContext
-from ....libstf.stf_import_context import STF_ResourceImportContext, STF_RootImportContext
+from ....libstf.stf_export_context import STF_ExportContext
+from ....libstf.stf_import_context import STF_ImportContext
 from ....libstf.buffer_utils import parse_uint, serialize_uint
 
 
 _stf_type = "stf.mesh.seams"
 
 
-def _stf_import(context: STF_RootImportContext, json_resource: dict, stf_id: str, parent_application_object: bpy.types.Mesh) -> tuple[any, any]:
-	mesh_context = STF_ResourceImportContext(context, json_resource, parent_application_object)
+def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: bpy.types.Mesh) -> any:
+	buffer_seams = BytesIO(context.import_buffer(json_resource["seams"]))
 
-	buffer_seams = BytesIO(mesh_context.import_buffer(json_resource["seams"]))
-
-	vertex_indices_width = 4 if len(parent_application_object.vertices) * 3 < 2**32 else 8
+	vertex_indices_width = 4 if len(context_object.vertices) * 3 < 2**32 else 8
 
 	edge_dict: dict[int, dict[int, bpy.types.MeshEdge]] = {}
-	for edge in parent_application_object.edges:
+	for edge in context_object.edges:
 		if(edge.vertices[0] not in edge_dict):
 			edge_dict[edge.vertices[0]] = {}
 		edge_dict[edge.vertices[0]][edge.vertices[1]] = edge
@@ -33,15 +32,13 @@ def _stf_import(context: STF_RootImportContext, json_resource: dict, stf_id: str
 		else:
 			pass # TODO warn about invalid data
 
-	return parent_application_object, context
+	return context_object
 
 
-def _stf_export(context: STF_RootExportContext, application_object: bpy.types.Mesh, parent_application_object: any) -> tuple[dict, str, any]:
+def _stf_export(context: STF_ExportContext, application_object: bpy.types.Mesh, context_object: any) -> tuple[dict, str]:
 	ret = {
 		"type": _stf_type
 	}
-	mesh_context = STF_ResourceExportContext(context, ret, application_object)
-
 	vertex_indices_width = 4 if len(application_object.vertices) * 3 < 2**32 else 8
 
 	buffer_seams = BytesIO()
@@ -52,9 +49,9 @@ def _stf_export(context: STF_RootExportContext, application_object: bpy.types.Me
 			for edge_vertex_index in edge.vertices:
 				buffer_seams.write(serialize_uint(edge_vertex_index, vertex_indices_width))
 	ret["seams_len"] = seams_len
-	ret["seams"] = mesh_context.serialize_buffer(buffer_seams.getvalue())
+	ret["seams"] = context.serialize_buffer(buffer_seams.getvalue())
 
-	return ret, application_object.stf_id, context
+	return ret, str(uuid.uuid4())
 
 
 def _can_handle_func(application_object: bpy.types.Mesh) -> tuple[bool, list[any]]:

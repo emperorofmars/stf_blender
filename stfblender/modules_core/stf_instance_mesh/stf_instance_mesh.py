@@ -3,8 +3,8 @@ from typing import Callable
 import uuid
 import bpy
 
-from ....libstf.stf_export_context import STF_ResourceExportContext
-from ....libstf.stf_import_context import STF_ResourceImportContext
+from ....libstf.stf_export_context import STF_ExportContext
+from ....libstf.stf_import_context import STF_ImportContext
 from ....libstf.stf_module import STF_Module
 from ....libstf.stf_report import STFReportSeverity, STFReport
 from ...utils.component_utils import get_components_from_object
@@ -25,25 +25,25 @@ def _translate_property_to_blender_func(blender_object: bpy.types.Object, stf_pr
 	return stf_property, 0, None
 
 
-def _stf_import(context: STF_ResourceImportContext, json_resource: dict, stf_id: str, parent_application_object: any) -> tuple[any, any]:
+def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
 	blender_resource = context.import_resource(json_resource["mesh"])
 	blender_object = bpy.data.objects.new(json_resource.get("name", "STF Node"), blender_resource)
 	context.register_imported_resource(stf_id, blender_object)
 
 	if(not blender_object or type(blender_object) is not bpy.types.Object):
-		context.report(STFReport("Failed to import mesh: " + str(json_resource.get("instance", {}).get("mesh")), STFReportSeverity.Error, stf_id, _stf_type, parent_application_object))
+		context.report(STFReport("Failed to import mesh: " + str(json_resource.get("instance", {}).get("mesh")), STFReportSeverity.Error, stf_id, _stf_type, context_object))
 
 	if("armature_instance" in json_resource):
 		armature_instance: bpy.types.Object = context.import_resource(json_resource["armature_instance"])
 		if(not armature_instance):
-			context.report(STFReport("Invalid armature instance: " + str(json_resource["armature_instance"]), STFReportSeverity.Error, stf_id, _stf_type, parent_application_object))
+			context.report(STFReport("Invalid armature instance: " + str(json_resource["armature_instance"]), STFReportSeverity.Error, stf_id, _stf_type, context_object))
 		else:
 			modifier: bpy.types.ArmatureModifier = blender_object.modifiers.new("Armature", "ARMATURE")
 			modifier.object = armature_instance
 
 	# TODO handle materials, blendshape values
 
-	return blender_object, context
+	return blender_object
 
 
 def _can_handle_application_object_func(application_object: any) -> int:
@@ -52,14 +52,12 @@ def _can_handle_application_object_func(application_object: any) -> int:
 	else:
 		return -1
 
-def _stf_export(context: STF_ResourceExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:
+def _stf_export(context: STF_ExportContext, application_object: any, context_object: any) -> tuple[dict, str]:
 	blender_object: bpy.types.Object = application_object[0]
 	blender_mesh: bpy.types.Mesh = application_object[1]
 	ret = {"type": _stf_type}
 
 	blender_object.update_from_editmode()
-
-	mesh_instance_context = STF_ResourceExportContext(context, ret, blender_object)
 
 	blender_armatures: list[bpy.types.ArmatureModifier] = []
 	for _, modifier in blender_object.modifiers.items():
@@ -71,20 +69,20 @@ def _stf_export(context: STF_ResourceExportContext, application_object: any, par
 			# TODO check if the armature is in the export and within the same hierarchy, otherwise check if its in an instanced hierarchy
 
 			# The armature has to be passed, because in Blenders datamodel the relationship between mesh and armature loose.
-			ret["mesh"] = mesh_instance_context.serialize_resource(blender_mesh, blender_armatures[0].object.data, module_kind="data")
-			ret["armature_instance"] = mesh_instance_context.serialize_resource(blender_armatures[0].object, module_kind="node")
+			ret["mesh"] = context.serialize_resource(blender_mesh, blender_armatures[0].object.data, module_kind="data")
+			ret["armature_instance"] = context.serialize_resource(blender_armatures[0].object, module_kind="node")
 		else:
-			mesh_instance_context.report(STFReport("Invalid armature: " + str(blender_armatures[0].object), severity=STFReportSeverity.FatalError, stf_id=blender_object.stf_id, stf_type=_stf_type, application_object=blender_object))
+			context.report(STFReport("Invalid armature: " + str(blender_armatures[0].object), severity=STFReportSeverity.FatalError, stf_id=blender_object.stf_id, stf_type=_stf_type, application_object=blender_object))
 	elif(len(blender_armatures) > 1):
-		mesh_instance_context.report(STFReport("More than one Armature per mesh is not supported!", severity=STFReportSeverity.FatalError, stf_id=blender_object.stf_id, stf_type=_stf_type, application_object=blender_object))
+		context.report(STFReport("More than one Armature per mesh is not supported!", severity=STFReportSeverity.FatalError, stf_id=blender_object.stf_id, stf_type=_stf_type, application_object=blender_object))
 	else:
-		ret["mesh"] = mesh_instance_context.serialize_resource(blender_mesh, module_kind="data")
+		ret["mesh"] = context.serialize_resource(blender_mesh, module_kind="data")
 
 	material_slots = []
 	for blender_slot in blender_object.material_slots:
 		material_slots.append({
 			"name": blender_slot.name,
-			"material": mesh_instance_context.serialize_resource(blender_slot.material, module_kind="data") if blender_slot.material else None,
+			"material": context.serialize_resource(blender_slot.material, module_kind="data") if blender_slot.material else None,
 		})
 	ret["material_slots"] = material_slots
 
@@ -94,7 +92,7 @@ def _stf_export(context: STF_ResourceExportContext, application_object: any, par
 			blendshape_values.append(blendshape.value)
 	ret["blendshape_values"] = blendshape_values
 
-	return ret, str(uuid.uuid4()), mesh_instance_context
+	return ret, str(uuid.uuid4())
 
 
 class STF_Module_STF_Instance_Mesh(STF_Module):

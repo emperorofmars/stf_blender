@@ -31,11 +31,11 @@ class STF_Module:
 	can_handle_application_object_func: Callable[[any], int]
 
 
-	# (Import Context, Json Dict, ID, Optional Parent Application Object) -> (The Application Object, Import Context)
-	import_func: Callable[[any, dict, str, any], tuple[any, any]]
+	# (Import Context, Json Dict, ID, Optional Parent Application Object) -> The Application Object
+	import_func: Callable[[any, dict, str, any], any]
 
-	# (Export Context, Application Object, Optional Parent Application Object) -> (Json Dict, ID, Export Context)
-	export_func: Callable[[any, any, any], tuple[dict, str, any]]
+	# (Export Context, Application Object, Optional Parent Application Object) -> (Json Dict, ID)
+	export_func: Callable[[any, any, any], tuple[dict, str]]
 
 
 	# (Target Application Node, Application Path, Property Index) -> (List of STF Path Elements, Function to Application translate animation keys to STF)

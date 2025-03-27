@@ -1,7 +1,7 @@
 from io import BytesIO
 import bpy
 
-from ....libstf.stf_import_context import STF_ResourceImportContext, STF_RootImportContext
+from ....libstf.stf_import_context import STF_ImportContext
 from ....libstf.stf_report import STFReportSeverity, STFReport
 from ...utils.trs_utils import stf_translation_to_blender, stf_uv_to_blender
 from ....libstf.buffer_utils import parse_float, parse_int, parse_uint
@@ -12,7 +12,7 @@ _stf_type = "stf.mesh"
 
 # Mesh import and export are the lowest hanging fruits for performance improvements.
 
-def import_stf_mesh(context: STF_RootImportContext, json_resource: dict, stf_id: str, parent_application_object: any) -> tuple[any, any]:
+def import_stf_mesh(context: STF_ImportContext, json_resource: dict, stf_id: str, parent_application_object: any) -> tuple[any, any]:
 	blender_mesh = bpy.data.meshes.new(json_resource.get("name", "STF Mesh"))
 	blender_mesh.stf_id = stf_id
 	if(json_resource.get("name")):
@@ -24,15 +24,13 @@ def import_stf_mesh(context: STF_RootImportContext, json_resource: dict, stf_id:
 		bpy.data.objects.remove(tmp_blender_mesh_object)
 	context.add_task(_clean_tmp_mesh_object)
 
-	mesh_context = STF_ResourceImportContext(context, json_resource, blender_mesh)
-
 	vertex_count = json_resource["vertex_count"]
 	vertex_indices_width = json_resource.get("vertex_indices_width", 4)
 	vertex_width = json_resource.get("vertex_width", 4)
 
 
 	# Vertices
-	buffer_vertices = BytesIO(mesh_context.import_buffer(json_resource["vertices"]))
+	buffer_vertices = BytesIO(context.import_buffer(json_resource["vertices"]))
 	py_vertices = []
 	for _ in range(vertex_count):
 		p0 = parse_float(buffer_vertices, vertex_width)
@@ -47,7 +45,7 @@ def import_stf_mesh(context: STF_RootImportContext, json_resource: dict, stf_id:
 	# Splits
 	py_splits = []
 	if(split_count > 0 and "splits" in json_resource):
-		buffer_split = BytesIO(mesh_context.import_buffer(json_resource["splits"]))
+		buffer_split = BytesIO(context.import_buffer(json_resource["splits"]))
 		for index in range(split_count):
 			py_splits.append(parse_uint(buffer_split, vertex_indices_width))
 
@@ -58,8 +56,8 @@ def import_stf_mesh(context: STF_RootImportContext, json_resource: dict, stf_id:
 	face_count = json_resource.get("face_count", 0)
 	if(face_count > 0):
 		face_indices_width = json_resource.get("face_indices_width", 4)
-		buffer_faces = BytesIO(mesh_context.import_buffer(json_resource["faces"]))
-		buffer_tris = BytesIO(mesh_context.import_buffer(json_resource["tris"]))
+		buffer_faces = BytesIO(context.import_buffer(json_resource["faces"]))
+		buffer_tris = BytesIO(context.import_buffer(json_resource["tris"]))
 
 		for index in range(face_count):
 			face_len = parse_uint(buffer_faces, face_indices_width)
@@ -74,7 +72,7 @@ def import_stf_mesh(context: STF_RootImportContext, json_resource: dict, stf_id:
 				face_indices.append(py_splits[split_index])
 			py_faces.append(face_indices)
 	elif(tris_count > 0):
-		buffer_tris = BytesIO(mesh_context.import_buffer(json_resource["tris"]))
+		buffer_tris = BytesIO(context.import_buffer(json_resource["tris"]))
 		for index in range(tris_count):
 			face_splits = set()
 			for _ in range(3):
@@ -91,7 +89,7 @@ def import_stf_mesh(context: STF_RootImportContext, json_resource: dict, stf_id:
 	# Lines (Edges not part of faces)
 	py_lines = []
 	if("lines" in json_resource and "lines_len" in json_resource):
-		buffer_lines = BytesIO(mesh_context.import_buffer(json_resource["lines"]))
+		buffer_lines = BytesIO(context.import_buffer(json_resource["lines"]))
 		for line_index in range(json_resource["lines_len"]):
 			py_lines.append([parse_uint(buffer_lines, vertex_indices_width), parse_uint(buffer_lines, vertex_indices_width)])
 
@@ -106,14 +104,14 @@ def import_stf_mesh(context: STF_RootImportContext, json_resource: dict, stf_id:
 	if("sharp_face_indices" in json_resource and "sharp_face_indices_len" in json_resource):
 		sharp_face_indices_len = json_resource["sharp_face_indices_len"]
 		face_indices_width = json_resource.get("face_indices_width", 4)
-		buffer_sharp_face_indices = BytesIO(mesh_context.import_buffer(json_resource["sharp_face_indices"]))
+		buffer_sharp_face_indices = BytesIO(context.import_buffer(json_resource["sharp_face_indices"]))
 		for _ in range(sharp_face_indices_len):
 			smooth_index = parse_uint(buffer_sharp_face_indices, face_indices_width)
 			blender_mesh.polygons[smooth_index].use_smooth = False
 
 	# Explicit edge sharpness
 	if("sharp_edges" in json_resource and "sharp_edges_len" in json_resource):
-		buffer_sharp_edges = BytesIO(mesh_context.import_buffer(json_resource["sharp_edges"]))
+		buffer_sharp_edges = BytesIO(context.import_buffer(json_resource["sharp_edges"]))
 
 		edge_dict: dict[int, dict[int, bpy.types.MeshEdge]] = {}
 		for edge in blender_mesh.edges:
@@ -135,7 +133,7 @@ def import_stf_mesh(context: STF_RootImportContext, json_resource: dict, stf_id:
 	"""# Vertex Normals
 	if("normals" in json_resource):
 		vertex_normals_width = json_resource.get("vertex_normals_width", 4)
-		buffer_vertex_normals = BytesIO(mesh_context.import_buffer(json_resource["normals"]))
+		buffer_vertex_normals = BytesIO(context.import_buffer(json_resource["normals"]))
 		for index, vertex in enumerate(blender_mesh.vertices):
 			p0 = parse_float(buffer_vertex_normals, vertex_normals_width)
 			p1 = parse_float(buffer_vertex_normals, vertex_normals_width)
@@ -146,7 +144,7 @@ def import_stf_mesh(context: STF_RootImportContext, json_resource: dict, stf_id:
 		vertex_color_width = json_resource.get("vertex_color_width", 4)
 		for index in range(len(json_resource["colors"])):
 			color_attribute = blender_mesh.color_attributes.new("Color", "FLOAT_COLOR", "POINT")
-			buffer_vertex_colors = BytesIO(mesh_context.import_buffer(json_resource["colors"][index]))
+			buffer_vertex_colors = BytesIO(context.import_buffer(json_resource["colors"][index]))
 			for index, vertex in enumerate(blender_mesh.vertices):
 				r = parse_float(buffer_vertex_colors, vertex_color_width)
 				g = parse_float(buffer_vertex_colors, vertex_color_width)
@@ -158,7 +156,7 @@ def import_stf_mesh(context: STF_RootImportContext, json_resource: dict, stf_id:
 	if(split_count > 0 and "splits" in json_resource):
 		if("split_normals" in json_resource):
 			split_normal_width = json_resource.get("split_normal_width", 4)
-			buffer_split_normals = BytesIO(mesh_context.import_buffer(json_resource["split_normals"]))
+			buffer_split_normals = BytesIO(context.import_buffer(json_resource["split_normals"]))
 			py_split_normals = []
 			for index, loop in enumerate(blender_mesh.loops):
 				normal = stf_translation_to_blender([parse_float(buffer_split_normals, split_normal_width), parse_float(buffer_split_normals, split_normal_width), parse_float(buffer_split_normals, split_normal_width)])
@@ -169,7 +167,7 @@ def import_stf_mesh(context: STF_RootImportContext, json_resource: dict, stf_id:
 			split_uv_width = json_resource.get("split_uv_width", 4)
 			for uv_layer_index in range(len(json_resource["uvs"])):
 				uv_layer = blender_mesh.uv_layers.new(name=json_resource["uvs"][uv_layer_index].get("name", "UVMap"))
-				buffer_uv = BytesIO(mesh_context.import_buffer(json_resource["uvs"][uv_layer_index]["uv"]))
+				buffer_uv = BytesIO(context.import_buffer(json_resource["uvs"][uv_layer_index]["uv"]))
 				for index, loop in enumerate(blender_mesh.loops):
 					# TODO convert uv from gltf uv coordinate space
 					uv = stf_uv_to_blender([parse_float(buffer_uv, split_uv_width), parse_float(buffer_uv, split_uv_width)])
@@ -179,7 +177,7 @@ def import_stf_mesh(context: STF_RootImportContext, json_resource: dict, stf_id:
 			split_color_width = json_resource.get("split_color_width", 4)
 			for index in range(len(json_resource["colors"])):
 				color_attribute = blender_mesh.color_attributes.new("Color", "FLOAT_COLOR", "POINT")
-				buffer_split_colors = BytesIO(mesh_context.import_buffer(json_resource["split_colors"][index]))
+				buffer_split_colors = BytesIO(context.import_buffer(json_resource["split_colors"][index]))
 				for index, vertex in enumerate(blender_mesh.vertices):
 					r = parse_float(buffer_split_colors, split_color_width)
 					g = parse_float(buffer_split_colors, split_color_width)
@@ -192,22 +190,22 @@ def import_stf_mesh(context: STF_RootImportContext, json_resource: dict, stf_id:
 		for material_slot in json_resource["material_slots"]:
 			material = None
 			if(material_slot):
-				material = mesh_context.import_resource(material_slot)
+				material = context.import_resource(material_slot)
 			blender_mesh.materials.append(material)
 
 	material_indices_count = face_count if face_count > 0 else tris_count
 	if("material_indices" in json_resource and material_indices_count > 0):
 		material_indices_width = json_resource.get("material_indices_width", 4)
-		buffer_material_indices = BytesIO(mesh_context.import_buffer(json_resource["material_indices"]))
+		buffer_material_indices = BytesIO(context.import_buffer(json_resource["material_indices"]))
 		for polygon in blender_mesh.polygons:
 			polygon.material_index = parse_uint(buffer_material_indices, material_indices_width)
 
 
 	# Weight paint
 	if("armature" in json_resource and "weights" in json_resource and "bones" in json_resource):
-		armature: bpy.types.Armature = mesh_context.import_resource(json_resource["armature"])
+		armature: bpy.types.Armature = context.import_resource(json_resource["armature"])
 		if(not armature):
-			mesh_context.report(STFReport("Invalid Armature (armature id: " + json_resource["armature"] + " )", STFReportSeverity.Error, stf_id, _stf_type, blender_mesh))
+			context.report(STFReport("Invalid Armature (armature id: " + json_resource["armature"] + " )", STFReportSeverity.Error, stf_id, _stf_type, blender_mesh))
 		else:
 			bone_weight_width = json_resource.get("bone_weight_width", 4)
 			bones = []
@@ -219,12 +217,12 @@ def import_stf_mesh(context: STF_RootImportContext, json_resource: dict, stf_id:
 						vertex_groups.append(tmp_blender_mesh_object.vertex_groups.new(name=blender_bone.name))
 						break
 			if(len(vertex_groups) < len(json_resource["bones"])):
-				mesh_context.report(STFReport("Invalid Bone Mapping", STFReportSeverity.Error, stf_id, _stf_type, blender_mesh))
+				context.report(STFReport("Invalid Bone Mapping", STFReportSeverity.Error, stf_id, _stf_type, blender_mesh))
 
 			for weight_channel in json_resource["weights"]:
 				indexed = weight_channel["indexed"]
 				weights_count = weight_channel["count"]
-				buffer = BytesIO(mesh_context.import_buffer(weight_channel["buffer"]))
+				buffer = BytesIO(context.import_buffer(weight_channel["buffer"]))
 
 				for index in range(weights_count):
 					if(indexed):
@@ -242,7 +240,7 @@ def import_stf_mesh(context: STF_RootImportContext, json_resource: dict, stf_id:
 		for vertex_group_index, json_vertex_group in enumerate(json_resource["vertex_groups"]):
 			indexed = json_vertex_group["indexed"]
 			count = json_vertex_group["count"]
-			buffer_vertex_weights = BytesIO(mesh_context.import_buffer(json_vertex_group["buffer"]))
+			buffer_vertex_weights = BytesIO(context.import_buffer(json_vertex_group["buffer"]))
 			vertex_group = tmp_blender_mesh_object.vertex_groups.new(name=json_vertex_group.get("name", "STF Vertex Group " + str(vertex_group_index)))
 			for index in range(count):
 				if(indexed):
@@ -261,8 +259,8 @@ def import_stf_mesh(context: STF_RootImportContext, json_resource: dict, stf_id:
 			indexed = json_blendshape["indexed"]
 			count = json_blendshape["count"]
 			if(indexed):
-				buffer_blendshape_indices = BytesIO(mesh_context.import_buffer(json_blendshape["indices"]))
-			buffer_blendshape_pos_offset = BytesIO(mesh_context.import_buffer(json_blendshape["position_offsets"]))
+				buffer_blendshape_indices = BytesIO(context.import_buffer(json_blendshape["indices"]))
+			buffer_blendshape_pos_offset = BytesIO(context.import_buffer(json_blendshape["position_offsets"]))
 			# Normals and Tangents are irrelevant to import into Blender
 
 			shape_key = tmp_blender_mesh_object.shape_key_add(name=json_blendshape.get("name", "STF Blendshape " + str(blendshape_index)), from_mix=False)
@@ -281,4 +279,4 @@ def import_stf_mesh(context: STF_RootImportContext, json_resource: dict, stf_id:
 			shape_key.slider_max = json_blendshape.get("limit_upper", 1)
 			shape_key.slider_min = json_blendshape.get("limit_lower", 0)
 
-	return blender_mesh, mesh_context
+	return blender_mesh

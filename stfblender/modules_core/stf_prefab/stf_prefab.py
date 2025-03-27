@@ -1,8 +1,8 @@
 import bpy
 
 
-from ....libstf.stf_import_context import STF_ResourceImportContext, STF_RootImportContext
-from ....libstf.stf_export_context import STF_ResourceExportContext, STF_RootExportContext
+from ....libstf.stf_import_context import STF_ImportContext
+from ....libstf.stf_export_context import STF_ExportContext
 from ....libstf.stf_module import STF_Module
 from ....libstf.stf_report import STFReport
 from ...utils.component_utils import STF_Component_Ref, get_components_from_object
@@ -12,7 +12,7 @@ from ...utils.id_utils import ensure_stf_id
 _stf_type = "stf.prefab"
 
 
-def _stf_import(context: STF_RootImportContext, json_resource: dict, stf_id: str, parent_application_object: any) -> tuple[any, any]:
+def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
 	collection = bpy.data.collections.new(json_resource.get("name", context.get_filename()))
 	collection.stf_id = stf_id
 	if(json_resource.get("name")):
@@ -21,16 +21,15 @@ def _stf_import(context: STF_RootImportContext, json_resource: dict, stf_id: str
 	bpy.context.scene.collection.children.link(collection)
 	collection.stf_use_collection_as_prefab = True
 
-	node_import_context = STF_ResourceImportContext(context, json_resource, collection)
 	for node_id in json_resource.get("root_nodes", []):
-		node_import_context.import_resource(node_id)
+		context.import_resource(node_id, context_object=collection)
 
 	# TODO animations
 
-	return collection, node_import_context
+	return collection
 
 
-def _stf_export(context: STF_RootExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:
+def _stf_export(context: STF_ExportContext, application_object: any, context_object: any) -> tuple[dict, str]:
 	collection: bpy.types.Collection = application_object
 	ensure_stf_id(context, collection)
 
@@ -43,17 +42,15 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 		"animations": animations,
 	}
 
-	node_export_context = STF_ResourceExportContext(context, ret, collection)
-
 	for blender_object in collection.all_objects[:]:
 		if(type(blender_object) is bpy.types.Object and blender_object.parent == None):
-			root_nodes.append(node_export_context.serialize_resource(blender_object, module_kind="node"))
+			root_nodes.append(context.serialize_resource(blender_object, module_kind="node", context_object=collection))
 
 	for action in bpy.data.actions:
-		if(stf_animation_id := node_export_context.serialize_resource(action, module_kind="data")):
+		if(stf_animation_id := context.serialize_resource(action, module_kind="data", context_object=collection)):
 			animations.append(stf_animation_id)
 
-	return ret, collection.stf_id, node_export_context
+	return ret, collection.stf_id
 
 
 class STF_Module_STF_Prefab(STF_Module):

@@ -1,7 +1,7 @@
 import bpy
 
-from .....libstf.stf_export_context import STF_ResourceExportContext
-from .....libstf.stf_import_context import STF_ResourceImportContext
+from .....libstf.stf_export_context import STF_ExportContext
+from .....libstf.stf_import_context import STF_ImportContext
 from ..stf_material_definition import STF_Material_Value_Base, STF_Material_Value_Module_Base
 
 
@@ -11,12 +11,12 @@ class STF_Material_Value_Image(STF_Material_Value_Base):
 	# uv_offset:
 
 
-def _value_import_func(context: STF_ResourceImportContext, blender_material: bpy.types.Material, json_resource: any, value: STF_Material_Value_Image):
+def _value_import_func(context: STF_ImportContext, blender_material: bpy.types.Material, json_resource: any, value: STF_Material_Value_Image):
 	if("image" in json_resource):
 		value.image = context.import_resource(json_resource["image"])
 
 
-def _value_export_func(context: STF_ResourceExportContext, blender_material: bpy.types.Material, value: STF_Material_Value_Image) -> any:
+def _value_export_func(context: STF_ExportContext, blender_material: bpy.types.Material, value: STF_Material_Value_Image) -> any:
 	ret = {}
 	if(value.image): ret["image"] = context.serialize_resource(value.image)
 	return ret

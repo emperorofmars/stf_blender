@@ -1,5 +1,3 @@
-import io
-
 from .stf_report import STFReportSeverity, STFReport
 from .stf_file import STF_File
 from .stf_module import STF_Module
@@ -28,14 +26,14 @@ class STF_ImportState(StateUtil):
 	def determine_module(self, json_resource: dict) -> STF_Module:
 		return self._modules.get(json_resource["type"])
 
-	def register_imported_resource(self, id: str | list[str], application_object: any):
-		self._imported_resources[id] = application_object
+	def register_imported_resource(self, stf_id: str, application_object: any):
+		self._imported_resources[stf_id] = application_object
 
-	def get_imported_resource(self, id: str | list[str]):
-		return self._imported_resources.get(id, None)
+	def get_imported_resource(self, stf_id: str):
+		return self._imported_resources.get(stf_id, None)
 
-	def import_buffer(self, id: str) -> bytes:
-		buffer = self._file.definition.buffers.get(id)
+	def import_buffer(self, stf_id: str) -> bytes:
+		buffer = self._file.definition.buffers.get(stf_id)
 		match(buffer.type):
 			case "stf.buffer.included":
 				return self._file.buffers_included[buffer.index]
@@ -47,8 +45,8 @@ class STF_ImportState(StateUtil):
 				self.report(STFReport("Invalid buffer type: " + buffer.type, severity=STFReportSeverity.Error))
 		return None
 
-	def get_json_resource(self, id: int) -> dict:
-		return self._file.definition.resources.get(id)
+	def get_json_resource(self, stf_id: int) -> dict:
+		return self._file.definition.resources.get(stf_id)
 
 	def get_root_id(self) -> str:
 		return self._file.definition.stf.root

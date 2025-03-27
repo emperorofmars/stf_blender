@@ -5,8 +5,8 @@ from typing import Callable
 
 from ....libstf.stf_module import STF_Module
 from ....libstf.stf_report import STFReportSeverity, STFReport
-from ....libstf.stf_export_context import STF_ResourceExportContext
-from ....libstf.stf_import_context import STF_ResourceImportContext
+from ....libstf.stf_export_context import STF_ExportContext
+from ....libstf.stf_import_context import STF_ImportContext
 from ...utils.component_utils import get_components_from_object
 from ...utils.id_utils import ensure_stf_id
 from ...utils.id_binding_resolver import STF_Blender_BindingResolver
@@ -44,10 +44,10 @@ def _translate_property_to_blender_func(blender_object: bpy.types.Object, stf_pr
 
 
 
-def _stf_import(context: STF_ResourceImportContext, json_resource: dict, stf_id: str, parent_application_object: any) -> tuple[any, any]:
+def _stf_import(context: STF_ExportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
 	blender_armature = context.import_resource(json_resource["armature"])
 	if(not blender_armature or type(blender_armature) is not bpy.types.Armature):
-		context.report(STFReport("Failed to import armature: " + str(json_resource.get("instance", {}).get("armature")), STFReportSeverity.Error, stf_id, _stf_type, parent_application_object))
+		context.report(STFReport("Failed to import armature: " + str(json_resource.get("instance", {}).get("armature")), STFReportSeverity.Error, stf_id, _stf_type, context_object))
 
 	blender_object = bpy.data.objects.new(json_resource.get("name", "STF Node"), blender_armature)
 	bpy.context.scene.collection.objects.link(blender_object)
@@ -74,7 +74,7 @@ def _stf_import(context: STF_ResourceImportContext, json_resource: dict, stf_id:
 		else:
 			context.report(STFReport("Failed to import pose for armature: " + str(json_resource.get("armature")), STFReportSeverity.Error, stf_id, _stf_type, blender_armature))
 
-	return blender_object, context
+	return blender_object
 
 
 def _can_handle_application_object_func(application_object: any) -> int:
@@ -83,14 +83,12 @@ def _can_handle_application_object_func(application_object: any) -> int:
 	else:
 		return -1
 
-def _stf_export(context: STF_ResourceExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:
+def _stf_export(context: STF_ExportContext, application_object: any, context_object: any) -> tuple[dict, str]:
 	blender_object: bpy.types.Object = application_object[0]
 	blender_armature: bpy.types.Armature = application_object[1]
 	ret = {"type": _stf_type}
 
-	armature_instance_context = STF_ResourceExportContext(context, ret, blender_object)
-
-	ret["armature"] = armature_instance_context.serialize_resource(blender_armature, module_kind="data")
+	ret["armature"] = context.serialize_resource(blender_armature, module_kind="data")
 
 	if(blender_object.pose):
 		stf_pose: dict[str, list[list[float]]] = {}
@@ -102,7 +100,7 @@ def _stf_export(context: STF_ResourceExportContext, application_object: any, par
 			stf_pose[blender_armature.bones[blender_pose.name].stf_id] = trs_utils.blender_to_trs(t, r, s)
 		ret["pose"] = stf_pose
 
-	return ret, str(uuid.uuid4()), armature_instance_context
+	return ret, str(uuid.uuid4())
 
 
 def _resolve_id_binding_func(blender_object: any, path_part: str) -> any:

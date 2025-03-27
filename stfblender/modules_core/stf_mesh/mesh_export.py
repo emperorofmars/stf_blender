@@ -1,7 +1,7 @@
 from io import BytesIO
 import bpy
 
-from ....libstf.stf_export_context import STF_ResourceExportContext, STF_RootExportContext
+from ....libstf.stf_export_context import STF_ExportContext
 from ...utils.id_utils import ensure_stf_id
 from ...utils.trs_utils import blender_translation_to_stf, blender_uv_to_stf
 from ....libstf.buffer_utils import serialize_float, serialize_int, serialize_uint
@@ -20,7 +20,7 @@ export_options: dict = {
 
 # Mesh import and export are the lowest hanging fruits for performance improvements.
 
-def export_stf_mesh(context: STF_RootExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:
+def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str]:
 	blender_mesh: bpy.types.Mesh = application_object
 	ensure_stf_id(context, blender_mesh)
 
@@ -36,12 +36,11 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 		"type": _stf_type,
 		"name": blender_mesh.stf_name if blender_mesh.stf_name_source_of_truth else blender_mesh.name,
 	}
-	mesh_context = STF_ResourceExportContext(context, stf_mesh, blender_mesh)
 
 	material_slots = []
 	for material in blender_mesh.materials:
 		if(material):
-			material_slots.append(mesh_context.serialize_resource(material))
+			material_slots.append(context.serialize_resource(material))
 		else:
 			material_slots.append(None)
 	stf_mesh["material_slots"] = material_slots
@@ -63,7 +62,7 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 		buffer_vertices.write(serialize_float(position[0], float_width))
 		buffer_vertices.write(serialize_float(position[1], float_width))
 		buffer_vertices.write(serialize_float(position[2], float_width))
-	stf_mesh["vertices"] = mesh_context.serialize_buffer(buffer_vertices.getvalue())
+	stf_mesh["vertices"] = context.serialize_buffer(buffer_vertices.getvalue())
 
 	# Are non-split vertex normals needed?
 	"""# Vertex normals
@@ -74,7 +73,7 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 		buffer_vertex_normals.write(serialize_float(normal[0], float_width))
 		buffer_vertex_normals.write(serialize_float(normal[1], float_width))
 		buffer_vertex_normals.write(serialize_float(normal[2], float_width))
-	stf_mesh["vertex_normals"] = mesh_context.serialize_buffer(buffer_vertex_normals.getvalue())"""
+	stf_mesh["vertex_normals"] = context.serialize_buffer(buffer_vertex_normals.getvalue())"""
 
 	# Vertex color channels
 	stf_mesh["vertex_color_width"] = float_width
@@ -98,7 +97,7 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 				color_buffer.write(serialize_float(color_layer.data[vertex.index].color[3], float_width))
 	stf_mesh["colors"] = []
 	for color_buffer in buffers_color:
-		stf_mesh["colors"].append(mesh_context.serialize_buffer(color_buffer.getvalue()))
+		stf_mesh["colors"].append(context.serialize_buffer(color_buffer.getvalue()))
 
 	# Face corners (Splits)
 	stf_mesh["split_count"] = len(blender_mesh.loops)
@@ -155,18 +154,18 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 				color_buffer.write(serialize_float(color_layer.data[loop.index].color[2], float_width))
 				color_buffer.write(serialize_float(color_layer.data[loop.index].color[3], float_width))
 
-	stf_mesh["splits"] = mesh_context.serialize_buffer(buffer_split_vertices.getvalue())
-	stf_mesh["split_normals"] = mesh_context.serialize_buffer(buffer_split_normals.getvalue())
-	stf_mesh["split_tangents"] = mesh_context.serialize_buffer(buffer_split_tangents.getvalue())
+	stf_mesh["splits"] = context.serialize_buffer(buffer_split_vertices.getvalue())
+	stf_mesh["split_normals"] = context.serialize_buffer(buffer_split_normals.getvalue())
+	stf_mesh["split_tangents"] = context.serialize_buffer(buffer_split_tangents.getvalue())
 	stf_mesh["uvs"] = []
 	for index, buffer_uv in enumerate(buffers_uv):
 		stf_mesh["uvs"].append({
 				"name": uv_names[index],
-				"uv": mesh_context.serialize_buffer(buffer_uv.getvalue()),
+				"uv": context.serialize_buffer(buffer_uv.getvalue()),
 			})
 	stf_mesh["split_colors"] = []
 	for split_color_buffer in buffers_split_color:
-		stf_mesh["split_colors"].append(mesh_context.serialize_buffer(split_color_buffer.getvalue()))
+		stf_mesh["split_colors"].append(context.serialize_buffer(split_color_buffer.getvalue()))
 
 
 	# Triangles, faces, and their material indices
@@ -189,7 +188,7 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 			buffer_tris.write(serialize_uint(split_index, split_indices_width))
 		last_face_index = tris.polygon_index
 
-	stf_mesh["tris"] = mesh_context.serialize_buffer(buffer_tris.getvalue())
+	stf_mesh["tris"] = context.serialize_buffer(buffer_tris.getvalue())
 
 	# Material indices and face sharpness
 	buffer_flat_face_indices = BytesIO()
@@ -205,10 +204,10 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 			flat_face_indices_len += 1
 			buffer_flat_face_indices.write(serialize_uint(polygon.index, face_indices_width)) # this could be done better
 
-	stf_mesh["faces"] = mesh_context.serialize_buffer(buffer_faces.getvalue())
-	stf_mesh["material_indices"] = mesh_context.serialize_buffer(buffer_face_material_indices.getvalue())
+	stf_mesh["faces"] = context.serialize_buffer(buffer_faces.getvalue())
+	stf_mesh["material_indices"] = context.serialize_buffer(buffer_face_material_indices.getvalue())
 	stf_mesh["sharp_face_indices_len"] = flat_face_indices_len
-	stf_mesh["sharp_face_indices"] = mesh_context.serialize_buffer(buffer_flat_face_indices.getvalue())
+	stf_mesh["sharp_face_indices"] = context.serialize_buffer(buffer_flat_face_indices.getvalue())
 
 
 	# Lines (Edges not part of faces)
@@ -220,7 +219,7 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 			for edge_vertex_index in edge.vertices:
 				buffer_lines.write(serialize_uint(edge_vertex_index, vertex_indices_width))
 	stf_mesh["lines_len"] = lines_len
-	stf_mesh["lines"] = mesh_context.serialize_buffer(buffer_lines.getvalue())
+	stf_mesh["lines"] = context.serialize_buffer(buffer_lines.getvalue())
 
 
 	# explicit edge sharpness
@@ -232,7 +231,7 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 			for edge_vertex_index in edge.vertices:
 				buffer_sharp_edges.write(serialize_uint(edge_vertex_index, vertex_indices_width))
 	stf_mesh["sharp_edges_len"] = shapr_edges_len
-	stf_mesh["sharp_edges"] = mesh_context.serialize_buffer(buffer_sharp_edges.getvalue())
+	stf_mesh["sharp_edges"] = context.serialize_buffer(buffer_sharp_edges.getvalue())
 
 
 	# TODO explicit single vertex sharpness at some point Blender plz
@@ -240,7 +239,7 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 
 	# Weightpaint
 	if(armature and tmp_blender_mesh_object):
-		stf_mesh["armature"] = mesh_context.serialize_resource(armature)
+		stf_mesh["armature"] = context.serialize_resource(armature)
 
 		# Create vertex group lookup dictionary for stf_ids from the previous name lookup dict
 		weight_bone_map = []
@@ -283,7 +282,7 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 			buffers_weights.append({
 				"indexed": indexed,
 				"count": len(channel) if indexed else len(blender_mesh.vertices),
-				"buffer": mesh_context.serialize_buffer(buffer_weights.getvalue()),
+				"buffer": context.serialize_buffer(buffer_weights.getvalue()),
 			})
 
 		stf_mesh["weights"] = buffers_weights
@@ -326,7 +325,7 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 					"name": vertex_group_name,
 					"indexed": indexed,
 					"count": len(group) if indexed else len(blender_mesh.vertices),
-					"buffer": mesh_context.serialize_buffer(buffer_weights.getvalue()),
+					"buffer": context.serialize_buffer(buffer_weights.getvalue()),
 				})
 			stf_mesh["vertex_groups"] = buffers_vertex_groups
 
@@ -396,10 +395,10 @@ def export_stf_mesh(context: STF_RootExportContext, application_object: any, par
 				"limit_upper": shape_key.slider_max,
 				"limit_lower": shape_key.slider_min,
 			}
-			if(indexed): blendshape["indices"] = mesh_context.serialize_buffer(buffer_blendshape_indices.getvalue())
-			blendshape["position_offsets"] = mesh_context.serialize_buffer(buffer_blendshape_position_offsets.getvalue())
-			blendshape["normal_offsets"] = mesh_context.serialize_buffer(buffer_blendshape_normal_offsets.getvalue())
+			if(indexed): blendshape["indices"] = context.serialize_buffer(buffer_blendshape_indices.getvalue())
+			blendshape["position_offsets"] = context.serialize_buffer(buffer_blendshape_position_offsets.getvalue())
+			blendshape["normal_offsets"] = context.serialize_buffer(buffer_blendshape_normal_offsets.getvalue())
 			blendshapes.append(blendshape)
 		stf_mesh["blendshapes"] = blendshapes
 
-	return stf_mesh, blender_mesh.stf_id, mesh_context
+	return stf_mesh, blender_mesh.stf_id

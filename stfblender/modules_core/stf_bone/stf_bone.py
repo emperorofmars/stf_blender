@@ -3,8 +3,8 @@ import bpy
 
 from ....libstf.stf_report import STFReportSeverity, STFReport
 from ....libstf.stf_module import STF_Module
-from ....libstf.stf_import_context import STF_ResourceImportContext
-from ....libstf.stf_export_context import STF_ResourceExportContext
+from ....libstf.stf_import_context import STF_ImportContext
+from ....libstf.stf_export_context import STF_ExportContext
 from ...utils.component_utils import STF_Component_Ref, get_components_from_object
 from ...utils.id_utils import ensure_stf_id
 from ...utils import trs_utils
@@ -14,14 +14,14 @@ from ...utils.armature_bone import ArmatureBone
 _stf_type = "stf.bone"
 
 
-def _stf_import(context: STF_ResourceImportContext, json_resource: dict, stf_id: str, parent_application_object: any) -> tuple[any, any]:
-	blender_armature: bpy.types.Armature = parent_application_object.data
-	blender_object: bpy.types.Object = parent_application_object
+def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
+	blender_armature: bpy.types.Armature = context_object.data
+	blender_object: bpy.types.Object = context_object
 
 	# Once Blender enters into edit-mode, the Bone references will be invalidated. Store the child-names as string.
 	children = []
 	for child_id in json_resource.get("children", []):
-		child: ArmatureBone = context.import_resource(child_id)
+		child: ArmatureBone = context.import_resource(child_id, context_object)
 		if(child):
 			children.append(child.name)
 		else:
@@ -47,7 +47,6 @@ def _stf_import(context: STF_ResourceImportContext, json_resource: dict, stf_id:
 	bpy.ops.object.mode_set(mode="OBJECT", toggle=False)
 
 	blender_bone = ArmatureBone(blender_armature, blender_bone_name)
-	bone_context = STF_ResourceImportContext(context, json_resource, blender_bone)
 	context.register_imported_resource(stf_id, blender_bone)
 
 	blender_armature.bones[blender_bone_name].stf_id = stf_id
@@ -55,15 +54,15 @@ def _stf_import(context: STF_ResourceImportContext, json_resource: dict, stf_id:
 		blender_armature.bones[blender_bone_name].stf_name = json_resource["name"]
 		blender_armature.bones[blender_bone_name].stf_name_source_of_truth = True
 
-	return blender_bone, bone_context
+	return blender_bone
 
 
-def _stf_export(context: STF_ResourceExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:
+def _stf_export(context: STF_ExportContext, application_object: any, context_object: any) -> tuple[dict, str]:
 	blender_bone_def: ArmatureBone = application_object
 	ensure_stf_id(context, blender_bone_def.get_bone())
 
-	blender_armature_object: bpy.types.Object = parent_application_object
-	blender_armature: bpy.types.Armature = parent_application_object.data
+	blender_armature_object: bpy.types.Object = context_object
+	blender_armature: bpy.types.Armature = context_object.data
 
 	# Once Blender enters into edit-mode, the Bone reference will be invalidated. Access by name instead.
 	blender_bone_name = blender_bone_def.name
@@ -80,7 +79,7 @@ def _stf_export(context: STF_ResourceExportContext, application_object: any, par
 		ret["connected"] = blender_armature.bones[blender_bone_name].use_connect
 
 	for child in blender_child_bones:
-		children.append(context.serialize_resource(child))
+		children.append(context.serialize_resource(child, context_object=context_object))
 
 	if(bpy.context.mode != "OBJECT"): bpy.ops.object.mode_set(mode="OBJECT", toggle=False)
 	bpy.context.view_layer.objects.active = blender_armature_object
@@ -94,7 +93,7 @@ def _stf_export(context: STF_ResourceExportContext, application_object: any, par
 
 	bpy.ops.object.mode_set(mode="OBJECT", toggle=False)
 
-	return ret, stf_id, context
+	return ret, stf_id
 
 
 class STF_Module_STF_Bone(STF_Module):

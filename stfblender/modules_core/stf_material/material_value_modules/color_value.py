@@ -1,7 +1,7 @@
 import bpy
 
-from .....libstf.stf_export_context import STF_ResourceExportContext
-from .....libstf.stf_import_context import STF_ResourceImportContext
+from .....libstf.stf_export_context import STF_ExportContext
+from .....libstf.stf_import_context import STF_ImportContext
 from ..stf_material_definition import STF_Material_Value_Module_Base, STF_Material_Value_Base
 
 
@@ -9,11 +9,11 @@ class STF_Material_Value_Color(STF_Material_Value_Base):
 	color: bpy.props.FloatVectorProperty(name="Color", subtype="COLOR", size=4, min=0, max=1, default=(1,1,1,1)) # type: ignore
 
 
-def _value_import_func(context: STF_ResourceImportContext, blender_material: bpy.types.Material, json_resource: any, value: STF_Material_Value_Color):
+def _value_import_func(context: STF_ImportContext, blender_material: bpy.types.Material, json_resource: any, value: STF_Material_Value_Color):
 	value.color = (json_resource[0],json_resource[1], json_resource[2])
 
 
-def _value_export_func(context: STF_ResourceExportContext, blender_material: bpy.types.Material, value: STF_Material_Value_Color) -> any:
+def _value_export_func(context: STF_ExportContext, blender_material: bpy.types.Material, value: STF_Material_Value_Color) -> any:
 	return [value.color[0], value.color[1], value.color[2]]
 
 

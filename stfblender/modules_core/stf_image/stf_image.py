@@ -1,7 +1,7 @@
 import bpy
 
-from ....libstf.stf_export_context import STF_ResourceExportContext, STF_RootExportContext
-from ....libstf.stf_import_context import STF_ResourceImportContext, STF_RootImportContext
+from ....libstf.stf_export_context import STF_ExportContext
+from ....libstf.stf_import_context import STF_ImportContext
 from ....libstf.stf_module import STF_Module
 from ....libstf.stf_report import STFReportSeverity, STFReport
 from ...utils.component_utils import STF_Component_Ref, get_components_from_object
@@ -11,19 +11,17 @@ from ...utils.id_utils import ensure_stf_id
 _stf_type = "stf.image"
 
 
-def _stf_import(context: STF_RootImportContext, json_resource: dict, stf_id: str, parent_application_object: any) -> tuple[any, any]:
+def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
 	blender_image = bpy.data.images.new(json_resource.get("name", "STF Image"), 1024, 1024)
 	blender_image.stf_id = stf_id
 	if(json_resource.get("name")):
 		blender_image.stf_name = json_resource["name"]
 		blender_image.stf_name_source_of_truth = True
 
-	image_context = STF_ResourceImportContext(context, json_resource, blender_image)
-
-	return blender_image, image_context
+	return blender_image
 
 
-def _stf_export(context: STF_RootExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:
+def _stf_export(context: STF_ExportContext, application_object: any, context_object: any) -> tuple[dict, str]:
 	blender_image: bpy.types.Image = application_object
 	ensure_stf_id(context, blender_image)
 
@@ -31,9 +29,8 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 		"type": _stf_type,
 		"name": blender_image.stf_name if blender_image.stf_name_source_of_truth else blender_image.name,
 	}
-	image_context = STF_ResourceExportContext(context, ret, blender_image)
 
-	return ret, blender_image.stf_id, image_context
+	return ret, blender_image.stf_id
 
 
 class STF_Module_STF_Image(STF_Module):

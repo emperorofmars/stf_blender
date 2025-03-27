@@ -6,21 +6,19 @@ from .stf_dependency_import import libstf, stfblender
 _stf_type = "my_custom.namespaced.brush"
 
 
-def _stf_import(context: libstf.stf_import_context.STF_RootImportContext, json_resource: dict, id: str, parent_application_object: any) -> tuple[any, any]: # type: ignore
+def _stf_import(context: libstf.stf_import_context.STF_RootImportContext, json_resource: dict, id: str, context_object: any) -> any: # type: ignore
 	application_object = bpy.data.brushes.new(json_resource.get("name", "My Custom Brush"))
 	application_object.stf_id = id
 	if(json_resource.get("name")):
 		application_object.stf_name = json_resource["name"]
 		application_object.stf_name_source_of_truth = True
 
-	resource_context = libstf.stf_import_context.STF_ResourceImportContext(context, json_resource, application_object)
-
 	# TODO Do most of the import
 
-	return application_object, resource_context
+	return application_object
 
 
-def _stf_export(context: libstf.stf_export_context.STF_RootExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]: # type: ignore
+def _stf_export(context: libstf.stf_export_context.STF_RootExportContext, application_object: any, context_object: any) -> tuple[dict, str]: # type: ignore
 	application_object: bpy.types.Brush = application_object
 	stfblender.utils.id_utils.ensure_stf_id(context, application_object)
 
@@ -28,11 +26,10 @@ def _stf_export(context: libstf.stf_export_context.STF_RootExportContext, applic
 		"type": _stf_type,
 		"name": application_object.stf_name if application_object.stf_name_source_of_truth else application_object.name,
 	}
-	resource_context = libstf.stf_export_context.STF_ResourceExportContext(context, json_resource, application_object)
 
 	# TODO Do most of the export
 
-	return json_resource, application_object.stf_id, resource_context
+	return json_resource, application_object.stf_id
 
 
 class CustomSTFBrushModule(libstf.stf_module.STF_Module):

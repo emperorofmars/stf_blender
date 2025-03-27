@@ -1,7 +1,7 @@
 import bpy
 
-from ...libstf.stf_export_context import STF_RootExportContext
-from ...libstf.stf_import_context import STF_RootImportContext
+from ...libstf.stf_export_context import STF_ExportContext
+from ...libstf.stf_import_context import STF_ImportContext
 from ..utils.component_utils import STF_BlenderComponentBase, STF_BlenderComponentModule, add_component
 from ..utils.op_utils import SetActiveObjectOperator
 
@@ -57,21 +57,21 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 
 
 
-def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, parent_application_object: any) -> tuple[any, any]:
+def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, parent_application_object: any) -> any:
 	component_ref, component = add_component(parent_application_object, _blender_property_name, id, _stf_type)
 
 	component.automap = json_resource.get("automap")
 
-	return component, context
+	return component
 
 
-def _stf_export(context: STF_RootExportContext, application_object: AVA_Avatar, parent_application_object: any) -> tuple[dict, str, any]:
+def _stf_export(context: STF_ExportContext, application_object: AVA_Avatar, parent_application_object: any) -> tuple[dict, str]:
 	ret = {
 		"type": _stf_type,
 		"name": application_object.stf_name,
 		"automap": application_object.automap
 	}
-	return ret, application_object.stf_id, context
+	return ret, application_object.stf_id
 
 
 class STF_Module_AVA_Avatar(STF_BlenderComponentModule):

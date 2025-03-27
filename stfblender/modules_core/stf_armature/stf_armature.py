@@ -1,7 +1,7 @@
 import bpy
 
-from ....libstf.stf_import_context import STF_ResourceImportContext, STF_RootImportContext
-from ....libstf.stf_export_context import STF_ResourceExportContext, STF_RootExportContext
+from ....libstf.stf_import_context import STF_ImportContext
+from ....libstf.stf_export_context import STF_ExportContext
 from ....libstf.stf_module import STF_Module
 from ...utils.component_utils import STF_Component_Ref, get_components_from_object
 from ...utils.id_utils import ensure_stf_id
@@ -12,7 +12,7 @@ from ...utils.id_binding_resolver import STF_Blender_BindingResolver
 _stf_type = "stf.armature"
 
 
-def _stf_import(context: STF_RootImportContext, json_resource: dict, stf_id: str, parent_application_object: any) -> tuple[any, any]:
+def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
 	blender_armature = bpy.data.armatures.new(json_resource.get("name", "STF Armature"))
 	blender_armature.stf_id = stf_id
 	if(json_resource.get("name")):
@@ -25,14 +25,13 @@ def _stf_import(context: STF_RootImportContext, json_resource: dict, stf_id: str
 		bpy.data.objects.remove(tmp_hook_object)
 	context.add_task(_clean_tmp_mesh_object)
 
-	bone_import_context = STF_ResourceImportContext(context, json_resource, tmp_hook_object)
 	for bone_id in json_resource.get("root_bones", []):
-		bone_import_context.import_resource(bone_id)
+		context.import_resource(bone_id, tmp_hook_object)
 
-	return blender_armature, bone_import_context
+	return blender_armature
 
 
-def _stf_export(context: STF_RootExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:
+def _stf_export(context: STF_ExportContext, application_object: any, context_object: any) -> tuple[dict, str]:
 	blender_armature: bpy.types.Armature = application_object
 	ensure_stf_id(context, blender_armature)
 
@@ -49,16 +48,15 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 		"root_bones": root_bones,
 	}
 
-	bone_export_context = STF_ResourceExportContext(context, ret, tmp_hook_object)
 	root_bone_definitions = []
 	for blender_bone in blender_armature.bones:
 		if(blender_bone.parent == None):
 			root_bone_definitions.append(ArmatureBone(blender_armature, blender_bone.name))
 
 	for root_bone_definition in root_bone_definitions:
-		root_bones.append(bone_export_context.serialize_resource(root_bone_definition))
+		root_bones.append(context.serialize_resource(root_bone_definition, context_object=tmp_hook_object))
 
-	return ret, blender_armature.stf_id, bone_export_context
+	return ret, blender_armature.stf_id
 
 
 class STF_Module_STF_Armature(STF_Blender_BindingResolver, STF_Module):

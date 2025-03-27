@@ -1,8 +1,8 @@
 import json
 import bpy
 
-from ....libstf.stf_export_context import STF_RootExportContext
-from ....libstf.stf_import_context import STF_RootImportContext
+from ....libstf.stf_export_context import STF_ExportContext
+from ....libstf.stf_import_context import STF_ImportContext
 from ...utils.component_utils import STF_BlenderComponentBase, STF_BlenderComponentModule, add_component
 
 
@@ -23,7 +23,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 	#layout.prop(component, "referenced_buffers")
 
 
-def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, parent_application_object: any) -> tuple[any, any]:
+def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, parent_application_object: any) -> tuple[any, any]:
 	component_ref, component = add_component(parent_application_object, _blender_property_name, id, json_resource["type"])
 
 	component.stf_type = json_resource["type"]
@@ -35,7 +35,7 @@ def _stf_import(context: STF_RootImportContext, json_resource: dict, id: str, pa
 	return component, context
 
 
-def _stf_export(context: STF_RootExportContext, application_object: JsonFallbackComponent, parent_application_object: any) -> tuple[dict, str, any]:
+def _stf_export(context: STF_ExportContext, application_object: JsonFallbackComponent, parent_application_object: any) -> tuple[dict, str, any]:
 	ret = {
 		"type": application_object.stf_type,
 		"name": application_object.stf_name,

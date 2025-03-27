@@ -1,7 +1,7 @@
 import bpy
 
-from ....libstf.stf_export_context import STF_ResourceExportContext, STF_RootExportContext
-from ....libstf.stf_import_context import STF_ResourceImportContext, STF_RootImportContext
+from ....libstf.stf_export_context import STF_ExportContext
+from ....libstf.stf_import_context import STF_ImportContext
 from ....libstf.stf_module import STF_Module
 from ....libstf.stf_report import STFReportSeverity, STFReport
 from ...utils.component_utils import STF_Component_Ref, get_components_from_object
@@ -11,19 +11,17 @@ from ...utils.id_utils import ensure_stf_id
 _stf_type = "stf.animation"
 
 
-def _stf_import(context: STF_RootImportContext, json_resource: dict, stf_id: str, parent_application_object: any) -> tuple[any, any]:
+def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, parent_application_object: any) -> any:
 	blender_animation = bpy.data.actions.new(json_resource.get("name", "STF Animation"))
 	blender_animation.stf_id = stf_id
 	if(json_resource.get("name")):
 		blender_animation.stf_name = json_resource["name"]
 		blender_animation.stf_name_source_of_truth = True
 
-	animation_context = STF_ResourceImportContext(context, json_resource, blender_animation)
-
-	return blender_animation, animation_context
+	return blender_animation
 
 
-def _stf_export(context: STF_RootExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str, any]:
+def _stf_export(context: STF_ExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str]:
 	blender_animation: bpy.types.Action = application_object
 	if(blender_animation.stf_exclude): return (None, None, None)
 	if(blender_animation.is_action_legacy):
@@ -42,7 +40,6 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 	if(blender_animation.use_frame_range):
 		ret["range"] = [blender_animation.frame_start, blender_animation.frame_end]
 
-	animation_context = STF_ResourceExportContext(context, ret, blender_animation)
 
 	"""print(blender_animation.name)
 	print(blender_animation.is_action_legacy)
@@ -97,7 +94,7 @@ def _stf_export(context: STF_RootExportContext, application_object: any, parent_
 
 	#print()
 
-	return ret, blender_animation.stf_id, animation_context
+	return ret, blender_animation.stf_id
 
 
 class STF_Module_STF_Animation(STF_Module):

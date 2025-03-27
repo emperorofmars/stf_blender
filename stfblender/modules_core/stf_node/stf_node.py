@@ -2,8 +2,8 @@ import bpy
 import mathutils
 
 from ....libstf.stf_module import STF_Module
-from ....libstf.stf_import_context import STF_ResourceImportContext
-from ....libstf.stf_export_context import STF_ResourceExportContext
+from ....libstf.stf_import_context import STF_ImportContext
+from ....libstf.stf_export_context import STF_ExportContext
 from ....libstf.stf_report import STFReport, STFReportSeverity
 from ...utils.component_utils import STF_Component_Ref, get_components_from_object
 from ...utils import trs_utils
@@ -14,7 +14,7 @@ from .node_property_conversion import stf_node_translate_property_to_stf_func, s
 _stf_type = "stf.node"
 
 
-def _stf_import(context: STF_ResourceImportContext, json_resource: dict, stf_id: str, parent_application_object: any) -> tuple[any, any]:
+def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
 	if("instance" in json_resource):
 		blender_object: bpy.types.Object = context.import_resource(json_resource["instance"])
 	else:
@@ -29,7 +29,7 @@ def _stf_import(context: STF_ResourceImportContext, json_resource: dict, stf_id:
 	for collection in blender_object.users_collection:
 		collection.objects.unlink(blender_object)
 
-	parent_application_object.objects.link(blender_object)
+	context_object.objects.link(blender_object)
 
 	for child_id in json_resource.get("children", []):
 		child: bpy.types.Object = context.import_resource(child_id)
@@ -59,7 +59,7 @@ def _stf_import(context: STF_ResourceImportContext, json_resource: dict, stf_id:
 		trs_utils.trs_to_blender_object(json_resource["trs"], blender_object)
 	context.add_task(_trs_callback)
 
-	return blender_object, context
+	return blender_object
 
 
 def _can_handle_application_object_func(application_object: any) -> int:
@@ -72,7 +72,7 @@ def _can_handle_application_object_func(application_object: any) -> int:
 		return -1
 
 
-def _stf_export(context: STF_ResourceExportContext, blender_object: any, parent_application_object: any) -> tuple[dict, str, any]:
+def _stf_export(context: STF_ExportContext, blender_object: any, context_object: any) -> tuple[dict, str]:
 	ensure_stf_id(context, blender_object)
 
 	json_resource = {
@@ -119,7 +119,7 @@ def _stf_export(context: STF_ResourceExportContext, blender_object: any, parent_
 		if(instance_id):
 			json_resource["instance"] = instance_id
 
-	return json_resource, blender_object.stf_id, context
+	return json_resource, blender_object.stf_id
 
 
 
