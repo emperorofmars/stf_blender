@@ -32,7 +32,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	context_object.objects.link(blender_object)
 
 	for child_id in json_resource.get("children", []):
-		child: bpy.types.Object = context.import_resource(child_id)
+		child: bpy.types.Object = context.import_resource(child_id, context_object)
 		if(child):
 			child.parent_type = "OBJECT"
 			child.parent = blender_object
