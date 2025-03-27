@@ -5,7 +5,8 @@ from ....libstf.stf_module import STF_Module
 from ....libstf.stf_import_context import STF_ImportContext
 from ....libstf.stf_export_context import STF_ExportContext
 from ....libstf.stf_report import STFReport, STFReportSeverity
-from ...utils.component_utils import STF_Component_Ref, get_components_from_object
+from ...utils.boilerplate import boilerplate_register, boilerplate_unregister
+from ...utils.component_utils import get_components_from_object
 from ...utils import trs_utils
 from ...utils.id_utils import ensure_stf_id
 from .node_property_conversion import stf_node_translate_property_to_stf_func, stf_node_translate_property_to_blender_func
@@ -143,20 +144,7 @@ register_stf_modules = [
 
 
 def register():
-	bpy.types.Object.stf_id = bpy.props.StringProperty(name="ID") # type: ignore
-	bpy.types.Object.stf_name = bpy.props.StringProperty(name="Name") # type: ignore
-	bpy.types.Object.stf_name_source_of_truth = bpy.props.BoolProperty(name="STF Name Is Source Of Truth") # type: ignore
-	bpy.types.Object.stf_components = bpy.props.CollectionProperty(type=STF_Component_Ref, name="Components") # type: ignore
-	bpy.types.Object.stf_active_component_index = bpy.props.IntProperty()
+	boilerplate_register(bpy.types.Object, "node")
 
 def unregister():
-	if hasattr(bpy.types.Object, "stf_id"):
-		del bpy.types.Object.stf_id
-	if hasattr(bpy.types.Object, "stf_name"):
-		del bpy.types.Object.stf_name
-	if hasattr(bpy.types.Object, "stf_name_source_of_truth"):
-		del bpy.types.Object.stf_name_source_of_truth
-	if hasattr(bpy.types.Object, "stf_components"):
-		del bpy.types.Object.stf_components
-	if hasattr(bpy.types.Object, "stf_active_component_index"):
-		del bpy.types.Object.stf_active_component_index
+	boilerplate_unregister(bpy.types.Object, "node")

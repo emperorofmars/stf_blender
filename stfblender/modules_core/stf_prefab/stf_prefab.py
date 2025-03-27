@@ -4,8 +4,8 @@ import bpy
 from ....libstf.stf_import_context import STF_ImportContext
 from ....libstf.stf_export_context import STF_ExportContext
 from ....libstf.stf_module import STF_Module
-from ....libstf.stf_report import STFReport
-from ...utils.component_utils import STF_Component_Ref, get_components_from_object
+from ...utils.boilerplate import boilerplate_register, boilerplate_unregister
+from ...utils.component_utils import get_components_from_object
 from ...utils.id_utils import ensure_stf_id
 
 
@@ -67,27 +67,11 @@ register_stf_modules = [
 	STF_Module_STF_Prefab
 ]
 
-
 def register():
-	bpy.types.Collection.stf_id = bpy.props.StringProperty(name="ID") # type: ignore
-	bpy.types.Collection.stf_name = bpy.props.StringProperty(name="Name") # type: ignore
-	bpy.types.Collection.stf_name_source_of_truth = bpy.props.BoolProperty(name="STF Name Is Source Of Truth") # type: ignore
-	bpy.types.Collection.stf_components = bpy.props.CollectionProperty(type=STF_Component_Ref, name="Components") # type: ignore
-	bpy.types.Collection.stf_active_component_index = bpy.props.IntProperty()
-
+	boilerplate_register(bpy.types.Collection, "data")
 	bpy.types.Collection.stf_use_collection_as_prefab = bpy.props.BoolProperty(name="Use As STF Prefab", default=False)
 
 def unregister():
-	if hasattr(bpy.types.Collection, "stf_id"):
-		del bpy.types.Collection.stf_id
-	if hasattr(bpy.types.Collection, "stf_name"):
-		del bpy.types.Collection.stf_name
-	if hasattr(bpy.types.Collection, "stf_name_source_of_truth"):
-		del bpy.types.Collection.stf_name_source_of_truth
-	if hasattr(bpy.types.Collection, "stf_components"):
-		del bpy.types.Collection.stf_components
-	if hasattr(bpy.types.Collection, "stf_active_component_index"):
-		del bpy.types.Collection.stf_active_component_index
-
+	boilerplate_unregister(bpy.types.Collection, "data")
 	if hasattr(bpy.types.Collection, "stf_use_collection_as_prefab"):
 		del bpy.types.Collection.stf_use_collection_as_prefab
