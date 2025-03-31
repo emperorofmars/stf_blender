@@ -66,7 +66,7 @@ def _stf_export(context: STF_ExportContext, application_object: any, parent_appl
 					if(assignment):
 						for fcurve in channelbag.fcurves:
 							# Get bezier export import done first, then deal with interpolation and whatever else
-							property_translation = context.translate_application_property(slot_link.target, fcurve.data_path, fcurve.array_index)
+							property_translation = context.resolve_application_property_path(slot_link.target, fcurve.data_path, fcurve.array_index)
 
 							"""print()
 							print(slot_link.target)

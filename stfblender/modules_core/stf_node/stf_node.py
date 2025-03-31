@@ -1,3 +1,4 @@
+from typing import Callable
 import bpy
 import mathutils
 
@@ -9,7 +10,7 @@ from ...utils.boilerplate import boilerplate_register, boilerplate_unregister
 from ...utils.component_utils import get_components_from_object
 from ...utils import trs_utils
 from ...utils.id_utils import ensure_stf_id
-from .node_property_conversion import stf_node_translate_property_to_stf_func, stf_node_translate_property_to_blender_func
+from .node_property_conversion import stf_node_resolve_property_path_to_stf_func
 
 
 _stf_type = "stf.node"
@@ -120,7 +121,6 @@ def _stf_export(context: STF_ExportContext, blender_object: any, context_object:
 	return json_resource, blender_object.stf_id
 
 
-
 class STF_Module_STF_Node(STF_Module):
 	stf_type = _stf_type
 	stf_kind = "node"
@@ -131,8 +131,9 @@ class STF_Module_STF_Node(STF_Module):
 	can_handle_application_object_func = _can_handle_application_object_func
 	get_components_func = get_components_from_object
 
-	translate_property_to_stf_func = stf_node_translate_property_to_stf_func
-	translate_property_to_blender_func: stf_node_translate_property_to_blender_func
+	understood_application_property_path_types = [bpy.types.Object]
+	understood_application_property_path_parts = ["location", "rotation_quaternion", "scale"]
+	resolve_property_path_to_stf_func = stf_node_resolve_property_path_to_stf_func
 
 
 register_stf_modules = [

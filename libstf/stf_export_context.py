@@ -91,23 +91,14 @@ class STF_ExportContext:
 		return self._state.serialize_buffer(data)
 
 
-	def translate_application_property(self, application_object: any, application_property: str, property_index: int) -> any:
+	def resolve_application_property_path(self, application_object: any, data_path: str, data_index: int) -> tuple[list[str], Callable[[any], any]]:
 		if(application_object == None): return None
 
-		selected_module = self._state.determine_module(application_object)
-		if(selected_module and hasattr(selected_module, "translate_property_to_stf_func")):
-			return selected_module.translate_property_to_stf_func(application_object, application_property, property_index)
+		if(data_path.startswith(".")): data_path = data_path[1::]
 
-		selected_hooks = self._state.determine_hooks(application_object)
-		for hook in selected_hooks:
-			if(hook and hasattr(hook, "translate_property_to_stf_func")):
-				return hook.translate_property_to_stf_func(application_object, application_property, property_index)
-
-		if(hasattr(selected_module, "get_components_func")):
-			components = selected_module.get_components_func(application_object)
-			for component in components:
-				if(component and hasattr(component, "translate_property_to_stf_func")):
-					return component.translate_property_to_stf_func(application_object, application_property, property_index)
+		selected_module = self._state.determine_property_resolution_module(application_object, data_path)
+		if(selected_module and hasattr(selected_module, "resolve_property_path_to_stf_func")):
+			return selected_module.resolve_property_path_to_stf_func(self, application_object, data_path, data_index)
 
 		return None
 

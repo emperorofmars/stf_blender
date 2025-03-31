@@ -1,4 +1,6 @@
+import re
 import bpy
+from typing import Callable
 
 from ...libstf.stf_export_context import STF_ExportContext
 from ...libstf.stf_import_context import STF_ImportContext
@@ -34,6 +36,13 @@ def _stf_export(context: STF_ExportContext, application_object: AVA_Constraint_T
 	return ret, application_object.stf_id
 
 
+def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: any, data_path: str, data_index: int) -> tuple[list[str], Callable[[any], any]]:
+	if(match := re.search(r"^stf_ava_constraint_twist\[(?P<component_index>[\d]+)\].weight", data_path)):
+		component = application_object.stf_ava_constraint_twist[int(match.groupdict()["component_index"])]
+		return [application_object.stf_id, "components", component.stf_id, "weight"], None
+	return None
+
+
 class STF_Module_AVA_Constraint_Twist(STF_BlenderComponentModule):
 	stf_type = _stf_type
 	stf_kind = "component"
@@ -41,6 +50,10 @@ class STF_Module_AVA_Constraint_Twist(STF_BlenderComponentModule):
 	understood_application_types = [AVA_Constraint_Twist]
 	import_func = _stf_import
 	export_func = _stf_export
+
+	understood_application_property_path_types = [bpy.types.Object, bpy.types.Bone]
+	understood_application_property_path_parts = ["stf_ava_constraint_twist"]
+	resolve_property_path_to_stf_func = _resolve_property_path_to_stf_func
 
 	blender_property_name = _blender_property_name
 	single = True

@@ -10,38 +10,38 @@ from ....libstf.stf_import_context import STF_ImportContext
 from ...utils.component_utils import get_components_from_object
 from ...utils.id_utils import ensure_stf_id
 from ...utils import trs_utils
-from ...utils.animation_conversion_utils import get_rotation_to_stf_translation_func, get_scale_to_stf_translation_func, get_translation_to_stf_translation_func, translate_rotation_property_to_stf, translate_scale_property_to_stf, translate_translation_property_to_stf
+from ...utils.animation_conversion_utils import *
 
 
 _stf_type = "stf.instance.armature"
 
 
-def _translate_property_to_stf_func(blender_object: bpy.types.Object, data_path: str, data_index: int) -> tuple[list[str], Callable[[any], any]]:
+def _translate_property_to_stf_func(application_object: bpy.types.Object, data_path: str, data_index: int) -> tuple[list[str], Callable[[any], any]]:
 	match = re.search(r"^pose.bones\[\"(?P<bone_name>[\w]+)\"\].location", data_path)
 	if(match and "bone_name" in match.groupdict()):
-		bone = blender_object.data.bones[match.groupdict()["bone_name"]]
-		return [blender_object.stf_id, "instance", bone.stf_id, "t", translate_translation_property_to_stf(data_index)], get_translation_to_stf_translation_func(data_index)
+		bone = application_object.data.bones[match.groupdict()["bone_name"]]
+		return [application_object.stf_id, "instance", bone.stf_id, "t", translate_translation_property_to_stf(data_index)], get_translation_to_stf_translation_func(data_index)
 
 	match = re.search(r"^pose.bones\[\"(?P<bone_name>[\w]+)\"\].rotation_quaternion", data_path)
 	if(match and "bone_name" in match.groupdict()):
-		bone = blender_object.data.bones[match.groupdict()["bone_name"]]
-		return [blender_object.stf_id, "instance", bone.stf_id, "r", translate_rotation_property_to_stf(data_index)], get_rotation_to_stf_translation_func(data_index)
+		bone = application_object.data.bones[match.groupdict()["bone_name"]]
+		return [application_object.stf_id, "instance", bone.stf_id, "r", translate_rotation_property_to_stf(data_index)], get_rotation_to_stf_translation_func(data_index)
 
 	match = re.search(r"^pose.bones\[\"(?P<bone_name>[\w]+)\"\].scale", data_path)
 	if(match and "bone_name" in match.groupdict()):
-		bone = blender_object.data.bones[match.groupdict()["bone_name"]]
-		return [blender_object.stf_id, "instance", bone.stf_id, "s", translate_scale_property_to_stf(data_index)], get_scale_to_stf_translation_func(data_index)
+		bone = application_object.data.bones[match.groupdict()["bone_name"]]
+		return [application_object.stf_id, "instance", bone.stf_id, "s", translate_scale_property_to_stf(data_index)], get_scale_to_stf_translation_func(data_index)
 
 	return None
 
 
-def _translate_property_to_blender_func(blender_object: bpy.types.Object, stf_property: str) -> tuple[str, int, Callable[[any], any]]:
+def _translate_property_to_blender_func(application_object: bpy.types.Object, stf_property: str) -> tuple[str, int, Callable[[any], any]]:
 
 	return stf_property, 0, None
 
 
 
-def _stf_import(context: STF_ExportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
+def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
 	blender_armature = context.import_resource(json_resource["armature"])
 	if(not blender_armature or type(blender_armature) is not bpy.types.Armature):
 		context.report(STFReport("Failed to import armature: " + str(json_resource.get("instance", {}).get("armature")), STFReportSeverity.Error, stf_id, _stf_type, context_object))
@@ -100,6 +100,17 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 	return ret, str(uuid.uuid4())
 
 
+def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: any, data_path: str, data_index: int) -> tuple[list[str], Callable[[any], any]]:
+	if(match := re.search(r"^pose.bones\[\"(?P<bone_name>[\w]+)\"\]", data_path)):
+		bone = application_object.data.bones[match.groupdict()["bone_name"]]
+		module_ret = context.resolve_application_property_path(bone, data_path[match.endpos ::], data_index)
+		if(module_ret):
+			stf_path, translate_func = module_ret
+			return ["instance", bone.stf_id] + stf_path, translate_func
+
+	return None
+
+
 class STF_Module_STF_Instance_Armature(STF_Module):
 	stf_type = _stf_type
 	stf_kind = "instance"
@@ -110,8 +121,9 @@ class STF_Module_STF_Instance_Armature(STF_Module):
 	can_handle_application_object_func = _can_handle_application_object_func
 	get_components_func = get_components_from_object
 
-	translate_property_to_stf_func = _translate_property_to_stf_func
-	translate_property_to_blender_func: _translate_property_to_blender_func
+	understood_application_property_path_types = [bpy.types.Object]
+	understood_application_property_path_parts = ["pose.bones"]
+	resolve_property_path_to_stf_func = _resolve_property_path_to_stf_func
 
 
 register_stf_modules = [

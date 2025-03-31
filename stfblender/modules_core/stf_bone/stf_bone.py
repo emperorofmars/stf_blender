@@ -1,3 +1,5 @@
+import re
+from typing import Callable
 import bpy
 
 
@@ -10,6 +12,7 @@ from ...utils.boilerplate import boilerplate_register, boilerplate_unregister
 from ...utils.id_utils import ensure_stf_id
 from ...utils import trs_utils
 from ...utils.armature_bone import ArmatureBone
+from ...utils.animation_conversion_utils import *
 
 
 _stf_type = "stf.bone"
@@ -97,6 +100,19 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 	return ret, stf_id
 
 
+def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: any, data_path: str, data_index: int) -> tuple[list[str], Callable[[any], any]]:
+	if(match := re.search(r"^location", data_path)):
+		return [application_object.stf_id, "t", translate_translation_property_to_stf(data_index)], get_translation_to_stf_translation_func(data_index)
+
+	if(match := re.search(r"^rotation_quaternion", data_path)):
+		return [application_object.stf_id, "r", translate_rotation_property_to_stf(data_index)], get_rotation_to_stf_translation_func(data_index)
+
+	if(match := re.search(r"^scale", data_path)):
+		return [application_object.stf_id, "s", translate_scale_property_to_stf(data_index)], get_scale_to_stf_translation_func(data_index)
+
+	return None
+
+
 class STF_Module_STF_Bone(STF_Module):
 	stf_type = _stf_type
 	stf_kind = "node"
@@ -105,6 +121,10 @@ class STF_Module_STF_Bone(STF_Module):
 	import_func = _stf_import
 	export_func = _stf_export
 	get_components_func = get_components_from_object
+
+	understood_application_property_path_types = [bpy.types.Bone]
+	understood_application_property_path_parts = ["location", "rotation_quaternion", "scale"]
+	resolve_property_path_to_stf_func = _resolve_property_path_to_stf_func
 
 
 register_stf_modules = [
