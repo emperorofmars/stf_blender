@@ -41,17 +41,9 @@ def _stf_export(context: STF_ExportContext, application_object: any, parent_appl
 	if(blender_animation.use_frame_range):
 		ret["range"] = [blender_animation.frame_start, blender_animation.frame_end]
 
-
-	"""print(blender_animation.name)
-	print(blender_animation.is_action_legacy)
-	for slot in blender_animation.slots:
-		print(str(slot) + " handle: " + str(slot.handle) + " :: " + str(slot.target_id_type) + " - " + str(slot.identifier) + " - ")"""
-
 	stf_tracks = []
 
-	#print()
-	#if(blender_animation): print("ANIM: " + blender_animation.name)
-
+	# This is a mess.
 	for layer in blender_animation.layers:
 		for strip in layer.strips:
 			if(strip.type == "KEYFRAME"):
@@ -65,12 +57,8 @@ def _stf_export(context: STF_ExportContext, application_object: any, parent_appl
 							break
 					if(assignment):
 						for fcurve in channelbag.fcurves:
-							# Get bezier export import done first, then deal with interpolation and whatever else
+							# Get bezier export import done first, then deal with other interpolation kinds and whatever else
 							property_translation = context.resolve_application_property_path(slot_link.target, fcurve.data_path, fcurve.array_index)
-
-							"""print()
-							print(slot_link.target)
-							print(fcurve.data_path)"""
 
 							if(property_translation):
 								target, conversion_func = property_translation
@@ -86,10 +74,9 @@ def _stf_export(context: STF_ExportContext, application_object: any, parent_appl
 									"keyframes": track
 								})
 							else:
-								pass
+								context.report(STFReport("Invalid fcurve data_path: " + fcurve.data_path, STFReportSeverity.Debug, id, _stf_type, blender_animation))
 					else:
-						#context.report(STFReport("Invalid Animation Target", STFReportSeverity.Warn, id, _stf_type, blender_animation))
-						pass
+						context.report(STFReport("Invalid Animation Target", STFReportSeverity.Debug, id, _stf_type, blender_animation))
 
 	ret["tracks"] = stf_tracks
 
