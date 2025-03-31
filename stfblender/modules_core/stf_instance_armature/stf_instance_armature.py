@@ -9,7 +9,6 @@ from ....libstf.stf_export_context import STF_ExportContext
 from ....libstf.stf_import_context import STF_ImportContext
 from ...utils.component_utils import get_components_from_object
 from ...utils.id_utils import ensure_stf_id
-from ...utils.id_binding_resolver import STF_Blender_BindingResolver
 from ...utils import trs_utils
 from ...utils.animation_conversion_utils import get_rotation_to_stf_translation_func, get_scale_to_stf_translation_func, get_translation_to_stf_translation_func, translate_rotation_property_to_stf, translate_scale_property_to_stf, translate_translation_property_to_stf
 
@@ -32,8 +31,6 @@ def _translate_property_to_stf_func(blender_object: bpy.types.Object, data_path:
 	if(match and "bone_name" in match.groupdict()):
 		bone = blender_object.data.bones[match.groupdict()["bone_name"]]
 		return [blender_object.stf_id, "instance", bone.stf_id, "s", translate_scale_property_to_stf(data_index)], get_scale_to_stf_translation_func(data_index)
-
-	# TODO trs of the armature instance node itself
 
 	return None
 
@@ -103,15 +100,7 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 	return ret, str(uuid.uuid4())
 
 
-def _resolve_id_binding_func(blender_object: any, path_part: str) -> any:
-	armature: bpy.types.Armature = blender_object.data
-	for bone in armature.bones:
-		if(bone.stf_id == path_part):
-			return bone
-	return None
-
-
-class STF_Module_STF_Instance_Armature(STF_Module, STF_Blender_BindingResolver):
+class STF_Module_STF_Instance_Armature(STF_Module):
 	stf_type = _stf_type
 	stf_kind = "instance"
 	like_types = ["instance.armature", "instance"]
@@ -120,9 +109,6 @@ class STF_Module_STF_Instance_Armature(STF_Module, STF_Blender_BindingResolver):
 	export_func = _stf_export
 	can_handle_application_object_func = _can_handle_application_object_func
 	get_components_func = get_components_from_object
-
-	target_blender_binding_types = [bpy.types.Object]
-	resolve_id_binding_func = _resolve_id_binding_func
 
 	translate_property_to_stf_func = _translate_property_to_stf_func
 	translate_property_to_blender_func: _translate_property_to_blender_func

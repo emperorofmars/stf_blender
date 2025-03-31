@@ -7,7 +7,6 @@ from ...utils.component_utils import get_components_from_object
 from ...utils.boilerplate import boilerplate_register, boilerplate_unregister
 from ...utils.id_utils import ensure_stf_id
 from ...utils.armature_bone import ArmatureBone
-from ...utils.id_binding_resolver import STF_Blender_BindingResolver
 
 
 _stf_type = "stf.armature"
@@ -60,7 +59,7 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 	return ret, blender_armature.stf_id
 
 
-class STF_Module_STF_Armature(STF_Blender_BindingResolver, STF_Module):
+class STF_Module_STF_Armature(STF_Module):
 	stf_type = _stf_type
 	stf_kind = "data"
 	like_types = ["armature", "prefab"]
