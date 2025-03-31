@@ -24,10 +24,10 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, pa
 
 def _stf_export(context: STF_ExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str]:
 	blender_animation: bpy.types.Action = application_object
-	if(blender_animation.stf_exclude): return (None, None, None)
+	if(blender_animation.stf_exclude): return (None, None)
 	if(blender_animation.is_action_legacy):
 		context.report(STFReport("Ignoring legacy animation: " + blender_animation.name, STFReportSeverity.Warn, blender_animation.stf_id, _stf_type, application_object))
-		return (None, None, None)
+		return (None, None)
 	if(not hasattr(blender_animation, "slot_links")):
 		context.report(STFReport("Slot Links are required to export animations!", STFReportSeverity.Warn, blender_animation.stf_id, _stf_type, application_object))
 
@@ -79,8 +79,6 @@ def _stf_export(context: STF_ExportContext, application_object: any, parent_appl
 						context.report(STFReport("Invalid Animation Target", STFReportSeverity.Debug, id, _stf_type, blender_animation))
 
 	ret["tracks"] = stf_tracks
-
-	#print()
 
 	return ret, blender_animation.stf_id
 
