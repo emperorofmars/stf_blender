@@ -103,10 +103,10 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: any, data_path: str, data_index: int) -> tuple[list[str], Callable[[any], any]]:
 	if(match := re.search(r"^pose.bones\[\"(?P<bone_name>[\w]+)\"\]", data_path)):
 		bone = application_object.data.bones[match.groupdict()["bone_name"]]
-		module_ret = context.resolve_application_property_path(bone, data_path[match.endpos ::], data_index)
+		module_ret = context.resolve_application_property_path(bone, data_path[match.span()[1] :], data_index)
 		if(module_ret):
 			stf_path, translate_func = module_ret
-			return ["instance", bone.stf_id] + stf_path, translate_func
+			return [application_object.stf_id, "instance"] + stf_path, translate_func
 
 	return None
 

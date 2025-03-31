@@ -61,13 +61,14 @@ class STF_ExportState(StateUtil):
 	def determine_property_resolution_module(self, application_object: any, data_path: str) -> STF_Module:
 		# TODO handle priority for animation path handling maybe at some point?
 
-		for module in self._modules.get(type(application_object), []):
-			if(hasattr(module, "understood_application_property_path_types") and type(application_object) in module.understood_application_property_path_types
-					and hasattr(module, "understood_application_property_path_parts")
-					and hasattr(module, "resolve_property_path_to_stf_func")):
-				for understood_property in module.understood_application_property_path_parts:
-					if(data_path.startswith(understood_property)):
-						return module
+		for _, module_list in self._modules.items():
+			for module in module_list:
+				if(hasattr(module, "understood_application_property_path_types") and type(application_object) in module.understood_application_property_path_types
+						and hasattr(module, "understood_application_property_path_parts")
+						and hasattr(module, "resolve_property_path_to_stf_func")):
+					for understood_property in module.understood_application_property_path_parts:
+						if(data_path.startswith(understood_property)):
+							return module
 
 		return None
 

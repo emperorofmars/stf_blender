@@ -94,10 +94,9 @@ class STF_ExportContext:
 	def resolve_application_property_path(self, application_object: any, data_path: str, data_index: int) -> tuple[list[str], Callable[[any], any]]:
 		if(application_object == None): return None
 
-		if(data_path.startswith(".")): data_path = data_path[1::]
+		if(data_path.startswith(".")): data_path = data_path[1:]
 
-		selected_module = self._state.determine_property_resolution_module(application_object, data_path)
-		if(selected_module and hasattr(selected_module, "resolve_property_path_to_stf_func")):
+		if(selected_module := self._state.determine_property_resolution_module(application_object, data_path)):
 			return selected_module.resolve_property_path_to_stf_func(self, application_object, data_path, data_index)
 
 		return None
