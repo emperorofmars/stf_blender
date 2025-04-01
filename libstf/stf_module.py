@@ -44,8 +44,8 @@ class STF_Module:
 	# (Export Context, Application Object, Application Path, Property Index) -> (List of STF Path Elements, Function to Application translate animation keys to STF)
 	resolve_property_path_to_stf_func: Callable[[any, any, str, int], tuple[list[str], Callable[[any], any]]]
 
-	# (Import Context, Target Application Node, List of STF Path Elements) -> (Application Path, Property Index, Function to translate STF animation keys to the Application)
-	resolve_property_to_blender_func: Callable[[any, list[str]], tuple[str, int, Callable[[any], any]]]
+	# (Import Context, Target Application Node, List of STF Path Elements) -> (Property Type, Application Path, Property Index, Function to translate STF animation keys to the Application)
+	resolve_stf_property_to_blender_func: Callable[[any, list[str]], tuple[any, any, int, Callable[[any], any]]]
 
 
 	# Get a list of application-components on the application object.

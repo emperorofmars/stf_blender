@@ -45,6 +45,15 @@ class STF_ImportState(StateUtil):
 				self.report(STFReport("Invalid buffer type: " + buffer.type, severity=STFReportSeverity.Error))
 		return None
 
+
+	def determine_property_resolution_module(self, stf_id: str) -> STF_Module:
+		module = self.determine_module(self.get_json_resource(stf_id))
+		if(hasattr(module, "resolve_stf_property_to_blender_func")):
+			return module
+		else:
+			return None
+
+
 	def get_json_resource(self, stf_id: int) -> dict:
 		return self._file.definition.resources.get(stf_id)
 

@@ -63,6 +63,19 @@ class STF_ImportContext:
 		return self._state.import_buffer(stf_id)
 
 
+	def resolve_stf_property_path(self, stf_path: list[str]) -> tuple[any, any, str, int, Callable[[any], any]]:
+		if(stf_path == None or len(stf_path) == 0): return None
+
+		if(application_object := self.get_imported_resource(stf_path[0])):
+			if(selected_module := self._state.determine_property_resolution_module(stf_path[0])):
+				module_ret = selected_module.resolve_stf_property_to_blender_func(self, stf_path[1:])
+				if(module_ret):
+					slot_type, fcurve_target, property_index, conversion_func = module_ret
+					return application_object, slot_type, fcurve_target, property_index, conversion_func
+
+		return None
+
+
 	def add_task(self, task: Callable):
 		self._state._tasks.append(task)
 

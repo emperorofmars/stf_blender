@@ -13,6 +13,10 @@ _stf_type = "stf.animation"
 
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, parent_application_object: any) -> any:
+	if(not hasattr(bpy.types.Action, "slot_links")):
+		context.report(STFReport("Slot Links are required to export animations!", STFReportSeverity.Warn, stf_id, _stf_type))
+		return
+
 	blender_animation = bpy.data.actions.new(json_resource.get("name", "STF Animation"))
 	blender_animation.stf_id = stf_id
 	blender_animation.use_fake_user = True
@@ -20,20 +24,34 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, pa
 		blender_animation.stf_name = json_resource["name"]
 		blender_animation.stf_name_source_of_truth = True
 
+	blender_animation.use_cyclic = json_resource.get("loop", False)
+	if("range" in json_resource):
+		blender_animation.use_frame_range = True
+		blender_animation.frame_start = json_resource["range"][0]
+		blender_animation.frame_end = json_resource["range"][1]
+
 	for track in json_resource.get("tracks", []):
-		print(track["target"])
+		target_ret = context.resolve_stf_property_path(track.get("target", []))
+		if(target_ret):
+			target_object, slot_type, fcurve_target, property_index, conversion_func = target_ret
+
+
+			print()
+			print(track["target"])
+			print(str(target_object) + " (" + slot_type +"): " + str(fcurve_target) + " [" + str(property_index) + "] - " + str(conversion_func))
 
 	return blender_animation
 
 
 def _stf_export(context: STF_ExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str]:
 	blender_animation: bpy.types.Action = application_object
-	if(blender_animation.stf_exclude): return (None, None)
+	if(blender_animation.stf_exclude): return None
 	if(blender_animation.is_action_legacy):
 		context.report(STFReport("Ignoring legacy animation: " + blender_animation.name, STFReportSeverity.Warn, blender_animation.stf_id, _stf_type, application_object))
-		return (None, None)
+		return None
 	if(not hasattr(blender_animation, "slot_links")):
 		context.report(STFReport("Slot Links are required to export animations!", STFReportSeverity.Warn, blender_animation.stf_id, _stf_type, application_object))
+		return None
 
 	ensure_stf_id(context, blender_animation)
 

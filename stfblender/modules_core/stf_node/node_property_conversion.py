@@ -3,6 +3,7 @@ import re
 from typing import Callable
 
 from ....libstf.stf_export_context import STF_ExportContext
+from ....libstf.stf_import_context import STF_ImportContext
 from ...utils.animation_conversion_utils import *
 
 
@@ -20,3 +21,9 @@ def stf_node_resolve_property_path_to_stf_func(context: STF_ExportContext, appli
 
 	return None
 
+
+def stf_node_resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str]) -> tuple[any, any, int, Callable[[any], any]]:
+
+	print("AAA")
+
+	return None
