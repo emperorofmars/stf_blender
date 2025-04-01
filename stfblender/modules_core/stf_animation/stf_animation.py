@@ -68,7 +68,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, pa
 			fcurve: bpy.types.FCurve = selected_channelbag.fcurves.new(fcurve_target, index=property_index)
 
 			for stf_keyframe in track.get("keyframes", []):
-				keyframe = fcurve.keyframe_points.insert(stf_keyframe[0], stf_keyframe[1], options="FAST")
+				keyframe = fcurve.keyframe_points.insert(stf_keyframe[0], stf_keyframe[1] if not conversion_func else conversion_func(stf_keyframe[1]))
 				keyframe.handle_left.x = stf_keyframe[2]
 				keyframe.handle_left.y = stf_keyframe[3]
 				keyframe.handle_right.x = stf_keyframe[4]

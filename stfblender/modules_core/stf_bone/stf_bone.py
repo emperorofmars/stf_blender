@@ -113,6 +113,26 @@ def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_o
 	return None
 
 
+def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str]) -> tuple[any, any, any, int, Callable[[any], any]]:
+	blender_object = context.get_imported_resource(stf_path[0])
+	match(stf_path[1]):
+		case "t":
+			data_index = translate_translation_property_to_blender(stf_path[2])
+			return None, "OBJECT", "pose.bones[\"" + blender_object.name + "\"].location", data_index, get_translation_to_blender_translation_func(data_index)
+		case "r":
+			data_index = translate_rotation_property_to_blender(stf_path[2])
+			return None, "OBJECT", "pose.bones[\"" + blender_object.name + "\"].rotation_quaternion", data_index, get_rotation_to_blender_translation_func(data_index)
+		case "s":
+			data_index = translate_scale_property_to_blender(stf_path[2])
+			return None, "OBJECT", "pose.bones[\"" + blender_object.name + "\"].scale", data_index, get_scale_to_blender_translation_func(data_index)
+		case "components":
+			return context.resolve_stf_property_path(stf_path[2:])
+
+	# TODO object visibility
+
+	return None
+
+
 class STF_Module_STF_Bone(STF_Module):
 	stf_type = _stf_type
 	stf_kind = "node"
@@ -125,6 +145,7 @@ class STF_Module_STF_Bone(STF_Module):
 	understood_application_property_path_types = [bpy.types.Bone]
 	understood_application_property_path_parts = ["location", "rotation_quaternion", "scale"]
 	resolve_property_path_to_stf_func = _resolve_property_path_to_stf_func
+	resolve_stf_property_to_blender_func = _resolve_stf_property_to_blender_func
 
 
 register_stf_modules = [

@@ -26,13 +26,19 @@ def stf_node_resolve_stf_property_to_blender_func(context: STF_ImportContext, st
 	blender_object = context.get_imported_resource(stf_path[0])
 	match(stf_path[1]):
 		case "t":
-			return blender_object, "OBJECT", "location", translate_translation_property_to_blender(stf_path[2]), get_translation_to_blender_translation_func
+			data_index = translate_translation_property_to_blender(stf_path[2])
+			return blender_object, "OBJECT", "location", data_index, get_translation_to_blender_translation_func(data_index)
 		case "r":
-			return blender_object, "OBJECT", "rotation_quaternion", translate_rotation_property_to_blender(stf_path[2]), get_rotation_to_blender_translation_func
+			data_index = translate_rotation_property_to_blender(stf_path[2])
+			return blender_object, "OBJECT", "rotation_quaternion", data_index, get_rotation_to_blender_translation_func(data_index)
 		case "s":
-			return blender_object, "OBJECT", "scale", translate_scale_property_to_blender(stf_path[2]), get_scale_to_blender_translation_func
+			data_index = translate_scale_property_to_blender(stf_path[2])
+			return blender_object, "OBJECT", "scale", data_index, get_scale_to_blender_translation_func(data_index)
 		case "instance" | "components":
-			return context.resolve_stf_property_path(stf_path[2:])
+			module_ret =  context.resolve_stf_property_path(stf_path[2:])
+			if(module_ret):
+				target_object, slot_type, fcurve_target, property_index, conversion_func = module_ret # Ignore Target Object for now
+				return blender_object, slot_type, fcurve_target, property_index, conversion_func
 
 	# TODO object visibility
 
