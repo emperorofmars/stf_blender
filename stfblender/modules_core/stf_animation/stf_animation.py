@@ -35,6 +35,22 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, pa
 		if(target_ret):
 			target_object, slot_type, fcurve_target, property_index, conversion_func = target_ret
 
+			selected_slot_link = None
+			for slot_link in blender_animation.slot_links:
+				if(slot_link.target == target_object):
+					for slot in blender_animation.slots:
+						if(slot.handle == slot_link.slot_handle):
+							selected_slot_link = slot_link
+							break
+				if(selected_slot_link):
+					break
+
+			if(not selected_slot_link):
+				blender_slot = blender_animation.slots.new(slot_type, target_object.name + " - " + slot_type)
+				selected_slot_link = blender_animation.slot_links.add()
+				selected_slot_link.slot_handle = blender_slot.handle
+				selected_slot_link.target = target_object
+
 
 			"""print()
 			print(track["target"])
@@ -72,15 +88,15 @@ def _stf_export(context: STF_ExportContext, application_object: any, parent_appl
 				strip: bpy.types.ActionKeyframeStrip = strip
 				for channelbag in strip.channelbags:
 					# Get the target for this set of animation tracks from the Slot Link extension. (Why can't you be normal Blender?)
-					assignment = None
+					selected_slot_link = None
 					for slot_link in blender_animation.slot_links:
 						if(slot_link.slot_handle == channelbag.slot_handle):
-							assignment = slot_link
+							selected_slot_link = slot_link
 							break
-					if(assignment):
+					if(selected_slot_link):
 						for fcurve in channelbag.fcurves:
 							# Get bezier export import done first, then deal with other interpolation kinds and whatever else
-							property_translation = context.resolve_application_property_path(slot_link.target, fcurve.data_path, fcurve.array_index)
+							property_translation = context.resolve_application_property_path(selected_slot_link.target, fcurve.data_path, fcurve.array_index)
 
 							if(property_translation):
 								target, conversion_func = property_translation
