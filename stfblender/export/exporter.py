@@ -2,8 +2,9 @@ import json
 import bpy
 from bpy_extras.io_utils import ExportHelper
 
-from ..stf_meta import draw_meta_editor
 
+from ..stf_meta import draw_meta_editor
+from ...libstf.stf_report import STFReportSeverity
 from ...libstf.stf_registry import get_export_modules
 from ...libstf.stf_export_state import STF_ExportState
 from ...libstf.stf_export_context import STF_ExportContext
@@ -24,6 +25,7 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 	format: bpy.props.EnumProperty(items=[("binary", "Binary", ""), ("json_contained", "Json (self contained)", ""), ("json_seperate", "Json (seperate buffers)", "")], default="binary", name="Format") # type: ignore
 	debug: bpy.props.BoolProperty(name="Export Debug Json File", default=True) # type: ignore
 
+
 	def invoke(self, context, event):
 		if(self.scene_collection_as_root):
 			context.scene.stf_collection_selector = None
@@ -32,6 +34,7 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 		elif(context.scene.stf_root_collection):
 			context.scene.stf_collection_selector = context.scene.stf_root_collection
 		return ExportHelper.invoke(self, context, event)
+
 
 	def execute(self, context):
 		context.window.cursor_set('WAIT')
@@ -94,11 +97,18 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 				files.append(open(export_filepath, "wb"))
 				files[len(files) - 1].write(json_string)
 
+			do_report = False
 			if(len(stf_state._reports) > 0):
+				for report in stf_state._reports:
+					if(report.severity.value >= STFReportSeverity.Info.value):
+						do_report = True
+						break
+			if(do_report):
 				self.report({'WARNING'}, "STF asset exported with reports!")
 				for report in stf_state._reports:
-					print(report.to_string() + "\n")
-					self.report({'WARNING'}, report.to_string())
+					if(report.severity.value >= STFReportSeverity.Info.value):
+						print(report.to_string() + "\n")
+						self.report({'WARNING'}, report.to_string())
 			else:
 				self.report({'INFO'}, "STF asset exported successfully!")
 			return {"FINISHED"}
@@ -107,20 +117,23 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 				if(file is not None and not file.closed): file.close()
 			context.window.cursor_set('DEFAULT')
 
+
 	def draw(self, context):
 		self.layout.separator(factor=1, type="SPACE")
 		self.layout.prop_search(bpy.context.scene, "stf_collection_selector", bpy.data, "collections", text="Root")
 		self.layout.label(text="Remove Collection to export full scene")
 
-		self.layout.separator(factor=2, type="LINE")
+		# TODO support exploded format at some point
+		"""self.layout.separator(factor=2, type="LINE")
 		self.layout.prop(self, property="format")
 		if(self.format == "binary"):
-			self.layout.prop(self, property="debug")
+			self.layout.prop(self, property="debug")"""
 
 		self.layout.separator(factor=2, type="LINE")
 		box = self.layout.box()
 		box.label(text="Asset Meta")
 		draw_meta_editor(box, context.scene.stf_collection_selector if context.scene.stf_collection_selector else context.scene.collection, context.scene.stf_collection_selector == context.scene.collection)
+
 
 
 def export_button(self, context):

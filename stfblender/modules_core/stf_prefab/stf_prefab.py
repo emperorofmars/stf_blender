@@ -24,7 +24,8 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	for node_id in json_resource.get("root_nodes", []):
 		context.import_resource(node_id, context_object=collection)
 
-	# TODO animations
+	for animation_id in json_resource.get("animations", []):
+		context.import_resource(animation_id, context_object=collection)
 
 	return collection
 

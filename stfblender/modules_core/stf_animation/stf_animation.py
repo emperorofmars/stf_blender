@@ -15,9 +15,13 @@ _stf_type = "stf.animation"
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, parent_application_object: any) -> any:
 	blender_animation = bpy.data.actions.new(json_resource.get("name", "STF Animation"))
 	blender_animation.stf_id = stf_id
+	blender_animation.use_fake_user = True
 	if(json_resource.get("name")):
 		blender_animation.stf_name = json_resource["name"]
 		blender_animation.stf_name_source_of_truth = True
+
+	for track in json_resource.get("tracks", []):
+		print(track["target"])
 
 	return blender_animation
 
@@ -74,13 +78,17 @@ def _stf_export(context: STF_ExportContext, application_object: any, parent_appl
 									"keyframes": track
 								})
 							else:
-								context.report(STFReport("Invalid fcurve data_path: " + fcurve.data_path, STFReportSeverity.Debug, id, _stf_type, blender_animation))
+								context.report(STFReport("Invalid fcurve data_path: " + fcurve.data_path, STFReportSeverity.Debug, None, _stf_type, blender_animation))
 					else:
-						context.report(STFReport("Invalid Animation Target", STFReportSeverity.Debug, id, _stf_type, blender_animation))
+						context.report(STFReport("Invalid Animation Target", STFReportSeverity.Debug, None, _stf_type, blender_animation))
 
 	ret["tracks"] = stf_tracks
 
-	return ret, blender_animation.stf_id
+	if(len(stf_tracks) == 0):
+		context.report(STFReport("Empty Animation", STFReportSeverity.Debug, None, _stf_type, blender_animation))
+		return None
+	else:
+		return ret, blender_animation.stf_id
 
 
 class STF_Module_STF_Animation(STF_Module):
