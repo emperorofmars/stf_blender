@@ -68,16 +68,13 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, pa
 			fcurve: bpy.types.FCurve = selected_channelbag.fcurves.new(fcurve_target, index=property_index)
 
 			for stf_keyframe in track.get("keyframes", []):
-				keyframe = fcurve.keyframe_points.insert(stf_keyframe[0], stf_keyframe[1])
+				keyframe = fcurve.keyframe_points.insert(stf_keyframe[0], stf_keyframe[1], options="FAST")
 				keyframe.handle_left.x = stf_keyframe[2]
 				keyframe.handle_left.y = stf_keyframe[3]
 				keyframe.handle_right.x = stf_keyframe[4]
 				keyframe.handle_right.y = stf_keyframe[5]
 
-
-			"""print()
-			print(track["target"])
-			print(str(target_object) + " (" + slot_type +"): " + str(fcurve_target) + " [" + str(property_index) + "] - " + str(conversion_func))"""
+			fcurve.keyframe_points.handles_recalc()
 
 	return blender_animation
 
