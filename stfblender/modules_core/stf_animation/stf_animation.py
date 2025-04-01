@@ -30,12 +30,17 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, pa
 		blender_animation.frame_start = json_resource["range"][0]
 		blender_animation.frame_end = json_resource["range"][1]
 
+	layer = blender_animation.layers.new("stf_layer")
+	strip: bpy.types.ActionKeyframeStrip = layer.strips.new(type="KEYFRAME")
+
 	for track in json_resource.get("tracks", []):
 		target_ret = context.resolve_stf_property_path(track.get("target", []))
 		if(target_ret):
 			target_object, slot_type, fcurve_target, property_index, conversion_func = target_ret
 
 			selected_slot_link = None
+			selected_channelbag = None
+
 			for slot_link in blender_animation.slot_links:
 				if(slot_link.target == target_object):
 					for slot in blender_animation.slots:
@@ -50,6 +55,24 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, pa
 				selected_slot_link = blender_animation.slot_links.add()
 				selected_slot_link.slot_handle = blender_slot.handle
 				selected_slot_link.target = target_object
+				selected_channelbag = strip.channelbags.new(blender_slot)
+
+			for slot in blender_animation.slots:
+				if(slot.handle == selected_slot_link.slot_handle):
+					blender_slot = slot
+					break
+			for channelbag in strip.channelbags:
+				if(channelbag.slot_handle == blender_slot.handle):
+					selected_channelbag = channelbag
+
+			fcurve: bpy.types.FCurve = selected_channelbag.fcurves.new(fcurve_target, index=property_index)
+
+			for stf_keyframe in track.get("keyframes", []):
+				keyframe = fcurve.keyframe_points.insert(stf_keyframe[0], stf_keyframe[1])
+				keyframe.handle_left.x = stf_keyframe[2]
+				keyframe.handle_left.y = stf_keyframe[3]
+				keyframe.handle_right.x = stf_keyframe[4]
+				keyframe.handle_right.y = stf_keyframe[5]
 
 
 			"""print()
