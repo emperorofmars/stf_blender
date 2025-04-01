@@ -30,19 +30,20 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, pa
 		blender_animation.frame_start = json_resource["range"][0]
 		blender_animation.frame_end = json_resource["range"][1]
 
+	# This is a mess.
 	layer = blender_animation.layers.new("stf_layer")
 	strip: bpy.types.ActionKeyframeStrip = layer.strips.new(type="KEYFRAME")
 
 	for track in json_resource.get("tracks", []):
 		target_ret = context.resolve_stf_property_path(track.get("target", []))
 		if(target_ret):
-			target_object, slot_type, fcurve_target, property_index, conversion_func = target_ret
+			target_object, application_object_property_index, slot_type, fcurve_target, property_index, conversion_func = target_ret
 
 			selected_slot_link = None
 			selected_channelbag = None
 
 			for slot_link in blender_animation.slot_links:
-				if(slot_link.target == target_object):
+				if(slot_link.target == target_object and slot_link.datablock_index == application_object_property_index):
 					for slot in blender_animation.slots:
 						if(slot.handle == slot_link.slot_handle):
 							selected_slot_link = slot_link
@@ -55,6 +56,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, pa
 				selected_slot_link = blender_animation.slot_links.add()
 				selected_slot_link.slot_handle = blender_slot.handle
 				selected_slot_link.target = target_object
+				selected_slot_link.datablock_index = application_object_property_index
 				selected_channelbag = strip.channelbags.new(blender_slot)
 
 			for slot in blender_animation.slots:
@@ -116,7 +118,7 @@ def _stf_export(context: STF_ExportContext, application_object: any, parent_appl
 					if(selected_slot_link):
 						for fcurve in channelbag.fcurves:
 							# Get bezier export import done first, then deal with other interpolation kinds and whatever else
-							property_translation = context.resolve_application_property_path(selected_slot_link.target, fcurve.data_path, fcurve.array_index)
+							property_translation = context.resolve_application_property_path(selected_slot_link.target, selected_slot_link.datablock_index, fcurve.data_path, fcurve.array_index)
 
 							if(property_translation):
 								target, conversion_func = property_translation

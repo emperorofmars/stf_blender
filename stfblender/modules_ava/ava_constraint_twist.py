@@ -36,7 +36,7 @@ def _stf_export(context: STF_ExportContext, application_object: AVA_Constraint_T
 	return ret, application_object.stf_id
 
 
-def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: any, data_path: str, data_index: int) -> tuple[list[str], Callable[[any], any]]:
+def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: any, application_object_property_index: int, data_path: str, data_index: int) -> tuple[list[str], Callable[[any], any]]:
 	if(match := re.search(r"^stf_ava_constraint_twist\[(?P<component_index>[\d]+)\].weight", data_path)):
 		component = application_object.stf_ava_constraint_twist[int(match.groupdict()["component_index"])]
 		return [application_object.stf_id, "components", component.stf_id, "weight"], None
