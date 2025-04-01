@@ -36,9 +36,9 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, pa
 			target_object, slot_type, fcurve_target, property_index, conversion_func = target_ret
 
 
-			print()
+			"""print()
 			print(track["target"])
-			print(str(target_object) + " (" + slot_type +"): " + str(fcurve_target) + " [" + str(property_index) + "] - " + str(conversion_func))
+			print(str(target_object) + " (" + slot_type +"): " + str(fcurve_target) + " [" + str(property_index) + "] - " + str(conversion_func))"""
 
 	return blender_animation
 

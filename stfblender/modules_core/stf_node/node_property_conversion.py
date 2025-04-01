@@ -22,8 +22,18 @@ def stf_node_resolve_property_path_to_stf_func(context: STF_ExportContext, appli
 	return None
 
 
-def stf_node_resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str]) -> tuple[any, any, int, Callable[[any], any]]:
+def stf_node_resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str]) -> tuple[any, any, any, int, Callable[[any], any]]:
+	blender_object = context.get_imported_resource(stf_path[0])
+	match(stf_path[1]):
+		case "t":
+			return blender_object, "OBJECT", "location", translate_translation_property_to_blender(stf_path[2]), get_translation_to_blender_translation_func
+		case "r":
+			pass
+		case "s":
+			pass
+		case "instance" | "components":
+			return context.resolve_stf_property_path(stf_path[2:])
 
-	print("AAA")
+	# TODO object visibility
 
 	return None
