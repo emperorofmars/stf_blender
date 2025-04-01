@@ -28,9 +28,9 @@ def stf_node_resolve_stf_property_to_blender_func(context: STF_ImportContext, st
 		case "t":
 			return blender_object, "OBJECT", "location", translate_translation_property_to_blender(stf_path[2]), get_translation_to_blender_translation_func
 		case "r":
-			pass
+			return blender_object, "OBJECT", "rotation_quaternion", translate_rotation_property_to_blender(stf_path[2]), get_rotation_to_blender_translation_func
 		case "s":
-			pass
+			return blender_object, "OBJECT", "scale", translate_scale_property_to_blender(stf_path[2]), get_scale_to_blender_translation_func
 		case "instance" | "components":
 			return context.resolve_stf_property_path(stf_path[2:])
 
