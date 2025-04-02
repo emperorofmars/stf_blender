@@ -15,19 +15,17 @@ class AVA_Constraint_Twist(STF_BlenderComponentBase):
 	weight: bpy.props.FloatProperty(name="Weight", default=0.5) # type: ignore
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_BlenderComponentModule, parent_application_object: any, component: AVA_Constraint_Twist):
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_BlenderComponentModule, context_object: any, component: AVA_Constraint_Twist):
 	layout.prop(component, "weight")
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, parent_application_object: any) -> any:
-	component_ref, component = add_component(parent_application_object, _blender_property_name, id, _stf_type)
-
+def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
+	component_ref, component = add_component(context_object, _blender_property_name, stf_id, _stf_type)
 	component.weight = json_resource.get("weight")
-
 	return component
 
 
-def _stf_export(context: STF_ExportContext, application_object: AVA_Constraint_Twist, parent_application_object: any) -> tuple[dict, str]:
+def _stf_export(context: STF_ExportContext, application_object: AVA_Constraint_Twist, context_object: any) -> tuple[dict, str]:
 	ret = {
 		"type": _stf_type,
 		"name": application_object.stf_name,
@@ -43,6 +41,17 @@ def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_o
 	return None
 
 
+def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: any) -> tuple[any, int, any, any, int, Callable[[any], any]]:
+	blender_object = context.get_imported_resource(stf_path[0])
+	match(stf_path[1]):
+		case "weight":
+			for component_index, component in enumerate(application_object.stf_ava_constraint_twist):
+				if(component.stf_id == blender_object.stf_id):
+					break
+			return None, 0, "OBJECT", "stf_ava_constraint_twist[" + str(component_index) + "].weight", 0, None
+	return None
+
+
 class STF_Module_AVA_Constraint_Twist(STF_BlenderComponentModule):
 	stf_type = _stf_type
 	stf_kind = "component"
@@ -54,6 +63,7 @@ class STF_Module_AVA_Constraint_Twist(STF_BlenderComponentModule):
 	understood_application_property_path_types = [bpy.types.Object, bpy.types.Bone]
 	understood_application_property_path_parts = ["stf_ava_constraint_twist"]
 	resolve_property_path_to_stf_func = _resolve_property_path_to_stf_func
+	resolve_stf_property_to_blender_func = _resolve_stf_property_to_blender_func
 
 	blender_property_name = _blender_property_name
 	single = True

@@ -113,7 +113,7 @@ def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_o
 	return None
 
 
-def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str]) -> tuple[any, int, any, any, int, Callable[[any], any]]:
+def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: any) -> tuple[any, int, any, any, int, Callable[[any], any]]:
 	blender_object = context.get_imported_resource(stf_path[0])
 	match(stf_path[1]):
 		case "t":
@@ -126,9 +126,7 @@ def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: 
 			data_index = translate_scale_property_to_blender(stf_path[2])
 			return None, 0, "OBJECT", "pose.bones[\"" + blender_object.name + "\"].scale", data_index, get_scale_to_blender_translation_func(data_index)
 		case "components":
-			return context.resolve_stf_property_path(stf_path[2:])
-
-	# TODO object visibility
+			return context.resolve_stf_property_path(stf_path[2:], blender_object)
 
 	return None
 

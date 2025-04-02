@@ -1,5 +1,6 @@
 import sys
 from types import ModuleType
+
 from .stf_module import STF_ExportComponentHook, STF_Module
 
 """
@@ -25,10 +26,10 @@ def get_search_modules(search_modules: list[ModuleType | str] | None = None) -> 
 
 def get_stf_modules_from_pymodule(module: ModuleType) -> list[str, STF_Module]:
 	ret = []
-	if(stf_processor_list := getattr(module, "register_stf_modules", None)):
-		if(isinstance(stf_processor_list, list)):
-			for stf_processor in stf_processor_list:
-				ret.append(stf_processor)
+	if(stf_module_list := getattr(module, "register_stf_modules", None)):
+		if(isinstance(stf_module_list, list)):
+			for stf_module in stf_module_list:
+				ret.append(stf_module)
 	return ret
 
 
@@ -65,31 +66,22 @@ def get_import_modules(search_modules: list[ModuleType | str] | None = None) -> 
 def get_export_modules(search_modules: list[ModuleType | str] | None = None) -> tuple[dict[any, list[STF_Module]], dict[any, list[STF_ExportComponentHook]]]:
 	stf_modules = get_stf_modules(search_modules)
 
-	tmp_registered_modules = {}
-	tmp_registered_hooks = {}
-
 	ret_modules = {}
 	ret_hooks = {}
 
 	for stf_module in stf_modules:
 		if(hasattr(stf_module, "understood_application_types") and hasattr(stf_module, "export_func")):
-			if(not hasattr(stf_module, "hook_target_application_types")):
-				for understood_type in stf_module.understood_application_types:
-					if(not tmp_registered_modules.get(understood_type) or is_priority_higher(tmp_registered_modules[understood_type], stf_module)):
-						tmp_registered_modules[understood_type] = stf_module
+			for understood_type in stf_module.understood_application_types:
+				if(not ret_modules.get(understood_type)):
+					ret_modules[understood_type] = [stf_module]
+				else:
+					ret_modules[understood_type].append(stf_module)
 
-						if(not ret_modules.get(understood_type)):
-							ret_modules[understood_type] = [stf_module]
-						else:
-							ret_modules[understood_type].append(stf_module)
-			else:
-				for understood_type in stf_module.understood_application_types:
-					if(not tmp_registered_hooks.get(understood_type) or is_priority_higher(tmp_registered_hooks[understood_type], stf_module)):
-						tmp_registered_hooks[understood_type] = stf_module
-
-						if(not ret_hooks.get(understood_type)):
-							ret_hooks[understood_type] = [stf_module]
-						else:
-							ret_hooks[understood_type].append(stf_module)
+		if(hasattr(stf_module, "hook_target_application_types") and hasattr(stf_module, "hook_apply_func") and hasattr(stf_module, "hook_can_handle_application_object_func")):
+			for understood_type in stf_module.hook_target_application_types:
+				if(not ret_hooks.get(understood_type)):
+					ret_hooks[understood_type] = [stf_module]
+				else:
+					ret_hooks[understood_type].append(stf_module)
 
 	return (ret_modules, ret_hooks)

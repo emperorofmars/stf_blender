@@ -1,4 +1,3 @@
-import io
 from typing import Callable
 
 from .stf_export_state import STF_ExportState
@@ -19,25 +18,14 @@ class STF_ExportContext:
 	def register_id(self, application_object: any, stf_id: str):
 		self._state.register_id(application_object, stf_id)
 
-	def register_serialized_resource(self, application_object: any, json_resource: dict, stf_id: str):
-		self._state.register_serialized_resource(application_object, json_resource, stf_id)
 
-
-	def __run_hooks(self, application_object: any, json_resource: dict, stf_id: str):
-		"""Export components from application native constructs"""
+	def __run_hooks(self, application_object: any, context_object: any, json_resource: dict, stf_id: str):
+		"""Run hooks on application object"""
 		if(hooks := self._state.determine_hooks(application_object)):
 			for hook in hooks:
-				can_handle, hook_objects = hook.hook_can_handle_application_object_func(application_object)
-				if(can_handle and hook_objects and len(hook_objects) > 0):
+				if(hook.hook_can_handle_application_object_func(application_object)):
 					if("components" not in json_resource): json_resource["components"] = []
-					for hook_object in hook_objects:
-						hook_ret = hook.export_func(self, hook_object, application_object)
-						if(hook_ret):
-							hook_json_resource, hook_id = hook_ret
-							self._state.register_serialized_resource(hook_object, hook_json_resource, hook_id)
-							json_resource["components"].append(hook_id)
-						else:
-							self.report(STFReport("Export Hook Failed", STFReportSeverity.Error, stf_id, hook.stf_type, application_object))
+					hook.hook_apply_func(self, application_object, context_object)
 
 
 	def __run_components(self, application_object: any, json_resource: dict, stf_id: str, components: list):
@@ -72,7 +60,7 @@ class STF_ExportContext:
 
 				if(selected_module.stf_kind not in ["component", "instance"]):
 					# Export components from application native constructs
-					self.__run_hooks(application_object, json_resource, resource_id)
+					self.__run_hooks(application_object, context_object, json_resource, resource_id)
 
 					if(hasattr(selected_module, "get_components_func")):
 						# Export components explicitely defined

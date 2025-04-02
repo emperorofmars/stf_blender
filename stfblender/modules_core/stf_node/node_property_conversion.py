@@ -22,7 +22,7 @@ def stf_node_resolve_property_path_to_stf_func(context: STF_ExportContext, appli
 	return None
 
 
-def stf_node_resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str]) -> tuple[any, int, any, any, int, Callable[[any], any]]:
+def stf_node_resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: any) -> tuple[any, int, any, any, int, Callable[[any], any]]:
 	blender_object = context.get_imported_resource(stf_path[0])
 	match(stf_path[1]):
 		case "t":
@@ -35,7 +35,7 @@ def stf_node_resolve_stf_property_to_blender_func(context: STF_ImportContext, st
 			data_index = translate_scale_property_to_blender(stf_path[2])
 			return blender_object, 0, "OBJECT", "scale", data_index, get_scale_to_blender_translation_func(data_index)
 		case "instance" | "components":
-			module_ret =  context.resolve_stf_property_path(stf_path[2:])
+			module_ret =  context.resolve_stf_property_path(stf_path[2:], blender_object)
 			if(module_ret):
 				target_object, application_object_property_index, slot_type, fcurve_target, property_index, conversion_func = module_ret # Ignore Target Object for now
 				return blender_object, application_object_property_index, slot_type, fcurve_target, property_index, conversion_func
