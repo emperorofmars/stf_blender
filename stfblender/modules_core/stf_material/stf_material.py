@@ -35,12 +35,10 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 			material_value_module: STF_Material_Value_Module_Base = material_value_module
 			if(material_value_module.value_type == stf_property.get("type")):
 				prop, value_ref, value = add_property(blender_material, property_type, material_value_module)
-				if(stf_value := stf_property.get("value")):
-					material_value_module.value_import_func(context, blender_material, stf_value, value)
-				elif(stf_values := stf_property.get("values")):
-					prop.multi_value = True
-					if(len(stf_values) > 0):
-						material_value_module.value_import_func(context, blender_material, stf_values[0], value)
+				stf_values = stf_property.get("values")
+				prop.multi_value = True
+				if(len(stf_values) > 0):
+					material_value_module.value_import_func(context, blender_material, stf_values[0], value)
 					if(len(stf_values) > 1):
 						for stf_value in stf_values[1:]:
 							value_ref, value = add_value_to_property(blender_material, len(blender_material.stf_material_properties) - 1)
@@ -90,10 +88,7 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 							values.append(mat_module.value_export_func(context, blender_material, property_value))
 							break
 
-		if(property.multi_value):
-			json_prop["values"] = values
-		elif(len(values) > 0):
-			json_prop["value"] = values[0]
+		json_prop["values"] = values
 
 		ret["properties"][property.property_type] = json_prop
 
