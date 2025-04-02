@@ -1,4 +1,3 @@
-
 from .color_value import STF_Material_Value_Module_Color
 from .float_value import STF_Material_Value_Module_Float
 from .int_value import STF_Material_Value_Module_Int

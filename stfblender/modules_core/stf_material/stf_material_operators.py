@@ -4,12 +4,11 @@ from .stf_material_definition import STF_Material_Property, STF_Material_Value_M
 from .material_value_modules import blender_material_value_modules
 
 
-def add_property(blender_material: bpy.types.Material, property_type: str, value_module: STF_Material_Value_Module_Base, group: str = None) -> tuple[STF_Material_Property, STF_Material_Value_Ref, STF_Material_Value_Module_Base]:
+def add_property(blender_material: bpy.types.Material, property_type: str, value_module: STF_Material_Value_Module_Base) -> tuple[STF_Material_Property, STF_Material_Value_Ref, STF_Material_Value_Module_Base]:
 	prop = blender_material.stf_material_properties.add()
 	prop.property_type = property_type
 	prop.value_property_name = value_module.property_name
 	prop.value_type = value_module.value_type
-	if(group): prop.group = group
 
 	value_ref, value = add_value_to_property(blender_material, len(blender_material.stf_material_properties) - 1)
 	return prop, value_ref, value

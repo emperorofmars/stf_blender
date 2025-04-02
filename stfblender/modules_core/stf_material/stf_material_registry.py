@@ -2,6 +2,7 @@ import bpy
 
 from .material_value_modules import blender_material_value_modules
 
+
 def _build_stf_material_value_modules_enum(self, context):
 	return [((mat_module.value_type, mat_module.value_type, "")) for mat_module in blender_material_value_modules]
 

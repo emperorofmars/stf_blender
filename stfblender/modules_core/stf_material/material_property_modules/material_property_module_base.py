@@ -7,4 +7,3 @@ class Material_Property_Module_Base:
 	priority: int = 0
 	from_blender_func: Callable[[bpy.types.Material], bool]
 	to_blender_func: Callable[[bpy.types.Material], bool]
-	draw_func: Callable[[bpy.types.Material], bool]

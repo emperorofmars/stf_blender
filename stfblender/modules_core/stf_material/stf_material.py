@@ -1,15 +1,15 @@
 import bpy
 
-
-from .stf_material_definition import STF_Material_Definition, STF_Material_Property, STF_Material_Value_Ref
+from .stf_material_definition import STF_Material_Definition, STF_Material_Property, STF_Material_Value_Module_Base
+from .material_value_modules import blender_material_value_modules
 from .blender_material_to_stf import blender_material_to_stf
+from .stf_material_operators import add_property, add_value_to_property
 from ....libstf.stf_export_context import STF_ExportContext
 from ....libstf.stf_import_context import STF_ImportContext
 from ....libstf.stf_module import STF_Module
 from ...utils.component_utils import get_components_from_object
 from ...utils.id_utils import ensure_stf_id
 from ...utils.boilerplate import boilerplate_register, boilerplate_unregister
-from .material_value_modules import blender_material_value_modules
 
 
 _stf_type = "stf.material"
@@ -23,6 +23,31 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 		blender_material.stf_name_source_of_truth = True
 	blender_material.stf_is_source_of_truth = True
 	context.register_imported_resource(stf_id, blender_material)
+
+	for style_hint in json_resource.get("style_hints", []):
+		hint = blender_material.stf_material.style_hints.add()
+		hint.value = style_hint
+
+	# todo shader targets
+
+	for property_type, stf_property in json_resource.get("properties", {}).items():
+		for material_value_module in blender_material_value_modules:
+			material_value_module: STF_Material_Value_Module_Base = material_value_module
+			if(material_value_module.value_type == stf_property.get("type")):
+				prop, value_ref, value = add_property(blender_material, property_type, material_value_module)
+				if(stf_value := stf_property.get("value")):
+					material_value_module.value_import_func(context, blender_material, stf_value, value)
+				elif(stf_values := stf_property.get("values")):
+					prop.multi_value = True
+					if(len(stf_values) > 0):
+						material_value_module.value_import_func(context, blender_material, stf_values[0], value)
+					if(len(stf_values) > 1):
+						for stf_value in stf_values[1:]:
+							value_ref, value = add_value_to_property(blender_material, len(blender_material.stf_material_properties) - 1)
+							material_value_module.value_import_func(context, blender_material, stf_value, value)
+				else:
+					pass # TODO report fail
+				break
 
 	return blender_material
 
@@ -54,7 +79,7 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 
 	for property in blender_material.stf_material_properties:
 		property: STF_Material_Property = property
-		json_prop = {"value_type": property.value_type}
+		json_prop = {"type": property.value_type}
 
 		values = []
 		for value_ref in property.values:

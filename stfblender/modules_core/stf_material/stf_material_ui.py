@@ -26,12 +26,10 @@ class STFRemoveMaterialComponentOperator(bpy.types.Operator, STFRemoveComponentO
 	bl_idname = "stf.remove_material_component"
 	def get_property(self, context): return context.material
 
-# TODO draw group list
-
 class STFDrawMaterialPropertyList(bpy.types.UIList):
 	bl_idname = "COLLECTION_UL_stf_material_list"
 	def draw_item(self, context, layout, data, item: STF_Material_Property, icon, active_data, active_propname, index: int):
-		layout.label(text=(item.property_group + ": " if item.property_group else "Custom Property: ") + item.property_type + " (" + item.value_type + ")")
+		layout.label(text=item.property_type + " (" + item.value_type + ")")
 
 class STFDrawMaterialPropertyValueList(bpy.types.UIList):
 	bl_idname = "COLLECTION_UL_stf_material_value_list"
@@ -92,7 +90,6 @@ class STFMaterialSpatialPanel(bpy.types.Panel):
 				# Draw property
 				prop: STF_Material_Property = context.material.stf_material_properties[context.material.stf_active_material_property_index]
 				self.layout.prop(prop, "property_type") # TODO handle understood property types
-				self.layout.prop(prop, "property_group")
 				self.layout.prop(prop, "multi_value")
 
 				# Draw property value(s)

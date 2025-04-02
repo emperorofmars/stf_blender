@@ -24,4 +24,3 @@ class Blender_Material_Property_Module_Color(Material_Property_Module_Base):
 	priority = 0
 	from_blender_func = _from_blender_func
 	to_blender_func = None
-	draw_func = None
