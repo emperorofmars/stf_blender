@@ -87,7 +87,7 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 				if(mat_module.property_name == property.value_property_name):
 					for property_value in getattr(blender_material, property.value_property_name):
 						if(property_value.value_id == value_ref.value_id):
-							values.append(mat_module.value_export_func(context, blender_material, getattr(blender_material, property.value_property_name)[0]))
+							values.append(mat_module.value_export_func(context, blender_material, property_value))
 							break
 
 		if(property.multi_value):

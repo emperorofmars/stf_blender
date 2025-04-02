@@ -10,11 +10,11 @@ class STF_Material_Value_Color(STF_Material_Value_Base):
 
 
 def _value_import_func(context: STF_ImportContext, blender_material: bpy.types.Material, json_resource: any, value: STF_Material_Value_Color):
-	value.color = (json_resource[0],json_resource[1], json_resource[2])
+	value.color = (json_resource[0],json_resource[1], json_resource[2], json_resource[3])
 
 
 def _value_export_func(context: STF_ExportContext, blender_material: bpy.types.Material, value: STF_Material_Value_Color) -> any:
-	return [value.color[0], value.color[1], value.color[2]]
+	return [value.color[0], value.color[1], value.color[2], value.color[3]]
 
 
 def _draw_func(layout: bpy.types.UILayout, context: bpy.types.Context, blender_material: bpy.types.Material, value: STF_Material_Value_Color):
