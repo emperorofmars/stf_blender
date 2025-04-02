@@ -28,7 +28,12 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 		hint = blender_material.stf_material.style_hints.add()
 		hint.value = style_hint
 
-	# todo shader targets
+	for stf_target, stf_shaders in blender_material.get("shader_targets", {}).items():
+		shader_target = blender_material.stf_material.shader_targets.add()
+		shader_target.target = stf_target
+		for stf_shader in stf_shaders:
+			shader = shader_target.shaders.add()
+			shader.value = stf_shader
 
 	for property_type, stf_property in json_resource.get("properties", {}).items():
 		for material_value_module in blender_material_value_modules:

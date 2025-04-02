@@ -66,48 +66,48 @@ class STFMaterialSpatialPanel(bpy.types.Panel):
 		self.layout.separator(factor=2, type="LINE")
 
 		self.layout.prop(context.material, "stf_is_source_of_truth")
-		if(context.material.stf_is_source_of_truth):
-			# TODO buttons to clear the STF material, apply it to the Blender material, and to parse it from the Blender material
 
-			# STF Material Properties
-			self.layout.prop(context.material.stf_material, "style_hints")
+		# TODO buttons to clear the STF material, apply it to the Blender material, and to parse it from the Blender material
 
-			# TODO list properties by group, allow for custom hot-loaded code to draw entire groups, only list properties like that which don't have a recognized group
+		# STF Material Properties
+		self.layout.prop(context.material.stf_material, "style_hints")
 
-			# Draw List of ungrouped properties
-			row_property_list = self.layout.row()
-			row_property_list.template_list(STFDrawMaterialPropertyList.bl_idname, "", context.material, "stf_material_properties", context.material, "stf_active_material_property_index")
+		# TODO list properties by group, allow for custom hot-loaded code to draw entire groups, only list properties like that which don't have a recognized group
 
-			row = self.layout.row(align=True)
-			row.prop(context.scene, "stf_material_value_modules", text="")
-			row.operator(STFAddMaterialProperty.bl_idname, icon="ADD")
+		# Draw List of ungrouped properties
+		row_property_list = self.layout.row()
+		row_property_list.template_list(STFDrawMaterialPropertyList.bl_idname, "", context.material, "stf_material_properties", context.material, "stf_active_material_property_index")
 
-			self.layout.separator(factor=2, type="SPACE")
+		row = self.layout.row(align=True)
+		row.prop(context.scene, "stf_material_value_modules", text="")
+		row.operator(STFAddMaterialProperty.bl_idname, icon="ADD")
 
-			if(len(context.material.stf_material_properties) > context.material.stf_active_material_property_index):
-				row_property_list.operator(STFRemoveMaterialProperty.bl_idname, text="", icon="X").index = context.material.stf_active_material_property_index
+		self.layout.separator(factor=2, type="SPACE")
 
-				# Draw property
-				prop: STF_Material_Property = context.material.stf_material_properties[context.material.stf_active_material_property_index]
-				self.layout.prop(prop, "property_type") # TODO handle understood property types
-				self.layout.prop(prop, "multi_value")
+		if(len(context.material.stf_material_properties) > context.material.stf_active_material_property_index):
+			row_property_list.operator(STFRemoveMaterialProperty.bl_idname, text="", icon="X").index = context.material.stf_active_material_property_index
 
-				# Draw property value(s)
+			# Draw property
+			prop: STF_Material_Property = context.material.stf_material_properties[context.material.stf_active_material_property_index]
+			self.layout.prop(prop, "property_type") # TODO handle understood property types
+			self.layout.prop(prop, "multi_value")
+
+			# Draw property value(s)
+			if(prop.multi_value):
+				self.layout.separator(factor=1, type="SPACE")
+				row_value_list = self.layout.row()
+				row_value_list.template_list(STFDrawMaterialPropertyValueList.bl_idname, "", prop, "values", prop, "active_value_index")
+			if(value := _find_value(context, prop)):
 				if(prop.multi_value):
-					self.layout.separator(factor=1, type="SPACE")
-					row_value_list = self.layout.row()
-					row_value_list.template_list(STFDrawMaterialPropertyValueList.bl_idname, "", prop, "values", prop, "active_value_index")
-				if(value := _find_value(context, prop)):
-					if(prop.multi_value):
-						row_value_list.operator(STFRemoveMaterialPropertyValue.bl_idname, text="", icon="X").index = context.material.stf_active_material_property_index
-						self.layout.operator(STFAddMaterialPropertyValue.bl_idname).index = context.material.stf_active_material_property_index
+					row_value_list.operator(STFRemoveMaterialPropertyValue.bl_idname, text="", icon="X").index = context.material.stf_active_material_property_index
+					self.layout.operator(STFAddMaterialPropertyValue.bl_idname).index = context.material.stf_active_material_property_index
 
-					self.layout.separator(factor=1, type="SPACE")
-					_draw_value(self.layout, context, prop, value)
-				else:
-					self.layout.label(text="Invalid Value")
+				self.layout.separator(factor=1, type="SPACE")
+				_draw_value(self.layout, context, prop, value)
 			else:
-				self.layout.label(text="Invalid Property")
+				self.layout.label(text="Invalid Value")
+		else:
+			self.layout.label(text="Invalid Property")
 
 
 def _find_value(context: bpy.types.Context, prop: STF_Material_Property):
