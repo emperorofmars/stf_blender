@@ -24,8 +24,10 @@ class STF_Component_Ref(bpy.types.PropertyGroup): # Bringing polymorphism to Ble
 	blender_property_name: bpy.props.StringProperty(name="Blender Property Name") # type: ignore
 
 
-def add_component(application_object: any, blender_property_name: str, stf_id: str, stf_type: str) -> tuple[STF_Component_Ref, any]:
-	component_ref: STF_Component_Ref = application_object.stf_components.add()
+def add_component(application_object: any, blender_property_name: str, stf_id: str, stf_type: str, components_ref_property: any = None) -> tuple[STF_Component_Ref, any]:
+	if(components_ref_property is None):
+		components_ref_property = application_object.stf_components
+	component_ref: STF_Component_Ref = components_ref_property.add()
 	component_ref.stf_id = stf_id
 	component_ref.stf_type = stf_type
 	component_ref.blender_property_name = blender_property_name
@@ -45,11 +47,14 @@ class STFAddComponentOperatorBase:
 	property_name: bpy.props.StringProperty() # type: ignore
 
 	def execute(self, context):
-		add_component(self.get_property(context), self.property_name, str(uuid.uuid4()), self.stf_type)
+		add_component(self.get_property(context), self.property_name, str(uuid.uuid4()), self.stf_type, self.get_components_ref_property(context))
 		return {"FINISHED"}
 
 	def get_property(self, context) -> any:
 		pass
+
+	def get_components_ref_property(self, context) -> STF_Component_Ref:
+		return self.get_property(context).stf_components
 
 
 class STFRemoveComponentOperatorBase:
@@ -66,7 +71,7 @@ class STFRemoveComponentOperatorBase:
 
 	def execute(self, context):
 		target = self.get_property(context)
-		component_ref = target.stf_components[self.index]
+		component_ref = self.get_components_ref_property(context)[self.index]
 
 		component_type_list = getattr(target, self.property_name)
 		target_component_index = None
@@ -76,11 +81,14 @@ class STFRemoveComponentOperatorBase:
 				break
 
 		component_type_list.remove(target_component_index)
-		target.stf_components.remove(self.index)
+		self.get_components_ref_property(context).remove(self.index)
 		return {"FINISHED"}
 
 	def get_property(self, context) -> any:
 		pass
+
+	def get_components_ref_property(self, context) -> STF_Component_Ref:
+		return self.get_property(context).stf_components
 
 
 def get_components_from_object(application_object: any) -> list:

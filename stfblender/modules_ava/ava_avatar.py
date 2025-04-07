@@ -2,7 +2,7 @@ import bpy
 
 from ...libstf.stf_export_context import STF_ExportContext
 from ...libstf.stf_import_context import STF_ImportContext
-from ..utils.component_utils import STF_BlenderComponentBase, STF_BlenderComponentModule, add_component
+from ..utils.component_utils import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref, add_component
 from ..utils.op_utils import SetActiveObjectOperator
 
 
@@ -42,7 +42,7 @@ class CreateViewportObjectOperator(bpy.types.Operator):
 		return {"FINISHED"}
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_BlenderComponentModule, parent_application_object: any, component: AVA_Avatar):
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, parent_application_object: any, component: AVA_Avatar):
 	layout.prop(component, "automap")
 	if(component.viewport):
 		layout.prop(component, "viewport")

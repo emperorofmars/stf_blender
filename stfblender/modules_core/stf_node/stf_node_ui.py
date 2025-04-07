@@ -24,9 +24,9 @@ class STFRemoveObjectComponentOperator(bpy.types.Operator, STFRemoveComponentOpe
 	def get_property(self, context): return context.object
 
 
-class STFNodeSpatialPanel(bpy.types.Panel):
+class STFNodePanel(bpy.types.Panel):
 	"""STF options & export helper"""
-	bl_idname = "OBJECT_PT_stf_node_spatial_editor"
+	bl_idname = "OBJECT_PT_stf_node_editor"
 	bl_label = "STF Object Editor"
 	bl_region_type = "WINDOW"
 	bl_space_type = "PROPERTIES"
@@ -40,7 +40,7 @@ class STFNodeSpatialPanel(bpy.types.Panel):
 	def draw(self, context):
 		set_stf_component_filter(bpy.types.Object)
 
-		self.layout.label(text="stf.node.spatial")
+		self.layout.label(text="stf.node")
 
 		# Set ID
 		draw_stf_id_ui(self.layout, context, context.object, STFSetObjectIDOperator.bl_idname)

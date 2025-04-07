@@ -4,7 +4,7 @@ from typing import Callable
 
 from ...libstf.stf_export_context import STF_ExportContext
 from ...libstf.stf_import_context import STF_ImportContext
-from ..utils.component_utils import STF_BlenderComponentBase, STF_BlenderComponentModule, add_component
+from ..utils.component_utils import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref, add_component
 
 
 _stf_type = "ava.constraint.twist"
@@ -15,7 +15,7 @@ class AVA_Constraint_Twist(STF_BlenderComponentBase):
 	weight: bpy.props.FloatProperty(name="Weight", default=0.5) # type: ignore
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_BlenderComponentModule, context_object: any, component: AVA_Constraint_Twist):
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: AVA_Constraint_Twist):
 	layout.prop(component, "weight")
 
 
@@ -37,7 +37,10 @@ def _stf_export(context: STF_ExportContext, application_object: AVA_Constraint_T
 def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: any, application_object_property_index: int, data_path: str, data_index: int) -> tuple[list[str], Callable[[any], any]]:
 	if(match := re.search(r"^stf_ava_constraint_twist\[(?P<component_index>[\d]+)\].weight", data_path)):
 		component = application_object.stf_ava_constraint_twist[int(match.groupdict()["component_index"])]
-		return [application_object.stf_id, "components", component.stf_id, "weight"], None
+		for component_ref in application_object.stf_components:
+			if(component_ref.stf_id == component.stf_id):
+				return [application_object.stf_id, "components", component.stf_id, "weight"], None
+		print("WOOOOOOOOOOOOOOOOOOOOOO")
 	return None
 
 
@@ -60,13 +63,13 @@ class STF_Module_AVA_Constraint_Twist(STF_BlenderComponentModule):
 	import_func = _stf_import
 	export_func = _stf_export
 
-	understood_application_property_path_types = [bpy.types.Object, bpy.types.Bone]
+	understood_application_property_path_types = [bpy.types.Object]
 	understood_application_property_path_parts = ["stf_ava_constraint_twist"]
 	resolve_property_path_to_stf_func = _resolve_property_path_to_stf_func
 	resolve_stf_property_to_blender_func = _resolve_stf_property_to_blender_func
 
 	blender_property_name = _blender_property_name
-	single = True
+	single = False
 	filter = [bpy.types.Object, bpy.types.Bone]
 	draw_component_func = _draw_component
 

@@ -7,13 +7,24 @@ from ....libstf.stf_import_context import STF_ImportContext
 from ....libstf.stf_export_context import STF_ExportContext
 from ....libstf.stf_report import STFReport, STFReportSeverity
 from ...utils.boilerplate import boilerplate_register, boilerplate_unregister
-from ...utils.component_utils import get_components_from_object
+from ...utils.component_utils import STF_Component_Ref, get_components_from_object
 from ...utils import trs_utils
 from ...utils.id_utils import ensure_stf_id
 from .node_property_conversion import stf_node_resolve_property_path_to_stf_func, stf_node_resolve_stf_property_to_blender_func
 
 
 _stf_type = "stf.node"
+
+
+class InstanceModComponentRef(STF_Component_Ref):
+	node_id: bpy.props.StringProperty(name="Node Id") # type: ignore
+
+class STF_Instance(bpy.types.PropertyGroup):
+	stf_id: bpy.props.StringProperty(name="ID") # type: ignore
+	stf_name: bpy.props.StringProperty(name="Name") # type: ignore
+	stf_name_source_of_truth: bpy.props.BoolProperty(name="STF Name Is Source Of Truth", default=True) # type: ignore
+	stf_components: bpy.props.CollectionProperty(type=InstanceModComponentRef) # type: ignore
+	stf_active_component_index: bpy.props.IntProperty() # type: ignore
 
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
@@ -144,6 +155,9 @@ register_stf_modules = [
 
 def register():
 	boilerplate_register(bpy.types.Object, "node")
+	bpy.types.Object.stf_instance = bpy.props.PointerProperty(type=STF_Instance) # type: ignore
 
 def unregister():
+	if hasattr(bpy.types.Object, "stf_instance"):
+		del bpy.types.Object.stf_instance
 	boilerplate_unregister(bpy.types.Object, "node")

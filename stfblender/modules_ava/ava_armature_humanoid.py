@@ -2,7 +2,7 @@ import bpy
 
 from ...libstf.stf_export_context import STF_ExportContext
 from ...libstf.stf_import_context import STF_ImportContext
-from ..utils.component_utils import STF_BlenderComponentBase, STF_BlenderComponentModule, add_component
+from ..utils.component_utils import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref, add_component
 
 
 _stf_type = "ava.armature.humanoid"
@@ -13,7 +13,7 @@ class AVA_Armature_Humanoid(STF_BlenderComponentBase):
 	mappings: bpy.props.StringProperty(name="Mappings") # type: ignore
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_BlenderComponentModule, parent_application_object: any, component: AVA_Armature_Humanoid):
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, parent_application_object: any, component: AVA_Armature_Humanoid):
 	layout.prop(component, "mappings")
 
 
