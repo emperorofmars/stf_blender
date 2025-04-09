@@ -51,8 +51,8 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 			context.report(STFReport("Failed to import pose for armature: " + str(json_resource.get("armature")), STFReportSeverity.Error, stf_id, _stf_type, blender_armature))
 
 	if("mods" in json_resource):
-		if("component" in json_resource["mods"]):
-			for target_id, component_ids in json_resource["mods"]["component"].items():
+		if("components" in json_resource["mods"]):
+			for target_id, component_ids in json_resource["mods"]["components"].items():
 				for component_id in component_ids:
 					if(component := context.import_resource(component_id, blender_object)):
 						for component_ref_index, component_ref in enumerate(blender_object.stf_components):
@@ -106,7 +106,7 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 						if(component_ref.node_id not in add_component_mods):
 							add_component_mods[component_ref.node_id] = []
 						add_component_mods[component_ref.node_id].append(component_id)
-		ret["mods"] = {"component": add_component_mods}
+		ret["mods"] = {"components": add_component_mods}
 	# TODO property mods and whatnot
 
 	return ret, blender_object.stf_instance.stf_id

@@ -115,6 +115,8 @@ def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_o
 
 def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: any) -> tuple[any, int, any, any, int, Callable[[any], any]]:
 	blender_object = context.get_imported_resource(stf_path[0])
+	if(type(blender_object) is ArmatureBone):
+		blender_object = blender_object.armature.bones[blender_object.name]
 	match(stf_path[1]):
 		case "t":
 			data_index = translate_translation_property_to_blender(stf_path[2])
@@ -126,7 +128,7 @@ def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: 
 			data_index = translate_scale_property_to_blender(stf_path[2])
 			return None, 0, "OBJECT", "pose.bones[\"" + blender_object.name + "\"].scale", data_index, get_scale_to_blender_translation_func(data_index)
 		case "components":
-			return context.resolve_stf_property_path(stf_path[2:], blender_object)
+			return context.resolve_stf_property_path(stf_path[2:], application_object)
 
 	return None
 
