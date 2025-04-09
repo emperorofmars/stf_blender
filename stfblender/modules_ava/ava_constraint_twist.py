@@ -40,7 +40,7 @@ def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_o
 		for component_ref in application_object.stf_components:
 			if(component_ref.stf_id == component.stf_id):
 				return [application_object.stf_id, "components", component.stf_id, "weight"], None
-		print("WOOOOOOOOOOOOOOOOOOOOOO")
+		# TODO check application_object.stf_instance.stf_components for 'add_component' mods and 'animation_placeholders'.
 	return None
 
 

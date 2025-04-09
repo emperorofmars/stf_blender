@@ -9,6 +9,7 @@ from ....libstf.stf_import_context import STF_ImportContext
 from ...utils.id_utils import ensure_stf_id
 from ...utils import trs_utils
 from ...utils.animation_conversion_utils import *
+from ...utils.component_utils import add_component
 
 
 _stf_type = "stf.instance.armature"
@@ -48,6 +49,21 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 					next_poses += pose.children
 		else:
 			context.report(STFReport("Failed to import pose for armature: " + str(json_resource.get("armature")), STFReportSeverity.Error, stf_id, _stf_type, blender_armature))
+
+	if("mods" in json_resource):
+		if("component" in json_resource["mods"]):
+			for target_id, component_ids in json_resource["mods"]["component"].items():
+				for component_id in component_ids:
+					if(component := context.import_resource(component_id, blender_object)):
+						for component_ref_index, component_ref in enumerate(blender_object.stf_components):
+							if(component_ref.stf_id == component_id):
+								instance_component_ref = blender_object.stf_instance.stf_components.add()
+								instance_component_ref.stf_id = component_id
+								instance_component_ref.stf_type = component_ref.stf_type
+								instance_component_ref.blender_property_name = component_ref.blender_property_name
+								instance_component_ref.node_id = target_id
+								blender_object.stf_components.remove(component_ref_index)
+								break
 
 	return blender_object
 
@@ -91,6 +107,7 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 							add_component_mods[component_ref.node_id] = []
 						add_component_mods[component_ref.node_id].append(component_id)
 		ret["mods"] = {"component": add_component_mods}
+	# TODO property mods and whatnot
 
 	return ret, blender_object.stf_instance.stf_id
 
