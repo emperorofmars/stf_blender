@@ -9,13 +9,13 @@ from ...libstf.stf_file import STF_File
 
 
 class ImportSTF(bpy.types.Operator, ImportHelper):
-	"""Import a STF file (.stf/.stf.json)"""
+	"""Import a STF file (.stf)"""
 	bl_idname = 'stf.import'
 	bl_label = 'Import STF'
 	bl_options = {'PRESET', 'REGISTER', 'UNDO'}
 	bl_category = "STF"
 
-	filter_glob: bpy.props.StringProperty(default="*.stf;*.stf.json", options={'HIDDEN'}) # type: ignore
+	filter_glob: bpy.props.StringProperty(default="*.stf", options={'HIDDEN'}) # type: ignore
 
 	def invoke(self, context, event):
 		return ImportHelper.invoke_popup(self, context)
@@ -55,7 +55,7 @@ class ImportSTF(bpy.types.Operator, ImportHelper):
 
 
 def import_button(self, context):
-    self.layout.operator(ImportSTF.bl_idname, text="STF (.stf)")
+	self.layout.operator(ImportSTF.bl_idname, text="STF (.stf)")
 
 def register():
 	bpy.types.TOPBAR_MT_file_import.append(import_button)

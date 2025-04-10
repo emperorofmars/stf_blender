@@ -65,6 +65,8 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 								blender_object.stf_components.remove(component_ref_index)
 								break
 
+	# TODO create animation 'standins' for all the armature-bones components
+
 	return blender_object
 
 

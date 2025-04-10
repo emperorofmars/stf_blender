@@ -6,7 +6,7 @@ class STF_File_Handler(bpy.types.FileHandler):
 	bl_label = "STF - Squirrel Transfer Format"
 	bl_import_operator = "stf.import"
 	bl_export_operator = "stf.export"
-	bl_file_extensions = ".stf;.stf.json"
+	bl_file_extensions = ".stf"
 	bl_category = "STF"
 
 	@classmethod

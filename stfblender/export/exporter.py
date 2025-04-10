@@ -10,19 +10,18 @@ from ...libstf.stf_export_state import STF_ExportState
 from ...libstf.stf_export_context import STF_ExportContext
 
 class ExportSTF(bpy.types.Operator, ExportHelper):
-	"""Export as STF file (.stf/.stf.json)"""
+	"""Export as STF file (.stf)"""
 	bl_idname = "stf.export"
 	bl_label = "Export STF"
 	bl_options = {"PRESET", "BLOCKING"}
 	bl_category = "STF"
 
 	filename_ext = ""
-	filter_glob: bpy.props.StringProperty(default="*.stf;*.stf.json") # type: ignore
+	filter_glob: bpy.props.StringProperty(default="*.stf") # type: ignore
 
 	current_collection_as_root: bpy.props.BoolProperty(default=False, name="Scene Collection as Export Root") # type: ignore
 	scene_collection_as_root: bpy.props.BoolProperty(default=False, name="Current Collection as Export Root") # type: ignore
 
-	format: bpy.props.EnumProperty(items=[("binary", "Binary", ""), ("json_contained", "Json (self contained)", ""), ("json_seperate", "Json (seperate buffers)", "")], default="binary", name="Format") # type: ignore
 	debug: bpy.props.BoolProperty(name="Export Debug Json File", default=True) # type: ignore
 
 
@@ -42,8 +41,6 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 		try:
 			collection = context.scene.stf_collection_selector if context.scene.stf_collection_selector else context.scene.collection
 
-			# TODO: configure profiles
-
 			stf_state = STF_ExportState([], collection.stf_meta.to_stf_meta_assetInfo(), get_export_modules(bpy.context.preferences.addons.keys()))
 			stf_context = STF_ExportContext(stf_state)
 			root_id = stf_context.serialize_resource(collection)
@@ -54,47 +51,19 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 				print("\nExport Failed, invalid root ID:\n\n" + str(stf_state.get_root_id()))
 				raise Exception("Export Failed, invalid root ID")
 
-			if(self.format == "binary"):
-				export_filepath: str = self.filepath
-				if(not export_filepath.endswith(".stf")):
-					export_filepath += ".stf"
+			export_filepath: str = self.filepath
+			if(not export_filepath.endswith(".stf")):
+				export_filepath += ".stf"
 
-				# Create and write stf_file to disk
-				stf_file = stf_state.create_stf_binary_file(generator="stfblender")
-				files.append(open(export_filepath, "wb"))
-				stf_file.serialize(files[len(files) - 1])
+			# Create and write stf_file to disk
+			stf_file = stf_state.create_stf_binary_file(generator="stfblender")
+			files.append(open(export_filepath, "wb"))
+			stf_file.serialize(files[len(files) - 1])
 
-				if(self.debug):
-					# Write out the json itself for debugging purposes
-					json_string = json.dumps(stf_file.definition.to_dict(), indent="\t").encode(encoding="utf-8")
-					files.append(open(export_filepath + ".json", "wb"))
-					files[len(files) - 1].write(json_string)
-
-			elif(self.format == "json_contained"):
-				export_filepath: str = self.filepath
-				if(not export_filepath.endswith(".stf.json")):
-					if(not export_filepath.endswith(".stf")):
-						export_filepath += ".json"
-					else:
-						export_filepath += ".stf.json"
-
-				stf_definition = stf_state.create_stf_definition(generator="stfblender")
-				json_string = json.dumps(stf_definition.to_dict()).encode(encoding="utf-8")
-				files.append(open(export_filepath, "wb"))
-				files[len(files) - 1].write(json_string)
-
-			elif(self.format == "json_seperate"):
-				export_filepath: str = self.filepath
-				if(not export_filepath.endswith(".stf.json")):
-					if(not export_filepath.endswith(".stf")):
-						export_filepath += ".json"
-					else:
-						export_filepath += ".stf.json"
-
-				stf_definition = stf_state.create_stf_definition(generator="stfblender")
-				# TODO generate all buffers as files as well
-				json_string = json.dumps(stf_definition.to_dict()).encode(encoding="utf-8")
-				files.append(open(export_filepath, "wb"))
+			if(self.debug):
+				# Write out the json itself for debugging purposes
+				json_string = json.dumps(stf_file.definition.to_dict(), indent="\t").encode(encoding="utf-8")
+				files.append(open(export_filepath + ".json", "wb"))
 				files[len(files) - 1].write(json_string)
 
 			do_report = False
@@ -123,17 +92,12 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 		self.layout.prop_search(bpy.context.scene, "stf_collection_selector", bpy.data, "collections", text="Root")
 		self.layout.label(text="Remove Collection to export full scene")
 
-		# TODO support exploded format at some point
-		"""self.layout.separator(factor=2, type="LINE")
-		self.layout.prop(self, property="format")
-		if(self.format == "binary"):
-			self.layout.prop(self, property="debug")"""
+		self.layout.prop(self, property="debug")
 
 		self.layout.separator(factor=2, type="LINE")
 		box = self.layout.box()
 		box.label(text="Asset Meta")
 		draw_meta_editor(box, context.scene.stf_collection_selector if context.scene.stf_collection_selector else context.scene.collection, context.scene.stf_collection_selector == context.scene.collection)
-
 
 
 def export_button(self, context):
