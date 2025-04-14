@@ -1,6 +1,7 @@
 import re
 from typing import Callable
 import bpy
+import mathutils
 
 
 from ....libstf.stf_report import STFReportSeverity, STFReport
@@ -38,9 +39,12 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	blender_edit_bone = blender_armature.edit_bones.new(json_resource.get("name", "STF Bone"))
 	blender_bone_name = blender_edit_bone.name
 
-	blender_edit_bone.head = trs_utils.stf_translation_to_blender(json_resource["head"])
-	blender_edit_bone.tail = trs_utils.stf_translation_to_blender(json_resource["tail"])
-	blender_edit_bone.roll = json_resource["roll"]
+	blender_edit_bone.head = mathutils.Vector([0, 0, 0])
+	blender_edit_bone.tail = mathutils.Vector([0, 0, 1])
+	blender_edit_bone.roll = 0
+
+	blender_edit_bone.matrix = mathutils.Matrix.LocRotScale(trs_utils.stf_translation_to_blender(json_resource["translation"]), trs_utils.stf_rotation_to_blender(json_resource["rotation"]), mathutils.Vector([1, 1, 1]))
+	blender_edit_bone.length = json_resource["length"]
 
 	if("connected" in json_resource): blender_edit_bone.use_connect = json_resource["connected"]
 
@@ -51,6 +55,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	bpy.ops.object.mode_set(mode="OBJECT", toggle=False)
 
 	blender_bone = ArmatureBone(blender_armature, blender_bone_name)
+
 	context.register_imported_resource(stf_id, blender_bone)
 
 	blender_armature.bones[blender_bone_name].stf_id = stf_id
@@ -85,17 +90,11 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 	for child in blender_child_bones:
 		children.append(context.serialize_resource(child, context_object=context_object))
 
-	if(bpy.context.mode != "OBJECT"): bpy.ops.object.mode_set(mode="OBJECT", toggle=False)
-	bpy.context.view_layer.objects.active = blender_armature_object
-	bpy.ops.object.mode_set(mode="EDIT", toggle=False)
-
-	edit_bone = blender_armature.edit_bones[blender_bone_name]
-
-	ret["head"] = trs_utils.blender_translation_to_stf(edit_bone.head)
-	ret["tail"] = trs_utils.blender_translation_to_stf(edit_bone.tail)
-	ret["roll"] = edit_bone.roll
-
-	bpy.ops.object.mode_set(mode="OBJECT", toggle=False)
+	blender_bone = blender_armature.bones[blender_bone_name]
+	t, r, s = blender_bone.matrix_local.decompose()
+	ret["translation"] = trs_utils.blender_translation_to_stf(t)
+	ret["rotation"] = trs_utils.blender_rotation_to_stf(r)
+	ret["length"] = blender_bone.length
 
 	return ret, stf_id
 
