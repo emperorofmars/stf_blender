@@ -1,3 +1,4 @@
+import math
 import re
 from typing import Callable
 import bpy
@@ -91,7 +92,12 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 		children.append(context.serialize_resource(child, context_object=context_object))
 
 	blender_bone = blender_armature.bones[blender_bone_name]
+
 	t, r, s = blender_bone.matrix_local.decompose()
+	"""mat = blender_bone.matrix_local.to_3x3()
+	mat.rotate(mathutils.Quaternion([1, 0, 0], math.pi))
+	_, r, s = mat.to_4x4().decompose()"""
+
 	ret["translation"] = trs_utils.blender_translation_to_stf(t)
 	ret["rotation"] = trs_utils.blender_rotation_to_stf(r)
 	ret["length"] = blender_bone.length
