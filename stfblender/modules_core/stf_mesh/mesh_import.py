@@ -251,7 +251,7 @@ def import_stf_mesh(context: STF_ImportContext, json_resource: dict, stf_id: str
 				if(weight > 0):
 					vertex_group.add([vertex_index], weight, "REPLACE")
 
-	# Blendshapes | Morphtargets | Shapekeys
+	# Blendshapes / Morphtargets / Shapekeys / Blendtargets / Targetblends / Targetshapes / Morphshapes / Blendkeys / Shapetargets / Shapemorphs / Blendmorphs / Blendtargets / Morphblends / Morphkeys / Shapeblends / Blendblends / ...
 	if("blendshapes" in json_resource):
 		blendshape_pos_width = json_resource.get("blendshape_pos_width", 4)
 		tmp_blender_mesh_object.shape_key_add(name="Basis", from_mix=False)

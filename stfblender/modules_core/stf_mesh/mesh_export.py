@@ -330,9 +330,7 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 			stf_mesh["vertex_groups"] = buffers_vertex_groups
 
 
-	# Blendshapes | Morphtargets | Shapekeys
-	sk_empty = 0
-	sk_full = 0
+	# Blendshapes / Morphtargets / Shapekeys / Blendtargets / Targetblends / Targetshapes / Morphshapes / Blendkeys / Shapetargets / Shapemorphs / Blendmorphs / Blendtargets / Morphblends / Morphkeys / Shapeblends / Blendblends / ...
 	if(blender_mesh.shape_keys):
 		blendshapes = []
 		blendshape_pos_width = stf_mesh["blendshape_pos_width"] = 4
