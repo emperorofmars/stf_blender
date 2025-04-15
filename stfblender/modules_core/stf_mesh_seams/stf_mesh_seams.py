@@ -77,7 +77,8 @@ class STF_Module_STF_Mesh_Seams(STF_BlenderComponentModule):
 
 
 def _hook_can_handle_func(application_object: any) -> bool:
-	# TODO check if the mesh even has seams
+	mesh: bpy.types.Mesh = application_object
+	if(mesh.stf_mesh_seams and len(mesh.stf_mesh_seams) > 0): return False
 	return True
 
 
