@@ -1,8 +1,8 @@
 import bpy
 
-
 from ....libstf.stf_import_context import STF_ImportContext
 from ....libstf.stf_export_context import STF_ExportContext
+from ....libstf.stf_report import STFReportSeverity
 from ....libstf.stf_module import STF_Module
 from ...utils.boilerplate import boilerplate_register, boilerplate_unregister
 from ...utils.component_utils import get_components_from_object
@@ -48,7 +48,7 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 			root_nodes.append(context.serialize_resource(blender_object, module_kind="node", context_object=collection))
 
 	for action in bpy.data.actions:
-		if(stf_animation_id := context.serialize_resource(action, module_kind="data", context_object=collection)):
+		if(stf_animation_id := context.serialize_resource(action, module_kind="data", context_object=collection, export_fail_severity=STFReportSeverity.Debug)):
 			animations.append(stf_animation_id)
 
 	return ret, collection.stf_id

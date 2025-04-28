@@ -45,7 +45,7 @@ class STF_ExportContext:
 					self.report(STFReport("Unsupported Component", STFReportSeverity.Warn, None, None, application_object))
 
 
-	def serialize_resource(self, application_object: any, context_object: any = None, module_kind = None) -> str | None:
+	def serialize_resource(self, application_object: any, context_object: any = None, module_kind = None, export_fail_severity: STFReportSeverity = STFReportSeverity.Error) -> str | None:
 		"""Run all logic to serialize an application resource. If it already has been serialized, return the existing ID."""
 
 		if(application_object == None): return None
@@ -69,9 +69,9 @@ class STF_ExportContext:
 
 				return resource_id
 			else:
-				self.report(STFReport("Resource Export Failed", STFReportSeverity.Error, None, selected_module.stf_type, application_object))
+				self.report(STFReport("Resource Export Failed", export_fail_severity, None, selected_module.stf_type, application_object))
 		else:
-			self.report(STFReport("NO Module Found", STFReportSeverity.Error, None, None, application_object))
+			self.report(STFReport("NO Module Found", export_fail_severity, None, None, application_object))
 		return None
 
 
