@@ -32,6 +32,8 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 		bpy.data.objects.remove(tmp_blender_mesh_object)
 	context.add_task(_clean_tmp_mesh_object)
 
+	blender_mesh.calc_loop_triangles()
+
 	stf_mesh = {
 		"type": _stf_type,
 		"name": blender_mesh.stf_name if blender_mesh.stf_name_source_of_truth else blender_mesh.name,
@@ -46,13 +48,28 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 	stf_mesh["material_slots"] = material_slots
 
 	float_width = 4
-	vertex_indices_width = 4 if len(blender_mesh.vertices) * 3 < 2**32 else 8
-	split_indices_width = 4 if len(blender_mesh.loops) * 3 < 2**32 else 8
+
+	max_len_indices = max(len(blender_mesh.loops), len(blender_mesh.polygons))
+	## let indices_width
+	if(max_len_indices <= 2**8):
+		indices_width = 1
+	elif(max_len_indices <= 2**16):
+		indices_width = 2
+	elif(max_len_indices <= 2**32):
+		indices_width = 4
+	elif(max_len_indices <= 2**64):
+		indices_width = 8
+
+	#vertex_indices_width = 4 if len(blender_mesh.vertices) * 3 < 2**32 else 8
+	#split_indices_width = 4 if len(blender_mesh.loops) * 3 < 2**32 else 8
 
 	# vertices
-	stf_mesh["vertex_count"] = len(blender_mesh.vertices)
-	stf_mesh["vertex_width"] = float_width
-	stf_mesh["vertex_indices_width"] = vertex_indices_width
+	#stf_mesh["vertex_count"] = len(blender_mesh.vertices)
+	#stf_mesh["vertex_width"] = float_width
+	#stf_mesh["vertex_indices_width"] = vertex_indices_width
+
+	stf_mesh["float_width"] = float_width
+	stf_mesh["indices_width"] = indices_width
 
 	buffer_vertices = BytesIO()
 
@@ -66,7 +83,6 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 
 	# Are non-split vertex normals needed?
 	"""# Vertex normals
-	stf_mesh["vertex_normal_width"] = float_width
 	buffer_vertex_normals = BytesIO()
 	for vertex in blender_mesh.vertices:
 		normal = blender_translation_to_stf(vertex.normal)
@@ -100,13 +116,12 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 		stf_mesh["colors"].append(context.serialize_buffer(color_buffer.getvalue()))
 
 	# Face corners (Splits)
-	stf_mesh["split_count"] = len(blender_mesh.loops)
-	stf_mesh["split_indices_width"] = split_indices_width
-	stf_mesh["split_normal_width"] = float_width
-	stf_mesh["split_tangent_width"] = float_width
-	stf_mesh["split_color_width"] = float_width
-	stf_mesh["split_uv_width"] = float_width
-	stf_mesh["split_uv_width"] = float_width
+	#stf_mesh["split_count"] = len(blender_mesh.loops)
+	#stf_mesh["split_indices_width"] = split_indices_width
+	#stf_mesh["split_normal_width"] = float_width
+	#stf_mesh["split_tangent_width"] = float_width
+	#stf_mesh["split_color_width"] = float_width
+	#stf_mesh["split_uv_width"] = float_width
 
 	buffer_split_vertices = BytesIO()
 	buffer_split_normals = BytesIO()
@@ -118,7 +133,7 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 	for loop in blender_mesh.loops:
 		loop: bpy.types.MeshLoop = loop
 		# Split to vertex indices
-		buffer_split_vertices.write(serialize_uint(loop.vertex_index, vertex_indices_width))
+		buffer_split_vertices.write(serialize_uint(loop.vertex_index, indices_width))
 
 		normal = blender_translation_to_stf(loop.normal)
 		buffer_split_normals.write(serialize_float(normal[0], float_width))
@@ -169,23 +184,22 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 
 
 	# Triangles, faces, and their material indices
-	stf_mesh["tris_count"] = len(blender_mesh.loop_triangles)
-	stf_mesh["face_count"] = len(blender_mesh.polygons)
-	face_indices_width = stf_mesh["face_indices_width"] = 4
+	#stf_mesh["tris_count"] = len(blender_mesh.loop_triangles)
+	#stf_mesh["face_count"] = len(blender_mesh.polygons)
+	#face_indices_width = stf_mesh["face_indices_width"] = 4
 
 	buffer_tris = BytesIO()
 
 	# Loop through triangles, and also store how many belong to the same face
 	face_lens: list[int] = [0]
 	last_face_index = 0
-	blender_mesh.calc_loop_triangles()
 	for tris in blender_mesh.loop_triangles:
 		if(last_face_index == tris.polygon_index):
 			face_lens[len(face_lens) - 1] += 1
 		else:
 			face_lens.append(1)
 		for split_index in tris.loops:
-			buffer_tris.write(serialize_uint(split_index, split_indices_width))
+			buffer_tris.write(serialize_uint(split_index, indices_width))
 		last_face_index = tris.polygon_index
 
 	stf_mesh["tris"] = context.serialize_buffer(buffer_tris.getvalue())
@@ -195,18 +209,24 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 	flat_face_indices_len = 0
 	buffer_faces = BytesIO()
 
-	material_indices_width = stf_mesh["material_indices_width"] = 4
+	## let material_indices_width
+	if(len(blender_mesh.materials) < 2**8):
+		material_indices_width = 1
+	elif(len(blender_mesh.materials) < 2**16):
+		material_indices_width = 2
+	# else wtf
+	stf_mesh["material_indices_width"] = material_indices_width
 	buffer_face_material_indices = BytesIO()
 	for polygon in blender_mesh.polygons:
-		buffer_faces.write(serialize_uint(face_lens[polygon.index], face_indices_width))
+		buffer_faces.write(serialize_uint(face_lens[polygon.index], indices_width))
 		buffer_face_material_indices.write(serialize_uint(polygon.material_index, material_indices_width))
 		if(not polygon.use_smooth):
 			flat_face_indices_len += 1
-			buffer_flat_face_indices.write(serialize_uint(polygon.index, face_indices_width)) # this could be done better
+			buffer_flat_face_indices.write(serialize_uint(polygon.index, indices_width)) # this could be done better
 
 	stf_mesh["faces"] = context.serialize_buffer(buffer_faces.getvalue())
 	stf_mesh["material_indices"] = context.serialize_buffer(buffer_face_material_indices.getvalue())
-	stf_mesh["sharp_face_indices_len"] = flat_face_indices_len
+	#stf_mesh["sharp_face_indices_len"] = flat_face_indices_len
 	stf_mesh["sharp_face_indices"] = context.serialize_buffer(buffer_flat_face_indices.getvalue())
 
 
@@ -217,8 +237,8 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 		if(edge.is_loose):
 			lines_len += 1
 			for edge_vertex_index in edge.vertices:
-				buffer_lines.write(serialize_uint(edge_vertex_index, vertex_indices_width))
-	stf_mesh["lines_len"] = lines_len
+				buffer_lines.write(serialize_uint(edge_vertex_index, indices_width))
+	#stf_mesh["lines_len"] = lines_len
 	stf_mesh["lines"] = context.serialize_buffer(buffer_lines.getvalue())
 
 
@@ -229,8 +249,8 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 		if(edge.use_edge_sharp and not edge.is_loose):
 			shapr_edges_len += 1
 			for edge_vertex_index in edge.vertices:
-				buffer_sharp_edges.write(serialize_uint(edge_vertex_index, vertex_indices_width))
-	stf_mesh["sharp_edges_len"] = shapr_edges_len
+				buffer_sharp_edges.write(serialize_uint(edge_vertex_index, indices_width))
+	#stf_mesh["sharp_edges_len"] = shapr_edges_len
 	stf_mesh["sharp_edges"] = context.serialize_buffer(buffer_sharp_edges.getvalue())
 
 
@@ -258,7 +278,7 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 					if(channel not in bone_channels): bone_channels[channel] = {}
 					bone_channels[channel][vertex.index] = (group_to_bone_index[group.group], group.weight)
 
-		bone_weight_width = stf_mesh["bone_weight_width"] = 4
+		#bone_weight_width = stf_mesh["bone_weight_width"] = 4
 		buffers_weights = []
 
 		for channel_index, channel in bone_channels.items():
@@ -266,17 +286,17 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 			buffer_weights = BytesIO()
 			if(indexed):
 				for vertex_index, data in channel.items():
-					buffer_weights.write(serialize_uint(vertex_index, vertex_indices_width)) # vertex index
-					buffer_weights.write(serialize_int(data[0], vertex_indices_width)) # bone index
-					buffer_weights.write(serialize_float(data[1], bone_weight_width)) # bone weight
+					buffer_weights.write(serialize_uint(vertex_index, indices_width)) # vertex index
+					buffer_weights.write(serialize_int(data[0], indices_width)) # bone index
+					buffer_weights.write(serialize_float(data[1], float_width)) # bone weight
 			else:
 				for vertex in blender_mesh.vertices:
 					if(vertex.index in channel):
-						buffer_weights.write(serialize_int(channel[vertex.index][0], vertex_indices_width)) # bone index
-						buffer_weights.write(serialize_float(channel[vertex.index][1], bone_weight_width)) # bone weight
+						buffer_weights.write(serialize_int(channel[vertex.index][0], indices_width)) # bone index
+						buffer_weights.write(serialize_float(channel[vertex.index][1], float_width)) # bone weight
 					else:
-						buffer_weights.write(serialize_int(-1, vertex_indices_width)) # bone index
-						buffer_weights.write(serialize_float(0, bone_weight_width)) # bone weight
+						buffer_weights.write(serialize_int(-1, indices_width)) # bone index
+						buffer_weights.write(serialize_float(0, float_width)) # bone weight
 
 
 			buffers_weights.append({
@@ -304,7 +324,7 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 					if(group.group in group_index_to_group_name):
 						vertex_groups[group_index_to_group_name[group.group]][vertex.index] = group.weight
 
-			vertex_weight_width = stf_mesh["vertex_weight_width"] = 4
+			#vertex_weight_width = stf_mesh["vertex_weight_width"] = 4
 			buffers_vertex_groups = []
 
 			for vertex_group_name, group in vertex_groups.items():
@@ -312,14 +332,14 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 				buffer_weights = BytesIO()
 				if(indexed):
 					for vertex_index, weight in group.items():
-						buffer_weights.write(serialize_uint(vertex_index, vertex_indices_width)) # vertex index
-						buffer_weights.write(serialize_float(weight, vertex_weight_width)) # vertex weight
+						buffer_weights.write(serialize_uint(vertex_index, indices_width)) # vertex index
+						buffer_weights.write(serialize_float(weight, float_width)) # vertex weight
 				else:
 					for vertex in blender_mesh.vertices:
 						if(vertex.index in group):
-							buffer_weights.write(serialize_float(group[vertex.index], vertex_weight_width)) # vertex weight
+							buffer_weights.write(serialize_float(group[vertex.index], float_width)) # vertex weight
 						else:
-							buffer_weights.write(serialize_float(0, vertex_weight_width)) # vertex weight
+							buffer_weights.write(serialize_float(0, float_width)) # vertex weight
 
 				buffers_vertex_groups.append({
 					"name": vertex_group_name,
@@ -333,9 +353,9 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 	# Blendshapes / Morphtargets / Shapekeys / Blendtargets / Targetblends / Targetshapes / Morphshapes / Blendkeys / Shapetargets / Shapemorphs / Blendmorphs / Blendtargets / Morphblends / Morphkeys / Shapeblends / Blendblends / ...
 	if(blender_mesh.shape_keys):
 		blendshapes = []
-		blendshape_pos_width = stf_mesh["blendshape_pos_width"] = 4
-		blendshape_normal_width = stf_mesh["blendshape_normal_width"] = 4
-		blendshape_tangent_width = stf_mesh["blendshape_tangent_width"] = 4
+		#blendshape_pos_width = stf_mesh["blendshape_pos_width"] = 4
+		#blendshape_normal_width = stf_mesh["blendshape_normal_width"] = 4
+		#blendshape_tangent_width = stf_mesh["blendshape_tangent_width"] = 4
 
 		for shape_key in blender_mesh.shape_keys.key_blocks:
 			if(shape_key == shape_key.relative_key or shape_key.mute or blender_mesh.shape_keys.key_blocks[0].name == shape_key.name):
@@ -361,29 +381,29 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 
 			if(indexed):
 				for index, offset in blendshape_offsets.items():
-					buffer_blendshape_indices.write(serialize_uint(index, vertex_indices_width))
-					buffer_blendshape_position_offsets.write(serialize_float(offset[0][0], blendshape_pos_width))
-					buffer_blendshape_position_offsets.write(serialize_float(offset[0][1], blendshape_pos_width))
-					buffer_blendshape_position_offsets.write(serialize_float(offset[0][2], blendshape_pos_width))
-					buffer_blendshape_normal_offsets.write(serialize_float(offset[1][0], blendshape_normal_width))
-					buffer_blendshape_normal_offsets.write(serialize_float(offset[1][1], blendshape_normal_width))
-					buffer_blendshape_normal_offsets.write(serialize_float(offset[1][2], blendshape_normal_width))
+					buffer_blendshape_indices.write(serialize_uint(index, indices_width))
+					buffer_blendshape_position_offsets.write(serialize_float(offset[0][0], float_width))
+					buffer_blendshape_position_offsets.write(serialize_float(offset[0][1], float_width))
+					buffer_blendshape_position_offsets.write(serialize_float(offset[0][2], float_width))
+					buffer_blendshape_normal_offsets.write(serialize_float(offset[1][0], float_width))
+					buffer_blendshape_normal_offsets.write(serialize_float(offset[1][1], float_width))
+					buffer_blendshape_normal_offsets.write(serialize_float(offset[1][2], float_width))
 			else:
 				for vertex in blender_mesh.vertices:
 					if(vertex.index in blendshape_offsets):
-						buffer_blendshape_position_offsets.write(serialize_float(blendshape_offsets[vertex.index][0][0], blendshape_pos_width))
-						buffer_blendshape_position_offsets.write(serialize_float(blendshape_offsets[vertex.index][0][1], blendshape_pos_width))
-						buffer_blendshape_position_offsets.write(serialize_float(blendshape_offsets[vertex.index][0][2], blendshape_pos_width))
-						buffer_blendshape_normal_offsets.write(serialize_float(blendshape_offsets[vertex.index][1][0], blendshape_normal_width))
-						buffer_blendshape_normal_offsets.write(serialize_float(blendshape_offsets[vertex.index][1][1], blendshape_normal_width))
-						buffer_blendshape_normal_offsets.write(serialize_float(blendshape_offsets[vertex.index][1][2], blendshape_normal_width))
+						buffer_blendshape_position_offsets.write(serialize_float(blendshape_offsets[vertex.index][0][0], float_width))
+						buffer_blendshape_position_offsets.write(serialize_float(blendshape_offsets[vertex.index][0][1], float_width))
+						buffer_blendshape_position_offsets.write(serialize_float(blendshape_offsets[vertex.index][0][2], float_width))
+						buffer_blendshape_normal_offsets.write(serialize_float(blendshape_offsets[vertex.index][1][0], float_width))
+						buffer_blendshape_normal_offsets.write(serialize_float(blendshape_offsets[vertex.index][1][1], float_width))
+						buffer_blendshape_normal_offsets.write(serialize_float(blendshape_offsets[vertex.index][1][2], float_width))
 					else:
-						buffer_blendshape_position_offsets.write(serialize_float(0, blendshape_pos_width))
-						buffer_blendshape_position_offsets.write(serialize_float(0, blendshape_pos_width))
-						buffer_blendshape_position_offsets.write(serialize_float(0, blendshape_pos_width))
-						buffer_blendshape_normal_offsets.write(serialize_float(0, blendshape_normal_width))
-						buffer_blendshape_normal_offsets.write(serialize_float(0, blendshape_normal_width))
-						buffer_blendshape_normal_offsets.write(serialize_float(0, blendshape_normal_width))
+						buffer_blendshape_position_offsets.write(serialize_float(0, float_width))
+						buffer_blendshape_position_offsets.write(serialize_float(0, float_width))
+						buffer_blendshape_position_offsets.write(serialize_float(0, float_width))
+						buffer_blendshape_normal_offsets.write(serialize_float(0, float_width))
+						buffer_blendshape_normal_offsets.write(serialize_float(0, float_width))
+						buffer_blendshape_normal_offsets.write(serialize_float(0, float_width))
 
 			blendshape = {
 				"name": shape_key.name,

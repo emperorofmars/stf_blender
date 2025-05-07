@@ -73,5 +73,4 @@ def trs_to_blender_object(trs: list[list[float]], blender_object: bpy.types.Obje
 		blender_object.matrix_world = matrix_local
 
 def stf_uv_to_blender(stf_uv: list[float]) -> list[float]:
-	# x,y,z -> x,z,-y
 	return mathutils.Vector((stf_uv[0], 1 - stf_uv[1]))
