@@ -103,13 +103,14 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 	buffers_uv: list[BytesIO] = [BytesIO()] * len(blender_mesh.uv_layers)
 	buffers_split_color: list[BytesIO] = []
 
+
 	uv_names = []
 	for loop in blender_mesh.loops:
 		loop: bpy.types.MeshLoop = loop
 		# Split to vertex indices
 		buffer_split_vertices.write(serialize_uint(loop.vertex_index, indices_width))
 
-		normal = blender_translation_to_stf(loop.normal)
+		normal = blender_translation_to_stf(loop.normal.normalized())
 		buffer_split_normals.write(serialize_float(normal[0], float_width))
 		buffer_split_normals.write(serialize_float(normal[1], float_width))
 		buffer_split_normals.write(serialize_float(normal[2], float_width))
