@@ -227,6 +227,7 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 	if(armature and tmp_blender_mesh_object):
 		stf_mesh["armature"] = context.serialize_resource(armature)
 
+
 		# Create vertex group lookup dictionary for stf_ids from the previous name lookup dict
 		weight_bone_map = []
 		group_to_bone_index = {}
@@ -244,6 +245,14 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 					if(channel not in bone_channels): bone_channels[channel] = {}
 					bone_channels[channel][vertex.index] = (group_to_bone_index[group.group], group.weight)
 
+		## let bone_indices_width
+		if(len(bone_channels) <= 2**8):
+			bone_indices_width = 1
+		elif(len(bone_channels) <= 2**16):
+			bone_indices_width = 2
+		## else wtf
+		stf_mesh["bone_indices_width"] = bone_indices_width
+
 		buffers_weights = []
 		for channel_index, channel in bone_channels.items():
 			indexed = len(channel) < (len(blender_mesh.vertices) * 0.666)
@@ -251,15 +260,15 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 			if(indexed):
 				for vertex_index, data in channel.items():
 					buffer_weights.write(serialize_uint(vertex_index, indices_width)) # vertex index
-					buffer_weights.write(serialize_int(data[0], indices_width)) # bone index
+					buffer_weights.write(serialize_int(data[0], bone_indices_width)) # bone index
 					buffer_weights.write(serialize_float(data[1], float_width)) # bone weight
 			else:
 				for vertex in blender_mesh.vertices:
 					if(vertex.index in channel):
-						buffer_weights.write(serialize_int(channel[vertex.index][0], indices_width)) # bone index
+						buffer_weights.write(serialize_int(channel[vertex.index][0], bone_indices_width)) # bone index
 						buffer_weights.write(serialize_float(channel[vertex.index][1], float_width)) # bone weight
 					else:
-						buffer_weights.write(serialize_int(-1, indices_width)) # bone index
+						buffer_weights.write(serialize_int(-1, bone_indices_width)) # bone index
 						buffer_weights.write(serialize_float(0, float_width)) # bone weight
 
 			buffers_weights.append({

@@ -170,6 +170,7 @@ def import_stf_mesh(context: STF_ImportContext, json_resource: dict, stf_id: str
 		if(not armature):
 			context.report(STFReport("Invalid Armature (armature id: " + json_resource["armature"] + " )", STFReportSeverity.Error, stf_id, _stf_type, blender_mesh))
 		else:
+			bone_indices_width = json_resource.get("bone_indices_width", 1)
 			bones = []
 			vertex_groups = []
 			for bone_id in json_resource["bones"]:
@@ -192,7 +193,7 @@ def import_stf_mesh(context: STF_ImportContext, json_resource: dict, stf_id: str
 						vertex_index = parse_uint(buffer, indices_width)
 					else:
 						vertex_index = index
-					bone_index = parse_int(buffer, indices_width)
+					bone_index = parse_int(buffer, bone_indices_width)
 					weight = parse_float(buffer, float_width)
 					if(weight > 0 and bone_index >= 0):
 						vertex_groups[bone_index].add([vertex_index], weight, "REPLACE")
