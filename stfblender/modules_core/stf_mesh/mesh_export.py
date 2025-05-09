@@ -237,6 +237,7 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 				group_to_bone_index[group.index] = len(weight_bone_map) - 1
 		stf_mesh["bones"] = weight_bone_map
 
+		# TODO make this vertex-major and sort channels per vertex by weight
 		# dict[channel_index, dict[vertex_index, tuple[bone_index, weight]]]
 		bone_channels: dict[int, dict[int, tuple[int, float]]] = {}
 		for vertex in blender_mesh.vertices:

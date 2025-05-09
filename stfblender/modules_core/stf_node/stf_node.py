@@ -117,7 +117,7 @@ def _stf_export(context: STF_ExportContext, blender_object: any, context_object:
 				# TODO make this more generic
 				json_resource["parent_binding"] = [blender_object.parent.stf_id, "instance", blender_object.parent.data.bones[blender_object.parent_bone].stf_id]
 			case _:
-				context.report(STFReport("Unsupported object parent_type: " + str(blender_object.parent_type), STFReportSeverity.Error, blender_object.stf_id, json_resource.get("type"), blender_object))
+				context.report(STFReport("Unsupported object parent_type: " + str(blender_object.parent_type), STFReportSeverity.FatalError, blender_object.stf_id, json_resource.get("type"), blender_object))
 
 	json_resource["trs"] = trs_utils.blender_object_to_trs(blender_object)
 

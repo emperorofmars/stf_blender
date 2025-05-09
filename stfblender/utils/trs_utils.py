@@ -34,7 +34,8 @@ def blender_object_to_trs(blender_object: bpy.types.Object) -> list[list[float]]
 			case "OBJECT":
 				t, r, s = (blender_object.parent.matrix_world.inverted_safe() @ blender_object.matrix_world).decompose()
 			case "BONE":
-				t, r, s = (blender_object.parent.matrix_world.inverted_safe() @ blender_object.parent.data.bones[blender_object.parent_bone].matrix_local.inverted_safe() @ blender_object.matrix_world).decompose()
+				#t, r, s = (blender_object.parent.data.bones[blender_object.parent_bone].matrix_local.inverted_safe() @ blender_object.parent.matrix_world.inverted_safe() @ blender_object.matrix_world).decompose()
+				t, r, s = (blender_object.parent.matrix_world.inverted_safe() @ blender_object.matrix_world).decompose()
 	else:
 		t, r, s = blender_object.matrix_world.decompose()
 	return blender_to_trs(t, r, s)
@@ -66,8 +67,9 @@ def trs_to_blender_object(trs: list[list[float]], blender_object: bpy.types.Obje
 			case "OBJECT":
 				blender_object.matrix_world = blender_object.parent.matrix_world @ matrix_local
 			case "BONE":
-				matrix_bone = blender_object.parent.data.bones[blender_object.parent_bone].matrix_local
-				blender_object.matrix_world = blender_object.parent.matrix_world @ matrix_bone @ matrix_local
+				#matrix_bone = blender_object.parent.data.bones[blender_object.parent_bone].matrix_local
+				#blender_object.matrix_world = matrix_bone @ blender_object.parent.matrix_world @ matrix_local
+				blender_object.matrix_world = blender_object.parent.matrix_world @ matrix_local
 		# TODO handle parent binding
 	else:
 		blender_object.matrix_world = matrix_local
