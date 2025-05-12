@@ -42,6 +42,11 @@ class STFMeshSpatialPanel(bpy.types.Panel):
 
 		self.layout.label(text="stf.mesh")
 
+		if(context.object.find_armature()):
+			t, r, s = context.object.matrix_local.decompose()
+			if(t.length > 0.0001 or abs(r.x) > 0.0001 or abs(r.y) > 0.0001 or abs(r.z) > 0.0001 or abs((r.w - 1)) > 0.0001 or abs(s.x - 1) > 0.0001 or abs(s.y - 1) > 0.0001 or abs(s.z - 1) > 0.0001):
+				self.layout.label(text="Warning, origin not aligned with Armature! This will lead to differing output.")
+
 		# Set ID
 		draw_stf_id_ui(self.layout, context, context.mesh, STFSetMeshIDOperator.bl_idname)
 
