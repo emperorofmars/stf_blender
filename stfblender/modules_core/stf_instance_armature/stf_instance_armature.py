@@ -1,5 +1,6 @@
 import bpy
 import re
+import mathutils
 from typing import Callable
 
 from ....libstf.stf_module import STF_Module
@@ -42,10 +43,18 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 				root_poses = next_poses; next_poses = []
 				for pose in root_poses:
 					bone_id = blender_armature.bones[pose.name].stf_id
+
+					blender_matrix = mathutils.Matrix.LocRotScale(
+						mathutils.Vector((json_resource["pose"][bone_id][0][0], json_resource["pose"][bone_id][0][1], json_resource["pose"][bone_id][0][2])),
+						mathutils.Quaternion((json_resource["pose"][bone_id][1][3], json_resource["pose"][bone_id][1][0], json_resource["pose"][bone_id][1][1], json_resource["pose"][bone_id][1][2])),
+						mathutils.Vector((json_resource["pose"][bone_id][2][0], json_resource["pose"][bone_id][2][1], json_resource["pose"][bone_id][2][2]))
+					)
 					if(pose.parent):
-						pose.matrix = pose.parent.matrix @ trs_utils.stf_to_blender_matrix(json_resource["pose"][bone_id])
+						#pose.matrix = pose.parent.matrix @ trs_utils.stf_to_blender_matrix(json_resource["pose"][bone_id])
+						pose.matrix = pose.parent.matrix @ blender_matrix
 					else:
-						pose.matrix = trs_utils.stf_to_blender_matrix(json_resource["pose"][bone_id])
+						#pose.matrix = trs_utils.stf_to_blender_matrix(json_resource["pose"][bone_id])
+						pose.matrix = blender_matrix
 					next_poses += pose.children
 		else:
 			context.report(STFReport("Failed to import pose for armature: " + str(json_resource.get("armature")), STFReportSeverity.Error, stf_id, _stf_type, blender_armature))
@@ -94,7 +103,8 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 				t, r, s = (blender_pose.parent.matrix.inverted_safe() @ blender_pose.matrix).decompose()
 			else:
 				t, r, s = blender_pose.matrix.decompose()
-			stf_pose[blender_armature.bones[blender_pose.name].stf_id] = trs_utils.blender_to_trs(t, r, s)
+			#stf_pose[blender_armature.bones[blender_pose.name].stf_id] = trs_utils.blender_to_trs(t, r, s)
+			stf_pose[blender_armature.bones[blender_pose.name].stf_id] = [[t[0], t[1], t[2]], [r[1], r[2], r[3], r[0]], [s[0], s[1], s[2]]]
 		ret["pose"] = stf_pose
 
 	if(len(blender_object.stf_instance.stf_components) > 0):
