@@ -227,8 +227,7 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 	if(armature and tmp_blender_mesh_object):
 		stf_mesh["armature"] = context.serialize_resource(armature)
 
-
-		# Create vertex group lookup dictionary for stf_ids from the previous name lookup dict
+		# Create vertex group lookup dictionary for stf_ids
 		weight_bone_map = []
 		group_to_bone_index = {}
 		for group in tmp_blender_mesh_object.vertex_groups:
@@ -338,8 +337,13 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 			for vertex in blender_mesh.vertices:
 				point: bpy.types.ShapeKeyPoint = shape_key.data[vertex.index]
 				offset = point.co - vertex.co
+				normal = [
+					vertex_normals_flat[vertex.index * 3],
+					vertex_normals_flat[vertex.index * 3 + 1],
+					vertex_normals_flat[vertex.index * 3 + 2]
+				]
 				if(offset.length > 0.00001):
-					blendshape_offsets[vertex.index] = (blender_translation_to_stf(offset), blender_translation_to_stf(vertex_normals_flat[vertex.index * 3 : vertex.index * 3 + 3]))
+					blendshape_offsets[vertex.index] = (blender_translation_to_stf(offset), blender_translation_to_stf(normal))
 
 			indexed = len(blendshape_offsets) < len(blender_mesh.vertices) * 0.833
 
