@@ -44,12 +44,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	blender_edit_bone.tail = mathutils.Vector([0, 0, 1])
 	blender_edit_bone.roll = 0
 
-	blender_edit_bone.matrix = mathutils.Matrix.LocRotScale(trs_utils.stf_translation_to_blender(json_resource["translation"]), trs_utils.stf_rotation_to_blender(json_resource["rotation"]), mathutils.Vector([1, 1, 1]))
-	"""blender_edit_bone.matrix = mathutils.Matrix.LocRotScale(
-		mathutils.Vector((json_resource["translation"][0], json_resource["translation"][1], json_resource["translation"][2])),
-		mathutils.Quaternion((json_resource["rotation"][3], json_resource["rotation"][0], json_resource["rotation"][1], json_resource["rotation"][2])),
-		mathutils.Vector((1, 1, 1))
-	)"""
+	blender_edit_bone.matrix = mathutils.Matrix.LocRotScale(trs_utils.stf_translation_to_blender(json_resource["translation"]), trs_utils.stf_rotation_to_blender(json_resource["rotation"]), mathutils.Vector([1, 1, 1])) @ mathutils.Matrix.Rotation(math.radians(90), 4, "X")
 	blender_edit_bone.length = json_resource["length"]
 
 	if("connected" in json_resource): blender_edit_bone.use_connect = json_resource["connected"]

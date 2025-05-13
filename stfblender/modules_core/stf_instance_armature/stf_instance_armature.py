@@ -51,11 +51,9 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 						mathutils.Vector((json_resource["pose"][bone_id][2][0], json_resource["pose"][bone_id][2][1], json_resource["pose"][bone_id][2][2]))
 					)
 					if(pose.parent):
-						#pose.matrix = pose.parent.matrix @ trs_utils.stf_to_blender_matrix(json_resource["pose"][bone_id])
 						pose.matrix = pose.parent.matrix @ blender_matrix
 					else:
-						#pose.matrix = trs_utils.stf_to_blender_matrix(json_resource["pose"][bone_id])
-						pose.matrix = blender_matrix
+						pose.matrix = mathutils.Matrix.Rotation(math.radians(90), 4, "X") @ blender_matrix
 					next_poses += pose.children
 		else:
 			context.report(STFReport("Failed to import pose for armature: " + str(json_resource.get("armature")), STFReportSeverity.Error, stf_id, _stf_type, blender_armature))
