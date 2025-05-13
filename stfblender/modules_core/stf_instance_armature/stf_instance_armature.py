@@ -1,6 +1,7 @@
 import bpy
 import re
 import mathutils
+import math
 from typing import Callable
 
 from ....libstf.stf_module import STF_Module
@@ -102,9 +103,8 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 			if blender_pose.parent:
 				t, r, s = (blender_pose.parent.matrix.inverted_safe() @ blender_pose.matrix).decompose()
 			else:
-				t, r, s = blender_pose.matrix.decompose()
-			#stf_pose[blender_armature.bones[blender_pose.name].stf_id] = trs_utils.blender_to_trs(t, r, s)
-			stf_pose[blender_armature.bones[blender_pose.name].stf_id] = [[t[0], t[1], t[2]], [r[1], r[2], r[3], r[0]], [s[0], s[1], s[2]]]
+				t, r, s = (mathutils.Matrix.Rotation(math.radians(-90), 4, "X") @ blender_pose.matrix).decompose()
+			stf_pose[blender_armature.bones[blender_pose.name].stf_id] = [[t[0], t[1], t[2]], [r[1], r[2], r[3], r[0]], [s[0], s[1], s[2]]] # already in armature space
 		ret["pose"] = stf_pose
 
 	if(len(blender_object.stf_instance.stf_components) > 0):

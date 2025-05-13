@@ -2,6 +2,7 @@ import re
 from typing import Callable
 import bpy
 import mathutils
+import math
 
 
 from ....libstf.stf_report import STFReportSeverity, STFReport
@@ -43,12 +44,12 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	blender_edit_bone.tail = mathutils.Vector([0, 0, 1])
 	blender_edit_bone.roll = 0
 
-	#blender_edit_bone.matrix = mathutils.Matrix.LocRotScale(trs_utils.stf_translation_to_blender(json_resource["translation"]), trs_utils.stf_rotation_to_blender(json_resource["rotation"]), mathutils.Vector([1, 1, 1]))
-	blender_edit_bone.matrix = mathutils.Matrix.LocRotScale(
+	blender_edit_bone.matrix = mathutils.Matrix.LocRotScale(trs_utils.stf_translation_to_blender(json_resource["translation"]), trs_utils.stf_rotation_to_blender(json_resource["rotation"]), mathutils.Vector([1, 1, 1]))
+	"""blender_edit_bone.matrix = mathutils.Matrix.LocRotScale(
 		mathutils.Vector((json_resource["translation"][0], json_resource["translation"][1], json_resource["translation"][2])),
 		mathutils.Quaternion((json_resource["rotation"][3], json_resource["rotation"][0], json_resource["rotation"][1], json_resource["rotation"][2])),
 		mathutils.Vector((1, 1, 1))
-	)
+	)"""
 	blender_edit_bone.length = json_resource["length"]
 
 	if("connected" in json_resource): blender_edit_bone.use_connect = json_resource["connected"]
@@ -97,10 +98,10 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 
 	blender_bone = blender_armature.bones[blender_bone_name]
 
-	t, r, s = blender_bone.matrix_local.decompose()
+	t, r, s = (blender_bone.matrix_local @ mathutils.Matrix.Rotation(math.radians(-90), 4, "X")).decompose()
 
-	ret["translation"] = [t[0], t[1], t[2]]
-	ret["rotation"] = [r[1], r[2], r[3], r[0]]
+	ret["translation"] = trs_utils.blender_translation_to_stf(t)
+	ret["rotation"] = trs_utils.blender_rotation_to_stf(r)
 	ret["length"] = blender_bone.length
 
 	return ret, stf_id
