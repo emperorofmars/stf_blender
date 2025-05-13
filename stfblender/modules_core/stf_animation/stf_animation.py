@@ -71,10 +71,10 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, pa
 
 			for stf_keyframe in track.get("keyframes", []):
 				keyframe = fcurve.keyframe_points.insert(stf_keyframe[0], stf_keyframe[1] if not conversion_func else conversion_func(stf_keyframe[1]))
-				keyframe.handle_left.x = stf_keyframe[2]
-				keyframe.handle_left.y = stf_keyframe[3]
-				keyframe.handle_right.x = stf_keyframe[4]
-				keyframe.handle_right.y = stf_keyframe[5]
+				keyframe.handle_left.x = keyframe.co.x + stf_keyframe[2]
+				keyframe.handle_left.y = keyframe.co.y + stf_keyframe[3]
+				keyframe.handle_right.x = keyframe.co.x + stf_keyframe[4]
+				keyframe.handle_right.y = keyframe.co.y + stf_keyframe[5]
 
 			fcurve.keyframe_points.handles_recalc()
 
@@ -126,8 +126,13 @@ def _stf_export(context: STF_ExportContext, application_object: any, parent_appl
 								track = []
 
 								for keyframe in fcurve.keyframe_points:
-									# TODO handles likely need to be converted from coordinates to normalized angle and weight
-									track.append([keyframe.co.x, keyframe.co.y if not conversion_func else conversion_func(keyframe.co.y), keyframe.handle_left.x, keyframe.handle_left.y, keyframe.handle_right.x, keyframe.handle_right.y])
+									track.append([
+										keyframe.co.x,
+										keyframe.co.y if not conversion_func else conversion_func(keyframe.co.y),
+										keyframe.handle_left.x - keyframe.co.x,
+										keyframe.handle_left.y - keyframe.co.y,
+										keyframe.handle_right.x - keyframe.co.x,
+										keyframe.handle_right.y - keyframe.co.y])
 
 								stf_tracks.append({
 									"target": target,

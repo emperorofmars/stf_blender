@@ -135,6 +135,10 @@ def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: 
 	return None
 
 
+def _get_components_from_object(application_object: ArmatureBone) -> list:
+	return get_components_from_object(application_object.get_bone())
+
+
 class STF_Module_STF_Bone(STF_Module):
 	stf_type = _stf_type
 	stf_kind = "node"
@@ -142,7 +146,7 @@ class STF_Module_STF_Bone(STF_Module):
 	understood_application_types = [ArmatureBone]
 	import_func = _stf_import
 	export_func = _stf_export
-	get_components_func = get_components_from_object
+	get_components_func = _get_components_from_object
 
 	understood_application_property_path_types = [bpy.types.Bone]
 	understood_application_property_path_parts = ["location", "rotation_quaternion", "scale"]
