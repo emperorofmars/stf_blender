@@ -30,7 +30,7 @@ class ImportSTF(bpy.types.Operator, ImportHelper):
 
 			stf_state = STF_ImportState(stf_file, get_import_modules(bpy.context.preferences.addons.keys()))
 			stf_context = STF_ImportContext(stf_state)
-			root: bpy.types.Collection = stf_context.import_resource(stf_context.get_root_id())
+			root: bpy.types.Collection = stf_context.import_resource(stf_context.get_root_id(), "data")
 			stf_state.run_tasks()
 
 			if(not root or type(root) != bpy.types.Collection):

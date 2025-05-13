@@ -26,7 +26,7 @@ def _translate_property_to_blender_func(blender_object: bpy.types.Object, stf_pr
 
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
-	blender_resource = context.import_resource(json_resource["mesh"])
+	blender_resource = context.import_resource(json_resource["mesh"], stf_kind="data")
 	blender_object = bpy.data.objects.new(json_resource.get("name", "STF Node"), blender_resource)
 	context.register_imported_resource(stf_id, blender_object)
 
@@ -34,7 +34,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 		context.report(STFReport("Failed to import mesh: " + str(json_resource.get("instance", {}).get("mesh")), STFReportSeverity.Error, stf_id, _stf_type, context_object))
 
 	if("armature_instance" in json_resource):
-		armature_instance: bpy.types.Object = context.import_resource(json_resource["armature_instance"])
+		armature_instance: bpy.types.Object = context.import_resource(json_resource["armature_instance"], stf_kind="node")
 		if(not armature_instance):
 			context.report(STFReport("Invalid armature instance: " + str(json_resource["armature_instance"]), STFReportSeverity.Error, stf_id, _stf_type, context_object))
 		else:

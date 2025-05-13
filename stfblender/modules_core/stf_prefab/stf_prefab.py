@@ -22,10 +22,10 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	collection.stf_use_collection_as_prefab = True
 
 	for node_id in json_resource.get("root_nodes", []):
-		context.import_resource(node_id, context_object=collection)
+		context.import_resource(node_id, context_object=collection, stf_kind="node")
 
 	for animation_id in json_resource.get("animations", []):
-		context.import_resource(animation_id, context_object=collection)
+		context.import_resource(animation_id, context_object=collection, stf_kind="data")
 
 	return collection
 

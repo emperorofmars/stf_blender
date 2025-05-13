@@ -29,7 +29,7 @@ class STF_Instance(bpy.types.PropertyGroup):
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
 	if("instance" in json_resource):
-		blender_object: bpy.types.Object = context.import_resource(json_resource["instance"])
+		blender_object: bpy.types.Object = context.import_resource(json_resource["instance"], stf_kind="instance")
 	else:
 		blender_object: bpy.types.Object = bpy.data.objects.new(json_resource.get("name", "STF Node"), None)
 	context.register_imported_resource(stf_id, blender_object)
@@ -45,7 +45,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	context_object.objects.link(blender_object)
 
 	for child_id in json_resource.get("children", []):
-		child: bpy.types.Object = context.import_resource(child_id, context_object)
+		child: bpy.types.Object = context.import_resource(child_id, context_object, stf_kind="node")
 		if(child):
 			child.parent_type = "OBJECT"
 			child.parent = blender_object

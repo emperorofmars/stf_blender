@@ -18,7 +18,7 @@ _stf_type = "stf.instance.armature"
 
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
-	blender_armature = context.import_resource(json_resource["armature"])
+	blender_armature = context.import_resource(json_resource["armature"], stf_kind="data")
 	if(not blender_armature or type(blender_armature) is not bpy.types.Armature):
 		context.report(STFReport("Failed to import armature: " + str(json_resource.get("instance", {}).get("armature")), STFReportSeverity.Error, stf_id, _stf_type, context_object))
 
@@ -62,7 +62,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 		if("components" in json_resource["mods"]):
 			for target_id, component_ids in json_resource["mods"]["components"].items():
 				for component_id in component_ids:
-					if(component := context.import_resource(component_id, blender_object)):
+					if(component := context.import_resource(component_id, blender_object, stf_kind="component")):
 						for component_ref_index, component_ref in enumerate(blender_object.stf_components):
 							if(component_ref.stf_id == component_id):
 								instance_component_ref = blender_object.stf_instance.stf_components.add()

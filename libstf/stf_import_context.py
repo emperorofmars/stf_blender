@@ -25,7 +25,7 @@ class STF_ImportContext:
 		if("components" in json_resource):
 			for component_id in json_resource["components"]:
 				json_component = self.get_json_resource(component_id)
-				if(component_module := self._state.determine_module(json_component)):
+				if(component_module := self._state.determine_module(json_component, "component")):
 					component_result = component_module.import_func(self, json_component, component_id, application_object)
 					if(component_result):
 						application_component_object = component_result
@@ -36,7 +36,7 @@ class STF_ImportContext:
 					self.report(STFReport("No STF_Module registered for component", STFReportSeverity.Warn, component_id, json_component.get("type")))
 
 
-	def import_resource(self, stf_id: str, context_object: any = None) -> any:
+	def import_resource(self, stf_id: str, context_object: any = None, stf_kind: str = "data") -> any:
 		if(stf_id in self._state._imported_resources):
 			return self._state._imported_resources[stf_id]
 
@@ -44,10 +44,10 @@ class STF_ImportContext:
 		if(not json_resource or type(json_resource) is not dict or "type" not in json_resource):
 			self.report(STFReport("Invalid JSON resource", STFReportSeverity.FatalError, stf_id))
 
-		if(module := self._state.determine_module(json_resource)):
+		if(module := self._state.determine_module(json_resource, stf_kind)):
 			application_object = module.import_func(self, json_resource, stf_id, context_object)
 			if(application_object):
-				self.__run_components(json_resource, application_object)
+				self.__run_components(json_resource, module.get_components_holder_func(application_object) if hasattr(module, "get_components_holder_func") else application_object)
 
 				self.register_imported_resource(stf_id, application_object)
 				return application_object

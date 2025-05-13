@@ -26,7 +26,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	context.add_task(_clean_tmp_mesh_object)
 
 	for bone_id in json_resource.get("root_bones", []):
-		context.import_resource(bone_id, tmp_hook_object)
+		context.import_resource(bone_id, tmp_hook_object, "node")
 
 	return blender_armature
 

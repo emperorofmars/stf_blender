@@ -9,7 +9,7 @@ from ....libstf.stf_report import STFReportSeverity, STFReport
 from ....libstf.stf_module import STF_Module
 from ....libstf.stf_import_context import STF_ImportContext
 from ....libstf.stf_export_context import STF_ExportContext
-from ...utils.component_utils import get_components_from_object
+from ...utils.component_utils import STF_Component_Ref, add_component, get_components_from_object
 from ...utils.boilerplate import boilerplate_register, boilerplate_unregister
 from ...utils.id_utils import ensure_stf_id
 from ...utils import trs_utils
@@ -27,7 +27,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	# Once Blender enters into edit-mode, the Bone references will be invalidated. Store the child-names as string.
 	children = []
 	for child_id in json_resource.get("children", []):
-		child: ArmatureBone = context.import_resource(child_id, context_object)
+		child: ArmatureBone = context.import_resource(child_id, context_object, "node")
 		if(child):
 			children.append(child.name)
 		else:
@@ -138,6 +138,9 @@ def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: 
 def _get_components_from_object(application_object: ArmatureBone) -> list:
 	return get_components_from_object(application_object.get_bone())
 
+def _get_components_holder_func(application_object: ArmatureBone) -> any:
+	return application_object.get_bone()
+
 
 class STF_Module_STF_Bone(STF_Module):
 	stf_type = _stf_type
@@ -147,6 +150,7 @@ class STF_Module_STF_Bone(STF_Module):
 	import_func = _stf_import
 	export_func = _stf_export
 	get_components_func = _get_components_from_object
+	get_components_holder_func = _get_components_holder_func
 
 	understood_application_property_path_types = [bpy.types.Bone]
 	understood_application_property_path_parts = ["location", "rotation_quaternion", "scale"]

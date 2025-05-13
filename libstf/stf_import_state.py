@@ -11,20 +11,21 @@ class STF_ImportState(StateUtil):
 	Each context must have access to the same STF_ImportState instance.
 	"""
 
-	def __init__(self, file: STF_File, modules: dict[str, STF_Module], fail_on_severity: STFReportSeverity = STFReportSeverity.FatalError):
+	def __init__(self, file: STF_File, modules: dict[str, STF_Module], fail_on_severity: STFReportSeverity = STFReportSeverity.FatalError, fallback_modules: dict[str, STF_Module] = {}):
 		super().__init__(fail_on_severity)
 
 		self._file = file
 
 		self._modules: dict[str, STF_Module] = modules
+		self._fallback_modules = fallback_modules
 
 		self._imported_resources: dict[str, any] = {} # ID | list of IDs -> imported object
 		self._profiles: list[STF_Profile]
 		self._asset_info: STF_Meta_AssetInfo
 
 
-	def determine_module(self, json_resource: dict) -> STF_Module:
-		return self._modules.get(json_resource["type"])
+	def determine_module(self, json_resource: dict, stf_kind: str = None) -> STF_Module:
+		return self._modules.get(json_resource["type"], self._fallback_modules.get(stf_kind))
 
 	def register_imported_resource(self, stf_id: str, application_object: any):
 		self._imported_resources[stf_id] = application_object

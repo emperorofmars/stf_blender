@@ -13,7 +13,7 @@ class STF_Material_Value_Image(STF_Material_Value_Base):
 
 def _value_import_func(context: STF_ImportContext, blender_material: bpy.types.Material, json_resource: any, value: STF_Material_Value_Image):
 	if("image" in json_resource):
-		value.image = context.import_resource(json_resource["image"])
+		value.image = context.import_resource(json_resource["image"], stf_kind="data")
 
 
 def _value_export_func(context: STF_ExportContext, blender_material: bpy.types.Material, value: STF_Material_Value_Image) -> any:

@@ -57,6 +57,9 @@ class STF_Module:
 	# (Application Object) -> List[Application Component Object]
 	get_components_func: Callable[[any], list[any]]
 
+	# Add the object to add aa component to
+	get_components_holder_func: Callable[[any], any]
+
 
 class STF_ExportComponentHook:
 	"""
