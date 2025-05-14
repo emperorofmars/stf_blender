@@ -102,15 +102,15 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 	return ret, stf_id
 
 
-def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: any, application_object_property_index: int, data_path: str, data_index: int) -> tuple[list[str], Callable[[any], any]]:
+def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: ArmatureBone, application_object_property_index: int, data_path: str, data_index: int) -> tuple[list[str], Callable[[any], any]]:
 	if(match := re.search(r"^location", data_path)):
-		return [application_object.stf_id, "t", translate_translation_property_to_stf(data_index)], get_translation_to_stf_translation_func(data_index)
+		return [application_object.get_bone().stf_id, "t", translate_translation_property_to_stf(data_index)], get_translation_to_stf_translation_func(data_index)
 
 	if(match := re.search(r"^rotation_quaternion", data_path)):
-		return [application_object.stf_id, "r", translate_rotation_property_to_stf(data_index)], get_rotation_to_stf_translation_func(data_index)
+		return [application_object.get_bone().stf_id, "r", translate_rotation_property_to_stf(data_index)], get_rotation_to_stf_translation_func(data_index)
 
 	if(match := re.search(r"^scale", data_path)):
-		return [application_object.stf_id, "s", translate_scale_property_to_stf(data_index)], get_scale_to_stf_translation_func(data_index)
+		return [application_object.get_bone().stf_id, "s", translate_scale_property_to_stf(data_index)], get_scale_to_stf_translation_func(data_index)
 
 	return None
 
@@ -152,7 +152,7 @@ class STF_Module_STF_Bone(STF_Module):
 	get_components_func = _get_components_from_object
 	get_components_holder_func = _get_components_holder_func
 
-	understood_application_property_path_types = [bpy.types.Bone]
+	understood_application_property_path_types = [ArmatureBone]
 	understood_application_property_path_parts = ["location", "rotation_quaternion", "scale"]
 	resolve_property_path_to_stf_func = _resolve_property_path_to_stf_func
 	resolve_stf_property_to_blender_func = _resolve_stf_property_to_blender_func
