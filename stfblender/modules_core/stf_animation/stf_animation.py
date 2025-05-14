@@ -24,6 +24,11 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, pa
 		blender_animation.stf_name = json_resource["name"]
 		blender_animation.stf_name_source_of_truth = True
 
+	fps = json_resource.get("fps", 30)
+	if(fps != bpy.context.scene.render.fps):
+		blender_animation.stf_fps_override = True
+		blender_animation.stf_fps = fps
+
 	blender_animation.use_cyclic = json_resource.get("loop", False)
 	if("range" in json_resource):
 		blender_animation.use_frame_range = True
@@ -97,6 +102,7 @@ def _stf_export(context: STF_ExportContext, application_object: any, parent_appl
 		"type": _stf_type,
 		"name": blender_animation.stf_name if blender_animation.stf_name_source_of_truth else blender_animation.name,
 		"loop": blender_animation.use_cyclic,
+		"fps": bpy.context.scene.render.fps if not blender_animation.stf_fps_override else blender_animation.stf_fps
 	}
 	if(blender_animation.use_frame_range):
 		ret["range"] = [blender_animation.frame_start, blender_animation.frame_end]
@@ -170,8 +176,14 @@ register_stf_modules = [
 def register():
 	boilerplate_register(bpy.types.Action, "data")
 	bpy.types.Action.stf_exclude = bpy.props.BoolProperty(name="Exclude from STF", default=False) # type: ignore
+	bpy.types.Action.stf_fps_override = bpy.props.BoolProperty(name="FPS Override", default=False) # type: ignore
+	bpy.types.Action.stf_fps = bpy.props.FloatProperty(name="FPS", default=30) # type: ignore
 
 def unregister():
 	boilerplate_unregister(bpy.types.Action, "data")
 	if hasattr(bpy.types.Action, "stf_exclude"):
 		del bpy.types.Action.stf_exclude
+	if hasattr(bpy.types.Action, "stf_fps_override"):
+		del bpy.types.Action.stf_fps_override
+	if hasattr(bpy.types.Action, "stf_fps"):
+		del bpy.types.Action.stf_fps
