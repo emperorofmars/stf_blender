@@ -122,6 +122,18 @@ def _stf_export(context: STF_ExportContext, application_object: any, parent_appl
 							selected_slot_link = slot_link
 							break
 					if(selected_slot_link):
+						kurwas: dict[str, list[bpy.types.FCurve]] = dict()
+						for fcurve in channelbag.fcurves:
+							if(fcurve.data_path not in kurwas):
+								kurwas[fcurve.data_path] = [fcurve]
+							else:
+								kurwas[fcurve.data_path].append(fcurve)
+						for data_path, fcurves in kurwas.items():
+							print()
+							print(data_path + " : " + str(fcurves))
+							#TODO export data belonging together grouped
+
+						# OLD, TODO remove this once tracks are grouped
 						for fcurve in channelbag.fcurves:
 							# Get bezier export import done first, then deal with other interpolation kinds and whatever else
 							property_translation = context.resolve_application_property_path(selected_slot_link.target, selected_slot_link.datablock_index, fcurve.data_path, fcurve.array_index)
