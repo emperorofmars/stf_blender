@@ -102,33 +102,30 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 	return ret, stf_id
 
 
-def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: ArmatureBone, application_object_property_index: int, data_path: str, data_index: int) -> tuple[list[str], Callable[[any], any]]:
+def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: ArmatureBone, application_object_property_index: int, data_path: str) -> tuple[list[str], Callable[[any], any], list[int]]:
 	if(match := re.search(r"^location", data_path)):
-		return [application_object.get_bone().stf_id, "t", translate_bone_translation_property_to_stf(data_index)], None
+		return [application_object.get_bone().stf_id, "t"], convert_bone_translation_to_stf, translation_bone_index_conversion_to_stf
 
 	if(match := re.search(r"^rotation_quaternion", data_path)):
-		return [application_object.get_bone().stf_id, "r", translate_bone_rotation_property_to_stf(data_index)], None
+		return [application_object.get_bone().stf_id, "r"], convert_bone_rotation_to_stf, rotation_bone_index_conversion_to_stf
 
 	if(match := re.search(r"^scale", data_path)):
-		return [application_object.get_bone().stf_id, "s", translate_bone_scale_property_to_stf(data_index)], None
+		return [application_object.get_bone().stf_id, "s"], convert_bone_scale_to_stf, scale_bone_index_conversion_to_stf
 
 	return None
 
 
-def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: any) -> tuple[any, int, any, any, int, Callable[[any], any]]:
+def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: any) -> tuple[any, int, any, any, list[int], Callable[[int, any], any]]:
 	blender_object = context.get_imported_resource(stf_path[0])
 	if(type(blender_object) is ArmatureBone):
 		blender_object = blender_object.armature.bones[blender_object.name]
 	match(stf_path[1]):
 		case "t":
-			data_index = translate_translation_property_to_blender_bone(stf_path[2])
-			return None, 0, "OBJECT", "pose.bones[\"" + blender_object.name + "\"].location", data_index, None
+			return None, 0, "OBJECT", "pose.bones[\"" + blender_object.name + "\"].location", translation_bone_index_conversion_to_blender, convert_bone_translation_to_blender
 		case "r":
-			data_index = translate_rotation_property_to_blender_bone(stf_path[2])
-			return None, 0, "OBJECT", "pose.bones[\"" + blender_object.name + "\"].rotation_quaternion", data_index, None
+			return None, 0, "OBJECT", "pose.bones[\"" + blender_object.name + "\"].rotation_quaternion", rotation_index_bone_conversion_to_blender, convert_bone_rotation_to_blender
 		case "s":
-			data_index = translate_scale_property_to_blender_bone(stf_path[2])
-			return None, 0, "OBJECT", "pose.bones[\"" + blender_object.name + "\"].scale", data_index, None
+			return None, 0, "OBJECT", "pose.bones[\"" + blender_object.name + "\"].scale", scale_bone_index_conversion_to_blender, convert_bone_scale_to_blender
 		case "components":
 			return context.resolve_stf_property_path(stf_path[2:], application_object)
 

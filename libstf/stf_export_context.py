@@ -79,13 +79,13 @@ class STF_ExportContext:
 		return self._state.serialize_buffer(data)
 
 
-	def resolve_application_property_path(self, application_object: any, application_object_property_index: int, data_path: str, data_index: int) -> tuple[list[str], Callable[[any], any]]:
+	def resolve_application_property_path(self, application_object: any, application_object_property_index: int, data_path: str) -> tuple[list[str], Callable[[int, any], any], list[int]]:
 		if(application_object == None): return None
 
 		if(data_path.startswith(".")): data_path = data_path[1:]
 
 		if(selected_module := self._state.determine_property_resolution_module(application_object, data_path)):
-			return selected_module.resolve_property_path_to_stf_func(self, application_object, application_object_property_index, data_path, data_index)
+			return selected_module.resolve_property_path_to_stf_func(self, application_object, application_object_property_index, data_path)
 
 		return None
 

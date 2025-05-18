@@ -1,4 +1,5 @@
 import bpy
+from math import inf
 
 from ....libstf.stf_export_context import STF_ExportContext
 from ....libstf.stf_import_context import STF_ImportContext
@@ -42,7 +43,11 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, pa
 	for track in json_resource.get("tracks", []):
 		target_ret = context.resolve_stf_property_path(track.get("target", []))
 		if(target_ret):
-			target_object, application_object_property_index, slot_type, fcurve_target, property_index, conversion_func = target_ret
+			target_object, application_object_property_index, slot_type, fcurve_target, index_conversion, conversion_func = target_ret
+			if(not index_conversion):
+				index_conversion = []
+				for track_index in range(len(track.get("keyframes", [])[0].get("values", []))):
+					index_conversion.append(track_index)
 
 			selected_slot_link = None
 			selected_channelbag = None
@@ -72,14 +77,17 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, pa
 				if(channelbag.slot_handle == blender_slot.handle):
 					selected_channelbag = channelbag
 
-			fcurve: bpy.types.FCurve = selected_channelbag.fcurves.new(fcurve_target, index=property_index)
+			for stf_index in range(len(index_conversion)):
+				fcurve: bpy.types.FCurve = selected_channelbag.fcurves.new(fcurve_target, index=index_conversion[stf_index])
+				for stf_keyframes in track.get("keyframes", []):
+					timepoint = stf_keyframes["frame"]
+					stf_keyframe = stf_keyframes["values"][stf_index]
 
-			for stf_keyframe in track.get("keyframes", []):
-				keyframe = fcurve.keyframe_points.insert(stf_keyframe[0], stf_keyframe[1] if not conversion_func else conversion_func(stf_keyframe[1]))
-				keyframe.handle_left.x = keyframe.co.x + stf_keyframe[2]
-				keyframe.handle_left.y = keyframe.co.y + stf_keyframe[3]
-				keyframe.handle_right.x = keyframe.co.x + stf_keyframe[4]
-				keyframe.handle_right.y = keyframe.co.y + stf_keyframe[5]
+					keyframe = fcurve.keyframe_points.insert(timepoint, stf_keyframe[0] if not conversion_func else conversion_func(stf_index, stf_keyframe[0]))
+					keyframe.handle_left.x = keyframe.co.x + stf_keyframe[1]
+					keyframe.handle_left.y = keyframe.co.y + stf_keyframe[2]
+					keyframe.handle_right.x = keyframe.co.x + stf_keyframe[3]
+					keyframe.handle_right.y = keyframe.co.y + stf_keyframe[4]
 
 			fcurve.keyframe_points.handles_recalc()
 
@@ -122,39 +130,65 @@ def _stf_export(context: STF_ExportContext, application_object: any, parent_appl
 							selected_slot_link = slot_link
 							break
 					if(selected_slot_link):
-						kurwas: dict[str, list[bpy.types.FCurve]] = dict()
+						kurwas: dict[str, dict[int, bpy.types.FCurve]] = dict()
 						for fcurve in channelbag.fcurves:
 							if(fcurve.data_path not in kurwas):
-								kurwas[fcurve.data_path] = [fcurve]
+								kurwas[fcurve.data_path] = {fcurve.array_index: fcurve}
 							else:
-								kurwas[fcurve.data_path].append(fcurve)
+								kurwas[fcurve.data_path][fcurve.array_index] = fcurve
+
 						for data_path, fcurves in kurwas.items():
-							print()
-							print(data_path + " : " + str(fcurves))
-							#TODO export data belonging together grouped
-
-						# OLD, TODO remove this once tracks are grouped
-						for fcurve in channelbag.fcurves:
-							# Get bezier export import done first, then deal with other interpolation kinds and whatever else
-							property_translation = context.resolve_application_property_path(selected_slot_link.target, selected_slot_link.datablock_index, fcurve.data_path, fcurve.array_index)
-
+							#stf_track: dict[float, list] = {}
+							stf_track: list = []
+							property_translation = context.resolve_application_property_path(selected_slot_link.target, selected_slot_link.datablock_index, data_path)
 							if(property_translation):
-								target, conversion_func = property_translation
+								target, conversion_func, index_conversion = property_translation
+								if(not index_conversion):
+									index_conversion = []
+									for _, fcurve in fcurves.items():
+										index_conversion.append(fcurve.array_index)
 
-								track = []
+								def find_next_keyframe(last_timepoint: float):
+									closest_timepoint = inf
+									keyframes: list[bpy.types.Keyframe] = [None] * len(index_conversion)
+									success = False
+									for _, fcurve in fcurves.items():
+										for keyframe in fcurve.keyframe_points:
+											if(keyframe.co.x > (last_timepoint + 0.001) and keyframe.co.x < closest_timepoint):
+												closest_timepoint = keyframe.co.x
+												success = True
+												break
+									if(success):
+										for _, fcurve in fcurves.items():
+											for keyframe in fcurve.keyframe_points:
+												if(keyframe.co.x < (closest_timepoint + 0.001) and keyframe.co.x > (closest_timepoint - 0.001)):
+													keyframes[fcurve.array_index] = keyframe
+									return closest_timepoint if success else None, keyframes
 
-								for keyframe in fcurve.keyframe_points:
-									track.append([
-										keyframe.co.x,
-										keyframe.co.y if not conversion_func else conversion_func(keyframe.co.y),
-										keyframe.handle_left.x - keyframe.co.x,
-										keyframe.handle_left.y - keyframe.co.y,
-										keyframe.handle_right.x - keyframe.co.x,
-										keyframe.handle_right.y - keyframe.co.y])
+								current_timepoint, keyframes = find_next_keyframe(-inf)
+								while current_timepoint != None:
+									stf_keyframes = [None] * len(index_conversion)
+									# Get bezier export import done first, then deal with other interpolation kinds and whatever else
+									for keyframe_index, keyframe in enumerate(keyframes):
+										if(keyframe):
+											stf_keyframes[index_conversion[keyframe_index]] = [
+												conversion_func(keyframe_index, keyframe.co.y) if conversion_func else keyframe.co.y,
+												keyframe.handle_left.x - keyframe.co.x,
+												keyframe.handle_left.y - keyframe.co.y,
+												keyframe.handle_right.x - keyframe.co.x,
+												keyframe.handle_right.y - keyframe.co.y
+											]
+									#stf_track[current_timepoint] = stf_keyframes
+									stf_track.append({
+										"frame": current_timepoint,
+										"values": stf_keyframes
+									})
+
+									current_timepoint, keyframes = find_next_keyframe(current_timepoint)
 
 								stf_tracks.append({
 									"target": target,
-									"keyframes": track
+									"keyframes": stf_track
 								})
 							else:
 								context.report(STFReport("Invalid fcurve data_path: " + fcurve.data_path, STFReportSeverity.Debug, None, _stf_type, blender_animation))

@@ -1,78 +1,45 @@
 from typing import Callable
 
+
 """
 Export
 """
 
 # Translation
-def translate_translation_property_to_stf(index: int) -> str:
+translation_index_conversion_to_stf = [0, 2, 1]
+def convert_translation_to_stf(index: int, value: float) -> float:
 	match(index):
-			case 0: return "x"
-			case 1: return "z"
-			case 2: return "y"
+		case 0: return value
+		case 1: return -value
+		case 2: return value
 	return None
 
-def get_translation_to_stf_translation_func(index: int) -> Callable[[any], any]:
-	def __func(value: float) -> float:
-		match(index):
-			case 0: return value
-			case 1: return -value
-			case 2: return value
-	return __func
-
-def translate_bone_translation_property_to_stf(index: int) -> str:
-	match(index):
-			case 0: return "x"
-			case 1: return "y"
-			case 2: return "z"
-	return None
-
+translation_bone_index_conversion_to_stf = [0, 1, 2]
+def convert_bone_translation_to_stf(index: int, value: float) -> float:
+	return value
 
 # Rotation
-def translate_rotation_property_to_stf(index: int) -> str:
+rotation_index_conversion_to_stf = [3, 0, 2, 1]
+def convert_blender_rotation_to_stf(index: int, value: float) -> float:
 	match(index):
-			case 0: return "w"
-			case 1: return "x"
-			case 2: return "z"
-			case 3: return "y"
+		case 0: return value
+		case 1: return value
+		case 2: return -value
+		case 3: return value
 	return None
 
-def get_rotation_to_stf_translation_func(index: int) -> Callable[[any], any]:
-	def __func(value: float) -> float:
-		match(index):
-			case 0: return value
-			case 1: return value
-			case 2: return -value
-			case 3: return value
-	return __func
-
-def translate_bone_rotation_property_to_stf(index: int) -> str:
-	match(index):
-			case 0: return "w"
-			case 1: return "x"
-			case 2: return "y"
-			case 3: return "z"
-	return None
-
+rotation_bone_index_conversion_to_stf = [3, 0, 1, 2]
+def convert_bone_rotation_to_stf(index: int, value: float) -> float:
+	return value
 
 # Scale
-def translate_scale_property_to_stf(index: int) -> str:
-	match(index):
-			case 0: return "x"
-			case 1: return "z"
-			case 2: return "y"
-	return None
+scale_index_conversion_to_stf = [0, 2, 1]
+def convert_scale_to_stf(index: int, value: float) -> float:
+	return value
 
-def get_scale_to_stf_translation_func(index: int) -> Callable[[any], any]:
-	def __func(value: float) -> float: return value
-	return __func
-
-def translate_bone_scale_property_to_stf(index: int) -> str:
-	match(index):
-			case 0: return "x"
-			case 1: return "z"
-			case 2: return "y"
-	return None
+scale_bone_index_conversion_to_stf = [0, 1, 2]
+def convert_bone_scale_to_stf(index: int, value: float) -> float:
+	return value
 
 
 """
@@ -80,70 +47,37 @@ Import
 """
 
 # Translation
-def translate_translation_property_to_blender(property: str) -> int:
-	match(property):
-			case "x": return 0
-			case "z": return 1
-			case "y": return 2
+translation_index_conversion_to_blender = [0, 2, 1]
+def convert_translation_to_blender(index: int, value: float) -> float:
+	match(index):
+		case 0: return value
+		case 1: return -value
+		case 2: return value
 	return None
 
-def get_translation_to_blender_translation_func(index: int) -> Callable[[any], any]:
-	def __func(value: float) -> float:
-		match(index):
-			case 0: return value
-			case 1: return -value
-			case 2: return value
-	return __func
-
-def translate_translation_property_to_blender_bone(property: str) -> int:
-	match(property):
-			case "x": return 0
-			case "y": return 1
-			case "z": return 2
-	return None
+translation_bone_index_conversion_to_blender = [0, 1, 2]
+def convert_bone_translation_to_blender(index: int, value: float) -> float:
+	return value
 
 # Rotation
-def translate_rotation_property_to_blender(property: str) -> int:
-	match(property):
-			case "w": return 0
-			case "x": return 1
-			case "z": return 2
-			case "y": return 3
+rotation_index_conversion_to_blender = [1, 3, 2, 0]
+def convert_rotation_to_blender(index: int, value: float) -> Callable[[any], any]:
+	match(index):
+		case 0: return value
+		case 1: return value
+		case 2: return -value
+		case 3: return value
 	return None
 
-def get_rotation_to_blender_translation_func(index: int) -> Callable[[any], any]:
-	def __func(value: float) -> float:
-		match(index):
-			case 0: return value
-			case 1: return value
-			case 2: return -value
-			case 3: return value
-	return __func
-
-def translate_rotation_property_to_blender_bone(property: str) -> int:
-	match(property):
-			case "w": return 0
-			case "x": return 1
-			case "y": return 2
-			case "z": return 3
-	return None
-
+rotation_index_bone_conversion_to_blender = [1, 2, 3, 0]
+def convert_bone_rotation_to_blender(index: int, value: float) -> Callable[[any], any]:
+	return value
 
 # Scale
-def translate_scale_property_to_blender(property: str) -> int:
-	match(property):
-			case "x": return 0
-			case "z": return 1
-			case "y": return 2
-	return None
+scale_index_conversion_to_blender = [0, 2, 1]
+def convert_scale_to_blender(index: int, value: float) -> float:
+	return value
 
-def get_scale_to_blender_translation_func(index: int) -> Callable[[any], any]:
-	def __func(value: float) -> float: return value
-	return __func
-
-def translate_scale_property_to_blender_bone(property: str) -> int:
-	match(property):
-			case "x": return 0
-			case "y": return 1
-			case "z": return 2
-	return None
+scale_bone_index_conversion_to_blender = [0, 1, 2]
+def convert_bone_scale_to_blender(index: int, value: float) -> float:
+	return value

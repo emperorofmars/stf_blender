@@ -34,20 +34,20 @@ def _stf_export(context: STF_ExportContext, application_object: AVA_Constraint_T
 	return ret, application_object.stf_id
 
 
-def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: any, application_object_property_index: int, data_path: str, data_index: int) -> tuple[list[str], Callable[[any], any]]:
+def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: any, application_object_property_index: int, data_path: str) -> tuple[list[str], Callable[[int, any], any], list[int]]:
 	if(match := re.search(r"^stf_ava_constraint_twist\[(?P<component_index>[\d]+)\].weight", data_path)):
 		component = application_object.stf_ava_constraint_twist[int(match.groupdict()["component_index"])]
 		for component_ref in application_object.stf_components:
 			if(component_ref.stf_id == component.stf_id):
-				return [application_object.stf_id, "components", component.stf_id, "weight"], None
+				return [application_object.stf_id, "components", component.stf_id, "weight"], None, None
 		for component_ref in application_object.stf_instance.stf_components:
 			if(component_ref.stf_id == component.stf_id):
-				return [application_object.stf_id, "instance", component_ref.node_id, "components", component.stf_id, "weight"], None
+				return [application_object.stf_id, "instance", component_ref.node_id, "components", component.stf_id, "weight"], None, None
 		# TODO animation_placeholders in instances.
 	return None
 
 
-def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: any) -> tuple[any, int, any, any, int, Callable[[any], any]]:
+def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: any) -> tuple[any, int, any, any, list[int], Callable[[int, any], any]]:
 	blender_object = context.get_imported_resource(stf_path[0])
 	match(stf_path[1]):
 		case "weight":

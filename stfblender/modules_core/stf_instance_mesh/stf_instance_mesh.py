@@ -13,16 +13,18 @@ from ...utils.component_utils import get_components_from_object
 _stf_type = "stf.instance.mesh"
 
 
-def _translate_property_to_stf_func(blender_object: bpy.types.Object, data_path: str, data_index: int) -> tuple[list[str], Callable[[any], any]]:
+def _resolve_property_path_to_stf_func(blender_object: bpy.types.Object, data_path: str) -> tuple[list[str], Callable[[int, any], any], list[int]]:
 	match = re.search(r"^key_blocks\[\"(?P<blendshape_name>[\w]+)\"\].value", data_path)
 	if(match and "blendshape_name" in match.groupdict()):
-		return [blender_object.stf_id, "instance", "blendshape", match.groupdict()["blendshape_name"], "value"], None
+		return [blender_object.stf_id, "instance", "blendshape", match.groupdict()["blendshape_name"], "value"], None, None
 
 	return None
 
 
-def _translate_property_to_blender_func(blender_object: bpy.types.Object, stf_property: str) -> tuple[str, int, Callable[[any], any]]:
-	return stf_property, 0, None
+def _resolve_stf_property_to_blender_func(blender_object: bpy.types.Object, stf_property: str) -> tuple[any, int, any, any, list[int], Callable[[any], any]]:
+	if(len(stf_property) == 3 and stf_property[0] == "blendshape" and stf_property[2] == "value"):
+		return None, 0, "OBJECT", "key_blocks[" + stf_property[1] + "].value", None, None
+	return None
 
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
@@ -105,8 +107,8 @@ class STF_Module_STF_Instance_Mesh(STF_Module):
 	can_handle_application_object_func = _can_handle_application_object_func
 	get_components_func = get_components_from_object
 
-	translate_property_to_stf_func = _translate_property_to_stf_func
-	translate_property_to_blender_func: _translate_property_to_blender_func
+	resolve_property_path_to_stf_func = _resolve_property_path_to_stf_func
+	resolve_stf_property_to_blender_func: _resolve_stf_property_to_blender_func
 
 
 register_stf_modules = [
