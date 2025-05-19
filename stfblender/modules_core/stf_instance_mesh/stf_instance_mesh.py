@@ -13,24 +13,14 @@ from ...utils.component_utils import get_components_from_object
 _stf_type = "stf.instance.mesh"
 
 
-def _resolve_property_path_to_stf_func(blender_object: bpy.types.Object, data_path: str) -> tuple[list[str], Callable[[int, any], any], list[int]]:
-	match = re.search(r"^key_blocks\[\"(?P<blendshape_name>[\w]+)\"\].value", data_path)
-	if(match and "blendshape_name" in match.groupdict()):
-		return [blender_object.stf_id, "instance", "blendshape", match.groupdict()["blendshape_name"], "value"], None, None
-
-	return None
-
-
-def _resolve_stf_property_to_blender_func(blender_object: bpy.types.Object, stf_property: str) -> tuple[any, int, any, any, list[int], Callable[[any], any]]:
-	if(len(stf_property) == 3 and stf_property[0] == "blendshape" and stf_property[2] == "value"):
-		return None, 0, "OBJECT", "key_blocks[" + stf_property[1] + "].value", None, None
-	return None
-
-
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
 	blender_resource = context.import_resource(json_resource["mesh"], stf_kind="data")
 	blender_object = bpy.data.objects.new(json_resource.get("name", "STF Node"), blender_resource)
-	context.register_imported_resource(stf_id, blender_object)
+	blender_object.stf_instance.stf_id = stf_id
+	if(json_resource.get("name")):
+		blender_object.stf_instance.stf_name = json_resource["name"]
+		blender_object.stf_instance.stf_name_source_of_truth = True
+	context.register_imported_resource(stf_id, (blender_object, blender_resource))
 
 	if(not blender_object or type(blender_object) is not bpy.types.Object):
 		context.report(STFReport("Failed to import mesh: " + str(json_resource.get("instance", {}).get("mesh")), STFReportSeverity.Error, stf_id, _stf_type, context_object))
@@ -97,6 +87,19 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 	return ret, str(uuid.uuid4())
 
 
+def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: any, application_object_property_index: int, data_path: str) -> tuple[list[str], Callable[[int, any], any], list[int]]:
+	match = re.search(r"^key_blocks\[\"(?P<blendshape_name>[\w]+)\"\].value", data_path)
+	if(match and "blendshape_name" in match.groupdict()):
+		return [application_object.stf_id, "instance", "blendshape", match.groupdict()["blendshape_name"], "value"], None, None
+
+	return None
+
+def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: any) -> tuple[any, int, any, any, list[int], Callable[[int, any], any]]:
+	if(len(stf_path) == 4 and stf_path[1] == "blendshape" and stf_path[3] == "value"):
+		return None, 0, "KEY", "key_blocks[\"" + stf_path[2] + "\"].value", None, None
+	return None
+
+
 class STF_Module_STF_Instance_Mesh(STF_Module):
 	stf_type = _stf_type
 	stf_kind = "instance"
@@ -107,8 +110,10 @@ class STF_Module_STF_Instance_Mesh(STF_Module):
 	can_handle_application_object_func = _can_handle_application_object_func
 	get_components_func = get_components_from_object
 
+	understood_application_property_path_types = [bpy.types.Object]
+	understood_application_property_path_parts = ["key_blocks"]
 	resolve_property_path_to_stf_func = _resolve_property_path_to_stf_func
-	resolve_stf_property_to_blender_func: _resolve_stf_property_to_blender_func
+	resolve_stf_property_to_blender_func = _resolve_stf_property_to_blender_func
 
 
 register_stf_modules = [

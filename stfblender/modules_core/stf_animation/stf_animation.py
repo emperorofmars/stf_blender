@@ -55,7 +55,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, pa
 			for slot_link in blender_animation.slot_links:
 				if(slot_link.target == target_object and slot_link.datablock_index == application_object_property_index):
 					for slot in blender_animation.slots:
-						if(slot.handle == slot_link.slot_handle):
+						if(slot.handle == slot_link.slot_handle and slot.target_id_type == slot_type):
 							selected_slot_link = slot_link
 							break
 				if(selected_slot_link):

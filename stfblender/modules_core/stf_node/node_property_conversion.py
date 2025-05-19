@@ -31,7 +31,12 @@ def stf_node_resolve_stf_property_to_blender_func(context: STF_ImportContext, st
 			return blender_object, 0, "OBJECT", "rotation_quaternion", rotation_index_conversion_to_blender, convert_rotation_to_blender
 		case "s":
 			return blender_object, 0, "OBJECT", "scale", scale_index_conversion_to_blender, convert_scale_to_blender
-		case "instance" | "components":
+		case "instance":
+			module_ret =  context.resolve_stf_property_path([blender_object.stf_instance.stf_id] + stf_path[2:], blender_object)
+			if(module_ret):
+				target_object, application_object_property_index, slot_type, fcurve_target, index_table, conversion_func = module_ret # Ignore Target Object for now
+				return blender_object, application_object_property_index, slot_type, fcurve_target, index_table, conversion_func
+		case "components":
 			module_ret =  context.resolve_stf_property_path(stf_path[2:], blender_object)
 			if(module_ret):
 				target_object, application_object_property_index, slot_type, fcurve_target, index_table, conversion_func = module_ret # Ignore Target Object for now

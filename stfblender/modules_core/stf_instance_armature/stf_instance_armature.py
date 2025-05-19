@@ -28,7 +28,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 		blender_object.stf_instance.stf_name_source_of_truth = True
 
 	bpy.context.scene.collection.objects.link(blender_object)
-	context.register_imported_resource(stf_id, blender_object)
+	context.register_imported_resource(stf_id, (blender_object, blender_armature))
 
 	if("pose" in json_resource):
 		if(bpy.context.mode != "OBJECT"): bpy.ops.object.mode_set(mode="OBJECT", toggle=False)
@@ -130,6 +130,9 @@ def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_o
 
 	return None
 
+def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: any) -> tuple[any, int, any, any, list[int], Callable[[int, any], any]]:
+	return context.resolve_stf_property_path(stf_path[1:], application_object)
+
 
 class STF_Module_STF_Instance_Armature(STF_Module):
 	stf_type = _stf_type
@@ -144,6 +147,7 @@ class STF_Module_STF_Instance_Armature(STF_Module):
 	understood_application_property_path_types = [bpy.types.Object]
 	understood_application_property_path_parts = ["pose.bones"]
 	resolve_property_path_to_stf_func = _resolve_property_path_to_stf_func
+	resolve_stf_property_to_blender_func = _resolve_stf_property_to_blender_func
 
 
 register_stf_modules = [
