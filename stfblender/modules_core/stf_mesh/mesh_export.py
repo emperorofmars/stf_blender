@@ -338,9 +338,9 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 				point: bpy.types.ShapeKeyPoint = shape_key.data[vertex.index]
 				offset = point.co - vertex.co
 				normal = [
-					vertex_normals_flat[vertex.index * 3],
-					vertex_normals_flat[vertex.index * 3 + 1],
-					vertex_normals_flat[vertex.index * 3 + 2]
+					vertex_normals_flat[vertex.index * 3] - vertex.normal.x,
+					vertex_normals_flat[vertex.index * 3 + 1] - vertex.normal.y,
+					vertex_normals_flat[vertex.index * 3 + 2] - vertex.normal.z
 				]
 				if(offset.length > 0.00001):
 					blendshape_offsets[vertex.index] = (blender_translation_to_stf(offset), blender_translation_to_stf(normal))
