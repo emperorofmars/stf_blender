@@ -36,7 +36,7 @@ def convert_texture_or_float(blender_material: bpy.types.Material, socket: bpy.t
 	else:
 		if(socket.type == "VALUE"):
 			_, _, value = add_property(blender_material, float_property, STF_Material_Value_Module_Float)
-			value.color = socket.default_value
+			value.number = socket.default_value
 
 
 def convert_shader_node_to_stf(context: STF_ExportContext, blender_material: bpy.types.Material, node: bpy.types.ShaderNode):
