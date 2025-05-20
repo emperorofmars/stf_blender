@@ -18,6 +18,9 @@ class STF_Material_Value_Module_Base:
 
 	draw_func: Callable[[bpy.types.UILayout, bpy.types.Context, bpy.types.Material, STF_Material_Value_Base], None]
 
+	# TODO convert_from_blender_node
+	# TODO convert_to_blender_node
+
 
 class STF_Material_Value_Ref(bpy.types.PropertyGroup): # Bringing polymorphism to Blender
 	"""References the 'value_id' of the actual value property, whose property-name is unknown by this piece of code."""
