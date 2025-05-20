@@ -52,6 +52,7 @@ class STF_Meta:
 		self.version_major: int = 0
 		self.version_minor: int = 0
 		self.generator: str = "libstf_python"
+		self.generator_version = "0.0.0"
 		self.timestamp: str = datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat()
 		self.root: str = None
 		self.profiles: list[STF_Profile] = []
@@ -67,6 +68,7 @@ class STF_Meta:
 		ret.profiles = dict["profiles"]
 		ret.asset_info = STF_Meta_AssetInfo.from_dict(dict["asset_info"])
 		ret.generator = dict["generator"]
+		ret.generator_version = dict["generator_version"]
 		ret.timestamp = dict["timestamp"]
 		ret.metric_multiplier = dict["metric_multiplier"]
 		return ret
@@ -79,6 +81,7 @@ class STF_Meta:
 			"profiles": self.profiles,
 			"asset_info": self.asset_info.to_dict(),
 			"generator": self.generator,
+			"generator_version": self.generator_version,
 			"timestamp": self.timestamp,
 			"metric_multiplier": self.metric_multiplier,
 		}

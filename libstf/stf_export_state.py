@@ -119,7 +119,7 @@ class STF_ExportState(StateUtil):
 		return self._root_id
 
 
-	def create_stf_definition(self, buffer_mode: STF_Buffer_Mode = STF_Buffer_Mode.included_binary, generator: str = "libstf_python") -> STF_JsonDefinition:
+	def create_stf_definition(self, buffer_mode: STF_Buffer_Mode = STF_Buffer_Mode.included_binary, generator: str = "libstf_python", generator_version: str = "0.0.0") -> STF_JsonDefinition:
 		import datetime
 
 		ret = STF_JsonDefinition()
@@ -127,6 +127,7 @@ class STF_ExportState(StateUtil):
 		ret.stf.version_minor = 0
 		ret.stf.root = self._root_id
 		ret.stf.generator = generator
+		ret.stf.generator_version = generator_version
 		ret.stf.timestamp = datetime.datetime.now(datetime.timezone.utc).isoformat()
 		ret.stf.asset_info = self._asset_info
 		ret.stf.profiles = self._profiles
@@ -143,11 +144,11 @@ class STF_ExportState(StateUtil):
 		# TODO handle other buffer types
 		return ret
 
-	def create_stf_binary_file(self, generator: str = "libstf_python") -> STF_File:
+	def create_stf_binary_file(self, generator: str = "libstf_python", generator_version: str = "0.0.0") -> STF_File:
 		ret = STF_File()
 		ret.binary_version_major = 0
 		ret.binary_version_minor = 0
-		ret.definition = self.create_stf_definition(STF_Buffer_Mode.included_binary, generator)
+		ret.definition = self.create_stf_definition(STF_Buffer_Mode.included_binary, generator, generator_version)
 		for _, buffer in self._exported_buffers.items():
 			ret.buffers_included.append(buffer)
 		return ret

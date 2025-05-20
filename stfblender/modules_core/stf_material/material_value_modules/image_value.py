@@ -6,7 +6,7 @@ from ..stf_material_definition import STF_Material_Value_Base, STF_Material_Valu
 
 
 class STF_Material_Value_Image(STF_Material_Value_Base):
-	image: bpy.props.PointerProperty(type=bpy.types.Texture, name="Image") # type: ignore
+	image: bpy.props.PointerProperty(type=bpy.types.Image, name="Image") # type: ignore
 	# uv_multiplier:
 	# uv_offset:
 

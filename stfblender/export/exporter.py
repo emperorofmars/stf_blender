@@ -1,13 +1,20 @@
 import json
 import bpy
+import addon_utils
 from bpy_extras.io_utils import ExportHelper
-
 
 from ..stf_meta import draw_meta_editor
 from ...libstf.stf_report import STFReportSeverity
 from ...libstf.stf_registry import get_export_modules
 from ...libstf.stf_export_state import STF_ExportState
 from ...libstf.stf_export_context import STF_ExportContext
+
+def get_stf_version() -> str:
+	for module in addon_utils.modules():
+		if module.__name__.endswith("stf_blender"):
+			version = module.bl_info.get("version", (0, 0, 0))
+			return str(version[0]) + "." + str(version[1]) + "." + str(version[2])
+	return "0.0.0"
 
 class ExportSTF(bpy.types.Operator, ExportHelper):
 	"""Export as STF file (.stf)"""
@@ -56,7 +63,7 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 				export_filepath += ".stf"
 
 			# Create and write stf_file to disk
-			stf_file = stf_state.create_stf_binary_file(generator="stfblender")
+			stf_file = stf_state.create_stf_binary_file(generator="stf_blender", generator_version=get_stf_version())
 			files.append(open(export_filepath, "wb"))
 			stf_file.serialize(files[len(files) - 1])
 
