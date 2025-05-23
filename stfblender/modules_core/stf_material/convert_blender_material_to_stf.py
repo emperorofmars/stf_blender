@@ -39,7 +39,6 @@ def convert_texture_or_float(blender_material: bpy.types.Material, socket: bpy.t
 
 
 def convert_shader_node_to_stf(blender_material: bpy.types.Material, node: bpy.types.ShaderNode):
-	print()
 	if("Base Color" in node.inputs):
 		convert_texture_or_color(blender_material, node.inputs["Base Color"], "albedo.texture", "albedo.color")
 	if("Roughness" in node.inputs):

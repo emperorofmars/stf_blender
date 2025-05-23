@@ -1,8 +1,8 @@
 import bpy
 
+
 from .stf_material_definition import STF_Material_Definition, STF_Material_Property, STF_Material_Value_Module_Base
 from .material_value_modules import blender_material_value_modules
-from .convert_blender_material_to_stf import blender_material_to_stf
 from .stf_material_operators import add_property, add_value_to_property
 from ....libstf.stf_export_context import STF_ExportContext
 from ....libstf.stf_import_context import STF_ImportContext
@@ -10,6 +10,8 @@ from ....libstf.stf_module import STF_Module
 from ...utils.component_utils import get_components_from_object
 from ...utils.id_utils import ensure_stf_id
 from ...utils.boilerplate import boilerplate_register, boilerplate_unregister
+from .convert_blender_material_to_stf import blender_material_to_stf
+from .convert_stf_material_to_blender import stf_material_to_blender
 
 
 _stf_type = "stf.material"
@@ -52,6 +54,8 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 					pass # TODO report fail
 				break
 
+	stf_material_to_blender(blender_material)
+
 	return blender_material
 
 
@@ -66,7 +70,7 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 	}
 
 	if(not blender_material.stf_is_source_of_truth):
-		blender_material_to_stf(context, blender_material)
+		blender_material_to_stf(blender_material)
 
 
 	ret["style_hints"] = []
@@ -90,6 +94,7 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 				if(mat_module.property_name == property.value_property_name):
 					for property_value in getattr(blender_material, property.value_property_name):
 						if(property_value.value_id == value_ref.value_id):
+							# TODO check if export succeeded and warn if not
 							values.append(mat_module.value_export_func(context, blender_material, property_value))
 							break
 
