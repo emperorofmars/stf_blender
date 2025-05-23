@@ -2,7 +2,7 @@ import bpy
 
 from .stf_material_definition import STF_Material_Definition, STF_Material_Property, STF_Material_Value_Module_Base
 from .material_value_modules import blender_material_value_modules
-from .blender_material_to_stf import blender_material_to_stf
+from .convert_blender_material_to_stf import blender_material_to_stf
 from .stf_material_operators import add_property, add_value_to_property
 from ....libstf.stf_export_context import STF_ExportContext
 from ....libstf.stf_import_context import STF_ImportContext

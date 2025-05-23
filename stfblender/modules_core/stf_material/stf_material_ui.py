@@ -6,7 +6,8 @@ from ...utils.component_utils import STFAddComponentOperatorBase, STFRemoveCompo
 from ...utils.component_ui_utils import draw_components_ui, set_stf_component_filter
 from .material_value_modules import blender_material_value_modules
 from .stf_material_operators import STFAddMaterialProperty, STFAddMaterialPropertyValue, STFClearMaterial, STFRemoveMaterialProperty, STFRemoveMaterialPropertyValue
-from .blender_material_to_stf import STFConvertBlenderMaterialToSTF
+from .convert_blender_material_to_stf import STFConvertBlenderMaterialToSTF
+from .convert_stf_material_to_blender import STFConvertSTFMaterialToBlender
 
 
 class STFSetMaterialIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
@@ -70,7 +71,7 @@ class STFMaterialSpatialPanel(bpy.types.Panel):
 
 		row = self.layout.row()
 		row.operator(STFConvertBlenderMaterialToSTF.bl_idname)
-		row.label(text="Convert STF Material to Blender") # TODO
+		row.operator(STFConvertSTFMaterialToBlender.bl_idname)
 		row.operator(STFClearMaterial.bl_idname)
 
 		# STF Material Properties
