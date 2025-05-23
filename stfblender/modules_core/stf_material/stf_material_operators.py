@@ -84,6 +84,9 @@ class STFRemoveMaterialProperty(bpy.types.Operator):
 
 	index: bpy.props.IntProperty() # type: ignore
 
+	def invoke(self, context, event):
+		return context.window_manager.invoke_confirm(self, event)
+
 	def execute(self, context):
 		remove_property(context.material, self.index)
 		return {"FINISHED"}
@@ -109,6 +112,22 @@ class STFRemoveMaterialPropertyValue(bpy.types.Operator):
 
 	index: bpy.props.IntProperty() # type: ignore
 
+	def invoke(self, context, event):
+		return context.window_manager.invoke_confirm(self, event)
+
 	def execute(self, context):
 		remove_property_value(context.material, self.index)
+		return {"FINISHED"}
+
+class STFClearMaterial(bpy.types.Operator):
+	bl_idname = "stf.clear_material"
+	bl_label = "Clear STF Material"
+	bl_category = "STF"
+	bl_options = {"REGISTER", "UNDO"}
+
+	def invoke(self, context, event):
+		return context.window_manager.invoke_confirm(self, event)
+
+	def execute(self, context):
+		clear_stf_material(context.material)
 		return {"FINISHED"}

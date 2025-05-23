@@ -5,10 +5,9 @@ from .stf_material_operators import add_property, clear_stf_material
 from .material_value_modules.float_value import STF_Material_Value_Module_Float
 from .material_value_modules.color_value import STF_Material_Value_Module_Color
 from .material_value_modules.image_value import STF_Material_Value_Module_Image
-from . import stf_material_definition as stfmat
 
 
-def convert_principled_bsdf_to_stf(context: STF_ExportContext, blender_material: bpy.types.Material, node: bpy.types.ShaderNodeBsdfPrincipled):
+def convert_principled_bsdf_to_stf(blender_material: bpy.types.Material, node: bpy.types.ShaderNodeBsdfPrincipled):
 	hint = blender_material.stf_material.style_hints.add()
 	hint.value = "realistic"
 	hint = blender_material.stf_material.style_hints.add()
@@ -39,7 +38,7 @@ def convert_texture_or_float(blender_material: bpy.types.Material, socket: bpy.t
 			value.number = socket.default_value
 
 
-def convert_shader_node_to_stf(context: STF_ExportContext, blender_material: bpy.types.Material, node: bpy.types.ShaderNode):
+def convert_shader_node_to_stf(blender_material: bpy.types.Material, node: bpy.types.ShaderNode):
 	print()
 	if("Base Color" in node.inputs):
 		convert_texture_or_color(blender_material, node.inputs["Base Color"], "albedo.texture", "albedo.color")
@@ -47,7 +46,7 @@ def convert_shader_node_to_stf(context: STF_ExportContext, blender_material: bpy
 		convert_texture_or_float(blender_material, node.inputs["Roughness"], "roughness.texture", "roughness.value")
 
 
-def blender_material_to_stf(context: STF_ExportContext, blender_material: bpy.types.Material):
+def blender_material_to_stf(blender_material: bpy.types.Material):
 	clear_stf_material(blender_material)
 
 	if(blender_material.use_nodes):
@@ -55,12 +54,27 @@ def blender_material_to_stf(context: STF_ExportContext, blender_material: bpy.ty
 
 		if(len(output_node.inputs["Surface"].links) == 1):
 			if(type(output_node.inputs["Surface"].links[0].from_node) is bpy.types.ShaderNodeBsdfPrincipled):
-				convert_principled_bsdf_to_stf(context, blender_material, output_node.inputs["Surface"].links[0].from_node)
+				convert_principled_bsdf_to_stf(blender_material, output_node.inputs["Surface"].links[0].from_node)
 
 			if(issubclass(type(output_node.inputs["Surface"].links[0].from_node), bpy.types.ShaderNode)):
-				convert_shader_node_to_stf(context, blender_material, output_node.inputs["Surface"].links[0].from_node)
+				convert_shader_node_to_stf(blender_material, output_node.inputs["Surface"].links[0].from_node)
 
 
 	else:
 		_, _, value = add_property(blender_material, "albedo.color", STF_Material_Value_Module_Color)
 		value.color = blender_material.diffuse_color
+
+
+
+class STFConvertBlenderMaterialToSTF(bpy.types.Operator):
+	bl_idname = "stf.convert_blender_material_to_stf"
+	bl_label = "Convert Blender Material to STF"
+	bl_category = "STF"
+	bl_options = {"REGISTER", "UNDO"}
+
+	def invoke(self, context, event):
+		return context.window_manager.invoke_confirm(self, event)
+
+	def execute(self, context):
+		blender_material_to_stf(context.material)
+		return {"FINISHED"}

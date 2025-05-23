@@ -5,7 +5,8 @@ from ...utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
 from ...utils.component_utils import STFAddComponentOperatorBase, STFRemoveComponentOperatorBase
 from ...utils.component_ui_utils import draw_components_ui, set_stf_component_filter
 from .material_value_modules import blender_material_value_modules
-from .stf_material_operators import STFAddMaterialProperty, STFAddMaterialPropertyValue, STFRemoveMaterialProperty, STFRemoveMaterialPropertyValue
+from .stf_material_operators import STFAddMaterialProperty, STFAddMaterialPropertyValue, STFClearMaterial, STFRemoveMaterialProperty, STFRemoveMaterialPropertyValue
+from .blender_material_to_stf import STFConvertBlenderMaterialToSTF
 
 
 class STFSetMaterialIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
@@ -67,7 +68,10 @@ class STFMaterialSpatialPanel(bpy.types.Panel):
 
 		self.layout.prop(context.material, "stf_is_source_of_truth")
 
-		# TODO buttons to clear the STF material, apply it to the Blender material, and to parse it from the Blender material
+		row = self.layout.row()
+		row.operator(STFConvertBlenderMaterialToSTF.bl_idname)
+		row.label(text="Convert STF Material to Blender") # TODO
+		row.operator(STFClearMaterial.bl_idname)
 
 		# STF Material Properties
 		self.layout.prop(context.material.stf_material, "style_hints")
@@ -99,13 +103,14 @@ class STFMaterialSpatialPanel(bpy.types.Panel):
 				row_value_list.template_list(STFDrawMaterialPropertyValueList.bl_idname, "", prop, "values", prop, "active_value_index")
 			if(value := _find_value(context, prop)):
 				if(prop.multi_value):
-					row_value_list.operator(STFRemoveMaterialPropertyValue.bl_idname, text="", icon="X").index = context.material.stf_active_material_property_index
+					if(len(prop.values) > 1):
+						row_value_list.operator(STFRemoveMaterialPropertyValue.bl_idname, text="", icon="X").index = context.material.stf_active_material_property_index
 					self.layout.operator(STFAddMaterialPropertyValue.bl_idname).index = context.material.stf_active_material_property_index
 
 				self.layout.separator(factor=1, type="SPACE")
 				_draw_value(self.layout, context, prop, value)
 			else:
-				self.layout.label(text="Invalid Value")
+				self.layout.operator(STFAddMaterialPropertyValue.bl_idname).index = context.material.stf_active_material_property_index
 		else:
 			self.layout.label(text="Invalid Property")
 
