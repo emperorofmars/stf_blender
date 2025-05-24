@@ -29,7 +29,7 @@ class OpenSlotLinkWebpage(bpy.types.Operator):
 	bl_label = "Open Slot Link Webpage"
 	def execute(self, context):
 		import webbrowser
-		webbrowser.open("https://github.com/emperorofmars/blender_slot_link")
+		webbrowser.open("https://extensions.blender.org/add-ons/slot-link/")
 		return {"FINISHED"}
 
 

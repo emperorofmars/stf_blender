@@ -15,6 +15,7 @@ class STF_Texture(STF_BlenderComponentBase):
 	width: bpy.props.IntProperty(name="Width", default=1024, min=1) # type: ignore
 	height: bpy.props.IntProperty(name="Height", default=1024, min=1) # type: ignore
 	downscale_priority: bpy.props.IntProperty(name="Downscale Priority", default=0, min=-1) # type: ignore
+	quality: bpy.props.FloatProperty(name="Quality", default=1, min=0, max=1) # type: ignore
 	# TODO much more
 
 
@@ -22,6 +23,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 	layout.prop(component, "width")
 	layout.prop(component, "height")
 	layout.prop(component, "downscale_priority")
+	layout.prop(component, "quality")
 
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, parent_application_object: any) -> any:
@@ -30,6 +32,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, pa
 	component.width = json_resource.get("width", 1024)
 	component.height = json_resource.get("height", 1024)
 	component.downscale_priority = json_resource.get("downscale_priority", 0)
+	component.quality = json_resource.get("quality", 1)
 
 	return component
 
@@ -42,6 +45,7 @@ def _stf_export(context: STF_ExportContext, application_object: STF_Texture, par
 		"width": application_object.width,
 		"height": application_object.height,
 		"downscale_priority": application_object.downscale_priority,
+		"quality": application_object.quality,
 	}
 	return ret, application_object.stf_id
 
