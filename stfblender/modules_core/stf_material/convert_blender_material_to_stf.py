@@ -1,10 +1,12 @@
 import bpy
 
+
 from ....libstf.stf_export_context import STF_ExportContext
 from .stf_material_operators import add_property, clear_stf_material
 from .material_value_modules.float_value import STF_Material_Value_Module_Float
 from .material_value_modules.color_value import STF_Material_Value_Module_Color
 from .material_value_modules.image_value import STF_Material_Value_Module_Image
+from .stf_material_definition import ShaderTarget
 
 
 def convert_principled_bsdf_to_stf(blender_material: bpy.types.Material, node: bpy.types.ShaderNodeBsdfPrincipled):
@@ -12,6 +14,11 @@ def convert_principled_bsdf_to_stf(blender_material: bpy.types.Material, node: b
 	hint.value = "realistic"
 	hint = blender_material.stf_material.style_hints.add()
 	hint.value = "pbr"
+
+	shader_target: ShaderTarget = blender_material.stf_material.shader_targets.add()
+	shader_target.target = "stfblender"
+	shader = shader_target.shaders.add()
+	shader.value = "ShaderNodeBsdfPrincipled"
 
 def convert_texture_or_color(blender_material: bpy.types.Material, socket: bpy.types.NodeSocket, texture_property: str, color_property: str):
 	if(len(socket.links) == 1):

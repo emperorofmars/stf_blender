@@ -33,7 +33,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 			modifier: bpy.types.ArmatureModifier = blender_object.modifiers.new("Armature", "ARMATURE")
 			modifier.object = armature_instance
 
-	# TODO handle materials, blendshape values
+	# TODO handle materials, blendshape values per instance
 
 	return blender_object
 
@@ -72,11 +72,8 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 
 	material_slots = []
 	for blender_slot in blender_object.material_slots:
-		material_slots.append({
-			"name": blender_slot.name,
-			"material": context.serialize_resource(blender_slot.material, module_kind="data") if blender_slot.material else None,
-		})
-	ret["material_slots"] = material_slots
+		material_slots.append(context.serialize_resource(blender_slot.material, module_kind="data") if blender_slot.material else None)
+	ret["materials"] = material_slots
 
 	blendshape_values = []
 	if(blender_mesh.shape_keys):
@@ -122,6 +119,7 @@ register_stf_modules = [
 
 
 def register():
+	# TODO register per instance materials & blendshape values
 	pass
 
 def unregister():
