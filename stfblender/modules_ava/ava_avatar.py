@@ -13,7 +13,6 @@ _blender_property_name = "stf_ava_avatar"
 class AVA_Avatar(STF_BlenderComponentBase):
 	automap: bpy.props.BoolProperty(name="Automap", default=True) # type: ignore
 	viewport: bpy.props.PointerProperty(type=bpy.types.Object, name="Viewport") # type: ignore
-	delete_viewport_object_on_consuming_import: bpy.props.BoolProperty(name="Delete Viewport on consuming import", default=True) # type: ignore
 
 
 class CreateViewportObjectOperator(bpy.types.Operator):
@@ -46,7 +45,6 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 	layout.prop(component, "automap")
 	if(component.viewport):
 		layout.prop(component, "viewport")
-		layout.prop(component, "delete_viewport_object_on_consuming_import")
 		layout.operator(SetActiveObjectOperator.bl_idname, text="Select Viewport Object").target_name = "$ViewportFirstPerson"
 	else:
 		#if("$ViewportFirstPerson" in bpy.data.objects):
@@ -62,6 +60,11 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, parent
 
 	component.automap = json_resource.get("automap")
 
+	if("viewport" in json_resource):
+		def _handle_viewport():
+			component.viewport = context.get_imported_resource(json_resource["viewport"])
+		context.add_task(_handle_viewport)
+
 	return component
 
 
@@ -71,6 +74,12 @@ def _stf_export(context: STF_ExportContext, application_object: AVA_Avatar, pare
 		"name": application_object.stf_name,
 		"automap": application_object.automap
 	}
+
+	if(application_object.viewport):
+		def _handle_viewport():
+			ret["viewport"] = context.get_resource_id(application_object.viewport)
+		context.add_task(_handle_viewport)
+
 	return ret, application_object.stf_id
 
 
