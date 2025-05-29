@@ -13,6 +13,17 @@ from ...utils.component_utils import get_components_from_object
 _stf_type = "stf.instance.mesh"
 
 
+class STF_Instance_Mesh_Blendshape_Value(bpy.types.PropertyGroup):
+	value: bpy.props.FloatProperty(name="Value", default=0) # type: ignore
+
+class STF_Instance_Mesh_Material(bpy.types.PropertyGroup):
+	material: bpy.props.PointerProperty(type=bpy.types.Material, name="Material") # type: ignore
+
+class STF_Instance_Mesh(bpy.types.PropertyGroup):
+	blendshape_values: bpy.props.CollectionProperty(type=STF_Instance_Mesh_Blendshape_Value, name="Blendshape Values") # type: ignore
+	materials: bpy.props.CollectionProperty(type=STF_Instance_Mesh_Material, name="Material Overrides") # type: ignore
+
+
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
 	blender_resource = context.import_resource(json_resource["mesh"], stf_kind="data")
 	blender_object = bpy.data.objects.new(json_resource.get("name", "STF Node"), blender_resource)
@@ -119,8 +130,8 @@ register_stf_modules = [
 
 
 def register():
-	# TODO register per instance materials & blendshape values
-	pass
+	bpy.types.Object.stf_instance_mesh = bpy.props.PointerProperty(type=STF_Instance_Mesh) # type: ignore
 
 def unregister():
-	pass
+	if hasattr(bpy.types.Object, "stf_instance_mesh"):
+		del bpy.types.Object.stf_instance_mesh

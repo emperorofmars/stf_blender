@@ -67,8 +67,7 @@ register_stf_modules = [
 
 
 def register():
-	bpy.types.Image.stf_texture = bpy.props.CollectionProperty(type=STF_Texture) # type: ignore
+	pass
 
 def unregister():
-	if hasattr(bpy.types.Image, "stf_texture"):
-		del bpy.types.Image.stf_texture
+	pass

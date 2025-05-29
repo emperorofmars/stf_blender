@@ -10,17 +10,20 @@ _blender_property_name = "stf_ava_armature_humanoid"
 
 
 class AVA_Armature_Humanoid(STF_BlenderComponentBase):
-	mappings: bpy.props.StringProperty(name="Mappings") # type: ignore
+	locomotion_type: bpy.props.EnumProperty(items=[("planti", "Plantigrade", ""),("digi", "Digitigrade", "")], name="Locomotion Type", default="planti") # type: ignore
+	no_jaw: bpy.props.BoolProperty(name="No Jaw Mapping", default=False) # type: ignore
 
 
 def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, parent_application_object: any, component: AVA_Armature_Humanoid):
-	layout.prop(component, "mappings")
+	layout.prop(component, "locomotion_type")
+	layout.prop(component, "no_jaw")
 
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, parent_application_object: any) -> any:
 	component_ref, component = add_component(parent_application_object, _blender_property_name, id, _stf_type)
 
-	component.mappings = json_resource.get("mappings")
+	component.locomotion_type = json_resource.get("locomotion_type", "planti")
+	component.no_jaw = json_resource.get("no_jaw", False)
 
 	return component
 
@@ -29,7 +32,8 @@ def _stf_export(context: STF_ExportContext, application_object: AVA_Armature_Hum
 	ret = {
 		"type": _stf_type,
 		"name": application_object.stf_name,
-		"mappings": application_object.mappings
+		"locomotion_type": application_object.locomotion_type,
+		"no_jaw": application_object.no_jaw
 	}
 	return ret, application_object.stf_id
 
