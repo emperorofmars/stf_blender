@@ -73,14 +73,15 @@ class STFRemoveComponentOperatorBase:
 		target = self.get_property(context)
 		component_ref = self.get_components_ref_property(context)[self.index]
 
-		component_type_list = getattr(target, self.property_name)
-		target_component_index = None
-		for index, component in enumerate(component_type_list):
-			if(component.stf_id == component_ref.stf_id):
-				target_component_index = index
-				break
-
-		component_type_list.remove(target_component_index)
+		if(hasattr(target, self.property_name)):
+			component_type_list = getattr(target, self.property_name)
+			target_component_index = None
+			for index, component in enumerate(component_type_list):
+				if(component.stf_id == component_ref.stf_id):
+					target_component_index = index
+					break
+			component_type_list.remove(target_component_index)
+			
 		self.get_components_ref_property(context).remove(self.index)
 		return {"FINISHED"}
 

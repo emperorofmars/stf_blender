@@ -89,13 +89,16 @@ def draw_components_ui(
 			remove_button.index = components_ref_property.stf_active_component_index
 			remove_button.property_name = component_ref.blender_property_name
 
-			for component in getattr(component_holder, component_ref.blender_property_name):
-				if(component.stf_id == component_ref.stf_id):
-					target_object = component_holder
-					if(get_target_object_func):
-						target_object = get_target_object_func(component_holder, component_ref)
-					draw_component(layout, context, component_ref, target_object, component, inject_ui)
-					break
+			if(hasattr(component_holder, component_ref.blender_property_name)):
+				for component in getattr(component_holder, component_ref.blender_property_name):
+					if(component.stf_id == component_ref.stf_id):
+						target_object = component_holder
+						if(get_target_object_func):
+							target_object = get_target_object_func(component_holder, component_ref)
+						draw_component(layout, context, component_ref, target_object, component, inject_ui)
+						break
+			else:
+				layout.label(text="Invalid Component: " + component_ref.blender_property_name)
 	else:
 		layout.label(text="No Components For This Type Available")
 
