@@ -1,8 +1,8 @@
 from typing import Callable
 
 from .stf_export_state import STF_ExportState
-from .stf_definition import STF_Meta_AssetInfo, STF_Profile
-from .stf_report import STFReportSeverity, STFReport
+from ..core.stf_definition import STF_Meta_AssetInfo, STF_Profile
+from ..core.stf_report import STFReportSeverity, STFReport
 
 
 class STF_ExportContext:

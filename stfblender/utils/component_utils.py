@@ -2,7 +2,7 @@ from typing import Callable
 import uuid
 import bpy
 
-from ...libstf.stf_module import STF_Module
+from ..core.stf_module import STF_Module
 
 
 class STF_BlenderComponentModule(STF_Module):

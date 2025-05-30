@@ -1,8 +1,8 @@
-from .stf_report import STFReportSeverity, STFReport
-from .stf_file import STF_File
-from .stf_module import STF_Module
-from .stf_definition import STF_Meta_AssetInfo, STF_Profile
-from .stf_util import StateUtil
+from ..core.stf_report import STFReportSeverity, STFReport
+from ..core.stf_file import STF_File
+from ..core.stf_module import STF_Module
+from ..core.stf_definition import STF_Meta_AssetInfo, STF_Profile
+from ..core.stf_util import StateUtil
 
 
 class STF_ImportState(StateUtil):

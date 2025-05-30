@@ -1,6 +1,6 @@
 import bpy
 
-from ..libstf.stf_definition import STF_Meta_AssetInfo
+from .core.stf_definition import STF_Meta_AssetInfo
 
 
 class STF_KV(bpy.types.PropertyGroup):

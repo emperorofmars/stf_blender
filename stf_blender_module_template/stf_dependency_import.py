@@ -24,6 +24,5 @@ else:
 
 if(selected_stf_extension):
 	import importlib
-	libstf = importlib.import_module(selected_stf_extension + ".libstf")
 	stfblender = importlib.import_module(selected_stf_extension + ".stfblender")
 

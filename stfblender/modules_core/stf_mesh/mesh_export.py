@@ -1,10 +1,10 @@
 from io import BytesIO
 import bpy
 
-from ....libstf.stf_export_context import STF_ExportContext
+from ...exporter.stf_export_context import STF_ExportContext
 from ...utils.id_utils import ensure_stf_id
 from ...utils.trs_utils import blender_translation_to_stf, blender_uv_to_stf
-from ....libstf.buffer_utils import serialize_float, serialize_int, serialize_uint
+from ...core.buffer_utils import serialize_float, serialize_int, serialize_uint
 
 
 _stf_type = "stf.mesh"

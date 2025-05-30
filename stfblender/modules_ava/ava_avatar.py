@@ -1,7 +1,7 @@
 import bpy
 
-from ...libstf.stf_export_context import STF_ExportContext
-from ...libstf.stf_import_context import STF_ImportContext
+from ..exporter.stf_export_context import STF_ExportContext
+from ..importer.stf_import_context import STF_ImportContext
 from ..utils.component_utils import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref, add_component
 from ..utils.op_utils import SetActiveObjectOperator
 

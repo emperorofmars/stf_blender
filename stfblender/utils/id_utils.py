@@ -1,7 +1,7 @@
 import bpy
 import uuid
 
-from ...libstf.stf_report import STFReportSeverity, STFReport
+from ..core.stf_report import STFReportSeverity, STFReport
 
 
 class STFSetIDOperatorBase:

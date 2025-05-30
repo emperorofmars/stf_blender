@@ -62,7 +62,7 @@ class STFSceneCollectionPanel(bpy.types.Panel):
 			self.layout.label(text="Root")
 
 	def draw(self, context):
-		from ...export.exporter import ExportSTF
+		from ...exporter.exporter import ExportSTF
 		set_stf_component_filter(bpy.types.Collection)
 		self.layout.prop(context.scene.collection, "stf_use_collection_as_prefab")
 

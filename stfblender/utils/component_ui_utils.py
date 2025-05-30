@@ -1,6 +1,6 @@
 import bpy
 
-from ...libstf.stf_registry import get_stf_modules
+from ..core.stf_registry import get_stf_modules
 from .component_utils import STF_BlenderComponentModule, STF_Component_Ref
 
 

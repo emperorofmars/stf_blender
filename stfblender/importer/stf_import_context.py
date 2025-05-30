@@ -1,7 +1,7 @@
 from typing import Callable
 
 from .stf_import_state import STF_ImportState
-from .stf_report import STFReportSeverity, STFReport
+from ..core.stf_report import STFReportSeverity, STFReport
 
 
 class STF_ImportContext:

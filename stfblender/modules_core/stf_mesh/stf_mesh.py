@@ -1,6 +1,6 @@
 import bpy
 
-from ....libstf.stf_module import STF_Module
+from ...core.stf_module import STF_Module
 from ...utils.component_utils import get_components_from_object
 from ...utils.boilerplate import boilerplate_register, boilerplate_unregister
 

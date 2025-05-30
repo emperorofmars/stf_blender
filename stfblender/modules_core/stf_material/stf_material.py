@@ -4,9 +4,9 @@ import bpy
 from .stf_material_definition import STF_Material_Definition, STF_Material_Property, STF_Material_Value_Module_Base
 from .material_value_modules import blender_material_value_modules
 from .stf_material_operators import add_property, add_value_to_property
-from ....libstf.stf_export_context import STF_ExportContext
-from ....libstf.stf_import_context import STF_ImportContext
-from ....libstf.stf_module import STF_Module
+from ...exporter.stf_export_context import STF_ExportContext
+from ...importer.stf_import_context import STF_ImportContext
+from ...core.stf_module import STF_Module
 from ...utils.component_utils import get_components_from_object
 from ...utils.id_utils import ensure_stf_id
 from ...utils.boilerplate import boilerplate_register, boilerplate_unregister

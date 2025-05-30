@@ -4,10 +4,10 @@ import addon_utils
 from bpy_extras.io_utils import ExportHelper
 
 from ..stf_meta import draw_meta_editor
-from ...libstf.stf_report import STFReportSeverity
-from ...libstf.stf_registry import get_export_modules
-from ...libstf.stf_export_state import STF_ExportState
-from ...libstf.stf_export_context import STF_ExportContext
+from ..core.stf_report import STFReportSeverity
+from ..core.stf_registry import get_export_modules
+from .stf_export_state import STF_ExportState
+from .stf_export_context import STF_ExportContext
 
 def get_stf_version() -> str:
 	for module in addon_utils.modules():

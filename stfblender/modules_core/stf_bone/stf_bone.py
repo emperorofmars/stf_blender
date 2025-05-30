@@ -5,10 +5,10 @@ import mathutils
 import math
 
 
-from ....libstf.stf_report import STFReportSeverity, STFReport
-from ....libstf.stf_module import STF_Module
-from ....libstf.stf_import_context import STF_ImportContext
-from ....libstf.stf_export_context import STF_ExportContext
+from ...core.stf_report import STFReportSeverity, STFReport
+from ...core.stf_module import STF_Module
+from ...importer.stf_import_context import STF_ImportContext
+from ...exporter.stf_export_context import STF_ExportContext
 from ...utils.component_utils import STF_Component_Ref, add_component, get_components_from_object
 from ...utils.boilerplate import boilerplate_register, boilerplate_unregister
 from ...utils.id_utils import ensure_stf_id

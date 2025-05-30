@@ -2,10 +2,10 @@ from typing import Callable
 import bpy
 import mathutils
 
-from ....libstf.stf_module import STF_Module
-from ....libstf.stf_import_context import STF_ImportContext
-from ....libstf.stf_export_context import STF_ExportContext
-from ....libstf.stf_report import STFReport, STFReportSeverity
+from ...core.stf_module import STF_Module
+from ...importer.stf_import_context import STF_ImportContext
+from ...exporter.stf_export_context import STF_ExportContext
+from ...core.stf_report import STFReport, STFReportSeverity
 from ...utils.boilerplate import boilerplate_register, boilerplate_unregister
 from ...utils.component_utils import STF_Component_Ref, get_components_from_object
 from ...utils import trs_utils

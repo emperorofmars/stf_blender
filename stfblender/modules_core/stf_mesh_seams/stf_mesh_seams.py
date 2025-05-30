@@ -3,10 +3,10 @@ import uuid
 import bpy
 
 from ...utils.component_utils import STF_BlenderComponentBase, STF_BlenderComponentModule, add_component
-from ....libstf.stf_module import STF_ExportComponentHook
-from ....libstf.stf_export_context import STF_ExportContext
-from ....libstf.stf_import_context import STF_ImportContext
-from ....libstf.buffer_utils import parse_uint, serialize_uint
+from ...core.stf_module import STF_ExportComponentHook
+from ...exporter.stf_export_context import STF_ExportContext
+from ...importer.stf_import_context import STF_ImportContext
+from ...core.buffer_utils import parse_uint, serialize_uint
 
 
 _stf_type = "stf.mesh.seams"

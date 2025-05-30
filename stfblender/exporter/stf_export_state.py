@@ -1,11 +1,11 @@
 import io
 from enum import Enum
 
-from .stf_definition import STF_Buffer_Included, STF_JsonDefinition, STF_Meta_AssetInfo, STF_Profile
-from .stf_report import STFReportSeverity, STFReport
-from .stf_module import STF_ExportComponentHook, STF_Module
-from .stf_file import STF_File
-from .stf_util import StateUtil
+from ..core.stf_definition import STF_Buffer_Included, STF_JsonDefinition, STF_Meta_AssetInfo, STF_Profile
+from ..core.stf_report import STFReportSeverity, STFReport
+from ..core.stf_module import STF_ExportComponentHook, STF_Module
+from ..core.stf_file import STF_File
+from ..core.stf_util import StateUtil
 
 
 class STF_Buffer_Mode(Enum):

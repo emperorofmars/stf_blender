@@ -1,10 +1,10 @@
 import bpy
 import pathlib
 
-from ....libstf.stf_export_context import STF_ExportContext
-from ....libstf.stf_import_context import STF_ImportContext
-from ....libstf.stf_module import STF_Module
-from ....libstf.stf_report import STFReport, STFReportSeverity
+from ...exporter.stf_export_context import STF_ExportContext
+from ...importer.stf_import_context import STF_ImportContext
+from ...core.stf_module import STF_Module
+from ...core.stf_report import STFReport, STFReportSeverity
 from ...utils.component_utils import get_components_from_object
 from ...utils.id_utils import ensure_stf_id
 from ...utils.boilerplate import boilerplate_register, boilerplate_unregister

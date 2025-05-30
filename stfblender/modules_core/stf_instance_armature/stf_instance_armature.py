@@ -4,10 +4,10 @@ import mathutils
 import math
 from typing import Callable
 
-from ....libstf.stf_module import STF_Module
-from ....libstf.stf_report import STFReportSeverity, STFReport
-from ....libstf.stf_export_context import STF_ExportContext
-from ....libstf.stf_import_context import STF_ImportContext
+from ...core.stf_module import STF_Module
+from ...core.stf_report import STFReportSeverity, STFReport
+from ...exporter.stf_export_context import STF_ExportContext
+from ...importer.stf_import_context import STF_ImportContext
 from ...utils.id_utils import ensure_stf_id
 from ...utils.animation_conversion_utils import *
 from ...utils.armature_bone import ArmatureBone

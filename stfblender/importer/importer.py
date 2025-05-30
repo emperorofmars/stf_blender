@@ -1,11 +1,11 @@
 import bpy
 from bpy_extras.io_utils import ImportHelper
 
-from ...libstf.stf_registry import get_import_modules
-from ...libstf.stf_import_state import STF_ImportState
-from ...libstf.stf_report import STFException
-from ...libstf.stf_import_context import STF_ImportContext
-from ...libstf.stf_file import STF_File
+from ..core.stf_registry import get_import_modules
+from .stf_import_state import STF_ImportState
+from ..core.stf_report import STFException
+from .stf_import_context import STF_ImportContext
+from ..core.stf_file import STF_File
 
 
 class ImportSTF(bpy.types.Operator, ImportHelper):

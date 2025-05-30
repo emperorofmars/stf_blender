@@ -1,6 +1,6 @@
 import bpy
 
-from .stf_dependency_import import libstf, stfblender
+from .stf_dependency_import import stfblender
 
 
 _stf_type = "my_custom.namespaced.squeak_component"
@@ -15,7 +15,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 	layout.prop(component, "squeak")
 
 
-def _stf_import(context: libstf.stf_import_context.STF_RootImportContext, json_resource: dict, id: str, parent_application_object: any) -> tuple[any, any]: # type: ignore
+def _stf_import(context: stfblender.importer.stf_import_context.STF_RootImportContext, json_resource: dict, id: str, parent_application_object: any) -> tuple[any, any]: # type: ignore
 	component_ref, component = stfblender.utils.component_utils.add_component(parent_application_object, _blender_property_name, id, _stf_type)
 
 	component.squeak = json_resource.get("squeak", True)
@@ -23,7 +23,7 @@ def _stf_import(context: libstf.stf_import_context.STF_RootImportContext, json_r
 	return component, context
 
 
-def _stf_export(context: libstf.stf_export_context.STF_RootExportContext, application_object: SqueakComponent, parent_application_object: any) -> tuple[dict, str, any]: # type: ignore
+def _stf_export(context: stfblender.exporter.stf_export_context.STF_RootExportContext, application_object: SqueakComponent, parent_application_object: any) -> tuple[dict, str, any]: # type: ignore
 	ret = {
 		"type": _stf_type,
 		"name": application_object.stf_name,

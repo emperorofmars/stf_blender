@@ -1,4 +1,3 @@
-import io
 
 class STF_Profile:
 	def __init__(self):

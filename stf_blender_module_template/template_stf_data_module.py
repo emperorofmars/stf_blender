@@ -1,12 +1,12 @@
 import bpy
 
-from .stf_dependency_import import libstf, stfblender
+from .stf_dependency_import import stfblender
 
 
 _stf_type = "my_custom.namespaced.brush"
 
 
-def _stf_import(context: libstf.stf_import_context.STF_RootImportContext, json_resource: dict, id: str, context_object: any) -> any: # type: ignore
+def _stf_import(context: stfblender.importer.stf_import_context.STF_RootImportContext, json_resource: dict, id: str, context_object: any) -> any: # type: ignore
 	application_object = bpy.data.brushes.new(json_resource.get("name", "My Custom Brush"))
 	application_object.stf_id = id
 	if(json_resource.get("name")):
@@ -18,7 +18,7 @@ def _stf_import(context: libstf.stf_import_context.STF_RootImportContext, json_r
 	return application_object
 
 
-def _stf_export(context: libstf.stf_export_context.STF_RootExportContext, application_object: any, context_object: any) -> tuple[dict, str]: # type: ignore
+def _stf_export(context: stfblender.exporter.stf_export_context.STF_RootExportContext, application_object: any, context_object: any) -> tuple[dict, str]: # type: ignore
 	application_object: bpy.types.Brush = application_object
 	stfblender.utils.id_utils.ensure_stf_id(context, application_object)
 
@@ -32,7 +32,7 @@ def _stf_export(context: libstf.stf_export_context.STF_RootExportContext, applic
 	return json_resource, application_object.stf_id
 
 
-class CustomSTFBrushModule(libstf.stf_module.STF_Module):
+class CustomSTFBrushModule(stfblender.core.stf_module.STF_Module):
 	stf_type = _stf_type
 	stf_kind = "data"
 	like_types = ["brush", "or", "whatever"]
@@ -47,20 +47,7 @@ register_stf_modules = [CustomSTFBrushModule]
 
 
 def register():
-	bpy.types.Brush.stf_id = bpy.props.StringProperty(name="ID") # type: ignore
-	bpy.types.Brush.stf_name = bpy.props.StringProperty(name="Name") # type: ignore
-	bpy.types.Brush.stf_name_source_of_truth = bpy.props.BoolProperty(name="STF Name Is Source Of Truth") # type: ignore
-	bpy.types.Brush.stf_components = bpy.props.CollectionProperty(type=stfblender.utils.component_utils.STF_Component, name="Components") # type: ignore
-	bpy.types.Brush.stf_active_component_index = bpy.props.IntProperty()
+	stfblender.utils.boilerplate.boilerplate_register(bpy.types.Brush, "data")
 
 def unregister():
-	if hasattr(bpy.types.Brush, "stf_id"):
-		del bpy.types.Brush.stf_id
-	if hasattr(bpy.types.Brush, "stf_name"):
-		del bpy.types.Brush.stf_name
-	if hasattr(bpy.types.Brush, "stf_name_source_of_truth"):
-		del bpy.types.Brush.stf_name_source_of_truth
-	if hasattr(bpy.types.Brush, "stf_components"):
-		del bpy.types.Brush.stf_components
-	if hasattr(bpy.types.Brush, "stf_active_component_index"):
-		del bpy.types.Brush.stf_active_component_index
+	stfblender.utils.boilerplate.boilerplate_unregister(bpy.types.Brush, "data")
