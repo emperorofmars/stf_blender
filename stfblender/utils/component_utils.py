@@ -96,8 +96,9 @@ def get_components_from_object(application_object: any) -> list:
 	ret = []
 	if(hasattr(application_object, "stf_components")):
 		for component_ref in application_object.stf_components:
-			components = getattr(application_object, component_ref.blender_property_name)
-			for component in components:
-				if(component.stf_id == component_ref.stf_id):
-					ret.append(component)
+			if(hasattr(application_object, component_ref.blender_property_name)):
+				components = getattr(application_object, component_ref.blender_property_name)
+				for component in components:
+					if(component.stf_id == component_ref.stf_id):
+						ret.append(component)
 	return ret
