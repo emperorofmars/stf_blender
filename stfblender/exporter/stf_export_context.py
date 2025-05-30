@@ -94,6 +94,9 @@ class STF_ExportContext:
 		"""Add a task which will be execuded after everything else."""
 		self._state._tasks.append(task)
 
+	def add_cleanup_task(self, task: Callable):
+		self._state._cleanup_tasks.append(task)
+
 
 	def report(self, report: STFReport):
 		self._state.report(report)

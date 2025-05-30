@@ -21,9 +21,9 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 
 	tmp_hook_object: bpy.types.Object = bpy.data.objects.new("TRASH", blender_armature)
 	bpy.context.scene.collection.objects.link(tmp_hook_object)
-	def _clean_tmp_mesh_object():
+	def _clean_tmp_object():
 		bpy.data.objects.remove(tmp_hook_object)
-	context.add_task(_clean_tmp_mesh_object)
+	context.add_cleanup_task(_clean_tmp_object)
 
 	for bone_id in json_resource.get("root_bones", []):
 		context.import_resource(bone_id, tmp_hook_object, "node")
@@ -37,9 +37,9 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 
 	tmp_hook_object: bpy.types.Object = bpy.data.objects.new("TRASH", blender_armature)
 	bpy.context.scene.collection.objects.link(tmp_hook_object)
-	def _clean_tmp_mesh_object():
+	def _clean_tmp_object():
 		bpy.data.objects.remove(tmp_hook_object)
-	context.add_task(_clean_tmp_mesh_object)
+	context.add_cleanup_task(_clean_tmp_object)
 
 	root_bones = []
 	ret = {

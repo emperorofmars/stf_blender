@@ -22,7 +22,7 @@ def import_stf_mesh(context: STF_ImportContext, json_resource: dict, stf_id: str
 	tmp_blender_mesh_object = bpy.data.objects.new("STF TMP throw away", blender_mesh)
 	def _clean_tmp_mesh_object():
 		bpy.data.objects.remove(tmp_blender_mesh_object)
-	context.add_task(_clean_tmp_mesh_object)
+	context.add_cleanup_task(_clean_tmp_mesh_object)
 
 	indices_width: int = json_resource.get("indices_width", 4)
 	float_width: int = json_resource.get("float_width", 4)

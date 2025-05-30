@@ -19,14 +19,55 @@ class STFEXP_Constraint_Twist(STF_BlenderComponentBase):
 
 def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: STFEXP_Constraint_Twist):
 	layout.prop(component, "weight")
-	layout.prop(component, "target_object")
-	if(component.target_object and type(component.target_object.data) == bpy.types.Armature):
-		layout.prop_search(component, "target_bone", component.target_object.data, "bones")
+	if(type(context_object) == bpy.types.Bone):
+		layout.prop_search(component, "target_bone", context_object.id_data, "bones", text="Target")
+	else:
+		layout.prop(component, "target_object")
+		if(component.target_object and type(component.target_object.data) == bpy.types.Armature):
+			layout.prop_search(component, "target_bone", component.target_object.data, "bones")
 
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
 	component_ref, component = add_component(context_object, _blender_property_name, stf_id, _stf_type)
 	component.weight = json_resource.get("weight")
+
+	if("target" in json_resource):
+		armature = context_object.id_data
+		bone_name = context_object.name
+		component_id = component_ref.stf_id
+		if(type(context_object) == bpy.types.Bone):
+			# Between bone-edit and object mode, references get destroyed, so we have to find the bone by name. Because Blender -.-
+			def _get_component() -> STFEXP_Constraint_Twist:
+				for constraint in armature.bones[bone_name].stfexp_constraint_twist:
+					if(constraint.stf_id == component_id):
+						return constraint
+		else:
+			def _get_component() -> STFEXP_Constraint_Twist:
+				return component
+
+		if(len(json_resource["target"]) == 1 and type(context_object) == bpy.types.Bone):
+			def _handle_target_bone():
+				for bone in armature.bones:
+					if(bone.stf_id == json_resource["target"][0]):
+						constraint = _get_component()
+						constraint.target_bone = bone.name
+						break
+			context.add_task(_handle_target_bone)
+		elif(len(json_resource["target"]) == 1):
+			def _handle_target_object():
+				constraint = _get_component()
+				constraint.target_object = context.get_imported_resource(json_resource["target"][0])
+			context.add_task(_handle_target_object)
+		elif(len(json_resource["target"]) == 3):
+			def _handle_target_object():
+				constraint = _get_component()
+				constraint.target_object = context.get_imported_resource(json_resource["target"][0])
+			context.add_task(_handle_target_object)
+			def _handle_target_bone():
+				constraint = _get_component()
+				constraint.target_bone = context.get_imported_resource(json_resource["target"][2]).name
+			context.add_task(_handle_target_bone)
+
 	return component
 
 
@@ -36,6 +77,14 @@ def _stf_export(context: STF_ExportContext, application_object: STFEXP_Constrain
 		"name": application_object.stf_name,
 		"weight": application_object.weight
 	}
+
+	if(application_object.target_object and type(application_object.target_object.data) == bpy.types.Armature and application_object.target_bone and context_object.name in application_object.target_object.data.bones):
+		ret["target"] = [application_object.target_object.data.bones[application_object.target_bone].stf_id]
+	elif(application_object.target_object and type(application_object.target_object.data) == bpy.types.Armature and application_object.target_bone):
+		ret["target"] = [application_object.target_object.stf_id, "instance", application_object.target_object.data.bones[application_object.target_bone].stf_id]
+	elif(application_object.target_object):
+		ret["target"] = [application_object.target_object.stf_id]
+
 	return ret, application_object.stf_id
 
 

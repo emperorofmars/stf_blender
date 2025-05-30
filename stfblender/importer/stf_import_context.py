@@ -75,6 +75,9 @@ class STF_ImportContext:
 	def add_task(self, task: Callable):
 		self._state._tasks.append(task)
 
+	def add_cleanup_task(self, task: Callable):
+		self._state._cleanup_tasks.append(task)
+
 	def get_root_id(self) -> str:
 		return self._state._file.definition.stf.root
 
