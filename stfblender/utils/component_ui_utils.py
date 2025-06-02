@@ -29,7 +29,9 @@ def get_component_modules(filter = None) -> list[STF_BlenderComponentModule]:
 def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, stf_application_object: any, component: any, inject_ui = None):
 	box = layout.box()
 	box.label(text=component_ref.stf_type)
-	box.label(text=component_ref.stf_id)
+	box.prop(component_ref, "stf_id")
+	box.prop(component, "stf_name")
+	box.separator(factor=1, type="LINE")
 
 	stf_modules = get_component_modules()
 	selected_module = None
@@ -71,10 +73,10 @@ def draw_components_ui(
 	if(not components_ref_property):
 		components_ref_property = component_holder
 
-	if(context.scene.stf_component_modules):
-		row = layout.row()
-		row.prop(bpy.context.scene, "stf_component_modules", text="")
-		selected_add_module = find_component_module(stf_modules, context.scene.stf_component_modules)
+	row = layout.row()
+	row.prop(bpy.context.scene, "stf_component_modules", text="")
+	selected_add_module = find_component_module(stf_modules, context.scene.stf_component_modules)
+	if(len(stf_modules) > 0):
 		if(selected_add_module):
 			add_button = row.operator(add_component_op)
 			add_button.stf_type = context.scene.stf_component_modules
@@ -104,7 +106,7 @@ def draw_components_ui(
 
 
 stf_component_filter = None
-def set_stf_component_filter(filter: str = None):
+def set_stf_component_filter(filter = None):
 	global stf_component_filter
 	stf_component_filter = filter
 
@@ -118,7 +120,10 @@ def register():
 		name="STF Component Types",
 		description="Default & hot-loaded STF component types",
 		options={"SKIP_SAVE"},
-		default=0
+		default=None,
+		get=None,
+		set=None,
+		update=None,
 	)
 
 def unregister():
