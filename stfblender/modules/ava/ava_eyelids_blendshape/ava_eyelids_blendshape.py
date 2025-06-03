@@ -11,14 +11,29 @@ _blender_property_name = "ava_eyelids_blendshape"
 
 _eyelid_prefixes = ["", "vis.", "vis_", "vis ", "vrc.", "vrc_", "vrc ", "eye", "eyes", "eyelid", "eyelids"]
 _eyelid_shapes = {
-	"closed": ["closed", "blink"],
+	"closed": ["close", "closed", "blink"],
 	"up": ["up", "lookup", "look up", "look_up"],
 	"down": ["down", "lookdown", "look down", "look_down"],
 	"left": ["right", "lookright", "look right", "right_right"],
 	"right": [".r", ".right", "_r", "_right", " right"]
 }
-_eyelid_suffixes_left = [".l", ".left", "_l", "_left", " left"]
-_eyelid_suffixes_right = [".r", ".right", "_r", "_right", " right"]
+_eyelid_suffixes_left = [".l", ".left", "_l", "_left", " left", "left"]
+_eyelid_suffixes_right = [".r", ".right", "_r", "_right", " right", "right"]
+
+
+def _map_blendshape(blendshape_name: str) -> str:
+	for prefix in _eyelid_prefixes:
+		for shape_name, shape_mappings in _eyelid_shapes.items():
+			for shape in shape_mappings:
+				if(blendshape_name.lower() == prefix + shape):
+					return "eyes_closed" if shape_name == "closed" else "look_" + shape_name
+				else:
+					for suffix_left in _eyelid_suffixes_left:
+						if(blendshape_name.lower() == prefix + shape + suffix_left):
+							return "eye_closed_left" if shape_name == "closed" else "look_" + shape_name + "_left"
+					for suffix_right in _eyelid_suffixes_right:
+						if(blendshape_name.lower() == prefix + shape + suffix_right):
+							return "eye_closed_right" if shape_name == "closed" else "look_" + shape_name + "_right"
 
 
 class AutomapEyelids(bpy.types.Operator):
@@ -35,12 +50,10 @@ class AutomapEyelids(bpy.types.Operator):
 				break
 
 		if(context.mesh.shape_keys):
-			for shape_key in context.mesh.shape_keys.key_blocks:
-				for viseme in _eyelid_shapes:
-					for prefix in _eyelid_prefixes:
-						if(shape_key.name.lower().find(viseme + prefix) > 0 and len(component["vis_" + viseme]) > len(shape_key.name)):
-							component["vis_" + viseme] = shape_key.name
-							break
+			for blendshape_name in context.mesh.shape_keys.key_blocks:
+				mapping = _map_blendshape(blendshape_name.name)
+				if(mapping and (not getattr(component, mapping) or len(getattr(component, mapping)) > len(blendshape_name.name))):
+					setattr(component, mapping, blendshape_name.name)
 
 		return {"FINISHED"}
 
@@ -73,11 +86,17 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 	layout.prop(component, "look_down")
 	layout.prop(component, "look_left")
 	layout.prop(component, "look_right")
+
+	layout.separator(factor=1)
+
 	layout.prop(component, "eye_closed_left")
 	layout.prop(component, "look_up_left")
 	layout.prop(component, "look_down_left")
 	layout.prop(component, "look_left_left")
 	layout.prop(component, "look_right_left")
+	
+	layout.separator(factor=1)
+
 	layout.prop(component, "eye_closed_right")
 	layout.prop(component, "look_up_right")
 	layout.prop(component, "look_down_right")
@@ -88,9 +107,17 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, parent_application_object: any) -> any:
 	component_ref, component = add_component(parent_application_object, _blender_property_name, id, _stf_type)
 
-	#for viseme in _eyelid_shapes:
-	#	if(viseme in json_resource):
-	#		component["vis_" + viseme] = json_resource[viseme]
+	for shape_name, _ in _eyelid_shapes.items():
+		if(shape_name in json_resource):
+			setattr(component, "eyes_closed" if shape_name == "closed" else "look_" + shape_name, json_resource[shape_name])
+
+	for shape_name, _ in _eyelid_shapes.items():
+		if(shape_name + "_left" in json_resource):
+			setattr(component, "eye_closed_left" if shape_name == "closed" else "look_" + shape_name + "_left", json_resource[shape_name + "_left"])
+
+	for shape_name, _ in _eyelid_shapes.items():
+		if(shape_name + "_right" in json_resource):
+			setattr(component, "eye_closed_right" if shape_name == "closed" else "look_" + shape_name + "_right", json_resource[shape_name + "_right"])
 
 	return component
 
@@ -101,8 +128,14 @@ def _stf_export(context: STF_ExportContext, application_object: AVA_Eyelids_Blen
 		"name": application_object.stf_name
 	}
 
-	#for viseme in _eyelid_shapes:
-	#	ret[viseme] = application_object["vis_" + viseme]
+	for shape_name, _ in _eyelid_shapes.items():
+		ret[shape_name] = getattr(application_object, "eyes_closed" if shape_name == "closed" else "look_" + shape_name)
+
+	for shape_name, _ in _eyelid_shapes.items():
+		ret[shape_name + "_left"] = getattr(application_object, "eye_closed_left" if shape_name == "closed" else "look_" + shape_name + "_left")
+
+	for shape_name, _ in _eyelid_shapes.items():
+		ret[shape_name + "_right"] = getattr(application_object, "eye_closed_right" if shape_name == "closed" else "look_" + shape_name + "_right")
 
 	return ret, application_object.stf_id
 

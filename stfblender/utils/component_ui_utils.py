@@ -29,7 +29,7 @@ def get_component_modules(filter = None) -> list[STF_BlenderComponentModule]:
 def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, stf_application_object: any, component: any, inject_ui = None):
 	box = layout.box()
 	box.label(text=component_ref.stf_type)
-	box.prop(component_ref, "stf_id")
+	box.label(text=component_ref.stf_id)
 	box.prop(component, "stf_name")
 	box.separator(factor=1, type="LINE")
 
