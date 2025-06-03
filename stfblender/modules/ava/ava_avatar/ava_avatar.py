@@ -11,7 +11,6 @@ _blender_property_name = "stf_ava_avatar"
 
 
 class AVA_Avatar(STF_BlenderComponentBase):
-	automap: bpy.props.BoolProperty(name="Automap", default=True) # type: ignore
 	viewport: bpy.props.PointerProperty(type=bpy.types.Object, name="Viewport") # type: ignore
 	primary_armature_instance: bpy.props.PointerProperty(type=bpy.types.Object, name="Primary Armature Instance") # type: ignore
 
@@ -43,13 +42,10 @@ class CreateViewportObjectOperator(bpy.types.Operator):
 
 
 def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, parent_application_object: any, component: AVA_Avatar):
-	layout.prop(component, "automap")
 	if(component.viewport):
 		layout.prop(component, "viewport")
 		layout.operator(SetActiveObjectOperator.bl_idname, text="Select Viewport Object").target_name = "$ViewportFirstPerson"
 	else:
-		#if("$ViewportFirstPerson" in bpy.data.objects):
-		#	component.viewport = bpy.data.objects["$ViewportFirstPerson"]
 		create_viewport_button = layout.operator(CreateViewportObjectOperator.bl_idname, text="Create Viewport Object")
 		create_viewport_button.blender_collection = parent_application_object.name
 		create_viewport_button.component_id = component.stf_id
@@ -59,8 +55,6 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, parent_application_object: any) -> any:
 	component_ref, component = add_component(parent_application_object, _blender_property_name, id, _stf_type)
-
-	component.automap = json_resource.get("automap")
 
 	if("viewport" in json_resource):
 		def _handle_viewport():
@@ -79,7 +73,6 @@ def _stf_export(context: STF_ExportContext, application_object: AVA_Avatar, pare
 	ret = {
 		"type": _stf_type,
 		"name": application_object.stf_name,
-		"automap": application_object.automap
 	}
 
 	if(application_object.viewport):
