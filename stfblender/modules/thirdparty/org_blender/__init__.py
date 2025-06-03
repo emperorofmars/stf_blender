@@ -1,0 +1,7 @@
+
+from .org_blender_armature_display import org_blender_armature_display
+from .org_blender_instance_armature_display import org_blender_instance_armature_display
+
+register_stf_modules = \
+	org_blender_armature_display.register_stf_modules + \
+	org_blender_instance_armature_display.register_stf_modules

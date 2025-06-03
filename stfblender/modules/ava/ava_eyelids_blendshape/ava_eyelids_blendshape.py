@@ -1,0 +1,136 @@
+import bpy
+
+from ....exporter.stf_export_context import STF_ExportContext
+from ....importer.stf_import_context import STF_ImportContext
+from ....utils.component_utils import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref, add_component
+
+
+_stf_type = "ava.eyelids.blendshape"
+_blender_property_name = "ava_eyelids_blendshape"
+
+
+_eyelid_prefixes = ["", "vis.", "vis_", "vis ", "vrc.", "vrc_", "vrc ", "eye", "eyes", "eyelid", "eyelids"]
+_eyelid_shapes = {
+	"closed": ["closed", "blink"],
+	"up": ["up", "lookup", "look up", "look_up"],
+	"down": ["down", "lookdown", "look down", "look_down"],
+	"left": ["right", "lookright", "look right", "right_right"],
+	"right": [".r", ".right", "_r", "_right", " right"]
+}
+_eyelid_suffixes_left = [".l", ".left", "_l", "_left", " left"]
+_eyelid_suffixes_right = [".r", ".right", "_r", "_right", " right"]
+
+
+class AutomapEyelids(bpy.types.Operator):
+	"""Map from Names"""
+	bl_idname = "ava.ava_map_blendshape_eyelids"
+	bl_label = "Map from Names"
+	bl_options = {"REGISTER", "UNDO"}
+
+	component_id: bpy.props.StringProperty() # type: ignore
+
+	def execute(self, context):
+		for component in context.mesh.ava_eyelids_blendshape:
+			if(component.stf_id == self.component_id):
+				break
+
+		if(context.mesh.shape_keys):
+			for shape_key in context.mesh.shape_keys.key_blocks:
+				for viseme in _eyelid_shapes:
+					for prefix in _eyelid_prefixes:
+						if(shape_key.name.lower().find(viseme + prefix) > 0 and len(component["vis_" + viseme]) > len(shape_key.name)):
+							component["vis_" + viseme] = shape_key.name
+							break
+
+		return {"FINISHED"}
+
+
+class AVA_Eyelids_Blendshape(STF_BlenderComponentBase):
+	eyes_closed: bpy.props.StringProperty(name="Both Closed") # type: ignore
+	look_up: bpy.props.StringProperty(name="Both Up") # type: ignore
+	look_down: bpy.props.StringProperty(name="Both Down") # type: ignore
+	look_left: bpy.props.StringProperty(name="Both Left") # type: ignore
+	look_right: bpy.props.StringProperty(name="Both Right") # type: ignore
+
+	eye_closed_left: bpy.props.StringProperty(name="Left Closed") # type: ignore
+	look_up_left: bpy.props.StringProperty(name="Left Up") # type: ignore
+	look_down_left: bpy.props.StringProperty(name="Left Down") # type: ignore
+	look_left_left: bpy.props.StringProperty(name="Left Left") # type: ignore
+	look_right_left: bpy.props.StringProperty(name="Left Right") # type: ignore
+
+	eye_closed_right: bpy.props.StringProperty(name="Right Closed") # type: ignore
+	look_up_right: bpy.props.StringProperty(name="Right Up") # type: ignore
+	look_down_right: bpy.props.StringProperty(name="Right Down") # type: ignore
+	look_left_right: bpy.props.StringProperty(name="Right Left") # type: ignore
+	look_right_right: bpy.props.StringProperty(name="Right Right") # type: ignore
+
+
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, parent_application_object: any, component: AVA_Eyelids_Blendshape):
+	layout.operator(AutomapEyelids.bl_idname).component_id = component.stf_id
+
+	layout.prop(component, "eyes_closed")
+	layout.prop(component, "look_up")
+	layout.prop(component, "look_down")
+	layout.prop(component, "look_left")
+	layout.prop(component, "look_right")
+	layout.prop(component, "eye_closed_left")
+	layout.prop(component, "look_up_left")
+	layout.prop(component, "look_down_left")
+	layout.prop(component, "look_left_left")
+	layout.prop(component, "look_right_left")
+	layout.prop(component, "eye_closed_right")
+	layout.prop(component, "look_up_right")
+	layout.prop(component, "look_down_right")
+	layout.prop(component, "look_left_right")
+	layout.prop(component, "look_right_right")
+
+
+def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, parent_application_object: any) -> any:
+	component_ref, component = add_component(parent_application_object, _blender_property_name, id, _stf_type)
+
+	#for viseme in _eyelid_shapes:
+	#	if(viseme in json_resource):
+	#		component["vis_" + viseme] = json_resource[viseme]
+
+	return component
+
+
+def _stf_export(context: STF_ExportContext, application_object: AVA_Eyelids_Blendshape, parent_application_object: any) -> tuple[dict, str]:
+	ret = {
+		"type": _stf_type,
+		"name": application_object.stf_name
+	}
+
+	#for viseme in _eyelid_shapes:
+	#	ret[viseme] = application_object["vis_" + viseme]
+
+	return ret, application_object.stf_id
+
+
+class STF_Module_AVA_Eyelids_Blendshape(STF_BlenderComponentModule):
+	stf_type = _stf_type
+	stf_kind = "component"
+	understood_application_types = [AVA_Eyelids_Blendshape]
+	import_func = _stf_import
+	export_func = _stf_export
+
+	blender_property_name = _blender_property_name
+	single = True
+	filter = [bpy.types.Mesh]
+	draw_component_func = _draw_component
+
+	like_types = []
+
+
+register_stf_modules = [
+	STF_Module_AVA_Eyelids_Blendshape
+]
+
+
+def register():
+	bpy.types.Mesh.ava_eyelids_blendshape = bpy.props.CollectionProperty(type=AVA_Eyelids_Blendshape) # type: ignore
+
+def unregister():
+	if hasattr(bpy.types.Mesh, "ava_eyelids_blendshape"):
+		del bpy.types.Mesh.ava_eyelids_blendshape
+
