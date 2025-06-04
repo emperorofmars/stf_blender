@@ -2,7 +2,7 @@ from io import BytesIO
 import uuid
 import bpy
 
-from ....utils.component_utils import STF_BlenderComponentBase, STF_BlenderComponentModule, add_component
+from ....utils.component_utils import STF_BlenderComponentBase, STF_BlenderComponentModule, add_component, export_component_base, import_component_base
 from ....core.stf_module import STF_ExportComponentHook
 from ....exporter.stf_export_context import STF_ExportContext
 from ....importer.stf_import_context import STF_ImportContext
@@ -40,14 +40,14 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 			pass # TODO warn about invalid data
 
 	component_ref, component = add_component(context_object, _blender_property_name, stf_id, _stf_type)
+	import_component_base(component, json_resource)
 
 	return component
 
 
 def _stf_export(context: STF_ExportContext, application_object: STFEXP_Mesh_Seams, context_object: bpy.types.Mesh) -> tuple[dict, str]:
-	ret = {
-		"type": _stf_type
-	}
+	ret = export_component_base(_stf_type, application_object)
+
 	vertex_indices_width = 4 if len(context_object.vertices) * 3 < 2**32 else 8
 
 	buffer_seams = BytesIO()

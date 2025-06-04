@@ -2,7 +2,7 @@ import bpy
 
 from ....exporter.stf_export_context import STF_ExportContext
 from ....importer.stf_import_context import STF_ImportContext
-from ....utils.component_utils import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref, add_component
+from ....utils.component_utils import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref, add_component, export_component_base, import_component_base
 
 
 _stf_type = "ava.eyelids.blendshape"
@@ -106,6 +106,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, parent_application_object: any) -> any:
 	component_ref, component = add_component(parent_application_object, _blender_property_name, id, _stf_type)
+	import_component_base(component, json_resource)
 
 	for shape_name, _ in _eyelid_shapes.items():
 		if(shape_name in json_resource):
@@ -123,10 +124,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, parent
 
 
 def _stf_export(context: STF_ExportContext, application_object: AVA_Eyelids_Blendshape, parent_application_object: any) -> tuple[dict, str]:
-	ret = {
-		"type": _stf_type,
-		"name": application_object.stf_name
-	}
+	ret = export_component_base(_stf_type, application_object)
 
 	for shape_name, _ in _eyelid_shapes.items():
 		ret[shape_name] = getattr(application_object, "eyes_closed" if shape_name == "closed" else "look_" + shape_name)

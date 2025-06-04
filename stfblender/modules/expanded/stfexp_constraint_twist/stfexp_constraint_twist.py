@@ -4,7 +4,7 @@ from typing import Callable
 
 from ....exporter.stf_export_context import STF_ExportContext
 from ....importer.stf_import_context import STF_ImportContext
-from ....utils.component_utils import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref, add_component
+from ....utils.component_utils import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref, add_component, export_component_base, import_component_base
 
 
 _stf_type = "stfexp.constraint.twist"
@@ -29,6 +29,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
 	component_ref, component = add_component(context_object, _blender_property_name, stf_id, _stf_type)
+	import_component_base(component, json_resource)
 	component.weight = json_resource.get("weight")
 
 	if("target" in json_resource):
@@ -72,11 +73,8 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 
 
 def _stf_export(context: STF_ExportContext, application_object: STFEXP_Constraint_Twist, context_object: any) -> tuple[dict, str]:
-	ret = {
-		"type": _stf_type,
-		"name": application_object.stf_name,
-		"weight": application_object.weight
-	}
+	ret = export_component_base(_stf_type, application_object)
+	ret["weight"] = application_object.weight
 
 	if(application_object.target_object and type(application_object.target_object.data) == bpy.types.Armature and application_object.target_bone and context_object.name in application_object.target_object.data.bones):
 		ret["target"] = [application_object.target_object.data.bones[application_object.target_bone].stf_id]

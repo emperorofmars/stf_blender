@@ -3,7 +3,7 @@ import bpy
 
 from .....exporter.stf_export_context import STF_ExportContext
 from .....importer.stf_import_context import STF_ImportContext
-from .....utils.component_utils import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref, add_component
+from .....utils.component_utils import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref, add_component, import_component_base
 
 
 _stf_type = "com.vrchat.avatar_colliders"
@@ -22,6 +22,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, parent_application_object: any) -> any:
 	component_ref, component = add_component(parent_application_object, _blender_property_name, id, _stf_type)
 	component.data = str(json_resource)
+	import_component_base(component, json_resource)
 	return component
 
 
@@ -30,6 +31,7 @@ def _stf_export(context: STF_ExportContext, application_object: VRC_AvatarCollid
 		ret = json.loads(application_object.data)
 		ret["type"] = _stf_type
 		ret["name"] = application_object.stf_name
+		ret["overrides"] = [override.target_id for override in application_object.overrides]
 		return ret, application_object.stf_id
 	except:
 		return None

@@ -2,7 +2,7 @@ import bpy
 
 from ....exporter.stf_export_context import STF_ExportContext
 from ....importer.stf_import_context import STF_ImportContext
-from ....utils.component_utils import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref, add_component
+from ....utils.component_utils import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref, add_component, export_component_base, import_component_base
 
 
 _stf_type = "stfexp.armature.humanoid"
@@ -21,6 +21,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, parent_application_object: any) -> any:
 	component_ref, component = add_component(parent_application_object, _blender_property_name, id, _stf_type)
+	import_component_base(component, json_resource)
 
 	component.locomotion_type = json_resource.get("locomotion_type", "planti")
 	component.no_jaw = json_resource.get("no_jaw", False)
@@ -29,12 +30,9 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, parent
 
 
 def _stf_export(context: STF_ExportContext, application_object: STFEXP_Armature_Humanoid, parent_application_object: any) -> tuple[dict, str]:
-	ret = {
-		"type": _stf_type,
-		"name": application_object.stf_name,
-		"locomotion_type": application_object.locomotion_type,
-		"no_jaw": application_object.no_jaw
-	}
+	ret = export_component_base(_stf_type, application_object)
+	ret["locomotion_type"] = application_object.locomotion_type
+	ret["no_jaw"] = application_object.no_jaw
 	return ret, application_object.stf_id
 
 

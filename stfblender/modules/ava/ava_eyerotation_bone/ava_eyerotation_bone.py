@@ -2,7 +2,7 @@ import bpy
 
 from ....exporter.stf_export_context import STF_ExportContext
 from ....importer.stf_import_context import STF_ImportContext
-from ....utils.component_utils import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref, add_component
+from ....utils.component_utils import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref, add_component, export_component_base, import_component_base
 
 
 _stf_type = "ava.eye_rotation.bone"
@@ -26,6 +26,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, parent_application_object: any) -> any:
 	component_ref, component = add_component(parent_application_object, _blender_property_name, id, _stf_type)
+	import_component_base(component, json_resource)
 
 	component.limit_up = json_resource.get("up", 15)
 	component.limit_down = json_resource.get("down", 12)
@@ -36,14 +37,11 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, parent
 
 
 def _stf_export(context: STF_ExportContext, application_object: AVA_EyeRotation_Bone, parent_application_object: any) -> tuple[dict, str]:
-	ret = {
-		"type": _stf_type,
-		"name": application_object.stf_name,
-		"up": application_object.limit_up,
-		"down": application_object.limit_down,
-		"in": application_object.limit_in,
-		"out": application_object.limit_out,
-	}
+	ret = export_component_base(_stf_type, application_object)
+	ret["up"] = application_object.limit_up
+	ret["down"] = application_object.limit_down
+	ret["in"] = application_object.limit_in
+	ret["out"] = application_object.limit_out
 	return ret, application_object.stf_id
 
 

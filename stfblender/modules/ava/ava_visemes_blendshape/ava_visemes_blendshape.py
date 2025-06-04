@@ -2,7 +2,7 @@ import bpy
 
 from ....exporter.stf_export_context import STF_ExportContext
 from ....importer.stf_import_context import STF_ImportContext
-from ....utils.component_utils import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref, add_component
+from ....utils.component_utils import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref, add_component, export_component_base, import_component_base
 
 
 _stf_type = "ava.visemes.blendshape"
@@ -77,6 +77,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, parent_application_object: any) -> any:
 	component_ref, component = add_component(parent_application_object, _blender_property_name, id, _stf_type)
+	import_component_base(component, json_resource)
 
 	for viseme in _voice_visemes_15:
 		if(viseme in json_resource):
@@ -86,10 +87,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, parent
 
 
 def _stf_export(context: STF_ExportContext, application_object: AVA_Visemes_Blendshape, parent_application_object: any) -> tuple[dict, str]:
-	ret = {
-		"type": _stf_type,
-		"name": application_object.stf_name
-	}
+	ret = export_component_base(_stf_type, application_object)
 
 	for viseme in _voice_visemes_15:
 		ret[viseme] = application_object["vis_" + viseme]

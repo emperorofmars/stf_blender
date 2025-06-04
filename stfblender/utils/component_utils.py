@@ -165,18 +165,6 @@ class STFEditComponentOperatorBase:
 		return self.get_property(context).stf_components
 
 
-def get_components_from_object(application_object: any) -> list:
-	ret = []
-	if(hasattr(application_object, "stf_components")):
-		for component_ref in application_object.stf_components:
-			if(hasattr(application_object, component_ref.blender_property_name)):
-				components = getattr(application_object, component_ref.blender_property_name)
-				for component in components:
-					if(component.stf_id == component_ref.stf_id):
-						ret.append(component)
-	return ret
-
-
 class AddOverrideToComponent(bpy.types.Operator):
 	"""Add override to component"""
 	bl_idname = "stf.add_override_to_component"
@@ -198,6 +186,30 @@ class RemoveOverrideFromComponent(bpy.types.Operator):
 	def execute(self, context):
 		bpy.context.scene.workaround_for_blenders_datamodel__component_overrides.remove(self.index)
 		return {"FINISHED"}
+
+
+def get_components_from_object(application_object: any) -> list:
+	ret = []
+	if(hasattr(application_object, "stf_components")):
+		for component_ref in application_object.stf_components:
+			if(hasattr(application_object, component_ref.blender_property_name)):
+				components = getattr(application_object, component_ref.blender_property_name)
+				for component in components:
+					if(component.stf_id == component_ref.stf_id):
+						ret.append(component)
+	return ret
+
+def import_component_base(component: any, json_resource: any):
+	if("name" in json_resource): component.stf_name = json_resource["name"]
+	if("overrides" in json_resource):
+		for override in json_resource["overrides"]:
+			component.overrides.add().target_id = override
+
+def export_component_base(stf_type: str, component: any) -> dict:
+	ret = { "type": stf_type }
+	if(component.stf_name): ret["name"] = component.stf_name
+	if(component.overrides): ret["overrides"] = [override.target_id for override in component.overrides]
+	return ret
 
 
 def register():
