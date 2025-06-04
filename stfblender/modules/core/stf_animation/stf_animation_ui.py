@@ -1,7 +1,7 @@
 import bpy
 
 from ....utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
-from ....utils.component_utils import STFAddComponentOperatorBase, STFRemoveComponentOperatorBase
+from ....utils.component_utils import STFAddComponentOperatorBase, STFEditComponentIdOperatorBase, STFRemoveComponentOperatorBase
 from ....utils.component_ui_utils import draw_components_ui, set_stf_component_filter
 
 
@@ -23,6 +23,10 @@ class STFRemoveAnimationComponentOperator(bpy.types.Operator, STFRemoveComponent
 	bl_idname = "stf.remove_animation_component"
 	def get_property(self, context): return context.active_action
 
+class STFEditAnimationComponentIdOperator(bpy.types.Operator, STFEditComponentIdOperatorBase):
+	bl_idname = "stf.edit_animation_component_id"
+	def get_property(self, context): return context.active_action
+
 
 class OpenSlotLinkWebpage(bpy.types.Operator):
 	bl_idname = "stf.open_slot_link_webpage"
@@ -31,7 +35,6 @@ class OpenSlotLinkWebpage(bpy.types.Operator):
 		import webbrowser
 		webbrowser.open("https://extensions.blender.org/add-ons/slot-link/")
 		return {"FINISHED"}
-
 
 
 class STFAnimationSpatialPanel(bpy.types.Panel):
@@ -67,4 +70,4 @@ class STFAnimationSpatialPanel(bpy.types.Panel):
 		self.layout.separator(factor=2, type="LINE")
 
 		# Components
-		draw_components_ui(self.layout, context, context.active_action, STFAddAnimationComponentOperator.bl_idname, STFRemoveAnimationComponentOperator.bl_idname)
+		draw_components_ui(self.layout, context, context.active_action, STFAddAnimationComponentOperator.bl_idname, STFRemoveAnimationComponentOperator.bl_idname, STFEditAnimationComponentIdOperator.bl_idname)

@@ -2,7 +2,7 @@ import bpy
 
 from .stf_material_definition import STF_Material_Property, STF_Material_Value_Base, STF_Material_Value_Ref
 from ....utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
-from ....utils.component_utils import STFAddComponentOperatorBase, STFRemoveComponentOperatorBase
+from ....utils.component_utils import STFAddComponentOperatorBase, STFEditComponentIdOperatorBase, STFRemoveComponentOperatorBase
 from ....utils.component_ui_utils import draw_components_ui, set_stf_component_filter
 from .material_value_modules import blender_material_value_modules
 from .stf_material_operators import STFAddMaterialProperty, STFAddMaterialPropertyValue, STFClearMaterial, STFRemoveMaterialProperty, STFRemoveMaterialPropertyValue
@@ -26,6 +26,10 @@ class STFAddMaterialComponentOperator(bpy.types.Operator, STFAddComponentOperato
 
 class STFRemoveMaterialComponentOperator(bpy.types.Operator, STFRemoveComponentOperatorBase):
 	bl_idname = "stf.remove_material_component"
+	def get_property(self, context): return context.material
+
+class STFEditMaterialComponentIdOperator(bpy.types.Operator, STFEditComponentIdOperatorBase):
+	bl_idname = "stf.edit_material_component_id"
 	def get_property(self, context): return context.material
 
 class STFDrawMaterialPropertyList(bpy.types.UIList):
@@ -63,7 +67,7 @@ class STFMaterialSpatialPanel(bpy.types.Panel):
 		self.layout.separator(factor=2, type="LINE")
 
 		# Components
-		draw_components_ui(self.layout, context, context.material, STFAddMaterialComponentOperator.bl_idname, STFRemoveMaterialComponentOperator.bl_idname)
+		draw_components_ui(self.layout, context, context.material, STFAddMaterialComponentOperator.bl_idname, STFRemoveMaterialComponentOperator.bl_idname, STFEditMaterialComponentIdOperator.bl_idname)
 
 		self.layout.separator(factor=2, type="LINE")
 

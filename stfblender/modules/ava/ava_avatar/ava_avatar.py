@@ -13,6 +13,7 @@ _blender_property_name = "stf_ava_avatar"
 class AVA_Avatar(STF_BlenderComponentBase):
 	viewport: bpy.props.PointerProperty(type=bpy.types.Object, name="Viewport") # type: ignore
 	primary_armature_instance: bpy.props.PointerProperty(type=bpy.types.Object, name="Primary Armature Instance") # type: ignore
+	primary_mesh_instance: bpy.props.PointerProperty(type=bpy.types.Object, name="Primary Mesh Instance") # type: ignore
 
 
 class CreateViewportObjectOperator(bpy.types.Operator):
@@ -49,7 +50,14 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 		create_viewport_button = layout.operator(CreateViewportObjectOperator.bl_idname, text="Create Viewport Object")
 		create_viewport_button.blender_collection = parent_application_object.name
 		create_viewport_button.component_id = component.stf_id
+	
 	layout.prop(component, "primary_armature_instance")
+	if(component.primary_armature_instance and (not component.primary_armature_instance.data or type(component.primary_armature_instance.data) != bpy.types.Armature)):
+		layout.label(text="Warning! The Object isn't an Armature!")
+	
+	layout.prop(component, "primary_mesh_instance")
+	if(component.primary_mesh_instance and (not component.primary_mesh_instance.data or type(component.primary_mesh_instance.data) != bpy.types.Mesh)):
+		layout.label(text="Warning! The Object isn't an Mesh!")
 
 
 
@@ -66,6 +74,11 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, parent
 			component.primary_armature_instance = context.get_imported_resource(json_resource["primary_armature_instance"])
 		context.add_task(_handle_primary_armature_instance)
 
+	if("primary_mesh_instance" in json_resource):
+		def _handle_primary_mesh_instance():
+			component.primary_armature_instance = context.get_imported_resource(json_resource["primary_mesh_instance"])
+		context.add_task(_handle_primary_mesh_instance)
+
 	return component
 
 
@@ -80,10 +93,15 @@ def _stf_export(context: STF_ExportContext, application_object: AVA_Avatar, pare
 			ret["viewport"] = context.get_resource_id(application_object.viewport)
 		context.add_task(_handle_viewport)
 		
-	if(application_object.primary_armature_instance):
+	if(application_object.primary_armature_instance and application_object.primary_armature_instance.data or type(application_object.primary_armature_instance.data) == bpy.types.Armature):
 		def _handle_primary_armature_instance():
 			ret["primary_armature_instance"] = context.get_resource_id(application_object.primary_armature_instance)
 		context.add_task(_handle_primary_armature_instance)
+		
+	if(application_object.primary_mesh_instance and application_object.primary_mesh_instance.data or type(application_object.primary_mesh_instance.data) == bpy.types.Mesh):
+		def _handle_primary_mesh_instance():
+			ret["primary_mesh_instance"] = context.get_resource_id(application_object.primary_mesh_instance)
+		context.add_task(_handle_primary_mesh_instance)
 
 	return ret, application_object.stf_id
 

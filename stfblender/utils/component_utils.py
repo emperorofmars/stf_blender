@@ -92,6 +92,44 @@ class STFRemoveComponentOperatorBase:
 		return self.get_property(context).stf_components
 
 
+class STFEditComponentIdOperatorBase:
+	"""Edit Component ID"""
+	bl_label = "Edit ID"
+	bl_category = "STF"
+	bl_options = {"REGISTER", "UNDO"}
+
+	component_id: bpy.props.StringProperty(name="ID") # type: ignore
+	edit_component_id: bpy.props.StringProperty(name="ID") # type: ignore
+
+	def invoke(self, context, event):
+		self.edit_component_id = self.component_id
+		return context.window_manager.invoke_props_dialog(self)
+
+	def execute(self, context):
+		components_refs = self.get_components_ref_property(context)
+		for component_ref in components_refs:
+			if(component_ref.stf_id == self.component_id):
+				if(hasattr(self.get_property(context), component_ref.blender_property_name)):
+					components = getattr(self.get_property(context), component_ref.blender_property_name)
+					for component in components:
+						if(component.stf_id == self.component_id):
+							component.stf_id = self.edit_component_id
+							component_ref.stf_id = self.edit_component_id
+							return {"FINISHED"}
+
+		self.report({"ERROR"}, "Couldn't change Component ID")
+		return {"CANCELLED"}
+
+	def draw(self, context):
+		self.layout.prop(self, "edit_component_id")
+
+	def get_property(self, context) -> any:
+		pass
+
+	def get_components_ref_property(self, context) -> STF_Component_Ref:
+		return self.get_property(context).stf_components
+
+
 def get_components_from_object(application_object: any) -> list:
 	ret = []
 	if(hasattr(application_object, "stf_components")):

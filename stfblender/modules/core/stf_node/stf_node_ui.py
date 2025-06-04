@@ -1,7 +1,7 @@
 import bpy
 
 from ....utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
-from ....utils.component_utils import STFAddComponentOperatorBase, STFRemoveComponentOperatorBase
+from ....utils.component_utils import STFAddComponentOperatorBase, STFEditComponentIdOperatorBase, STFRemoveComponentOperatorBase
 from ....utils.component_ui_utils import draw_components_ui, set_stf_component_filter
 
 
@@ -21,6 +21,10 @@ class STFAddObjectComponentOperator(bpy.types.Operator, STFAddComponentOperatorB
 
 class STFRemoveObjectComponentOperator(bpy.types.Operator, STFRemoveComponentOperatorBase):
 	bl_idname = "stf.remove_object_component"
+	def get_property(self, context): return context.object
+
+class STFEditObjectComponentIdOperator(bpy.types.Operator, STFEditComponentIdOperatorBase):
+	bl_idname = "stf.edit_object_component_id"
 	def get_property(self, context): return context.object
 
 
@@ -48,4 +52,4 @@ class STFNodePanel(bpy.types.Panel):
 		self.layout.separator(factor=2, type="LINE")
 
 		# Components
-		draw_components_ui(self.layout, context, context.object, STFAddObjectComponentOperator.bl_idname, STFRemoveObjectComponentOperator.bl_idname)
+		draw_components_ui(self.layout, context, context.object, STFAddObjectComponentOperator.bl_idname, STFRemoveObjectComponentOperator.bl_idname, STFEditObjectComponentIdOperator.bl_idname)

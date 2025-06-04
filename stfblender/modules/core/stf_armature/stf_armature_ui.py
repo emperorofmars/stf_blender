@@ -1,7 +1,7 @@
 import bpy
 
 from ....utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
-from ....utils.component_utils import STFAddComponentOperatorBase, STFRemoveComponentOperatorBase
+from ....utils.component_utils import STFAddComponentOperatorBase, STFEditComponentIdOperatorBase, STFRemoveComponentOperatorBase
 from ....utils.component_ui_utils import draw_components_ui, set_stf_component_filter
 
 
@@ -21,6 +21,10 @@ class STFAddArmatureComponentOperator(bpy.types.Operator, STFAddComponentOperato
 
 class STFRemoveArmatureComponentOperator(bpy.types.Operator, STFRemoveComponentOperatorBase):
 	bl_idname = "stf.remove_armature_component"
+	def get_property(self, context): return context.armature
+
+class STFEditArmatureComponentIdOperator(bpy.types.Operator, STFEditComponentIdOperatorBase):
+	bl_idname = "stf.edit_armature_component_id"
 	def get_property(self, context): return context.armature
 
 
@@ -48,4 +52,4 @@ class STFArmatureSpatialPanel(bpy.types.Panel):
 		self.layout.separator(factor=2, type="LINE")
 
 		# Components
-		draw_components_ui(self.layout, context, context.armature, STFAddArmatureComponentOperator.bl_idname, STFRemoveArmatureComponentOperator.bl_idname)
+		draw_components_ui(self.layout, context, context.armature, STFAddArmatureComponentOperator.bl_idname, STFRemoveArmatureComponentOperator.bl_idname, STFEditArmatureComponentIdOperator.bl_idname)

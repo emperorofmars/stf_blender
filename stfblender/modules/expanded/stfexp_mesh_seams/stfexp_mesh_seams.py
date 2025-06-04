@@ -9,11 +9,11 @@ from ....importer.stf_import_context import STF_ImportContext
 from ....core.buffer_utils import parse_uint, serialize_uint
 
 
-_stf_type = "stf.mesh.seams"
-_blender_property_name = "stf_mesh_seams"
+_stf_type = "stfexp.mesh.seams"
+_blender_property_name = "stfexp_mesh_seams"
 
 
-class STF_Mesh_Seams(STF_BlenderComponentBase):
+class STFEXP_Mesh_Seams(STF_BlenderComponentBase):
 	pass
 
 
@@ -44,7 +44,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	return component
 
 
-def _stf_export(context: STF_ExportContext, application_object: STF_Mesh_Seams, context_object: bpy.types.Mesh) -> tuple[dict, str]:
+def _stf_export(context: STF_ExportContext, application_object: STFEXP_Mesh_Seams, context_object: bpy.types.Mesh) -> tuple[dict, str]:
 	ret = {
 		"type": _stf_type
 	}
@@ -66,7 +66,7 @@ def _stf_export(context: STF_ExportContext, application_object: STF_Mesh_Seams, 
 class STF_Module_STF_Mesh_Seams(STF_BlenderComponentModule):
 	stf_type = _stf_type
 	stf_kind = "component"
-	understood_application_types = [STF_Mesh_Seams]
+	understood_application_types = [STFEXP_Mesh_Seams]
 	import_func = _stf_import
 	export_func = _stf_export
 
@@ -78,7 +78,7 @@ class STF_Module_STF_Mesh_Seams(STF_BlenderComponentModule):
 
 def _hook_can_handle_func(application_object: any) -> bool:
 	mesh: bpy.types.Mesh = application_object
-	if(mesh.stf_mesh_seams and len(mesh.stf_mesh_seams) > 0): return False
+	if(mesh.stfexp_mesh_seams and len(mesh.stfexp_mesh_seams) > 0): return False
 	return True
 
 
@@ -86,7 +86,7 @@ def _hook_apply_func(context: STF_ExportContext, application_object: bpy.types.M
 	add_component(application_object, _blender_property_name, str(uuid.uuid4()), _stf_type)
 
 
-class HOOK_STF_Mesh_Seams(STF_ExportComponentHook):
+class HOOK_STFEXP_Mesh_Seams(STF_ExportComponentHook):
 	hook_target_application_types = [bpy.types.Mesh]
 	hook_can_handle_application_object_func = _hook_can_handle_func
 	hook_apply_func = _hook_apply_func
@@ -95,13 +95,13 @@ class HOOK_STF_Mesh_Seams(STF_ExportComponentHook):
 
 register_stf_modules = [
 	STF_Module_STF_Mesh_Seams,
-	HOOK_STF_Mesh_Seams
+	HOOK_STFEXP_Mesh_Seams
 ]
 
 
 def register():
-	bpy.types.Mesh.stf_mesh_seams = bpy.props.CollectionProperty(type=STF_Mesh_Seams) # type: ignore
+	bpy.types.Mesh.stfexp_mesh_seams = bpy.props.CollectionProperty(type=STFEXP_Mesh_Seams) # type: ignore
 
 def unregister():
-	if hasattr(bpy.types.Mesh, "stf_mesh_seams"):
-		del bpy.types.Mesh.stf_mesh_seams
+	if hasattr(bpy.types.Mesh, "stfexp_mesh_seams"):
+		del bpy.types.Mesh.stfexp_mesh_seams

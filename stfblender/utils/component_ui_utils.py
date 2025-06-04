@@ -12,6 +12,19 @@ class STFDrawComponentList(bpy.types.UIList):
 		layout.label(text=item.stf_id)
 
 
+class CopyComponentIdToClipboard(bpy.types.Operator):
+	"""Copy Component Id to Clipboard"""
+	bl_idname = "stf.copy_component_id_to_clipboard"
+	bl_label = "Copy to Clipboard"
+	bl_options = {"REGISTER", "UNDO"}
+
+	id: bpy.props.StringProperty() # type: ignore
+
+	def execute(self, context):
+		bpy.context.window_manager.clipboard = self.id
+		return {"FINISHED"}
+
+
 def get_component_modules(filter = None) -> list[STF_BlenderComponentModule]:
 	ret = []
 	for stf_module in get_stf_modules(bpy.context.preferences.addons.keys()):
@@ -26,10 +39,16 @@ def get_component_modules(filter = None) -> list[STF_BlenderComponentModule]:
 	return ret
 
 
-def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, stf_application_object: any, component: any, inject_ui = None):
+def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, stf_application_object: any, component: any, edit_op: str, inject_ui = None):
 	box = layout.box()
 	box.label(text=component_ref.stf_type)
-	box.label(text=component_ref.stf_id)
+	#box.label(text=component_ref.stf_type + " ( " + component_ref.stf_id + " )")
+	row = box.row()
+	row.label(text=component_ref.stf_id)
+	row.operator(CopyComponentIdToClipboard.bl_idname, text="Copy").id = component_ref.stf_id
+	edit_button = row.operator(edit_op, text="Edit")
+	edit_button.component_id = component_ref.stf_id
+
 	box.prop(component, "stf_name")
 	box.separator(factor=1, type="LINE")
 
@@ -64,6 +83,7 @@ def draw_components_ui(
 		component_holder: any,
 		add_component_op: str,
 		remove_component_op: str,
+		edit_component_id_op: str,
 		components_ref_property: any = None,
 		get_target_object_func: any = None,
 		inject_ui: any = None
@@ -97,7 +117,7 @@ def draw_components_ui(
 						target_object = component_holder
 						if(get_target_object_func):
 							target_object = get_target_object_func(component_holder, component_ref)
-						draw_component(layout, context, component_ref, target_object, component, inject_ui)
+						draw_component(layout, context, component_ref, target_object, component, edit_component_id_op, inject_ui)
 						break
 			else:
 				layout.label(text="Invalid Component: " + component_ref.blender_property_name)

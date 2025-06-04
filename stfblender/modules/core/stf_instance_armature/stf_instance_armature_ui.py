@@ -1,7 +1,7 @@
 import bpy
 
 from ....utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
-from ....utils.component_utils import STF_Component_Ref, STFAddComponentOperatorBase, STFRemoveComponentOperatorBase
+from ....utils.component_utils import STF_Component_Ref, STFAddComponentOperatorBase, STFEditComponentIdOperatorBase, STFRemoveComponentOperatorBase
 from ....utils.component_ui_utils import draw_components_ui, set_stf_component_filter
 from ..stf_node.stf_node import InstanceModComponentRef
 
@@ -23,6 +23,11 @@ class STFAddArmatureInstanceComponentOperator(bpy.types.Operator, STFAddComponen
 
 class STFRemoveArmatureInstanceComponentOperator(bpy.types.Operator, STFRemoveComponentOperatorBase):
 	bl_idname = "stf.remove_armature_instance_component"
+	def get_property(self, context): return context.object
+	def get_components_ref_property(self, context) -> STF_Component_Ref: return context.object.stf_instance.stf_components
+
+class STFEditArmatureInstanceComponentIdOperator(bpy.types.Operator, STFEditComponentIdOperatorBase):
+	bl_idname = "stf.edit_armature_instance_component_id"
 	def get_property(self, context): return context.object
 	def get_components_ref_property(self, context) -> STF_Component_Ref: return context.object.stf_instance.stf_components
 
@@ -64,4 +69,4 @@ class STFArmatureInstancePanel(bpy.types.Panel):
 		self.layout.separator(factor=2, type="LINE")
 
 		# Components
-		draw_components_ui(self.layout, context, context.object, STFAddArmatureInstanceComponentOperator.bl_idname, STFRemoveArmatureInstanceComponentOperator.bl_idname, context.object.stf_instance, _get_target_object_func, _inject_ui)
+		draw_components_ui(self.layout, context, context.object, STFAddArmatureInstanceComponentOperator.bl_idname, STFRemoveArmatureInstanceComponentOperator.bl_idname, STFEditArmatureInstanceComponentIdOperator.bl_idname, context.object.stf_instance, _get_target_object_func, _inject_ui)
