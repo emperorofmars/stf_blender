@@ -1,7 +1,7 @@
 import bpy
 
 from ....utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
-from ....utils.component_utils import STFAddComponentOperatorBase, STFEditComponentIdOperatorBase, STFRemoveComponentOperatorBase
+from ....utils.component_utils import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
 from ....utils.component_ui_utils import draw_components_ui, set_stf_component_filter
 
 
@@ -23,7 +23,7 @@ class STFRemoveArmatureComponentOperator(bpy.types.Operator, STFRemoveComponentO
 	bl_idname = "stf.remove_armature_component"
 	def get_property(self, context): return context.armature
 
-class STFEditArmatureComponentIdOperator(bpy.types.Operator, STFEditComponentIdOperatorBase):
+class STFEditArmatureComponentIdOperator(bpy.types.Operator, STFEditComponentOperatorBase):
 	bl_idname = "stf.edit_armature_component_id"
 	def get_property(self, context): return context.armature
 

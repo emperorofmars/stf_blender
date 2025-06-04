@@ -44,9 +44,16 @@ def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, compo
 	box.label(text=component_ref.stf_type)
 	#box.label(text=component_ref.stf_type + " ( " + component_ref.stf_id + " )")
 	row = box.row()
-	row.label(text=component_ref.stf_id)
+	row.label(text="ID: " + component_ref.stf_id)
 	row.operator(CopyComponentIdToClipboard.bl_idname, text="Copy").id = component_ref.stf_id
-	edit_button = row.operator(edit_op, text="Edit")
+
+	if(component.overrides):
+		box.label(text="Overrides:")
+		for override in component.overrides:
+			row = box.row()
+			row.label(text="ID: " + override.target_id)
+
+	edit_button = box.operator(edit_op, text="Edit")
 	edit_button.component_id = component_ref.stf_id
 
 	box.prop(component, "stf_name")

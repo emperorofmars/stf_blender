@@ -2,7 +2,7 @@ import bpy
 
 from .stf_material_definition import STF_Material_Property, STF_Material_Value_Base, STF_Material_Value_Ref
 from ....utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
-from ....utils.component_utils import STFAddComponentOperatorBase, STFEditComponentIdOperatorBase, STFRemoveComponentOperatorBase
+from ....utils.component_utils import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
 from ....utils.component_ui_utils import draw_components_ui, set_stf_component_filter
 from .material_value_modules import blender_material_value_modules
 from .stf_material_operators import STFAddMaterialProperty, STFAddMaterialPropertyValue, STFClearMaterial, STFRemoveMaterialProperty, STFRemoveMaterialPropertyValue
@@ -28,7 +28,7 @@ class STFRemoveMaterialComponentOperator(bpy.types.Operator, STFRemoveComponentO
 	bl_idname = "stf.remove_material_component"
 	def get_property(self, context): return context.material
 
-class STFEditMaterialComponentIdOperator(bpy.types.Operator, STFEditComponentIdOperatorBase):
+class STFEditMaterialComponentIdOperator(bpy.types.Operator, STFEditComponentOperatorBase):
 	bl_idname = "stf.edit_material_component_id"
 	def get_property(self, context): return context.material
 
