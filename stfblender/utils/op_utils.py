@@ -15,3 +15,16 @@ class SetActiveObjectOperator(bpy.types.Operator):
 		blender_object.select_set(True)
 		bpy.context.view_layer.objects.active = blender_object
 		return {"FINISHED"}
+
+
+class OpenWebpage(bpy.types.Operator):
+	bl_idname = "stf.open_webpage"
+	bl_label = "Open Webpage"
+
+	url: bpy.props.StringProperty(name = "URL") # type: ignore
+
+	def execute(self, context):
+		import webbrowser
+		webbrowser.open(self.url)
+		return {"FINISHED"}
+

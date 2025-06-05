@@ -3,6 +3,7 @@ import bpy
 from ....utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
 from ....utils.component_utils import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
 from ....utils.component_ui_utils import draw_components_ui, set_stf_component_filter
+from ....utils.op_utils import OpenWebpage
 
 
 class STFSetAnimationIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
@@ -28,15 +29,6 @@ class STFEditAnimationComponentIdOperator(bpy.types.Operator, STFEditComponentOp
 	def get_property(self, context): return context.active_action
 
 
-class OpenSlotLinkWebpage(bpy.types.Operator):
-	bl_idname = "stf.open_slot_link_webpage"
-	bl_label = "Open Slot Link Webpage"
-	def execute(self, context):
-		import webbrowser
-		webbrowser.open("https://extensions.blender.org/add-ons/slot-link/")
-		return {"FINISHED"}
-
-
 class STFAnimationSpatialPanel(bpy.types.Panel):
 	"""STF options & export helper"""
 	bl_idname = "OBJECT_PT_stf_animation_spatial_editor"
@@ -57,7 +49,7 @@ class STFAnimationSpatialPanel(bpy.types.Panel):
 		if(not hasattr(bpy.types.Action, "slot_links")):
 			self.layout.label(text="Note: the 'Slot Link' extension")
 			self.layout.label(text="is required to export animations!")
-			self.layout.operator(OpenSlotLinkWebpage.bl_idname)
+			self.layout.operator(OpenWebpage.bl_idname).url = "https://extensions.blender.org/add-ons/slot-link/"
 			return
 
 		self.layout.prop(context.active_action, "stf_exclude")
