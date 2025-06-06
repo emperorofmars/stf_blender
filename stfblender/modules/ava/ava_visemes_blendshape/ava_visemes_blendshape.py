@@ -43,13 +43,15 @@ class AutomapVisemes(bpy.types.Operator):
 			if(component.stf_id == self.component_id):
 				break
 
+		for viseme in _voice_visemes_15:
+			component["vis_" + viseme] = ""
+
 		if(context.mesh.shape_keys):
 			for shape_key in context.mesh.shape_keys.key_blocks:
 				for viseme in _voice_visemes_15:
 					for prefix in _voice_visemes_15_prefixes:
-						if(shape_key.name.lower().find(viseme + prefix) > 0 and len(component["vis_" + viseme]) > len(shape_key.name)):
+						if(shape_key.name.lower().find(prefix + viseme) > 0 and (len(getattr(component, "vis_" + viseme)) > len(shape_key.name) or len(getattr(component, "vis_" + viseme)) == 0)):
 							component["vis_" + viseme] = shape_key.name
-							break
 
 		return {"FINISHED"}
 
