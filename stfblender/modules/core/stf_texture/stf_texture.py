@@ -45,7 +45,7 @@ def _stf_export(context: STF_ExportContext, application_object: STF_Texture, par
 	ensure_stf_id(context, application_object)
 	ret = export_component_base(_stf_type, application_object)
 	ret["width"] = application_object.width
-	ret["width"] = application_object.height
+	ret["height"] = application_object.height
 	ret["downscale_priority"] = application_object.downscale_priority
 	ret["quality"] = application_object.quality
 	ret["mipmaps"] = application_object.mipmaps
