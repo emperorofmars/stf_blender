@@ -108,16 +108,18 @@ def _stf_export(context: STF_ExportContext, blender_object: any, context_object:
 	json_resource["children"] = children
 
 	# TODO do this in a callback and check if the referenced resources are within the exported file
-	if(blender_object.parent):
-		match(blender_object.parent_type):
-			case "OBJECT":
-				# TODO check if object is a prefab instance and deal with that whenever prefab instances are a thing.
-				pass
-			case "BONE":
-				# TODO make this more generic
-				json_resource["parent_binding"] = [blender_object.parent.stf_id, "instance", blender_object.parent.data.bones[blender_object.parent_bone].stf_id]
-			case _:
-				context.report(STFReport("Unsupported object parent_type: " + str(blender_object.parent_type), STFReportSeverity.FatalError, blender_object.stf_id, json_resource.get("type"), blender_object))
+	def _handle_parent_binding():
+		if(blender_object.parent):
+			match(blender_object.parent_type):
+				case "OBJECT":
+					# TODO check if object is a prefab instance and deal with that whenever prefab instances are a thing.
+					pass
+				case "BONE":
+					# TODO make this more generic
+					json_resource["parent_binding"] = [blender_object.parent.stf_id, "instance", blender_object.parent.data.bones[blender_object.parent_bone].stf_id]
+				case _:
+					context.report(STFReport("Unsupported object parent_type: " + str(blender_object.parent_type), STFReportSeverity.FatalError, blender_object.stf_id, json_resource.get("type"), blender_object))
+	context.add_task(_handle_parent_binding)
 
 	json_resource["trs"] = trs_utils.blender_object_to_trs(blender_object)
 

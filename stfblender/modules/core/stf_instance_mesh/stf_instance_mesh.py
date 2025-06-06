@@ -67,15 +67,12 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 		if(type(modifier) is bpy.types.ArmatureModifier):
 			blender_armatures.append(modifier)
 
-	if(len(blender_armatures) == 1):
-		if(blender_armatures[0].object.stf_id):
-			# TODO check if the armature is in the export and within the same hierarchy, otherwise check if its in an instanced hierarchy
+	if(len(blender_armatures) == 1 and blender_armatures[0] and blender_armatures[0].object and blender_armatures[0].object.data):
+		# TODO check if the armature is in the export and within the same hierarchy, otherwise check if its in an instanced hierarchy
 
-			# The armature has to be passed, because in Blenders datamodel the relationship between mesh and armature loose.
-			ret["mesh"] = context.serialize_resource(blender_mesh, blender_armatures[0].object.data, module_kind="data")
-			ret["armature_instance"] = context.serialize_resource(blender_armatures[0].object, module_kind="node")
-		else:
-			context.report(STFReport("Invalid armature: " + str(blender_armatures[0].object), severity=STFReportSeverity.FatalError, stf_id=blender_object.stf_id, stf_type=_stf_type, application_object=blender_object))
+		# The armature has to be passed, because in Blenders datamodel the relationship between mesh and armature loose.
+		ret["mesh"] = context.serialize_resource(blender_mesh, blender_armatures[0].object.data, module_kind="data")
+		ret["armature_instance"] = context.serialize_resource(blender_armatures[0].object, module_kind="node")
 	elif(len(blender_armatures) > 1):
 		context.report(STFReport("More than one Armature per mesh is not supported!", severity=STFReportSeverity.FatalError, stf_id=blender_object.stf_id, stf_type=_stf_type, application_object=blender_object))
 	else:
