@@ -139,7 +139,7 @@ def import_stf_mesh(context: STF_ImportContext, json_resource: dict, stf_id: str
 					uv_layer.uv[index].vector = uv
 
 		if("split_colors" in json_resource):
-			for index in range(len(json_resource["colors"])):
+			for index in range(len(json_resource["split_colors"])):
 				color_attribute = blender_mesh.color_attributes.new("Color", "FLOAT_COLOR", "POINT")
 				buffer_split_colors = BytesIO(context.import_buffer(json_resource["split_colors"][index]))
 				for index, vertex in enumerate(blender_mesh.vertices):
