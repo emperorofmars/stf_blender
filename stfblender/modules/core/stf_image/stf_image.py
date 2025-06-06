@@ -24,6 +24,10 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	blender_image.pack(data=image_buffer, data_len=len(image_buffer))
 	blender_image.source = "FILE"
 
+	if("data_type" in json_resource):
+		if(json_resource["data_type"] == "non_color"):
+			blender_image.colorspace_settings.name = "Non-Color"
+
 	return blender_image
 
 
@@ -46,7 +50,8 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 			"type": _stf_type,
 			"name": blender_image.stf_name if blender_image.stf_name_source_of_truth else blender_image.name,
 			"format": image_format,
-			"buffer": buffer_id
+			"buffer": buffer_id,
+			"data_type": "non_color" if blender_image.colorspace_settings.name == "Non-Color" else "color"
 		}
 
 		return ret, blender_image.stf_id

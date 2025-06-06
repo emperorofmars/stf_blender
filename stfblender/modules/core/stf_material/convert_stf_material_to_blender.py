@@ -3,7 +3,7 @@ import bpy
 from .stf_material_definition import STF_Material_Property
 
 
-def set_image_value(blender_material: bpy.types.Material, surface: bpy.types.ShaderNode, property: STF_Material_Property, target_input: str | int, color_space = "sRGB", position_index_v = 0, position_index_h = 0) -> bool:
+def set_image_value(blender_material: bpy.types.Material, surface: bpy.types.ShaderNode, property: STF_Material_Property, target_input: str | int, position_index_v = 0, position_index_h = 0) -> bool:
 	property: STF_Material_Property = property
 	if(property.value_type == "image"):
 		value_id = property.values[0].value_id
@@ -16,7 +16,6 @@ def set_image_value(blender_material: bpy.types.Material, surface: bpy.types.Sha
 			image_node.location.y = position_index_v * -300
 			image_node.location.x = position_index_h * -400
 			image_node.image = value.image
-			image_node.image.colorspace_settings.name = color_space
 			blender_material.node_tree.links.new(image_node.outputs[0], surface.inputs[target_input])
 			return True
 	return False
@@ -42,14 +41,14 @@ def stf_material_to_blender(blender_material: bpy.types.Material):
 		if(property.property_type == "albedo.texture" and property.value_type == "image"):
 			node_position_index += set_image_value(blender_material, surface, property, "Base Color", position_index_v = node_position_index)
 		elif(property.property_type == "roughness.texture" and property.value_type == "image"):
-			node_position_index += set_image_value(blender_material, surface, property, "Roughness", color_space = "Non-Color", position_index_v = node_position_index)
+			node_position_index += set_image_value(blender_material, surface, property, "Roughness", position_index_v = node_position_index)
 		elif(property.property_type == "metallic.texture" and property.value_type == "image"):
-			node_position_index += set_image_value(blender_material, surface, property, "Metallic", color_space = "Non-Color", position_index_v = node_position_index)
+			node_position_index += set_image_value(blender_material, surface, property, "Metallic", position_index_v = node_position_index)
 		elif(property.property_type == "normal.texture" and property.value_type == "image"):
 			normal_node = blender_material.node_tree.nodes.new("ShaderNodeNormalMap")
 			normal_node.location.y = node_position_index * -300
 			blender_material.node_tree.links.new(normal_node.outputs[0], surface.inputs["Normal"])
-			node_position_index += set_image_value(blender_material, normal_node, property, "Color", color_space = "Non-Color" ,position_index_v = node_position_index, position_index_h = 1)
+			node_position_index += set_image_value(blender_material, normal_node, property, "Color" ,position_index_v = node_position_index, position_index_h = 1)
 			node_position_index += 1
 
 	# TODO parse stf material
