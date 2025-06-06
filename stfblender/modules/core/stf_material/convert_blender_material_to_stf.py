@@ -1,6 +1,5 @@
 import bpy
 
-
 from ....exporter.stf_export_context import STF_ExportContext
 from .stf_material_operators import add_property, clear_stf_material
 from .material_value_modules.float_value import STF_Material_Value_Module_Float
@@ -20,26 +19,23 @@ def convert_principled_bsdf_to_stf(blender_material: bpy.types.Material, node: b
 	shader = shader_target.shaders.add()
 	shader.value = "ShaderNodeBsdfPrincipled"
 
-def convert_texture_or_color(blender_material: bpy.types.Material, socket: bpy.types.NodeSocket, texture_property: str, color_property: str):
+def convert_texture(blender_material: bpy.types.Material, socket: bpy.types.NodeSocket, texture_property: str) -> bool:
 	if(len(socket.links) == 1):
 		if(type(socket.links[0].from_node) is bpy.types.ShaderNodeTexImage):
 			texture_node: bpy.types.ShaderNodeTexImage = socket.links[0].from_node
 			if(texture_node.image):
 				_, _, value = add_property(blender_material, texture_property, STF_Material_Value_Module_Image)
 				value.image = texture_node.image
-	else:
+				return True
+
+def convert_texture_or_color(blender_material: bpy.types.Material, socket: bpy.types.NodeSocket, texture_property: str, color_property: str):
+	if(not convert_texture(blender_material, socket, texture_property)):
 		if(socket.type == "RGBA"):
 			_, _, value = add_property(blender_material, color_property, STF_Material_Value_Module_Color)
 			value.color = socket.default_value
 
 def convert_texture_or_float(blender_material: bpy.types.Material, socket: bpy.types.NodeSocket, texture_property: str, float_property: str):
-	if(len(socket.links) == 1):
-		if(type(socket.links[0].from_node) is bpy.types.ShaderNodeTexImage):
-			texture_node: bpy.types.ShaderNodeTexImage = socket.links[0].from_node
-			if(texture_node.image):
-				_, _, value = add_property(blender_material, texture_property, STF_Material_Value_Module_Image)
-				value.image = texture_node.image
-	else:
+	if(not convert_texture(blender_material, socket, texture_property)):
 		if(socket.type == "VALUE"):
 			_, _, value = add_property(blender_material, float_property, STF_Material_Value_Module_Float)
 			value.number = socket.default_value
@@ -50,6 +46,10 @@ def convert_shader_node_to_stf(blender_material: bpy.types.Material, node: bpy.t
 		convert_texture_or_color(blender_material, node.inputs["Base Color"], "albedo.texture", "albedo.color")
 	if("Roughness" in node.inputs):
 		convert_texture_or_float(blender_material, node.inputs["Roughness"], "roughness.texture", "roughness.value")
+	if("Metallic" in node.inputs):
+		convert_texture_or_float(blender_material, node.inputs["Metallic"], "metallic.texture", "metallic.value")
+	if("Normal" in node.inputs and len(node.inputs["Normal"].links) == 1 and type(node.inputs["Normal"].links[0].from_node) is bpy.types.ShaderNodeNormalMap):
+		convert_texture(blender_material, node.inputs["Normal"].links[0].from_node.inputs["Color"], "normal.texture")
 
 
 def blender_material_to_stf(blender_material: bpy.types.Material):
