@@ -8,12 +8,14 @@ from ....importer.stf_import_context import STF_ImportContext
 from ....core.stf_module import STF_Module
 from ....core.stf_report import STFReportSeverity, STFReport
 from ....utils.component_utils import get_components_from_object
+from .stf_instance_mesh_util import set_instance_blendshapes
 
 
 _stf_type = "stf.instance.mesh"
 
 
 class STF_Instance_Mesh_Blendshape_Value(bpy.types.PropertyGroup):
+	name: bpy.props.StringProperty(name="Name") # type: ignore
 	value: bpy.props.FloatProperty(name="Value", default=0) # type: ignore
 
 class STF_Instance_Mesh_Material(bpy.types.PropertyGroup):
@@ -44,7 +46,16 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 			modifier: bpy.types.ArmatureModifier = blender_object.modifiers.new("Armature", "ARMATURE")
 			modifier.object = armature_instance
 
-	# TODO handle materials, blendshape values per instance
+	set_instance_blendshapes(blender_object)
+	# blendshape values per instance
+	if("blendshape_values" in json_resource):
+		blender_mesh = blender_object.data
+		for index, blendshape_value in enumerate(json_resource["blendshape_values"]):
+			instance_blendshape = blender_object.stf_instance_mesh.blendshape_values[index]
+			instance_blendshape.name = blender_mesh.shape_keys.key_blocks[index].name
+			instance_blendshape.value = blendshape_value
+
+	# TODO handle materials
 
 	return blender_object
 
@@ -86,7 +97,12 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 	blendshape_values = []
 	if(blender_mesh.shape_keys):
 		for blendshape in blender_mesh.shape_keys.key_blocks:
-			blendshape_values.append(blendshape.value)
+			for instance_blendshape in blender_object.stf_instance_mesh.blendshape_values:
+				if(instance_blendshape.name == blendshape.name):
+					blendshape_values.append(instance_blendshape.value)
+					break
+			else:
+				blendshape_values.append(blendshape.value)
 	ret["blendshape_values"] = blendshape_values
 
 	return ret, str(uuid.uuid4())

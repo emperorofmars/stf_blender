@@ -1,6 +1,21 @@
 import bpy
 
 from ....utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
+from .stf_instance_mesh_util import set_instance_blendshapes
+
+
+class SetInstanceBlendshapes(bpy.types.Operator):
+	bl_idname = "stf.set_mesh_instance_blendshapes"
+	bl_label = "Set Blendshapes per Instance"
+	bl_category = "STF"
+	bl_options = {"REGISTER", "UNDO"}
+
+	@classmethod
+	def poll(cls, context): return context.object.stf_instance is not None and context.object.data and type(context.object.data) is bpy.types.Mesh
+
+	def execute(self, context):
+		set_instance_blendshapes(context.object)
+		return {"FINISHED"}
 
 
 class STFSetMeshInstanceIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
@@ -31,7 +46,13 @@ class STFMeshInstancePanel(bpy.types.Panel):
 
 		self.layout.separator(factor=2, type="LINE")
 
-		# TODO Blendshape Values per Instance
+		self.layout.operator(SetInstanceBlendshapes.bl_idname)
+
+		# Blendshape Values per Instance
+		box = self.layout.box()
+		for index, instance_blendshape in enumerate(context.object.stf_instance_mesh.blendshape_values):
+			box.prop(instance_blendshape, "value", text=instance_blendshape.name)
+
 
 		# TODO Materials per Instance
 
