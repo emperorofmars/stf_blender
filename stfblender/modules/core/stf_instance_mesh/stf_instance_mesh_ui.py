@@ -51,7 +51,9 @@ class STFMeshInstancePanel(bpy.types.Panel):
 		# Blendshape Values per Instance
 		box = self.layout.box()
 		for index, instance_blendshape in enumerate(context.object.stf_instance_mesh.blendshape_values):
-			box.prop(instance_blendshape, "value", text=instance_blendshape.name)
+			row = box.row()
+			row.prop(instance_blendshape, "override", text=instance_blendshape.name)
+			row.prop(instance_blendshape, "value", text="Value")
 
 
 		# TODO Materials per Instance

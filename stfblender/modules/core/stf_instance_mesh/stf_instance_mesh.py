@@ -16,6 +16,7 @@ _stf_type = "stf.instance.mesh"
 
 class STF_Instance_Mesh_Blendshape_Value(bpy.types.PropertyGroup):
 	name: bpy.props.StringProperty(name="Name") # type: ignore
+	override: bpy.props.BoolProperty(name="Override", default=False) # type: ignore
 	value: bpy.props.FloatProperty(name="Value", default=0) # type: ignore
 
 class STF_Instance_Mesh_Material(bpy.types.PropertyGroup):
@@ -52,8 +53,11 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 		blender_mesh = blender_object.data
 		for index, blendshape_value in enumerate(json_resource["blendshape_values"]):
 			instance_blendshape = blender_object.stf_instance_mesh.blendshape_values[index]
-			instance_blendshape.name = blender_mesh.shape_keys.key_blocks[index].name
-			instance_blendshape.value = blendshape_value
+			#instance_blendshape.name = blender_mesh.shape_keys.key_blocks[index].name
+			if(blendshape_value != None):
+				instance_blendshape.value = blendshape_value
+				instance_blendshape.override = True
+
 
 	# TODO handle materials
 
@@ -99,7 +103,7 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 		for blendshape in blender_mesh.shape_keys.key_blocks:
 			for instance_blendshape in blender_object.stf_instance_mesh.blendshape_values:
 				if(instance_blendshape.name == blendshape.name):
-					blendshape_values.append(instance_blendshape.value)
+					blendshape_values.append(instance_blendshape.value if instance_blendshape.override else None)
 					break
 			else:
 				blendshape_values.append(blendshape.value)
