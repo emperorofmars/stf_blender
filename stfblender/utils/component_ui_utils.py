@@ -52,11 +52,14 @@ def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, compo
 		for override in component.overrides:
 			row = box.row()
 			row.label(text="ID: " + override.target_id)
+	else:
+		box.label(text="No Overrides")
 
-	edit_button = box.operator(edit_op, text="Edit")
+	edit_button = box.operator(edit_op, text="Edit Overrides")
 	edit_button.component_id = component_ref.stf_id
 
 	box.prop(component, "stf_name")
+	box.prop(component, "enabled")
 	box.separator(factor=1, type="LINE")
 
 	stf_modules = get_component_modules()

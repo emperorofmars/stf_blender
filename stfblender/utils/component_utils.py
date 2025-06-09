@@ -19,6 +19,7 @@ class STF_BlenderComponentBase(bpy.types.PropertyGroup):
 	stf_id: bpy.props.StringProperty(name="ID") # type: ignore
 	stf_name: bpy.props.StringProperty(name="Name") # type: ignore
 	overrides: bpy.props.CollectionProperty(type=STF_BlenderComponentOverride, name="Overrides") # type: ignore
+	enabled: bpy.props.BoolProperty(name="Enabled", default=True) # type: ignore
 
 
 class STF_Component_Ref(bpy.types.PropertyGroup): # Bringing polymorphism to Blender
@@ -204,11 +205,14 @@ def import_component_base(component: any, json_resource: any):
 	if("overrides" in json_resource):
 		for override in json_resource["overrides"]:
 			component.overrides.add().target_id = override
+	if("enabled" in json_resource):
+		component.enabled = json_resource["enabled"]
 
 def export_component_base(stf_type: str, component: any) -> dict:
 	ret = { "type": stf_type }
 	if(component.stf_name): ret["name"] = component.stf_name
 	if(component.overrides): ret["overrides"] = [override.target_id for override in component.overrides]
+	if(component.enabled == False): ret["enabled"] = False
 	return ret
 
 
