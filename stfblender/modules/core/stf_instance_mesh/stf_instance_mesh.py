@@ -52,8 +52,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	if("blendshape_values" in json_resource):
 		blender_mesh = blender_object.data
 		for index, blendshape_value in enumerate(json_resource["blendshape_values"]):
-			instance_blendshape = blender_object.stf_instance_mesh.blendshape_values[index]
-			#instance_blendshape.name = blender_mesh.shape_keys.key_blocks[index].name
+			instance_blendshape = blender_object.stf_instance_mesh.blendshape_values[index + 1]
 			if(blendshape_value != None):
 				instance_blendshape.value = blendshape_value
 				instance_blendshape.override = True
@@ -99,8 +98,8 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 	ret["materials"] = material_slots
 
 	blendshape_values = []
-	if(blender_mesh.shape_keys):
-		for blendshape in blender_mesh.shape_keys.key_blocks:
+	if(blender_mesh.shape_keys and len(blender_mesh.shape_keys.key_blocks) > 1):
+		for blendshape in blender_mesh.shape_keys.key_blocks[1:]:
 			for instance_blendshape in blender_object.stf_instance_mesh.blendshape_values:
 				if(instance_blendshape.name == blendshape.name):
 					blendshape_values.append(instance_blendshape.value if instance_blendshape.override else None)
