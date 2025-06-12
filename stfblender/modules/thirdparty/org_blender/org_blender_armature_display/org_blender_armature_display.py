@@ -46,6 +46,8 @@ class STF_Module_Blender_Armature_Display(STF_BlenderComponentModule):
 
 
 def _hook_can_handle_func(application_object: any) -> bool:
+	armature: bpy.types.Armature = application_object
+	if(armature.org_blender_armature_display and len(armature.org_blender_armature_display) > 0): return False
 	return True
 
 def _hook_apply_func(context: STF_ExportContext, application_object: bpy.types.Armature, context_object: any):

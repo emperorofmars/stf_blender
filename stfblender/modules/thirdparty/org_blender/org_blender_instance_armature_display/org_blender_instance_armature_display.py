@@ -46,7 +46,10 @@ class STF_Module_Blender_Armature_Display(STF_BlenderComponentModule):
 
 
 def _hook_can_handle_func(application_object: bpy.types.Object) -> bool:
-	return type(application_object.data) is bpy.types.Armature
+	if(not type(application_object.data) is bpy.types.Armature): return False
+	blender_object: bpy.types.Object = application_object
+	if(blender_object.org_blender_instance_armature_display and len(blender_object.org_blender_instance_armature_display) > 0): return False
+	return True
 
 def _hook_apply_func(context: STF_ExportContext, application_object: bpy.types.Object, context_object: any):
 	add_component(application_object, _blender_property_name, str(uuid.uuid4()), _stf_type)
