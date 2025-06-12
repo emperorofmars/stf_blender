@@ -11,25 +11,23 @@ class SqueakComponent(stfblender.utils.component_utils.STF_BlenderComponentBase)
 	squeak: bpy.props.BoolProperty(name="Squeak", default=True) # type: ignore
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: stfblender.utils.component_utils.STF_BlenderComponentModule, parent_application_object: any, component: SqueakComponent): # type: ignore
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: stfblender.utils.component_utils.STF_BlenderComponentModule, context_object: any, component: SqueakComponent):
 	layout.prop(component, "squeak")
 
 
-def _stf_import(context: stfblender.importer.stf_import_context.STF_RootImportContext, json_resource: dict, id: str, parent_application_object: any) -> tuple[any, any]: # type: ignore
-	component_ref, component = stfblender.utils.component_utils.add_component(parent_application_object, _blender_property_name, id, _stf_type)
+def _stf_import(context: stfblender.importer.stf_import_context.STF_ImportContext, json_resource: dict, id: str, context_object: any) -> any:
+	component_ref, component = stfblender.utils.component_utils.add_component(context_object, _blender_property_name, id, _stf_type)
+	ret = stfblender.utils.component_utils.import_component_base(component, json_resource)
 
 	component.squeak = json_resource.get("squeak", True)
 
-	return component, context
+	return component
 
 
-def _stf_export(context: stfblender.exporter.stf_export_context.STF_RootExportContext, application_object: SqueakComponent, parent_application_object: any) -> tuple[dict, str, any]: # type: ignore
-	ret = {
-		"type": _stf_type,
-		"name": application_object.stf_name,
-		"squeak": application_object.squeak,
-	}
-	return ret, application_object.stf_id, context
+def _stf_export(context: stfblender.exporter.stf_export_context.STF_ExportContext, application_object: SqueakComponent, context_object: any) -> tuple[dict, str]:
+	ret = stfblender.utils.component_utils.export_component_base(_stf_type, application_object)
+	ret["squeak"] = application_object.squeak
+	return ret, application_object.stf_id
 
 
 class MyCustomSTFSqueakComponentModule(stfblender.utils.component_utils.STF_BlenderComponentModule):

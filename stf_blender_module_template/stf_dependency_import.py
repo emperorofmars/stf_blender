@@ -8,6 +8,8 @@ for m in {m.module for m in bpy.context.preferences.extensions.repos}:
 	if(loaded_state or m == "vscode_development"):
 		__installed_and_enabled_stf_extensions.append(m)
 
+print(__installed_and_enabled_stf_extensions)
+
 if("vscode_development" in __installed_and_enabled_stf_extensions):
 	print("Enabling Custom STF Modules for development extension.")
 	selected_stf_extension = "bl_ext.vscode_development.stf_blender"
@@ -19,8 +21,6 @@ elif(len(__installed_and_enabled_stf_extensions) > 1):
 	selected_stf_extension = "bl_ext." + __installed_and_enabled_stf_extensions[0] + ".stf_blender"
 else:
 	print("No STF Extension detected. Not enabling Custom STF Modules!")
-
-
 
 if(selected_stf_extension):
 	import importlib
