@@ -64,7 +64,7 @@ license = [
 # clipboard = "Copy and paste bone transforms"
 [permissions]
 files = "Import/export STF from/to disk"
-clipboard = "Copy and paste STF resources and definitions between different tools"
+clipboard = "Copy and paste STF definitions between different tools"
 
 # Optional: build settings.
 # https://docs.blender.org/manual/en/dev/advanced/extensions/command_line_arguments.html#command-line-args-extension-build
@@ -84,4 +84,9 @@ paths_exclude_pattern = [
 	"/stf_blender_module_template",
 	"/examples",
 	"/assets",
+	"/.gitignore",
+	"/.editorconfig",
+	"/readme.adoc",
+	"/LICENSE-APACHE2",
+	"/LICENSE-MIT",
 ]

@@ -20,6 +20,9 @@ Also install the https://extensions.blender.org/add-ons/slot-link/[Slot Link] ex
 
 **https://github.com/emperorofmars/stf_documentation[Read the Documentation!]**
 
+== Installation
+* Download the latest Release and add it under: `Edit` -> `Preferences` -> `Get Extensions` -> **Click on the top right most dropdown** -> `Install from Fisk...`
+
 == License
 All source-code in this repository, except when noted in individual files and/or directories, is licensed under either:
 
