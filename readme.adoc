@@ -16,12 +16,12 @@ Intended for (not only) game development use-cases.
 
 **WIP implementation for Blender 4.4+. Do not use productively!**
 
-Also install the https://extensions.blender.org/add-ons/slot-link/[Slot Link] extension if you want to import/export animations.
-
 **https://github.com/emperorofmars/stf_documentation[Read the Documentation!]**
 
 == Installation
 * Download the latest Release and add it under: `Edit` -> `Preferences` -> `Get Extensions` -> **Click on the top right most dropdown** -> `Install from Fisk...`
+
+Also install the https://extensions.blender.org/add-ons/slot-link/[Slot Link] extension if you want to import/export animations.
 
 == License
 All source-code in this repository, except when noted in individual files and/or directories, is licensed under either:
