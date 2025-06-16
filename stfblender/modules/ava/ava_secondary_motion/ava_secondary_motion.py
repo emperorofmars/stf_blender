@@ -15,6 +15,9 @@ class AVA_SecondaryMotion(STF_BlenderComponentBase):
 
 
 def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: AVA_SecondaryMotion):
+	layout.label(text="This component is mostly a stub for now.")
+	layout.label(text="Use application specific bone-physics")
+	layout.label(text="components if possible and override this one.")
 	layout.prop(component, "intensity")
 
 
