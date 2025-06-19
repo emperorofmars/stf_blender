@@ -5,6 +5,7 @@ from typing import Callable
 from ....exporter.stf_export_context import STF_ExportContext
 from ....importer.stf_import_context import STF_ImportContext
 from ....utils.component_utils import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref, add_component, export_component_base, import_component_base
+from ....utils.armature_bone import ArmatureBone
 
 
 _stf_type = "stfexp.constraint.twist"
@@ -72,18 +73,20 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	return component
 
 
-def _stf_export(context: STF_ExportContext, application_object: STFEXP_Constraint_Twist, context_object: any) -> tuple[dict, str]:
-	ret = export_component_base(_stf_type, application_object)
-	ret["weight"] = application_object.weight
+def _stf_export(context: STF_ExportContext, component: STFEXP_Constraint_Twist, context_object: any) -> tuple[dict, str]:
+	ret = export_component_base(_stf_type, component)
+	ret["weight"] = component.weight
 
-	if(application_object.target_object and type(application_object.target_object.data) == bpy.types.Armature and application_object.target_bone and context_object.name in application_object.target_object.data.bones):
-		ret["target"] = [application_object.target_object.data.bones[application_object.target_bone].stf_id]
-	elif(application_object.target_object and type(application_object.target_object.data) == bpy.types.Armature and application_object.target_bone):
-		ret["target"] = [application_object.target_object.stf_id, "instance", application_object.target_object.data.bones[application_object.target_bone].stf_id]
-	elif(application_object.target_object):
-		ret["target"] = [application_object.target_object.stf_id]
+	if(type(context_object) == ArmatureBone):
+		if((context_object.armature == component.target_object or not component.target_object) and component.target_bone):
+			ret["target"] = [context_object.armature.bones[component.target_bone].stf_id]
+	elif(component.target_object):
+		if(type(component.target_object.data) == bpy.types.Armature and component.target_bone):
+			ret["target"] = [component.target_object.stf_id, "instance", component.target_object.data.bones[component.target_bone].stf_id]
+		else:
+			ret["target"] = [component.target_object.stf_id]
 
-	return ret, application_object.stf_id
+	return ret, component.stf_id
 
 
 def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: any, application_object_property_index: int, data_path: str) -> tuple[list[str], Callable[[int, any], any], list[int]]:
