@@ -55,7 +55,7 @@ def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, compo
 	else:
 		box.label(text="No Overrides")
 
-	edit_button = box.operator(edit_op, text="Edit Overrides")
+	edit_button = box.operator(edit_op, text="Edit ID & Overrides")
 	edit_button.component_id = component_ref.stf_id
 
 	box.prop(component, "stf_name")

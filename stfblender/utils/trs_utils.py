@@ -46,7 +46,7 @@ def stf_translation_to_blender(vec: list[float]) -> mathutils.Vector:
 	# x,z,-y -> x,y,z
 	return mathutils.Vector((vec[0], -vec[2], vec[1]))
 
-def stf_rotation_to_blender(quat: list[float]) -> mathutils.Vector:
+def stf_rotation_to_blender(quat: list[float]) -> mathutils.Quaternion:
 	# x,z,-y,w -> w,x,y,z
 	return mathutils.Quaternion((quat[3], quat[0], -quat[2], quat[1]))
 
