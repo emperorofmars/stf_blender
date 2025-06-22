@@ -77,14 +77,16 @@ def _stf_export(context: STF_ExportContext, component: STFEXP_Constraint_Twist, 
 	ret = export_component_base(_stf_type, component)
 	ret["weight"] = component.weight
 
-	if(type(context_object) == ArmatureBone):
-		if((context_object.armature == component.target_object or not component.target_object) and component.target_bone):
-			ret["target"] = [context_object.armature.bones[component.target_bone].stf_id]
-	elif(component.target_object):
-		if(type(component.target_object.data) == bpy.types.Armature and component.target_bone):
-			ret["target"] = [component.target_object.stf_id, "instance", component.target_object.data.bones[component.target_bone].stf_id]
-		else:
-			ret["target"] = [component.target_object.stf_id]
+	def _handle():
+		if(type(context_object) == ArmatureBone):
+			if((context_object.armature == component.target_object or not component.target_object) and component.target_bone):
+				ret["target"] = [context_object.armature.bones[component.target_bone].stf_id]
+		elif(component.target_object):
+			if(type(component.target_object.data) == bpy.types.Armature and component.target_bone):
+				ret["target"] = [component.target_object.stf_id, "instance", component.target_object.data.bones[component.target_bone].stf_id]
+			else:
+				ret["target"] = [component.target_object.stf_id]
+	context.add_task(_handle)
 
 	return ret, component.stf_id
 
