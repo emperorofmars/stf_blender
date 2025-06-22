@@ -13,7 +13,7 @@ _blender_property_name = "ava_collider_sphere"
 
 class AVA_Collider_Sphere(STF_BlenderComponentBase):
 	radius: bpy.props.FloatProperty(name="Radius", default=1) # type: ignore
-	offset_position: bpy.props.FloatVectorProperty(name="Position Offset", size=3, default=(0, 0, 0)) # type: ignore
+	offset_position: bpy.props.FloatVectorProperty(name="Position Offset", size=3, default=(0, 0, 0), subtype="XYZ") # type: ignore
 
 
 def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: AVA_Collider_Sphere):

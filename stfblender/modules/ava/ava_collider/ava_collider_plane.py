@@ -12,8 +12,8 @@ _blender_property_name = "ava_collider_plane"
 
 
 class AVA_Collider_Plane(STF_BlenderComponentBase):
-	offset_position: bpy.props.FloatVectorProperty(name="Position Offset", size=3, default=(0, 0, 0)) # type: ignore
-	offset_rotation: bpy.props.FloatVectorProperty(name="Rotation Offset", size=3, default=(0, 0, 0)) # type: ignore
+	offset_position: bpy.props.FloatVectorProperty(name="Position Offset", size=3, default=(0, 0, 0), subtype="XYZ") # type: ignore
+	offset_rotation: bpy.props.FloatVectorProperty(name="Rotation Offset", size=3, default=(0, 0, 0), subtype="EULER") # type: ignore
 
 
 def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: AVA_Collider_Plane):
