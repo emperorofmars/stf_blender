@@ -104,6 +104,14 @@ def _stf_export(context: STF_ExportContext, application_object: any, parent_appl
 		context.report(STFReport("Slot Links are required to export animations!", STFReportSeverity.Warn, blender_animation.stf_id, _stf_type, application_object))
 		return None
 
+	for slot_link in blender_animation.slot_links:
+		if(slot_link.target):
+			single_slotlink_valid = True
+			break
+	else:
+		context.report(STFReport("No valid Slot Link target specified!", STFReportSeverity.Warn, blender_animation.stf_id, _stf_type, application_object))
+		return None
+
 	ensure_stf_id(context, blender_animation)
 
 	ret = {
@@ -138,7 +146,6 @@ def _stf_export(context: STF_ExportContext, application_object: any, parent_appl
 								kurwas[fcurve.data_path][fcurve.array_index] = fcurve
 
 						for data_path, fcurves in kurwas.items():
-							#stf_track: dict[float, list] = {}
 							stf_track: list = []
 							property_translation = context.resolve_application_property_path(selected_slot_link.target, selected_slot_link.datablock_index, data_path)
 							if(property_translation):

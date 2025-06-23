@@ -4,6 +4,7 @@ from ....exporter.stf_export_context import STF_ExportContext
 from ....importer.stf_import_context import STF_ImportContext
 from ....utils.component_utils import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref, add_component, export_component_base, import_component_base
 from ....utils.op_utils import OpenWebpage
+from ....core.stf_report import STFReport, STFReportSeverity
 
 
 _stf_type = "ava.emotes"
@@ -44,8 +45,10 @@ class AVA_FallbackBlendshape_Emote(bpy.types.PropertyGroup):
 	values: bpy.props.CollectionProperty(type=AVA_FallbackBlendshape_Value) # type: ignore
 
 
+_emote_enum_values = (("smile", "Smile", ""), ("smirk", "Smirk", ""), ("blep", "Blep", ""), ("sad", "Sad", ""), ("custom", "Custom", ""))
+
 class AVA_Emote(bpy.types.PropertyGroup):
-	emote: bpy.props.EnumProperty(name="Emote", items=(("smile", "Smile", ""), ("smirk", "Smirk", ""), ("blep", "Blep", ""), ("sad", "Sad", ""), ("custom", "Custom", ""))) # type: ignore
+	emote: bpy.props.EnumProperty(name="Emote", items=_emote_enum_values) # type: ignore
 	custom_emote: bpy.props.StringProperty(name="Custom Emote") # type: ignore
 
 	animation: bpy.props.PointerProperty(type=bpy.types.Action, name="Animation") # type: ignore # todo select only actions with a valid slot-link setup
@@ -93,6 +96,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 			row_inner.prop(emote, "breathing_intensity")
 
 		box.prop(emote, "animation")
+
 		box = box.box()
 		box.label(text="Blendshape Only Fallback")
 		# todo add op
@@ -105,12 +109,52 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
 	component_ref, component = add_component(context_object, _blender_property_name, stf_id, _stf_type)
 	import_component_base(component, json_resource)
+
+	def _handle():
+		for meaning, json_emote in json_resource.get("emotes", {}).items():
+			blender_emote: AVA_Emote = component.emotes.add()
+			for enum_value in _emote_enum_values:
+				if(enum_value[0] == meaning):
+					blender_emote.emote = enum_value[0]
+					break
+			else:
+				blender_emote.emote = "custom"
+				blender_emote.custom_emote = meaning
+			if("eyeblink_active" in json_emote): blender_emote.eyeblink_tracking = json_emote["eyeblink_active"]
+			if("breathing_speed" in json_emote): blender_emote.breathing_speed = json_emote["breathing_speed"]
+			if("breathing_intensity" in json_emote): blender_emote.breathing_intensity = json_emote["breathing_intensity"]
+			blender_emote.animation = context.get_imported_resource(json_emote.get("animation"))
+
+	context.add_task(_handle)
+
 	return component
 
 
-def _stf_export(context: STF_ExportContext, application_object: AVA_Emotes, context_object: any) -> tuple[dict, str]:
-	ret = export_component_base(_stf_type, application_object)
-	return ret, application_object.stf_id
+def _stf_export(context: STF_ExportContext, component: AVA_Emotes, context_object: any) -> tuple[dict, str]:
+	ret = export_component_base(_stf_type, component)
+
+	emotes = {}
+	ret["emotes"] = emotes
+
+	def _handle():
+		for blender_emote in component.emotes:
+			blender_emote: AVA_Emote = blender_emote
+			meaning = blender_emote.emote if blender_emote.emote != "custom" else blender_emote.custom_emote
+			animation_id = context.get_resource_id(blender_emote.animation)
+
+			if(meaning and animation_id):
+				json_emote = { "animation": animation_id }
+				if(blender_emote.emote == "custom"):
+					json_emote["eyeblink_active"] = blender_emote.eyeblink_tracking
+					json_emote["breathing_speed"] = blender_emote.breathing_speed
+					json_emote["breathing_intensity"] = blender_emote.breathing_intensity
+				emotes[meaning] = json_emote
+			else:
+				context.report(STFReport("Invalid Emote", STFReportSeverity.Warn, component.stf_id, _stf_type, component))
+
+	context.add_task(_handle)
+
+	return ret, component.stf_id
 
 
 class STF_Module_AVA_Emotes(STF_BlenderComponentModule):
