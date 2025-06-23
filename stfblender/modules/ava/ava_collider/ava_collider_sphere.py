@@ -51,7 +51,7 @@ class AVA_Collider_Sphere_LoadJsonOperator(bpy.types.Operator):
 				return {"FINISHED"}
 		except:
 			pass
-		self.report({"ERROR"}, "Failed applying json values.")
+		self.report({"ERROR"}, "Failed applying Json values.")
 		return {"CANCELLED"}
 
 	def draw(self, context):

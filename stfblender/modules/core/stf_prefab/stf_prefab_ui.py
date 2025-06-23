@@ -75,8 +75,8 @@ class STFCollectionPanel(bpy.types.Panel):
 			self.layout.label(text="stf.prefab")
 
 			if(not hasattr(bpy.types.Action, "slot_links")):
-				self.layout.label(text="Note: the 'Slot Link' extension")
-				self.layout.label(text="is required to import & export animations!")
+				self.layout.label(text="Note: the 'Slot Link' extension is")
+				self.layout.label(text="required to import & export animations!")
 				self.layout.operator(OpenWebpage.bl_idname).url = "https://extensions.blender.org/add-ons/slot-link/"
 				self.layout.separator(factor=1, type="SPACE")
 
