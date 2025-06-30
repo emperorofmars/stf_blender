@@ -4,7 +4,7 @@ import json
 
 from ....exporter.stf_export_context import STF_ExportContext
 from ....importer.stf_import_context import STF_ImportContext
-from ....utils.component_utils import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref, add_component, export_component_base, import_component_base
+from ....utils.component_utils import ComponentLoadJsonOperatorBase, STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref, add_component, export_component_base, import_component_base
 from ....utils.trs_utils import blender_translation_to_stf, stf_translation_to_blender
 
 
@@ -17,48 +17,29 @@ class AVA_Collider_Sphere(STF_BlenderComponentBase):
 	offset_position: bpy.props.FloatVectorProperty(name="Position Offset", size=3, default=(0, 0, 0), subtype="XYZ") # type: ignore
 
 
-class AVA_Collider_Sphere_LoadJsonOperator(bpy.types.Operator):
-	bl_idname = "stf.ava_collider_sphere_loadjson"
-	bl_label = "Set from Json"
-	bl_options = {"REGISTER", "UNDO"}
+def _parse_json(component: AVA_Collider_Sphere, json_resource: dict):
+	component.radius = json_resource.get("radius", 1)
+	if("offset_position" in json_resource):
+		offset_position = mathutils.Vector()
+		for index in range(3):
+			offset_position[index] = json_resource["offset_position"][index]
+		component.offset_position = stf_translation_to_blender(offset_position)
 
-	component_id: bpy.props.StringProperty() # type: ignore
+
+class AVA_Collider_Sphere_LoadJsonOperator(ComponentLoadJsonOperatorBase, bpy.types.Operator):
+	bl_idname = "stf.ava_collider_sphere_loadjson"
 	blender_bone: bpy.props.BoolProperty() # type: ignore
 
-	json_string: bpy.props.StringProperty() # type: ignore
+	def get_property(self, context) -> any:
+		if(not self.blender_bone):
+			return context.object.ava_collider_sphere
+		else:
+			return context.bone.ava_collider_sphere
 
-	def invoke(self, context, event):
-		return context.window_manager.invoke_props_dialog(self)
-
-	def execute(self, context):
-		try:
-			json_resource = json.loads(self.json_string)
-			if(not self.blender_bone):
-				for component in context.object.ava_collider_sphere:
-					if(component.stf_id == self.component_id):
-						break
-			else:
-				for component in context.bone.ava_collider_sphere:
-					if(component.stf_id == self.component_id):
-						break
-			if(json_resource.get("type") == _stf_type and component):
-				component.radius = json_resource.get("radius", 1)
-				if("offset_position" in json_resource):
-					offset_position = mathutils.Vector()
-					for index in range(3):
-						offset_position[index] = json_resource["offset_position"][index]
-					component.offset_position = stf_translation_to_blender(offset_position)
-				return {"FINISHED"}
-		except:
-			pass
-		self.report({"ERROR"}, "Failed applying Json values.")
-		return {"CANCELLED"}
-
-	def draw(self, context):
-		layout: bpy.types.UILayout = self.layout
-		layout.label(text="Paste json setup string.")
-		layout.label(text="(This will overwrite your current values)")
-		layout.prop(self, "json_string", text="")
+	def parse_json(self, context, component: any, json_resource: dict):
+		if(json_resource.get("type") != _stf_type): raise Exception("Invalid Type")
+		_parse_json(component, json_resource)
+		return {"FINISHED"}
 
 
 def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: AVA_Collider_Sphere):
@@ -73,12 +54,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
 	component_ref, component = add_component(context_object, _blender_property_name, stf_id, _stf_type)
 	import_component_base(component, json_resource)
-	component.radius = json_resource.get("radius", 1)
-	if("offset_position" in json_resource):
-		offset_position = mathutils.Vector()
-		for index in range(3):
-			offset_position[index] = json_resource["offset_position"][index]
-		component.offset_position = stf_translation_to_blender(offset_position)
+	_parse_json(component, json_resource)
 	return component
 
 

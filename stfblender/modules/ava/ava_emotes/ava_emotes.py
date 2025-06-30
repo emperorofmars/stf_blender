@@ -117,6 +117,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 			box.prop(blendshape, "mesh_instance")
 			#if(emote.blendshape_fallback.mesh_instance):
 			#	box.label(text="TODO blendshape values")
+			# todo delete op
 
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:

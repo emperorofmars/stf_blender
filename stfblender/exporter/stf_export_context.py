@@ -6,7 +6,7 @@ from ..core.stf_report import STFReportSeverity, STFReport
 
 
 class STF_ExportContext:
-	"""Context for top level resource export. An instance of this will be passed to each STF_Module's export func."""
+	"""Context for top level resource export. It will be passed to each STF_Module's export func."""
 
 	def __init__(self, state: STF_ExportState):
 		self._state = state

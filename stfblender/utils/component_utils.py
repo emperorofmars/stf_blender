@@ -1,3 +1,4 @@
+import json
 from typing import Callable
 import uuid
 import bpy
@@ -214,6 +215,46 @@ def export_component_base(stf_type: str, component: any) -> dict:
 	if(component.overrides): ret["overrides"] = [override.target_id for override in component.overrides]
 	if(component.enabled == False): ret["enabled"] = False
 	return ret
+
+
+
+class ComponentLoadJsonOperatorBase():
+	bl_label = "Set from Json"
+	bl_options = {"REGISTER", "UNDO"}
+
+	component_id: bpy.props.StringProperty() # type: ignore
+
+	json_string: bpy.props.StringProperty() # type: ignore
+
+	def invoke(self, context, event):
+		return context.window_manager.invoke_props_dialog(self)
+
+	def execute(self, context):
+		try:
+			json_resource = json.loads(self.json_string)
+
+			for component in self.get_property(context):
+				if(component.stf_id == self.component_id):
+					self.parse_json(context, component, json_resource)
+					return {"FINISHED"}
+		except Exception as e:
+			self.report({"ERROR"}, str(e))
+		self.report({"ERROR"}, "Failed applying Json values.")
+		return {"CANCELLED"}
+
+	def get_property(self, context) -> any:
+		pass
+
+	def parse_json(self, context, component: any, json_resource: dict):
+		pass
+
+	def draw(self, context):
+		layout: bpy.types.UILayout = self.layout
+		layout.label(text="Paste json setup string.")
+		layout.label(text="(This will overwrite your current values)")
+		layout.prop(self, "json_string", text="")
+
+
 
 
 def register():
