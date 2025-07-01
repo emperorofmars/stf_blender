@@ -36,10 +36,36 @@ class Edit_AVA_Emotes(bpy.types.Operator):
 		return {"CANCELLED"}
 
 
+class Edit_AVA_EmoteFallback(bpy.types.Operator):
+	bl_idname = "stf.edit_ava_emote_fallback"
+	bl_label = "Edit"
+	bl_options = {"REGISTER", "UNDO"}
+
+	component_id: bpy.props.StringProperty() # type: ignore
+
+	op: bpy.props.BoolProperty() # type: ignore
+	emote_index: bpy.props.IntProperty() # type: ignore
+	blendshape_index: bpy.props.IntProperty() # type: ignore
+
+	def execute(self, context):
+		if(self.op):
+			for component in context.collection.ava_emotes:
+				if(component.stf_id == self.component_id):
+					component.emotes[self.emote_index].blendshape_fallback.values.add()
+					return {"FINISHED"}
+		else:
+			for component in context.collection.ava_emotes:
+				if(component.stf_id == self.component_id):
+					component.emotes[self.emote_index].blendshape_fallback.values.remove(self.blendshape_index)
+					return {"FINISHED"}
+		self.report({"ERROR"}, "Couldn't edit Physbone")
+		return {"CANCELLED"}
+
+
 class AVA_FallbackBlendshape_Value(bpy.types.PropertyGroup):
 	mesh_instance: bpy.props.PointerProperty(type=bpy.types.Object, name="Meshinstance", poll=lambda s, o: o.data and type(o.data) == bpy.types.Mesh) # type: ignore
 	blendshape_name: bpy.props.StringProperty(name="Name") # type: ignore
-	blendshape_value: bpy.props.FloatProperty(name="Value", default=0.5) # type: ignore
+	blendshape_value: bpy.props.FloatProperty(name="Value", default=0, soft_min=0, soft_max=1, subtype="FACTOR") # type: ignore
 
 class AVA_FallbackBlendshape_Emote(bpy.types.PropertyGroup):
 	values: bpy.props.CollectionProperty(type=AVA_FallbackBlendshape_Value) # type: ignore
@@ -112,12 +138,22 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 
 		box = box.box()
 		box.label(text="Blendshape Only Fallback")
-		# todo add op
-		for index, blendshape in enumerate(emote.blendshape_fallback.values):
-			box.prop(blendshape, "mesh_instance")
-			#if(emote.blendshape_fallback.mesh_instance):
-			#	box.label(text="TODO blendshape values")
-			# todo delete op
+
+		add_button = box.operator(Edit_AVA_EmoteFallback.bl_idname, text="Add Blendshape")
+		add_button.component_id = component.stf_id
+		add_button.op = True
+		add_button.emote_index = index
+		for blendshape_index, blendshape in enumerate(emote.blendshape_fallback.values):
+			inner_row = box.row()
+			inner_row.prop(blendshape, "mesh_instance", text="")
+			if(blendshape.mesh_instance and type(blendshape.mesh_instance.data) == bpy.types.Mesh):
+				inner_row.prop_search(blendshape, "blendshape_name", blendshape.mesh_instance.data.shape_keys, "key_blocks", text="")
+				inner_row.prop(blendshape, "blendshape_value", text="")
+			remove_button = inner_row.operator(Edit_AVA_EmoteFallback.bl_idname, text="", icon="X")
+			remove_button.component_id = component.stf_id
+			remove_button.op = False
+			remove_button.emote_index = index
+			remove_button.blendshape_index = blendshape_index
 
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
@@ -135,6 +171,14 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 				blender_emote.emote = "custom"
 				blender_emote.custom_emote = meaning
 			blender_emote.animation = context.get_imported_resource(json_emote.get("animation"))
+			
+			if("fallback" in json_emote):
+				for fallback in json_emote["fallback"]:
+					if(mesh_instance := context.get_imported_resource(fallback["mesh_instance"])):
+						blender_fallback = blender_emote.blendshape_fallback.values.add()
+						blender_fallback.mesh_instance = mesh_instance
+						blender_fallback.blendshape_name = fallback["name"]
+						blender_fallback.blendshape_value = fallback["value"]
 
 	context.add_task(_handle)
 
@@ -156,6 +200,18 @@ def _stf_export(context: STF_ExportContext, component: AVA_Emotes, context_objec
 			if(meaning and animation_id):
 				json_emote = { "animation": animation_id }
 				emotes[meaning] = json_emote
+
+				if(len(blender_emote.blendshape_fallback.values) > 0):
+					fallback = []
+					for fallback_blendshape in blender_emote.blendshape_fallback.values:
+						if(fallback_blendshape.mesh_instance and fallback_blendshape.blendshape_name):
+							fallback.append({
+								"mesh_instance": context.get_resource_id(fallback_blendshape.mesh_instance),
+								"name": fallback_blendshape.blendshape_name,
+								"value": fallback_blendshape.blendshape_value,
+							})
+
+					json_emote["fallback"] = fallback
 			else:
 				context.report(STFReport("Invalid Emote", STFReportSeverity.Warn, component.stf_id, _stf_type, component))
 
