@@ -100,6 +100,7 @@ class AVA_Emote(bpy.types.PropertyGroup):
 
 	animation: bpy.props.PointerProperty(type=bpy.types.Action, name="Animation") # type: ignore # todo select only actions with a valid slot-link setup
 
+	use_blendshape_fallback: bpy.props.BoolProperty(name="Provide Blendshape Only Fallback", default=False) # type: ignore
 	blendshape_fallback: bpy.props.PointerProperty(type=AVA_FallbackBlendshape_Emote, name="Blendshape Only Fallback") # type: ignore
 
 
@@ -134,26 +135,30 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 		if(emote.emote == "custom"):
 			box.prop(emote, "custom_emote")
 
+		layout.label(text="Note: the animation must have a valid 'Slot Link' target.")
 		box.prop(emote, "animation")
 
-		box = box.box()
-		box.label(text="Blendshape Only Fallback")
+		box.separator(factor=1, type="LINE")
+		box.prop(emote, "use_blendshape_fallback")
+		if(emote.use_blendshape_fallback):
+			box = box.box()
+			box.label(text="Blendshape Only Fallback")
 
-		add_button = box.operator(Edit_AVA_EmoteFallback.bl_idname, text="Add Blendshape")
-		add_button.component_id = component.stf_id
-		add_button.op = True
-		add_button.emote_index = index
-		for blendshape_index, blendshape in enumerate(emote.blendshape_fallback.values):
-			inner_row = box.row()
-			inner_row.prop(blendshape, "mesh_instance", text="")
-			if(blendshape.mesh_instance and type(blendshape.mesh_instance.data) == bpy.types.Mesh):
-				inner_row.prop_search(blendshape, "blendshape_name", blendshape.mesh_instance.data.shape_keys, "key_blocks", text="")
-				inner_row.prop(blendshape, "blendshape_value", text="")
-			remove_button = inner_row.operator(Edit_AVA_EmoteFallback.bl_idname, text="", icon="X")
-			remove_button.component_id = component.stf_id
-			remove_button.op = False
-			remove_button.emote_index = index
-			remove_button.blendshape_index = blendshape_index
+			add_button = box.operator(Edit_AVA_EmoteFallback.bl_idname, text="Add Blendshape")
+			add_button.component_id = component.stf_id
+			add_button.op = True
+			add_button.emote_index = index
+			for blendshape_index, blendshape in enumerate(emote.blendshape_fallback.values):
+				inner_row = box.row()
+				inner_row.prop(blendshape, "mesh_instance", text="")
+				if(blendshape.mesh_instance and type(blendshape.mesh_instance.data) == bpy.types.Mesh):
+					inner_row.prop_search(blendshape, "blendshape_name", blendshape.mesh_instance.data.shape_keys, "key_blocks", text="")
+					inner_row.prop(blendshape, "blendshape_value", text="")
+				remove_button = inner_row.operator(Edit_AVA_EmoteFallback.bl_idname, text="", icon="X")
+				remove_button.component_id = component.stf_id
+				remove_button.op = False
+				remove_button.emote_index = index
+				remove_button.blendshape_index = blendshape_index
 
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
@@ -173,6 +178,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 			blender_emote.animation = context.get_imported_resource(json_emote.get("animation"))
 			
 			if("fallback" in json_emote):
+				blender_emote.use_blendshape_fallback = True
 				for fallback in json_emote["fallback"]:
 					if(mesh_instance := context.get_imported_resource(fallback["mesh_instance"])):
 						blender_fallback = blender_emote.blendshape_fallback.values.add()
@@ -201,7 +207,7 @@ def _stf_export(context: STF_ExportContext, component: AVA_Emotes, context_objec
 				json_emote = { "animation": animation_id }
 				emotes[meaning] = json_emote
 
-				if(len(blender_emote.blendshape_fallback.values) > 0):
+				if(blender_emote.use_blendshape_fallback and len(blender_emote.blendshape_fallback.values) > 0):
 					fallback = []
 					for fallback_blendshape in blender_emote.blendshape_fallback.values:
 						if(fallback_blendshape.mesh_instance and fallback_blendshape.blendshape_name):

@@ -11,9 +11,20 @@ from ....importer.stf_import_context import STF_ImportContext
 from ....utils.id_utils import ensure_stf_id
 from ....utils.animation_conversion_utils import *
 from ....utils.armature_bone import ArmatureBone
+from ....utils.component_utils import STF_Component_Ref
 
 
 _stf_type = "stf.instance.armature"
+
+
+class InstanceModComponentRef(STF_Component_Ref):
+	bone: bpy.props.StringProperty(name="Bone") # type: ignore
+
+class STF_Instance_Armature(bpy.types.PropertyGroup):
+	stf_components: bpy.props.CollectionProperty(type=InstanceModComponentRef) # type: ignore
+	stf_active_component_index: bpy.props.IntProperty() # type: ignore
+	stf_component_instance_standins: bpy.props.CollectionProperty(type=InstanceModComponentRef) # type: ignore
+	stf_active_component_instance_standins_index: bpy.props.IntProperty() # type: ignore
 
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
@@ -68,7 +79,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 								instance_component_ref.stf_id = component_id
 								instance_component_ref.stf_type = component_ref.stf_type
 								instance_component_ref.blender_property_name = component_ref.blender_property_name
-								instance_component_ref.node_id = target_id
+								instance_component_ref.bone = context.get_imported_resource(target_id).name
 								blender_object.stf_components.remove(component_ref_index)
 								break
 
@@ -112,9 +123,10 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 				if(component.stf_id == component_ref.stf_id):
 					component_id = context.serialize_resource(component, None, module_kind="component")
 					if(component_id):
-						if(component_ref.node_id not in add_component_mods):
-							add_component_mods[component_ref.node_id] = []
-						add_component_mods[component_ref.node_id].append(component_id)
+						bone = blender_armature.bones[component_ref.bone]
+						if(bone.stf_id not in add_component_mods):
+							add_component_mods[bone.stf_id] = []
+						add_component_mods[bone.stf_id].append(component_id)
 		ret["mods"] = {"components": add_component_mods}
 	# TODO property mods and whatnot
 
@@ -156,7 +168,8 @@ register_stf_modules = [
 
 
 def register():
-	pass
+	bpy.types.Object.stf_instance_armature = bpy.props.PointerProperty(type=STF_Instance_Armature)
 
 def unregister():
-	pass
+	if hasattr(bpy.types.Object, "stf_instance_armature"):
+		del bpy.types.Object.stf_instance_armature
