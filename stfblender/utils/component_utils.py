@@ -13,6 +13,12 @@ class STF_BlenderComponentModule(STF_Module):
 	draw_component_func: Callable
 
 
+class STF_BlenderBoneComponentModule(STF_BlenderComponentModule):
+	"""Use for components that are allowed on bones and are animatable or can have different values per instance of the armature."""
+	draw_component_instance_func: Callable
+	set_component_instance_standin: Callable
+
+
 class STF_BlenderComponentOverride(bpy.types.PropertyGroup):
 	target_id: bpy.props.StringProperty(name="ID") # type: ignore
 

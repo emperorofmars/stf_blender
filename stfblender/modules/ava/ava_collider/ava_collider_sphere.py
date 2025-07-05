@@ -4,7 +4,7 @@ import json
 
 from ....exporter.stf_export_context import STF_ExportContext
 from ....importer.stf_import_context import STF_ImportContext
-from ....utils.component_utils import ComponentLoadJsonOperatorBase, STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref, add_component, export_component_base, import_component_base
+from ....utils.component_utils import ComponentLoadJsonOperatorBase, STF_BlenderBoneComponentModule, STF_BlenderComponentBase, STF_Component_Ref, add_component, export_component_base, import_component_base
 from ....utils.trs_utils import blender_translation_to_stf, stf_translation_to_blender
 
 
@@ -67,7 +67,7 @@ def _stf_export(context: STF_ExportContext, application_object: AVA_Collider_Sph
 	return ret, application_object.stf_id
 
 
-class STF_Module_AVA_Collider_Sphere(STF_BlenderComponentModule):
+class STF_Module_AVA_Collider_Sphere(STF_BlenderBoneComponentModule):
 	stf_type = _stf_type
 	stf_kind = "component"
 	like_types = ["collider.sphere", "collider"]
