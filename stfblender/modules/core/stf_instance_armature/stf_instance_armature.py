@@ -75,7 +75,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 					if(component := context.import_resource(component_id, blender_object, stf_kind="component")):
 						for component_ref_index, component_ref in enumerate(blender_object.stf_components):
 							if(component_ref.stf_id == component_id):
-								instance_component_ref = blender_object.stf_instance.stf_components.add()
+								instance_component_ref = blender_object.stf_instance_armature.stf_components.add()
 								instance_component_ref.stf_id = component_id
 								instance_component_ref.stf_type = component_ref.stf_type
 								instance_component_ref.blender_property_name = component_ref.blender_property_name
@@ -115,9 +115,9 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 			stf_pose[blender_armature.bones[blender_pose.name].stf_id] = [[t[0], t[1], t[2]], [r[1], r[2], r[3], r[0]], [s[0], s[1], s[2]]] # already in armature space
 		ret["pose"] = stf_pose
 
-	if(len(blender_object.stf_instance.stf_components) > 0):
+	if(len(blender_object.stf_instance_armature.stf_components) > 0):
 		add_component_mods = {}
-		for component_ref in blender_object.stf_instance.stf_components:
+		for component_ref in blender_object.stf_instance_armature.stf_components:
 			components = getattr(blender_object, component_ref.blender_property_name)
 			for component in components:
 				if(component.stf_id == component_ref.stf_id):

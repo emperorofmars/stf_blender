@@ -40,8 +40,7 @@ def _get_target_object_func(component_holder: bpy.types.Object, component_ref: I
 	return None
 
 def _inject_ui(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: InstanceModComponentRef, context_object: any, component: any):
-	layout.label(text=str(context_object))
-	layout.prop_search(component_ref, "node_id", component_ref.id_data.data, "bones", text="Target Bone")
+	layout.prop_search(component_ref, "bone", component_ref.id_data.data, "bones", text="Target Bone")
 	layout.separator(type="LINE", factor=1)
 
 
