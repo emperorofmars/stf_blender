@@ -70,8 +70,11 @@ class STFArmatureInstancePanel(bpy.types.Panel):
 		draw_components_ui(self.layout, context, context.object, STFAddArmatureInstanceComponentOperator.bl_idname, STFRemoveArmatureInstanceComponentOperator.bl_idname, STFEditArmatureInstanceComponentIdOperator.bl_idname, context.object.stf_instance_armature, _get_target_object_func, _inject_ui)
 
 		self.layout.separator(factor=2, type="LINE")
-		
+
 		# todo standins for components on bones
 		self.layout.operator(UpdateArmatureInstanceComponentStandins.bl_idname)
+
+		for standin in context.object.stf_instance_armature.stf_component_instance_standins:
+			self.layout.label(text=standin.stf_type)
 
 		#draw_components_ui(self.layout, context, context.object, STFAddArmatureInstanceComponentOperator.bl_idname, STFRemoveArmatureInstanceComponentOperator.bl_idname, STFEditArmatureInstanceComponentIdOperator.bl_idname, context.object.stf_instance_armature, _get_target_object_func, _inject_ui)

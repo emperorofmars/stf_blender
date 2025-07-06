@@ -60,7 +60,7 @@ def _draw_component_instance(layout: bpy.types.UILayout, context: bpy.types.Cont
 	load_json_button.component_id = component.stf_id
 
 
-def _set_component_instance_standin(context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: AVA_Collider_Sphere):
+def _set_component_instance_standin(context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: AVA_Collider_Sphere, standin_component: AVA_Collider_Sphere):
 	print("WOOOOOOO")
 
 
