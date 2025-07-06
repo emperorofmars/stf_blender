@@ -51,6 +51,19 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 	load_json_button.component_id = component.stf_id
 
 
+def _draw_component_instance(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: AVA_Collider_Sphere):
+	layout.prop(component, "radius")
+	layout.prop(component, "offset_position")
+	
+	load_json_button = layout.operator(AVA_Collider_Sphere_LoadJsonOperator.bl_idname)
+	load_json_button.blender_bone = type(component.id_data) == bpy.types.Armature
+	load_json_button.component_id = component.stf_id
+
+
+def _set_component_instance_standin(context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: AVA_Collider_Sphere):
+	print("WOOOOOOO")
+
+
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
 	component_ref, component = add_component(context_object, _blender_property_name, stf_id, _stf_type)
 	import_component_base(component, json_resource)
@@ -79,6 +92,9 @@ class STF_Module_AVA_Collider_Sphere(STF_BlenderBoneComponentModule):
 	single = False
 	filter = [bpy.types.Object, bpy.types.Bone]
 	draw_component_func = _draw_component
+
+	draw_component_instance = _draw_component_instance
+	set_component_instance_standin = _set_component_instance_standin
 
 
 register_stf_modules = [

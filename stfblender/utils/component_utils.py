@@ -4,19 +4,30 @@ import uuid
 import bpy
 
 from ..core.stf_module import STF_Module
+from ..core.stf_registry import get_stf_modules
+
+
+class STF_Component_Ref(bpy.types.PropertyGroup): # Bringing polymorphism to Blender
+	"""This property defines the type and ID, from which the appropriate registered function can handle the correct object"""
+	stf_type: bpy.props.StringProperty(name="Type") # type: ignore
+	stf_id: bpy.props.StringProperty(name="ID") # type: ignore
+	blender_property_name: bpy.props.StringProperty(name="Blender Property Name") # type: ignore
 
 
 class STF_BlenderComponentModule(STF_Module):
 	"""Extension to STF_Module which also associates a function to draw the component in Blender's UI"""
 	blender_property_name: str
 	filter: list
-	draw_component_func: Callable
+	# (layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: STF_BlenderComponentModule) -> None
+	draw_component_func: Callable[[bpy.types.UILayout, bpy.types.Context, STF_Component_Ref, any, any], None]
 
 
 class STF_BlenderBoneComponentModule(STF_BlenderComponentModule):
 	"""Use for components that are allowed on bones and are animatable or can have different values per instance of the armature."""
-	draw_component_instance_func: Callable
-	set_component_instance_standin: Callable
+	# (layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: STF_BlenderComponentModule) -> None
+	draw_component_instance_func: Callable[[bpy.types.UILayout, bpy.types.Context, STF_Component_Ref, any, any], None]
+	# (context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: STF_BlenderComponentModule) -> None
+	set_component_instance_standin: Callable[[bpy.types.Context, STF_Component_Ref, any, any], None]
 
 
 class STF_BlenderComponentOverride(bpy.types.PropertyGroup):
@@ -29,11 +40,24 @@ class STF_BlenderComponentBase(bpy.types.PropertyGroup):
 	enabled: bpy.props.BoolProperty(name="Enabled", default=True) # type: ignore
 
 
-class STF_Component_Ref(bpy.types.PropertyGroup): # Bringing polymorphism to Blender
-	"""This property defines the type and ID, from which the appropriate registered function can handle the correct object"""
-	stf_type: bpy.props.StringProperty(name="Type") # type: ignore
-	stf_id: bpy.props.StringProperty(name="ID") # type: ignore
-	blender_property_name: bpy.props.StringProperty(name="Blender Property Name") # type: ignore
+def get_component_modules(filter = None) -> list[STF_BlenderComponentModule]:
+	ret = []
+	for stf_module in get_stf_modules(bpy.context.preferences.addons.keys()):
+		if(isinstance(stf_module, STF_BlenderComponentModule) or hasattr(stf_module, "blender_property_name") and hasattr(stf_module, "filter")):
+			if(hasattr(stf_module, "filter") and filter):
+				if(filter in getattr(stf_module, "filter")):
+					ret.append(stf_module)
+				else:
+					continue
+			else:
+				ret.append(stf_module)
+	return ret
+
+
+def find_component_module(stf_modules: list[STF_BlenderComponentModule], stf_type: str) -> STF_BlenderComponentModule:
+	for stf_module in stf_modules:
+		if(stf_module.stf_type == stf_type):
+			return stf_module
 
 
 def add_component(application_object: any, blender_property_name: str, stf_id: str, stf_type: str, components_ref_property: any = None) -> tuple[STF_Component_Ref, any]:

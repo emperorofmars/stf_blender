@@ -1,7 +1,6 @@
 import bpy
 
-from ..core.stf_registry import get_stf_modules
-from .component_utils import STF_BlenderComponentModule, STF_Component_Ref
+from .component_utils import STF_BlenderComponentModule, STF_Component_Ref, find_component_module, get_component_modules
 
 
 class STFDrawComponentList(bpy.types.UIList):
@@ -23,20 +22,6 @@ class CopyComponentIdToClipboard(bpy.types.Operator):
 	def execute(self, context):
 		bpy.context.window_manager.clipboard = self.id
 		return {"FINISHED"}
-
-
-def get_component_modules(filter = None) -> list[STF_BlenderComponentModule]:
-	ret = []
-	for stf_module in get_stf_modules(bpy.context.preferences.addons.keys()):
-		if(isinstance(stf_module, STF_BlenderComponentModule) or hasattr(stf_module, "blender_property_name") and hasattr(stf_module, "filter")):
-			if(hasattr(stf_module, "filter") and filter):
-				if(filter in getattr(stf_module, "filter")):
-					ret.append(stf_module)
-				else:
-					continue
-			else:
-				ret.append(stf_module)
-	return ret
 
 
 def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, stf_application_object: any, component: any, edit_op: str, inject_ui = None):
@@ -79,12 +64,6 @@ def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, compo
 	else:
 		box.label(text="Unknown Type")
 		box.label(text="Blender Property Name: " + component_ref.blender_property_name)
-
-
-def find_component_module(stf_modules: list[STF_BlenderComponentModule], stf_type: str) -> STF_BlenderComponentModule:
-	for stf_module in stf_modules:
-		if(stf_module.stf_type == stf_type):
-			return stf_module
 
 
 def draw_components_ui(

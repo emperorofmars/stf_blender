@@ -1,6 +1,7 @@
 import bpy
 
 from .stf_instance_armature import InstanceModComponentRef
+from .stf_instance_armature_utils import UpdateArmatureInstanceComponentStandins
 from ....utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
 from ....utils.component_utils import STF_Component_Ref, STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
 from ....utils.component_ui_utils import draw_components_ui, set_stf_component_filter
@@ -68,7 +69,9 @@ class STFArmatureInstancePanel(bpy.types.Panel):
 		# Components specific to this instance
 		draw_components_ui(self.layout, context, context.object, STFAddArmatureInstanceComponentOperator.bl_idname, STFRemoveArmatureInstanceComponentOperator.bl_idname, STFEditArmatureInstanceComponentIdOperator.bl_idname, context.object.stf_instance_armature, _get_target_object_func, _inject_ui)
 
+		self.layout.separator(factor=2, type="LINE")
+		
 		# todo standins for components on bones
-		# self.layout.operator(UpdateArmatureInstanceComponentStandins.bl_idname)
+		self.layout.operator(UpdateArmatureInstanceComponentStandins.bl_idname)
 
 		#draw_components_ui(self.layout, context, context.object, STFAddArmatureInstanceComponentOperator.bl_idname, STFRemoveArmatureInstanceComponentOperator.bl_idname, STFEditArmatureInstanceComponentIdOperator.bl_idname, context.object.stf_instance_armature, _get_target_object_func, _inject_ui)
