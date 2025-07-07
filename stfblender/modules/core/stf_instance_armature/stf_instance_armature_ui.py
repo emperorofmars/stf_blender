@@ -4,7 +4,7 @@ from .stf_instance_armature import InstanceModComponentRef
 from .stf_instance_armature_utils import UpdateArmatureInstanceComponentStandins
 from ....utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
 from ....utils.component_utils import STF_Component_Ref, STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
-from ....utils.component_ui_utils import draw_components_ui, set_stf_component_filter
+from ....utils.component_ui_utils import draw_components_ui, draw_instance_standin_components_ui, set_stf_component_filter
 
 
 class STFSetArmatureInstanceIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
@@ -40,9 +40,19 @@ def _get_target_object_func(component_holder: bpy.types.Object, component_ref: I
 			return bone
 	return None
 
-def _inject_ui(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: InstanceModComponentRef, context_object: any, component: any):
+def _inject_ui(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: InstanceModComponentRef, context_object: any, component: any) -> bool:
 	layout.prop_search(component_ref, "bone", component_ref.id_data.data, "bones", text="Target Bone")
+	if(not component_ref.bone):
+		layout.label(text="Please select a target Bone")
+		return False
 	layout.separator(type="LINE", factor=1)
+	return True
+
+def _inject_standin_ui(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: InstanceModComponentRef, context_object: any, component: any) -> bool:
+	layout.label(text="Target Bone: " + component_ref.bone)
+	layout.prop(component_ref, "override")
+	layout.separator(type="LINE", factor=1)
+	return True
 
 
 class STFArmatureInstancePanel(bpy.types.Panel):
@@ -69,12 +79,12 @@ class STFArmatureInstancePanel(bpy.types.Panel):
 		# Components specific to this instance
 		draw_components_ui(self.layout, context, context.object, STFAddArmatureInstanceComponentOperator.bl_idname, STFRemoveArmatureInstanceComponentOperator.bl_idname, STFEditArmatureInstanceComponentIdOperator.bl_idname, context.object.stf_instance_armature, _get_target_object_func, _inject_ui)
 
-		self.layout.separator(factor=2, type="LINE")
+		self.layout.separator(factor=4, type="LINE")
+		self.layout.label(text="Override and animate values of components on bones.")
 
 		# todo standins for components on bones
 		self.layout.operator(UpdateArmatureInstanceComponentStandins.bl_idname)
-
-		for standin in context.object.stf_instance_armature.stf_component_instance_standins:
-			self.layout.label(text=standin.stf_type)
-
-		#draw_components_ui(self.layout, context, context.object, STFAddArmatureInstanceComponentOperator.bl_idname, STFRemoveArmatureInstanceComponentOperator.bl_idname, STFEditArmatureInstanceComponentIdOperator.bl_idname, context.object.stf_instance_armature, _get_target_object_func, _inject_ui)
+		self.layout.separator(factor=1, type="SPACE")
+		
+		if(len(context.object.stf_instance_armature_component_standins.stf_components) > 0):
+			draw_instance_standin_components_ui(self.layout, context, context.object, STFEditArmatureInstanceComponentIdOperator.bl_idname, context.object.stf_instance_armature_component_standins, _get_target_object_func, _inject_standin_ui)

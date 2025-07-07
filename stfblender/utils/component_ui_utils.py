@@ -32,6 +32,10 @@ def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, compo
 	row.label(text="ID: " + component_ref.stf_id)
 	row.operator(CopyComponentIdToClipboard.bl_idname, text="Copy").id = component_ref.stf_id
 
+	if(inject_ui):
+		if(not inject_ui(box, context, component_ref, stf_application_object, component)):
+			return
+
 	if(component.overrides):
 		box.label(text="Overrides:")
 		for override in component.overrides:
@@ -55,9 +59,9 @@ def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, compo
 			break
 
 	if(selected_module):
-		if(inject_ui):
-			inject_ui(box, context, component_ref, stf_application_object, component)
-		if(hasattr(selected_module, "draw_component_func")):
+		if(hasattr(selected_module, "draw_component_instance_func")):
+			selected_module.draw_component_instance_func(box, context, component_ref, stf_application_object, component)
+		elif(hasattr(selected_module, "draw_component_func")):
 			selected_module.draw_component_func(box, context, component_ref, stf_application_object, component)
 		else:
 			pass
@@ -99,6 +103,41 @@ def draw_components_ui(
 			remove_button = row.operator(remove_component_op, icon="X", text="")
 			remove_button.index = components_ref_property.stf_active_component_index
 			remove_button.property_name = component_ref.blender_property_name
+
+			if(hasattr(component_holder, component_ref.blender_property_name)):
+				for component in getattr(component_holder, component_ref.blender_property_name):
+					if(component.stf_id == component_ref.stf_id):
+						target_object = component_holder
+						if(get_target_object_func):
+							target_object = get_target_object_func(component_holder, component_ref)
+						draw_component(layout, context, component_ref, target_object, component, edit_component_id_op, inject_ui)
+						break
+			else:
+				layout.label(text="Invalid Component: " + component_ref.blender_property_name)
+	else:
+		layout.label(text="No Components For This Type Available")
+
+
+def draw_instance_standin_components_ui(
+		layout: bpy.types.UILayout,
+		context: bpy.types.Context,
+		component_holder: any,
+		edit_component_id_op: str,
+		components_ref_property: any = None,
+		get_target_object_func: any = None,
+		inject_ui: any = None
+		):
+	stf_modules = get_component_modules()
+
+	if(not components_ref_property):
+		components_ref_property = component_holder
+
+	row = layout.row()
+	if(len(stf_modules) > 0):
+		row = layout.row()
+		row.template_list(STFDrawComponentList.bl_idname, "", components_ref_property, "stf_components", components_ref_property, "stf_active_component_index")
+		if(len(components_ref_property.stf_components) > components_ref_property.stf_active_component_index):
+			component_ref = components_ref_property.stf_components[components_ref_property.stf_active_component_index]
 
 			if(hasattr(component_holder, component_ref.blender_property_name)):
 				for component in getattr(component_holder, component_ref.blender_property_name):

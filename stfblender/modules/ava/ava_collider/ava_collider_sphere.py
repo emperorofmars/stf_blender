@@ -61,7 +61,8 @@ def _draw_component_instance(layout: bpy.types.UILayout, context: bpy.types.Cont
 
 
 def _set_component_instance_standin(context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: AVA_Collider_Sphere, standin_component: AVA_Collider_Sphere):
-	print("WOOOOOOO")
+	standin_component.radius = component.radius
+	standin_component.offset_position = component.offset_position
 
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
@@ -93,8 +94,8 @@ class STF_Module_AVA_Collider_Sphere(STF_BlenderBoneComponentModule):
 	filter = [bpy.types.Object, bpy.types.Bone]
 	draw_component_func = _draw_component
 
-	draw_component_instance = _draw_component_instance
-	set_component_instance_standin = _set_component_instance_standin
+	draw_component_instance_func = _draw_component_instance
+	set_component_instance_standin_func = _set_component_instance_standin
 
 
 register_stf_modules = [

@@ -27,7 +27,12 @@ class STF_BlenderBoneComponentModule(STF_BlenderComponentModule):
 	# (layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: STF_BlenderComponentModule) -> None
 	draw_component_instance_func: Callable[[bpy.types.UILayout, bpy.types.Context, STF_Component_Ref, any, any], None]
 	# (context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: STF_BlenderComponentModule, standin_component: STF_BlenderComponentModule) -> None
-	set_component_instance_standin: Callable[[bpy.types.Context, STF_Component_Ref, any, any, any], None]
+	set_component_instance_standin_func: Callable[[bpy.types.Context, STF_Component_Ref, any, any, any], None]
+
+	# (context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: STF_BlenderComponentModule, standin_component: STF_BlenderComponentModule) -> json_resource: dict
+	serialize_component_instance_standin_func: Callable[[bpy.types.Context, STF_Component_Ref, any, any, any], dict]
+	# (context: bpy.types.Context, json_resource: dict, component_ref: STF_Component_Ref, context_object: any, component: STF_BlenderComponentModule, standin_component: STF_BlenderComponentModule) -> None
+	parse_component_instance_standin_func: Callable[[bpy.types.Context, dict, STF_Component_Ref, any, any, any], None]
 
 
 class STF_BlenderComponentOverride(bpy.types.PropertyGroup):
