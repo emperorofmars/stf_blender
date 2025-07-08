@@ -8,11 +8,10 @@ from ..core.stf_registry import get_stf_modules
 
 
 class STF_Component_Ref(bpy.types.PropertyGroup): # Bringing polymorphism to Blender
-	"""This property defines the type and ID, from which the appropriate registered function can handle the correct object"""
+	"""This property defines the type and ID, from which the appropriate registered function can find the correct component in the `blender_property_name` property of the appropriate Blender construct."""
 	stf_type: bpy.props.StringProperty(name="Type") # type: ignore
 	stf_id: bpy.props.StringProperty(name="ID") # type: ignore
 	blender_property_name: bpy.props.StringProperty(name="Blender Property Name") # type: ignore
-
 
 class STF_BlenderComponentModule(STF_Module):
 	"""Extension to STF_Module which also associates a function to draw the component in Blender's UI"""
@@ -22,6 +21,11 @@ class STF_BlenderComponentModule(STF_Module):
 	draw_component_func: Callable[[bpy.types.UILayout, bpy.types.Context, STF_Component_Ref, any, any], None]
 
 
+class InstanceModComponentRef(STF_Component_Ref):
+	"""Used by armature instances to add or modify a component on an instance of a bone"""
+	bone: bpy.props.StringProperty(name="Bone") # type: ignore
+	override: bpy.props.BoolProperty(name="Override", default=False) # type: ignore
+
 class STF_BlenderBoneComponentModule(STF_BlenderComponentModule):
 	"""Use for components that are allowed on bones and are animatable or can have different values per instance of the armature."""
 	# (layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: STF_BlenderComponentModule) -> None
@@ -29,10 +33,10 @@ class STF_BlenderBoneComponentModule(STF_BlenderComponentModule):
 	# (context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: STF_BlenderComponentModule, standin_component: STF_BlenderComponentModule) -> None
 	set_component_instance_standin_func: Callable[[bpy.types.Context, STF_Component_Ref, any, any, any], None]
 
-	# (context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: STF_BlenderComponentModule, standin_component: STF_BlenderComponentModule) -> json_resource: dict
-	serialize_component_instance_standin_func: Callable[[bpy.types.Context, STF_Component_Ref, any, any, any], dict]
-	# (context: bpy.types.Context, json_resource: dict, component_ref: STF_Component_Ref, context_object: any, component: STF_BlenderComponentModule, standin_component: STF_BlenderComponentModule) -> None
-	parse_component_instance_standin_func: Callable[[bpy.types.Context, dict, STF_Component_Ref, any, any, any], None]
+	# (context: bpy.types.Context, component_ref: STF_Component_Ref, standin_component: STF_BlenderComponentModule, context_object: any) -> json_resource: dict
+	serialize_component_instance_standin_func: Callable[[bpy.types.Context, STF_Component_Ref, STF_BlenderComponentModule, any], dict]
+	# (context: bpy.types.Context, json_resource: dict, component_ref: STF_Component_Ref, standin_component: STF_BlenderComponentModule, context_object: any) -> None
+	parse_component_instance_standin_func: Callable[[bpy.types.Context, dict, STF_Component_Ref, STF_BlenderComponentModule, any], None]
 
 
 class STF_BlenderComponentOverride(bpy.types.PropertyGroup):
@@ -288,8 +292,6 @@ class ComponentLoadJsonOperatorBase():
 		layout.label(text="Paste json setup string.")
 		layout.label(text="(This will overwrite your current values)")
 		layout.prop(self, "json_string", text="")
-
-
 
 
 def register():

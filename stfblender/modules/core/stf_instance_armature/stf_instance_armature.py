@@ -11,16 +11,12 @@ from ....importer.stf_import_context import STF_ImportContext
 from ....utils.id_utils import ensure_stf_id
 from ....utils.animation_conversion_utils import *
 from ....utils.armature_bone import ArmatureBone
-from ....utils.component_utils import STF_Component_Ref
-from .stf_instance_armature_utils import serialize_standin
+from ....utils.component_utils import InstanceModComponentRef
+from .stf_instance_armature_utils import parse_standin, serialize_standin, update_armature_instance_component_standins
 
 
 _stf_type = "stf.instance.armature"
 
-
-class InstanceModComponentRef(STF_Component_Ref):
-	bone: bpy.props.StringProperty(name="Bone") # type: ignore
-	override: bpy.props.BoolProperty(name="Override", default=False) # type: ignore
 
 class STF_Instance_Armature(bpy.types.PropertyGroup):
 	stf_components: bpy.props.CollectionProperty(type=InstanceModComponentRef) # type: ignore
@@ -83,21 +79,11 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 							blender_object.stf_components.remove(component_ref_index)
 							break
 
-	# todo changes to bone component values for this armature instance only
+	# changes to bone component values for this armature instance only
+	update_armature_instance_component_standins(bpy.context, blender_object)
 	if("modified_components" in json_resource):
-		for component_id, component_ids in json_resource["modified_components"].items():
-			pass
-			"""for component_id in component_ids:
-				if(component := context.import_resource(component_id, blender_object, stf_kind="component")):
-					for component_ref_index, component_ref in enumerate(blender_object.stf_components):
-						if(component_ref.stf_id == component_id):
-							instance_component_ref = blender_object.stf_instance_armature.stf_components.add()
-							instance_component_ref.stf_id = component_id
-							instance_component_ref.stf_type = component_ref.stf_type
-							instance_component_ref.blender_property_name = component_ref.blender_property_name
-							instance_component_ref.bone = context.get_imported_resource(target_id).name
-							blender_object.stf_components.remove(component_ref_index)
-							break"""
+		for component_id, standin_component_json in json_resource["modified_components"].items():
+			parse_standin(context, blender_object, component_id, standin_component_json)
 
 	return blender_object
 
@@ -149,10 +135,10 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 		modified_components = {}
 		for component_ref in blender_object.stf_instance_armature_component_standins.stf_components:
 			if(component_ref.override):
-				bone = blender_armature.bones[component_ref.bone]
-				standin_overrides = serialize_standin(context, blender_object, component_ref)
-				if(standin_overrides):
-					modified_components[component_ref.stf_id].append(standin_overrides)
+				#bone = blender_armature.bones[component_ref.bone]
+				standin_override = serialize_standin(context, blender_object, component_ref)
+				if(standin_override):
+					modified_components[component_ref.stf_id] = standin_override
 			if(len(modified_components) > 0):
 				ret["modified_components"] = modified_components
 

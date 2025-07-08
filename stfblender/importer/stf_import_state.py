@@ -38,10 +38,6 @@ class STF_ImportState(StateUtil):
 		match(buffer.type):
 			case "stf.buffer.included":
 				return self._file.buffers_included[buffer.index]
-			case "stf.buffer.file":
-				pass # TODO
-			case "stf.buffer.json_array":
-				pass # TODO
 			case _:
 				self.report(STFReport("Invalid buffer type: " + buffer.type, severity=STFReportSeverity.Error))
 		return None

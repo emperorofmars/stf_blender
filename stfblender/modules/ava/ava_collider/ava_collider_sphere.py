@@ -4,7 +4,7 @@ import json
 
 from ....exporter.stf_export_context import STF_ExportContext
 from ....importer.stf_import_context import STF_ImportContext
-from ....utils.component_utils import ComponentLoadJsonOperatorBase, STF_BlenderBoneComponentModule, STF_BlenderComponentBase, STF_Component_Ref, add_component, export_component_base, import_component_base
+from ....utils.component_utils import ComponentLoadJsonOperatorBase, STF_BlenderBoneComponentModule, STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref, add_component, export_component_base, import_component_base
 from ....utils.trs_utils import blender_translation_to_stf, stf_translation_to_blender
 
 
@@ -24,6 +24,13 @@ def _parse_json(component: AVA_Collider_Sphere, json_resource: dict):
 		for index in range(3):
 			offset_position[index] = json_resource["offset_position"][index]
 		component.offset_position = stf_translation_to_blender(offset_position)
+
+
+def _serialize_json(component: AVA_Collider_Sphere, json_resource: dict = {}) -> dict:
+	json_resource["radius"] = component.radius
+	offset_position = mathutils.Vector(component.offset_position)
+	json_resource["offset_position"] = blender_translation_to_stf(offset_position)
+	return json_resource
 
 
 class AVA_Collider_Sphere_LoadJsonOperator(ComponentLoadJsonOperatorBase, bpy.types.Operator):
@@ -65,6 +72,13 @@ def _set_component_instance_standin(context: bpy.types.Context, component_ref: S
 	standin_component.offset_position = component.offset_position
 
 
+def _serialize_component_instance_standin_func(context: bpy.types.Context, component_ref: STF_Component_Ref, standin_component: STF_BlenderComponentModule, context_object: any) -> dict:
+	return _serialize_json(standin_component)
+
+def _parse_component_instance_standin_func(context: bpy.types.Context, json_resource: dict, component_ref: STF_Component_Ref, standin_component: STF_BlenderComponentModule, context_object: any):
+	_parse_json(standin_component, json_resource)
+
+
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
 	component_ref, component = add_component(context_object, _blender_property_name, stf_id, _stf_type)
 	import_component_base(component, json_resource)
@@ -72,13 +86,13 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	return component
 
 
-def _stf_export(context: STF_ExportContext, application_object: AVA_Collider_Sphere, context_object: any) -> tuple[dict, str]:
-	ret = export_component_base(_stf_type, application_object)
-	ret["radius"] = application_object.radius
+def _stf_export(context: STF_ExportContext, component: AVA_Collider_Sphere, context_object: any) -> tuple[dict, str]:
+	ret = export_component_base(_stf_type, component)
+	ret["radius"] = component.radius
 
-	offset_position = mathutils.Vector(application_object.offset_position)
+	offset_position = mathutils.Vector(component.offset_position)
 	ret["offset_position"] = blender_translation_to_stf(offset_position)
-	return ret, application_object.stf_id
+	return ret, component.stf_id
 
 
 class STF_Module_AVA_Collider_Sphere(STF_BlenderBoneComponentModule):
@@ -96,6 +110,9 @@ class STF_Module_AVA_Collider_Sphere(STF_BlenderBoneComponentModule):
 
 	draw_component_instance_func = _draw_component_instance
 	set_component_instance_standin_func = _set_component_instance_standin
+
+	serialize_component_instance_standin_func = _serialize_component_instance_standin_func
+	parse_component_instance_standin_func = _parse_component_instance_standin_func
 
 
 register_stf_modules = [
