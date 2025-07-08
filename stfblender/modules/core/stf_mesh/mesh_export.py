@@ -1,10 +1,11 @@
 from io import BytesIO
 import bpy
+import numpy as np
 
 from ....exporter.stf_export_context import STF_ExportContext
 from ....utils.id_utils import ensure_stf_id
 from ....utils.trs_utils import blender_translation_to_stf, blender_uv_to_stf
-from ....core.buffer_utils import serialize_float, serialize_int, serialize_uint
+from ....core.buffer_utils import determine_pack_format_float, serialize_float, serialize_int, serialize_uint
 
 
 _stf_type = "stf.mesh"
@@ -63,15 +64,21 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 	stf_mesh["float_width"] = float_width
 	stf_mesh["indices_width"] = indices_width
 
-	buffer_vertices = BytesIO()
-
 	# Vertex positions
+	"""buffer_vertices = BytesIO()
 	for vertex in blender_mesh.vertices:
 		position = blender_translation_to_stf(vertex.co)
 		buffer_vertices.write(serialize_float(position[0], float_width))
 		buffer_vertices.write(serialize_float(position[1], float_width))
 		buffer_vertices.write(serialize_float(position[2], float_width))
-	stf_mesh["vertices"] = context.serialize_buffer(buffer_vertices.getvalue())
+	stf_mesh["vertices"] = context.serialize_buffer(buffer_vertices.getvalue())"""
+
+	buffer_vertices = np.zeros(len(blender_mesh.vertices) * 3, dtype=determine_pack_format_float(float_width))
+	blender_mesh.vertices.foreach_get("co", buffer_vertices)
+	buffer_vertices = np.reshape(buffer_vertices, (-1, 3))
+	buffer_vertices[:, [1, 2]] = buffer_vertices[:, [2, 1]]
+	buffer_vertices[:, 2] *= -1
+	stf_mesh["vertices"] = context.serialize_buffer(buffer_vertices.tobytes())
 
 	# Vertex color channels
 	stf_mesh["vertex_color_width"] = float_width
@@ -99,7 +106,6 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 
 	buffer_split_vertices = BytesIO()
 	buffer_split_normals = BytesIO()
-	#buffer_split_tangents = BytesIO()
 	buffers_uv: list[BytesIO] = [BytesIO()] * len(blender_mesh.uv_layers)
 	buffers_split_color: list[BytesIO] = []
 
@@ -114,11 +120,6 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 		buffer_split_normals.write(serialize_float(normal[0], float_width))
 		buffer_split_normals.write(serialize_float(normal[1], float_width))
 		buffer_split_normals.write(serialize_float(normal[2], float_width))
-
-		"""tangent = blender_translation_to_stf(loop.tangent)
-		buffer_split_tangents.write(serialize_float(tangent[0], float_width))
-		buffer_split_tangents.write(serialize_float(tangent[1], float_width))
-		buffer_split_tangents.write(serialize_float(tangent[2], float_width))"""
 
 		for uv_index, uv_layer in enumerate(blender_mesh.uv_layers):
 			uv_names.append(uv_layer.name)
@@ -146,7 +147,6 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 
 	stf_mesh["splits"] = context.serialize_buffer(buffer_split_vertices.getvalue())
 	stf_mesh["split_normals"] = context.serialize_buffer(buffer_split_normals.getvalue())
-	#stf_mesh["split_tangents"] = context.serialize_buffer(buffer_split_tangents.getvalue())
 	stf_mesh["uvs"] = []
 	for index, buffer_uv in enumerate(buffers_uv):
 		stf_mesh["uvs"].append({
