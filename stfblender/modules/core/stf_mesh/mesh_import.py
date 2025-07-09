@@ -122,11 +122,10 @@ def import_stf_mesh(context: STF_ImportContext, json_resource: dict, stf_id: str
 		if("uvs" in json_resource):
 			for uv_layer_index in range(len(json_resource["uvs"])):
 				uv_layer = blender_mesh.uv_layers.new(name=json_resource["uvs"][uv_layer_index].get("name", "UVMap"))
-				buffer_uv = BytesIO(context.import_buffer(json_resource["uvs"][uv_layer_index]["uv"]))
-				for index, loop in enumerate(blender_mesh.loops):
-					# TODO convert uv from gltf uv coordinate space
-					uv = stf_uv_to_blender([parse_float(buffer_uv, float_width), parse_float(buffer_uv, float_width)])
-					uv_layer.uv[index].vector = uv
+				buffer_uv = np.copy(np.frombuffer(context.import_buffer(json_resource["uvs"][uv_layer_index]["uv"]), dtype=determine_pack_format_float(float_width)))
+				buffer_uv = np.reshape(buffer_uv, (-1, 2))
+				buffer_uv[:, 1] = 1 - buffer_uv[:, 1]
+				uv_layer.uv.foreach_set("vector", np.reshape(buffer_uv, -1))
 
 		if("split_colors" in json_resource):
 			for index in range(len(json_resource["split_colors"])):
