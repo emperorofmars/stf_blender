@@ -15,8 +15,8 @@ def determine_pack_format_uint(width: int) -> str:
 	elif(width <= 8): return "<Q"
 
 def determine_pack_format_float(width: int) -> str:
-	if(width <= 2): return "<e"
-	elif(width <= 4): return "<f"
+	#if(width <= 2): return "<e"
+	if(width <= 4): return "<f"
 	elif(width <= 8): return "<d"
 
 

@@ -98,7 +98,7 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 		stf_mesh["colors"].append(context.serialize_buffer(color_buffer.getvalue()))
 
 	# splits
-	buffer_split_vertices = np.zeros(len(blender_mesh.loops) * 3, dtype=determine_pack_format_uint(indices_width))
+	buffer_split_vertices = np.zeros(len(blender_mesh.loops), dtype=determine_pack_format_uint(indices_width))
 	blender_mesh.loops.foreach_get("vertex_index", buffer_split_vertices)
 	stf_mesh["splits"] = context.serialize_buffer(buffer_split_vertices.tobytes())
 
