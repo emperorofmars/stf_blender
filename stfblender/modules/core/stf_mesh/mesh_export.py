@@ -316,66 +316,43 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 			if(shape_key == shape_key.relative_key or shape_key.mute or blender_mesh.shape_keys.key_blocks[0].name == shape_key.name):
 				continue
 
-			# TODO deal with vertex group multiplication
+			# TODO deal with vertex group multiplication maybe at some point
 
-			vertex_normals_flat: list[float] = shape_key.normals_vertex_get() # Blender why
+			blendshape_offsets_buffer = np.zeros(len(blender_mesh.vertices) * 3, dtype=determine_pack_format_float(float_width))
+			shape_key.data.foreach_get("co", blendshape_offsets_buffer)
+			blendshape_offsets_buffer = np.reshape(blendshape_offsets_buffer, (-1, 3))
+			blendshape_offsets_buffer[:, [1, 2]] = blendshape_offsets_buffer[:, [2, 1]]
+			blendshape_offsets_buffer[:, 2] *= -1
+			blendshape_offsets_buffer -= buffer_vertices
 
-			blendshape_offsets: dict[int, tuple[list[float], list[float]]] = {}
-			for vertex in blender_mesh.vertices:
-				point: bpy.types.ShapeKeyPoint = shape_key.data[vertex.index]
-				offset = point.co - vertex.co
-				normal = [
-					vertex_normals_flat[vertex.index * 3] - vertex.normal.x,
-					vertex_normals_flat[vertex.index * 3 + 1] - vertex.normal.y,
-					vertex_normals_flat[vertex.index * 3 + 2] - vertex.normal.z
-				]
-				if(offset.length > 0.00001):
-					blendshape_offsets[vertex.index] = (blender_translation_to_stf(offset), blender_translation_to_stf(normal))
+			blendshape_normals_buffer = np.array(shape_key.normals_vertex_get(), dtype=determine_pack_format_float(float_width))
+			blendshape_normals_buffer = np.reshape(blendshape_normals_buffer, (-1, 3))
+			blendshape_normals_buffer[:, [1, 2]] = blendshape_normals_buffer[:, [2, 1]]
+			blendshape_normals_buffer[:, 2] *= -1
+			
+			blendshape_offset_lengths = np.linalg.norm(blendshape_offsets_buffer, 1, 1)
+			blendshape_offset_lengths_valid = np.where(blendshape_offset_lengths > 0.0001, True, False)
+			num_valid = np.count_nonzero(blendshape_offset_lengths_valid)
 
-			indexed = len(blendshape_offsets) < len(blender_mesh.vertices) * 0.833
-
-			buffer_blendshape_indices = BytesIO()
-			buffer_blendshape_position_offsets = BytesIO()
-			buffer_blendshape_normal_offsets = BytesIO()
-			buffer_blendshape_tangent_offsets = BytesIO() # TODO calculate tangents
-
-			if(indexed):
-				for index, offset in blendshape_offsets.items():
-					buffer_blendshape_indices.write(serialize_uint(index, indices_width))
-					buffer_blendshape_position_offsets.write(serialize_float(offset[0][0], float_width))
-					buffer_blendshape_position_offsets.write(serialize_float(offset[0][1], float_width))
-					buffer_blendshape_position_offsets.write(serialize_float(offset[0][2], float_width))
-					buffer_blendshape_normal_offsets.write(serialize_float(offset[1][0], float_width))
-					buffer_blendshape_normal_offsets.write(serialize_float(offset[1][1], float_width))
-					buffer_blendshape_normal_offsets.write(serialize_float(offset[1][2], float_width))
-			else:
-				for vertex in blender_mesh.vertices:
-					if(vertex.index in blendshape_offsets):
-						buffer_blendshape_position_offsets.write(serialize_float(blendshape_offsets[vertex.index][0][0], float_width))
-						buffer_blendshape_position_offsets.write(serialize_float(blendshape_offsets[vertex.index][0][1], float_width))
-						buffer_blendshape_position_offsets.write(serialize_float(blendshape_offsets[vertex.index][0][2], float_width))
-						buffer_blendshape_normal_offsets.write(serialize_float(blendshape_offsets[vertex.index][1][0], float_width))
-						buffer_blendshape_normal_offsets.write(serialize_float(blendshape_offsets[vertex.index][1][1], float_width))
-						buffer_blendshape_normal_offsets.write(serialize_float(blendshape_offsets[vertex.index][1][2], float_width))
-					else:
-						buffer_blendshape_position_offsets.write(serialize_float(0, float_width))
-						buffer_blendshape_position_offsets.write(serialize_float(0, float_width))
-						buffer_blendshape_position_offsets.write(serialize_float(0, float_width))
-						buffer_blendshape_normal_offsets.write(serialize_float(0, float_width))
-						buffer_blendshape_normal_offsets.write(serialize_float(0, float_width))
-						buffer_blendshape_normal_offsets.write(serialize_float(0, float_width))
+			indexed = num_valid < len(blender_mesh.vertices) * 0.833
 
 			blendshape = {
 				"name": shape_key.name,
 				"indexed": indexed,
-				"count": len(blendshape_offsets) if indexed else len(blender_mesh.vertices),
+				"count": num_valid if indexed else len(blender_mesh.vertices),
 				"default_value": shape_key.value,
 				"limit_upper": shape_key.slider_max,
 				"limit_lower": shape_key.slider_min,
 			}
-			if(indexed): blendshape["indices"] = context.serialize_buffer(buffer_blendshape_indices.getvalue())
-			blendshape["position_offsets"] = context.serialize_buffer(buffer_blendshape_position_offsets.getvalue())
-			blendshape["normal_offsets"] = context.serialize_buffer(buffer_blendshape_normal_offsets.getvalue())
+			if(indexed):
+				blendhshape_indices_buffer = np.extract(blendshape_offset_lengths_valid, np.arange(len(blender_mesh.vertices), dtype=determine_pack_format_uint(indices_width)))
+				np.take(blendshape_offsets_buffer, blendhshape_indices_buffer, 0)
+				blendshape["indices"] = context.serialize_buffer(blendhshape_indices_buffer.tobytes())
+				blendshape["position_offsets"] = context.serialize_buffer(np.take(blendshape_offsets_buffer, blendhshape_indices_buffer, 0).tobytes())
+				blendshape["normal_offsets"] = context.serialize_buffer(np.take(blendshape_normals_buffer, blendhshape_indices_buffer, 0).tobytes())
+			else:
+				blendshape["position_offsets"] = context.serialize_buffer(blendshape_offsets_buffer.tobytes())
+				blendshape["normal_offsets"] = context.serialize_buffer(blendshape_normals_buffer.tobytes())
 			blendshapes.append(blendshape)
 		stf_mesh["blendshapes"] = blendshapes
 
