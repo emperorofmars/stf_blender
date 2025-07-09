@@ -1,10 +1,11 @@
 from io import BytesIO
 import bpy
+import numpy as np
 
 from ....importer.stf_import_context import STF_ImportContext
 from ....core.stf_report import STFReportSeverity, STFReport
 from ....utils.trs_utils import stf_translation_to_blender, stf_uv_to_blender
-from ....core.buffer_utils import parse_float, parse_int, parse_uint
+from ....core.buffer_utils import determine_pack_format_float, determine_pack_format_uint, parse_float, parse_int, parse_uint
 
 
 _stf_type = "stf.mesh"
@@ -29,23 +30,13 @@ def import_stf_mesh(context: STF_ImportContext, json_resource: dict, stf_id: str
 
 
 	# Vertices
-	buffer_vertices = BytesIO(context.import_buffer(json_resource["vertices"]))
-	py_vertices = []
-
-	for _ in range(int(buffer_vertices.getbuffer().nbytes / (float_width * 3))):
-		p0 = parse_float(buffer_vertices, float_width)
-		p1 = parse_float(buffer_vertices, float_width)
-		p2 = parse_float(buffer_vertices, float_width)
-		py_vertices.append(stf_translation_to_blender([p0, p1, p2]))
-
+	buffer_vertices = np.copy(np.frombuffer(context.import_buffer(json_resource["vertices"]), dtype=determine_pack_format_float(float_width)))
+	buffer_vertices = np.reshape(buffer_vertices, (-1, 3))
+	buffer_vertices[:, 2] *= -1
+	buffer_vertices[:, [1, 2]] = buffer_vertices[:, [2, 1]]
 
 	# Splits
-	py_splits = []
-	if("splits" in json_resource):
-		buffer_split = BytesIO(context.import_buffer(json_resource["splits"]))
-		for index in range(int(buffer_split.getbuffer().nbytes / indices_width)):
-			py_splits.append(parse_uint(buffer_split, indices_width))
-
+	buffer_splits = np.frombuffer(context.import_buffer(json_resource["splits"]), dtype=determine_pack_format_uint(indices_width))
 
 	# Faces
 	py_faces = []
@@ -63,7 +54,7 @@ def import_stf_mesh(context: STF_ImportContext, json_resource: dict, stf_id: str
 
 			face_indices = []
 			for split_index in sorted(face_splits):
-				face_indices.append(py_splits[split_index])
+				face_indices.append(buffer_splits[split_index])
 			py_faces.append(face_indices)
 
 
@@ -76,7 +67,7 @@ def import_stf_mesh(context: STF_ImportContext, json_resource: dict, stf_id: str
 
 
 	# Construct the topology
-	blender_mesh.from_pydata(py_vertices, py_lines, py_faces, False)
+	blender_mesh.from_pydata(buffer_vertices, py_lines, py_faces, False)
 	if(blender_mesh.validate(verbose=True)): # return is True if errors found
 		context.report(STFReport("Invalid mesh", STFReportSeverity.Error, stf_id, _stf_type, blender_mesh))
 
@@ -122,12 +113,11 @@ def import_stf_mesh(context: STF_ImportContext, json_resource: dict, stf_id: str
 	# Face corners (Splits)
 	if("splits" in json_resource):
 		if("split_normals" in json_resource):
-			buffer_split_normals = BytesIO(context.import_buffer(json_resource["split_normals"]))
-			py_split_normals = []
-			for index, loop in enumerate(blender_mesh.loops):
-				normal = stf_translation_to_blender([parse_float(buffer_split_normals, float_width), parse_float(buffer_split_normals, float_width), parse_float(buffer_split_normals, float_width)])
-				py_split_normals.append(normal)
-			blender_mesh.normals_split_custom_set(py_split_normals)
+			buffer_split_normals = np.copy(np.frombuffer(context.import_buffer(json_resource["split_normals"]), dtype=determine_pack_format_float(float_width)))
+			buffer_split_normals = np.reshape(buffer_split_normals, (-1, 3))
+			buffer_split_normals[:, 2] *= -1
+			buffer_split_normals[:, [1, 2]] = buffer_split_normals[:, [2, 1]]
+			blender_mesh.normals_split_custom_set(buffer_split_normals)
 
 		if("uvs" in json_resource):
 			for uv_layer_index in range(len(json_resource["uvs"])):
@@ -200,7 +190,6 @@ def import_stf_mesh(context: STF_ImportContext, json_resource: dict, stf_id: str
 
 	# Vertex groups
 	if("vertex_groups" in json_resource):
-		#vertex_weight_width = json_resource.get("vertex_weight_width", 4)
 		for vertex_group_index, json_vertex_group in enumerate(json_resource["vertex_groups"]):
 			indexed = json_vertex_group["indexed"]
 			count = json_vertex_group["count"]
@@ -222,23 +211,31 @@ def import_stf_mesh(context: STF_ImportContext, json_resource: dict, stf_id: str
 		for blendshape_index, json_blendshape in enumerate(json_resource["blendshapes"]):
 			indexed = json_blendshape["indexed"]
 			count = json_blendshape["count"]
-			## let buffer_blendshape_indices
+
+			buffer_blendshape_pos_offset = np.copy(np.frombuffer(context.import_buffer(json_blendshape["position_offsets"]), dtype=determine_pack_format_float(float_width)))
+			buffer_blendshape_pos_offset = np.reshape(buffer_blendshape_pos_offset, (-1, 3))
+			buffer_blendshape_pos_offset[:, 2] *= -1
+			buffer_blendshape_pos_offset[:, [1, 2]] = buffer_blendshape_pos_offset[:, [2, 1]]
+
 			if(indexed):
-				buffer_blendshape_indices = BytesIO(context.import_buffer(json_blendshape["indices"]))
-			buffer_blendshape_pos_offset = BytesIO(context.import_buffer(json_blendshape["position_offsets"]))
+				buffer_blendshape_indices = np.frombuffer(context.import_buffer(json_blendshape["indices"]), dtype=determine_pack_format_uint(indices_width))
+				buffer_blendshape_pos_offset_indexed = buffer_blendshape_pos_offset
+				buffer_blendshape_pos_offset = np.zeros((len(blender_mesh.vertices), 3), dtype=determine_pack_format_float(float_width))
+				for index, vertex_index in enumerate(buffer_blendshape_indices):
+					buffer_blendshape_pos_offset[vertex_index] = buffer_blendshape_pos_offset_indexed[index]
+
+			# todo import vertices into numpy array and use that
+			buffer_vertices = np.zeros(len(blender_mesh.vertices) * 3, dtype=determine_pack_format_float(float_width))
+			blender_mesh.vertices.foreach_get("co", buffer_vertices)
+			buffer_vertices = np.reshape(buffer_vertices, (-1, 3))
+
+			buffer_blendshape_pos_offset += buffer_vertices
+
 			# Normals and Tangents are irrelevant to import into Blender
 
 			shape_key = tmp_blender_mesh_object.shape_key_add(name=json_blendshape.get("name", "STF Blendshape " + str(blendshape_index)), from_mix=False)
 
-			for index in range(count):
-				if(indexed):
-					vertex_index = parse_uint(buffer_blendshape_indices, indices_width)
-				else:
-					vertex_index = index
-				pos_x = parse_float(buffer_blendshape_pos_offset, float_width)
-				pos_y = parse_float(buffer_blendshape_pos_offset, float_width)
-				pos_z = parse_float(buffer_blendshape_pos_offset, float_width)
-				shape_key.data[vertex_index].co = blender_mesh.vertices[vertex_index].co + stf_translation_to_blender([pos_x, pos_y, pos_z])
+			shape_key.data.foreach_set("co", np.reshape(buffer_blendshape_pos_offset, -1))
 
 			shape_key.value = json_blendshape.get("default_value", 0)
 			shape_key.slider_max = json_blendshape.get("limit_upper", 1)
