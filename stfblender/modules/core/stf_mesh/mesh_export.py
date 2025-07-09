@@ -5,7 +5,7 @@ import numpy as np
 from ....exporter.stf_export_context import STF_ExportContext
 from ....utils.id_utils import ensure_stf_id
 from ....utils.trs_utils import blender_translation_to_stf, blender_uv_to_stf
-from ....core.buffer_utils import determine_pack_format_float, serialize_float, serialize_int, serialize_uint
+from ....core.buffer_utils import determine_pack_format_float, determine_pack_format_uint, serialize_float, serialize_int, serialize_uint
 
 
 _stf_type = "stf.mesh"
@@ -65,14 +65,6 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 	stf_mesh["indices_width"] = indices_width
 
 	# Vertex positions
-	"""buffer_vertices = BytesIO()
-	for vertex in blender_mesh.vertices:
-		position = blender_translation_to_stf(vertex.co)
-		buffer_vertices.write(serialize_float(position[0], float_width))
-		buffer_vertices.write(serialize_float(position[1], float_width))
-		buffer_vertices.write(serialize_float(position[2], float_width))
-	stf_mesh["vertices"] = context.serialize_buffer(buffer_vertices.getvalue())"""
-
 	buffer_vertices = np.zeros(len(blender_mesh.vertices) * 3, dtype=determine_pack_format_float(float_width))
 	blender_mesh.vertices.foreach_get("co", buffer_vertices)
 	buffer_vertices = np.reshape(buffer_vertices, (-1, 3))
@@ -81,6 +73,7 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 	stf_mesh["vertices"] = context.serialize_buffer(buffer_vertices.tobytes())
 
 	# Vertex color channels
+	# todo use numpy
 	stf_mesh["vertex_color_width"] = float_width
 	buffers_color: list[BytesIO] = []
 	for index, color_layer in enumerate(blender_mesh.color_attributes):
@@ -104,29 +97,31 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 	for color_buffer in buffers_color:
 		stf_mesh["colors"].append(context.serialize_buffer(color_buffer.getvalue()))
 
-	buffer_split_vertices = BytesIO()
-	buffer_split_normals = BytesIO()
-	buffers_uv: list[BytesIO] = [BytesIO()] * len(blender_mesh.uv_layers)
+	# splits
+	buffer_split_vertices = np.zeros(len(blender_mesh.loops) * 3, dtype=determine_pack_format_uint(indices_width))
+	blender_mesh.loops.foreach_get("vertex_index", buffer_split_vertices)
+	stf_mesh["splits"] = context.serialize_buffer(buffer_split_vertices.tobytes())
+
+	# normals
+	buffer_split_normals = np.zeros(len(blender_mesh.loops) * 3, dtype=determine_pack_format_float(float_width))
+	blender_mesh.loops.foreach_get("normal", buffer_split_normals)
+	buffer_split_normals = np.reshape(buffer_split_normals, (-1, 3))
+	buffer_split_normals[:, [1, 2]] = buffer_split_normals[:, [2, 1]]
+	buffer_split_normals[:, 2] *= -1
+	stf_mesh["split_normals"] = context.serialize_buffer(buffer_split_normals.tobytes())
+
+	# uvs
+	uvs = []
+	for uv_index, uv_layer in enumerate(blender_mesh.uv_layers):
+		buffer_uv = np.zeros(len(blender_mesh.loops) * 2, dtype=determine_pack_format_float(float_width))
+		uv_layer.uv.foreach_get("vector", buffer_uv)
+		buffer_uv = np.reshape(buffer_uv, (-1, 2))
+		buffer_uv[:, 1] = 1 - buffer_uv[:, 1]
+		uvs.append({"name": uv_layer.name, "uv": context.serialize_buffer(buffer_uv.tobytes())})
+	stf_mesh["uvs"] = uvs
+
+	# split colors
 	buffers_split_color: list[BytesIO] = []
-
-
-	uv_names = []
-	for loop in blender_mesh.loops:
-		loop: bpy.types.MeshLoop = loop
-		# Split to vertex indices
-		buffer_split_vertices.write(serialize_uint(loop.vertex_index, indices_width))
-
-		normal = blender_translation_to_stf(loop.normal.normalized())
-		buffer_split_normals.write(serialize_float(normal[0], float_width))
-		buffer_split_normals.write(serialize_float(normal[1], float_width))
-		buffer_split_normals.write(serialize_float(normal[2], float_width))
-
-		for uv_index, uv_layer in enumerate(blender_mesh.uv_layers):
-			uv_names.append(uv_layer.name)
-			uv = blender_uv_to_stf(uv_layer.uv[loop.index].vector)
-			buffers_uv[uv_index].write(serialize_float(uv[0], float_width))
-			buffers_uv[uv_index].write(serialize_float(uv[1], float_width))
-
 	for color_layer in blender_mesh.color_attributes:
 		if(color_layer.data_type == "FLOAT_COLOR" and color_layer.domain == "CORNER"):
 			color_buffer = BytesIO()
@@ -145,18 +140,11 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 				color_buffer.write(serialize_float(color_layer.data[loop.index].color[2], float_width))
 				color_buffer.write(serialize_float(color_layer.data[loop.index].color[3], float_width))
 
-	stf_mesh["splits"] = context.serialize_buffer(buffer_split_vertices.getvalue())
-	stf_mesh["split_normals"] = context.serialize_buffer(buffer_split_normals.getvalue())
-	stf_mesh["uvs"] = []
-	for index, buffer_uv in enumerate(buffers_uv):
-		stf_mesh["uvs"].append({
-				"name": uv_names[index],
-				"uv": context.serialize_buffer(buffer_uv.getvalue()),
-			})
 	stf_mesh["split_colors"] = []
 	for split_color_buffer in buffers_split_color:
 		stf_mesh["split_colors"].append(context.serialize_buffer(split_color_buffer.getvalue()))
 
+	# topology
 	buffer_tris = BytesIO()
 
 	# Loop through triangles, and also store how many belong to the same face
@@ -278,7 +266,6 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 			})
 
 		stf_mesh["weights"] = buffers_weights
-
 
 
 	# Vertex groups

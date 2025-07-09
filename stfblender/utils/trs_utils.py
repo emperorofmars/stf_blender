@@ -23,7 +23,7 @@ def blender_to_trs(t: mathutils.Vector, r: mathutils.Quaternion, s: mathutils.Ve
 	]
 
 def blender_uv_to_stf(blender_vec: list[float]) -> list[float]:
-	# x,y,z -> x,z,-y
+	# x,y -> x,1-y
 	return [blender_vec[0], 1 - blender_vec[1]]
 
 
