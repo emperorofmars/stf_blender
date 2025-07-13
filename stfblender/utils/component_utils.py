@@ -24,7 +24,7 @@ class STF_BlenderComponentModule(STF_Module):
 class InstanceModComponentRef(STF_Component_Ref):
 	"""Used by armature instances to add or modify a component on an instance of a bone"""
 	bone: bpy.props.StringProperty(name="Bone") # type: ignore
-	override: bpy.props.BoolProperty(name="Override", default=False) # type: ignore
+	override: bpy.props.BoolProperty(name="Enable Instance Override", default=False) # type: ignore
 
 class STF_BlenderBoneComponentModule(STF_BlenderComponentModule):
 	"""Use for components that are allowed on bones and are animatable or can have different values per instance of the armature."""

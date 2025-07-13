@@ -80,11 +80,13 @@ class STFArmatureInstancePanel(bpy.types.Panel):
 		draw_components_ui(self.layout, context, context.object, STFAddArmatureInstanceComponentOperator.bl_idname, STFRemoveArmatureInstanceComponentOperator.bl_idname, STFEditArmatureInstanceComponentIdOperator.bl_idname, context.object.stf_instance_armature, _get_target_object_func, _inject_ui)
 
 		self.layout.separator(factor=4, type="LINE")
-		self.layout.label(text="Override and animate values of components on bones.")
 
 		# todo standins for components on bones
-		self.layout.operator(UpdateArmatureInstanceComponentStandins.bl_idname)
-		self.layout.separator(factor=1, type="SPACE")
-		
-		if(len(context.object.stf_instance_armature_component_standins.stf_components) > 0):
-			draw_instance_standin_components_ui(self.layout, context, context.object, STFEditArmatureInstanceComponentIdOperator.bl_idname, context.object.stf_instance_armature_component_standins, _get_target_object_func, _inject_standin_ui)
+		self.layout.prop(context.object.stf_instance_armature_component_standins, "use_bone_component_overrides")
+		if(context.object.stf_instance_armature_component_standins.use_bone_component_overrides):
+			self.layout.label(text="Override and animate values of components on bones.")
+			self.layout.operator(UpdateArmatureInstanceComponentStandins.bl_idname)
+			self.layout.separator(factor=1, type="SPACE")
+			
+			if(len(context.object.stf_instance_armature_component_standins.stf_components) > 0):
+				draw_instance_standin_components_ui(self.layout, context, context.object, STFEditArmatureInstanceComponentIdOperator.bl_idname, context.object.stf_instance_armature_component_standins, _get_target_object_func, _inject_standin_ui)
