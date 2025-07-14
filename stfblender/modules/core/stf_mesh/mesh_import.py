@@ -170,22 +170,16 @@ def import_stf_mesh(context: STF_ImportContext, json_resource: dict, stf_id: str
 						break
 			if(len(vertex_groups) < len(json_resource["bones"])):
 				context.report(STFReport("Invalid Bone Mapping", STFReportSeverity.Error, stf_id, _stf_type, blender_mesh))
-
-			for weight_channel in json_resource["weights"]:
-				indexed = weight_channel["indexed"]
-				weights_count = weight_channel["count"]
-				buffer = BytesIO(context.import_buffer(weight_channel["buffer"]))
-
-				for index in range(weights_count):
-					## let vertex_index
-					if(indexed):
-						vertex_index = parse_uint(buffer, indices_width)
-					else:
-						vertex_index = index
-					bone_index = parse_int(buffer, bone_indices_width)
-					weight = parse_float(buffer, float_width)
-					if(weight > 0 and bone_index >= 0):
-						vertex_groups[bone_index].add([vertex_index], weight, "REPLACE")
+			
+			buffer_weight_lens = BytesIO(context.import_buffer(json_resource["weight_lens"]))
+			buffer_weights = BytesIO(context.import_buffer(json_resource["weights"]))
+			for vertex in blender_mesh.vertices:
+				weights_count = parse_uint(buffer_weight_lens, indices_width)
+				for weight_index in range(weights_count):
+					bone_index = parse_uint(buffer_weights, bone_indices_width)
+					weight = parse_float(buffer_weights, float_width)
+					if(weight > 0):
+						vertex_groups[bone_index].add([vertex.index], weight, "REPLACE")
 
 	# Vertex groups
 	if("vertex_groups" in json_resource):

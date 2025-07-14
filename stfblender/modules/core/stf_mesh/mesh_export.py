@@ -15,7 +15,7 @@ export_options: dict = {
 	"export_normals": True,
 	"export_tangents": True,
 	"export_colors": True,
-	"float_treshhold_blendshape": 0.00001,
+	"float_treshhold_blendshape": 0.0001,
 }
 
 
@@ -217,55 +217,47 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 
 		# Create vertex group lookup dictionary for stf_ids
 		weight_bone_map = []
-		group_to_bone_index = {}
+		# dict[blendergroup_index, bone_id_index]
+		group_to_bone_index: dict[int, int] = {}
 		for group in tmp_blender_mesh_object.vertex_groups:
 			if(group.name in armature.bones):
 				weight_bone_map.append(armature.bones[group.name].stf_id)
 				group_to_bone_index[group.index] = len(weight_bone_map) - 1
 		stf_mesh["bones"] = weight_bone_map
 
-		# TODO make this vertex-major and sort channels per vertex by weight
-		# dict[channel_index, dict[vertex_index, tuple[bone_index, weight]]]
-		bone_channels: dict[int, dict[int, tuple[int, float]]] = {}
-		for vertex in blender_mesh.vertices:
-			for channel, group in enumerate(vertex.groups):
-				if(group.group in group_to_bone_index):
-					if(channel not in bone_channels): bone_channels[channel] = {}
-					bone_channels[channel][vertex.index] = (group_to_bone_index[group.group], group.weight)
-
 		## let bone_indices_width
-		if(len(bone_channels) <= 2**8):
+		if(len(weight_bone_map) <= 2**8):
 			bone_indices_width = 1
-		elif(len(bone_channels) <= 2**16):
+		elif(len(weight_bone_map) <= 2**16):
 			bone_indices_width = 2
 		## else wtf
 		stf_mesh["bone_indices_width"] = bone_indices_width
 
-		buffers_weights = []
-		for channel_index, channel in bone_channels.items():
-			indexed = len(channel) < (len(blender_mesh.vertices) * 0.666)
-			buffer_weights = BytesIO()
-			if(indexed):
-				for vertex_index, data in channel.items():
-					buffer_weights.write(serialize_uint(vertex_index, indices_width)) # vertex index
-					buffer_weights.write(serialize_int(data[0], bone_indices_width)) # bone index
-					buffer_weights.write(serialize_float(data[1], float_width)) # bone weight
-			else:
-				for vertex in blender_mesh.vertices:
-					if(vertex.index in channel):
-						buffer_weights.write(serialize_int(channel[vertex.index][0], bone_indices_width)) # bone index
-						buffer_weights.write(serialize_float(channel[vertex.index][1], float_width)) # bone weight
-					else:
-						buffer_weights.write(serialize_int(-1, bone_indices_width)) # bone index
-						buffer_weights.write(serialize_float(0, float_width)) # bone weight
+		# list[list[tuple[bone_index, weight]]]
+		vertex_weights: list[list[tuple[int, float]]] = []
+		for vertex in blender_mesh.vertices:
+			group_arr = []
+			for channel, group in enumerate(vertex.groups):
+				if(group.group in group_to_bone_index and group.weight > export_options["float_treshhold_blendshape"]):
+					group_arr.append((group_to_bone_index[group.group], group.weight))
+			group_arr.sort(key=lambda e: e[1], reverse=True)
+			vertex_weights.append(group_arr)
 
-			buffers_weights.append({
-				"indexed": indexed,
-				"count": len(channel) if indexed else len(blender_mesh.vertices),
-				"buffer": context.serialize_buffer(buffer_weights.getvalue()),
-			})
+		#for vertex in blender_mesh.vertices:
+		#	vertex_weights[vertex.index].sort(key=lambda e: e[1], reverse=True)
 
-		stf_mesh["weights"] = buffers_weights
+		weight_lens = BytesIO()
+		buffer_weights = BytesIO()
+		for weights in vertex_weights:
+			# Write the number of weights for that vertex
+			weight_lens.write(serialize_uint(len(weights), indices_width)) # weights per vertex
+			for weight in weights:
+				# Write the bone index and bone weight
+				buffer_weights.write(serialize_uint(weight[0], bone_indices_width)) # bone index
+				buffer_weights.write(serialize_float(weight[1], float_width)) # bone weight
+
+		stf_mesh["weight_lens"] = context.serialize_buffer(weight_lens.getvalue())
+		stf_mesh["weights"] = context.serialize_buffer(buffer_weights.getvalue())
 
 
 	# Vertex groups
@@ -329,9 +321,9 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 			blendshape_normals_buffer = np.reshape(blendshape_normals_buffer, (-1, 3))
 			blendshape_normals_buffer[:, [1, 2]] = blendshape_normals_buffer[:, [2, 1]]
 			blendshape_normals_buffer[:, 2] *= -1
-			
+
 			blendshape_offset_lengths = np.linalg.norm(blendshape_offsets_buffer, 1, 1)
-			blendshape_offset_lengths_valid = np.where(blendshape_offset_lengths > 0.0001, True, False)
+			blendshape_offset_lengths_valid = np.where(blendshape_offset_lengths > export_options["float_treshhold_blendshape"], True, False)
 			num_valid = np.count_nonzero(blendshape_offset_lengths_valid)
 
 			indexed = num_valid < len(blender_mesh.vertices) * 0.833
