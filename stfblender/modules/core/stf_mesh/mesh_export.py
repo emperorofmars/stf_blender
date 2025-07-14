@@ -243,9 +243,6 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 			group_arr.sort(key=lambda e: e[1], reverse=True)
 			vertex_weights.append(group_arr)
 
-		#for vertex in blender_mesh.vertices:
-		#	vertex_weights[vertex.index].sort(key=lambda e: e[1], reverse=True)
-
 		weight_lens = BytesIO()
 		buffer_weights = BytesIO()
 		for weights in vertex_weights:
@@ -279,10 +276,11 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 
 			for vertex_group_name, group in vertex_groups.items():
 				indexed = len(group) < (len(blender_mesh.vertices) / 2)
+				buffer_indices = BytesIO()
 				buffer_weights = BytesIO()
 				if(indexed):
 					for vertex_index, weight in group.items():
-						buffer_weights.write(serialize_uint(vertex_index, indices_width)) # vertex index
+						buffer_indices.write(serialize_uint(vertex_index, indices_width)) # vertex index
 						buffer_weights.write(serialize_float(weight, float_width)) # vertex weight
 				else:
 					for vertex in blender_mesh.vertices:
@@ -290,13 +288,13 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 							buffer_weights.write(serialize_float(group[vertex.index], float_width)) # vertex weight
 						else:
 							buffer_weights.write(serialize_float(0, float_width)) # vertex weight
-
-				buffers_vertex_groups.append({
+				vertex_group = {
 					"name": vertex_group_name,
-					"indexed": indexed,
-					"count": len(group) if indexed else len(blender_mesh.vertices),
-					"buffer": context.serialize_buffer(buffer_weights.getvalue()),
-				})
+					"weights": context.serialize_buffer(buffer_weights.getvalue()),
+				}
+				if(indexed):
+					vertex_group["indices"] = context.serialize_buffer(buffer_indices.getvalue())
+				buffers_vertex_groups.append(vertex_group)
 			stf_mesh["vertex_groups"] = buffers_vertex_groups
 
 
@@ -330,8 +328,6 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 
 			blendshape = {
 				"name": shape_key.name,
-				"indexed": indexed,
-				"count": num_valid if indexed else len(blender_mesh.vertices),
 				"default_value": shape_key.value,
 				"limit_upper": shape_key.slider_max,
 				"limit_lower": shape_key.slider_min,

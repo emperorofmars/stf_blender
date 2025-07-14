@@ -184,26 +184,26 @@ def import_stf_mesh(context: STF_ImportContext, json_resource: dict, stf_id: str
 	# Vertex groups
 	if("vertex_groups" in json_resource):
 		for vertex_group_index, json_vertex_group in enumerate(json_resource["vertex_groups"]):
-			indexed = json_vertex_group["indexed"]
-			count = json_vertex_group["count"]
-			buffer_vertex_weights = BytesIO(context.import_buffer(json_vertex_group["buffer"]))
+			indexed = "indices" in json_vertex_group
+			# let buffer_vertex_indices
+			if(indexed):
+				buffer_vertex_indices = BytesIO(context.import_buffer(json_vertex_group["indices"]))
+			buffer_vertex_weights = BytesIO(context.import_buffer(json_vertex_group["weights"]))
 			vertex_group = tmp_blender_mesh_object.vertex_groups.new(name=json_vertex_group.get("name", "STF Vertex Group " + str(vertex_group_index)))
-			for index in range(count):
+			for index in range(int(buffer_vertex_weights.getbuffer().nbytes / float_width)):
 				## let vertex_index
 				if(indexed):
-					vertex_index = parse_uint(buffer_vertex_weights, indices_width)
+					vertex_index = parse_uint(buffer_vertex_indices, indices_width)
 				else:
 					vertex_index = index
 				weight = parse_float(buffer_vertex_weights, float_width)
-				if(weight > 0):
-					vertex_group.add([vertex_index], weight, "REPLACE")
+				vertex_group.add([vertex_index], weight, "REPLACE")
 
 	# Blendshapes / Morphtargets / Shapekeys / Blendtargets / Targetblends / Targetshapes / Morphshapes / Blendkeys / Shapetargets / Shapemorphs / Blendmorphs / Blendtargets / Morphblends / Morphkeys / Shapeblends / Blendblends / ...
 	if("blendshapes" in json_resource):
 		tmp_blender_mesh_object.shape_key_add(name="Basis", from_mix=False)
 		for blendshape_index, json_blendshape in enumerate(json_resource["blendshapes"]):
-			indexed = json_blendshape["indexed"]
-			count = json_blendshape["count"]
+			indexed = "indices" in json_blendshape
 
 			buffer_blendshape_pos_offset = np.copy(np.frombuffer(context.import_buffer(json_blendshape["position_offsets"]), dtype=determine_pack_format_float(float_width)))
 			buffer_blendshape_pos_offset = np.reshape(buffer_blendshape_pos_offset, (-1, 3))
@@ -217,7 +217,6 @@ def import_stf_mesh(context: STF_ImportContext, json_resource: dict, stf_id: str
 				for index, vertex_index in enumerate(buffer_blendshape_indices):
 					buffer_blendshape_pos_offset[vertex_index] = buffer_blendshape_pos_offset_indexed[index]
 
-			# todo import vertices into numpy array and use that
 			buffer_vertices = np.zeros(len(blender_mesh.vertices) * 3, dtype=determine_pack_format_float(float_width))
 			blender_mesh.vertices.foreach_get("co", buffer_vertices)
 			buffer_vertices = np.reshape(buffer_vertices, (-1, 3))
