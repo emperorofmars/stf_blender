@@ -315,8 +315,14 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 			blendshape_offsets_buffer[:, 2] *= -1
 			blendshape_offsets_buffer -= buffer_vertices
 
+
+			buffer_normals = np.zeros(len(blender_mesh.vertices) * 3, dtype=determine_pack_format_float(float_width))
+			blender_mesh.vertices.foreach_get("normal", buffer_normals)
+			buffer_normals = np.reshape(buffer_normals, (-1, 3))
+
 			blendshape_normals_buffer = np.array(shape_key.normals_vertex_get(), dtype=determine_pack_format_float(float_width))
 			blendshape_normals_buffer = np.reshape(blendshape_normals_buffer, (-1, 3))
+			blendshape_normals_buffer -= buffer_normals
 			blendshape_normals_buffer[:, [1, 2]] = blendshape_normals_buffer[:, [2, 1]]
 			blendshape_normals_buffer[:, 2] *= -1
 
@@ -337,10 +343,10 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 				np.take(blendshape_offsets_buffer, blendhshape_indices_buffer, 0)
 				blendshape["indices"] = context.serialize_buffer(blendhshape_indices_buffer.tobytes())
 				blendshape["position_offsets"] = context.serialize_buffer(np.take(blendshape_offsets_buffer, blendhshape_indices_buffer, 0).tobytes())
-				blendshape["normals"] = context.serialize_buffer(np.take(blendshape_normals_buffer, blendhshape_indices_buffer, 0).tobytes())
+				blendshape["normal_offsets"] = context.serialize_buffer(np.take(blendshape_normals_buffer, blendhshape_indices_buffer, 0).tobytes())
 			else:
 				blendshape["position_offsets"] = context.serialize_buffer(blendshape_offsets_buffer.tobytes())
-				blendshape["normals"] = context.serialize_buffer(blendshape_normals_buffer.tobytes())
+				blendshape["normal_offsets"] = context.serialize_buffer(blendshape_normals_buffer.tobytes())
 			blendshapes.append(blendshape)
 		stf_mesh["blendshapes"] = blendshapes
 
