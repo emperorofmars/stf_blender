@@ -337,10 +337,10 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 				np.take(blendshape_offsets_buffer, blendhshape_indices_buffer, 0)
 				blendshape["indices"] = context.serialize_buffer(blendhshape_indices_buffer.tobytes())
 				blendshape["position_offsets"] = context.serialize_buffer(np.take(blendshape_offsets_buffer, blendhshape_indices_buffer, 0).tobytes())
-				blendshape["normal_offsets"] = context.serialize_buffer(np.take(blendshape_normals_buffer, blendhshape_indices_buffer, 0).tobytes())
+				blendshape["normals"] = context.serialize_buffer(np.take(blendshape_normals_buffer, blendhshape_indices_buffer, 0).tobytes())
 			else:
 				blendshape["position_offsets"] = context.serialize_buffer(blendshape_offsets_buffer.tobytes())
-				blendshape["normal_offsets"] = context.serialize_buffer(blendshape_normals_buffer.tobytes())
+				blendshape["normals"] = context.serialize_buffer(blendshape_normals_buffer.tobytes())
 			blendshapes.append(blendshape)
 		stf_mesh["blendshapes"] = blendshapes
 
