@@ -122,6 +122,10 @@ def _stf_export(context: STF_ExportContext, application_object: any, parent_appl
 	}
 	if(blender_animation.use_frame_range):
 		ret["range"] = [blender_animation.frame_start, blender_animation.frame_end]
+	else:
+		ret["range"] = [blender_animation.frame_range[0], blender_animation.frame_range[1]]
+	print(blender_animation.name)
+	print(blender_animation.frame_range)
 
 	stf_tracks = []
 
@@ -146,6 +150,9 @@ def _stf_export(context: STF_ExportContext, application_object: any, parent_appl
 								kurwas[fcurve.data_path][fcurve.array_index] = fcurve
 
 						for data_path, fcurves in kurwas.items():
+							fcurve.update()
+							if(blender_animation.stf_bake):
+								fcurve.bake(int(blender_animation.frame_range[0]), int(blender_animation.frame_range[1]))
 							stf_track: list = []
 							property_translation = context.resolve_application_property_path(selected_slot_link.target, selected_slot_link.datablock_index, data_path)
 							if(property_translation):
@@ -229,6 +236,7 @@ register_stf_modules = [
 def register():
 	boilerplate_register(bpy.types.Action, "data")
 	bpy.types.Action.stf_exclude = bpy.props.BoolProperty(name="Exclude from STF", default=False) # type: ignore
+	bpy.types.Action.stf_bake = bpy.props.BoolProperty(name="Bake Animation on Export", default=False) # type: ignore
 	bpy.types.Action.stf_fps_override = bpy.props.BoolProperty(name="FPS Override", default=False) # type: ignore
 	bpy.types.Action.stf_fps = bpy.props.FloatProperty(name="FPS", default=30) # type: ignore
 
@@ -236,6 +244,8 @@ def unregister():
 	boilerplate_unregister(bpy.types.Action, "data")
 	if hasattr(bpy.types.Action, "stf_exclude"):
 		del bpy.types.Action.stf_exclude
+	if hasattr(bpy.types.Action, "stf_bake"):
+		del bpy.types.Action.stf_bake
 	if hasattr(bpy.types.Action, "stf_fps_override"):
 		del bpy.types.Action.stf_fps_override
 	if hasattr(bpy.types.Action, "stf_fps"):

@@ -60,6 +60,11 @@ class STFAnimationSpatialPanel(bpy.types.Panel):
 		draw_stf_id_ui(self.layout, context, context.active_action, STFSetAnimationIDOperator.bl_idname)
 
 		self.layout.separator(factor=2, type="LINE")
+		
+		self.layout.prop(context.active_action, "stf_bake")
+		self.layout.label(text="Warning: Baking is destructive!")
+
+		self.layout.separator(factor=2, type="LINE")
 
 		# Components
 		draw_components_ui(self.layout, context, context.active_action, STFAddAnimationComponentOperator.bl_idname, STFRemoveAnimationComponentOperator.bl_idname, STFEditAnimationComponentIdOperator.bl_idname)
