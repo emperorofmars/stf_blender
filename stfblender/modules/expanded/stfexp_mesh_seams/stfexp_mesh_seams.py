@@ -7,6 +7,7 @@ from ....core.stf_module import STF_ExportComponentHook
 from ....exporter.stf_export_context import STF_ExportContext
 from ....importer.stf_import_context import STF_ImportContext
 from ....core.buffer_utils import parse_uint, serialize_uint
+from ....utils.reference_helper import export_buffer
 
 
 _stf_type = "stfexp.mesh.seams"
@@ -58,7 +59,7 @@ def _stf_export(context: STF_ExportContext, application_object: STFEXP_Mesh_Seam
 			for edge_vertex_index in edge.vertices:
 				buffer_seams.write(serialize_uint(edge_vertex_index, vertex_indices_width))
 	ret["seams_len"] = seams_len
-	ret["seams"] = context.serialize_buffer(buffer_seams.getvalue())
+	ret["seams"] = export_buffer(ret, context.serialize_buffer(buffer_seams.getvalue()))
 
 	return ret, application_object.stf_id
 

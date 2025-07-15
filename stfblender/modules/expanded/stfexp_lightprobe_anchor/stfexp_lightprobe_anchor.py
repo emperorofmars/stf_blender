@@ -3,6 +3,7 @@ import bpy
 from ....exporter.stf_export_context import STF_ExportContext
 from ....importer.stf_import_context import STF_ImportContext
 from ....utils.component_utils import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref, add_component, export_component_base, import_component_base
+from ....utils.reference_helper import export_resource
 
 
 _stf_type = "stfexp.lightprobe_anchor"
@@ -46,9 +47,9 @@ def _stf_export(context: STF_ExportContext, component: STFEXP_LightprobeAnchor, 
 	if(component.anchor_object):
 		def _handle():
 			if(type(component.anchor_object.data) == bpy.types.Armature and component.anghor_bone):
-				ret["anchor"] = [component.anchor_object.stf_id, "instance", component.anchor_object.data.bones[component.anghor_bone].stf_id]
+				ret["anchor"] = [export_resource(ret, component.anchor_object.stf_id), "instance", export_resource(ret, component.anchor_object.data.bones[component.anghor_bone].stf_id)]
 			else:
-				ret["anchor"] = [component.anchor_object.stf_id]
+				ret["anchor"] = [export_resource(ret, component.anchor_object.stf_id)]
 
 		context.add_task(_handle)
 

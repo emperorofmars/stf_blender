@@ -4,6 +4,7 @@ from ....exporter.stf_export_context import STF_ExportContext
 from ....importer.stf_import_context import STF_ImportContext
 from ....utils.component_utils import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref, add_component, export_component_base, import_component_base
 from ....utils.op_utils import SetActiveObjectOperator
+from ....utils.reference_helper import export_resource
 
 
 _stf_type = "ava.avatar"
@@ -88,17 +89,17 @@ def _stf_export(context: STF_ExportContext, application_object: AVA_Avatar, pare
 
 	if(application_object.viewport):
 		def _handle_viewport():
-			ret["viewport"] = context.get_resource_id(application_object.viewport)
+			ret["viewport"] = export_resource(ret, context.get_resource_id(application_object.viewport))
 		context.add_task(_handle_viewport)
 		
 	if(application_object.primary_armature_instance and application_object.primary_armature_instance.data and type(application_object.primary_armature_instance.data) == bpy.types.Armature):
 		def _handle_primary_armature_instance():
-			ret["primary_armature_instance"] = context.get_resource_id(application_object.primary_armature_instance)
+			ret["primary_armature_instance"] = export_resource(ret, context.get_resource_id(application_object.primary_armature_instance))
 		context.add_task(_handle_primary_armature_instance)
 		
 	if(application_object.primary_mesh_instance and application_object.primary_mesh_instance.data and type(application_object.primary_mesh_instance.data) == bpy.types.Mesh):
 		def _handle_primary_mesh_instance():
-			ret["primary_mesh_instance"] = context.get_resource_id(application_object.primary_mesh_instance)
+			ret["primary_mesh_instance"] = export_resource(ret, context.get_resource_id(application_object.primary_mesh_instance))
 		context.add_task(_handle_primary_mesh_instance)
 
 	return ret, application_object.stf_id

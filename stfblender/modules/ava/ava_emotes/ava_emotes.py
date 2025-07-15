@@ -5,6 +5,7 @@ from ....importer.stf_import_context import STF_ImportContext
 from ....utils.component_utils import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref, add_component, export_component_base, import_component_base
 from ....utils.op_utils import OpenWebpage
 from ....core.stf_report import STFReport, STFReportSeverity
+from ....utils.reference_helper import export_resource
 
 
 _stf_type = "ava.emotes"
@@ -204,7 +205,7 @@ def _stf_export(context: STF_ExportContext, component: AVA_Emotes, context_objec
 			animation_id = context.get_resource_id(blender_emote.animation)
 
 			if(meaning and animation_id):
-				json_emote = { "animation": animation_id }
+				json_emote = { "animation": export_resource(ret, animation_id) }
 				emotes[meaning] = json_emote
 
 				if(blender_emote.use_blendshape_fallback and len(blender_emote.blendshape_fallback.values) > 0):
@@ -212,7 +213,7 @@ def _stf_export(context: STF_ExportContext, component: AVA_Emotes, context_objec
 					for fallback_blendshape in blender_emote.blendshape_fallback.values:
 						if(fallback_blendshape.mesh_instance and fallback_blendshape.blendshape_name):
 							fallback.append({
-								"mesh_instance": context.get_resource_id(fallback_blendshape.mesh_instance),
+								"mesh_instance": export_resource(ret, context.get_resource_id(fallback_blendshape.mesh_instance)),
 								"name": fallback_blendshape.blendshape_name,
 								"value": fallback_blendshape.blendshape_value,
 							})
