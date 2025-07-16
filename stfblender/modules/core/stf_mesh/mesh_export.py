@@ -4,8 +4,7 @@ import numpy as np
 
 from ....exporter.stf_export_context import STF_ExportContext
 from ....utils.id_utils import ensure_stf_id
-from ....utils.trs_utils import blender_translation_to_stf, blender_uv_to_stf
-from ....core.buffer_utils import determine_pack_format_float, determine_pack_format_uint, serialize_float, serialize_int, serialize_uint
+from ....core.buffer_utils import determine_pack_format_float, determine_pack_format_uint, serialize_float, serialize_uint
 
 
 _stf_type = "stf.mesh"
@@ -16,6 +15,8 @@ export_options: dict = {
 	"export_tangents": True,
 	"export_colors": True,
 	"float_treshhold_blendshape": 0.0001,
+	"export_blendshape_normals": True,
+	"export_blendshape_tangents": True,
 }
 
 
@@ -315,22 +316,25 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 			blendshape_offsets_buffer[:, 2] *= -1
 			blendshape_offsets_buffer -= buffer_vertices
 
-
-			buffer_normals = np.zeros(len(blender_mesh.vertices) * 3, dtype=determine_pack_format_float(float_width))
-			blender_mesh.vertices.foreach_get("normal", buffer_normals)
-			buffer_normals = np.reshape(buffer_normals, (-1, 3))
-
-			blendshape_normals_buffer = np.array(shape_key.normals_vertex_get(), dtype=determine_pack_format_float(float_width))
-			blendshape_normals_buffer = np.reshape(blendshape_normals_buffer, (-1, 3))
-			blendshape_normals_buffer -= buffer_normals
-			blendshape_normals_buffer[:, [1, 2]] = blendshape_normals_buffer[:, [2, 1]]
-			blendshape_normals_buffer[:, 2] *= -1
-
 			blendshape_offset_lengths = np.linalg.norm(blendshape_offsets_buffer, 1, 1)
 			blendshape_offset_lengths_valid = np.where(blendshape_offset_lengths > export_options["float_treshhold_blendshape"], True, False)
 			num_valid = np.count_nonzero(blendshape_offset_lengths_valid)
+			indexed = num_valid < len(blender_mesh.vertices) * 0.75
+			# let blendhshape_indices_buffer
+			if(indexed):
+				blendhshape_indices_buffer = np.extract(blendshape_offset_lengths_valid, np.arange(len(blender_mesh.vertices), dtype=determine_pack_format_uint(indices_width)))
 
-			indexed = num_valid < len(blender_mesh.vertices) * 0.833
+			# let blendshape_normals_split_buffer
+			# let blendhshape_split_indices_buffer
+			if(export_options["export_blendshape_normals"]):
+				blendshape_normals_split_buffer = np.array(shape_key.normals_split_get(), dtype=determine_pack_format_float(float_width))
+				blendshape_normals_split_buffer = np.reshape(blendshape_normals_split_buffer, (-1, 3))
+				blendshape_normals_split_buffer[:, [1, 2]] = blendshape_normals_split_buffer[:, [2, 1]]
+				blendshape_normals_split_buffer[:, 2] *= -1
+
+				if(indexed):
+					valid_split_positions = blendshape_offset_lengths_valid[buffer_split_vertices]
+					blendhshape_split_indices_buffer = np.extract(valid_split_positions, np.arange(len(blender_mesh.loops), dtype=determine_pack_format_uint(indices_width)))
 
 			blendshape = {
 				"name": shape_key.name,
@@ -339,14 +343,15 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 				"limit_lower": shape_key.slider_min,
 			}
 			if(indexed):
-				blendhshape_indices_buffer = np.extract(blendshape_offset_lengths_valid, np.arange(len(blender_mesh.vertices), dtype=determine_pack_format_uint(indices_width)))
-				np.take(blendshape_offsets_buffer, blendhshape_indices_buffer, 0)
 				blendshape["indices"] = context.serialize_buffer(blendhshape_indices_buffer.tobytes())
 				blendshape["position_offsets"] = context.serialize_buffer(np.take(blendshape_offsets_buffer, blendhshape_indices_buffer, 0).tobytes())
-				blendshape["normal_offsets"] = context.serialize_buffer(np.take(blendshape_normals_buffer, blendhshape_indices_buffer, 0).tobytes())
+				if(export_options["export_blendshape_normals"]):
+					blendshape["split_indices"] = context.serialize_buffer(blendhshape_split_indices_buffer.tobytes())
+					blendshape["split_normals"] = context.serialize_buffer(np.take(blendshape_normals_split_buffer, blendhshape_split_indices_buffer, 0).tobytes())
 			else:
 				blendshape["position_offsets"] = context.serialize_buffer(blendshape_offsets_buffer.tobytes())
-				blendshape["normal_offsets"] = context.serialize_buffer(blendshape_normals_buffer.tobytes())
+				if(export_options["export_blendshape_normals"]):
+					blendshape["split_normals"] = context.serialize_buffer(blendshape_normals_split_buffer.tobytes())
 			blendshapes.append(blendshape)
 		stf_mesh["blendshapes"] = blendshapes
 
