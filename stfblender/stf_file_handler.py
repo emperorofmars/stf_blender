@@ -7,7 +7,6 @@ class STF_File_Handler(bpy.types.FileHandler):
 	bl_import_operator = "stf.import"
 	bl_export_operator = "stf.export"
 	bl_file_extensions = ".stf"
-	bl_category = "STF"
 
 	@classmethod
 	def poll_drop(cls, context):

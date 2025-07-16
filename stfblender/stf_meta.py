@@ -52,7 +52,6 @@ class STF_Meta(bpy.types.PropertyGroup):
 class STFAddMetaPropertyCollection(bpy.types.Operator):
 	bl_idname = "stf.add_meta_property_collection"
 	bl_label = "Add Property"
-	bl_category = "STF"
 	bl_options = {"REGISTER", "UNDO"}
 
 	@classmethod
@@ -65,7 +64,6 @@ class STFAddMetaPropertyCollection(bpy.types.Operator):
 class STFAddMetaPropertyScene(bpy.types.Operator):
 	bl_idname = "stf.add_meta_property_scene"
 	bl_label = "Add Property"
-	bl_category = "STF"
 	bl_options = {"REGISTER", "UNDO"}
 
 	@classmethod
@@ -79,7 +77,6 @@ class STFAddMetaPropertyScene(bpy.types.Operator):
 class STFRemoveMetaPropertyCollection(bpy.types.Operator):
 	bl_idname = "stf.remove_meta_property_collection"
 	bl_label = "Remove"
-	bl_category = "STF"
 	bl_options = {"REGISTER", "UNDO"}
 
 	index: bpy.props.IntProperty(name="Index") # type: ignore
@@ -95,7 +92,6 @@ class STFRemoveMetaPropertyCollection(bpy.types.Operator):
 class STFRemoveMetaPropertyScene(bpy.types.Operator):
 	bl_idname = "stf.remove_meta_property_scene"
 	bl_label = "Remove"
-	bl_category = "STF"
 	bl_options = {"REGISTER", "UNDO"}
 
 	index: bpy.props.IntProperty(name="Index") # type: ignore

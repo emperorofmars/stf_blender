@@ -7,7 +7,6 @@ from ..core.stf_report import STFReportSeverity, STFReport
 class STFSetIDOperatorBase:
 	"""Set STF-ID"""
 	bl_label = "Set STF-ID"
-	bl_category = "STF"
 	bl_options = {"REGISTER", "UNDO"}
 
 	def execute(self, context):

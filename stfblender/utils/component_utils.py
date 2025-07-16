@@ -85,7 +85,6 @@ def add_component(application_object: any, blender_property_name: str, stf_id: s
 class STFAddComponentOperatorBase:
 	"""Base class to add an STF component to a Blender object"""
 	bl_label = "Add Component"
-	bl_category = "STF"
 	bl_options = {"REGISTER", "UNDO"}
 
 	stf_type: bpy.props.StringProperty(name="Type") # type: ignore
@@ -105,7 +104,6 @@ class STFAddComponentOperatorBase:
 class STFRemoveComponentOperatorBase:
 	"""Base class to remove an STF component from a Blender object"""
 	bl_label = "Remove Component"
-	bl_category = "STF"
 	bl_options = {"REGISTER", "UNDO"}
 
 	index: bpy.props.IntProperty(name = "component_index", default=-1) # type: ignore
@@ -140,7 +138,6 @@ class STFRemoveComponentOperatorBase:
 class STFEditComponentOperatorBase:
 	"""Base class to edit a components ID"""
 	bl_label = "Edit ID"
-	bl_category = "STF"
 	bl_options = {"REGISTER", "UNDO"}
 
 	component_id: bpy.props.StringProperty() # type: ignore

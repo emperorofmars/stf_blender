@@ -1,6 +1,5 @@
 import json
 import bpy
-import addon_utils
 from bpy_extras.io_utils import ExportHelper
 
 from ..stf_meta import draw_meta_editor
@@ -8,22 +7,14 @@ from ..core.stf_report import STFReportSeverity
 from ..core.stf_registry import get_export_modules
 from .stf_export_state import STF_ExportState
 from .stf_export_context import STF_ExportContext
-from ..utils.minsc import draw_slot_link_warning
+from ..utils.minsc import draw_slot_link_warning, get_stf_version
 
-
-def get_stf_version() -> str:
-	for module in addon_utils.modules():
-		if module.__name__.endswith("stf_blender"):
-			version = module.bl_info.get("version", (0, 0, 0))
-			return str(version[0]) + "." + str(version[1]) + "." + str(version[2])
-	return "0.0.0"
 
 class ExportSTF(bpy.types.Operator, ExportHelper):
 	"""Export as STF file (.stf)"""
 	bl_idname = "stf.export"
 	bl_label = "Export STF"
 	bl_options = {"PRESET", "BLOCKING"}
-	bl_category = "STF"
 
 	filename_ext = ""
 	filter_glob: bpy.props.StringProperty(default="*.stf") # type: ignore
@@ -97,13 +88,18 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 
 
 	def draw(self, context):
+		self.layout.label(text="STF version: " + get_stf_version())
 		self.layout.separator(factor=1, type="SPACE")
 
-		if(not hasattr(bpy.types.Action, "slot_links")):
-			draw_slot_link_warning(self.layout)
+		draw_slot_link_warning(self.layout)
 
 		self.layout.prop_search(bpy.context.scene, "stf_collection_selector", bpy.data, "collections", text="Root")
-		self.layout.label(text="Remove Collection to export full scene")
+		if(bpy.context.scene.stf_collection_selector):
+			self.layout.label(text="Remove Collection to export full scene")
+		else:
+			self.layout.label(text="Exporting full scene")
+
+		self.layout.separator(factor=2, type="LINE")
 
 		self.layout.prop(self, property="debug")
 

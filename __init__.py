@@ -1,6 +1,13 @@
+
 from . import auto_load
+from .stfblender import package_key
+
+
+package_key.package_key = __package__
+
 
 auto_load.init()
+
 
 def register():
 	auto_load.register()

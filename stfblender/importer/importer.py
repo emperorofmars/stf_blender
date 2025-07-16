@@ -6,7 +6,7 @@ from .stf_import_state import STF_ImportState
 from ..core.stf_report import STFException
 from .stf_import_context import STF_ImportContext
 from ..core.stf_file import STF_File
-from ..utils.minsc import draw_slot_link_warning
+from ..utils.minsc import draw_slot_link_warning, get_stf_version
 
 
 class ImportSTF(bpy.types.Operator, ImportHelper):
@@ -14,7 +14,6 @@ class ImportSTF(bpy.types.Operator, ImportHelper):
 	bl_idname = 'stf.import'
 	bl_label = 'Import STF'
 	bl_options = {'PRESET', 'REGISTER', 'UNDO'}
-	bl_category = "STF"
 
 	filter_glob: bpy.props.StringProperty(default="*.stf", options={'HIDDEN'}) # type: ignore
 
@@ -55,10 +54,10 @@ class ImportSTF(bpy.types.Operator, ImportHelper):
 			context.window.cursor_set('DEFAULT')
 
 	def draw(self, context):
+		self.layout.label(text="STF version: " + get_stf_version())
 		self.layout.separator(factor=1, type="SPACE")
 
-		if(not hasattr(bpy.types.Action, "slot_links")):
-			draw_slot_link_warning(self.layout)
+		draw_slot_link_warning(self.layout)
 
 
 def import_button(self, context):
