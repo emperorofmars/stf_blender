@@ -245,16 +245,18 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 			vertex_weights.append(group_arr)
 
 		weight_lens = BytesIO()
+		buffer_bone_indices = BytesIO()
 		buffer_weights = BytesIO()
 		for weights in vertex_weights:
 			# Write the number of weights for that vertex
 			weight_lens.write(serialize_uint(len(weights), indices_width)) # weights per vertex
 			for weight in weights:
 				# Write the bone index and bone weight
-				buffer_weights.write(serialize_uint(weight[0], bone_indices_width)) # bone index
+				buffer_bone_indices.write(serialize_uint(weight[0], bone_indices_width)) # bone index
 				buffer_weights.write(serialize_float(weight[1], float_width)) # bone weight
 
 		stf_mesh["weight_lens"] = context.serialize_buffer(weight_lens.getvalue())
+		stf_mesh["bone_indices"] = context.serialize_buffer(buffer_bone_indices.getvalue())
 		stf_mesh["weights"] = context.serialize_buffer(buffer_weights.getvalue())
 
 

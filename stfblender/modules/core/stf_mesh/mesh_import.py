@@ -172,11 +172,12 @@ def import_stf_mesh(context: STF_ImportContext, json_resource: dict, stf_id: str
 				context.report(STFReport("Invalid Bone Mapping", STFReportSeverity.Error, stf_id, _stf_type, blender_mesh))
 			
 			buffer_weight_lens = BytesIO(context.import_buffer(json_resource["weight_lens"]))
+			buffer_bone_indices = BytesIO(context.import_buffer(json_resource["bone_indices"]))
 			buffer_weights = BytesIO(context.import_buffer(json_resource["weights"]))
 			for vertex in blender_mesh.vertices:
 				weights_count = parse_uint(buffer_weight_lens, indices_width)
 				for weight_index in range(weights_count):
-					bone_index = parse_uint(buffer_weights, bone_indices_width)
+					bone_index = parse_uint(buffer_bone_indices, bone_indices_width)
 					weight = parse_float(buffer_weights, float_width)
 					if(weight > 0):
 						vertex_groups[bone_index].add([vertex.index], weight, "REPLACE")
