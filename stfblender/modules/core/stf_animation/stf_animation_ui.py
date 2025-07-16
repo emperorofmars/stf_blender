@@ -3,7 +3,7 @@ import bpy
 from ....utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
 from ....utils.component_utils import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
 from ....utils.component_ui_utils import draw_components_ui, set_stf_component_filter
-from ....utils.op_utils import OpenWebpage
+from ....utils.minsc import draw_slot_link_warning
 
 
 class STFSetAnimationIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
@@ -47,9 +47,7 @@ class STFAnimationSpatialPanel(bpy.types.Panel):
 		self.layout.label(text="stf.animation")
 
 		if(not hasattr(bpy.types.Action, "slot_links")):
-			self.layout.label(text="Note: the 'Slot Link' extension")
-			self.layout.label(text="is required to export animations!")
-			self.layout.operator(OpenWebpage.bl_idname).url = "https://extensions.blender.org/add-ons/slot-link/"
+			draw_slot_link_warning(self.layout)
 			return
 
 		self.layout.prop(context.active_action, "stf_exclude")

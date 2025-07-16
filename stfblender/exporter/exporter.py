@@ -8,7 +8,7 @@ from ..core.stf_report import STFReportSeverity
 from ..core.stf_registry import get_export_modules
 from .stf_export_state import STF_ExportState
 from .stf_export_context import STF_ExportContext
-from ..utils.op_utils import OpenWebpage
+from ..utils.minsc import draw_slot_link_warning
 
 
 def get_stf_version() -> str:
@@ -100,10 +100,7 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 		self.layout.separator(factor=1, type="SPACE")
 
 		if(not hasattr(bpy.types.Action, "slot_links")):
-			self.layout.label(text="Note: the 'Slot Link' extension is")
-			self.layout.label(text="required to import & export animations!")
-			self.layout.operator(OpenWebpage.bl_idname).url = "https://extensions.blender.org/add-ons/slot-link/"
-			self.layout.separator(factor=1, type="SPACE")
+			draw_slot_link_warning(self.layout)
 
 		self.layout.prop_search(bpy.context.scene, "stf_collection_selector", bpy.data, "collections", text="Root")
 		self.layout.label(text="Remove Collection to export full scene")

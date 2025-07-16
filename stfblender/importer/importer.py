@@ -6,7 +6,7 @@ from .stf_import_state import STF_ImportState
 from ..core.stf_report import STFException
 from .stf_import_context import STF_ImportContext
 from ..core.stf_file import STF_File
-from ..utils.op_utils import OpenWebpage
+from ..utils.minsc import draw_slot_link_warning
 
 
 class ImportSTF(bpy.types.Operator, ImportHelper):
@@ -58,10 +58,7 @@ class ImportSTF(bpy.types.Operator, ImportHelper):
 		self.layout.separator(factor=1, type="SPACE")
 
 		if(not hasattr(bpy.types.Action, "slot_links")):
-			self.layout.label(text="Note: the 'Slot Link' extension is")
-			self.layout.label(text="required to import & export animations!")
-			self.layout.operator(OpenWebpage.bl_idname).url = "https://extensions.blender.org/add-ons/slot-link/"
-			self.layout.separator(factor=1, type="SPACE")
+			draw_slot_link_warning(self.layout)
 
 
 def import_button(self, context):

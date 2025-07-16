@@ -3,9 +3,9 @@ import bpy
 from ....exporter.stf_export_context import STF_ExportContext
 from ....importer.stf_import_context import STF_ImportContext
 from ....utils.component_utils import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref, add_component, export_component_base, import_component_base
-from ....utils.op_utils import OpenWebpage
 from ....core.stf_report import STFReport, STFReportSeverity
 from ....utils.reference_helper import export_resource
+from ....utils.minsc import draw_slot_link_warning
 
 
 _stf_type = "ava.emotes"
@@ -114,10 +114,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 	row.label(text="Emotes")
 	
 	if(not hasattr(bpy.types.Action, "slot_links")):
-		layout.label(text="Note: the 'Slot Link' extension is")
-		layout.label(text="required to import & export animations!")
-		layout.operator(OpenWebpage.bl_idname).url = "https://extensions.blender.org/add-ons/slot-link/"
-		layout.separator(factor=1, type="SPACE")
+		draw_slot_link_warning(layout)
 
 	add_button = layout.operator(Edit_AVA_Emotes.bl_idname, text="Add")
 	add_button.component_id = component.stf_id

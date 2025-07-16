@@ -4,7 +4,7 @@ from ....utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
 from ....utils.component_utils import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
 from ....utils.component_ui_utils import draw_components_ui, set_stf_component_filter
 from ....stf_meta import draw_meta_editor
-from ....utils.op_utils import OpenWebpage
+from ....utils.minsc import draw_slot_link_warning
 
 
 class STFSetCollectionAsRootOperator(bpy.types.Operator):
@@ -75,10 +75,7 @@ class STFCollectionPanel(bpy.types.Panel):
 			self.layout.label(text="stf.prefab")
 
 			if(not hasattr(bpy.types.Action, "slot_links")):
-				self.layout.label(text="Note: the 'Slot Link' extension is")
-				self.layout.label(text="required to import & export animations!")
-				self.layout.operator(OpenWebpage.bl_idname).url = "https://extensions.blender.org/add-ons/slot-link/"
-				self.layout.separator(factor=1, type="SPACE")
+				draw_slot_link_warning(self.layout)
 
 			# Export Functionality
 			if(context.scene.stf_root_collection == context.collection):
