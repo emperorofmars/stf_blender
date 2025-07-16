@@ -38,10 +38,11 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 	def execute(self, context):
 		context.window.cursor_set('WAIT')
 		files = []
+		trash_objects: list[bpy.types.Object] = []
 		try:
 			collection = context.scene.stf_collection_selector if context.scene.stf_collection_selector else context.scene.collection
 
-			stf_state = STF_ExportState([], collection.stf_meta.to_stf_meta_assetInfo(), get_export_modules(bpy.context.preferences.addons.keys()))
+			stf_state = STF_ExportState([], collection.stf_meta.to_stf_meta_assetInfo(), get_export_modules(bpy.context.preferences.addons.keys()), trash_objects)
 			stf_context = STF_ExportContext(stf_state)
 			root_id = stf_context.serialize_resource(collection)
 			stf_state.set_root_id(root_id)
@@ -84,6 +85,9 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 		finally:
 			for file in files:
 				if(file is not None and not file.closed): file.close()
+			for trash in trash_objects:
+				if(trash is not None):
+					bpy.data.objects.remove(trash)
 			context.window.cursor_set('DEFAULT')
 
 

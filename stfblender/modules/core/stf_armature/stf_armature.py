@@ -36,10 +36,8 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 	ensure_stf_id(context, blender_armature)
 
 	tmp_hook_object: bpy.types.Object = bpy.data.objects.new("TRASH", blender_armature)
+	context.register_trash_object(tmp_hook_object)
 	bpy.context.scene.collection.objects.link(tmp_hook_object)
-	def _clean_tmp_object():
-		bpy.data.objects.remove(tmp_hook_object)
-	context.add_cleanup_task(_clean_tmp_object)
 
 	root_bones = []
 	ret = {

@@ -1,3 +1,4 @@
+import bpy
 from typing import Callable
 
 from .stf_export_state import STF_ExportState
@@ -96,6 +97,9 @@ class STF_ExportContext:
 
 	def add_cleanup_task(self, task: Callable):
 		self._state._cleanup_tasks.append(task)
+	
+	def register_trash_object(self, trash: bpy.types.Object):
+		self._state._trash_objects.append(trash)
 
 
 	def report(self, report: STFReport):
@@ -114,23 +118,3 @@ class STF_ExportContext:
 
 	def get_profiles(self) -> list[STF_Profile]:
 		return self._state._profiles
-
-"""
-	def ensure_resource_properties(self):
-		if(not hasattr(self._json_resource, "referenced_resources")):
-			self._json_resource["referenced_resources"] = []
-		if(not hasattr(self._json_resource, "referenced_buffers")):
-			self._json_resource["referenced_buffers"] = []
-
-	def register_serialized_resource(self, application_object: any, json_resource: dict, id: str):
-		#self._parent_context.register_serialized_resource(application_object, json_resource, id)
-		super().register_serialized_resource(application_object, json_resource, id)
-		if(id and id not in self._json_resource["referenced_resources"]):
-			self._json_resource["referenced_resources"].append(id)
-
-	def serialize_buffer(self, data: bytes) -> str:
-		#id = self._parent_context.serialize_buffer(data)
-		id = super().serialize_buffer(data)
-		self._json_resource["referenced_buffers"].append(id)
-		return id
-"""

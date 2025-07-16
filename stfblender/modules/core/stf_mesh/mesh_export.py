@@ -29,10 +29,8 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 	armature: bpy.types.Armature = parent_application_object
 
 	tmp_blender_mesh_object: bpy.types.Object = bpy.data.objects.new("TRASH", blender_mesh)
+	context.register_trash_object(tmp_blender_mesh_object)
 	bpy.context.scene.collection.objects.link(tmp_blender_mesh_object)
-	def _clean_tmp_mesh_object():
-		bpy.data.objects.remove(tmp_blender_mesh_object)
-	context.add_cleanup_task(_clean_tmp_mesh_object)
 
 	blender_mesh.calc_loop_triangles()
 
