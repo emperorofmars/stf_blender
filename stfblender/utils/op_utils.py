@@ -28,3 +28,16 @@ class OpenWebpage(bpy.types.Operator):
 		webbrowser.open(self.url)
 		return {"FINISHED"}
 
+
+class CopyToClipboard(bpy.types.Operator):
+	"""Copy to Clipboard"""
+	bl_idname = "stf.copy_to_clipboard"
+	bl_label = "Copy to Clipboard"
+	bl_options = {"REGISTER", "UNDO"}
+
+	text: bpy.props.StringProperty() # type: ignore
+
+	def execute(self, context):
+		bpy.context.window_manager.clipboard = self.text
+		return {"FINISHED"}
+

@@ -114,6 +114,7 @@ def draw_meta_editor(layout: bpy.types.UILayout, collection: bpy.types.Collectio
 	layout.prop(collection.stf_meta, "documentation_url")
 
 	layout.separator(factor=1, type="LINE")
+	layout.label(text="Custom Properties:")
 	for custom_property in collection.stf_meta.custom_properties:
 		row = layout.row()
 		row.prop(custom_property, "name")
@@ -126,9 +127,9 @@ def draw_meta_editor(layout: bpy.types.UILayout, collection: bpy.types.Collectio
 			row.operator(STFRemoveMetaPropertyScene.bl_idname, text="", icon="X")
 
 	if(not is_scene):
-		layout.operator(STFAddMetaPropertyCollection.bl_idname)
+		layout.operator(STFAddMetaPropertyCollection.bl_idname, icon="ADD")
 	else:
-		layout.operator(STFAddMetaPropertyScene.bl_idname)
+		layout.operator(STFAddMetaPropertyScene.bl_idname, icon="ADD")
 
 
 def register():

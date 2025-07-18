@@ -1,6 +1,7 @@
 import bpy
 import uuid
 
+from ..utils.op_utils import CopyToClipboard
 from ..core.stf_report import STFReportSeverity, STFReport
 
 
@@ -19,7 +20,9 @@ class STFSetIDOperatorBase:
 
 def draw_stf_id_ui(layout: bpy.types.UILayout, context: bpy.types.Context, blender_object: any, set_id_op: str):
 	if(blender_object.stf_id):
-		layout.prop(blender_object, "stf_id")
+		row = layout.row()
+		row.prop(blender_object, "stf_id")
+		row.operator(CopyToClipboard.bl_idname)
 	else:
 		layout.operator(set_id_op)
 

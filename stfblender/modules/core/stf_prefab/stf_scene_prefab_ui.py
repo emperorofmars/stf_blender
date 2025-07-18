@@ -76,16 +76,14 @@ class STFSceneCollectionPanel(bpy.types.Panel):
 
 			# Export Functionality
 			if(context.scene.stf_root_collection == None):
-				self.layout.operator(operator=ExportSTF.bl_idname, text="Export as STF")
+				self.layout.operator(operator=ExportSTF.bl_idname, text="Export as STF", icon="EXPORT")
 			else:
 				self.layout.operator(STFSetSceneCollectionAsRootOperator.bl_idname)
 				self.layout.operator(operator=ExportSTF.bl_idname, text="Export this Scene as STF root prefab").scene_collection_as_root = True
 
 			self.layout.separator(factor=1, type="SPACE")
 
-			box = self.layout.box()
-			box.label(text="Asset Meta")
-			draw_meta_editor(box, context.scene.collection, True)
+			draw_meta_editor(self.layout.box(), context.scene.collection, True)
 
 			self.layout.separator(factor=1, type="SPACE")
 

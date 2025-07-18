@@ -1,6 +1,7 @@
 import bpy
 
-from .component_utils import STF_BlenderComponentModule, STF_Component_Ref, find_component_module, get_component_modules
+from .component_utils import STF_Component_Ref, find_component_module, get_component_modules
+from .op_utils import CopyToClipboard
 
 
 class STFDrawComponentList(bpy.types.UIList):
@@ -11,26 +12,13 @@ class STFDrawComponentList(bpy.types.UIList):
 		layout.label(text=item.stf_id)
 
 
-class CopyComponentIdToClipboard(bpy.types.Operator):
-	"""Copy Component Id to Clipboard"""
-	bl_idname = "stf.copy_component_id_to_clipboard"
-	bl_label = "Copy to Clipboard"
-	bl_options = {"REGISTER", "UNDO"}
-
-	id: bpy.props.StringProperty() # type: ignore
-
-	def execute(self, context):
-		bpy.context.window_manager.clipboard = self.id
-		return {"FINISHED"}
-
-
 def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, stf_application_object: any, component: any, edit_op: str, inject_ui = None):
 	box = layout.box()
 	box.label(text=component_ref.stf_type)
 	#box.label(text=component_ref.stf_type + " ( " + component_ref.stf_id + " )")
 	row = box.row()
 	row.label(text="ID: " + component_ref.stf_id)
-	row.operator(CopyComponentIdToClipboard.bl_idname, text="Copy").id = component_ref.stf_id
+	row.operator(CopyToClipboard.bl_idname, text="Copy").text = component_ref.stf_id
 
 	if(inject_ui):
 		if(not inject_ui(box, context, component_ref, stf_application_object, component)):
@@ -85,6 +73,8 @@ def draw_components_ui(
 
 	if(not components_ref_property):
 		components_ref_property = component_holder
+
+	layout.label(text="Components", icon="GROUP")
 
 	row = layout.row()
 	row.prop(bpy.context.scene, "stf_component_modules", text="")
