@@ -32,7 +32,7 @@ class STFEditImageComponentIdOperator(bpy.types.Operator, STFEditComponentOperat
 class STFImageSpatialPanel(bpy.types.Panel):
 	"""STF options & export helper"""
 	bl_idname = "OBJECT_PT_stf_image_editor"
-	bl_label = "STF Image Editor"
+	bl_label = "STF Editor: stf.image"
 	bl_region_type = "UI"
 	bl_space_type = "IMAGE_EDITOR"
 	bl_category = "Image"
@@ -43,8 +43,6 @@ class STFImageSpatialPanel(bpy.types.Panel):
 
 	def draw(self, context):
 		set_stf_component_filter(bpy.types.Image)
-
-		self.layout.label(text="stf.image")
 
 		# Set ID
 		draw_stf_id_ui(self.layout, context, context.edit_image, STFSetImageIDOperator.bl_idname)

@@ -31,10 +31,9 @@ class STFEditBoneComponentIdOperator(bpy.types.Operator, STFEditComponentOperato
 class STFBoneSpatialPanel(bpy.types.Panel):
 	"""STF options & export helper"""
 	bl_idname = "OBJECT_PT_stf_bone_spatial_editor"
-	bl_label = "STF Bone Editor"
+	bl_label = "STF Editor: stf.bone"
 	bl_region_type = "WINDOW"
 	bl_space_type = "PROPERTIES"
-	bl_category = "STF"
 	bl_context = "bone"
 
 	@classmethod
@@ -44,7 +43,7 @@ class STFBoneSpatialPanel(bpy.types.Panel):
 	def draw(self, context):
 		set_stf_component_filter(bpy.types.Bone)
 
-		self.layout.label(text="stf.bone.spatial")
+		self.layout.label(text="stf.bone")
 
 		# Set ID
 		draw_stf_id_ui(self.layout, context, context.bone, STFSetBoneIDOperator.bl_idname)

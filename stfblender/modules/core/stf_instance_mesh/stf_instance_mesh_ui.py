@@ -28,10 +28,9 @@ class STFSetMeshInstanceIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
 class STFMeshInstancePanel(bpy.types.Panel):
 	"""STF options & export helper"""
 	bl_idname = "OBJECT_PT_stf_mesh_instance_editor"
-	bl_label = "STF MeshInstance Editor"
+	bl_label = "STF Editor: stf.instance.mesh"
 	bl_region_type = "WINDOW"
 	bl_space_type = "PROPERTIES"
-	bl_category = "STF"
 	bl_context = "object"
 
 	@classmethod
@@ -39,8 +38,6 @@ class STFMeshInstancePanel(bpy.types.Panel):
 		return (context.object.stf_instance is not None and context.object.data and type(context.object.data) is bpy.types.Mesh)
 
 	def draw(self, context):
-		self.layout.label(text="stf.instance.mesh")
-
 		# Set ID
 		draw_stf_id_ui(self.layout, context, context.object.stf_instance, STFSetMeshInstanceIDOperator.bl_idname)
 

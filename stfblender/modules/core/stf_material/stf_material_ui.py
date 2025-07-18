@@ -46,10 +46,9 @@ class STFDrawMaterialPropertyValueList(bpy.types.UIList):
 class STFMaterialSpatialPanel(bpy.types.Panel):
 	"""STF options & export helper"""
 	bl_idname = "OBJECT_PT_stf_material_spatial_editor"
-	bl_label = "STF Material Editor"
+	bl_label = "STF Editor: stf.material"
 	bl_region_type = "WINDOW"
 	bl_space_type = "PROPERTIES"
-	bl_category = "STF"
 	bl_context = "material"
 
 	@classmethod
@@ -58,8 +57,6 @@ class STFMaterialSpatialPanel(bpy.types.Panel):
 
 	def draw(self, context):
 		set_stf_component_filter(bpy.types.Material)
-
-		self.layout.label(text="stf.material")
 
 		# Set ID
 		draw_stf_id_ui(self.layout, context, context.material, STFSetMaterialIDOperator.bl_idname)

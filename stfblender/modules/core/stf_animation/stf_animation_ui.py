@@ -32,7 +32,7 @@ class STFEditAnimationComponentIdOperator(bpy.types.Operator, STFEditComponentOp
 class STFAnimationSpatialPanel(bpy.types.Panel):
 	"""STF options & export helper"""
 	bl_idname = "OBJECT_PT_stf_animation_spatial_editor"
-	bl_label = "STF Animation Editor"
+	bl_label = "STF Editor: stf.animation"
 	bl_region_type = "UI"
 	bl_space_type = "DOPESHEET_EDITOR"
 	bl_category = "Action"
@@ -43,8 +43,6 @@ class STFAnimationSpatialPanel(bpy.types.Panel):
 
 	def draw(self, context):
 		set_stf_component_filter(bpy.types.Action)
-
-		self.layout.label(text="stf.animation")
 
 		if(not hasattr(bpy.types.Action, "slot_links")):
 			draw_slot_link_warning(self.layout)

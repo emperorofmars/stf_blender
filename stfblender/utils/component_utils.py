@@ -187,14 +187,14 @@ class STFEditComponentOperatorBase:
 
 	def draw(self, context):
 		layout: bpy.types.UILayout = self.layout
-		self.layout.prop(self, "edit_component_id")
+		layout.prop(self, "edit_component_id")
 
-		self.layout.prop(context.scene, "workaround_for_blenders_datamodel__component_overrides")
+		layout.label(text="Overrides:")
 		for index, override in enumerate(context.scene.workaround_for_blenders_datamodel__component_overrides):
-			row = self.layout.row()
-			row.prop(override, "target_id")
+			row = layout.row()
+			row.prop(override, "target_id", text="Target ID")
 			row.operator(RemoveOverrideFromComponent.bl_idname, text="", icon="X").index = index
-		self.layout.operator(AddOverrideToComponent.bl_idname)
+		layout.operator(AddOverrideToComponent.bl_idname)
 
 	def get_property(self, context) -> any:
 		pass

@@ -31,7 +31,7 @@ class STFEditMeshComponentIdOperator(bpy.types.Operator, STFEditComponentOperato
 class STFMeshSpatialPanel(bpy.types.Panel):
 	"""STF options & export helper"""
 	bl_idname = "OBJECT_PT_stf_mesh_editor"
-	bl_label = "STF Mesh Editor"
+	bl_label = "STF Editor: stf.mesh"
 	bl_region_type = "WINDOW"
 	bl_space_type = "PROPERTIES"
 	bl_category = "STF"
@@ -43,8 +43,6 @@ class STFMeshSpatialPanel(bpy.types.Panel):
 
 	def draw(self, context):
 		set_stf_component_filter(bpy.types.Mesh)
-
-		self.layout.label(text="stf.mesh")
 
 		if(context.object.find_armature()):
 			t, r, s = context.object.matrix_local.decompose()

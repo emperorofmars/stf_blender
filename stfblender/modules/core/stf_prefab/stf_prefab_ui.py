@@ -52,7 +52,7 @@ class STFEditCollectionComponentIdOperator(bpy.types.Operator, STFEditComponentO
 class STFCollectionPanel(bpy.types.Panel):
 	"""STF options & export helper"""
 	bl_idname = "COLLECTION_PT_stf_collection_editor"
-	bl_label = "STF Collection Editor"
+	bl_label = "STF Editor: stf.prefab"
 	bl_region_type = "WINDOW"
 	bl_space_type = "PROPERTIES"
 	bl_category = "STF"
@@ -72,10 +72,7 @@ class STFCollectionPanel(bpy.types.Panel):
 		self.layout.prop(context.collection, "stf_use_collection_as_prefab")
 
 		if(context.collection.stf_use_collection_as_prefab):
-			self.layout.label(text="stf.prefab")
-
-			if(not hasattr(bpy.types.Action, "slot_links")):
-				draw_slot_link_warning(self.layout)
+			draw_slot_link_warning(self.layout)
 
 			# Export Functionality
 			if(context.scene.stf_root_collection == context.collection):

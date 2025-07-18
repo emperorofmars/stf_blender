@@ -61,7 +61,6 @@ class STFArmatureInstancePanel(bpy.types.Panel):
 	bl_label = "STF Editor: stf.instance.armature"
 	bl_region_type = "WINDOW"
 	bl_space_type = "PROPERTIES"
-	bl_category = "STF"
 	bl_context = "object"
 
 	@classmethod

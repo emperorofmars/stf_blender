@@ -31,10 +31,9 @@ class STFEditArmatureComponentIdOperator(bpy.types.Operator, STFEditComponentOpe
 class STFArmatureSpatialPanel(bpy.types.Panel):
 	"""STF options & export helper"""
 	bl_idname = "OBJECT_PT_stf_armature_spatial_editor"
-	bl_label = "STF Armature Editor"
+	bl_label = "STF Editor: stf.armature"
 	bl_region_type = "WINDOW"
 	bl_space_type = "PROPERTIES"
-	bl_category = "STF"
 	bl_context = "data"
 
 	@classmethod

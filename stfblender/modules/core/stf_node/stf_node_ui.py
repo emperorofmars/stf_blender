@@ -34,7 +34,6 @@ class STFNodePanel(bpy.types.Panel):
 	bl_label = "STF Editor: stf.node"
 	bl_region_type = "WINDOW"
 	bl_space_type = "PROPERTIES"
-	bl_category = "STF"
 	bl_context = "object"
 
 	@classmethod
