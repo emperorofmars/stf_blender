@@ -21,9 +21,7 @@ def import_stf_mesh(context: STF_ImportContext, json_resource: dict, stf_id: str
 		blender_mesh.stf_name_source_of_truth = True
 
 	tmp_blender_mesh_object = bpy.data.objects.new("STF TMP throw away", blender_mesh)
-	def _clean_tmp_mesh_object():
-		bpy.data.objects.remove(tmp_blender_mesh_object)
-	context.add_cleanup_task(_clean_tmp_mesh_object)
+	context.register_trash_object(tmp_blender_mesh_object)
 
 	indices_width: int = json_resource.get("indices_width", 4)
 	float_width: int = json_resource.get("float_width", 4)
@@ -160,6 +158,7 @@ def import_stf_mesh(context: STF_ImportContext, json_resource: dict, stf_id: str
 			context.report(STFReport("Invalid Armature (armature id: " + json_resource["armature"] + " )", STFReportSeverity.Error, stf_id, _stf_type, blender_mesh))
 		else:
 			bone_indices_width = json_resource.get("bone_indices_width", 1)
+			weight_lens_width = json_resource.get("weight_lens_width", 1)
 			bones = []
 			vertex_groups = []
 			for bone_id in json_resource["bones"]:
@@ -175,7 +174,7 @@ def import_stf_mesh(context: STF_ImportContext, json_resource: dict, stf_id: str
 			buffer_bone_indices = BytesIO(context.import_buffer(json_resource["bone_indices"]))
 			buffer_weights = BytesIO(context.import_buffer(json_resource["weights"]))
 			for vertex in blender_mesh.vertices:
-				weights_count = parse_uint(buffer_weight_lens, indices_width)
+				weights_count = parse_uint(buffer_weight_lens, weight_lens_width)
 				for weight_index in range(weights_count):
 					bone_index = parse_uint(buffer_bone_indices, bone_indices_width)
 					weight = parse_float(buffer_weights, float_width)

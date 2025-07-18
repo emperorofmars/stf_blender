@@ -70,17 +70,17 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 			do_report = False
 			if(len(stf_state._reports) > 0):
 				for report in stf_state._reports:
-					if(report.severity.value >= STFReportSeverity.Info.value):
+					if(report.severity.value >= STFReportSeverity.Warn.value):
 						do_report = True
 						break
 			if(do_report):
 				self.report({'WARNING'}, "STF asset exported with reports!")
-				for report in stf_state._reports:
-					if(report.severity.value >= STFReportSeverity.Info.value):
-						print(report.to_string() + "\n")
-						self.report({'WARNING'}, report.to_string())
 			else:
 				self.report({'INFO'}, "STF asset exported successfully!")
+			for report in stf_state._reports:
+				if(report.severity.value >= STFReportSeverity.Warn.value):
+					self.report({'WARNING'}, report.to_string())
+				print(report.to_string() + "\n")
 			return {"FINISHED"}
 		finally:
 			for file in files:

@@ -98,10 +98,10 @@ def _stf_export(context: STF_ExportContext, application_object: any, parent_appl
 	blender_animation: bpy.types.Action = application_object
 	if(blender_animation.stf_exclude): return None
 	if(blender_animation.is_action_legacy):
-		context.report(STFReport("Ignoring legacy animation: " + blender_animation.name, STFReportSeverity.Warn, blender_animation.stf_id, _stf_type, application_object))
+		context.report(STFReport("Ignoring legacy animation: " + blender_animation.name, STFReportSeverity.Info, blender_animation.stf_id, _stf_type, application_object))
 		return None
 	if(not hasattr(blender_animation, "slot_links")):
-		context.report(STFReport("Slot Links are required to export animations!", STFReportSeverity.Warn, blender_animation.stf_id, _stf_type, application_object))
+		context.report(STFReport("Slot Links are required to export animations!", STFReportSeverity.Info, blender_animation.stf_id, _stf_type, application_object))
 		return None
 
 	for slot_link in blender_animation.slot_links:
@@ -109,7 +109,7 @@ def _stf_export(context: STF_ExportContext, application_object: any, parent_appl
 			single_slotlink_valid = True
 			break
 	else:
-		context.report(STFReport("No valid Slot Link target specified!", STFReportSeverity.Warn, blender_animation.stf_id, _stf_type, application_object))
+		context.report(STFReport("No valid Slot Link target specified!", STFReportSeverity.Info, blender_animation.stf_id, _stf_type, application_object))
 		return None
 
 	ensure_stf_id(context, blender_animation)

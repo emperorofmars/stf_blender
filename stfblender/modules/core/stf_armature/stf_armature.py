@@ -20,10 +20,8 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 		blender_armature.stf_name_source_of_truth = True
 
 	tmp_hook_object: bpy.types.Object = bpy.data.objects.new("TRASH", blender_armature)
+	context.register_trash_object(tmp_hook_object)
 	bpy.context.scene.collection.objects.link(tmp_hook_object)
-	def _clean_tmp_object():
-		bpy.data.objects.remove(tmp_hook_object)
-	context.add_cleanup_task(_clean_tmp_object)
 
 	for bone_id in json_resource.get("root_bones", []):
 		context.import_resource(bone_id, tmp_hook_object, "node")

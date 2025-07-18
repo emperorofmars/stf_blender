@@ -1,3 +1,4 @@
+import bpy
 from typing import Callable
 
 from .stf_import_state import STF_ImportState
@@ -77,6 +78,9 @@ class STF_ImportContext:
 
 	def add_cleanup_task(self, task: Callable):
 		self._state._cleanup_tasks.append(task)
+	
+	def register_trash_object(self, trash: bpy.types.Object):
+		self._state._trash_objects.append(trash)
 
 	def get_root_id(self) -> str:
 		return self._state._file.definition.stf.root

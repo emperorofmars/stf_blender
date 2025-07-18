@@ -217,7 +217,7 @@ def _stf_export(context: STF_ExportContext, component: AVA_Emotes, context_objec
 
 					json_emote["fallback"] = fallback
 			else:
-				context.report(STFReport("Invalid Emote", STFReportSeverity.Warn, component.stf_id, _stf_type, component))
+				context.report(STFReport("Invalid Emote", STFReportSeverity.Info, component.stf_id, _stf_type, component))
 
 	context.add_task(_handle)
 

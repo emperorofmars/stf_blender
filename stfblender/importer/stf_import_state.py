@@ -1,3 +1,5 @@
+import bpy
+
 from ..core.stf_report import STFReportSeverity, STFReport
 from ..core.stf_file import STF_File
 from ..core.stf_module import STF_Module
@@ -11,7 +13,7 @@ class STF_ImportState(StateUtil):
 	Each context must have access to the same STF_ImportState instance.
 	"""
 
-	def __init__(self, file: STF_File, modules: dict[str, STF_Module], fail_on_severity: STFReportSeverity = STFReportSeverity.FatalError, fallback_modules: dict[str, STF_Module] = {}):
+	def __init__(self, file: STF_File, modules: dict[str, STF_Module], trash_objects: list[bpy.types.Object] = [], fail_on_severity: STFReportSeverity = STFReportSeverity.FatalError, fallback_modules: dict[str, STF_Module] = {}):
 		super().__init__(fail_on_severity)
 
 		self._file = file
@@ -22,6 +24,8 @@ class STF_ImportState(StateUtil):
 		self._imported_resources: dict[str, any] = {} # ID | list of IDs -> imported object
 		self._profiles: list[STF_Profile]
 		self._asset_info: STF_Meta_AssetInfo
+
+		self._trash_objects: list[bpy.types.Object] = trash_objects
 
 
 	def determine_module(self, json_resource: dict, stf_kind: str = None) -> STF_Module:

@@ -49,7 +49,7 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 
 	float_width = 4
 
-	max_len_indices = max(len(blender_mesh.loops), len(blender_mesh.polygons))
+	max_len_indices = len(blender_mesh.loops)
 	## let indices_width
 	if(max_len_indices <= 2**8):
 		indices_width = 1
@@ -232,6 +232,8 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 		## else wtf
 		stf_mesh["bone_indices_width"] = bone_indices_width
 
+		max_len_weights_per_vertex = 0
+
 		# list[list[tuple[bone_index, weight]]]
 		vertex_weights: list[list[tuple[int, float]]] = []
 		for vertex in blender_mesh.vertices:
@@ -240,14 +242,27 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 				if(group.group in group_to_bone_index and group.weight > export_options["float_treshhold_blendshape"]):
 					group_arr.append((group_to_bone_index[group.group], group.weight))
 			group_arr.sort(key=lambda e: e[1], reverse=True)
+			max_len_weights_per_vertex = max(max_len_weights_per_vertex, len(group_arr))
 			vertex_weights.append(group_arr)
+
+		## let weight_lens_width
+		if(max_len_weights_per_vertex <= 2**8):
+			weight_lens_width = 1
+		elif(max_len_weights_per_vertex <= 2**16):
+			weight_lens_width = 2
+		elif(max_len_weights_per_vertex <= 2**32):
+			weight_lens_width = 4
+		elif(max_len_weights_per_vertex <= 2**64):
+			weight_lens_width = 8
+		
+		stf_mesh["weight_lens_width"] = weight_lens_width
 
 		weight_lens = BytesIO()
 		buffer_bone_indices = BytesIO()
 		buffer_weights = BytesIO()
 		for weights in vertex_weights:
 			# Write the number of weights for that vertex
-			weight_lens.write(serialize_uint(len(weights), indices_width)) # weights per vertex
+			weight_lens.write(serialize_uint(len(weights), weight_lens_width)) # weights per vertex
 			for weight in weights:
 				# Write the bone index and bone weight
 				buffer_bone_indices.write(serialize_uint(weight[0], bone_indices_width)) # bone index

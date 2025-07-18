@@ -23,12 +23,13 @@ class ImportSTF(bpy.types.Operator, ImportHelper):
 	def execute(self, context):
 		context.window.cursor_set('WAIT')
 		file = None
+		trash_objects: list[bpy.types.Object] = []
 		try:
 			# Read and parse stf_file from disk
 			file = open(self.filepath, "rb")
 			stf_file = STF_File.parse(file)
 
-			stf_state = STF_ImportState(stf_file, get_import_modules(bpy.context.preferences.addons.keys()))
+			stf_state = STF_ImportState(stf_file, get_import_modules(bpy.context.preferences.addons.keys()), trash_objects)
 			stf_context = STF_ImportContext(stf_state)
 			root: bpy.types.Collection = stf_context.import_resource(stf_context.get_root_id(), "data")
 			stf_state.run_tasks()
@@ -51,6 +52,9 @@ class ImportSTF(bpy.types.Operator, ImportHelper):
 			return {"CANCELLED"}
 		finally:
 			if(file is not None and not file.closed): file.close()
+			for trash in trash_objects:
+				if(trash is not None):
+					bpy.data.objects.remove(trash)
 			context.window.cursor_set('DEFAULT')
 
 	def draw(self, context):
