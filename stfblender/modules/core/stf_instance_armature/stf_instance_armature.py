@@ -99,11 +99,9 @@ def _can_handle_application_object_func(application_object: any) -> int:
 def _stf_export(context: STF_ExportContext, application_object: any, context_object: any) -> tuple[dict, str]:
 	blender_object: bpy.types.Object = application_object[0]
 	blender_armature: bpy.types.Armature = application_object[1]
+
 	ensure_stf_id(context, blender_object.stf_instance)
-	ret = {
-		"type": _stf_type,
-		"name": blender_object.stf_instance.stf_name
-	}
+	ret = {"type": _stf_type, "name": blender_object.stf_instance.stf_name}
 
 	ret["armature"] = context.serialize_resource(blender_armature, module_kind="data")
 

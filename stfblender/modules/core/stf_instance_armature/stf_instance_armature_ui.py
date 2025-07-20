@@ -71,7 +71,7 @@ class STFArmatureInstancePanel(bpy.types.Panel):
 		set_stf_component_filter(bpy.types.Bone)
 
 		# Set ID
-		draw_stf_id_ui(self.layout, context, context.object.stf_instance, STFSetArmatureInstanceIDOperator.bl_idname)
+		draw_stf_id_ui(self.layout, context, context.object.stf_instance, STFSetArmatureInstanceIDOperator.bl_idname, True)
 
 		self.layout.separator(factor=2, type="LINE")
 

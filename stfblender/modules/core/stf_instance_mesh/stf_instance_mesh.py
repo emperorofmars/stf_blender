@@ -6,6 +6,7 @@ import bpy
 from ....exporter.stf_export_context import STF_ExportContext
 from ....importer.stf_import_context import STF_ImportContext
 from ....core.stf_module import STF_Module
+from ....utils.id_utils import ensure_stf_id
 from ....core.stf_report import STFReportSeverity, STFReport
 from ....utils.component_utils import get_components_from_object
 from .stf_instance_mesh_util import set_instance_blendshapes
@@ -17,7 +18,7 @@ _stf_type = "stf.instance.mesh"
 class STF_Instance_Mesh_Blendshape_Value(bpy.types.PropertyGroup):
 	name: bpy.props.StringProperty(name="Name") # type: ignore
 	override: bpy.props.BoolProperty(name="Override", default=False) # type: ignore
-	value: bpy.props.FloatProperty(name="Value", default=0) # type: ignore
+	value: bpy.props.FloatProperty(name="Value", default=0, soft_min=0, soft_max=1, subtype="FACTOR") # type: ignore
 
 class STF_Instance_Mesh_Material(bpy.types.PropertyGroup):
 	material: bpy.props.PointerProperty(type=bpy.types.Material, name="Material") # type: ignore
@@ -72,7 +73,9 @@ def _can_handle_application_object_func(application_object: any) -> int:
 def _stf_export(context: STF_ExportContext, application_object: any, context_object: any) -> tuple[dict, str]:
 	blender_object: bpy.types.Object = application_object[0]
 	blender_mesh: bpy.types.Mesh = application_object[1]
-	ret = {"type": _stf_type}
+	
+	ensure_stf_id(context, blender_object.stf_instance)
+	ret = {"type": _stf_type, "name": blender_object.stf_instance.stf_name}
 
 	blender_object.update_from_editmode()
 

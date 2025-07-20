@@ -63,6 +63,9 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 		trs_utils.trs_to_blender_object(json_resource["trs"], blender_object)
 	context.add_task(_trs_callback)
 
+	if("enabled" in json_resource and json_resource["enabled"] == False):
+		blender_object.hide_render = True
+
 	return blender_object
 
 
@@ -106,7 +109,6 @@ def _stf_export(context: STF_ExportContext, blender_object: any, context_object:
 		if(blender_object.parent):
 			match(blender_object.parent_type):
 				case "OBJECT":
-					# TODO check if object is a prefab instance and deal with that whenever prefab instances are a thing.
 					pass
 				case "BONE":
 					# TODO make this more generic

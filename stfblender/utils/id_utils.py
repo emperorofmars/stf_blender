@@ -18,7 +18,7 @@ class STFSetIDOperatorBase:
 		pass
 
 
-def draw_stf_id_ui(layout: bpy.types.UILayout, context: bpy.types.Context, blender_object: any, set_id_op: str):
+def draw_stf_id_ui(layout: bpy.types.UILayout, context: bpy.types.Context, blender_object: any, set_id_op: str, is_instance: bool = False):
 	if(blender_object.stf_id):
 		row = layout.row()
 		row.prop(blender_object, "stf_id")
@@ -26,11 +26,12 @@ def draw_stf_id_ui(layout: bpy.types.UILayout, context: bpy.types.Context, blend
 	else:
 		layout.operator(set_id_op)
 
-	if(blender_object.stf_name or blender_object.stf_name_source_of_truth):
+	if(not is_instance):
 		layout.prop(blender_object, "stf_name_source_of_truth")
+
+	if(blender_object.stf_name or blender_object.stf_name_source_of_truth):
 		layout.prop(blender_object, "stf_name")
 	else:
-		layout.prop(blender_object, "stf_name_source_of_truth")
 		layout.label(text="Using Blender Name: " + blender_object.name)
 
 
