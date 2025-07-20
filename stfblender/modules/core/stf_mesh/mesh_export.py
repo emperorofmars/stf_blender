@@ -1,6 +1,7 @@
 from io import BytesIO
 import bpy
 import numpy as np
+import mathutils
 
 from ....exporter.stf_export_context import STF_ExportContext
 from ....utils.id_utils import ensure_stf_id
@@ -12,11 +13,10 @@ _stf_type = "stf.mesh"
 
 export_options: dict = {
 	"export_normals": True,
-	"export_tangents": True,
 	"export_colors": True,
-	"float_treshhold_blendshape": 0.0001,
 	"export_blendshape_normals": True,
-	"export_blendshape_tangents": True,
+	"float_treshhold": 0.0001,
+	"float_treshhold_blendshape": 0.0001,
 }
 
 
@@ -96,15 +96,60 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 	for color_buffer in buffers_color:
 		stf_mesh["colors"].append(context.serialize_buffer(color_buffer.getvalue()))
 
+
+	# Prepare optimization of splits
+	def compareUVs(a: int, b: int) -> bool:
+		for uv_layer in blender_mesh.uv_layers:
+			if ((uv_layer.uv[a].vector - uv_layer.uv[b].vector).length > export_options["float_treshhold"]):
+				return False
+		return True
+
+	verts_to_split: dict[int, list] = {}
+	deduped_split_indices: list[int] = []
+	split_to_deduped_split_index: list[int] = []
+	for loop in blender_mesh.loops:
+		splitIndex = loop.index
+		vertexIndex = loop.vertex_index
+
+		if (vertexIndex not in verts_to_split):
+			verts_to_split[vertexIndex] = [splitIndex]
+			deduped_split_indices.append(splitIndex)
+			split_to_deduped_split_index.append(len(deduped_split_indices) - 1)
+		else:
+			success = False
+			for candidateIndex in range(len(verts_to_split[vertexIndex])):
+				splitCandidate = verts_to_split[vertexIndex][candidateIndex]
+				if (
+					(loop.normal - blender_mesh.loops[splitCandidate].normal).length < export_options["float_treshhold"]
+					and compareUVs(splitIndex, splitCandidate)
+					# TODO colors
+				):
+					split_to_deduped_split_index.append(split_to_deduped_split_index[splitCandidate])
+					success = True
+					break
+			if (not success):
+				verts_to_split[vertexIndex].append(splitIndex)
+				deduped_split_indices.append(splitIndex)
+				split_to_deduped_split_index.append(len(deduped_split_indices) - 1)
+	
+	deduped_split_indices = np.array(deduped_split_indices, dtype=determine_pack_format_uint(indices_width))
+	split_to_deduped_split_index = np.array(split_to_deduped_split_index, dtype=determine_pack_format_uint(indices_width))
+
+
 	# splits
 	buffer_split_vertices = np.zeros(len(blender_mesh.loops), dtype=determine_pack_format_uint(indices_width))
 	blender_mesh.loops.foreach_get("vertex_index", buffer_split_vertices)
+	buffer_split_vertices = buffer_split_vertices[deduped_split_indices]
+	
+	stf_mesh["deduped_splits"] = context.serialize_buffer(split_to_deduped_split_index.tobytes()) # Index of unique face corner to index of shared split data
 	stf_mesh["splits"] = context.serialize_buffer(buffer_split_vertices.tobytes())
+
 
 	# normals
 	buffer_split_normals = np.zeros(len(blender_mesh.loops) * 3, dtype=determine_pack_format_float(float_width))
 	blender_mesh.loops.foreach_get("normal", buffer_split_normals)
 	buffer_split_normals = np.reshape(buffer_split_normals, (-1, 3))
+	buffer_split_normals = buffer_split_normals[deduped_split_indices]
 	buffer_split_normals[:, [1, 2]] = buffer_split_normals[:, [2, 1]]
 	buffer_split_normals[:, 2] *= -1
 	stf_mesh["split_normals"] = context.serialize_buffer(buffer_split_normals.tobytes())
@@ -115,6 +160,7 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 		buffer_uv = np.zeros(len(blender_mesh.loops) * 2, dtype=determine_pack_format_float(float_width))
 		uv_layer.uv.foreach_get("vector", buffer_uv)
 		buffer_uv = np.reshape(buffer_uv, (-1, 2))
+		buffer_uv = buffer_uv[deduped_split_indices]
 		buffer_uv[:, 1] = 1 - buffer_uv[:, 1]
 		uvs.append({"name": uv_layer.name, "uv": context.serialize_buffer(buffer_uv.tobytes())})
 	stf_mesh["uvs"] = uvs
@@ -156,6 +202,7 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 			face_lens.append(1)
 		for split_index in tris.loops:
 			buffer_tris.write(serialize_uint(split_index, indices_width))
+			#buffer_tris.write(serialize_uint(split_to_deduped_split_index[split_index], indices_width))
 		last_face_index = tris.polygon_index
 
 	stf_mesh["tris"] = context.serialize_buffer(buffer_tris.getvalue())
@@ -344,6 +391,7 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 			if(export_options["export_blendshape_normals"]):
 				blendshape_normals_split_buffer = np.array(shape_key.normals_split_get(), dtype=determine_pack_format_float(float_width))
 				blendshape_normals_split_buffer = np.reshape(blendshape_normals_split_buffer, (-1, 3))
+				blendshape_normals_split_buffer = blendshape_normals_split_buffer[deduped_split_indices]
 				blendshape_normals_split_buffer[:, [1, 2]] = blendshape_normals_split_buffer[:, [2, 1]]
 				blendshape_normals_split_buffer[:, 2] *= -1
 

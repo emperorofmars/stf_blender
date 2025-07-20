@@ -80,7 +80,8 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 			for report in stf_state._reports:
 				if(report.severity.value >= STFReportSeverity.Warn.value):
 					self.report({'WARNING'}, report.to_string())
-				print(report.to_string() + "\n")
+				if(report.severity.value >= STFReportSeverity.Info.value):
+					print(report.to_string() + "\n")
 			return {"FINISHED"}
 		finally:
 			for file in files:

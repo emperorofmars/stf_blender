@@ -35,6 +35,13 @@ def import_stf_mesh(context: STF_ImportContext, json_resource: dict, stf_id: str
 
 	# Splits
 	buffer_splits = np.frombuffer(context.import_buffer(json_resource["splits"]), dtype=determine_pack_format_uint(indices_width))
+	# let deduped_splits, buffer_full_splits
+	if("deduped_splits" in json_resource):
+		deduped_splits = np.frombuffer(context.import_buffer(json_resource["deduped_splits"]), dtype=determine_pack_format_uint(indices_width))
+		buffer_full_splits = buffer_splits[deduped_splits]
+	else:
+		deduped_splits = np.array(range(len(buffer_splits)))
+		buffer_full_splits = buffer_splits
 
 	# Faces
 	py_faces = []
@@ -52,7 +59,7 @@ def import_stf_mesh(context: STF_ImportContext, json_resource: dict, stf_id: str
 
 			face_indices = []
 			for split_index in sorted(face_splits):
-				face_indices.append(buffer_splits[split_index])
+				face_indices.append(buffer_full_splits[split_index])
 			py_faces.append(face_indices)
 
 
@@ -115,7 +122,8 @@ def import_stf_mesh(context: STF_ImportContext, json_resource: dict, stf_id: str
 			buffer_split_normals = np.reshape(buffer_split_normals, (-1, 3))
 			buffer_split_normals[:, 2] *= -1
 			buffer_split_normals[:, [1, 2]] = buffer_split_normals[:, [2, 1]]
-			blender_mesh.normals_split_custom_set(buffer_split_normals)
+			#blender_mesh.normals_split_custom_set(buffer_split_normals)
+			blender_mesh.normals_split_custom_set(buffer_split_normals[deduped_splits])
 
 		if("uvs" in json_resource):
 			for uv_layer_index in range(len(json_resource["uvs"])):
@@ -123,6 +131,7 @@ def import_stf_mesh(context: STF_ImportContext, json_resource: dict, stf_id: str
 				buffer_uv = np.copy(np.frombuffer(context.import_buffer(json_resource["uvs"][uv_layer_index]["uv"]), dtype=determine_pack_format_float(float_width)))
 				buffer_uv = np.reshape(buffer_uv, (-1, 2))
 				buffer_uv[:, 1] = 1 - buffer_uv[:, 1]
+				buffer_uv = buffer_uv[deduped_splits]
 				uv_layer.uv.foreach_set("vector", np.reshape(buffer_uv, -1))
 
 		if("split_colors" in json_resource):
