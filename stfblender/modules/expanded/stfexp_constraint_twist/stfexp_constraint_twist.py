@@ -7,6 +7,7 @@ from ....importer.stf_import_context import STF_ImportContext
 from ....utils.component_utils import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref, add_component, export_component_base, import_component_base
 from ....utils.armature_bone import ArmatureBone
 from ....utils.reference_helper import export_resource
+from ....utils.animation_conversion_utils import get_component_stf_path
 
 
 _stf_type = "stfexp.constraint.twist"
@@ -95,24 +96,28 @@ def _stf_export(context: STF_ExportContext, component: STFEXP_Constraint_Twist, 
 def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: any, application_object_property_index: int, data_path: str) -> tuple[list[str], Callable[[int, any], any], list[int]]:
 	if(match := re.search(r"^stfexp_constraint_twist\[(?P<component_index>[\d]+)\].weight", data_path)):
 		component = application_object.stfexp_constraint_twist[int(match.groupdict()["component_index"])]
-		for component_ref in application_object.stf_components:
-			if(component_ref.stf_id == component.stf_id):
-				return [application_object.stf_id, "components", component.stf_id, "weight"], None, None
-		for component_ref in application_object.stf_instance.stf_components:
-			if(component_ref.stf_id == component.stf_id):
-				return [application_object.stf_id, "instance", component_ref.node_id, "components", component.stf_id, "weight"], None, None
-		# TODO animation_placeholders in instances.
+		component_path = get_component_stf_path(application_object, component)
+		if(component_path):
+			return component_path + ["weight"], None, None
+	if(match := re.search(r"^stfexp_constraint_twist\[(?P<component_index>[\d]+)\].enabled", data_path)):
+		component = application_object.stfexp_constraint_twist[int(match.groupdict()["component_index"])]
+		component_path = get_component_stf_path(application_object, component)
+		if(component_path):
+			return component_path + ["enabled"], None, None
 	return None
 
 
 def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: any) -> tuple[any, int, any, any, list[int], Callable[[int, any], any]]:
 	blender_object = context.get_imported_resource(stf_path[0])
+	# let component_index
+	for component_index, component in enumerate(application_object.stfexp_constraint_twist):
+		if(component.stf_id == blender_object.stf_id):
+			break
 	match(stf_path[1]):
 		case "weight":
-			for component_index, component in enumerate(application_object.stfexp_constraint_twist):
-				if(component.stf_id == blender_object.stf_id):
-					break
 			return None, 0, "OBJECT", "stfexp_constraint_twist[" + str(component_index) + "].weight", 0, None
+		case "enabled":
+			return None, 0, "OBJECT", "stfexp_constraint_twist[" + str(component_index) + "].enabled", 0, None
 	return None
 
 
@@ -125,7 +130,7 @@ class STF_Module_STFEXP_Constraint_Twist(STF_BlenderComponentModule):
 	export_func = _stf_export
 
 	understood_application_property_path_types = [bpy.types.Object]
-	understood_application_property_path_parts = ["stfexp_constraint_twist"]
+	understood_application_property_path_parts = [_blender_property_name]
 	resolve_property_path_to_stf_func = _resolve_property_path_to_stf_func
 	resolve_stf_property_to_blender_func = _resolve_stf_property_to_blender_func
 

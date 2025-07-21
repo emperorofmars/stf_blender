@@ -1,11 +1,13 @@
+import re
+from typing import Callable
 import bpy
 import mathutils
-import json
 
 from ....exporter.stf_export_context import STF_ExportContext
 from ....importer.stf_import_context import STF_ImportContext
 from ....utils.component_utils import ComponentLoadJsonOperatorBase, STF_BlenderBoneComponentModule, STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref, add_component, export_component_base, import_component_base
 from ....utils.trs_utils import blender_translation_to_stf, stf_translation_to_blender
+from ....utils.animation_conversion_utils import get_component_stf_path
 
 
 _stf_type = "ava.collider.sphere"
@@ -95,6 +97,27 @@ def _stf_export(context: STF_ExportContext, component: AVA_Collider_Sphere, cont
 	return ret, component.stf_id
 
 
+def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: any, application_object_property_index: int, data_path: str) -> tuple[list[str], Callable[[int, any], any], list[int]]:
+	if(match := re.search(r"^ava_collider_sphere\[(?P<component_index>[\d]+)\].enabled", data_path)):
+		component = application_object.ava_collider_sphere[int(match.groupdict()["component_index"])]
+		component_path = get_component_stf_path(application_object, component)
+		if(component_path):
+			return component_path + ["enabled"], None, None
+	return None
+
+
+def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: any) -> tuple[any, int, any, any, list[int], Callable[[int, any], any]]:
+	blender_object = context.get_imported_resource(stf_path[0])
+	# let component_index
+	for component_index, component in enumerate(application_object.ava_collider_sphere):
+		if(component.stf_id == blender_object.stf_id):
+			break
+	match(stf_path[1]):
+		case "enabled":
+			return None, 0, "OBJECT", "ava_collider_sphere[" + str(component_index) + "].enabled", 0, None
+	return None
+
+
 class STF_Module_AVA_Collider_Sphere(STF_BlenderBoneComponentModule):
 	stf_type = _stf_type
 	stf_kind = "component"
@@ -102,6 +125,11 @@ class STF_Module_AVA_Collider_Sphere(STF_BlenderBoneComponentModule):
 	understood_application_types = [AVA_Collider_Sphere]
 	import_func = _stf_import
 	export_func = _stf_export
+
+	understood_application_property_path_types = [bpy.types.Object]
+	understood_application_property_path_parts = [_blender_property_name]
+	resolve_property_path_to_stf_func = _resolve_property_path_to_stf_func
+	resolve_stf_property_to_blender_func = _resolve_stf_property_to_blender_func
 
 	blender_property_name = _blender_property_name
 	single = False

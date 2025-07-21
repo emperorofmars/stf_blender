@@ -35,13 +35,14 @@ def import_stf_mesh(context: STF_ImportContext, json_resource: dict, stf_id: str
 
 	# Splits
 	buffer_splits = np.frombuffer(context.import_buffer(json_resource["splits"]), dtype=determine_pack_format_uint(indices_width))
-	# let deduped_splits, buffer_full_splits
-	if("deduped_splits" in json_resource):
-		deduped_splits = np.frombuffer(context.import_buffer(json_resource["deduped_splits"]), dtype=determine_pack_format_uint(indices_width))
-		buffer_full_splits = buffer_splits[deduped_splits]
+	# let face_corners, buffer_full_splits
+	if("face_corners" in json_resource):
+		face_corners = np.frombuffer(context.import_buffer(json_resource["face_corners"]), dtype=determine_pack_format_uint(indices_width))
+		buffer_full_splits = buffer_splits[face_corners]
 	else:
-		deduped_splits = np.array(range(len(buffer_splits)))
+		face_corners = np.array(range(len(buffer_splits)))
 		buffer_full_splits = buffer_splits
+
 
 	# Faces
 	py_faces = []
@@ -122,8 +123,7 @@ def import_stf_mesh(context: STF_ImportContext, json_resource: dict, stf_id: str
 			buffer_split_normals = np.reshape(buffer_split_normals, (-1, 3))
 			buffer_split_normals[:, 2] *= -1
 			buffer_split_normals[:, [1, 2]] = buffer_split_normals[:, [2, 1]]
-			#blender_mesh.normals_split_custom_set(buffer_split_normals)
-			blender_mesh.normals_split_custom_set(buffer_split_normals[deduped_splits])
+			blender_mesh.normals_split_custom_set(buffer_split_normals[face_corners])
 
 		if("uvs" in json_resource):
 			for uv_layer_index in range(len(json_resource["uvs"])):
@@ -131,10 +131,10 @@ def import_stf_mesh(context: STF_ImportContext, json_resource: dict, stf_id: str
 				buffer_uv = np.copy(np.frombuffer(context.import_buffer(json_resource["uvs"][uv_layer_index]["uv"]), dtype=determine_pack_format_float(float_width)))
 				buffer_uv = np.reshape(buffer_uv, (-1, 2))
 				buffer_uv[:, 1] = 1 - buffer_uv[:, 1]
-				buffer_uv = buffer_uv[deduped_splits]
+				buffer_uv = buffer_uv[face_corners]
 				uv_layer.uv.foreach_set("vector", np.reshape(buffer_uv, -1))
 
-		if("split_colors" in json_resource):
+		if("split_colors" in json_resource): # todo rework / optimize this
 			for index in range(len(json_resource["split_colors"])):
 				color_attribute = blender_mesh.color_attributes.new("Color", "FLOAT_COLOR", "POINT")
 				buffer_split_colors = BytesIO(context.import_buffer(json_resource["split_colors"][index]))

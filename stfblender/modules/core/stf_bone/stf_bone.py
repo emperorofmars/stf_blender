@@ -127,6 +127,8 @@ def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: 
 			return None, 0, "OBJECT", "pose.bones[\"" + blender_object.name + "\"].scale", scale_bone_index_conversion_to_blender, convert_bone_scale_to_blender
 		case "components":
 			return context.resolve_stf_property_path(stf_path[2:], application_object)
+		case "component_mods":
+			return context.resolve_stf_property_path(stf_path[2:], application_object)
 
 	return None
 
