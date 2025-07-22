@@ -105,16 +105,6 @@ def import_stf_mesh(context: STF_ImportContext, json_resource: dict, stf_id: str
 			else:
 				pass # TODO warn about invalid data
 
-	if("colors" in json_resource):
-		for index in range(len(json_resource["colors"])):
-			color_attribute = blender_mesh.color_attributes.new("Color", "FLOAT_COLOR", "POINT")
-			buffer_vertex_colors = BytesIO(context.import_buffer(json_resource["colors"][index]))
-			for index, _vertex in enumerate(blender_mesh.vertices):
-				r = parse_float(buffer_vertex_colors, float_width)
-				g = parse_float(buffer_vertex_colors, float_width)
-				b = parse_float(buffer_vertex_colors, float_width)
-				a = parse_float(buffer_vertex_colors, float_width)
-				color_attribute.data[index].color = (r, g, b, a)
 
 	# Face corners (Splits)
 	if("splits" in json_resource):
@@ -135,15 +125,12 @@ def import_stf_mesh(context: STF_ImportContext, json_resource: dict, stf_id: str
 				uv_layer.uv.foreach_set("vector", np.reshape(buffer_uv, -1))
 
 		if("split_colors" in json_resource): # todo rework / optimize this
-			for index in range(len(json_resource["split_colors"])):
-				color_attribute = blender_mesh.color_attributes.new("Color", "FLOAT_COLOR", "POINT")
-				buffer_split_colors = BytesIO(context.import_buffer(json_resource["split_colors"][index]))
-				for index, vertex in enumerate(blender_mesh.vertices):
-					r = parse_float(buffer_split_colors, float_width)
-					g = parse_float(buffer_split_colors, float_width)
-					b = parse_float(buffer_split_colors, float_width)
-					a = parse_float(buffer_split_colors, float_width)
-					color_attribute.data[index].color = (r, g, b, a)
+			color_attribute = blender_mesh.color_attributes.new("Color", "FLOAT_COLOR", "CORNER")
+			color_buffer = np.copy(np.frombuffer(context.import_buffer(json_resource["split_colors"]), dtype=determine_pack_format_float(float_width)))
+			color_buffer = np.reshape(color_buffer, (-1, 4))
+			color_buffer = color_buffer[face_corners]
+			color_attribute.data.foreach_set("color", np.reshape(color_buffer, -1))
+
 
 	# Material slots and material slot indices
 	if("material_slots" in json_resource):

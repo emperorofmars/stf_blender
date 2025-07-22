@@ -1,6 +1,7 @@
 from io import BytesIO
 import bpy
 import numpy as np
+import mathutils
 
 from ....exporter.stf_export_context import STF_ExportContext
 from ....utils.id_utils import ensure_stf_id
@@ -70,39 +71,16 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 	buffer_vertices[:, 2] *= -1
 	stf_mesh["vertices"] = context.serialize_buffer(buffer_vertices.tobytes())
 
-	# Vertex color channels
-	if(export_options["export_colors"]):
-		# todo use numpy
-		stf_mesh["vertex_color_width"] = float_width
-		buffers_color: list[BytesIO] = []
-		for index, color_layer in enumerate(blender_mesh.color_attributes):
-			if(color_layer.data_type == "FLOAT_COLOR" and color_layer.domain == "POINT"):
-				color_buffer = BytesIO()
-				buffers_color.append(color_buffer)
-				for vertex in blender_mesh.vertices:
-					color_buffer.write(serialize_float(color_layer.data[vertex.index].color[0], float_width))
-					color_buffer.write(serialize_float(color_layer.data[vertex.index].color[1], float_width))
-					color_buffer.write(serialize_float(color_layer.data[vertex.index].color[2], float_width))
-					color_buffer.write(serialize_float(color_layer.data[vertex.index].color[3], float_width))
-			elif(color_layer.data_type == "BYTE_COLOR" and color_layer.domain == "POINT"): # TODO deal with byte_color vs float_color actually
-				color_buffer = BytesIO()
-				buffers_color.append(color_buffer)
-				for vertex in blender_mesh.vertices:
-					color_buffer.write(serialize_float(color_layer.data[vertex.index].color[0], float_width))
-					color_buffer.write(serialize_float(color_layer.data[vertex.index].color[1], float_width))
-					color_buffer.write(serialize_float(color_layer.data[vertex.index].color[2], float_width))
-					color_buffer.write(serialize_float(color_layer.data[vertex.index].color[3], float_width))
-		stf_mesh["colors"] = []
-		for color_buffer in buffers_color:
-			stf_mesh["colors"].append(context.serialize_buffer(color_buffer.getvalue()))
-
-
 	# Prepare optimization of splits
 	def compareUVs(a: int, b: int) -> bool:
 		for uv_layer in blender_mesh.uv_layers:
 			if ((uv_layer.uv[a].vector - uv_layer.uv[b].vector).length > export_options["float_treshhold"]):
 				return False
 		return True
+	
+	def compareColors(a: int, b: int) -> bool:
+		if(not export_options["export_colors"] or not blender_mesh.color_attributes.active_color or blender_mesh.color_attributes.active_color.domain != "CORNER"): return True
+		return (mathutils.Vector(blender_mesh.color_attributes.active_color.data[a].color[:]) - mathutils.Vector(blender_mesh.color_attributes.active_color.data[b].color[:])).length < export_options["float_treshhold"]
 
 	verts_to_split: dict[int, list] = {}
 	deduped_split_indices: list[int] = []
@@ -118,7 +96,7 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 				if (
 					(loop.normal - blender_mesh.loops[split_candidate].normal).length < export_options["float_treshhold"]
 					and compareUVs(loop.index, split_candidate)
-					# TODO colors
+					and compareColors(loop.index, split_candidate)
 				):
 					face_corners_to_split.append(face_corners_to_split[split_candidate])
 					break
@@ -138,7 +116,6 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 	
 	stf_mesh["face_corners"] = context.serialize_buffer(face_corners_to_split.tobytes()) # Index of unique face corners to index of shared split data
 	stf_mesh["splits"] = context.serialize_buffer(buffer_splits.tobytes())
-
 
 	# normals
 	buffer_split_normals = np.zeros(len(blender_mesh.loops) * 3, dtype=determine_pack_format_float(float_width))
@@ -161,31 +138,14 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 	stf_mesh["uvs"] = uvs
 
 	# split colors
-	if(export_options["export_colors"]):
-		# todo rework & optimize this
-		buffers_split_color: list[BytesIO] = []
-		for color_layer in blender_mesh.color_attributes:
-			if(color_layer.data_type == "FLOAT_COLOR" and color_layer.domain == "CORNER"):
-				color_buffer = BytesIO()
-				buffers_split_color.append(color_buffer)
-				for loop in blender_mesh.loops:
-					color_buffer.write(serialize_float(color_layer.data[loop.index].color[0], float_width))
-					color_buffer.write(serialize_float(color_layer.data[loop.index].color[1], float_width))
-					color_buffer.write(serialize_float(color_layer.data[loop.index].color[2], float_width))
-					color_buffer.write(serialize_float(color_layer.data[loop.index].color[3], float_width))
-			elif(color_layer.data_type == "BYTE_COLOR" and color_layer.domain == "CORNER"): # TODO deal with byte_color vs float_color actually
-				color_buffer = BytesIO()
-				buffers_split_color.append(color_buffer)
-				for loop in blender_mesh.loops:
-					color_buffer.write(serialize_float(color_layer.data[loop.index].color[0], float_width))
-					color_buffer.write(serialize_float(color_layer.data[loop.index].color[1], float_width))
-					color_buffer.write(serialize_float(color_layer.data[loop.index].color[2], float_width))
-					color_buffer.write(serialize_float(color_layer.data[loop.index].color[3], float_width))
+	if(export_options["export_colors"] and blender_mesh.color_attributes.active_color):
+		if(blender_mesh.color_attributes.active_color.domain == "CORNER"):
+			color_buffer = np.zeros(len(blender_mesh.loops) * 4, dtype=determine_pack_format_float(float_width))
+			blender_mesh.color_attributes.active_color.data.foreach_get("color", color_buffer)
+			color_buffer = np.reshape(color_buffer, (-1, 4))
+			color_buffer = color_buffer[deduped_split_indices]
+			stf_mesh["split_colors"] = context.serialize_buffer(color_buffer.tobytes())
 
-		if(buffers_split_color):
-			stf_mesh["split_colors"] = []
-			for split_color_buffer in buffers_split_color:
-				stf_mesh["split_colors"].append(context.serialize_buffer(split_color_buffer.getvalue()))
 
 	# topology
 	buffer_tris = BytesIO()
