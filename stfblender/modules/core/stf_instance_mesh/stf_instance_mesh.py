@@ -50,9 +50,9 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 			modifier: bpy.types.ArmatureModifier = blender_object.modifiers.new("Armature", "ARMATURE")
 			modifier.object = armature_instance
 
-	set_instance_blendshapes(blender_object)
 	# blendshape values per instance
 	if("blendshape_values" in json_resource):
+		set_instance_blendshapes(blender_object)
 		blender_object.stf_instance_mesh.override_blendshape_values = True
 		for index, blendshape_value in enumerate(json_resource["blendshape_values"]):
 			instance_blendshape = blender_object.stf_instance_mesh.blendshape_values[index + 1]
