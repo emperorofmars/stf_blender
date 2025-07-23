@@ -14,3 +14,6 @@ def set_instance_blendshapes(blender_object: bpy.types.Object):
 				instance_blendshape.name = blendshape.name
 				instance_blendshape.value = blendshape.value
 
+
+def set_instance_materials(blender_object: bpy.types.Object):
+	pass

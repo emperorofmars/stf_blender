@@ -24,7 +24,9 @@ class STF_Instance_Mesh_Material(bpy.types.PropertyGroup):
 	material: bpy.props.PointerProperty(type=bpy.types.Material, name="Material") # type: ignore
 
 class STF_Instance_Mesh(bpy.types.PropertyGroup):
+	override_blendshape_values: bpy.props.BoolProperty(name="Override Blendshape Values", default=False) # type: ignore
 	blendshape_values: bpy.props.CollectionProperty(type=STF_Instance_Mesh_Blendshape_Value, name="Blendshape Values") # type: ignore
+	override_materials: bpy.props.BoolProperty(name="Override Materials", default=False) # type: ignore
 	materials: bpy.props.CollectionProperty(type=STF_Instance_Mesh_Material, name="Material Overrides") # type: ignore
 
 
@@ -51,7 +53,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	set_instance_blendshapes(blender_object)
 	# blendshape values per instance
 	if("blendshape_values" in json_resource):
-		blender_mesh = blender_object.data
+		blender_object.stf_instance_mesh.override_blendshape_values = True
 		for index, blendshape_value in enumerate(json_resource["blendshape_values"]):
 			instance_blendshape = blender_object.stf_instance_mesh.blendshape_values[index + 1]
 			if(blendshape_value != None):
@@ -59,7 +61,12 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 				instance_blendshape.override = True
 
 
-	# TODO handle materials
+	if("materials" in json_resource):
+		blender_object.stf_instance_mesh.override_materials = True
+		for material_id in json_resource["materials"]:
+			material: STF_Instance_Mesh_Material = blender_object.stf_instance_mesh.materials.add()
+			if(material_id):
+				material.material = context.import_resource(material_id, stf_kind="data")
 
 	return blender_object
 
@@ -95,13 +102,14 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 	else:
 		ret["mesh"] = context.serialize_resource(blender_mesh, module_kind="data")
 
-	material_slots = []
-	for blender_slot in blender_object.material_slots:
-		material_slots.append(context.serialize_resource(blender_slot.material, module_kind="data") if blender_slot.material else None)
-	ret["materials"] = material_slots
+	if(blender_object.stf_instance_mesh.override_materials):
+		material_slots = []
+		for blender_slot in blender_object.material_slots:
+			material_slots.append(context.serialize_resource(blender_slot.material, module_kind="data") if blender_slot.material else None)
+		ret["materials"] = material_slots
 
-	blendshape_values = []
-	if(blender_mesh.shape_keys and len(blender_mesh.shape_keys.key_blocks) > 1):
+	if(blender_mesh.shape_keys and len(blender_mesh.shape_keys.key_blocks) > 1 and blender_object.stf_instance_mesh.override_blendshape_values):
+		blendshape_values = []
 		for blendshape in blender_mesh.shape_keys.key_blocks[1:]:
 			for instance_blendshape in blender_object.stf_instance_mesh.blendshape_values:
 				if(instance_blendshape.name == blendshape.name):
@@ -109,7 +117,7 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 					break
 			else:
 				blendshape_values.append(blendshape.value)
-	ret["blendshape_values"] = blendshape_values
+		ret["blendshape_values"] = blendshape_values
 
 	return ret, str(uuid.uuid4())
 

@@ -1,8 +1,21 @@
 import bpy
 
 from ....utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
-from .stf_instance_mesh_util import set_instance_blendshapes
+from .stf_instance_mesh_util import set_instance_blendshapes, set_instance_materials
 
+
+class SetInstanceMaterials(bpy.types.Operator):
+	bl_idname = "stf.set_mesh_instance_materials"
+	bl_label = "Set Materials per Instance"
+	bl_category = "STF"
+	bl_options = {"REGISTER", "UNDO"}
+
+	@classmethod
+	def poll(cls, context): return context.object.stf_instance is not None and context.object.data and type(context.object.data) is bpy.types.Mesh
+
+	def execute(self, context):
+		set_instance_materials(context.object)
+		return {"FINISHED"}
 
 class SetInstanceBlendshapes(bpy.types.Operator):
 	bl_idname = "stf.set_mesh_instance_blendshapes"
@@ -43,15 +56,24 @@ class STFMeshInstancePanel(bpy.types.Panel):
 
 		self.layout.separator(factor=2, type="LINE")
 
-		self.layout.operator(SetInstanceBlendshapes.bl_idname)
+		# Materials per Instance
+		self.layout.prop(context.object.stf_instance_mesh, "override_materials")
+		if(context.object.stf_instance_mesh.override_materials):
+			self.layout.operator(SetInstanceMaterials.bl_idname)
+
+		self.layout.separator(factor=2, type="LINE")
 
 		# Blendshape Values per Instance
-		if(len(context.object.stf_instance_mesh.blendshape_values) > 1):
-			box = self.layout.box()
-			for index, instance_blendshape in enumerate(context.object.stf_instance_mesh.blendshape_values[1:]):
-				row = box.row()
-				row.prop(instance_blendshape, "override", text=instance_blendshape.name)
-				row.prop(instance_blendshape, "value", text="Value")
+		self.layout.prop(context.object.stf_instance_mesh, "override_blendshape_values")
+		if(context.object.stf_instance_mesh.override_blendshape_values):
+			self.layout.operator(SetInstanceBlendshapes.bl_idname)
+
+			if(len(context.object.stf_instance_mesh.blendshape_values) > 1):
+				box = self.layout.box()
+				for index, instance_blendshape in enumerate(context.object.stf_instance_mesh.blendshape_values[1:]):
+					row = box.row()
+					row.prop(instance_blendshape, "override", text=instance_blendshape.name)
+					row.prop(instance_blendshape, "value", text="Value")
 
 
 		# TODO Materials per Instance
