@@ -24,6 +24,8 @@ default_export_options: dict = {
 
 def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str]:
 	export_options = dict(default_export_options)
+	export_options["export_colors"] = context.get_setting("stf_mesh_vertex_colors", export_options["export_colors"])
+	export_options["export_blendshape_normals"] = context.get_setting("stf_mesh_blendshape_normals", export_options["export_blendshape_normals"])
 
 	blender_mesh: bpy.types.Mesh = application_object
 	ensure_stf_id(context, blender_mesh)

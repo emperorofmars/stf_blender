@@ -21,7 +21,7 @@ class STF_ExportState(StateUtil):
 	Each context must have access to the same STF_ExportState instance.
 	"""
 
-	def __init__(self, profiles: list[STF_Profile], asset_info: STF_Meta_AssetInfo, modules: tuple[dict[any, list[STF_Module]], dict[any, list[STF_ExportComponentHook]]], trash_objects: list[bpy.types.Object] = [], fail_on_severity: STFReportSeverity = STFReportSeverity.FatalError, permit_id_reassignment: bool = True, metric_multiplier: float = 1):
+	def __init__(self, profiles: list[STF_Profile], asset_info: STF_Meta_AssetInfo, modules: tuple[dict[any, list[STF_Module]], dict[any, list[STF_ExportComponentHook]]], trash_objects: list[bpy.types.Object] = [], fail_on_severity: STFReportSeverity = STFReportSeverity.FatalError, permit_id_reassignment: bool = True, metric_multiplier: float = 1, settings: any = None):
 		super().__init__(fail_on_severity)
 
 		self._modules: dict[any, list[STF_Module]] = modules[0]
@@ -38,6 +38,8 @@ class STF_ExportState(StateUtil):
 		self._metric_multiplier = metric_multiplier
 
 		self._trash_objects: list[bpy.types.Object] = trash_objects
+
+		self._settings = settings
 
 
 	def determine_module(self, application_object: any, module_kind: str = None) -> STF_Module:

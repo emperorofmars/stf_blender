@@ -8,6 +8,7 @@ from ..core.stf_registry import get_export_modules
 from .stf_export_state import STF_ExportState
 from .stf_export_context import STF_ExportContext
 from ..utils.minsc import draw_slot_link_warning, get_stf_version
+from .export_settings import STF_ExportSettings
 
 
 class ExportSTF(bpy.types.Operator, ExportHelper):
@@ -21,6 +22,8 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 
 	current_collection_as_root: bpy.props.BoolProperty(default=False, name="Scene Collection as Export Root") # type: ignore
 	scene_collection_as_root: bpy.props.BoolProperty(default=False, name="Current Collection as Export Root") # type: ignore
+
+	export_settings: bpy.props.PointerProperty(type=STF_ExportSettings) # type: ignore
 
 	debug: bpy.props.BoolProperty(name="Export Debug Json File", default=True) # type: ignore
 
@@ -42,7 +45,7 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 		try:
 			collection = context.scene.stf_collection_selector if context.scene.stf_collection_selector else context.scene.collection
 
-			stf_state = STF_ExportState([], collection.stf_meta.to_stf_meta_assetInfo(), get_export_modules(bpy.context.preferences.addons.keys()), trash_objects)
+			stf_state = STF_ExportState([], collection.stf_meta.to_stf_meta_assetInfo(), get_export_modules(bpy.context.preferences.addons.keys()), trash_objects, settings = self.export_settings)
 			stf_context = STF_ExportContext(stf_state)
 			root_id = stf_context.serialize_resource(collection)
 			stf_state.set_root_id(root_id)
@@ -112,6 +115,11 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 		box = self.layout.box()
 		box.label(text="Asset Meta")
 		draw_meta_editor(box, context.scene.stf_collection_selector if context.scene.stf_collection_selector else context.scene.collection, context.scene.stf_collection_selector == context.scene.collection)
+
+		self.layout.separator(factor=2, type="LINE")
+		
+		self.layout.prop(self.export_settings, property="stf_mesh_vertex_colors")
+		self.layout.prop(self.export_settings, property="stf_mesh_blendshape_normals")
 
 
 def export_button(self, context):

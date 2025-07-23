@@ -109,6 +109,8 @@ class STF_ExportContext:
 	def id_exists(self, stf_id: str) -> bool:
 		return self._state.id_exists(stf_id)
 
+	def get_setting(self, key: str, default: any = None) -> any:
+		return getattr(self._state._settings, key) if hasattr(self._state._settings, key) else default
 
 	def get_root_id(self) -> str | None:
 		return self._state._root_id
