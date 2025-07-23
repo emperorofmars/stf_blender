@@ -11,7 +11,7 @@ from ....core.buffer_utils import determine_pack_format_float, determine_pack_fo
 _stf_type = "stf.mesh"
 
 
-export_options: dict = {
+default_export_options: dict = {
 	"export_normals": True,
 	"export_colors": True,
 	"export_blendshape_normals": True,
@@ -23,6 +23,8 @@ export_options: dict = {
 # Mesh import and export are the lowest hanging fruits for performance improvements.
 
 def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str]:
+	export_options = dict(default_export_options)
+
 	blender_mesh: bpy.types.Mesh = application_object
 	ensure_stf_id(context, blender_mesh)
 
