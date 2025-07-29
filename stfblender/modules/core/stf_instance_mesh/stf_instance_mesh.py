@@ -121,7 +121,7 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 					blendshape_values.append(instance_blendshape.value if instance_blendshape.override else None)
 					break
 			else:
-				blendshape_values.append(blendshape.value)
+				blendshape_values.append(None)
 		ret["blendshape_values"] = blendshape_values
 
 	return ret, str(uuid.uuid4())
