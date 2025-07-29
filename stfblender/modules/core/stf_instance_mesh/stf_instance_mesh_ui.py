@@ -60,6 +60,12 @@ class STFMeshInstancePanel(bpy.types.Panel):
 		self.layout.prop(context.object.stf_instance_mesh, "override_materials")
 		if(context.object.stf_instance_mesh.override_materials):
 			self.layout.operator(SetInstanceMaterials.bl_idname)
+			if(len(context.object.stf_instance_mesh.materials) > 1):
+				box = self.layout.box()
+				for material in context.object.stf_instance_mesh.materials:
+					row = box.row()
+					row.prop(material, "override")
+					row.prop(material, "material")
 
 		self.layout.separator(factor=2, type="LINE")
 
@@ -70,7 +76,7 @@ class STFMeshInstancePanel(bpy.types.Panel):
 
 			if(len(context.object.stf_instance_mesh.blendshape_values) > 1):
 				box = self.layout.box()
-				for index, instance_blendshape in enumerate(context.object.stf_instance_mesh.blendshape_values[1:]):
+				for instance_blendshape in context.object.stf_instance_mesh.blendshape_values[1:]:
 					row = box.row()
 					row.prop(instance_blendshape, "override", text=instance_blendshape.name)
 					row.prop(instance_blendshape, "value", text="Value")

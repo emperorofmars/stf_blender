@@ -9,7 +9,7 @@ from ....core.stf_module import STF_Module
 from ....utils.id_utils import ensure_stf_id
 from ....core.stf_report import STFReportSeverity, STFReport
 from ....utils.component_utils import get_components_from_object
-from .stf_instance_mesh_util import set_instance_blendshapes
+from .stf_instance_mesh_util import set_instance_blendshapes, set_instance_materials
 
 
 _stf_type = "stf.instance.mesh"
@@ -21,6 +21,7 @@ class STF_Instance_Mesh_Blendshape_Value(bpy.types.PropertyGroup):
 	value: bpy.props.FloatProperty(name="Value", default=0, soft_min=0, soft_max=1, subtype="FACTOR") # type: ignore
 
 class STF_Instance_Mesh_Material(bpy.types.PropertyGroup):
+	override: bpy.props.BoolProperty(name="Override", default=False) # type: ignore
 	material: bpy.props.PointerProperty(type=bpy.types.Material, name="Material") # type: ignore
 
 class STF_Instance_Mesh(bpy.types.PropertyGroup):
@@ -60,13 +61,14 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 				instance_blendshape.value = blendshape_value
 				instance_blendshape.override = True
 
-
 	if("materials" in json_resource):
+		set_instance_materials(blender_object)
 		blender_object.stf_instance_mesh.override_materials = True
-		for material_id in json_resource["materials"]:
-			material: STF_Instance_Mesh_Material = blender_object.stf_instance_mesh.materials.add()
+		for material_index, material_id in enumerate(json_resource["materials"]):
 			if(material_id):
+				material: STF_Instance_Mesh_Material = blender_object.stf_instance_mesh.materials[material_index]
 				material.material = context.import_resource(material_id, stf_kind="data")
+				material.override = True
 
 	return blender_object
 
@@ -92,7 +94,7 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 			blender_armatures.append(modifier)
 
 	if(len(blender_armatures) == 1 and blender_armatures[0] and blender_armatures[0].object and blender_armatures[0].object.data):
-		# TODO check if the armature is in the export and within the same hierarchy, otherwise check if its in an instanced hierarchy
+		# TODO check if the armature instance is in the export
 
 		# The armature has to be passed, because in Blenders datamodel the relationship between mesh and armature loose.
 		ret["mesh"] = context.serialize_resource(blender_mesh, blender_armatures[0].object.data, module_kind="data")
@@ -104,8 +106,11 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 
 	if(blender_object.stf_instance_mesh.override_materials):
 		material_slots = []
-		for blender_slot in blender_object.material_slots:
-			material_slots.append(context.serialize_resource(blender_slot.material, module_kind="data") if blender_slot.material else None)
+		for material_index, instance_material in enumerate(blender_object.stf_instance_mesh.materials):
+			if(instance_material.override and instance_material.material):
+				material_slots.append(context.serialize_resource(instance_material.material, module_kind="data"))
+			else:
+				material_slots.append(None)
 		ret["materials"] = material_slots
 
 	if(blender_mesh.shape_keys and len(blender_mesh.shape_keys.key_blocks) > 1 and blender_object.stf_instance_mesh.override_blendshape_values):
