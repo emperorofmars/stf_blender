@@ -2,6 +2,17 @@ from io import BytesIO
 import struct
 
 
+def determine_indices_width(length: int) -> int:
+	if(length <= 2**8):
+		return 1
+	elif(length <= 2**16):
+		return 2
+	elif(length <= 2**32):
+		return 4
+	elif(length <= 2**64):
+		return 8
+
+
 def determine_pack_format_int(width: int) -> str:
 	if(width <= 1): return "<b"
 	elif(width <= 2): return "<h"

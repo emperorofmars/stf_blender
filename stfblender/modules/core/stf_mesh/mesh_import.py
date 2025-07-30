@@ -79,6 +79,7 @@ def import_stf_mesh(context: STF_ImportContext, json_resource: dict, stf_id: str
 
 
 	# Face smooth setting
+	# This must be set before applying custom split normals
 	if("sharp_face_indices" in json_resource):
 		buffer_sharp_face_indices = BytesIO(context.import_buffer(json_resource["sharp_face_indices"]))
 		for _ in range(int(buffer_sharp_face_indices.getbuffer().nbytes / indices_width)):
@@ -86,6 +87,8 @@ def import_stf_mesh(context: STF_ImportContext, json_resource: dict, stf_id: str
 			blender_mesh.polygons[smooth_index].use_smooth = False
 
 	# Explicit edge sharpness
+	# This must be set before applying custom split normals
+	sharp_edges = []
 	if("sharp_edges" in json_resource):
 		buffer_sharp_edges = BytesIO(context.import_buffer(json_resource["sharp_edges"]))
 
@@ -93,17 +96,15 @@ def import_stf_mesh(context: STF_ImportContext, json_resource: dict, stf_id: str
 		for edge in blender_mesh.edges:
 			if(edge.vertices[0] not in edge_dict):
 				edge_dict[edge.vertices[0]] = {}
+			if(edge.vertices[1] not in edge_dict):
+				edge_dict[edge.vertices[1]] = {}
 			edge_dict[edge.vertices[0]][edge.vertices[1]] = edge
-
-		for line_index in range(int(buffer_sharp_edges.getbuffer().nbytes / (indices_width * 2))):
+			edge_dict[edge.vertices[1]][edge.vertices[0]] = edge
+		for _ in range(int(buffer_sharp_edges.getbuffer().nbytes / (indices_width * 2))):
 			v0_index = parse_uint(buffer_sharp_edges, indices_width)
 			v1_index = parse_uint(buffer_sharp_edges, indices_width)
-			if(v0_index in edge_dict and v1_index in edge_dict[v0_index]):
-				edge_dict[v0_index][v1_index].use_edge_sharp = True
-			elif(v1_index in edge_dict and v0_index in edge_dict[v1_index]):
-				edge_dict[v1_index][v0_index].use_edge_sharp = True
-			else:
-				pass # TODO warn about invalid data
+			edge_dict[v0_index][v1_index].use_edge_sharp = True
+			sharp_edges.append(edge_dict[v0_index][v1_index])
 
 
 	# Face corners (Splits)
@@ -115,6 +116,12 @@ def import_stf_mesh(context: STF_ImportContext, json_resource: dict, stf_id: str
 			buffer_split_normals[:, [1, 2]] = buffer_split_normals[:, [2, 1]]
 			blender_mesh.normals_split_custom_set(buffer_split_normals[face_corners])
 
+			# Undo what Blender does wrong during `normals_split_custom_set`, if applicable and possible
+			if(len(sharp_edges) > 0):
+				for edge in blender_mesh.edges:
+					if(edge not in sharp_edges):
+						edge.use_edge_sharp = False
+
 		if("uvs" in json_resource):
 			for uv_layer_index in range(len(json_resource["uvs"])):
 				uv_layer = blender_mesh.uv_layers.new(name=json_resource["uvs"][uv_layer_index].get("name", "UVMap"))
@@ -124,11 +131,11 @@ def import_stf_mesh(context: STF_ImportContext, json_resource: dict, stf_id: str
 				buffer_uv = buffer_uv[face_corners]
 				uv_layer.uv.foreach_set("vector", np.reshape(buffer_uv, -1))
 
-		if("split_colors" in json_resource): # todo rework / optimize this
-			color_attribute = blender_mesh.color_attributes.new("Color", "FLOAT_COLOR", "CORNER")
+		if("split_colors" in json_resource):
 			color_buffer = np.copy(np.frombuffer(context.import_buffer(json_resource["split_colors"]), dtype=determine_pack_format_float(float_width)))
 			color_buffer = np.reshape(color_buffer, (-1, 4))
 			color_buffer = color_buffer[face_corners]
+			color_attribute = blender_mesh.color_attributes.new("Color", "FLOAT_COLOR", "CORNER")
 			color_attribute.data.foreach_set("color", np.reshape(color_buffer, -1))
 
 

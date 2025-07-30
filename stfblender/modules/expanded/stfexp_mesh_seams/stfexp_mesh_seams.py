@@ -6,7 +6,7 @@ from ....utils.component_utils import STF_BlenderComponentBase, STF_BlenderCompo
 from ....core.stf_module import STF_ExportComponentHook
 from ....exporter.stf_export_context import STF_ExportContext
 from ....importer.stf_import_context import STF_ImportContext
-from ....core.buffer_utils import parse_uint, serialize_uint
+from ....core.buffer_utils import determine_indices_width, parse_uint, serialize_uint
 from ....utils.reference_helper import export_buffer
 
 
@@ -18,27 +18,24 @@ class STFEXP_Mesh_Seams(STF_BlenderComponentBase):
 	pass
 
 
-
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: bpy.types.Mesh) -> any:
 	buffer_seams = BytesIO(context.import_buffer(json_resource["seams"]))
 
-	vertex_indices_width = 4 if len(context_object.vertices) * 3 < 2**32 else 8
+	indices_width: int = json_resource.get("indices_width", 4)
 
 	edge_dict: dict[int, dict[int, bpy.types.MeshEdge]] = {}
 	for edge in context_object.edges:
 		if(edge.vertices[0] not in edge_dict):
 			edge_dict[edge.vertices[0]] = {}
+		if(edge.vertices[1] not in edge_dict):
+			edge_dict[edge.vertices[1]] = {}
 		edge_dict[edge.vertices[0]][edge.vertices[1]] = edge
+		edge_dict[edge.vertices[1]][edge.vertices[0]] = edge
 
-	for seam_index in range(json_resource["seams_len"]):
-		v0_index = parse_uint(buffer_seams, vertex_indices_width)
-		v1_index = parse_uint(buffer_seams, vertex_indices_width)
-		if(v0_index in edge_dict and v1_index in edge_dict[v0_index]):
-			edge_dict[v0_index][v1_index].use_seam = True
-		elif(v1_index in edge_dict and v0_index in edge_dict[v1_index]):
-			edge_dict[v1_index][v0_index].use_seam = True
-		else:
-			pass # TODO warn about invalid data
+	for _ in range(int((buffer_seams.getbuffer().nbytes / indices_width) / 2)):
+		v0_index = parse_uint(buffer_seams, indices_width)
+		v1_index = parse_uint(buffer_seams, indices_width)
+		edge_dict[v0_index][v1_index].use_seam = True
 
 	component_ref, component = add_component(context_object, _blender_property_name, stf_id, _stf_type)
 	import_component_base(component, json_resource)
@@ -49,16 +46,14 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 def _stf_export(context: STF_ExportContext, application_object: STFEXP_Mesh_Seams, context_object: bpy.types.Mesh) -> tuple[dict, str]:
 	ret = export_component_base(_stf_type, application_object)
 
-	vertex_indices_width = 4 if len(context_object.vertices) * 3 < 2**32 else 8
+	indices_width = determine_indices_width(len(context_object.loops))
 
 	buffer_seams = BytesIO()
-	seams_len = 0
 	for edge in context_object.edges:
 		if(edge.use_seam and not edge.is_loose):
-			seams_len += 1
 			for edge_vertex_index in edge.vertices:
-				buffer_seams.write(serialize_uint(edge_vertex_index, vertex_indices_width))
-	ret["seams_len"] = seams_len
+				buffer_seams.write(serialize_uint(edge_vertex_index, indices_width))
+	ret["indices_width"] = indices_width
 	ret["seams"] = export_buffer(ret, context.serialize_buffer(buffer_seams.getvalue()))
 
 	return ret, application_object.stf_id
