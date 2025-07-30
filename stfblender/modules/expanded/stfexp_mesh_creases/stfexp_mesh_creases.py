@@ -8,6 +8,7 @@ from ....core.stf_module import STF_ExportComponentHook
 from ....exporter.stf_export_context import STF_ExportContext
 from ....importer.stf_import_context import STF_ImportContext
 from ....core.buffer_utils import determine_indices_width, determine_pack_format_float
+from ....utils.reference_helper import export_buffer
 
 
 _stf_type = "stfexp.mesh.creases"
@@ -62,15 +63,15 @@ def _stf_export(context: STF_ExportContext, application_object: STFEXP_Mesh_Crea
 	if(context_object.vertex_creases):
 		buffer_vertex_creases = np.zeros(len(context_object.vertex_creases.data), dtype=determine_pack_format_float(4))
 		context_object.vertex_creases.data.foreach_get("value", buffer_vertex_creases)
-		ret["vertex_creases"] = context.serialize_buffer(buffer_vertex_creases.tobytes())
+		ret["vertex_creases"] = export_buffer(ret, context.serialize_buffer(buffer_vertex_creases.tobytes()))
 
 	if(context_object.edge_creases):
 		buffer_edge_creases = np.zeros(len(context_object.edge_creases.data), dtype=determine_pack_format_float(4))
 		context_object.edge_creases.data.foreach_get("value", buffer_edge_creases)
-		ret["edge_creases"] = context.serialize_buffer(buffer_edge_creases.tobytes())
+		ret["edge_creases"] = export_buffer(ret, context.serialize_buffer(buffer_edge_creases.tobytes()))
 
 		buffer_edges = np.array(context_object.edge_keys, dtype=determine_pack_format_float(indices_width))
-		ret["edges"] = context.serialize_buffer(buffer_edges.tobytes())
+		ret["edges"] = export_buffer(ret, context.serialize_buffer(buffer_edges.tobytes()))
 		ret["indices_width"] = indices_width
 
 	return ret, application_object.stf_id
