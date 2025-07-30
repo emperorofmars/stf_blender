@@ -37,19 +37,16 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 
 	try:
 		## let image_bytes: bytes
-		## let image_format: str
 		if(blender_image.packed_file):
 			image_bytes = blender_image.packed_file.data
-			image_format = blender_image.file_format.lower()
 		else:
 			image_bytes = pathlib.Path(bpy.path.abspath(blender_image.filepath)).resolve().read_bytes()
-			image_format = pathlib.Path(blender_image.filepath).suffix[1:].lower() if pathlib.Path(blender_image.filepath).suffix.startswith(".") else pathlib.Path(blender_image.filepath).suffix.lower()
 		buffer_id = context.serialize_buffer(image_bytes)
 
 		ret = {
 			"type": _stf_type,
 			"name": blender_image.stf_name if blender_image.stf_name_source_of_truth else blender_image.name,
-			"format": image_format,
+			"format": blender_image.file_format.lower(),
 			"buffer": buffer_id,
 			"data_type": "non_color" if blender_image.colorspace_settings.name == "Non-Color" else "color"
 		}
