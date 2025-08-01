@@ -36,7 +36,8 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, pa
 		blender_animation.frame_start = json_resource["range"][0]
 		blender_animation.frame_end = json_resource["range"][1]
 
-	# This is a mess.
+	# All of this is a mess
+
 	layer = blender_animation.layers.new("stf_layer")
 	strip: bpy.types.ActionKeyframeStrip = layer.strips.new(type="KEYFRAME")
 
@@ -127,7 +128,8 @@ def _stf_export(context: STF_ExportContext, application_object: any, parent_appl
 
 	stf_tracks = []
 
-	# This is a mess.
+	# All of this is a mess
+
 	for layer in blender_animation.layers:
 		for strip in layer.strips:
 			if(strip.type == "KEYFRAME"):
@@ -151,7 +153,6 @@ def _stf_export(context: STF_ExportContext, application_object: any, parent_appl
 							fcurve.update()
 							if(blender_animation.stf_bake):
 								fcurve.bake(int(blender_animation.frame_range[0]), int(blender_animation.frame_range[1]))
-							stf_track: list = []
 							property_translation = context.resolve_application_property_path(selected_slot_link.target, selected_slot_link.datablock_index, data_path)
 							if(property_translation):
 								target, conversion_func, index_conversion = property_translation
@@ -177,6 +178,7 @@ def _stf_export(context: STF_ExportContext, application_object: any, parent_appl
 													keyframes[fcurve.array_index] = keyframe
 									return closest_timepoint if success else None, keyframes
 
+								stf_track: list = []
 								current_timepoint, keyframes = find_next_keyframe(-inf)
 								while current_timepoint != None:
 									stf_keyframes = [None] * len(index_conversion)
@@ -190,7 +192,6 @@ def _stf_export(context: STF_ExportContext, application_object: any, parent_appl
 												keyframe.handle_right.x - keyframe.co.x,
 												keyframe.handle_right.y - keyframe.co.y
 											]
-									#stf_track[current_timepoint] = stf_keyframes
 									stf_track.append({
 										"frame": current_timepoint,
 										"values": stf_keyframes
