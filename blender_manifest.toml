@@ -5,13 +5,13 @@ schema_version = "1.0.0"
 id = "stf_blender"
 version = "0.0.7"
 name = "STF - Squirrel Transfer Format"
-tagline = "Modular 3D Interchange Format"
+tagline = "Modular 3D File-Format"
 maintainer = "Mars (https://squirrelbite.com)"
 # Supported types: "add-on", "theme"
 type = "add-on"
 
 # Optional link to documentation, support, source files, etc
-website = "https://github.com/emperorofmars/stf_blender"
+website = "https://stfform.at/"
 
 # Optional list defined by Blender and server, see:
 # https://docs.blender.org/manual/en/dev/advanced/extensions/tags.html

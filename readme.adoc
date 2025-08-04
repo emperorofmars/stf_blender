@@ -11,12 +11,12 @@ ifdef::env-github[]
 :note-caption: :information_source:
 endif::[]
 
-**Squirrel Transfer Format - Experimental Modular 3D Interchange Format**
+**Squirrel Transfer Format - Modular 3D File-Format**
 Intended for (not only) game development use-cases.
 
 **WIP implementation for Blender 4.4+. Do not use productively!**
 
-**https://github.com/emperorofmars/stf_documentation[Read the Documentation!]**
+**https://stfform.at/[Read the Documentation!]**
 
 == Installation
 * Download the https://github.com/emperorofmars/stf_blender/releases/latest[latest release] and add it under: `Edit` -> `Preferences` -> `Get Extensions` -> **Click on the top right most dropdown** -> `Install from Fisk...`
