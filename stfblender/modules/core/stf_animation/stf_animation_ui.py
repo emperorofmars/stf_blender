@@ -60,7 +60,7 @@ class STFAnimationSpatialPanel(bpy.types.Panel):
 		self.layout.separator(factor=2, type="LINE")
 		
 		self.layout.prop(context.active_action, "stf_bake")
-		self.layout.label(text="Warning: Baking is destructive!")
+		self.layout.label(text="Warning: Baking is slooow!")
 
 		self.layout.separator(factor=2, type="LINE")
 
