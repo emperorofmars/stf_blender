@@ -8,14 +8,14 @@ from ....utils.component_ui_utils import draw_components_ui, draw_instance_stand
 
 
 class STFSetArmatureInstanceIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
-	"""Set STF-ID for ArmatureInstance"""
+	"""Set STF-ID for Armature-Instance"""
 	bl_idname = "stf.set_armature_instance_stf_id"
 	@classmethod
 	def poll(cls, context): return context.object.stf_instance is not None and context.object.data and type(context.object.data) is bpy.types.Armature
 	def get_property(self, context): return context.object.stf_instance
 
 class STFAddArmatureInstanceComponentOperator(bpy.types.Operator, STFAddComponentOperatorBase):
-	"""Add Component to ArmatureInstance"""
+	"""Add Component to Armature-Instance"""
 	bl_idname = "stf.add_armature_instance_component"
 	@classmethod
 	def poll(cls, context): return context.object.stf_instance_armature is not None and context.object.data and type(context.object.data) is bpy.types.Armature
@@ -23,11 +23,13 @@ class STFAddArmatureInstanceComponentOperator(bpy.types.Operator, STFAddComponen
 	def get_components_ref_property(self, context) -> STF_Component_Ref: return context.object.stf_instance_armature.stf_components
 
 class STFRemoveArmatureInstanceComponentOperator(bpy.types.Operator, STFRemoveComponentOperatorBase):
+	"""Remove selected component from Armature-Instance"""
 	bl_idname = "stf.remove_armature_instance_component"
 	def get_property(self, context): return context.object
 	def get_components_ref_property(self, context) -> STF_Component_Ref: return context.object.stf_instance_armature.stf_components
 
 class STFEditArmatureInstanceComponentIdOperator(bpy.types.Operator, STFEditComponentOperatorBase):
+	"""Edit the ID and overrides of this Component"""
 	bl_idname = "stf.edit_armature_instance_component_id"
 	def get_property(self, context): return context.object
 	def get_components_ref_property(self, context) -> STF_Component_Ref: return context.object.stf_instance_armature.stf_components

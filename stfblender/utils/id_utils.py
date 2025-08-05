@@ -1,7 +1,7 @@
 import bpy
 import uuid
 
-from ..utils.op_utils import CopyToClipboard
+from ..utils.minsc import CopyToClipboard
 from ..core.stf_report import STFReportSeverity, STFReport
 
 
@@ -19,20 +19,21 @@ class STFSetIDOperatorBase:
 
 
 def draw_stf_id_ui(layout: bpy.types.UILayout, context: bpy.types.Context, blender_object: any, set_id_op: str, is_instance: bool = False):
+	layout = layout.box()
 	if(blender_object.stf_id):
-		row = layout.row()
+		row = layout.row(align=True)
 		row.prop(blender_object, "stf_id")
-		row.operator(CopyToClipboard.bl_idname)
+		row.operator(CopyToClipboard.bl_idname, text="Copy ID")
 	else:
 		layout.operator(set_id_op)
 
-	if(not is_instance):
-		layout.prop(blender_object, "stf_name_source_of_truth")
-
+	row = layout.row()
 	if(blender_object.stf_name or blender_object.stf_name_source_of_truth):
-		layout.prop(blender_object, "stf_name")
+		row.prop(blender_object, "stf_name", text="Name")
 	else:
-		layout.label(text="Using Blender Name: " + blender_object.name)
+		row.label(text="Name: " + blender_object.name)
+	if(not is_instance):
+		row.prop(blender_object, "stf_name_source_of_truth", text="Override Name")
 
 
 def ensure_stf_id(stf_context: any, blender_object: any):

@@ -20,10 +20,12 @@ class STFAddArmatureComponentOperator(bpy.types.Operator, STFAddComponentOperato
 	def get_property(self, context): return context.armature
 
 class STFRemoveArmatureComponentOperator(bpy.types.Operator, STFRemoveComponentOperatorBase):
+	"""Remove selected component from Armature"""
 	bl_idname = "stf.remove_armature_component"
 	def get_property(self, context): return context.armature
 
 class STFEditArmatureComponentIdOperator(bpy.types.Operator, STFEditComponentOperatorBase):
+	"""Edit the ID and overrides of this Component"""
 	bl_idname = "stf.edit_armature_component_id"
 	def get_property(self, context): return context.armature
 
@@ -42,8 +44,6 @@ class STFArmatureSpatialPanel(bpy.types.Panel):
 
 	def draw(self, context):
 		set_stf_component_filter(bpy.types.Armature)
-
-		self.layout.label(text="stf.armature")
 
 		# Set ID
 		draw_stf_id_ui(self.layout, context, context.armature, STFSetArmatureIDOperator.bl_idname)

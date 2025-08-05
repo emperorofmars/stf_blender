@@ -20,10 +20,12 @@ class STFAddObjectComponentOperator(bpy.types.Operator, STFAddComponentOperatorB
 	def get_property(self, context): return context.object
 
 class STFRemoveObjectComponentOperator(bpy.types.Operator, STFRemoveComponentOperatorBase):
+	"""Remove selected component from Object"""
 	bl_idname = "stf.remove_object_component"
 	def get_property(self, context): return context.object
 
 class STFEditObjectComponentIdOperator(bpy.types.Operator, STFEditComponentOperatorBase):
+	"""Edit the ID and overrides of this Component"""
 	bl_idname = "stf.edit_object_component_id"
 	def get_property(self, context): return context.object
 

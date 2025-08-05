@@ -8,7 +8,7 @@ from ..core.stf_registry import get_stf_modules
 
 
 class STF_Component_Ref(bpy.types.PropertyGroup): # Bringing polymorphism to Blender
-	"""This property defines the type and ID, from which the appropriate registered function can find the correct component in the `blender_property_name` property of the appropriate Blender construct."""
+	"""Defines the ID, by which the correct component in the `blender_property_name` property of the appropriate Blender construct can be found"""
 	stf_type: bpy.props.StringProperty(name="Type") # type: ignore
 	stf_id: bpy.props.StringProperty(name="ID") # type: ignore
 	blender_property_name: bpy.props.StringProperty(name="Blender Property Name") # type: ignore
@@ -27,7 +27,7 @@ class InstanceModComponentRef(STF_Component_Ref):
 	override: bpy.props.BoolProperty(name="Enable Instance Override", default=False) # type: ignore
 
 class STF_BlenderBoneComponentModule(STF_BlenderComponentModule):
-	"""Use for components that are allowed on bones and are animatable or can have different values per instance of the armature."""
+	"""Use for components that are allowed on bones and are animatable or can have different values per instance of the armature"""
 	# (layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: STF_BlenderComponentModule) -> None
 	draw_component_instance_func: Callable[[bpy.types.UILayout, bpy.types.Context, STF_Component_Ref, any, any], None]
 	# (context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: STF_BlenderComponentModule, standin_component: STF_BlenderComponentModule) -> None
@@ -40,12 +40,14 @@ class STF_BlenderBoneComponentModule(STF_BlenderComponentModule):
 
 
 class STF_BlenderComponentOverride(bpy.types.PropertyGroup):
-	target_id: bpy.props.StringProperty(name="ID") # type: ignore
+	"""If this component is parsed by a game-engine, the target component should be ignored"""
+	target_id: bpy.props.StringProperty(name="Target ID") # type: ignore
 
 class STF_BlenderComponentBase(bpy.types.PropertyGroup):
-	stf_id: bpy.props.StringProperty(name="ID") # type: ignore
-	stf_name: bpy.props.StringProperty(name="Name") # type: ignore
-	overrides: bpy.props.CollectionProperty(type=STF_BlenderComponentOverride, name="Overrides") # type: ignore
+	"""Base class for stf component property-groups"""
+	stf_id: bpy.props.StringProperty(name="ID", description="Universally unique ID") # type: ignore
+	stf_name: bpy.props.StringProperty(name="STF Name", description="Optional component name") # type: ignore
+	overrides: bpy.props.CollectionProperty(type=STF_BlenderComponentOverride, name="Overrides", description="If this component is parsed by a game-engine, these components should be ignored") # type: ignore
 	enabled: bpy.props.BoolProperty(name="Enabled", default=True) # type: ignore
 
 

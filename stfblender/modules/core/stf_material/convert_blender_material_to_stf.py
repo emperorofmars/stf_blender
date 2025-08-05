@@ -64,8 +64,6 @@ def blender_material_to_stf(blender_material: bpy.types.Material):
 
 			if(issubclass(type(output_node.inputs["Surface"].links[0].from_node), bpy.types.ShaderNode)):
 				convert_shader_node_to_stf(blender_material, output_node.inputs["Surface"].links[0].from_node)
-
-
 	else:
 		_, _, value = add_property(blender_material, "albedo.color", STF_Material_Value_Module_Color)
 		value.color = blender_material.diffuse_color
@@ -73,9 +71,9 @@ def blender_material_to_stf(blender_material: bpy.types.Material):
 
 
 class STFConvertBlenderMaterialToSTF(bpy.types.Operator):
+	"""Determine STF material properties from Blender Material. Will erase any existing properties"""
 	bl_idname = "stf.convert_blender_material_to_stf"
 	bl_label = "Convert Blender Material to STF"
-	bl_category = "STF"
 	bl_options = {"REGISTER", "UNDO"}
 
 	def invoke(self, context, event):

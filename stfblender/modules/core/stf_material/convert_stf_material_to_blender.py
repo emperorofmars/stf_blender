@@ -55,9 +55,9 @@ def stf_material_to_blender(blender_material: bpy.types.Material):
 
 
 class STFConvertSTFMaterialToBlender(bpy.types.Operator):
+	"""Convert STF material properties to Blender Material. Will erase all settings of the Blender Material"""
 	bl_idname = "stf.convert_stf_material_to_blender"
 	bl_label = "Convert STF Material to Blender"
-	bl_category = "STF"
 	bl_options = {"REGISTER", "UNDO"}
 
 	def invoke(self, context, event):

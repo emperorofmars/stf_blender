@@ -5,9 +5,9 @@ from .stf_instance_mesh_util import set_instance_blendshapes, set_instance_mater
 
 
 class SetInstanceMaterials(bpy.types.Operator):
+	"""Override the Materials of the Mesh"""
 	bl_idname = "stf.set_mesh_instance_materials"
 	bl_label = "Set Materials per Instance"
-	bl_category = "STF"
 	bl_options = {"REGISTER", "UNDO"}
 
 	@classmethod
@@ -18,9 +18,9 @@ class SetInstanceMaterials(bpy.types.Operator):
 		return {"FINISHED"}
 
 class SetInstanceBlendshapes(bpy.types.Operator):
+	"""Override the Blendshape values of the Mesh"""
 	bl_idname = "stf.set_mesh_instance_blendshapes"
 	bl_label = "Set Blendshapes per Instance"
-	bl_category = "STF"
 	bl_options = {"REGISTER", "UNDO"}
 
 	@classmethod
@@ -80,7 +80,4 @@ class STFMeshInstancePanel(bpy.types.Panel):
 					row = box.row()
 					row.prop(instance_blendshape, "override", text=instance_blendshape.name)
 					row.prop(instance_blendshape, "value", text="Value")
-
-
-		# TODO Materials per Instance
 

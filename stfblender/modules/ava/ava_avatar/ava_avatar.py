@@ -3,7 +3,7 @@ import bpy
 from ....exporter.stf_export_context import STF_ExportContext
 from ....importer.stf_import_context import STF_ImportContext
 from ....utils.component_utils import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref, add_component, export_component_base, import_component_base
-from ....utils.op_utils import SetActiveObjectOperator
+from ....utils.minsc import SetActiveObjectOperator
 from ....utils.reference_helper import export_resource
 
 

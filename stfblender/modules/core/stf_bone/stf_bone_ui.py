@@ -20,10 +20,12 @@ class STFAddBoneComponentOperator(bpy.types.Operator, STFAddComponentOperatorBas
 	def get_property(self, context): return context.bone
 
 class STFRemoveBoneComponentOperator(bpy.types.Operator, STFRemoveComponentOperatorBase):
+	"""Remove selected component from Bone"""
 	bl_idname = "stf.remove_bone_component"
 	def get_property(self, context): return context.bone
 
 class STFEditBoneComponentIdOperator(bpy.types.Operator, STFEditComponentOperatorBase):
+	"""Edit the ID and overrides of this Component"""
 	bl_idname = "stf.edit_bone_component_id"
 	def get_property(self, context): return context.bone
 
@@ -42,8 +44,6 @@ class STFBoneSpatialPanel(bpy.types.Panel):
 
 	def draw(self, context):
 		set_stf_component_filter(bpy.types.Bone)
-
-		self.layout.label(text="stf.bone")
 
 		# Set ID
 		draw_stf_id_ui(self.layout, context, context.bone, STFSetBoneIDOperator.bl_idname)

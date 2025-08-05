@@ -1,4 +1,5 @@
 import bpy
+import time
 from bpy_extras.io_utils import ImportHelper
 
 from ..core.stf_registry import get_import_modules
@@ -10,18 +11,19 @@ from ..utils.minsc import draw_slot_link_warning, get_stf_version
 
 
 class ImportSTF(bpy.types.Operator, ImportHelper):
-	"""Import a STF file (.stf)"""
-	bl_idname = 'stf.import'
-	bl_label = 'Import STF'
-	bl_options = {'PRESET', 'REGISTER', 'UNDO'}
+	"""Import an STF file (.stf)"""
+	bl_idname = "stf.import"
+	bl_label = "Import STF"
+	bl_options = {"PRESET", "REGISTER", "UNDO"}
 
-	filter_glob: bpy.props.StringProperty(default="*.stf", options={'HIDDEN'}) # type: ignore
+	filter_glob: bpy.props.StringProperty(default="*.stf", options={"HIDDEN"}) # type: ignore
 
 	def invoke(self, context, event):
 		return ImportHelper.invoke_popup(self, context)
 
 	def execute(self, context):
-		context.window.cursor_set('WAIT')
+		time_start = time.time()
+		context.window.cursor_set("WAIT")
 		file = None
 		trash_objects: list[bpy.types.Object] = []
 		try:
@@ -40,22 +42,22 @@ class ImportSTF(bpy.types.Operator, ImportHelper):
 			root.stf_meta.from_stf_meta_assetInfo(stf_file.definition.stf.asset_info)
 
 			if(len(stf_state._reports) > 0):
-				self.report({'WARNING'}, "STF asset imported with reports!")
+				self.report({"WARNING"}, "STF asset imported with reports! (%.3f sec.)" % (time.time() - time_start))
 				for report in stf_state._reports:
 					print(report.to_string() + "\n")
-					self.report({'WARNING'}, report.to_string())
+					self.report({"WARNING"}, report.to_string())
 			else:
-				self.report({'INFO'}, "STF asset imported successfully!")
-			return {'FINISHED'}
+				self.report({"INFO"}, "STF asset imported successfully! (%.3f sec.)" % (time.time() - time_start))
+			return {"FINISHED"}
 		except STFException as error:
-			self.report({'ERROR'}, str(error))
+			self.report({"ERROR"}, str(error))
 			return {"CANCELLED"}
 		finally:
 			if(file is not None and not file.closed): file.close()
 			for trash in trash_objects:
 				if(trash is not None):
 					bpy.data.objects.remove(trash)
-			context.window.cursor_set('DEFAULT')
+			context.window.cursor_set("DEFAULT")
 
 	def draw(self, context):
 		self.layout.label(text="STF version: " + get_stf_version())

@@ -1,10 +1,11 @@
 import bpy
 
 from .component_utils import STF_Component_Ref, find_component_module, get_component_modules
-from .op_utils import CopyToClipboard
+from .minsc import CopyToClipboard
 
 
 class STFDrawComponentList(bpy.types.UIList):
+	"""List of STF components"""
 	bl_idname = "COLLECTION_UL_stf_component_list"
 
 	def draw_item(self, context, layout, data, item, icon, active_data, active_propname):
@@ -14,11 +15,8 @@ class STFDrawComponentList(bpy.types.UIList):
 
 def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, stf_application_object: any, component: any, edit_op: str, inject_ui = None):
 	box = layout.box()
-	box.label(text=component_ref.stf_type)
-	#box.label(text=component_ref.stf_type + " ( " + component_ref.stf_id + " )")
 	row = box.row()
-	row.label(text="ID: " + component_ref.stf_id)
-	row.operator(CopyToClipboard.bl_idname, text="Copy").text = component_ref.stf_id
+	row.label(text=component_ref.stf_type + "  -  ID: " + component_ref.stf_id + " ")
 
 	if(inject_ui):
 		if(not inject_ui(box, context, component_ref, stf_application_object, component)):
@@ -26,14 +24,15 @@ def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, compo
 
 	if(component.overrides):
 		box.label(text="Overrides:")
+		row_inner = box.row()
+		row_inner.separator(factor=2.0)
+		col = row_inner.column()
 		for override in component.overrides:
-			row = box.row()
-			row.label(text="ID: " + override.target_id)
-	else:
-		box.label(text="No Overrides")
+			col.label(text=override.target_id)
 
-	edit_button = box.operator(edit_op, text="Edit ID & Overrides")
-	edit_button.component_id = component_ref.stf_id
+	row = box.row()
+	row.operator(CopyToClipboard.bl_idname, text="Copy ID").text = component_ref.stf_id
+	row.operator(edit_op, text="Edit ID & Overrides").component_id = component_ref.stf_id
 
 	box.prop(component, "stf_name")
 	box.prop(component, "enabled")
@@ -76,7 +75,7 @@ def draw_components_ui(
 
 	layout.label(text="Components", icon="GROUP")
 
-	row = layout.row()
+	row = layout.row(align=True)
 	row.prop(bpy.context.scene, "stf_component_modules", text="")
 	selected_add_module = find_component_module(stf_modules, context.scene.stf_component_modules)
 	if(len(stf_modules) > 0):
@@ -84,8 +83,11 @@ def draw_components_ui(
 			add_button = row.operator(add_component_op)
 			add_button.stf_type = context.scene.stf_component_modules
 			add_button.property_name = selected_add_module.blender_property_name
+		else:
+			row.separator(factor=1)
+			row.label(text="Please select a component type")
 
-		row = layout.row()
+		row = layout.row(align=True)
 		row.template_list(STFDrawComponentList.bl_idname, "", components_ref_property, "stf_components", components_ref_property, "stf_active_component_index")
 		if(len(components_ref_property.stf_components) > components_ref_property.stf_active_component_index):
 			component_ref = components_ref_property.stf_components[components_ref_property.stf_active_component_index]
@@ -155,8 +157,8 @@ def _build_stf_component_types_enum_callback(self, context) -> list:
 def register():
 	bpy.types.Scene.stf_component_modules = bpy.props.EnumProperty(
 		items=_build_stf_component_types_enum_callback,
-		name="STF Component Types",
-		description="Default & hot-loaded STF component types",
+		name="Available STF Components",
+		description="Select STF component to add",
 		options={"SKIP_SAVE"},
 		default=None,
 		get=None,

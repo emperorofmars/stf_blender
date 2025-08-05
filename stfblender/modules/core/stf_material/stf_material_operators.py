@@ -52,6 +52,7 @@ def remove_property_value(blender_material: bpy.types.Material, index: int):
 
 def clear_stf_material(blender_material: bpy.types.Material):
 	blender_material.stf_material.style_hints.clear()
+	blender_material.stf_material.shader_targets.clear()
 	for mat_property in blender_material.stf_material_properties:
 		if(hasattr(blender_material, mat_property.value_property_name)):
 			getattr(blender_material, mat_property.value_property_name).clear()
@@ -61,9 +62,9 @@ def clear_stf_material(blender_material: bpy.types.Material):
 
 
 class STFAddMaterialProperty(bpy.types.Operator):
+	"""Add property to this material"""
 	bl_idname = "stf.add_material_property"
 	bl_label = "Add Property"
-	bl_category = "STF"
 	bl_options = {"REGISTER", "UNDO"}
 
 	property_type: bpy.props.StringProperty() # type: ignore
@@ -73,13 +74,13 @@ class STFAddMaterialProperty(bpy.types.Operator):
 			if(mat_module.value_type == context.scene.stf_material_value_modules):
 				add_property(context.material, self.property_type, mat_module)
 				return {"FINISHED"}
-		self.report({'ERROR'}, "Invalid material value module!")
+		self.report({"ERROR"}, "Invalid material value module!")
 		return {"CANCELLED"}
 
 class STFRemoveMaterialProperty(bpy.types.Operator):
+	"""Remove property from this material"""
 	bl_idname = "stf.remove_material_property"
 	bl_label = "Remove"
-	bl_category = "STF"
 	bl_options = {"REGISTER", "UNDO"}
 
 	index: bpy.props.IntProperty() # type: ignore
@@ -93,9 +94,9 @@ class STFRemoveMaterialProperty(bpy.types.Operator):
 
 
 class STFAddMaterialPropertyValue(bpy.types.Operator):
+	"""Add Value to this property"""
 	bl_idname = "stf.add_material_property_value"
 	bl_label = "Add Value"
-	bl_category = "STF"
 	bl_options = {"REGISTER", "UNDO"}
 
 	index: bpy.props.IntProperty() # type: ignore
@@ -105,9 +106,9 @@ class STFAddMaterialPropertyValue(bpy.types.Operator):
 		return {"FINISHED"}
 
 class STFRemoveMaterialPropertyValue(bpy.types.Operator):
+	"""Remove Value from this property"""
 	bl_idname = "stf.remove_material_property_value"
 	bl_label = "Remove"
-	bl_category = "STF"
 	bl_options = {"REGISTER", "UNDO"}
 
 	index: bpy.props.IntProperty() # type: ignore
@@ -120,9 +121,9 @@ class STFRemoveMaterialPropertyValue(bpy.types.Operator):
 		return {"FINISHED"}
 
 class STFClearMaterial(bpy.types.Operator):
+	"""Remove all STF material properties"""
 	bl_idname = "stf.clear_material"
 	bl_label = "Clear STF Material"
-	bl_category = "STF"
 	bl_options = {"REGISTER", "UNDO"}
 
 	def invoke(self, context, event):

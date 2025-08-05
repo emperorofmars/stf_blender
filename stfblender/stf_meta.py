@@ -9,6 +9,7 @@ class STF_KV(bpy.types.PropertyGroup):
 
 
 class STF_Meta(bpy.types.PropertyGroup):
+	"""Metainformation about the STF asset"""
 	asset_name: bpy.props.StringProperty(name="Asset Name") # type: ignore
 	version: bpy.props.StringProperty(name="Version") # type: ignore
 	url: bpy.props.StringProperty(name="Asset URL") # type: ignore
@@ -50,6 +51,7 @@ class STF_Meta(bpy.types.PropertyGroup):
 
 
 class STFAddMetaPropertyCollection(bpy.types.Operator):
+	"""Add custom property"""
 	bl_idname = "stf.add_meta_property_collection"
 	bl_label = "Add Property"
 	bl_options = {"REGISTER", "UNDO"}
@@ -62,6 +64,7 @@ class STFAddMetaPropertyCollection(bpy.types.Operator):
 		return {"FINISHED"}
 
 class STFAddMetaPropertyScene(bpy.types.Operator):
+	"""Add custom property"""
 	bl_idname = "stf.add_meta_property_scene"
 	bl_label = "Add Property"
 	bl_options = {"REGISTER", "UNDO"}
@@ -75,6 +78,7 @@ class STFAddMetaPropertyScene(bpy.types.Operator):
 
 
 class STFRemoveMetaPropertyCollection(bpy.types.Operator):
+	"""Remove custom property"""
 	bl_idname = "stf.remove_meta_property_collection"
 	bl_label = "Remove"
 	bl_options = {"REGISTER", "UNDO"}
@@ -90,6 +94,7 @@ class STFRemoveMetaPropertyCollection(bpy.types.Operator):
 
 
 class STFRemoveMetaPropertyScene(bpy.types.Operator):
+	"""Remove custom property"""
 	bl_idname = "stf.remove_meta_property_scene"
 	bl_label = "Remove"
 	bl_options = {"REGISTER", "UNDO"}
@@ -115,12 +120,15 @@ def draw_meta_editor(layout: bpy.types.UILayout, collection: bpy.types.Collectio
 
 	layout.separator(factor=1, type="LINE")
 	layout.label(text="Custom Properties:")
+	col = layout.column(align=True)
+	if(len(collection.stf_meta.custom_properties)):
+		row = col.row(align=True); row.label(text="Name"); row.label(text="Value")
 	for custom_property in collection.stf_meta.custom_properties:
-		row = layout.row()
-		row.prop(custom_property, "name")
-		row.separator(factor=5, type="SPACE")
-		row.prop(custom_property, "value")
-		row.separator(factor=2, type="SPACE")
+		row = col.row(align=True)
+		row.prop(custom_property, "name", text="")
+		#row.separator(factor=2, type="SPACE")
+		row.prop(custom_property, "value", text="")
+		#row.separator(factor=1, type="SPACE")
 		if(not is_scene):
 			row.operator(STFRemoveMetaPropertyCollection.bl_idname, text="", icon="X")
 		else:

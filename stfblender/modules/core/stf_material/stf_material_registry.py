@@ -10,8 +10,8 @@ def _build_stf_material_value_modules_enum(self, context):
 def register():
 	bpy.types.Scene.stf_material_value_modules = bpy.props.EnumProperty(
 		items=_build_stf_material_value_modules_enum,
-		name="STF Material Value Modules",
-		description="Default & hot-loaded STF Material-Property-Value Modules",
+		name="Property Types",
+		description="Select a Property Type",
 		options={"SKIP_SAVE"},
 		default=0
 	)

@@ -25,12 +25,15 @@ class STFAddMaterialComponentOperator(bpy.types.Operator, STFAddComponentOperato
 	def get_property(self, context): return context.material
 
 class STFRemoveMaterialComponentOperator(bpy.types.Operator, STFRemoveComponentOperatorBase):
+	"""Remove selected component from Material"""
 	bl_idname = "stf.remove_material_component"
 	def get_property(self, context): return context.material
 
 class STFEditMaterialComponentIdOperator(bpy.types.Operator, STFEditComponentOperatorBase):
+	"""Edit the ID and overrides of this Component"""
 	bl_idname = "stf.edit_material_component_id"
 	def get_property(self, context): return context.material
+
 
 class STFDrawMaterialPropertyList(bpy.types.UIList):
 	bl_idname = "COLLECTION_UL_stf_material_list"
@@ -41,6 +44,67 @@ class STFDrawMaterialPropertyValueList(bpy.types.UIList):
 	bl_idname = "COLLECTION_UL_stf_material_value_list"
 	def draw_item(self, context, layout, data, item: STF_Material_Value_Ref, icon, active_data, active_propname, index: int):
 		layout.label(text="Value " + str(index))
+
+
+class STFMaterialHintAdd(bpy.types.Operator):
+	"""Add style hint. These values can be used to determine a target shader and their settings"""
+	bl_idname = "stf.material_hint_add"
+	bl_label = "Add Style Hint"
+	bl_options = {"REGISTER", "UNDO"}
+	def execute(self, context):
+		context.material.stf_material.style_hints.add()
+		return {"FINISHED"}
+
+class STFMaterialHintRemove(bpy.types.Operator):
+	"""Remove style hint"""
+	bl_idname = "stf.material_hint_remove"
+	bl_label = "Remove Style Hint"
+	bl_options = {"REGISTER", "UNDO"}
+	index: bpy.props.IntProperty() # type: ignore
+	def execute(self, context):
+		context.material.stf_material.style_hints.remove(self.index)
+		return {"FINISHED"}
+
+
+class STFMaterialShaderTargetAdd(bpy.types.Operator):
+	"""Define which application will parse this material into which shader. The shader names are set in the order of their priority. The first shader that exists will be used"""
+	bl_idname = "stf.material_shader_target_add"
+	bl_label = "Add Shader Target"
+	bl_options = {"REGISTER", "UNDO"}
+	def execute(self, context):
+		context.material.stf_material.shader_targets.add()
+		return {"FINISHED"}
+
+class STFMaterialShaderTargetRemove(bpy.types.Operator):
+	"""Remove stader target"""
+	bl_idname = "stf.material_shader_target_remove"
+	bl_label = "Remove Shader Target"
+	bl_options = {"REGISTER", "UNDO"}
+	index: bpy.props.IntProperty() # type: ignore
+	def execute(self, context):
+		context.material.stf_material.shader_targets.remove(self.index)
+		return {"FINISHED"}
+
+class STFMaterialShaderTargetShaderAdd(bpy.types.Operator):
+	"""Add shader name to target"""
+	bl_idname = "stf.material_shader_target_shader_add"
+	bl_label = "Add Shader"
+	bl_options = {"REGISTER", "UNDO"}
+	index: bpy.props.IntProperty() # type: ignore
+	def execute(self, context):
+		context.material.stf_material.shader_targets[self.index].shaders.add()
+		return {"FINISHED"}
+
+class STFMaterialShaderTargetShaderRemove(bpy.types.Operator):
+	"""Remove stader"""
+	bl_idname = "stf.material_shader_target_shader_remove"
+	bl_label = "Remove Shader"
+	bl_options = {"REGISTER", "UNDO"}
+	index: bpy.props.IntProperty() # type: ignore
+	index_shader: bpy.props.IntProperty() # type: ignore
+	def execute(self, context):
+		context.material.stf_material.shader_targets[self.index].shaders.remove(self.index_shader)
+		return {"FINISHED"}
 
 
 class STFMaterialSpatialPanel(bpy.types.Panel):
@@ -76,12 +140,51 @@ class STFMaterialSpatialPanel(bpy.types.Panel):
 		row.operator(STFClearMaterial.bl_idname)
 
 		# STF Material Properties
-		self.layout.prop(context.material.stf_material, "style_hints")
 
-		# TODO list properties by group, allow for custom hot-loaded code to draw entire groups, only list properties like that which don't have a recognized group
+		self.layout.separator(factor=2, type="LINE")
+		self.layout.label(text="Style Hints")
+		if(len(context.material.stf_material.style_hints)):
+			row = self.layout.row()
+			row.separator(factor=2.0)
+			col = row.column(align=True)
+			for style_hint_index, style_hint in enumerate(context.material.stf_material.style_hints):
+				row_inner = col.row(align=True)
+				row_inner.prop(style_hint, "value", text="")
+				row_inner.operator(STFMaterialHintRemove.bl_idname, text="", icon="X").index = style_hint_index
+		self.layout.operator(STFMaterialHintAdd.bl_idname)
+
+		self.layout.separator(factor=2, type="LINE")
+		self.layout.label(text="Shader Targets")
+		if(len(context.material.stf_material.shader_targets)):
+			row = self.layout.row()
+			row.separator(factor=2.0)
+			col = row.column()
+			for target_index, shader_target in enumerate(context.material.stf_material.shader_targets):
+				col_outer = col.column()
+				row_inner = col_outer.row(align=True)
+				row_inner.prop(shader_target, "target")
+				row_inner.operator(STFMaterialShaderTargetRemove.bl_idname, text="", icon="X").index = target_index
+				if(len(shader_target.shaders)):
+					row_inner = col_outer.row()
+					row_inner.separator(factor=4.0)
+					col_inner = row_inner.column(align=True)
+					for shader_index, shader in enumerate(shader_target.shaders):
+						row_value = col_inner.row(align=True)
+						row_value.prop(shader, "value", text="")
+						btn = row_value.operator(STFMaterialShaderTargetShaderRemove.bl_idname, text="", icon="X")
+						btn.index = target_index
+						btn.index_shader = shader_index
+				col_outer.operator(STFMaterialShaderTargetShaderAdd.bl_idname).index = target_index
+				if(len(shader_target.shaders)):
+					col_outer.separator(factor=1.0)
+		self.layout.operator(STFMaterialShaderTargetAdd.bl_idname)
+
+		self.layout.separator(factor=2, type="LINE")
+		# TODO list properties by group, allow for custom hot-loaded code to draw entire groups, only list properties manually like this in an 'advanced view'
+		self.layout.label(text="STF Material Properties")
 
 		# Draw List of ungrouped properties
-		row_property_list = self.layout.row()
+		row_property_list = self.layout.row(align=True)
 		row_property_list.template_list(STFDrawMaterialPropertyList.bl_idname, "", context.material, "stf_material_properties", context.material, "stf_active_material_property_index")
 
 		row = self.layout.row(align=True)
@@ -101,7 +204,7 @@ class STFMaterialSpatialPanel(bpy.types.Panel):
 			# Draw property value(s)
 			if(prop.multi_value):
 				self.layout.separator(factor=1, type="SPACE")
-				row_value_list = self.layout.row()
+				row_value_list = self.layout.row(align=True)
 				row_value_list.template_list(STFDrawMaterialPropertyValueList.bl_idname, "", prop, "values", prop, "active_value_index")
 			if(value := _find_value(context, prop)):
 				if(prop.multi_value):

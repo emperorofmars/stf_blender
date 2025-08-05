@@ -11,7 +11,6 @@ class STFSetCollectionAsRootOperator(bpy.types.Operator):
 	"""Set Collection as the STF export root"""
 	bl_idname = "stf.set_collection_as_export_root"
 	bl_label = "Set as STF export root"
-	bl_category = "STF"
 	bl_options = {"REGISTER", "UNDO"}
 
 	@classmethod
@@ -41,10 +40,12 @@ class STFAddCollectionComponentOperator(bpy.types.Operator, STFAddComponentOpera
 	def get_property(self, context): return context.collection
 
 class STFRemoveCollectionComponentOperator(bpy.types.Operator, STFRemoveComponentOperatorBase):
+	"""Remove selected component from Collection"""
 	bl_idname = "stf.remove_collection_component"
 	def get_property(self, context): return context.collection
 
 class STFEditCollectionComponentIdOperator(bpy.types.Operator, STFEditComponentOperatorBase):
+	"""Edit the ID and overrides of this Component"""
 	bl_idname = "stf.edit_collection_component_id"
 	def get_property(self, context): return context.collection
 
@@ -55,7 +56,6 @@ class STFCollectionPanel(bpy.types.Panel):
 	bl_label = "STF Editor: stf.prefab"
 	bl_region_type = "WINDOW"
 	bl_space_type = "PROPERTIES"
-	bl_category = "STF"
 	bl_context = "collection"
 
 	@classmethod

@@ -1,5 +1,6 @@
 import json
 import bpy
+import time
 from bpy_extras.io_utils import ExportHelper
 
 from ..stf_meta import draw_meta_editor
@@ -25,7 +26,7 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 
 	export_settings: bpy.props.PointerProperty(type=STF_ExportSettings) # type: ignore
 
-	debug: bpy.props.BoolProperty(name="Export Debug Json File", default=True) # type: ignore
+	debug: bpy.props.BoolProperty(name="Export Debug Json File", default=True, description="Useful for inspection the exported file in a text-editor") # type: ignore
 
 
 	def invoke(self, context, event):
@@ -39,7 +40,8 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 
 
 	def execute(self, context):
-		context.window.cursor_set('WAIT')
+		time_start = time.time()
+		context.window.cursor_set("WAIT")
 		files = []
 		trash_objects: list[bpy.types.Object] = []
 		try:
@@ -77,12 +79,12 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 						do_report = True
 						break
 			if(do_report):
-				self.report({'WARNING'}, "STF asset exported with reports!")
+				self.report({"WARNING"}, "STF asset exported with reports! (%.3f sec.)" % (time.time() - time_start))
 			else:
-				self.report({'INFO'}, "STF asset exported successfully!")
+				self.report({"INFO"}, "STF asset exported successfully! (%.3f sec.)" % (time.time() - time_start))
 			for report in stf_state._reports:
 				if(report.severity.value >= STFReportSeverity.Warn.value):
-					self.report({'WARNING'}, report.to_string())
+					self.report({"WARNING"}, report.to_string())
 				if(report.severity.value >= STFReportSeverity.Info.value):
 					print(report.to_string() + "\n")
 			return {"FINISHED"}
@@ -92,7 +94,7 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 			for trash in trash_objects:
 				if(trash is not None):
 					bpy.data.objects.remove(trash)
-			context.window.cursor_set('DEFAULT')
+			context.window.cursor_set("DEFAULT")
 
 
 	def draw(self, context):
@@ -103,9 +105,9 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 
 		self.layout.prop_search(bpy.context.scene, "stf_collection_selector", bpy.data, "collections", text="Root")
 		if(bpy.context.scene.stf_collection_selector):
-			self.layout.label(text="Remove Collection to export full scene")
+			self.layout.label(text="Remove Collection to export the entire Scene")
 		else:
-			self.layout.label(text="Exporting full scene")
+			self.layout.label(text="Exporting full Scene")
 
 		self.layout.separator(factor=2, type="LINE")
 
@@ -132,7 +134,7 @@ def __poll_collection(self, object) -> bool:
 def register():
 	bpy.types.TOPBAR_MT_file_export.append(export_button)
 
-	bpy.types.Scene.stf_collection_selector = bpy.props.PointerProperty(type=bpy.types.Collection, poll=__poll_collection, name="Collection", options={"SKIP_SAVE"}) # type: ignore
+	bpy.types.Scene.stf_collection_selector = bpy.props.PointerProperty(type=bpy.types.Collection, poll=__poll_collection, name="Collection", options={"SKIP_SAVE"}, description="Select a Collection for export") # type: ignore
 
 def unregister():
 	bpy.types.TOPBAR_MT_file_export.remove(export_button)

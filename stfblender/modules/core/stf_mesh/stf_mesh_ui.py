@@ -20,10 +20,12 @@ class STFAddMeshComponentOperator(bpy.types.Operator, STFAddComponentOperatorBas
 	def get_property(self, context): return context.mesh
 
 class STFRemoveMeshComponentOperator(bpy.types.Operator, STFRemoveComponentOperatorBase):
+	"""Remove selected component from Mesh"""
 	bl_idname = "stf.remove_mesh_component"
 	def get_property(self, context): return context.mesh
 
 class STFEditMeshComponentIdOperator(bpy.types.Operator, STFEditComponentOperatorBase):
+	"""Edit the ID and overrides of this Component"""
 	bl_idname = "stf.edit_mesh_component_id"
 	def get_property(self, context): return context.mesh
 
@@ -34,7 +36,6 @@ class STFMeshSpatialPanel(bpy.types.Panel):
 	bl_label = "STF Editor: stf.mesh"
 	bl_region_type = "WINDOW"
 	bl_space_type = "PROPERTIES"
-	bl_category = "STF"
 	bl_context = "data"
 
 	@classmethod

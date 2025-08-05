@@ -21,10 +21,12 @@ class STFAddImageComponentOperator(bpy.types.Operator, STFAddComponentOperatorBa
 	def get_property(self, context): return context.edit_image
 
 class STFRemoveImageComponentOperator(bpy.types.Operator, STFRemoveComponentOperatorBase):
+	"""Remove selected component from Image"""
 	bl_idname = "stf.remove_image_component"
 	def get_property(self, context): return context.edit_image
 
 class STFEditImageComponentIdOperator(bpy.types.Operator, STFEditComponentOperatorBase):
+	"""Edit the ID and overrides of this Component"""
 	bl_idname = "stf.edit_image_component_id"
 	def get_property(self, context): return context.edit_image
 

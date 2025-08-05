@@ -21,10 +21,12 @@ class STFAddAnimationComponentOperator(bpy.types.Operator, STFAddComponentOperat
 	def get_property(self, context): return context.active_action
 
 class STFRemoveAnimationComponentOperator(bpy.types.Operator, STFRemoveComponentOperatorBase):
+	"""Remove selected component from Animation"""
 	bl_idname = "stf.remove_animation_component"
 	def get_property(self, context): return context.active_action
 
 class STFEditAnimationComponentIdOperator(bpy.types.Operator, STFEditComponentOperatorBase):
+	"""Edit the ID and overrides of this Component"""
 	bl_idname = "stf.edit_animation_component_id"
 	def get_property(self, context): return context.active_action
 

@@ -72,7 +72,6 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 	if(not blender_material.stf_is_source_of_truth):
 		blender_material_to_stf(blender_material)
 
-
 	ret["style_hints"] = []
 	for style_hint in blender_material.stf_material.style_hints:
 		ret["style_hints"].append(style_hint.value)
