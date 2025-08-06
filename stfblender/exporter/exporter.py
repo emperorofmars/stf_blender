@@ -116,7 +116,7 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 		self.layout.separator(factor=2, type="LINE")
 		box = self.layout.box()
 		box.label(text="Asset Meta")
-		draw_meta_editor(box, context.scene.stf_collection_selector if context.scene.stf_collection_selector else context.scene.collection, context.scene.stf_collection_selector == context.scene.collection)
+		draw_meta_editor(box, context.scene.stf_collection_selector if context.scene.stf_collection_selector else context.scene.collection, context.scene.stf_collection_selector != context.scene.collection)
 
 		self.layout.separator(factor=2, type="LINE")
 		

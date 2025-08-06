@@ -192,6 +192,12 @@ def _stf_export(context: STF_ExportContext, application_object: any, parent_appl
 													# If one of the curves for this data_path doesn't contain a keyframe, bake it if desired
 													if(blender_animation.stf_bake):
 														keyframes[fcurve.array_index] = fcurve.evaluate(closest_timepoint)
+									elif(blender_animation.stf_bake and last_timepoint < ret["range"][1] - 0.001):
+										# If no more keyframes are present, but the animation ends after the last_timepoint, bake if desired
+										success = True
+										closest_timepoint = last_timepoint + 1
+										for _, fcurve in fcurves.items():
+											keyframes[fcurve.array_index] = fcurve.evaluate(closest_timepoint)
 									return closest_timepoint if success else None, keyframes
 
 								stf_track: list = []
