@@ -1,13 +1,13 @@
 import bpy
 
-from ..core.stf_report import STFReportSeverity, STFReport
-from ..core.stf_file import STF_File
-from ..core.stf_module import STF_Module
-from ..core.stf_definition import STF_Meta_AssetInfo, STF_Profile
-from ..core.stf_util import StateUtil
+from ..base.stf_report import STFReportSeverity, STFReport
+from ..base.stf_file import STF_File
+from ..base.stf_module import STF_Module
+from ..base.stf_definition import STF_Meta_AssetInfo
+from ..base.stf_state_base import STF_State_Base
 
 
-class STF_ImportState(StateUtil):
+class STF_ImportState(STF_State_Base):
 	"""
 	Hold all the data from a file for an import run.
 	Each context must have access to the same STF_ImportState instance.
@@ -22,7 +22,6 @@ class STF_ImportState(StateUtil):
 		self._fallback_modules = fallback_modules
 
 		self._imported_resources: dict[str, any] = {} # ID | list of IDs -> imported object
-		self._profiles: list[STF_Profile]
 		self._asset_info: STF_Meta_AssetInfo
 
 		self._trash_objects: list[bpy.types.Object] = trash_objects
@@ -43,7 +42,7 @@ class STF_ImportState(StateUtil):
 			case "stf.buffer.included":
 				return self._file.buffers_included[buffer.index]
 			case _:
-				self.report(STFReport("Invalid buffer type: " + buffer.type, severity=STFReportSeverity.Error))
+				self.report(STFReport("Invalid buffer type: " + buffer.type, severity=STFReportSeverity.FatalError))
 		return None
 
 

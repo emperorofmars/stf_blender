@@ -16,5 +16,5 @@ def unregister():
 	auto_load.unregister()
 
 
-from .stfblender.modules import register_stf_modules
+from .stfblender.stf_modules import register_stf_modules
 

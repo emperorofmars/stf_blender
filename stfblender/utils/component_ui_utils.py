@@ -46,6 +46,14 @@ def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, compo
 			break
 
 	if(selected_module):
+		if(selected_module.__doc__):
+			for line in selected_module.__doc__.split("\n"):
+				remaining = line
+				while(len(remaining) > 80):
+					box.label(text=remaining[:80])
+					remaining = remaining[80:]
+				box.label(text=remaining)
+
 		if(hasattr(selected_module, "draw_component_instance_func")):
 			selected_module.draw_component_instance_func(box, context, component_ref, stf_application_object, component)
 		elif(hasattr(selected_module, "draw_component_func")):
@@ -152,7 +160,7 @@ def set_stf_component_filter(filter = None):
 
 
 def _build_stf_component_types_enum_callback(self, context) -> list:
-	return [((stf_module.stf_type, stf_module.stf_type, "")) for stf_module in get_component_modules(stf_component_filter)]
+	return [((stf_module.stf_type, stf_module.stf_type, stf_module.__doc__ if stf_module.__doc__ else "")) for stf_module in get_component_modules(stf_component_filter)]
 
 def register():
 	bpy.types.Scene.stf_component_modules = bpy.props.EnumProperty(

@@ -3,7 +3,7 @@ import bpy
 
 from ..exporter.stf_export_context import STF_ExportContext
 from ..importer.stf_import_context import STF_ImportContext
-from ..core.stf_module import STF_Module
+from ..base.stf_module import STF_Module
 
 
 class JsonFallbackData(bpy.types.PropertyGroup):

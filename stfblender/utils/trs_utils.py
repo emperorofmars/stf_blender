@@ -28,18 +28,15 @@ def blender_uv_to_stf(blender_vec: list[float]) -> list[float]:
 
 
 def blender_object_to_trs(blender_object: bpy.types.Object) -> list[list[float]]:
-	#t, r, s = blender_object.matrix_local.decompose()
 	if(blender_object.parent):
 		match(blender_object.parent_type):
 			case "OBJECT":
 				t, r, s = (blender_object.parent.matrix_world.inverted_safe() @ blender_object.matrix_world).decompose()
 			case "BONE":
-				#t, r, s = (blender_object.parent.data.bones[blender_object.parent_bone].matrix_local.inverted_safe() @ blender_object.parent.matrix_world.inverted_safe() @ blender_object.matrix_world).decompose()
 				t, r, s = (blender_object.parent.matrix_world.inverted_safe() @ blender_object.matrix_world).decompose()
 	else:
 		t, r, s = blender_object.matrix_world.decompose()
 	return blender_to_trs(t, r, s)
-	#return to_trs(blender_object.location, blender_object.rotation_quaternion, blender_object.scale)
 
 
 def stf_translation_to_blender(vec: list[float]) -> mathutils.Vector:
@@ -67,10 +64,7 @@ def trs_to_blender_object(trs: list[list[float]], blender_object: bpy.types.Obje
 			case "OBJECT":
 				blender_object.matrix_world = blender_object.parent.matrix_world @ matrix_local
 			case "BONE":
-				#matrix_bone = blender_object.parent.data.bones[blender_object.parent_bone].matrix_local
-				#blender_object.matrix_world = matrix_bone @ blender_object.parent.matrix_world @ matrix_local
 				blender_object.matrix_world = blender_object.parent.matrix_world @ matrix_local
-		# TODO handle parent binding
 	else:
 		blender_object.matrix_world = matrix_local
 

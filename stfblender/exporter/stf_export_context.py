@@ -2,8 +2,8 @@ import bpy
 from typing import Callable
 
 from .stf_export_state import STF_ExportState
-from ..core.stf_definition import STF_Meta_AssetInfo, STF_Profile
-from ..core.stf_report import STFReportSeverity, STFReport
+from ..base.stf_definition import STF_Meta_AssetInfo
+from ..base.stf_report import STFReportSeverity, STFReport
 
 
 class STF_ExportContext:
@@ -117,6 +117,3 @@ class STF_ExportContext:
 
 	def get_asset_info(self) -> STF_Meta_AssetInfo:
 		return self._state._asset_info
-
-	def get_profiles(self) -> list[STF_Profile]:
-		return self._state._profiles

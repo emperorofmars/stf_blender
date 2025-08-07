@@ -9,7 +9,7 @@ def boilerplate_register(blender_type: any, stf_kind: str):
 	blender_type.stf_name_source_of_truth = bpy.props.BoolProperty(name="STF Name Is Source Of Truth", description="Use Blender name or specify one manually") # type: ignore
 	if(stf_kind not in ["instance", "comopnent"]):
 		blender_type.stf_components = bpy.props.CollectionProperty(type=STF_Component_Ref, name="Components") # type: ignore
-		blender_type.stf_active_component_index = bpy.props.IntProperty()
+		blender_type.stf_active_component_index = bpy.props.IntProperty(name="Selected Component")
 
 def boilerplate_unregister(blender_type: any, stf_kind: str):
 	if hasattr(blender_type, "stf_id"):

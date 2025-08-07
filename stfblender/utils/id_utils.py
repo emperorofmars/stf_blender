@@ -2,7 +2,7 @@ import bpy
 import uuid
 
 from ..utils.minsc import CopyToClipboard
-from ..core.stf_report import STFReportSeverity, STFReport
+from ..base.stf_report import STFReportSeverity, STFReport
 
 
 class STFSetIDOperatorBase:

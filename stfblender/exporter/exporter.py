@@ -3,9 +3,9 @@ import bpy
 import time
 from bpy_extras.io_utils import ExportHelper
 
-from ..stf_meta import draw_meta_editor
-from ..core.stf_report import STFReportSeverity
-from ..core.stf_registry import get_export_modules
+from ..base.stf_meta import draw_meta_editor
+from ..base.stf_report import STFReportSeverity
+from ..base.stf_registry import get_export_modules
 from .stf_export_state import STF_ExportState
 from .stf_export_context import STF_ExportContext
 from ..utils.minsc import draw_slot_link_warning, get_stf_version
@@ -47,7 +47,7 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 		try:
 			collection = context.scene.stf_collection_selector if context.scene.stf_collection_selector else context.scene.collection
 
-			stf_state = STF_ExportState([], collection.stf_meta.to_stf_meta_assetInfo(), get_export_modules(bpy.context.preferences.addons.keys()), trash_objects, settings = self.export_settings)
+			stf_state = STF_ExportState(collection.stf_meta.to_stf_meta_assetInfo(), get_export_modules(), trash_objects, settings = self.export_settings)
 			stf_context = STF_ExportContext(stf_state)
 			root_id = stf_context.serialize_resource(collection)
 			stf_state.set_root_id(root_id)
@@ -62,7 +62,7 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 				export_filepath += ".stf"
 
 			# Create and write stf_file to disk
-			stf_file = stf_state.create_stf_binary_file(generator="stf_blender", generator_version=get_stf_version())
+			stf_file = stf_state.create_stf_binary_file()
 			files.append(open(export_filepath, "wb"))
 			stf_file.serialize(files[len(files) - 1])
 

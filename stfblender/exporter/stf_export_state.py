@@ -2,11 +2,12 @@ import bpy
 import io
 from enum import Enum
 
-from ..core.stf_definition import STF_Buffer_Included, STF_JsonDefinition, STF_Meta_AssetInfo, STF_Profile
-from ..core.stf_report import STFReportSeverity, STFReport
-from ..core.stf_module import STF_ExportComponentHook, STF_Module
-from ..core.stf_file import STF_File
-from ..core.stf_util import StateUtil
+from ..base.stf_definition import STF_Buffer_Included, STF_JsonDefinition, STF_Meta_AssetInfo
+from ..base.stf_report import STFReportSeverity, STFReport
+from ..base.stf_module import STF_ExportComponentHook, STF_Module
+from ..base.stf_file import STF_File
+from ..base.stf_state_base import STF_State_Base
+from ..utils.minsc import get_stf_version
 
 
 class STF_Buffer_Mode(Enum):
@@ -15,13 +16,13 @@ class STF_Buffer_Mode(Enum):
 	external = 2
 
 
-class STF_ExportState(StateUtil):
+class STF_ExportState(STF_State_Base):
 	"""
 	Hold all the data from an export run.
 	Each context must have access to the same STF_ExportState instance.
 	"""
 
-	def __init__(self, profiles: list[STF_Profile], asset_info: STF_Meta_AssetInfo, modules: tuple[dict[any, list[STF_Module]], dict[any, list[STF_ExportComponentHook]]], trash_objects: list[bpy.types.Object] = [], fail_on_severity: STFReportSeverity = STFReportSeverity.FatalError, permit_id_reassignment: bool = True, metric_multiplier: float = 1, settings: any = None):
+	def __init__(self, asset_info: STF_Meta_AssetInfo, modules: tuple[dict[any, list[STF_Module]], dict[any, list[STF_ExportComponentHook]]], trash_objects: list[bpy.types.Object] = [], fail_on_severity: STFReportSeverity = STFReportSeverity.FatalError, permit_id_reassignment: bool = True, metric_multiplier: float = 1, settings: any = None):
 		super().__init__(fail_on_severity)
 
 		self._modules: dict[any, list[STF_Module]] = modules[0]
@@ -31,7 +32,6 @@ class STF_ExportState(StateUtil):
 		self._exported_resources: dict[str, dict] = {} # ID -> exported STF Json resource
 		self._exported_buffers: dict[str, io.BytesIO] = {} # ID -> exported STF Json buffer
 
-		self._profiles = profiles
 		self._asset_info = asset_info
 		self._permit_id_reassignment = permit_id_reassignment
 		self._root_id: str = None
@@ -124,18 +124,17 @@ class STF_ExportState(StateUtil):
 		return self._root_id
 
 
-	def create_stf_definition(self, buffer_mode: STF_Buffer_Mode = STF_Buffer_Mode.included_binary, generator: str = "libstf_python", generator_version: str = "0.0.0") -> STF_JsonDefinition:
+	def create_stf_definition(self, buffer_mode: STF_Buffer_Mode = STF_Buffer_Mode.included_binary) -> STF_JsonDefinition:
 		import datetime
 
 		ret = STF_JsonDefinition()
 		ret.stf.version_major = 0
 		ret.stf.version_minor = 0
 		ret.stf.root = self._root_id
-		ret.stf.generator = generator
-		ret.stf.generator_version = generator_version
+		ret.stf.generator = "stf_blender"
+		ret.stf.generator_version = get_stf_version()
 		ret.stf.timestamp = datetime.datetime.now(datetime.timezone.utc).isoformat()
 		ret.stf.asset_info = self._asset_info
-		ret.stf.profiles = self._profiles
 		ret.stf.metric_multiplier = self._metric_multiplier
 		ret.resources = self._exported_resources
 		ret.buffers = {}
@@ -146,14 +145,13 @@ class STF_ExportState(StateUtil):
 				json_buffer_def.index = buffer_index
 				ret.buffers[id] = json_buffer_def
 				buffer_index += 1
-		# TODO handle other buffer types
 		return ret
 
-	def create_stf_binary_file(self, generator: str = "libstf_python", generator_version: str = "0.0.0") -> STF_File:
+	def create_stf_binary_file(self) -> STF_File:
 		ret = STF_File()
 		ret.binary_version_major = 0
 		ret.binary_version_minor = 0
-		ret.definition = self.create_stf_definition(STF_Buffer_Mode.included_binary, generator, generator_version)
+		ret.definition = self.create_stf_definition(STF_Buffer_Mode.included_binary)
 		for _, buffer in self._exported_buffers.items():
 			ret.buffers_included.append(buffer)
 		return ret

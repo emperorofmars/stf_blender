@@ -2,11 +2,11 @@ import bpy
 import time
 from bpy_extras.io_utils import ImportHelper
 
-from ..core.stf_registry import get_import_modules
+from ..base.stf_registry import get_import_modules
 from .stf_import_state import STF_ImportState
-from ..core.stf_report import STFException
+from ..base.stf_report import STFException
 from .stf_import_context import STF_ImportContext
-from ..core.stf_file import STF_File
+from ..base.stf_file import STF_File
 from ..utils.minsc import draw_slot_link_warning, get_stf_version
 
 
@@ -31,7 +31,7 @@ class ImportSTF(bpy.types.Operator, ImportHelper):
 			file = open(self.filepath, "rb")
 			stf_file = STF_File.parse(file)
 
-			stf_state = STF_ImportState(stf_file, get_import_modules(bpy.context.preferences.addons.keys()), trash_objects)
+			stf_state = STF_ImportState(stf_file, get_import_modules(), trash_objects)
 			stf_context = STF_ImportContext(stf_state)
 			root: bpy.types.Collection = stf_context.import_resource(stf_context.get_root_id(), "data")
 			stf_state.run_tasks()
