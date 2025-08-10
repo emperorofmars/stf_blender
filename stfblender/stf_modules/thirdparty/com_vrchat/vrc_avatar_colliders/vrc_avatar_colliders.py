@@ -1,9 +1,11 @@
 import json
 import bpy
 
+from .....base.stf_module import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
 from .....exporter.stf_export_context import STF_ExportContext
 from .....importer.stf_import_context import STF_ImportContext
-from .....utils.component_utils import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref, add_component, import_component_base
+from .....utils.component_utils import add_component, import_component_base
+from .....utils.id_utils import ensure_stf_id
 
 
 _stf_type = "com.vrchat.avatar_colliders"
@@ -26,13 +28,14 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, parent
 	return component
 
 
-def _stf_export(context: STF_ExportContext, application_object: VRC_AvatarColliders, parent_application_object: any) -> tuple[dict, str]:
+def _stf_export(context: STF_ExportContext, component: VRC_AvatarColliders, parent_application_object: any) -> tuple[dict, str]:
 	try:
-		ret = json.loads(application_object.data)
+		ensure_stf_id(context, component, component)
+		ret = json.loads(component.data)
 		ret["type"] = _stf_type
-		ret["name"] = application_object.stf_name
-		ret["overrides"] = [override.target_id for override in application_object.overrides]
-		return ret, application_object.stf_id
+		ret["name"] = component.stf_name
+		ret["overrides"] = [override.target_id for override in component.overrides]
+		return ret, component.stf_id
 	except:
 		return None
 

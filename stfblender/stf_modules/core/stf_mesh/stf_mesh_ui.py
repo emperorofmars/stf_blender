@@ -51,9 +51,9 @@ class STFMeshSpatialPanel(bpy.types.Panel):
 				self.layout.label(text="Warning, origin not aligned with Armature! This will lead to differing output.")
 
 		# Set ID
-		draw_stf_id_ui(self.layout, context, context.mesh, STFSetMeshIDOperator.bl_idname)
+		draw_stf_id_ui(self.layout, context, context.mesh, context.mesh.stf_info, STFSetMeshIDOperator.bl_idname)
 
 		self.layout.separator(factor=2, type="LINE")
 
 		# Components
-		draw_components_ui(self.layout, context, context.mesh, STFAddMeshComponentOperator.bl_idname, STFRemoveMeshComponentOperator.bl_idname, STFEditMeshComponentIdOperator.bl_idname)
+		draw_components_ui(self.layout, context, context.mesh.stf_info, context.mesh, STFAddMeshComponentOperator.bl_idname, STFRemoveMeshComponentOperator.bl_idname, STFEditMeshComponentIdOperator.bl_idname)

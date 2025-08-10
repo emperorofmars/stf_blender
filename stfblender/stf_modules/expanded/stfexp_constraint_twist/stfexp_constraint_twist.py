@@ -2,9 +2,10 @@ import re
 import bpy
 from typing import Callable
 
+from ....base.stf_module import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
 from ....exporter.stf_export_context import STF_ExportContext
 from ....importer.stf_import_context import STF_ImportContext
-from ....utils.component_utils import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref, add_component, export_component_base, import_component_base
+from ....utils.component_utils import add_component, export_component_base, import_component_base
 from ....utils.armature_bone import ArmatureBone
 from ....utils.reference_helper import export_resource
 from ....utils.animation_conversion_utils import get_component_stf_path
@@ -76,18 +77,18 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 
 
 def _stf_export(context: STF_ExportContext, component: STFEXP_Constraint_Twist, context_object: any) -> tuple[dict, str]:
-	ret = export_component_base(_stf_type, component)
+	ret = export_component_base(context, _stf_type, component)
 	ret["weight"] = component.weight
 
 	def _handle():
 		if(type(context_object) == ArmatureBone):
 			if((context_object.armature == component.target_object or not component.target_object) and component.target_bone):
-				ret["target"] = [export_resource(ret, context_object.armature.bones[component.target_bone].stf_id)]
+				ret["target"] = [export_resource(ret, context_object.armature.bones[component.target_bone].stf_info.stf_id)]
 		elif(component.target_object):
 			if(type(component.target_object.data) == bpy.types.Armature and component.target_bone):
-				ret["target"] = [export_resource(ret, component.target_object.stf_id), "instance", export_resource(ret, component.target_object.data.bones[component.target_bone].stf_id)]
+				ret["target"] = [export_resource(ret, component.target_object.stf_info.stf_id), "instance", export_resource(ret, component.target_object.data.bones[component.target_bone].stf_info.stf_id)]
 			else:
-				ret["target"] = [export_resource(ret, component.target_object.stf_id)]
+				ret["target"] = [export_resource(ret, component.target_object.stf_info.stf_id)]
 	context.add_task(_handle)
 
 	return ret, component.stf_id

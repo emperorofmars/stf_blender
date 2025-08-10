@@ -28,10 +28,10 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 		blender_object: bpy.types.Object = bpy.data.objects.new(json_resource.get("name", "STF Node"), None)
 	context.register_imported_resource(stf_id, blender_object)
 
-	blender_object.stf_id = stf_id
+	blender_object.stf_info.stf_id = stf_id
 	if(json_resource.get("name")):
-		blender_object.stf_name = json_resource["name"]
-		blender_object.stf_name_source_of_truth = True
+		blender_object.stf_info.stf_name = json_resource["name"]
+		blender_object.stf_info.stf_name_source_of_truth = True
 	blender_object.name = json_resource.get("name", "STF Node")
 	for collection in blender_object.users_collection:
 		collection.objects.unlink(blender_object)
@@ -84,7 +84,7 @@ def _stf_export(context: STF_ExportContext, blender_object: any, context_object:
 
 	json_resource = {
 		"type": _stf_type,
-		"name": blender_object.stf_name if blender_object.stf_name_source_of_truth else blender_object.name
+		"name": blender_object.stf_info.stf_name if blender_object.stf_info.stf_name_source_of_truth else blender_object.name
 	}
 
 	children = []
@@ -112,9 +112,9 @@ def _stf_export(context: STF_ExportContext, blender_object: any, context_object:
 					pass
 				case "BONE":
 					# TODO make this more generic
-					json_resource["parent_binding"] = [blender_object.parent.stf_id, "instance", blender_object.parent.data.bones[blender_object.parent_bone].stf_id]
+					json_resource["parent_binding"] = [blender_object.parent.stf_info.stf_id, "instance", blender_object.parent.data.bones[blender_object.parent_bone].stf_info.stf_id]
 				case _:
-					context.report(STFReport("Unsupported object parent_type: " + str(blender_object.parent_type), STFReportSeverity.FatalError, blender_object.stf_id, json_resource.get("type"), blender_object))
+					context.report(STFReport("Unsupported object parent_type: " + str(blender_object.parent_type), STFReportSeverity.FatalError, blender_object.stf_info.stf_id, json_resource.get("type"), blender_object))
 	context.add_task(_handle_parent_binding)
 
 	json_resource["trs"] = trs_utils.blender_object_to_trs(blender_object)
@@ -127,7 +127,7 @@ def _stf_export(context: STF_ExportContext, blender_object: any, context_object:
 		if(instance_id):
 			json_resource["instance"] = instance_id
 
-	return json_resource, blender_object.stf_id
+	return json_resource, blender_object.stf_info.stf_id
 
 
 class STF_Module_STF_Node(STF_Module):

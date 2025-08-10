@@ -2,8 +2,8 @@ from io import BytesIO
 import uuid
 import bpy
 
-from ....utils.component_utils import STF_BlenderComponentBase, STF_BlenderComponentModule, add_component, export_component_base, import_component_base
-from ....base.stf_module import STF_ExportComponentHook
+from ....base.stf_module import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_ExportComponentHook
+from ....utils.component_utils import add_component, export_component_base, import_component_base
 from ....exporter.stf_export_context import STF_ExportContext
 from ....importer.stf_import_context import STF_ImportContext
 from ....utils.buffer_utils import determine_indices_width, parse_uint, serialize_uint
@@ -44,7 +44,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 
 
 def _stf_export(context: STF_ExportContext, application_object: STFEXP_Mesh_Seams, context_object: bpy.types.Mesh) -> tuple[dict, str]:
-	ret = export_component_base(_stf_type, application_object)
+	ret = export_component_base(context, _stf_type, application_object)
 
 	indices_width = determine_indices_width(len(context_object.loops))
 

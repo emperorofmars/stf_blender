@@ -46,9 +46,9 @@ class STFNodePanel(bpy.types.Panel):
 		set_stf_component_filter(bpy.types.Object)
 
 		# Set ID
-		draw_stf_id_ui(self.layout, context, context.object, STFSetObjectIDOperator.bl_idname)
+		draw_stf_id_ui(self.layout, context, context.object, context.object.stf_info, STFSetObjectIDOperator.bl_idname)
 
 		self.layout.separator(factor=2, type="LINE")
 
 		# Components
-		draw_components_ui(self.layout, context, context.object, STFAddObjectComponentOperator.bl_idname, STFRemoveObjectComponentOperator.bl_idname, STFEditObjectComponentIdOperator.bl_idname)
+		draw_components_ui(self.layout, context, context.object.stf_info, context.object, STFAddObjectComponentOperator.bl_idname, STFRemoveObjectComponentOperator.bl_idname, STFEditObjectComponentIdOperator.bl_idname)

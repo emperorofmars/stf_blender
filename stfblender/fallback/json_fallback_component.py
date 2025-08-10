@@ -1,9 +1,10 @@
 import json
 import bpy
 
+from ..base.stf_module import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
 from ..exporter.stf_export_context import STF_ExportContext
 from ..importer.stf_import_context import STF_ImportContext
-from ..utils.component_utils import STF_BlenderComponentBase, STF_BlenderComponentModule, add_component
+from ..utils.component_utils import add_component
 
 
 _blender_property_name = "stf_json_fallback_component"
@@ -16,7 +17,7 @@ class JsonFallbackComponent(STF_BlenderComponentBase):
 	#referenced_buffers:
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_BlenderComponentModule, context_object: any, component: JsonFallbackComponent):
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: JsonFallbackComponent):
 	layout.prop(component, "json")
 	#layout.prop(component, "referenced_resources")
 	#layout.prop(component, "referenced_buffers")

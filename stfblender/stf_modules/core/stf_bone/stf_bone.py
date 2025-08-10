@@ -58,10 +58,10 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 
 	context.register_imported_resource(stf_id, blender_bone)
 
-	blender_armature.bones[blender_bone_name].stf_id = stf_id
+	blender_armature.bones[blender_bone_name].stf_info.stf_id = stf_id
 	if(json_resource.get("name")):
-		blender_armature.bones[blender_bone_name].stf_name = json_resource["name"]
-		blender_armature.bones[blender_bone_name].stf_name_source_of_truth = True
+		blender_armature.bones[blender_bone_name].stf_info.stf_name = json_resource["name"]
+		blender_armature.bones[blender_bone_name].stf_info.stf_name_source_of_truth = True
 
 	return blender_bone
 
@@ -76,12 +76,12 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 	# Once Blender enters into edit-mode, the Bone reference will be invalidated. Access by name instead.
 	blender_bone_name = blender_bone_def.name
 	blender_child_bones = [ArmatureBone(blender_armature, child.name) for child in blender_bone_def.get_bone().children]
-	stf_id = blender_bone_def.get_bone().stf_id
+	stf_id = blender_bone_def.get_bone().stf_info.stf_id
 
 	children = []
 	ret = {
 		"type": _stf_type,
-		"name": blender_bone_def.get_bone().stf_name if blender_bone_def.get_bone().stf_name_source_of_truth else blender_bone_def.get_bone().name,
+		"name": blender_bone_def.get_bone().stf_info.stf_name if blender_bone_def.get_bone().stf_info.stf_name_source_of_truth else blender_bone_def.get_bone().name,
 		"children": children,
 	}
 	if(blender_armature.bones[blender_bone_name].parent):
@@ -103,13 +103,13 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 
 def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: ArmatureBone, application_object_property_index: int, data_path: str) -> tuple[list[str], Callable[[any], any], list[int]]:
 	if(match := re.search(r"^location", data_path)):
-		return [application_object.get_bone().stf_id, "t"], convert_bone_translation_to_stf, translation_bone_index_conversion_to_stf
+		return [application_object.get_bone().stf_info.stf_id, "t"], convert_bone_translation_to_stf, translation_bone_index_conversion_to_stf
 
 	if(match := re.search(r"^rotation_quaternion", data_path)):
-		return [application_object.get_bone().stf_id, "r"], convert_bone_rotation_to_stf, rotation_bone_index_conversion_to_stf
+		return [application_object.get_bone().stf_info.stf_id, "r"], convert_bone_rotation_to_stf, rotation_bone_index_conversion_to_stf
 
 	if(match := re.search(r"^scale", data_path)):
-		return [application_object.get_bone().stf_id, "s"], convert_bone_scale_to_stf, scale_bone_index_conversion_to_stf
+		return [application_object.get_bone().stf_info.stf_id, "s"], convert_bone_scale_to_stf, scale_bone_index_conversion_to_stf
 
 	return None
 

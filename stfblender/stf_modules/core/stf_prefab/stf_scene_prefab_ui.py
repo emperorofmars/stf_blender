@@ -19,9 +19,9 @@ class STFSetSceneCollectionAsRootOperator(bpy.types.Operator):
 
 	def execute(self, context):
 		context.scene.stf_root_collection = None
-		if(not context.scene.collection.stf_id):
+		if(not context.scene.collection.stf_info.stf_id):
 			import uuid
-			context.scene.collection.stf_id = str(uuid.uuid4())
+			context.scene.collection.stf_info.stf_id = str(uuid.uuid4())
 		return {"FINISHED"}
 
 
@@ -88,9 +88,9 @@ class STFSceneCollectionPanel(bpy.types.Panel):
 			self.layout.separator(factor=1, type="SPACE")
 
 			# Set ID
-			draw_stf_id_ui(self.layout, context, context.scene.collection, STFSetSceneCollectionIDOperator.bl_idname)
+			draw_stf_id_ui(self.layout, context, context.scene.collection, context.scene.collection.stf_info, STFSetSceneCollectionIDOperator.bl_idname)
 
 			self.layout.separator(factor=2, type="LINE")
 
 			# Components
-			draw_components_ui(self.layout, context, context.scene.collection, STFAddSceneCollectionComponentOperator.bl_idname, STFRemoveSceneCollectionComponentOperator.bl_idname, STFEditSceneCollectionComponentIdOperator.bl_idname)
+			draw_components_ui(self.layout, context, context.scene.collection.stf_info, context.scene.collection, STFAddSceneCollectionComponentOperator.bl_idname, STFRemoveSceneCollectionComponentOperator.bl_idname, STFEditSceneCollectionComponentIdOperator.bl_idname)

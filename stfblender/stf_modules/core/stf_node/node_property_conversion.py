@@ -9,16 +9,16 @@ from ....utils.animation_conversion_utils import *
 
 def stf_node_resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: any, application_object_property_index: int, data_path: str) -> tuple[list[str], Callable[[int, any], any], list[int]]:
 	if(match := re.search(r"^location", data_path)):
-		return [application_object.stf_id, "t"], convert_translation_to_stf, translation_index_conversion_to_stf
+		return [application_object.stf_info.stf_id, "t"], convert_translation_to_stf, translation_index_conversion_to_stf
 
 	if(match := re.search(r"^rotation_quaternion", data_path)):
-		return [application_object.stf_id, "r"], convert_blender_rotation_to_stf, rotation_index_conversion_to_stf
+		return [application_object.stf_info.stf_id, "r"], convert_blender_rotation_to_stf, rotation_index_conversion_to_stf
 
 	if(match := re.search(r"^scale", data_path)):
-		return [application_object.stf_id, "s"], convert_scale_to_stf, scale_index_conversion_to_stf
+		return [application_object.stf_info.stf_id, "s"], convert_scale_to_stf, scale_index_conversion_to_stf
 
 	if(match := re.search(r"^hide_render", data_path)):
-		return [application_object.stf_id, "enabled"], lambda i, v: not v, None
+		return [application_object.stf_info.stf_id, "enabled"], lambda i, v: not v, None
 
 	return None
 

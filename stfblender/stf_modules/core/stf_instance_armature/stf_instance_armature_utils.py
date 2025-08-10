@@ -1,9 +1,10 @@
 import bpy
 
+from ....base.stf_module import InstanceModComponentRef, STF_BlenderComponentModule
 from ....exporter.stf_export_context import STF_ExportContext
 from ....importer.stf_import_context import STF_ImportContext
 from ....utils.animation_conversion_utils import *
-from ....utils.component_utils import InstanceModComponentRef, STF_BlenderComponentModule, add_component, find_component_module, get_component_modules
+from ....utils.component_utils import add_component, find_component_module, get_component_modules
 
 
 def update_armature_instance_component_standins(context: bpy.types.Context, blender_object: bpy.types.Object, stf_modules: list[STF_BlenderComponentModule] = None):
@@ -13,7 +14,7 @@ def update_armature_instance_component_standins(context: bpy.types.Context, blen
 		stf_modules = get_component_modules()
 
 	for bone in blender_armature.bones:
-		for component_ref in bone.stf_components:
+		for component_ref in bone.stf_info.stf_components:
 			if(hasattr(bone, component_ref.blender_property_name)):
 				for component in getattr(bone, component_ref.blender_property_name):
 					if(component.stf_id == component_ref.stf_id):

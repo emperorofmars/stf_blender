@@ -14,10 +14,10 @@ _stf_type = "stf.prefab"
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
 	collection = bpy.data.collections.new(json_resource.get("name", context.get_filename()))
-	collection.stf_id = stf_id
+	collection.stf_info.stf_id = stf_id
 	if(json_resource.get("name")):
-		collection.stf_name = json_resource["name"]
-		collection.stf_name_source_of_truth = True
+		collection.stf_info.stf_name = json_resource["name"]
+		collection.stf_info.stf_name_source_of_truth = True
 	bpy.context.scene.collection.children.link(collection)
 	collection.stf_use_collection_as_prefab = True
 
@@ -38,7 +38,7 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 	animations = []
 	ret = {
 		"type": _stf_type,
-		"name": collection.stf_name if collection.stf_name_source_of_truth else collection.name,
+		"name": collection.stf_info.stf_name if collection.stf_info.stf_name_source_of_truth else collection.name,
 		"root_nodes": root_nodes,
 		"animations": animations,
 	}
@@ -51,7 +51,7 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 		if(stf_animation_id := context.serialize_resource(action, module_kind="data", context_object=collection, export_fail_severity=STFReportSeverity.Debug)):
 			animations.append(stf_animation_id)
 
-	return ret, collection.stf_id
+	return ret, collection.stf_info.stf_id
 
 
 class STF_Module_STF_Prefab(STF_Module):

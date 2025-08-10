@@ -1,8 +1,9 @@
 import bpy
 
+from ....base.stf_module import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
 from ....exporter.stf_export_context import STF_ExportContext
 from ....importer.stf_import_context import STF_ImportContext
-from ....utils.component_utils import STF_BlenderComponentBase, STF_BlenderComponentModule, add_component, export_component_base, import_component_base
+from ....utils.component_utils import add_component, export_component_base, import_component_base
 from ....utils.id_utils import ensure_stf_id
 
 
@@ -20,7 +21,7 @@ class STF_Texture(STF_BlenderComponentBase):
 	# TODO much more
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_BlenderComponentModule, parent_application_object: any, component: STF_Texture):
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, parent_application_object: any, component: STF_Texture):
 	layout.prop(component, "width")
 	layout.prop(component, "height")
 	layout.prop(component, "downscale_priority")
@@ -28,8 +29,8 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 	layout.prop(component, "mipmaps")
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, parent_application_object: any) -> any:
-	component_ref, component = add_component(parent_application_object, _blender_property_name, stf_id, _stf_type)
+def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
+	component_ref, component = add_component(context_object, _blender_property_name, stf_id, _stf_type)
 	import_component_base(component, json_resource)
 
 	component.width = json_resource.get("width", 1024)
@@ -41,15 +42,14 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, pa
 	return component
 
 
-def _stf_export(context: STF_ExportContext, application_object: STF_Texture, parent_application_object: any) -> tuple[dict, str]:
-	ensure_stf_id(context, application_object)
-	ret = export_component_base(_stf_type, application_object)
-	ret["width"] = application_object.width
-	ret["height"] = application_object.height
-	ret["downscale_priority"] = application_object.downscale_priority
-	ret["quality"] = application_object.quality
-	ret["mipmaps"] = application_object.mipmaps
-	return ret, application_object.stf_id
+def _stf_export(context: STF_ExportContext, component: STF_Texture, context_object: any) -> tuple[dict, str]:
+	ret = export_component_base(context, _stf_type, component)
+	ret["width"] = component.width
+	ret["height"] = component.height
+	ret["downscale_priority"] = component.downscale_priority
+	ret["quality"] = component.quality
+	ret["mipmaps"] = component.mipmaps
+	return ret, component.stf_id
 
 
 class STF_Module_STF_Texture(STF_BlenderComponentModule):

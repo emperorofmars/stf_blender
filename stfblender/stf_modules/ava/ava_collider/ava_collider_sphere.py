@@ -3,9 +3,10 @@ from typing import Callable
 import bpy
 import mathutils
 
+from ....base.stf_module import STF_BlenderBoneComponentModule, STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
 from ....exporter.stf_export_context import STF_ExportContext
 from ....importer.stf_import_context import STF_ImportContext
-from ....utils.component_utils import ComponentLoadJsonOperatorBase, STF_BlenderBoneComponentModule, STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref, add_component, export_component_base, import_component_base
+from ....utils.component_utils import ComponentLoadJsonOperatorBase, add_component, export_component_base, import_component_base
 from ....utils.trs_utils import blender_translation_to_stf, stf_translation_to_blender
 from ....utils.animation_conversion_utils import get_component_stf_path
 
@@ -89,7 +90,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 
 
 def _stf_export(context: STF_ExportContext, component: AVA_Collider_Sphere, context_object: any) -> tuple[dict, str]:
-	ret = export_component_base(_stf_type, component)
+	ret = export_component_base(context, _stf_type, component)
 	ret["radius"] = component.radius
 
 	offset_position = mathutils.Vector(component.offset_position)

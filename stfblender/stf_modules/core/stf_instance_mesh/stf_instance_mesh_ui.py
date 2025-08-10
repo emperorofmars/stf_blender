@@ -52,7 +52,7 @@ class STFMeshInstancePanel(bpy.types.Panel):
 
 	def draw(self, context):
 		# Set ID
-		draw_stf_id_ui(self.layout, context, context.object.stf_instance, STFSetMeshInstanceIDOperator.bl_idname, True)
+		draw_stf_id_ui(self.layout, context, context.object.stf_instance, context.object.stf_instance, STFSetMeshInstanceIDOperator.bl_idname, True)
 
 		self.layout.separator(factor=2, type="LINE")
 

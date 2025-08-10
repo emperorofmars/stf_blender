@@ -123,12 +123,12 @@ class STFMaterialSpatialPanel(bpy.types.Panel):
 		set_stf_component_filter(bpy.types.Material)
 
 		# Set ID
-		draw_stf_id_ui(self.layout, context, context.material, STFSetMaterialIDOperator.bl_idname)
+		draw_stf_id_ui(self.layout, context, context.material, context.material.stf_info, STFSetMaterialIDOperator.bl_idname)
 
 		self.layout.separator(factor=2, type="LINE")
 
 		# Components
-		draw_components_ui(self.layout, context, context.material, STFAddMaterialComponentOperator.bl_idname, STFRemoveMaterialComponentOperator.bl_idname, STFEditMaterialComponentIdOperator.bl_idname)
+		draw_components_ui(self.layout, context, context.material.stf_info, context.material, STFAddMaterialComponentOperator.bl_idname, STFRemoveMaterialComponentOperator.bl_idname, STFEditMaterialComponentIdOperator.bl_idname)
 
 		self.layout.separator(factor=2, type="LINE")
 

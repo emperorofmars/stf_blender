@@ -14,10 +14,10 @@ _stf_type = "stf.armature"
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
 	blender_armature = bpy.data.armatures.new(json_resource.get("name", "STF Armature"))
-	blender_armature.stf_id = stf_id
+	blender_armature.stf_info.stf_id = stf_id
 	if(json_resource.get("name")):
-		blender_armature.stf_name = json_resource["name"]
-		blender_armature.stf_name_source_of_truth = True
+		blender_armature.stf_info.stf_name = json_resource["name"]
+		blender_armature.stf_info.stf_name_source_of_truth = True
 
 	tmp_hook_object: bpy.types.Object = bpy.data.objects.new("TRASH", blender_armature)
 	context.register_trash_object(tmp_hook_object)
@@ -40,7 +40,7 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 	root_bones = []
 	ret = {
 		"type": _stf_type,
-		"name": blender_armature.stf_name if blender_armature.stf_name_source_of_truth else blender_armature.name,
+		"name": blender_armature.stf_info.stf_name if blender_armature.stf_info.stf_name_source_of_truth else blender_armature.name,
 		"root_bones": root_bones,
 	}
 
@@ -52,7 +52,7 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 	for root_bone_definition in root_bone_definitions:
 		root_bones.append(context.serialize_resource(root_bone_definition, context_object=tmp_hook_object))
 
-	return ret, blender_armature.stf_id
+	return ret, blender_armature.stf_info.stf_id
 
 
 class STF_Module_STF_Armature(STF_Module):

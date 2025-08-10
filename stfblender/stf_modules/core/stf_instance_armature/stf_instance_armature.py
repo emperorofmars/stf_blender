@@ -4,14 +4,13 @@ import mathutils
 import math
 from typing import Callable
 
-from ....base.stf_module import STF_Module
+from ....base.stf_module import STF_Module, InstanceModComponentRef
 from ....base.stf_report import STFReportSeverity, STFReport
 from ....exporter.stf_export_context import STF_ExportContext
 from ....importer.stf_import_context import STF_ImportContext
 from ....utils.id_utils import ensure_stf_id
 from ....utils.animation_conversion_utils import *
 from ....utils.armature_bone import ArmatureBone
-from ....utils.component_utils import InstanceModComponentRef
 from .stf_instance_armature_utils import parse_standin, serialize_standin, update_armature_instance_component_standins
 
 
@@ -50,7 +49,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 			while(len(next_poses) > 0):
 				root_poses = next_poses; next_poses = []
 				for pose in root_poses:
-					bone_id = blender_armature.bones[pose.name].stf_id
+					bone_id = blender_armature.bones[pose.name].stf_info.stf_id
 
 					blender_matrix = mathutils.Matrix.LocRotScale(
 						mathutils.Vector((json_resource["pose"][bone_id][0][0], json_resource["pose"][bone_id][0][1], json_resource["pose"][bone_id][0][2])),
@@ -112,7 +111,7 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 				t, r, s = (blender_pose.parent.matrix.inverted_safe() @ blender_pose.matrix).decompose()
 			else:
 				t, r, s = (mathutils.Matrix.Rotation(math.radians(-90), 4, "X") @ blender_pose.matrix).decompose()
-			stf_pose[blender_armature.bones[blender_pose.name].stf_id] = [[t[0], t[1], t[2]], [r[1], r[2], r[3], r[0]], [s[0], s[1], s[2]]] # already in armature space
+			stf_pose[blender_armature.bones[blender_pose.name].stf_info.stf_id] = [[t[0], t[1], t[2]], [r[1], r[2], r[3], r[0]], [s[0], s[1], s[2]]] # already in armature space
 		ret["pose"] = stf_pose
 
 	# components that exist on bones of this armature instance
@@ -125,9 +124,9 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 					component_id = context.serialize_resource(component, None, module_kind="component")
 					if(component_id):
 						bone = blender_armature.bones[component_ref.bone]
-						if(bone.stf_id not in added_components):
-							added_components[bone.stf_id] = []
-						added_components[bone.stf_id].append(component_id)
+						if(bone.stf_info.stf_id not in added_components):
+							added_components[bone.stf_info.stf_id] = []
+						added_components[bone.stf_info.stf_id].append(component_id)
 		ret["added_components"] = added_components
 
 	# changes to bone component values for this armature instance only
@@ -150,7 +149,7 @@ def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_o
 		module_ret = context.resolve_application_property_path(ArmatureBone(application_object.data, match.groupdict()["bone_name"]), application_object_property_index, data_path[match.span()[1] :])
 		if(module_ret):
 			stf_path, translate_func, index_table = module_ret
-			return [application_object.stf_id, "instance"] + stf_path, translate_func, index_table
+			return [application_object.stf_info.stf_id, "instance"] + stf_path, translate_func, index_table
 
 	return None
 

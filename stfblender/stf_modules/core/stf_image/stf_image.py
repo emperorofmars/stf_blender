@@ -15,10 +15,10 @@ _stf_type = "stf.image"
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
 	blender_image = bpy.data.images.new(json_resource.get("name", "STF Image"), 8, 8)
-	blender_image.stf_id = stf_id
+	blender_image.stf_info.stf_id = stf_id
 	if(json_resource.get("name")):
-		blender_image.stf_name = json_resource["name"]
-		blender_image.stf_name_source_of_truth = True
+		blender_image.stf_info.stf_name = json_resource["name"]
+		blender_image.stf_info.stf_name_source_of_truth = True
 
 	image_buffer = context.import_buffer(json_resource["buffer"])
 	blender_image.pack(data=image_buffer, data_len=len(image_buffer))
@@ -45,15 +45,15 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 
 		ret = {
 			"type": _stf_type,
-			"name": blender_image.stf_name if blender_image.stf_name_source_of_truth else blender_image.name,
+			"name": blender_image.stf_info.stf_name if blender_image.stf_info.stf_name_source_of_truth else blender_image.name,
 			"format": blender_image.file_format.lower(),
 			"buffer": buffer_id,
 			"data_type": "non_color" if blender_image.colorspace_settings.name == "Non-Color" else "color"
 		}
 
-		return ret, blender_image.stf_id
+		return ret, blender_image.stf_info.stf_id
 	except Exception as error:
-		context.report(STFReport("Could not export image: " + str(blender_image.filepath), STFReportSeverity.Error, blender_image.stf_id, _stf_type, blender_image))
+		context.report(STFReport("Could not export image: " + str(blender_image.filepath), STFReportSeverity.Error, blender_image.stf_info.stf_id, _stf_type, blender_image))
 		return None
 
 

@@ -1,8 +1,9 @@
 import bpy
 
+from ....base.stf_module import STF_BlenderComponentBase
 from ....exporter.stf_export_context import STF_ExportContext
 from ....importer.stf_import_context import STF_ImportContext
-from ....utils.component_utils import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref, add_component, export_component_base, import_component_base
+from ....utils.component_utils import STF_BlenderComponentModule, STF_Component_Ref, add_component, export_component_base, import_component_base
 
 
 _stf_type = "stfexp.armature.humanoid"
@@ -30,7 +31,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, parent
 
 
 def _stf_export(context: STF_ExportContext, application_object: STFEXP_Armature_Humanoid, parent_application_object: any) -> tuple[dict, str]:
-	ret = export_component_base(_stf_type, application_object)
+	ret = export_component_base(context, _stf_type, application_object)
 	ret["locomotion_type"] = application_object.locomotion_type
 	ret["no_jaw"] = application_object.no_jaw
 	return ret, application_object.stf_id

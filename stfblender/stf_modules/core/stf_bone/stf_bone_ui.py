@@ -46,9 +46,9 @@ class STFBoneSpatialPanel(bpy.types.Panel):
 		set_stf_component_filter(bpy.types.Bone)
 
 		# Set ID
-		draw_stf_id_ui(self.layout, context, context.bone, STFSetBoneIDOperator.bl_idname)
+		draw_stf_id_ui(self.layout, context, context.bone, context.bone.stf_info, STFSetBoneIDOperator.bl_idname)
 
 		self.layout.separator(factor=2, type="LINE")
 
 		# Components
-		draw_components_ui(self.layout, context, context.bone, STFAddBoneComponentOperator.bl_idname, STFRemoveBoneComponentOperator.bl_idname, STFEditBoneComponentIdOperator.bl_idname)
+		draw_components_ui(self.layout, context, context.bone.stf_info, context.bone, STFAddBoneComponentOperator.bl_idname, STFRemoveBoneComponentOperator.bl_idname, STFEditBoneComponentIdOperator.bl_idname)

@@ -15,10 +15,10 @@ _stf_type = "stf.mesh"
 
 def import_stf_mesh(context: STF_ImportContext, json_resource: dict, stf_id: str, parent_application_object: any) -> tuple[any, any]:
 	blender_mesh = bpy.data.meshes.new(json_resource.get("name", "STF Mesh"))
-	blender_mesh.stf_id = stf_id
+	blender_mesh.stf_info.stf_id = stf_id
 	if(json_resource.get("name")):
-		blender_mesh.stf_name = json_resource["name"]
-		blender_mesh.stf_name_source_of_truth = True
+		blender_mesh.stf_info.stf_name = json_resource["name"]
+		blender_mesh.stf_info.stf_name_source_of_truth = True
 
 	tmp_blender_mesh_object = bpy.data.objects.new("STF TMP throw away", blender_mesh)
 	context.register_trash_object(tmp_blender_mesh_object)
@@ -166,7 +166,7 @@ def import_stf_mesh(context: STF_ImportContext, json_resource: dict, stf_id: str
 			vertex_groups = []
 			for bone_id in json_resource["bones"]:
 				for blender_bone in armature.bones:
-					if(blender_bone.stf_id == bone_id):
+					if(blender_bone.stf_info.stf_id == bone_id):
 						bones.append(blender_bone.name)
 						vertex_groups.append(tmp_blender_mesh_object.vertex_groups.new(name=blender_bone.name))
 						break

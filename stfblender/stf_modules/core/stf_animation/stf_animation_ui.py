@@ -55,7 +55,7 @@ class STFAnimationSpatialPanel(bpy.types.Panel):
 			return
 
 		# Set ID
-		draw_stf_id_ui(self.layout, context, context.active_action, STFSetAnimationIDOperator.bl_idname)
+		draw_stf_id_ui(self.layout, context, context.active_action, context.active_action.stf_info, STFSetAnimationIDOperator.bl_idname)
 
 		self.layout.separator(factor=2, type="LINE")
 		
@@ -65,4 +65,4 @@ class STFAnimationSpatialPanel(bpy.types.Panel):
 		self.layout.separator(factor=2, type="LINE")
 
 		# Components
-		draw_components_ui(self.layout, context, context.active_action, STFAddAnimationComponentOperator.bl_idname, STFRemoveAnimationComponentOperator.bl_idname, STFEditAnimationComponentIdOperator.bl_idname)
+		draw_components_ui(self.layout, context, context.active_action.stf_info, context.active_action, STFAddAnimationComponentOperator.bl_idname, STFRemoveAnimationComponentOperator.bl_idname, STFEditAnimationComponentIdOperator.bl_idname)

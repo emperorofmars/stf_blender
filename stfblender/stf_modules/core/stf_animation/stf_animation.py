@@ -19,11 +19,11 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, pa
 		return
 
 	blender_animation = bpy.data.actions.new(json_resource.get("name", "STF Animation"))
-	blender_animation.stf_id = stf_id
+	blender_animation.stf_info.stf_id = stf_id
 	blender_animation.use_fake_user = True
 	if(json_resource.get("name")):
-		blender_animation.stf_name = json_resource["name"]
-		blender_animation.stf_name_source_of_truth = True
+		blender_animation.stf_info.stf_name = json_resource["name"]
+		blender_animation.stf_info.stf_name_source_of_truth = True
 
 	fps = json_resource.get("fps", 30)
 	if(fps != bpy.context.scene.render.fps):
@@ -99,10 +99,10 @@ def _stf_export(context: STF_ExportContext, application_object: any, parent_appl
 	blender_animation: bpy.types.Action = application_object
 	if(blender_animation.stf_exclude): return None
 	if(blender_animation.is_action_legacy):
-		context.report(STFReport("Ignoring legacy animation: " + blender_animation.name, STFReportSeverity.Debug, blender_animation.stf_id, _stf_type, application_object))
+		context.report(STFReport("Ignoring legacy animation: " + blender_animation.name, STFReportSeverity.Debug, blender_animation.stf_info.stf_id, _stf_type, application_object))
 		return None
 	if(not hasattr(blender_animation, "slot_links")):
-		context.report(STFReport("Slot Links are required to export animations!", STFReportSeverity.Debug, blender_animation.stf_id, _stf_type, application_object))
+		context.report(STFReport("Slot Links are required to export animations!", STFReportSeverity.Debug, blender_animation.stf_info.stf_id, _stf_type, application_object))
 		return None
 
 	for slot_link in blender_animation.slot_links:
@@ -110,14 +110,14 @@ def _stf_export(context: STF_ExportContext, application_object: any, parent_appl
 			single_slotlink_valid = True
 			break
 	else:
-		context.report(STFReport("No valid Slot Link target specified!", STFReportSeverity.Debug, blender_animation.stf_id, _stf_type, application_object))
+		context.report(STFReport("No valid Slot Link target specified!", STFReportSeverity.Debug, blender_animation.stf_info.stf_id, _stf_type, application_object))
 		return None
 
 	ensure_stf_id(context, blender_animation)
 
 	ret = {
 		"type": _stf_type,
-		"name": blender_animation.stf_name if blender_animation.stf_name_source_of_truth else blender_animation.name,
+		"name": blender_animation.stf_info.stf_name if blender_animation.stf_info.stf_name_source_of_truth else blender_animation.name,
 		"loop": blender_animation.use_cyclic,
 		"fps": bpy.context.scene.render.fps if not blender_animation.stf_fps_override else blender_animation.stf_fps
 	}
@@ -241,7 +241,7 @@ def _stf_export(context: STF_ExportContext, application_object: any, parent_appl
 		context.report(STFReport("Empty Animation", STFReportSeverity.Debug, None, _stf_type, blender_animation))
 		return None
 	else:
-		return ret, blender_animation.stf_id
+		return ret, blender_animation.stf_info.stf_id
 
 
 class STF_Module_STF_Animation(STF_Module):

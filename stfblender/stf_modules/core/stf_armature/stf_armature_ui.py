@@ -46,9 +46,9 @@ class STFArmatureSpatialPanel(bpy.types.Panel):
 		set_stf_component_filter(bpy.types.Armature)
 
 		# Set ID
-		draw_stf_id_ui(self.layout, context, context.armature, STFSetArmatureIDOperator.bl_idname)
+		draw_stf_id_ui(self.layout, context, context.armature, context.armature.stf_info, STFSetArmatureIDOperator.bl_idname)
 
 		self.layout.separator(factor=2, type="LINE")
 
 		# Components
-		draw_components_ui(self.layout, context, context.armature, STFAddArmatureComponentOperator.bl_idname, STFRemoveArmatureComponentOperator.bl_idname, STFEditArmatureComponentIdOperator.bl_idname)
+		draw_components_ui(self.layout, context, context.armature.stf_info, context.armature, STFAddArmatureComponentOperator.bl_idname, STFRemoveArmatureComponentOperator.bl_idname, STFEditArmatureComponentIdOperator.bl_idname)

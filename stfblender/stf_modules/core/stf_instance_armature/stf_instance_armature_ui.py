@@ -38,7 +38,7 @@ class STFEditArmatureInstanceComponentIdOperator(bpy.types.Operator, STFEditComp
 def _get_target_object_func(component_holder: bpy.types.Object, component_ref: InstanceModComponentRef) -> any:
 	armature: bpy.types.Armature = component_holder.data
 	for bone in armature.bones:
-		if(bone.stf_id == component_ref.bone):
+		if(bone.stf_info.stf_id == component_ref.bone):
 			return bone
 	return None
 
@@ -73,12 +73,12 @@ class STFArmatureInstancePanel(bpy.types.Panel):
 		set_stf_component_filter(bpy.types.Bone)
 
 		# Set ID
-		draw_stf_id_ui(self.layout, context, context.object.stf_instance, STFSetArmatureInstanceIDOperator.bl_idname, True)
+		draw_stf_id_ui(self.layout, context, context.object.stf_instance, context.object.stf_instance, STFSetArmatureInstanceIDOperator.bl_idname, True)
 
 		self.layout.separator(factor=2, type="LINE")
 
 		# Components specific to this instance
-		draw_components_ui(self.layout, context, context.object, STFAddArmatureInstanceComponentOperator.bl_idname, STFRemoveArmatureInstanceComponentOperator.bl_idname, STFEditArmatureInstanceComponentIdOperator.bl_idname, context.object.stf_instance_armature, _get_target_object_func, _inject_ui)
+		draw_components_ui(self.layout, context, context.object.stf_instance_armature, context.object, STFAddArmatureInstanceComponentOperator.bl_idname, STFRemoveArmatureInstanceComponentOperator.bl_idname, STFEditArmatureInstanceComponentIdOperator.bl_idname, _get_target_object_func, _inject_ui)
 
 		self.layout.separator(factor=4, type="LINE")
 
@@ -90,4 +90,4 @@ class STFArmatureInstancePanel(bpy.types.Panel):
 			self.layout.separator(factor=1, type="SPACE")
 			
 			if(len(context.object.stf_instance_armature_component_standins.stf_components) > 0):
-				draw_instance_standin_components_ui(self.layout, context, context.object, STFEditArmatureInstanceComponentIdOperator.bl_idname, context.object.stf_instance_armature_component_standins, _get_target_object_func, _inject_standin_ui)
+				draw_instance_standin_components_ui(self.layout, context, context.object.stf_instance_armature_component_standins, context.object, STFEditArmatureInstanceComponentIdOperator.bl_idname, _get_target_object_func, _inject_standin_ui)

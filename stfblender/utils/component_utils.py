@@ -1,54 +1,10 @@
 import json
-from typing import Callable
 import uuid
 import bpy
 
-from ..base.stf_module import STF_Module
+from ..base.stf_module import STF_BlenderComponentModule, STF_Component_Ref, STF_BlenderComponentOverride
 from ..base.stf_registry import get_stf_modules
-
-
-class STF_Component_Ref(bpy.types.PropertyGroup): # Bringing polymorphism to Blender
-	"""Defines the ID, by which the correct component in the `blender_property_name` property of the appropriate Blender construct can be found"""
-	stf_type: bpy.props.StringProperty(name="Type") # type: ignore
-	stf_id: bpy.props.StringProperty(name="ID") # type: ignore
-	blender_property_name: bpy.props.StringProperty(name="Blender Property Name") # type: ignore
-
-class STF_BlenderComponentModule(STF_Module):
-	"""Extension to STF_Module which also associates a function to draw the component in Blender's UI"""
-	blender_property_name: str
-	filter: list
-	# (layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: STF_BlenderComponentModule) -> None
-	draw_component_func: Callable[[bpy.types.UILayout, bpy.types.Context, STF_Component_Ref, any, any], None]
-
-
-class InstanceModComponentRef(STF_Component_Ref):
-	"""Used by armature instances to add or modify a component on an instance of a bone"""
-	bone: bpy.props.StringProperty(name="Bone") # type: ignore
-	override: bpy.props.BoolProperty(name="Enable Instance Override", default=False) # type: ignore
-
-class STF_BlenderBoneComponentModule(STF_BlenderComponentModule):
-	"""Use for components that are allowed on bones and are animatable or can have different values per instance of the armature"""
-	# (layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: STF_BlenderComponentModule) -> None
-	draw_component_instance_func: Callable[[bpy.types.UILayout, bpy.types.Context, STF_Component_Ref, any, any], None]
-	# (context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: STF_BlenderComponentModule, standin_component: STF_BlenderComponentModule) -> None
-	set_component_instance_standin_func: Callable[[bpy.types.Context, STF_Component_Ref, any, any, any], None]
-
-	# (context: bpy.types.Context, component_ref: STF_Component_Ref, standin_component: STF_BlenderComponentModule, context_object: any) -> json_resource: dict
-	serialize_component_instance_standin_func: Callable[[bpy.types.Context, STF_Component_Ref, STF_BlenderComponentModule, any], dict]
-	# (context: bpy.types.Context, json_resource: dict, component_ref: STF_Component_Ref, standin_component: STF_BlenderComponentModule, context_object: any) -> None
-	parse_component_instance_standin_func: Callable[[bpy.types.Context, dict, STF_Component_Ref, STF_BlenderComponentModule, any], None]
-
-
-class STF_BlenderComponentOverride(bpy.types.PropertyGroup):
-	"""If this component is parsed by a game-engine, the target component should be ignored"""
-	target_id: bpy.props.StringProperty(name="Target ID") # type: ignore
-
-class STF_BlenderComponentBase(bpy.types.PropertyGroup):
-	"""Base class for stf component property-groups"""
-	stf_id: bpy.props.StringProperty(name="ID", description="Universally unique ID") # type: ignore
-	stf_name: bpy.props.StringProperty(name="STF Name", description="Optional component name") # type: ignore
-	overrides: bpy.props.CollectionProperty(type=STF_BlenderComponentOverride, name="Overrides", description="If this component is parsed by a game-engine, these components should be ignored") # type: ignore
-	enabled: bpy.props.BoolProperty(name="Enabled", default=True) # type: ignore
+from ..utils.id_utils import ensure_stf_id
 
 
 def get_component_modules(filter = None) -> list[STF_BlenderComponentModule]:
@@ -73,7 +29,7 @@ def find_component_module(stf_modules: list[STF_BlenderComponentModule], stf_typ
 
 def add_component(application_object: any, blender_property_name: str, stf_id: str, stf_type: str, components_ref_property: any = None) -> tuple[STF_Component_Ref, any]:
 	if(components_ref_property is None):
-		components_ref_property = application_object.stf_components
+		components_ref_property = application_object.stf_info.stf_components
 	component_ref: STF_Component_Ref = components_ref_property.add()
 	component_ref.stf_id = stf_id
 	component_ref.stf_type = stf_type
@@ -100,7 +56,7 @@ class STFAddComponentOperatorBase:
 		pass
 
 	def get_components_ref_property(self, context) -> STF_Component_Ref:
-		return self.get_property(context).stf_components
+		return self.get_property(context).stf_info.stf_components
 
 
 class STFRemoveComponentOperatorBase:
@@ -134,7 +90,7 @@ class STFRemoveComponentOperatorBase:
 		pass
 
 	def get_components_ref_property(self, context) -> STF_Component_Ref:
-		return self.get_property(context).stf_components
+		return self.get_property(context).stf_info.stf_components
 
 
 class STFEditComponentOperatorBase:
@@ -202,7 +158,7 @@ class STFEditComponentOperatorBase:
 		pass
 
 	def get_components_ref_property(self, context) -> STF_Component_Ref:
-		return self.get_property(context).stf_components
+		return self.get_property(context).stf_info.stf_components
 
 
 class AddOverrideToComponent(bpy.types.Operator):
@@ -230,8 +186,8 @@ class RemoveOverrideFromComponent(bpy.types.Operator):
 
 def get_components_from_object(application_object: any) -> list:
 	ret = []
-	if(hasattr(application_object, "stf_components")):
-		for component_ref in application_object.stf_components:
+	if(hasattr(application_object, "stf_info")):
+		for component_ref in application_object.stf_info.stf_components:
 			if(hasattr(application_object, component_ref.blender_property_name)):
 				components = getattr(application_object, component_ref.blender_property_name)
 				for component in components:
@@ -247,7 +203,8 @@ def import_component_base(component: any, json_resource: any):
 	if("enabled" in json_resource):
 		component.enabled = json_resource["enabled"]
 
-def export_component_base(stf_type: str, component: any) -> dict:
+def export_component_base(stf_context: any, stf_type: str, component: any) -> dict:
+	ensure_stf_id(stf_context, component, component)
 	ret = { "type": stf_type }
 	if(component.stf_name): ret["name"] = component.stf_name
 	if(component.overrides): ret["overrides"] = [override.target_id for override in component.overrides]

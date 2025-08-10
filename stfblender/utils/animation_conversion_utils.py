@@ -1,7 +1,7 @@
 import bpy
 from typing import Callable
 
-from .component_utils import STF_BlenderComponentBase
+from ..base.stf_module import STF_BlenderComponentBase
 
 
 """
@@ -47,7 +47,7 @@ def convert_bone_scale_to_stf(index: int, value: float) -> float:
 
 # components
 def get_component_stf_path(application_object: any, component: STF_BlenderComponentBase):
-	for component_ref in application_object.stf_components:
+	for component_ref in application_object.stf_info.stf_components:
 		if(component_ref.stf_id == component.stf_id):
 			return [application_object.stf_id, "components", component.stf_id]
 	if(type(application_object.data) == bpy.types.Armature):

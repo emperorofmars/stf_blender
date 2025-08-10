@@ -19,11 +19,11 @@ _stf_type = "stf.material"
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
 	blender_material = bpy.data.materials.new(json_resource.get("name", "STF Material"))
-	blender_material.stf_id = stf_id
+	blender_material.stf_info.stf_id = stf_id
 	if(json_resource.get("name")):
-		blender_material.stf_name = json_resource["name"]
-		blender_material.stf_name_source_of_truth = True
-	blender_material.stf_is_source_of_truth = True
+		blender_material.stf_info.stf_name = json_resource["name"]
+		blender_material.stf_info.stf_name_source_of_truth = True
+	blender_material.stf_info.stf_is_source_of_truth = True
 	context.register_imported_resource(stf_id, blender_material)
 
 	for style_hint in json_resource.get("style_hints", []):
@@ -65,7 +65,7 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 
 	ret = {
 		"type": _stf_type,
-		"name": blender_material.stf_name if blender_material.stf_name_source_of_truth else blender_material.name,
+		"name": blender_material.stf_info.stf_name if blender_material.stf_info.stf_name_source_of_truth else blender_material.name,
 		"properties": {},
 	}
 
@@ -101,7 +101,7 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 
 		ret["properties"][property.property_type] = json_prop
 
-	return ret, blender_material.stf_id
+	return ret, blender_material.stf_info.stf_id
 
 
 class STF_Module_STF_Material(STF_Module):

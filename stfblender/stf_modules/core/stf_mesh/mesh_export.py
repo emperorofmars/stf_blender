@@ -40,7 +40,7 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 
 	stf_mesh = {
 		"type": _stf_type,
-		"name": blender_mesh.stf_name if blender_mesh.stf_name_source_of_truth else blender_mesh.name,
+		"name": blender_mesh.stf_info.stf_name if blender_mesh.stf_info.stf_name_source_of_truth else blender_mesh.name,
 	}
 
 	material_slots = []
@@ -204,7 +204,7 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 		group_to_bone_index: dict[int, int] = {}
 		for group in tmp_blender_mesh_object.vertex_groups:
 			if(group.name in armature.bones):
-				weight_bone_map.append(armature.bones[group.name].stf_id)
+				weight_bone_map.append(armature.bones[group.name].stf_info.stf_id)
 				group_to_bone_index[group.index] = len(weight_bone_map) - 1
 		stf_mesh["bones"] = weight_bone_map
 
@@ -342,4 +342,4 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 			blendshapes.append(blendshape)
 		stf_mesh["blendshapes"] = blendshapes
 
-	return stf_mesh, blender_mesh.stf_id
+	return stf_mesh, blender_mesh.stf_info.stf_id

@@ -47,10 +47,10 @@ class STFImageSpatialPanel(bpy.types.Panel):
 		set_stf_component_filter(bpy.types.Image)
 
 		# Set ID
-		draw_stf_id_ui(self.layout, context, context.edit_image, STFSetImageIDOperator.bl_idname)
+		draw_stf_id_ui(self.layout, context, context.edit_image, context.edit_image.stf_info, STFSetImageIDOperator.bl_idname)
 
 		self.layout.separator(factor=2, type="LINE")
 
 		# Components
-		draw_components_ui(self.layout, context, context.edit_image, STFAddImageComponentOperator.bl_idname, STFRemoveImageComponentOperator.bl_idname, STFEditImageComponentIdOperator.bl_idname)
+		draw_components_ui(self.layout, context, context.edit_image.stf_info, context.edit_image, STFAddImageComponentOperator.bl_idname, STFRemoveImageComponentOperator.bl_idname, STFEditImageComponentIdOperator.bl_idname)
 
