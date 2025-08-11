@@ -1,4 +1,3 @@
-import re
 from typing import Callable
 import bpy
 import mathutils
@@ -102,6 +101,7 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 
 
 def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: ArmatureBone, application_object_property_index: int, data_path: str) -> tuple[list[str], Callable[[any], any], list[int]]:
+	import re
 	if(match := re.search(r"^location", data_path)):
 		return [application_object.get_bone().stf_info.stf_id, "t"], convert_bone_translation_to_stf, translation_bone_index_conversion_to_stf
 

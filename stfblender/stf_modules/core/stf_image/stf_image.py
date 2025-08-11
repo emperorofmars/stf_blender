@@ -1,5 +1,4 @@
 import bpy
-import pathlib
 
 from ....exporter.stf_export_context import STF_ExportContext
 from ....importer.stf_import_context import STF_ImportContext
@@ -40,6 +39,7 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 		if(blender_image.packed_file):
 			image_bytes = blender_image.packed_file.data
 		else:
+			import pathlib
 			image_bytes = pathlib.Path(bpy.path.abspath(blender_image.filepath)).resolve().read_bytes()
 		buffer_id = context.serialize_buffer(image_bytes)
 

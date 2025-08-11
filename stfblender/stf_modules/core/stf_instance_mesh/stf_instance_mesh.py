@@ -1,6 +1,4 @@
-import re
 from typing import Callable
-import uuid
 import bpy
 
 from ....exporter.stf_export_context import STF_ExportContext
@@ -124,10 +122,11 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 				blendshape_values.append(None)
 		ret["blendshape_values"] = blendshape_values
 
-	return ret, str(uuid.uuid4())
+	return ret, blender_object.stf_instance.stf_id
 
 
 def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: any, application_object_property_index: int, data_path: str) -> tuple[list[str], Callable[[int, any], any], list[int]]:
+	import re
 	match = re.search(r"^key_blocks\[\"(?P<blendshape_name>[\w. -:,]+)\"\].value", data_path)
 	if(match and "blendshape_name" in match.groupdict()):
 		return [application_object.stf_info.stf_id, "instance", "blendshape", match.groupdict()["blendshape_name"], "value"], None, None

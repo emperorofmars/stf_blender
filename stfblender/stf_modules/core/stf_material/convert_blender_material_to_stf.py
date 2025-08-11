@@ -1,6 +1,5 @@
 import bpy
 
-from ....exporter.stf_export_context import STF_ExportContext
 from .stf_material_operators import add_property, clear_stf_material
 from .material_value_modules.float_value import STF_Material_Value_Module_Float
 from .material_value_modules.color_value import STF_Material_Value_Module_Color

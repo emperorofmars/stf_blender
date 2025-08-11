@@ -1,6 +1,5 @@
 import bpy
 
-
 from .stf_material_definition import STF_Material_Definition, STF_Material_Property, STF_Material_Value_Module_Base
 from .material_value_modules import blender_material_value_modules
 from .stf_material_operators import add_property, add_value_to_property

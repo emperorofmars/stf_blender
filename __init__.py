@@ -16,5 +16,6 @@ def unregister():
 	auto_load.unregister()
 
 
+# Expose all registered STF modules to be loaded
 from .stfblender.stf_modules import register_stf_modules
 
