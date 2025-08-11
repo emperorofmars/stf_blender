@@ -5,8 +5,8 @@ from ....utils.component_utils import STFAddComponentOperatorBase, STFEditCompon
 from ....utils.component_ui_utils import draw_components_ui, set_stf_component_filter
 from ....base.stf_meta import draw_meta_editor
 from ....utils.minsc import draw_slot_link_warning
-from ....utils.dev_utils import CleanupOp
 from .... import package_key
+from ....utils.dev_utils import CleanupOp
 
 
 class STFSetSceneCollectionAsRootOperator(bpy.types.Operator):

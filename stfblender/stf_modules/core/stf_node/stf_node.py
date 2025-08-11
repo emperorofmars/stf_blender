@@ -1,5 +1,4 @@
 import bpy
-import mathutils
 
 from ....base.stf_module import STF_Module
 from ....importer.stf_import_context import STF_ImportContext
@@ -43,7 +42,6 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 		if(child):
 			child.parent_type = "OBJECT"
 			child.parent = blender_object
-			child.matrix_parent_inverse = mathutils.Matrix()
 		else:
 			context.report(STFReport("Invalid Child: " + str(child_id), STFReportSeverity.Error, stf_id, json_resource["type"], blender_object))
 

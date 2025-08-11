@@ -1,5 +1,4 @@
 import bpy
-import time
 from bpy_extras.io_utils import ImportHelper
 
 from ..base.stf_registry import get_import_modules
@@ -22,6 +21,7 @@ class ImportSTF(bpy.types.Operator, ImportHelper):
 		return ImportHelper.invoke_popup(self, context)
 
 	def execute(self, context):
+		import time
 		time_start = time.time()
 		context.window.cursor_set("WAIT")
 		file = None

@@ -69,14 +69,14 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 		for target_id, component_ids in json_resource["added_components"].items():
 			for component_id in component_ids:
 				if(component := context.import_resource(component_id, blender_object, stf_kind="component")):
-					for component_ref_index, component_ref in enumerate(blender_object.stf_components):
+					for component_ref_index, component_ref in enumerate(blender_object.stf_info.stf_components):
 						if(component_ref.stf_id == component_id):
 							instance_component_ref = blender_object.stf_instance_armature.stf_components.add()
 							instance_component_ref.stf_id = component_id
 							instance_component_ref.stf_type = component_ref.stf_type
 							instance_component_ref.blender_property_name = component_ref.blender_property_name
 							instance_component_ref.bone = context.get_imported_resource(target_id).name
-							blender_object.stf_components.remove(component_ref_index)
+							blender_object.stf_info.stf_components.remove(component_ref_index)
 							break
 
 	# changes to bone component values for this armature instance only

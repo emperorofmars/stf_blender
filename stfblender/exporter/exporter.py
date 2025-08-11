@@ -1,6 +1,4 @@
-import json
 import bpy
-import time
 from bpy_extras.io_utils import ExportHelper
 
 from ..base.stf_meta import draw_meta_editor
@@ -40,6 +38,7 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 
 
 	def execute(self, context):
+		import time
 		time_start = time.time()
 		context.window.cursor_set("WAIT")
 		files = []
@@ -68,6 +67,7 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 
 			if(self.debug):
 				# Write out the json itself for debugging purposes
+				import json
 				json_string = json.dumps(stf_file.definition.to_dict(), indent="\t").encode(encoding="utf-8")
 				files.append(open(export_filepath + ".json", "wb"))
 				files[len(files) - 1].write(json_string)

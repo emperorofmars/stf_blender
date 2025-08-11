@@ -1,7 +1,6 @@
 import io
 import json
 
-
 from .stf_definition import STF_JsonDefinition
 from ..utils import buffer_utils
 

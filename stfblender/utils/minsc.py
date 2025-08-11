@@ -1,5 +1,4 @@
 import bpy
-import addon_utils
 
 
 def draw_slot_link_warning(layout: bpy.types.UILayout):
@@ -12,6 +11,7 @@ def draw_slot_link_warning(layout: bpy.types.UILayout):
 
 
 def get_stf_version() -> str:
+	import addon_utils
 	for module in addon_utils.modules():
 		if module.__name__.endswith("stf_blender"):
 			version = module.bl_info.get("version", (0, 0, 0))

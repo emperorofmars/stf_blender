@@ -1,4 +1,3 @@
-import bpy
 import re
 from typing import Callable
 

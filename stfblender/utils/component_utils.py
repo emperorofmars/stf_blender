@@ -1,5 +1,3 @@
-import json
-import uuid
 import bpy
 
 from ..base.stf_module import STF_BlenderComponentModule, STF_Component_Ref, STF_BlenderComponentOverride
@@ -49,6 +47,7 @@ class STFAddComponentOperatorBase:
 	property_name: bpy.props.StringProperty() # type: ignore
 
 	def execute(self, context):
+		import uuid
 		add_component(self.get_property(context), self.property_name, str(uuid.uuid4()), self.stf_type, self.get_components_ref_property(context))
 		return {"FINISHED"}
 
@@ -226,6 +225,7 @@ class ComponentLoadJsonOperatorBase():
 
 	def execute(self, context):
 		try:
+			import json
 			json_resource = json.loads(self.json_string)
 
 			for component in self.get_property(context):

@@ -1,12 +1,10 @@
 import bpy
-from types import ModuleType
 
 from .stf_module import STF_ExportComponentHook, STF_Module
 
 """
 Util to retrieve all existing STF-modules
 """
-
 
 def get_stf_modules() -> list[STF_Module]:
 	stf_modules = []
