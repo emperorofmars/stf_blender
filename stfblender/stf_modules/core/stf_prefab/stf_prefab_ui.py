@@ -5,6 +5,8 @@ from ....utils.component_utils import STFAddComponentOperatorBase, STFEditCompon
 from ....utils.component_ui_utils import draw_components_ui, set_stf_component_filter
 from ....base.stf_meta import draw_meta_editor
 from ....utils.minsc import draw_slot_link_warning
+from .... import package_key
+from ....utils.dev_utils import CleanupOp
 
 
 class STFSetCollectionAsRootOperator(bpy.types.Operator):
@@ -30,7 +32,7 @@ class STFSetCollectionIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
 	bl_idname = "stf.set_collection_stf_id"
 	@classmethod
 	def poll(cls, context): return context.collection is not None
-	def get_property(self, context): return context.collection
+	def get_property(self, context): return context.collection.stf_info
 
 class STFAddCollectionComponentOperator(bpy.types.Operator, STFAddComponentOperatorBase):
 	"""Add Component to Collection"""
@@ -94,3 +96,9 @@ class STFCollectionPanel(bpy.types.Panel):
 
 			# Components
 			draw_components_ui(self.layout, context, context.collection.stf_info, context.collection, STFAddCollectionComponentOperator.bl_idname, STFRemoveCollectionComponentOperator.bl_idname, STFEditCollectionComponentIdOperator.bl_idname)
+
+		# Dev Options
+		if(bpy.context.preferences.addons[package_key.package_key].preferences.enable_dev_mode):
+			self.layout.separator(factor=4, type="LINE")
+			self.layout.label(text="Development Helpers")
+			self.layout.operator(CleanupOp.bl_idname)

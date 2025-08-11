@@ -53,7 +53,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 		if(len(json_resource["target"]) == 1 and type(context_object) == bpy.types.Bone):
 			def _handle_target_bone():
 				for bone in armature.bones:
-					if(bone.stf_id == json_resource["target"][0]):
+					if(bone.stf_info.stf_id == json_resource["target"][0]):
 						constraint = _get_component()
 						constraint.target_bone = bone.name
 						break

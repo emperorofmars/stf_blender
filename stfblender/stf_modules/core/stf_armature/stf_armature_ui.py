@@ -10,7 +10,7 @@ class STFSetArmatureIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
 	bl_idname = "stf.set_armature_stf_id"
 	@classmethod
 	def poll(cls, context): return context.armature is not None
-	def get_property(self, context): return context.armature
+	def get_property(self, context): return context.armature.stf_info
 
 class STFAddArmatureComponentOperator(bpy.types.Operator, STFAddComponentOperatorBase):
 	"""Add Component to Armature"""

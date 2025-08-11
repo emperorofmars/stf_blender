@@ -15,7 +15,7 @@ class STFSetMaterialIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
 	bl_idname = "stf.set_material_stf_id"
 	@classmethod
 	def poll(cls, context): return context.material is not None
-	def get_property(self, context): return context.material
+	def get_property(self, context): return context.material.stf_info
 
 class STFAddMaterialComponentOperator(bpy.types.Operator, STFAddComponentOperatorBase):
 	"""Add Component to Material"""
@@ -185,7 +185,7 @@ class STFMaterialSpatialPanel(bpy.types.Panel):
 
 		# Draw List of ungrouped properties
 		row_property_list = self.layout.row(align=True)
-		row_property_list.template_list(STFDrawMaterialPropertyList.bl_idname, "", context.material, "stf_material_properties", context.material, "stf_active_material_property_index")
+		row_property_list.template_list(STFDrawMaterialPropertyList.bl_idname, "", context.material.stf_material, "properties", context.material.stf_material, "active_property_index")
 
 		row = self.layout.row(align=True)
 		row.prop(context.scene, "stf_material_value_modules", text="")
@@ -193,11 +193,11 @@ class STFMaterialSpatialPanel(bpy.types.Panel):
 
 		self.layout.separator(factor=2, type="SPACE")
 
-		if(len(context.material.stf_material_properties) > context.material.stf_active_material_property_index):
-			row_property_list.operator(STFRemoveMaterialProperty.bl_idname, text="", icon="X").index = context.material.stf_active_material_property_index
+		if(len(context.material.stf_material.properties) > context.material.stf_material.active_property_index):
+			row_property_list.operator(STFRemoveMaterialProperty.bl_idname, text="", icon="X").index = context.material.stf_material.active_property_index
 
 			# Draw property
-			prop: STF_Material_Property = context.material.stf_material_properties[context.material.stf_active_material_property_index]
+			prop: STF_Material_Property = context.material.stf_material.properties[context.material.stf_material.active_property_index]
 			self.layout.prop(prop, "property_type") # TODO handle understood property types
 			self.layout.prop(prop, "multi_value")
 
@@ -209,15 +209,13 @@ class STFMaterialSpatialPanel(bpy.types.Panel):
 			if(value := _find_value(context, prop)):
 				if(prop.multi_value):
 					if(len(prop.values) > 1):
-						row_value_list.operator(STFRemoveMaterialPropertyValue.bl_idname, text="", icon="X").index = context.material.stf_active_material_property_index
-					self.layout.operator(STFAddMaterialPropertyValue.bl_idname).index = context.material.stf_active_material_property_index
+						row_value_list.operator(STFRemoveMaterialPropertyValue.bl_idname, text="", icon="X").index = context.material.stf_material.active_property_index
+					self.layout.operator(STFAddMaterialPropertyValue.bl_idname).index = context.material.stf_material.active_property_index
 
 				self.layout.separator(factor=1, type="SPACE")
 				_draw_value(self.layout, context, prop, value)
 			else:
-				self.layout.operator(STFAddMaterialPropertyValue.bl_idname).index = context.material.stf_active_material_property_index
-		else:
-			self.layout.label(text="Invalid Property")
+				self.layout.operator(STFAddMaterialPropertyValue.bl_idname).index = context.material.stf_material.active_property_index
 
 
 def _find_value(context: bpy.types.Context, prop: STF_Material_Property):

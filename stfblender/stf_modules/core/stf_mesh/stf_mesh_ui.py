@@ -10,7 +10,7 @@ class STFSetMeshIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
 	bl_idname = "stf.set_mesh_stf_id"
 	@classmethod
 	def poll(cls, context): return context.mesh is not None
-	def get_property(self, context): return context.mesh
+	def get_property(self, context): return context.mesh.stf_info
 
 class STFAddMeshComponentOperator(bpy.types.Operator, STFAddComponentOperatorBase):
 	"""Add Component to Mesh"""

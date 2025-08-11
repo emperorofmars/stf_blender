@@ -48,27 +48,17 @@ class ShaderTarget(bpy.types.PropertyGroup):
 
 class STF_Material_Definition(bpy.types.PropertyGroup):
 	"""This object merely holds all the meta information for a material"""
+	stf_is_source_of_truth: bpy.props.BoolProperty(name="STF Material Is Source Of Truth", default=False, description="Whether to use the explicit STF material definition, or to convert the Blender material, overwriting any existing STF material properties") # type: ignore
 	style_hints: bpy.props.CollectionProperty(type=StringProperty, name="Style Hints") # type: ignore
 	shader_targets: bpy.props.CollectionProperty(type=ShaderTarget, name="Shader Targets") # type: ignore
+	properties: bpy.props.CollectionProperty(type=STF_Material_Property, name="STF Material Properties") # type: ignore
+	active_property_index: bpy.props.IntProperty() # type: ignore
+	property_value_refs: bpy.props.CollectionProperty(type=STF_Material_Value_Ref, name="STF Material Values") # type: ignore
 
 
 def register():
-	bpy.types.Material.stf_is_source_of_truth = bpy.props.BoolProperty(name="STF Material Is Source Of Truth", default=False, description="Whether to use the explicit STF material definition, or to convert the Blender material, overwriting any existing STF material properties") # type: ignore
-
 	bpy.types.Material.stf_material = bpy.props.PointerProperty(type=STF_Material_Definition, name="STF Material")
-	bpy.types.Material.stf_material_properties = bpy.props.CollectionProperty(type=STF_Material_Property, name="STF Material Properties")
-	bpy.types.Material.stf_active_material_property_index = bpy.props.IntProperty()
-	bpy.types.Material.stf_material_property_value_refs = bpy.props.CollectionProperty(type=STF_Material_Value_Ref, name="STF Material Values")
 
 def unregister():
-	if hasattr(bpy.types.Material, "stf_is_source_of_truth"):
-		del bpy.types.Material.stf_is_source_of_truth
-
 	if hasattr(bpy.types.Material, "stf_material"):
 		del bpy.types.Material.stf_material
-	if hasattr(bpy.types.Material, "stf_material_properties"):
-		del bpy.types.Material.stf_material_properties
-	if hasattr(bpy.types.Material, "stf_active_material_property_index"):
-		del bpy.types.Material.stf_active_material_property_index
-	if hasattr(bpy.types.Material, "stf_material_property_values"):
-		del bpy.types.Material.stf_material_property_values

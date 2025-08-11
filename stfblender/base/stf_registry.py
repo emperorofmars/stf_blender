@@ -7,20 +7,19 @@ from .stf_module import STF_ExportComponentHook, STF_Module
 Util to retrieve all existing STF-modules
 """
 
-def get_stf_modules_from_pymodule(python_module: ModuleType) -> list[str, STF_Module]:
-	stf_modules = []
-	if(stf_module_list := getattr(python_module, "register_stf_modules", None)):
-		if(isinstance(stf_module_list, list)):
-			for stf_module in stf_module_list:
-				stf_modules.append(stf_module)
-	return stf_modules
 
 def get_stf_modules() -> list[STF_Module]:
 	stf_modules = []
 	import sys
-	python_modules = [sys.modules[m] for m in bpy.context.preferences.addons.keys()]
-	for python_module in python_modules:
-		stf_modules = stf_modules + get_stf_modules_from_pymodule(python_module)
+	for blender_addon in bpy.context.preferences.addons.keys():
+		try:
+			python_module = sys.modules[blender_addon]
+			if(stf_module_list := getattr(python_module, "register_stf_modules", None)):
+				if(isinstance(stf_module_list, list)):
+					for stf_module in stf_module_list:
+						stf_modules.append(stf_module)
+		except Exception:
+			continue
 	return stf_modules
 
 

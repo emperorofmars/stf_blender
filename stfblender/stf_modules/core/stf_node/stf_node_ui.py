@@ -10,7 +10,7 @@ class STFSetObjectIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
 	bl_idname = "stf.set_object_stf_id"
 	@classmethod
 	def poll(cls, context): return context.object is not None
-	def get_property(self, context): return context.object
+	def get_property(self, context): return context.object.stf_info
 
 class STFAddObjectComponentOperator(bpy.types.Operator, STFAddComponentOperatorBase):
 	"""Add Component to Object"""

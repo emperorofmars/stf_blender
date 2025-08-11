@@ -36,7 +36,7 @@ def stf_material_to_blender(blender_material: bpy.types.Material):
 
 	node_position_index = 0
 
-	for property in blender_material.stf_material_properties:
+	for property in blender_material.stf_material.properties:
 		property: STF_Material_Property = property
 		if(property.property_type == "albedo.texture" and property.value_type == "image"):
 			node_position_index += set_image_value(blender_material, surface, property, "Base Color", position_index_v = node_position_index)

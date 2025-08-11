@@ -48,7 +48,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 					material_value_module.value_import_func(context, blender_material, stf_values[0], value)
 					if(len(stf_values) > 1):
 						for stf_value in stf_values[1:]:
-							value_ref, value = add_value_to_property(blender_material, len(blender_material.stf_material_properties) - 1)
+							value_ref, value = add_value_to_property(blender_material, len(blender_material.stf_material.properties) - 1)
 							material_value_module.value_import_func(context, blender_material, stf_value, value)
 				else:
 					pass # TODO report fail
@@ -69,7 +69,7 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 		"properties": {},
 	}
 
-	if(not blender_material.stf_is_source_of_truth):
+	if(not blender_material.stf_material.stf_is_source_of_truth):
 		blender_material_to_stf(blender_material)
 
 	ret["style_hints"] = []
@@ -83,7 +83,7 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 			ret["shader_targets"][target.target].append(shader.value)
 
 
-	for property in blender_material.stf_material_properties:
+	for property in blender_material.stf_material.properties:
 		property: STF_Material_Property = property
 		json_prop = {"type": property.value_type}
 

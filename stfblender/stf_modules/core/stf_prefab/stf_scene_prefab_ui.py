@@ -5,6 +5,8 @@ from ....utils.component_utils import STFAddComponentOperatorBase, STFEditCompon
 from ....utils.component_ui_utils import draw_components_ui, set_stf_component_filter
 from ....base.stf_meta import draw_meta_editor
 from ....utils.minsc import draw_slot_link_warning
+from ....utils.dev_utils import CleanupOp
+from .... import package_key
 
 
 class STFSetSceneCollectionAsRootOperator(bpy.types.Operator):
@@ -30,7 +32,7 @@ class STFSetSceneCollectionIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
 	bl_idname = "stf.set_scene_collection_stf_id"
 	@classmethod
 	def poll(cls, context): return context.scene is not None
-	def get_property(self, context): return context.scene.collection
+	def get_property(self, context): return context.scene.collection.stf_info
 
 class STFAddSceneCollectionComponentOperator(bpy.types.Operator, STFAddComponentOperatorBase):
 	"""Add Component to Scene Collection"""
@@ -94,3 +96,9 @@ class STFSceneCollectionPanel(bpy.types.Panel):
 
 			# Components
 			draw_components_ui(self.layout, context, context.scene.collection.stf_info, context.scene.collection, STFAddSceneCollectionComponentOperator.bl_idname, STFRemoveSceneCollectionComponentOperator.bl_idname, STFEditSceneCollectionComponentIdOperator.bl_idname)
+
+		# Dev Options
+		if(bpy.context.preferences.addons[package_key.package_key].preferences.enable_dev_mode):
+			self.layout.separator(factor=4, type="LINE")
+			self.layout.label(text="Development Helpers")
+			self.layout.operator(CleanupOp.bl_idname)

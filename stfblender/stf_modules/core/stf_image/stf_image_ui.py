@@ -10,7 +10,7 @@ class STFSetImageIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
 	bl_idname = "stf.set_image_stf_id"
 	@classmethod
 	def poll(cls, context): return context.edit_image is not None
-	def get_property(self, context): return context.edit_image
+	def get_property(self, context): return context.edit_image.stf_info
 
 
 class STFAddImageComponentOperator(bpy.types.Operator, STFAddComponentOperatorBase):

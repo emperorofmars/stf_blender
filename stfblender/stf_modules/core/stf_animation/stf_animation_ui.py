@@ -11,7 +11,7 @@ class STFSetAnimationIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
 	bl_idname = "stf.set_animation_stf_id"
 	@classmethod
 	def poll(cls, context): return context.active_action is not None
-	def get_property(self, context): return context.active_action
+	def get_property(self, context): return context.active_action.stf_info
 
 class STFAddAnimationComponentOperator(bpy.types.Operator, STFAddComponentOperatorBase):
 	"""Add Component to Animation"""
@@ -50,8 +50,8 @@ class STFAnimationSpatialPanel(bpy.types.Panel):
 			draw_slot_link_warning(self.layout)
 			return
 
-		self.layout.prop(context.active_action, "stf_exclude")
-		if(context.active_action.stf_exclude):
+		self.layout.prop(context.active_action.stf_animation, "exclude")
+		if(context.active_action.stf_animation.exclude):
 			return
 
 		# Set ID
@@ -59,8 +59,7 @@ class STFAnimationSpatialPanel(bpy.types.Panel):
 
 		self.layout.separator(factor=2, type="LINE")
 		
-		self.layout.prop(context.active_action, "stf_bake")
-		self.layout.label(text="Warning: Baking is slooow!")
+		self.layout.prop(context.active_action.stf_animation, "bake")
 
 		self.layout.separator(factor=2, type="LINE")
 

@@ -13,6 +13,13 @@ from ....utils.id_utils import ensure_stf_id
 _stf_type = "stf.animation"
 
 
+class STF_Animation(bpy.types.PropertyGroup):
+	exclude: bpy.props.BoolProperty(name="Exclude from STF export", default=False) # type: ignore
+	bake: bpy.props.BoolProperty(name="Bake Animation on Export", default=True) # type: ignore
+	fps_override: bpy.props.BoolProperty(name="FPS Override", default=False) # type: ignore
+	fps: bpy.props.FloatProperty(name="FPS", default=30) # type: ignore
+
+
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, parent_application_object: any) -> any:
 	if(not hasattr(bpy.types.Action, "slot_links")):
 		context.report(STFReport("Slot Links are required to export animations!", STFReportSeverity.Warn, stf_id, _stf_type))
@@ -27,14 +34,16 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, pa
 
 	fps = json_resource.get("fps", 30)
 	if(fps != bpy.context.scene.render.fps):
-		blender_animation.stf_fps_override = True
-		blender_animation.stf_fps = fps
+		blender_animation.stf_animation.fps_override = True
+		blender_animation.stf_animation.fps = fps
 
 	blender_animation.use_cyclic = json_resource.get("loop", False)
 	if("range" in json_resource):
 		blender_animation.use_frame_range = True
 		blender_animation.frame_start = json_resource["range"][0]
 		blender_animation.frame_end = json_resource["range"][1]
+
+	blender_animation.stf_animation.bake = json_resource.get("bake_on_export", True)
 
 	# All of this is a mess
 
@@ -83,7 +92,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, pa
 				for stf_keyframes in track.get("keyframes", []):
 					timepoint = stf_keyframes["frame"]
 					stf_keyframe = stf_keyframes["values"][stf_index]
-					if(len(stf_keyframe) == 5): # Only import full unbaked keyframes
+					if(stf_keyframe and len(stf_keyframe) == 5): # Only import full unbaked keyframes
 						keyframe = fcurve.keyframe_points.insert(timepoint, stf_keyframe[0] if not conversion_func else conversion_func(stf_index, stf_keyframe[0]))
 						keyframe.handle_left.x = keyframe.co.x + stf_keyframe[1]
 						keyframe.handle_left.y = keyframe.co.y + stf_keyframe[2]
@@ -97,7 +106,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, pa
 
 def _stf_export(context: STF_ExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str]:
 	blender_animation: bpy.types.Action = application_object
-	if(blender_animation.stf_exclude): return None
+	if(blender_animation.stf_animation.exclude): return None
 	if(blender_animation.is_action_legacy):
 		context.report(STFReport("Ignoring legacy animation: " + blender_animation.name, STFReportSeverity.Debug, blender_animation.stf_info.stf_id, _stf_type, application_object))
 		return None
@@ -119,7 +128,8 @@ def _stf_export(context: STF_ExportContext, application_object: any, parent_appl
 		"type": _stf_type,
 		"name": blender_animation.stf_info.stf_name if blender_animation.stf_info.stf_name_source_of_truth else blender_animation.name,
 		"loop": blender_animation.use_cyclic,
-		"fps": bpy.context.scene.render.fps if not blender_animation.stf_fps_override else blender_animation.stf_fps
+		"fps": bpy.context.scene.render.fps if not blender_animation.stf_animation.fps_override else blender_animation.animation.stf_fps,
+		"bake_on_export": blender_animation.stf_animation.bake
 	}
 	if(blender_animation.use_frame_range):
 		ret["range"] = [blender_animation.frame_start, blender_animation.frame_end]
@@ -180,7 +190,7 @@ def _stf_export(context: STF_ExportContext, application_object: any, parent_appl
 												break
 									if(success):
 										# If the next keyframe is further that one frame, and if desired, bake the values instead
-										if(blender_animation.stf_bake and closest_timepoint > last_timepoint + 1.001):
+										if(blender_animation.stf_animation.bake and closest_timepoint > last_timepoint + 1.001):
 											closest_timepoint = last_timepoint + 1
 											for _, fcurve in fcurves.items():
 												keyframes[fcurve.array_index] = fcurve.evaluate(closest_timepoint)
@@ -192,9 +202,9 @@ def _stf_export(context: STF_ExportContext, application_object: any, parent_appl
 														break
 												else:
 													# If one of the curves for this data_path doesn't contain a keyframe, bake it if desired
-													if(blender_animation.stf_bake):
+													if(blender_animation.stf_animation.bake):
 														keyframes[fcurve.array_index] = fcurve.evaluate(closest_timepoint)
-									elif(blender_animation.stf_bake and last_timepoint < ret["range"][1] - 0.001):
+									elif(blender_animation.stf_animation.bake and last_timepoint < ret["range"][1] - 0.001):
 										# If no more keyframes are present, but the animation ends after the last_timepoint, bake if desired
 										success = True
 										closest_timepoint = last_timepoint + 1
@@ -261,18 +271,9 @@ register_stf_modules = [
 
 def register():
 	boilerplate_register(bpy.types.Action, "data")
-	bpy.types.Action.stf_exclude = bpy.props.BoolProperty(name="Exclude from STF", default=False) # type: ignore
-	bpy.types.Action.stf_bake = bpy.props.BoolProperty(name="Bake Animation on Export", default=False) # type: ignore
-	bpy.types.Action.stf_fps_override = bpy.props.BoolProperty(name="FPS Override", default=False) # type: ignore
-	bpy.types.Action.stf_fps = bpy.props.FloatProperty(name="FPS", default=30) # type: ignore
+	bpy.types.Action.stf_animation = bpy.props.PointerProperty(type=STF_Animation)
 
 def unregister():
+	if hasattr(bpy.types.Action, "stf_animation"):
+		del bpy.types.Action.stf_animation
 	boilerplate_unregister(bpy.types.Action, "data")
-	if hasattr(bpy.types.Action, "stf_exclude"):
-		del bpy.types.Action.stf_exclude
-	if hasattr(bpy.types.Action, "stf_bake"):
-		del bpy.types.Action.stf_bake
-	if hasattr(bpy.types.Action, "stf_fps_override"):
-		del bpy.types.Action.stf_fps_override
-	if hasattr(bpy.types.Action, "stf_fps"):
-		del bpy.types.Action.stf_fps

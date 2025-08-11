@@ -10,7 +10,7 @@ class STFSetBoneIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
 	bl_idname = "stf.set_bone_stf_id"
 	@classmethod
 	def poll(cls, context): return context.bone is not None
-	def get_property(self, context): return context.bone
+	def get_property(self, context): return context.bone.stf_info
 
 class STFAddBoneComponentOperator(bpy.types.Operator, STFAddComponentOperatorBase):
 	"""Add Component to Bone"""
