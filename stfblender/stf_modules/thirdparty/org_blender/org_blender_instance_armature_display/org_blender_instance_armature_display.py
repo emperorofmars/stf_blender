@@ -1,9 +1,8 @@
 import uuid
 import bpy
 
-from .....base.stf_module import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
+from .....base.stf_module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_ExportComponentHook
 from .....utils.component_utils import add_component, export_component_base, import_component_base
-from .....base.stf_module import STF_ExportComponentHook
 from .....exporter.stf_export_context import STF_ExportContext
 from .....importer.stf_import_context import STF_ImportContext
 
@@ -59,7 +58,6 @@ class HOOK_Blender_Instance_Armature_Display(STF_ExportComponentHook):
 	hook_target_application_types = [bpy.types.Object]
 	hook_can_handle_application_object_func = _hook_can_handle_func
 	hook_apply_func = _hook_apply_func
-
 
 
 register_stf_modules = [

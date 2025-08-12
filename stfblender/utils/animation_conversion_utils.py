@@ -1,7 +1,7 @@
 import bpy
 from typing import Callable
 
-from ..base.stf_module import STF_BlenderComponentBase
+from ..base.stf_module_component import STF_BlenderComponentBase
 
 """
 Export

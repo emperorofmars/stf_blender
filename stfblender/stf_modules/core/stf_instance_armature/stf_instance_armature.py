@@ -3,7 +3,8 @@ import mathutils
 import math
 from typing import Callable
 
-from ....base.stf_module import STF_Module, InstanceModComponentRef
+from ....base.stf_module import STF_Module
+from ....base.stf_module_component import InstanceModComponentRef
 from ....base.stf_report import STFReportSeverity, STFReport
 from ....exporter.stf_export_context import STF_ExportContext
 from ....importer.stf_import_context import STF_ImportContext

@@ -1,6 +1,6 @@
 import bpy
 
-from ..base.stf_module import STF_Info
+from ..base.stf_info import STF_Info
 
 
 def boilerplate_register(blender_type: any, stf_kind: str):

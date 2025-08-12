@@ -40,6 +40,8 @@ class ImportSTF(bpy.types.Operator, ImportHelper):
 				raise Exception("Import Failed, invalid root!")
 
 			root.stf_meta.from_stf_meta_assetInfo(stf_file.definition.stf.asset_info)
+			if(not context.scene.stf_root_collection):
+				context.scene.stf_root_collection = root
 
 			if(len(stf_state._reports) > 0):
 				self.report({"WARNING"}, "STF asset imported with reports! (%.3f sec.)" % (time.time() - time_start))

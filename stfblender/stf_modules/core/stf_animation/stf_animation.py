@@ -1,5 +1,5 @@
+from typing import Callable
 import bpy
-from math import inf
 
 from ....exporter.stf_export_context import STF_ExportContext
 from ....importer.stf_import_context import STF_ImportContext
@@ -15,14 +15,14 @@ _stf_type = "stf.animation"
 
 class STF_Animation(bpy.types.PropertyGroup):
 	exclude: bpy.props.BoolProperty(name="Exclude from STF export", default=False) # type: ignore
-	bake: bpy.props.BoolProperty(name="Bake Animation on Export", default=True) # type: ignore
+	bake: bpy.props.BoolProperty(name="Bake Animation on Export", default=False) # type: ignore
 	fps_override: bpy.props.BoolProperty(name="FPS Override", default=False) # type: ignore
 	fps: bpy.props.FloatProperty(name="FPS", default=30) # type: ignore
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, parent_application_object: any) -> any:
+def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
 	if(not hasattr(bpy.types.Action, "slot_links")):
-		context.report(STFReport("Slot Links are required to export animations!", STFReportSeverity.Warn, stf_id, _stf_type))
+		context.report(STFReport("Slot-Link is required to import animations!", STFReportSeverity.Warn, stf_id, _stf_type))
 		return
 
 	blender_animation = bpy.data.actions.new(json_resource.get("name", "STF Animation"))
@@ -43,7 +43,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, pa
 		blender_animation.frame_start = json_resource["range"][0]
 		blender_animation.frame_end = json_resource["range"][1]
 
-	blender_animation.stf_animation.bake = json_resource.get("bake_on_export", True)
+	blender_animation.stf_animation.bake = json_resource.get("bake_on_export", False)
 
 	# All of this is a mess
 
@@ -92,26 +92,37 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, pa
 				for stf_keyframes in track.get("keyframes", []):
 					timepoint = stf_keyframes["frame"]
 					stf_keyframe = stf_keyframes["values"][stf_index]
-					if(stf_keyframe and len(stf_keyframe) == 5): # Only import full unbaked keyframes
+					# Only import full unbaked keyframes
+					is_source_keyframe = True if stf_keyframe and len(stf_keyframe) > 1 and type(stf_keyframe[0]) == bool and stf_keyframe[0] else False
+					if(stf_keyframe and len(stf_keyframe) == 5): # todo legacy, remove at some point
 						keyframe = fcurve.keyframe_points.insert(timepoint, stf_keyframe[0] if not conversion_func else conversion_func(stf_index, stf_keyframe[0]))
 						keyframe.handle_left.x = keyframe.co.x + stf_keyframe[1]
 						keyframe.handle_left.y = keyframe.co.y + stf_keyframe[2]
 						keyframe.handle_right.x = keyframe.co.x + stf_keyframe[3]
 						keyframe.handle_right.y = keyframe.co.y + stf_keyframe[4]
+					elif(is_source_keyframe and len(stf_keyframe) == 6):
+						keyframe = fcurve.keyframe_points.insert(timepoint, stf_keyframe[1] if not conversion_func else conversion_func(stf_index, stf_keyframe[1]))
+						keyframe.handle_left.x = keyframe.co.x + stf_keyframe[2]
+						keyframe.handle_left.y = keyframe.co.y + stf_keyframe[3]
+						keyframe.handle_right.x = keyframe.co.x + stf_keyframe[4]
+						keyframe.handle_right.y = keyframe.co.y + stf_keyframe[5]
+					elif(is_source_keyframe and len(stf_keyframe) == 2):
+						keyframe = fcurve.keyframe_points.insert(timepoint, stf_keyframe[1] if not conversion_func else conversion_func(stf_index, stf_keyframe[1]))
+					# else keyframe is baked and can be ignored
 
 			fcurve.keyframe_points.handles_recalc()
 
 	return blender_animation
 
 
-def _stf_export(context: STF_ExportContext, application_object: any, parent_application_object: any) -> tuple[dict, str]:
+def _stf_export(context: STF_ExportContext, application_object: any, context_object: any) -> tuple[dict, str]:
 	blender_animation: bpy.types.Action = application_object
 	if(blender_animation.stf_animation.exclude): return None
 	if(blender_animation.is_action_legacy):
 		context.report(STFReport("Ignoring legacy animation: " + blender_animation.name, STFReportSeverity.Debug, blender_animation.stf_info.stf_id, _stf_type, application_object))
 		return None
 	if(not hasattr(blender_animation, "slot_links")):
-		context.report(STFReport("Slot Links are required to export animations!", STFReportSeverity.Debug, blender_animation.stf_info.stf_id, _stf_type, application_object))
+		context.report(STFReport("Slot-Link is required to export animations!", STFReportSeverity.Debug, blender_animation.stf_info.stf_id, _stf_type, application_object))
 		return None
 
 	for slot_link in blender_animation.slot_links:
@@ -177,71 +188,22 @@ def _stf_export(context: STF_ExportContext, application_object: any, parent_appl
 										if(fcurve):
 											index_conversion.append(fcurve.array_index)
 
-								def find_next_keyframe(last_timepoint: float):
-									closest_timepoint = inf
-									keyframes: list[bpy.types.Keyframe | float | None] = [None] * len(index_conversion)
-									success = False
-									# Find the point in time where one of the curves on the same data_path has the next keyframe
-									for _, fcurve in fcurves.items():
-										for keyframe in fcurve.keyframe_points:
-											if(keyframe.co.x > (last_timepoint + 0.001) and keyframe.co.x < closest_timepoint):
-												closest_timepoint = keyframe.co.x
-												success = True
-												break
-									if(success):
-										# If the next keyframe is further that one frame, and if desired, bake the values instead
-										if(blender_animation.stf_animation.bake and closest_timepoint > last_timepoint + 1.001):
-											closest_timepoint = last_timepoint + 1
-											for _, fcurve in fcurves.items():
-												keyframes[fcurve.array_index] = fcurve.evaluate(closest_timepoint)
-										else: # Export normal full keyframe
-											for _, fcurve in fcurves.items():
-												for keyframe in fcurve.keyframe_points:
-													if(keyframe.co.x < (closest_timepoint + 0.001) and keyframe.co.x > (closest_timepoint - 0.001)):
-														keyframes[fcurve.array_index] = keyframe
-														break
-												else:
-													# If one of the curves for this data_path doesn't contain a keyframe, bake it if desired
-													if(blender_animation.stf_animation.bake):
-														keyframes[fcurve.array_index] = fcurve.evaluate(closest_timepoint)
-									elif(blender_animation.stf_animation.bake and last_timepoint < ret["range"][1] - 0.001):
-										# If no more keyframes are present, but the animation ends after the last_timepoint, bake if desired
-										success = True
-										closest_timepoint = last_timepoint + 1
-										for _, fcurve in fcurves.items():
-											keyframes[fcurve.array_index] = fcurve.evaluate(closest_timepoint)
-									return closest_timepoint if success else None, keyframes
-
 								stf_track: list = []
-								current_timepoint, keyframes = find_next_keyframe(ret["range"][0] - 1)
+								#current_timepoint, keyframes = find_next_keyframe(ret["range"][0] - 1)
+								current_timepoint, keyframes = find_next_keyframe(ret["range"][0] - 1, blender_animation, fcurves, ret["range"][1], index_conversion, conversion_func)
 								while current_timepoint != None:
-									stf_keyframes = [None] * len(index_conversion)
-									# Get bezier export import done first, then deal with other interpolation kinds and whatever else
-									for keyframe_index, keyframe in enumerate(keyframes):
-										if(keyframe and type(keyframe) == bpy.types.Keyframe):
-											stf_keyframes[index_conversion[keyframe_index]] = [
-												conversion_func(keyframe_index, keyframe.co.y) if conversion_func else keyframe.co.y,
-												keyframe.handle_left.x - keyframe.co.x,
-												keyframe.handle_left.y - keyframe.co.y,
-												keyframe.handle_right.x - keyframe.co.x,
-												keyframe.handle_right.y - keyframe.co.y
-											]
-										elif(keyframe and type(keyframe) == float):
-											stf_keyframes[index_conversion[keyframe_index]] = [
-												conversion_func(keyframe_index, keyframe) if conversion_func else keyframe,
-											]
 									stf_track.append({
 										"frame": current_timepoint,
-										"values": stf_keyframes
+										"values": keyframes
 									})
-									current_timepoint, keyframes = find_next_keyframe(current_timepoint)
-
+									current_timepoint, keyframes = find_next_keyframe(current_timepoint, blender_animation, fcurves, ret["range"][1], index_conversion, conversion_func)
+									#current_timepoint, keyframes = find_next_keyframe(current_timepoint)
 								stf_tracks.append({
 									"target": target,
 									"keyframes": stf_track
 								})
 							else:
-								context.report(STFReport("Invalid fcurve data_path: " + fcurve.data_path, STFReportSeverity.Debug, None, _stf_type, blender_animation))
+								context.report(STFReport("Invalid FCurve data_path: " + fcurve.data_path, STFReportSeverity.Debug, None, _stf_type, blender_animation))
 					else:
 						context.report(STFReport("Invalid Animation Target", STFReportSeverity.Debug, None, _stf_type, blender_animation))
 
@@ -252,6 +214,50 @@ def _stf_export(context: STF_ExportContext, application_object: any, parent_appl
 		return None
 	else:
 		return ret, blender_animation.stf_info.stf_id
+
+
+def find_next_keyframe(last_timepoint: float, blender_animation: bpy.types.Action, fcurves: dict[int, bpy.types.FCurve], max_range: float, index_conversion: list[int], conversion_func: Callable[[int, any], any] = None) -> tuple[list | None]:
+	from math import inf
+	closest_timepoint = inf
+	keyframes: list[list | None] = [None] * len(index_conversion)
+	success = False
+	# Find the point in time where one of the curves on the same data_path has the next keyframe
+	for _, fcurve in fcurves.items():
+		for keyframe in fcurve.keyframe_points:
+			if(keyframe.co.x > (last_timepoint + 0.001) and keyframe.co.x < closest_timepoint):
+				closest_timepoint = keyframe.co.x
+				success = True
+				break
+	if(success):
+		# If the next keyframe is further that one frame, and if desired, bake the values instead
+		if(blender_animation.stf_animation.bake and closest_timepoint > last_timepoint + 1.001):
+			closest_timepoint = last_timepoint + 1
+			for _, fcurve in fcurves.items():
+				keyframes[index_conversion[fcurve.array_index]] = [False, conversion_func(index_conversion[fcurve.array_index], fcurve.evaluate(closest_timepoint)) if conversion_func else fcurve.evaluate(closest_timepoint)]
+		else: # Export normal full keyframe
+			for _, fcurve in fcurves.items():
+				for keyframe in fcurve.keyframe_points:
+					if(keyframe.co.x < (closest_timepoint + 0.001) and keyframe.co.x > (closest_timepoint - 0.001)):
+						# todo figure out tangents more properly
+						keyframes[index_conversion[fcurve.array_index]] = [True,
+							conversion_func(index_conversion[fcurve.array_index], keyframe.co.y) if conversion_func else keyframe.co.y,
+							keyframe.handle_left.x - keyframe.co.x,
+							keyframe.handle_left.y - keyframe.co.y,
+							keyframe.handle_right.x - keyframe.co.x,
+							keyframe.handle_right.y - keyframe.co.y
+						]
+						break
+				else:
+					# If one of the curves for this data_path doesn't contain a keyframe, bake it if desired
+					if(blender_animation.stf_animation.bake):
+						keyframes[index_conversion[fcurve.array_index]] = [False, conversion_func(index_conversion[fcurve.array_index], fcurve.evaluate(closest_timepoint)) if conversion_func else fcurve.evaluate(closest_timepoint)]
+	elif(blender_animation.stf_animation.bake and last_timepoint < max_range + 0.001):
+		# If no more keyframes are present, but the animation ends after the last_timepoint, bake if desired
+		success = True
+		closest_timepoint = last_timepoint + 1
+		for _, fcurve in fcurves.items():
+			keyframes[index_conversion[fcurve.array_index]] = [False, conversion_func(index_conversion[fcurve.array_index], fcurve.evaluate(closest_timepoint)) if conversion_func else fcurve.evaluate(closest_timepoint)]
+	return closest_timepoint if success else None, keyframes
 
 
 class STF_Module_STF_Animation(STF_Module):

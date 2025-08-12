@@ -1,7 +1,7 @@
 import json
 import bpy
 
-from .....base.stf_module import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
+from .....base.stf_module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
 from .....exporter.stf_export_context import STF_ExportContext
 from .....importer.stf_import_context import STF_ImportContext
 from .....utils.component_utils import add_component, export_component_base, import_component_base
@@ -118,19 +118,22 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 
 def _stf_export(context: STF_ExportContext, component: VRC_Physbone, context_object: any) -> tuple[dict, str]:
 	ret = export_component_base(context, _stf_type, component)
-	ret["values"] = component.values
+	try:
+		ret["values"] = json.loads(component.values)
 
-	ignores = []
-	for ignore in component.ignores:
-		ignores.append(ignore.id)
-	ret["ignores"] = ignores
+		ignores = []
+		for ignore in component.ignores:
+			ignores.append(ignore.id)
+		ret["ignores"] = ignores
 
-	colliders = []
-	for collider in component.colliders:
-		colliders.append(collider.id)
-	ret["colliders"] = colliders
+		colliders = []
+		for collider in component.colliders:
+			colliders.append(collider.id)
+		ret["colliders"] = colliders
 
-	return ret, component.stf_id
+		return ret, component.stf_id
+	except Exception:
+		return None
 
 
 class STF_Module_VRC_Physbone(STF_BlenderComponentModule):

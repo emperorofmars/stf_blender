@@ -1,6 +1,6 @@
 import bpy
 
-from ....base.stf_module import InstanceModComponentRef, STF_BlenderComponentModule
+from ....base.stf_module_component import InstanceModComponentRef, STF_BlenderComponentModule
 from ....exporter.stf_export_context import STF_ExportContext
 from ....importer.stf_import_context import STF_ImportContext
 from ....utils.animation_conversion_utils import *

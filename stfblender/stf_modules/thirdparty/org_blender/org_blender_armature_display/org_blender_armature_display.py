@@ -1,12 +1,10 @@
 import uuid
 import bpy
 
-from .....base.stf_module import STF_BlenderComponentBase, STF_BlenderComponentModule
+from .....base.stf_module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_ExportComponentHook
 from .....utils.component_utils import add_component, export_component_base, import_component_base
-from .....base.stf_module import STF_ExportComponentHook
 from .....exporter.stf_export_context import STF_ExportContext
 from .....importer.stf_import_context import STF_ImportContext
-from .....utils.buffer_utils import parse_uint, serialize_uint
 
 
 _stf_type = "org.blender.armature.display"

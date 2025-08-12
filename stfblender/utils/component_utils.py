@@ -1,6 +1,6 @@
 import bpy
 
-from ..base.stf_module import STF_BlenderComponentModule, STF_Component_Ref, STF_BlenderComponentOverride
+from ..base.stf_module_component import STF_BlenderComponentModule, STF_Component_Ref, STF_BlenderComponentOverride
 from ..base.stf_registry import get_stf_modules
 from ..utils.id_utils import ensure_stf_id
 

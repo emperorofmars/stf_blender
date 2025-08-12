@@ -1,7 +1,7 @@
 import json
 import bpy
 
-from .....base.stf_module import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
+from .....base.stf_module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
 from .....exporter.stf_export_context import STF_ExportContext
 from .....importer.stf_import_context import STF_ImportContext
 from .....utils.component_utils import add_component, import_component_base
@@ -16,19 +16,19 @@ class VRC_AvatarColliders(STF_BlenderComponentBase):
 	data: bpy.props.StringProperty(name="Data") # type: ignore
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, parent_application_object: any, component: VRC_AvatarColliders):
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: VRC_AvatarColliders):
 	layout.prop(component, "data")
 	layout.label
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, parent_application_object: any) -> any:
-	component_ref, component = add_component(parent_application_object, _blender_property_name, id, _stf_type)
+def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, context_object: any) -> any:
+	component_ref, component = add_component(context_object, _blender_property_name, id, _stf_type)
 	component.data = json.dumps(json_resource)
 	import_component_base(component, json_resource)
 	return component
 
 
-def _stf_export(context: STF_ExportContext, component: VRC_AvatarColliders, parent_application_object: any) -> tuple[dict, str]:
+def _stf_export(context: STF_ExportContext, component: VRC_AvatarColliders, context_object: any) -> tuple[dict, str]:
 	try:
 		ensure_stf_id(context, component, component)
 		ret = json.loads(component.data)

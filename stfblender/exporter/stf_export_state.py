@@ -4,7 +4,8 @@ from enum import Enum
 
 from ..base.stf_definition import STF_Buffer_Included, STF_JsonDefinition, STF_Meta_AssetInfo
 from ..base.stf_report import STFReportSeverity, STFReport
-from ..base.stf_module import STF_ExportComponentHook, STF_Module
+from ..base.stf_module import STF_Module
+from ..base.stf_module_component import STF_ExportComponentHook
 from ..base.stf_file import STF_File
 from ..base.stf_state_base import STF_State_Base
 from ..utils.minsc import get_stf_version

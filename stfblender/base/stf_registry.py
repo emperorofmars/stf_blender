@@ -1,6 +1,7 @@
 import bpy
 
-from .stf_module import STF_ExportComponentHook, STF_Module
+from .stf_module import STF_Module
+from .stf_module_component import STF_ExportComponentHook
 
 """
 Util to retrieve all existing STF-modules
