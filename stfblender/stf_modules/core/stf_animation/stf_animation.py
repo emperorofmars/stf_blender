@@ -190,13 +190,13 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 
 								stf_track: list = []
 								#current_timepoint, keyframes = find_next_keyframe(ret["range"][0] - 1)
-								current_timepoint, keyframes = find_next_keyframe(ret["range"][0] - 1, blender_animation, fcurves, ret["range"][1], index_conversion, conversion_func)
+								current_timepoint, keyframes = __find_next_keyframe(ret["range"][0] - 1, blender_animation, fcurves, ret["range"][1], index_conversion, conversion_func)
 								while current_timepoint != None:
 									stf_track.append({
 										"frame": current_timepoint,
 										"values": keyframes
 									})
-									current_timepoint, keyframes = find_next_keyframe(current_timepoint, blender_animation, fcurves, ret["range"][1], index_conversion, conversion_func)
+									current_timepoint, keyframes = __find_next_keyframe(current_timepoint, blender_animation, fcurves, ret["range"][1], index_conversion, conversion_func)
 									#current_timepoint, keyframes = find_next_keyframe(current_timepoint)
 								stf_tracks.append({
 									"target": target,
@@ -216,7 +216,7 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 		return ret, blender_animation.stf_info.stf_id
 
 
-def find_next_keyframe(last_timepoint: float, blender_animation: bpy.types.Action, fcurves: dict[int, bpy.types.FCurve], max_range: float, index_conversion: list[int], conversion_func: Callable[[int, any], any] = None) -> tuple[list | None]:
+def __find_next_keyframe(last_timepoint: float, blender_animation: bpy.types.Action, fcurves: dict[int, bpy.types.FCurve], max_range: float, index_conversion: list[int], conversion_func: Callable[[int, any], any] = None) -> tuple[list | None]:
 	from math import inf
 	closest_timepoint = inf
 	keyframes: list[list | None] = [None] * len(index_conversion)
