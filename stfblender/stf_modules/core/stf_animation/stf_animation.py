@@ -189,7 +189,6 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 											index_conversion.append(fcurve.array_index)
 
 								stf_track: list = []
-								#current_timepoint, keyframes = find_next_keyframe(ret["range"][0] - 1)
 								current_timepoint, keyframes = __find_next_keyframe(ret["range"][0] - 1, blender_animation, fcurves, ret["range"][1], index_conversion, conversion_func)
 								while current_timepoint != None:
 									stf_track.append({
@@ -197,7 +196,6 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 										"values": keyframes
 									})
 									current_timepoint, keyframes = __find_next_keyframe(current_timepoint, blender_animation, fcurves, ret["range"][1], index_conversion, conversion_func)
-									#current_timepoint, keyframes = find_next_keyframe(current_timepoint)
 								stf_tracks.append({
 									"target": target,
 									"keyframes": stf_track
@@ -236,21 +234,53 @@ def __find_next_keyframe(last_timepoint: float, blender_animation: bpy.types.Act
 				keyframes[index_conversion[fcurve.array_index]] = [False, conversion_func(index_conversion[fcurve.array_index], fcurve.evaluate(closest_timepoint)) if conversion_func else fcurve.evaluate(closest_timepoint)]
 		else: # Export normal full keyframe
 			for _, fcurve in fcurves.items():
-				for keyframe in fcurve.keyframe_points:
+				for keyframe_index, keyframe in enumerate(fcurve.keyframe_points):
 					if(keyframe.co.x < (closest_timepoint + 0.001) and keyframe.co.x > (closest_timepoint - 0.001)):
+						
+						prev_keyframe = fcurve.keyframe_points[keyframe_index - 1] if keyframe_index > 0 else None
+						next_keyframe = fcurve.keyframe_points[keyframe_index + 1] if keyframe_index + 1 < len(fcurve.keyframe_points) else None
+
+						keyframe_value = conversion_func(index_conversion[fcurve.array_index], keyframe.co.y) if conversion_func else keyframe.co.y
+
+						keyframe_tangent_left_x = keyframe.handle_left.x - keyframe.co.x
+						left_frame_offset = 1
+						left_tangent_factor = 1
+						if(prev_keyframe):
+							left_frame_offset = keyframe.co.x - prev_keyframe.co.x
+							left_tangent_factor = max(abs((keyframe.handle_left.x - keyframe.co.x) / left_frame_offset), 1)
+							
+						keyframe_tangent_right_x = keyframe.handle_right.x - keyframe.co.x
+						right_frame_offset = 1
+						right_tangent_factor = 1
+						if(next_keyframe):
+							right_frame_offset = next_keyframe.co.x - keyframe.co.x
+							right_tangent_factor = max(abs((keyframe.handle_right.x - keyframe.co.x) / right_frame_offset), 1)
+
+						keyframe_tangent_left_x /= left_tangent_factor
+						keyframe_tangent_left_y = (keyframe.handle_left.y - keyframe.co.y) / left_tangent_factor
+						keyframe_tangent_right_x /= right_tangent_factor
+						keyframe_tangent_right_y = (keyframe.handle_right.y - keyframe.co.y) / right_tangent_factor
+
 						# todo figure out tangents more properly
+
 						keyframes[index_conversion[fcurve.array_index]] = [True,
+							keyframe_value,
+							keyframe_tangent_left_x,
+							keyframe_tangent_left_y,
+							keyframe_tangent_right_x,
+							keyframe_tangent_right_y
+						]
+						"""keyframes[index_conversion[fcurve.array_index]] = [True,
 							conversion_func(index_conversion[fcurve.array_index], keyframe.co.y) if conversion_func else keyframe.co.y,
 							keyframe.handle_left.x - keyframe.co.x,
 							keyframe.handle_left.y - keyframe.co.y,
 							keyframe.handle_right.x - keyframe.co.x,
 							keyframe.handle_right.y - keyframe.co.y
-						]
+						]"""
 						break
 				else:
-					# If one of the curves for this data_path doesn't contain a keyframe, bake it if desired
-					if(blender_animation.stf_animation.bake):
-						keyframes[index_conversion[fcurve.array_index]] = [False, conversion_func(index_conversion[fcurve.array_index], fcurve.evaluate(closest_timepoint)) if conversion_func else fcurve.evaluate(closest_timepoint)]
+					# If one of the curves for this data_path doesn't contain a keyframe, bake it, regardles of the `bake` setting
+					keyframes[index_conversion[fcurve.array_index]] = [False, conversion_func(index_conversion[fcurve.array_index], fcurve.evaluate(closest_timepoint)) if conversion_func else fcurve.evaluate(closest_timepoint)]
 	elif(blender_animation.stf_animation.bake and last_timepoint < max_range + 0.001):
 		# If no more keyframes are present, but the animation ends after the last_timepoint, bake if desired
 		success = True
