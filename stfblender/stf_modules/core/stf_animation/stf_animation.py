@@ -100,12 +100,16 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 						keyframe.handle_left.y = keyframe.co.y + stf_keyframe[2]
 						keyframe.handle_right.x = keyframe.co.x + stf_keyframe[3]
 						keyframe.handle_right.y = keyframe.co.y + stf_keyframe[4]
+						keyframe.handle_left_type = "FREE"
+						keyframe.handle_right_type = "FREE"
 					elif(is_source_keyframe and len(stf_keyframe) == 6):
 						keyframe = fcurve.keyframe_points.insert(timepoint, stf_keyframe[1] if not conversion_func else conversion_func(stf_index, stf_keyframe[1]))
 						keyframe.handle_left.x = keyframe.co.x + stf_keyframe[2]
 						keyframe.handle_left.y = keyframe.co.y + stf_keyframe[3]
 						keyframe.handle_right.x = keyframe.co.x + stf_keyframe[4]
 						keyframe.handle_right.y = keyframe.co.y + stf_keyframe[5]
+						keyframe.handle_left_type = "FREE"
+						keyframe.handle_right_type = "FREE"
 					elif(is_source_keyframe and len(stf_keyframe) == 2):
 						keyframe = fcurve.keyframe_points.insert(timepoint, stf_keyframe[1] if not conversion_func else conversion_func(stf_index, stf_keyframe[1]))
 					# else keyframe is baked and can be ignored
@@ -242,41 +246,25 @@ def __find_next_keyframe(last_timepoint: float, blender_animation: bpy.types.Act
 
 						keyframe_value = conversion_func(index_conversion[fcurve.array_index], keyframe.co.y) if conversion_func else keyframe.co.y
 
-						keyframe_tangent_left_x = keyframe.handle_left.x - keyframe.co.x
-						left_frame_offset = 1
 						left_tangent_factor = 1
 						if(prev_keyframe):
 							left_frame_offset = keyframe.co.x - prev_keyframe.co.x
 							left_tangent_factor = max(abs((keyframe.handle_left.x - keyframe.co.x) / left_frame_offset), 1)
 							
-						keyframe_tangent_right_x = keyframe.handle_right.x - keyframe.co.x
-						right_frame_offset = 1
 						right_tangent_factor = 1
 						if(next_keyframe):
 							right_frame_offset = next_keyframe.co.x - keyframe.co.x
 							right_tangent_factor = max(abs((keyframe.handle_right.x - keyframe.co.x) / right_frame_offset), 1)
 
-						keyframe_tangent_left_x /= left_tangent_factor
-						keyframe_tangent_left_y = (keyframe.handle_left.y - keyframe.co.y) / left_tangent_factor
-						keyframe_tangent_right_x /= right_tangent_factor
-						keyframe_tangent_right_y = (keyframe.handle_right.y - keyframe.co.y) / right_tangent_factor
-
 						# todo figure out tangents more properly
 
 						keyframes[index_conversion[fcurve.array_index]] = [True,
 							keyframe_value,
-							keyframe_tangent_left_x,
-							keyframe_tangent_left_y,
-							keyframe_tangent_right_x,
-							keyframe_tangent_right_y
+							(keyframe.handle_left.x - keyframe.co.x) / left_tangent_factor,
+							(keyframe.handle_left.y - keyframe.co.y) / left_tangent_factor,
+							(keyframe.handle_left.y - keyframe.co.y) / left_tangent_factor,
+							(keyframe.handle_right.y - keyframe.co.y) / right_tangent_factor
 						]
-						"""keyframes[index_conversion[fcurve.array_index]] = [True,
-							conversion_func(index_conversion[fcurve.array_index], keyframe.co.y) if conversion_func else keyframe.co.y,
-							keyframe.handle_left.x - keyframe.co.x,
-							keyframe.handle_left.y - keyframe.co.y,
-							keyframe.handle_right.x - keyframe.co.x,
-							keyframe.handle_right.y - keyframe.co.y
-						]"""
 						break
 				else:
 					# If one of the curves for this data_path doesn't contain a keyframe, bake it, regardles of the `bake` setting
