@@ -1,3 +1,4 @@
+from io import BytesIO
 from typing import Callable
 import bpy
 
@@ -8,6 +9,7 @@ from ....base.stf_report import STFReportSeverity, STFReport
 from ....utils.component_utils import get_components_from_object
 from ....utils.boilerplate import boilerplate_register, boilerplate_unregister
 from ....utils.id_utils import ensure_stf_id
+from ....utils.buffer_utils import serialize_float
 
 
 _stf_type = "stf.animation"
@@ -184,17 +186,11 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 										if(fcurve):
 											index_conversion.append(fcurve.array_index)
 
-								stf_track: list = []
-								current_timepoint, keyframes = __find_next_keyframe(ret["range"][0] - 1, blender_animation, fcurves, ret["range"][1], index_conversion, conversion_func)
-								while current_timepoint != None:
-									stf_track.append({
-										"frame": current_timepoint,
-										"values": keyframes
-									})
-									current_timepoint, keyframes = __find_next_keyframe(current_timepoint, blender_animation, fcurves, ret["range"][1], index_conversion, conversion_func)
+								sub_tracks = __serialize_subtracks(context, blender_animation, fcurves, ret["range"], index_conversion, conversion_func)
+
 								stf_tracks.append({
 									"target": target,
-									"keyframes": stf_track
+									"subtracks": sub_tracks
 								})
 							else:
 								context.report(STFReport("Invalid FCurve data_path: " + fcurve.data_path, STFReportSeverity.Debug, None, _stf_type, blender_animation))
@@ -210,106 +206,102 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 		return ret, blender_animation.stf_info.stf_id
 
 
-def __find_next_keyframe(last_timepoint: float, blender_animation: bpy.types.Action, fcurves: dict[int, bpy.types.FCurve], max_range: float, index_conversion: list[int], conversion_func: Callable[[int, any], any] = None) -> tuple[list | None]:
-	from math import inf
-	closest_timepoint = inf
-	keyframes: list[dict | None] = [None] * len(index_conversion)
-	success = False
-	# Find the point in time where one of the curves on the same data_path has the next keyframe
+def __serialize_subtracks(context: STF_ExportContext, blender_animation: bpy.types.Action, fcurves: dict[int, bpy.types.FCurve], range: list[float], index_conversion: list[int], conversion_func: Callable[[int, any], any] = None) -> list:
+	real_timepoints_set: set[float] = set()
+	# for each subtrack (i.e. the x,y,z components of a location), determine at wich times have a keyframe at any of these subtracks
 	for _, fcurve in fcurves.items():
 		for keyframe in fcurve.keyframe_points:
-			if(keyframe.co.x > (last_timepoint + 0.001) and keyframe.co.x < closest_timepoint):
-				closest_timepoint = keyframe.co.x
-				success = True
-				break
-	if(success):
-		# If the next keyframe is further that one frame, and if desired, bake the values instead
-		if(blender_animation.stf_animation.bake and closest_timepoint > last_timepoint + 1.001):
-			closest_timepoint = last_timepoint + 1
-			for _, fcurve in fcurves.items():
-				keyframes[index_conversion[fcurve.array_index]] = [
-					False, # is source of truth, false because it's baked
-					"linear", # interpolation type
-					conversion_func(index_conversion[fcurve.array_index], fcurve.evaluate(closest_timepoint)) if conversion_func else fcurve.evaluate(closest_timepoint) #value
-				]
-				"""keyframes[index_conversion[fcurve.array_index]] = {
-					"source": False,
-					"type": "linear",
-					"value": conversion_func(index_conversion[fcurve.array_index], fcurve.evaluate(closest_timepoint)) if conversion_func else fcurve.evaluate(closest_timepoint)
-				}"""
-		else: # Export normal full keyframe
-			for _, fcurve in fcurves.items():
-				for keyframe_index, keyframe in enumerate(fcurve.keyframe_points):
-					prev_keyframe = fcurve.keyframe_points[keyframe_index - 1] if keyframe_index > 0 else None
-					next_keyframe = fcurve.keyframe_points[keyframe_index + 1] if keyframe_index + 1 < len(fcurve.keyframe_points) else None
+			real_timepoints_set.add(keyframe.co.x)
+	real_timepoints = list(real_timepoints_set)
+	real_timepoints.sort()
 
-					if(keyframe.co.x < (closest_timepoint + 0.001) and keyframe.co.x > (closest_timepoint - 0.001)):
-						if(keyframe.interpolation == "BEZIER"):
+	ret = [None] * len(index_conversion)
+	for _, fcurve in fcurves.items():
+		ret[index_conversion[fcurve.array_index]] = {}
 
-							left_tangent_factor = 1
-							if(prev_keyframe):
-								left_frame_offset = keyframe.co.x - prev_keyframe.co.x
-								left_tangent_factor = max(abs((keyframe.handle_left.x - keyframe.co.x) / left_frame_offset), 1)
-								
-							right_tangent_factor = 1
-							if(next_keyframe):
-								right_frame_offset = next_keyframe.co.x - keyframe.co.x
-								right_tangent_factor = max(abs((keyframe.handle_right.x - keyframe.co.x) / right_frame_offset), 1)
+	for _, fcurve in fcurves.items():
+		keyframes = []
+		# let baked_values
+		if(blender_animation.stf_animation.bake):
+			baked_values = BytesIO()
 
-							# todo figure out tangents more properly
-							keyframe.handle_left_type == "AUTO_CLAMPED"
+		keyframe_index = 0
+		timepoint = range[0]
+		for real_timepoint in real_timepoints:
+			prev_keyframe = fcurve.keyframe_points[keyframe_index - 1] if keyframe_index > 0 else None
+			next_keyframe = fcurve.keyframe_points[keyframe_index + 1] if keyframe_index + 1 < len(fcurve.keyframe_points) else None
 
-							"""keyframes[index_conversion[fcurve.array_index]] = [True,
-								conversion_func(index_conversion[fcurve.array_index], keyframe.co.y) if conversion_func else keyframe.co.y,
-								(keyframe.handle_left.x - keyframe.co.x) / left_tangent_factor,
-								(keyframe.handle_left.y - keyframe.co.y) / left_tangent_factor,
-								(keyframe.handle_right.x - keyframe.co.x) / right_tangent_factor,
-								(keyframe.handle_right.y - keyframe.co.y) / right_tangent_factor
-							]"""
-							keyframes[index_conversion[fcurve.array_index]] = [
-								True, # is source of truth
-								"bezier", # interpolation type
-								conversion_func(index_conversion[fcurve.array_index], keyframe.co.y) if conversion_func else keyframe.co.y, #value
-								[__handle_type_to_stf.get(keyframe.handle_left_type, "split")] + list(((keyframe.handle_left - keyframe.co) / left_tangent_factor)), # left tangent type and values relative to keyframe
-								[__handle_type_to_stf.get(keyframe.handle_right_type, "split")] + list(((keyframe.handle_right - keyframe.co) / right_tangent_factor)[:]), # right tangent type and values relative to keyframe
-							]
-							"""keyframes[index_conversion[fcurve.array_index]] = {
-								"source": True,
-								"type": "bezier",
-								"value": conversion_func(index_conversion[fcurve.array_index], keyframe.co.y) if conversion_func else keyframe.co.y,
-								"tangent_left_type": __handle_type_to_stf.get(keyframe.handle_left_type, "split"),
-								"tangent_left": ((keyframe.handle_left - keyframe.co) / left_tangent_factor)[:],
-								"tangent_right_type": __handle_type_to_stf.get(keyframe.handle_right_type, "split"),
-								"tangent_right": ((keyframe.handle_right - keyframe.co) / right_tangent_factor)[:],
-							}"""
-							break
-						elif(keyframe.interpolation == "CONSTANT"):
-							pass # todo
-						elif(keyframe.interpolation == "LINEAR"):
-							pass # todo
-				else:
-					# If one of the curves for this data_path doesn't contain a keyframe, bake it, regardles of the `bake` setting
-					keyframes[index_conversion[fcurve.array_index]] = [
-						False, # is source of truth, false because it's baked
+			# bake values if desired
+			if(blender_animation.stf_animation.bake):
+				while(timepoint < real_timepoint - 0.001):
+					baked_values.write(serialize_float(conversion_func(index_conversion[fcurve.array_index], fcurve.evaluate(timepoint)) if conversion_func else fcurve.evaluate(timepoint), 4))
+					timepoint += 1 # bake interval
+
+			# If is real keyframe, write source of truth values
+			if(fcurve.keyframe_points[keyframe_index].co.x == real_timepoint):
+				keyframe = fcurve.keyframe_points[keyframe_index]
+				if(keyframe.interpolation == "BEZIER"):
+					left_tangent_factor = 1
+					if(prev_keyframe):
+						left_frame_offset = keyframe.co.x - prev_keyframe.co.x
+						left_tangent_factor = max(abs((keyframe.handle_left.x - keyframe.co.x) / left_frame_offset), 1)
+						
+					right_tangent_factor = 1
+					if(next_keyframe):
+						right_frame_offset = next_keyframe.co.x - keyframe.co.x
+						right_tangent_factor = max(abs((keyframe.handle_right.x - keyframe.co.x) / right_frame_offset), 1)
+
+					keyframes.append([
+						True, # is source of truth
+						keyframe.co.x, # frame number
+						"bezier", # interpolation type
+						conversion_func(index_conversion[fcurve.array_index], keyframe.co.y) if conversion_func else keyframe.co.y, #value
+						[__handle_type_to_stf.get(keyframe.handle_left_type, "split")] + list(((keyframe.handle_left - keyframe.co) / left_tangent_factor)), # left tangent type and values relative to keyframe
+						[__handle_type_to_stf.get(keyframe.handle_right_type, "split")] + list(((keyframe.handle_right - keyframe.co) / right_tangent_factor)[:]), # right tangent type and values relative to keyframe
+					])
+				elif(keyframe.interpolation == "CONSTANT"):
+					left_tangent_factor = 1
+					if(prev_keyframe):
+						left_frame_offset = keyframe.co.x - prev_keyframe.co.x
+						left_tangent_factor = max(abs((keyframe.handle_left.x - keyframe.co.x) / left_frame_offset), 1)
+
+					keyframes.append([
+						True, # is source of truth
+						keyframe.co.x, # frame number
+						"constant", # interpolation type
+						conversion_func(index_conversion[fcurve.array_index], keyframe.co.y) if conversion_func else keyframe.co.y, #value
+						[__handle_type_to_stf.get(keyframe.handle_left_type, "split")] + list(((keyframe.handle_left - keyframe.co) / left_tangent_factor)), # left tangent type and values relative to keyframe
+					])
+				elif(keyframe.interpolation == "LINEAR"):
+					keyframes.append([
+						True, # is source of truth
+						keyframe.co.x, # frame number
 						"linear", # interpolation type
-						conversion_func(index_conversion[fcurve.array_index], fcurve.evaluate(closest_timepoint)) if conversion_func else fcurve.evaluate(closest_timepoint) #value
-					]
-					"""keyframes[index_conversion[fcurve.array_index]] = {
-						"source": False,
-						"type": "linear",
-						"value": conversion_func(index_conversion[fcurve.array_index], fcurve.evaluate(closest_timepoint)) if conversion_func else fcurve.evaluate(closest_timepoint)
-					}"""
-	elif(blender_animation.stf_animation.bake and last_timepoint < max_range + 0.001):
-		# If no more keyframes are present, but the animation ends after the last_timepoint, bake if desired
-		success = True
-		closest_timepoint = last_timepoint + 1
-		for _, fcurve in fcurves.items():
-			keyframes[index_conversion[fcurve.array_index]] = [
-				False, # is source of truth, false because it's baked
-				"linear",# interpolation type
-				conversion_func(index_conversion[fcurve.array_index], fcurve.evaluate(closest_timepoint)) if conversion_func else fcurve.evaluate(closest_timepoint) #value
-			]
-	return closest_timepoint if success else None, keyframes
+						conversion_func(index_conversion[fcurve.array_index], keyframe.co.y) if conversion_func else keyframe.co.y, #value
+					])
+
+				if(blender_animation.stf_animation.bake):
+					baked_values.write(serialize_float(conversion_func(index_conversion[fcurve.array_index], keyframe.co.y) if conversion_func else keyframe.co.y, 4))
+				keyframe_index += 1
+			else:
+				# If one of the curves for this data_path doesn't contain a keyframe when the others do, bake it, regardles of the `bake` setting
+				keyframes.append([
+					False, # is source of truth, false because it's baked
+					keyframe.co.x, # frame number
+					"linear", # interpolation type
+					conversion_func(index_conversion[fcurve.array_index], fcurve.evaluate(real_timepoint)) if conversion_func else fcurve.evaluate(real_timepoint) #value
+				])
+				if(blender_animation.stf_animation.bake):
+					baked_values.write(serialize_float(conversion_func(index_conversion[fcurve.array_index], fcurve.evaluate(real_timepoint)) if conversion_func else fcurve.evaluate(real_timepoint), 4))
+
+			timepoint = real_timepoint
+
+		ret[index_conversion[fcurve.array_index]]["keyframes"] = keyframes
+		if(blender_animation.stf_animation.bake):
+			ret[index_conversion[fcurve.array_index]]["bake_interval"] = 1
+			ret[index_conversion[fcurve.array_index]]["baked"] = context.serialize_buffer(baked_values.getbuffer())
+
+	return ret
 
 
 __handle_type_to_stf = {
