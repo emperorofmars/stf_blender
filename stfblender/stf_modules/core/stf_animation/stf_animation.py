@@ -58,7 +58,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 			target_object, application_object_property_index, slot_type, fcurve_target, index_conversion, conversion_func = target_ret
 			if(not index_conversion):
 				index_conversion = []
-				for track_index in range(len(track.get("keyframes", [])[0].get("values", []))):
+				for track_index in range(len(track.get("subtracks", []))):
 					index_conversion.append(track_index)
 
 			selected_slot_link = None
@@ -89,26 +89,29 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 				if(channelbag.slot_handle == blender_slot.handle):
 					selected_channelbag = channelbag
 
-			for stf_index in range(len(index_conversion)):
-				fcurve: bpy.types.FCurve = selected_channelbag.fcurves.new(fcurve_target, index=index_conversion[stf_index])
-				for stf_keyframes in track.get("keyframes", []):
-					timepoint = stf_keyframes["frame"]
-					stf_keyframe = stf_keyframes["values"][stf_index]
+			for subtrack_index, subtrack in enumerate(track.get("subtracks", [])):
+				fcurve: bpy.types.FCurve = selected_channelbag.fcurves.new(fcurve_target, index=index_conversion[subtrack_index])
+				for stf_keyframe in subtrack.get("keyframes", []):
 					# Only import full unbaked keyframes
-					is_source_keyframe = True if stf_keyframe and len(stf_keyframe) > 1 and type(stf_keyframe[0]) == bool and stf_keyframe[0] else False
-					if(is_source_keyframe and len(stf_keyframe) == 6):
-						keyframe = fcurve.keyframe_points.insert(timepoint, stf_keyframe[1] if not conversion_func else conversion_func(stf_index, stf_keyframe[1]))
-						keyframe.handle_left.x = keyframe.co.x + stf_keyframe[2]
-						keyframe.handle_left.y = keyframe.co.y + stf_keyframe[3]
-						keyframe.handle_right.x = keyframe.co.x + stf_keyframe[4]
-						keyframe.handle_right.y = keyframe.co.y + stf_keyframe[5]
-						keyframe.handle_left_type = "FREE"
-						keyframe.handle_right_type = "FREE"
-					elif(is_source_keyframe and len(stf_keyframe) == 2):
-						keyframe = fcurve.keyframe_points.insert(timepoint, stf_keyframe[1] if not conversion_func else conversion_func(stf_index, stf_keyframe[1]))
+					is_source_keyframe = stf_keyframe[0]
+					if(is_source_keyframe):
+						timepoint = stf_keyframe[1]
+						interpolation_type = stf_keyframe[2]
+						value = stf_keyframe[3]
+						if(interpolation_type == "bezier"):
+							keyframe = fcurve.keyframe_points.insert(timepoint, value if not conversion_func else conversion_func(subtrack_index, value))
+							keyframe.handle_left.x = keyframe.co.x + stf_keyframe[4][1]
+							keyframe.handle_left.y = keyframe.co.y + stf_keyframe[4][2]
+							keyframe.handle_right.x = keyframe.co.x + stf_keyframe[5][1]
+							keyframe.handle_right.y = keyframe.co.y + stf_keyframe[5][2]
+							keyframe.handle_left_type = __handle_type_to_blender[stf_keyframe[4][0]]
+							keyframe.handle_right_type = __handle_type_to_blender[stf_keyframe[5][0]]
+						elif(interpolation_type == "constant"):
+							keyframe = fcurve.keyframe_points.insert(timepoint, value if not conversion_func else conversion_func(subtrack_index, value))
+						elif(interpolation_type == "linear"):
+							keyframe = fcurve.keyframe_points.insert(timepoint, value if not conversion_func else conversion_func(subtrack_index, value))
 					# else keyframe is baked and can be ignored
-
-			fcurve.keyframe_points.handles_recalc()
+				fcurve.keyframe_points.handles_recalc()
 
 	return blender_animation
 
