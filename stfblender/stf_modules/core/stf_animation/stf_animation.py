@@ -17,7 +17,7 @@ _stf_type = "stf.animation"
 
 class STF_Animation(bpy.types.PropertyGroup):
 	exclude: bpy.props.BoolProperty(name="Exclude from STF export", default=False) # type: ignore
-	bake: bpy.props.BoolProperty(name="Bake Animation on Export", default=False) # type: ignore
+	bake: bpy.props.BoolProperty(name="Bake Animation on Export", default=True) # type: ignore
 	fps_override: bpy.props.BoolProperty(name="FPS Override", default=False) # type: ignore
 	fps: bpy.props.FloatProperty(name="FPS", default=30) # type: ignore
 
@@ -45,7 +45,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 		blender_animation.frame_start = json_resource["range"][0]
 		blender_animation.frame_end = json_resource["range"][1]
 
-	blender_animation.stf_animation.bake = json_resource.get("bake_on_export", False)
+	blender_animation.stf_animation.bake = json_resource.get("bake_on_export", True)
 
 	# All of this is a mess
 
@@ -62,8 +62,6 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 					index_conversion.append(track_index)
 
 			selected_slot_link = None
-			selected_channelbag = None
-
 			for slot_link in blender_animation.slot_links:
 				if(slot_link.target == target_object and slot_link.datablock_index == application_object_property_index):
 					for slot in blender_animation.slots:
@@ -73,6 +71,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 				if(selected_slot_link):
 					break
 
+			selected_channelbag = None
 			if(not selected_slot_link):
 				blender_slot = blender_animation.slots.new(slot_type, target_object.name + " - " + slot_type)
 				selected_slot_link = blender_animation.slot_links.add()
@@ -88,6 +87,9 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 			for channelbag in strip.channelbags:
 				if(channelbag.slot_handle == blender_slot.handle):
 					selected_channelbag = channelbag
+					break
+
+			# Yay we can finally deal with curves
 
 			for subtrack_index, subtrack in enumerate(track.get("subtracks", [])):
 				fcurve: bpy.types.FCurve = selected_channelbag.fcurves.new(fcurve_target, index=index_conversion[subtrack_index])
@@ -110,6 +112,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 							keyframe = fcurve.keyframe_points.insert(timepoint, value if not conversion_func else conversion_func(subtrack_index, value))
 						elif(interpolation_type == "linear"):
 							keyframe = fcurve.keyframe_points.insert(timepoint, value if not conversion_func else conversion_func(subtrack_index, value))
+						# todo else warn about unsupported keyframe type
 					# else keyframe is baked and can be ignored
 				fcurve.keyframe_points.handles_recalc()
 
@@ -168,7 +171,7 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 					if(selected_slot_link):
 						# Yay we can finally deal with curves
 
-						# Sort collect curves belonging together. I.e. curves animating the x, y, z positions under the same data_path
+						# Collect curves belonging together. I.e. curves animating the x, y, z positions under the same data_path
 						kurwas: dict[str, dict[int, bpy.types.FCurve]] = dict()
 						for fcurve in channelbag.fcurves:
 							if(fcurve.data_path not in kurwas):
