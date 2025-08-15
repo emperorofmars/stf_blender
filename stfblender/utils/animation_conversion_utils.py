@@ -12,8 +12,8 @@ translation_index_conversion_to_stf = [0, 2, 1]
 def convert_translation_to_stf(index: int, value: float) -> float:
 	match(index):
 		case 0: return value
-		case 1: return -value
-		case 2: return value
+		case 1: return value
+		case 2: return -value
 	return None
 
 translation_bone_index_conversion_to_stf = [0, 1, 2]
@@ -68,8 +68,8 @@ translation_index_conversion_to_blender = [0, 2, 1]
 def convert_translation_to_blender(index: int, value: float) -> float:
 	match(index):
 		case 0: return value
-		case 1: return -value
-		case 2: return value
+		case 1: return value
+		case 2: return -value
 	return None
 
 translation_bone_index_conversion_to_blender = [0, 1, 2]
