@@ -58,6 +58,7 @@ def stf_to_blender_matrix(trs: list[list[float]]) -> mathutils.Matrix:
 	return mathutils.Matrix.LocRotScale(stf_translation_to_blender(trs[0]), stf_rotation_to_blender(trs[1]), stf_scale_to_blender(trs[2]))
 
 def trs_to_blender_object(trs: list[list[float]], blender_object: bpy.types.Object):
+	blender_object.rotation_mode = "QUATERNION"
 	matrix_local = stf_to_blender_matrix(trs)
 	if(blender_object.parent):
 		match(blender_object.parent_type):
