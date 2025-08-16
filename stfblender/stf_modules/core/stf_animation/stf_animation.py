@@ -39,7 +39,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 		blender_animation.stf_animation.fps_override = True
 		blender_animation.stf_animation.fps = fps
 
-	blender_animation.use_cyclic = json_resource.get("loop", False)
+	blender_animation.use_cyclic = False if json_resource.get("loop", "none") == "none" else True
 	if("range" in json_resource):
 		blender_animation.use_frame_range = True
 		blender_animation.frame_start = json_resource["range"][0]
@@ -155,7 +155,7 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 	ret = {
 		"type": _stf_type,
 		"name": blender_animation.stf_info.stf_name if blender_animation.stf_info.stf_name_source_of_truth else blender_animation.name,
-		"loop": blender_animation.use_cyclic,
+		"loop": "cycle" if blender_animation.use_cyclic else "none", # todo create ui for this setting
 		"fps": bpy.context.scene.render.fps if not blender_animation.stf_animation.fps_override else blender_animation.animation.stf_fps,
 		"bake_on_export": blender_animation.stf_animation.bake
 	}
@@ -328,12 +328,13 @@ def __serialize_subtracks(context: STF_ExportContext, blender_animation: bpy.typ
 __handle_type_to_stf = {
 	"FREE": "split",
 	"ALIGNED": "aligned",
-	"AUTO_CLAMPED": "aligned",
-	"AUTOMATIC": "aligned",
+	"AUTO_CLAMPED": "auto",
+	"AUTOMATIC": "auto",
 }
 __handle_type_to_blender = {
 	"split": "FREE",
 	"aligned": "ALIGNED",
+	"auto": "AUTOMATIC"
 }
 
 
