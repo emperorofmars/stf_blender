@@ -23,7 +23,7 @@ def draw_stf_id_ui(layout: bpy.types.UILayout, context: bpy.types.Context, blend
 	if(stf_prop_holder.stf_id):
 		row = layout.row(align=True)
 		row.prop(stf_prop_holder, "stf_id")
-		row.operator(CopyToClipboard.bl_idname, text="Copy ID")
+		row.operator(CopyToClipboard.bl_idname, text="Copy ID").text = stf_prop_holder.stf_id
 	else:
 		layout.operator(set_id_op)
 

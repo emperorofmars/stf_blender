@@ -321,7 +321,7 @@ def __serialize_subtracks(context: STF_ExportContext, blender_animation: bpy.typ
 				if(blender_animation.stf_animation.bake):
 					baked_values.write(serialize_float(conversion_func(index_conversion[fcurve.array_index], fcurve.evaluate(real_timepoint)) if conversion_func else fcurve.evaluate(real_timepoint), 4))
 
-			timepoint = real_timepoint
+			timepoint = real_timepoint + 1
 
 		ret[index_conversion[fcurve.array_index]]["keyframes"] = keyframes
 		if(blender_animation.stf_animation.bake):
