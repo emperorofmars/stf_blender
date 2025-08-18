@@ -7,7 +7,7 @@ _stf_type = "my_custom.namespaced.squeak_component"
 _blender_property_name = "my_custom_namespaced_squeak_component"
 
 
-class SqueakComponent(stfblender.utils.component_utils.STF_BlenderComponentBase):
+class SqueakComponent(stfblender.base.stf_module_component.STF_BlenderComponentBase):
 	squeak: bpy.props.BoolProperty(name="Squeak", default=True) # type: ignore
 
 
@@ -24,13 +24,13 @@ def _stf_import(context: stfblender.importer.stf_import_context.STF_ImportContex
 	return component
 
 
-def _stf_export(context: stfblender.exporter.stf_export_context.STF_ExportContext, application_object: SqueakComponent, context_object: any) -> tuple[dict, str]:
-	ret = stfblender.utils.component_utils.export_component_base(_stf_type, application_object)
-	ret["squeak"] = application_object.squeak
-	return ret, application_object.stf_id
+def _stf_export(context: stfblender.exporter.stf_export_context.STF_ExportContext, component: SqueakComponent, context_object: any) -> tuple[dict, str]:
+	ret = stfblender.utils.component_utils.export_component_base(context, _stf_type, component)
+	ret["squeak"] = component.squeak
+	return ret, component.stf_id
 
 
-class MyCustomSTFSqueakComponentModule(stfblender.utils.component_utils.STF_BlenderComponentModule):
+class MyCustomSTFSqueakComponentModule(stfblender.base.stf_module_component.STF_BlenderComponentModule):
 	stf_type = _stf_type
 	stf_kind = "component"
 	understood_application_types = [SqueakComponent]

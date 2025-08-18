@@ -8,10 +8,10 @@ _stf_type = "my_custom.namespaced.brush"
 
 def _stf_import(context: stfblender.importer.stf_import_context.STF_ImportContext, json_resource: dict, id: str, context_object: any) -> any:
 	application_object = bpy.data.brushes.new(json_resource.get("name", "My Custom Brush"))
-	application_object.stf_id = id
+	application_object.stf_info.stf_id = id
 	if(json_resource.get("name")):
-		application_object.stf_name = json_resource["name"]
-		application_object.stf_name_source_of_truth = True
+		application_object.stf_info.stf_name = json_resource["name"]
+		application_object.stf_info.stf_name_source_of_truth = True
 
 	# TODO Do most of the import
 
@@ -24,15 +24,15 @@ def _stf_export(context: stfblender.exporter.stf_export_context.STF_ExportContex
 
 	json_resource = {
 		"type": _stf_type,
-		"name": application_object.stf_name if application_object.stf_name_source_of_truth else application_object.name,
+		"name": application_object.stf_info.stf_name if application_object.stf_info.stf_name_source_of_truth else application_object.name,
 	}
 
 	# TODO Do most of the export
 
-	return json_resource, application_object.stf_id
+	return json_resource, application_object.stf_info.stf_id
 
 
-class CustomSTFBrushModule(stfblender.core.stf_module.STF_Module):
+class CustomSTFBrushModule(stfblender.base.stf_module.STF_Module):
 	stf_type = _stf_type
 	stf_kind = "data"
 	like_types = ["brush", "or", "whatever"]
