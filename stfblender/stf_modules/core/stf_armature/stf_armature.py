@@ -18,7 +18,6 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	if(json_resource.get("name")):
 		blender_armature.stf_info.stf_name = json_resource["name"]
 		blender_armature.stf_info.stf_name_source_of_truth = True
-
 	tmp_hook_object: bpy.types.Object = bpy.data.objects.new("TRASH", blender_armature)
 	context.register_trash_object(tmp_hook_object)
 	bpy.context.scene.collection.objects.link(tmp_hook_object)
