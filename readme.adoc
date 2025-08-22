@@ -1,5 +1,5 @@
 = STF: Blender
-:homepage: https://github.com/emperorofmars/stf_blender
+:homepage: https://stfform.at
 :keywords: stf, 3d, fileformat, format, interchange, interoperability, blender
 :hardbreaks-option:
 :idprefix:
@@ -16,10 +16,16 @@ Intended for (not only) game development use-cases.
 
 **WIP implementation for Blender 4.4+. Do not use productively!**
 
-**https://stfform.at/[Read the Documentation!]**
+**link:./docs/user_guide.adoc[Read the User Guide!]** ⭐ **https://stfform.at/[STF Website]**
 
 == Installation
-* Download the https://github.com/emperorofmars/stf_blender/releases/latest[latest release] and add it under: `Edit` -> `Preferences` -> `Get Extensions` -> **Click on the top right most dropdown** -> `Install from Fisk...`
+=== From Repository
+Follow the steps on https://stfform.at[stfform.at]!
+
+=== Manual
+Download the https://github.com/emperorofmars/stf_blender/releases/latest[latest release] and add it under: `Edit` -> `Preferences` -> `Get Extensions` -> **Click on the top right most dropdown** -> `Install from Fisk...`
+
+---
 
 Also install the https://extensions.blender.org/add-ons/slot-link/[Slot Link] extension if you want to import/export animations.
 
