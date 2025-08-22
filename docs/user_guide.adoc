@@ -16,10 +16,10 @@ endif::[]
 
 === Export - Import
 
-An STF asset is represented by a Blender Collection. By default, that is the Scene Collection.
+An STF asset is represented by a Blender Collection. By default the Scene Collection is used.
 image:scene_collection.png[width=50%]
 
-If you wish to use another one, select it and check `Use as STF Prefab`.
+If you wish to use another one, select it and check `Use as STF Prefab` in the `STF Editor` panel.
 If you click the `Set as STF export root` button, it will be automatically selected on export.
 image:collection.png[width=50%]
 
