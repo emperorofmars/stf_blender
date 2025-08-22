@@ -23,7 +23,7 @@ Intended for (not only) game development use-cases.
 Follow the steps on https://stfform.at[stfform.at]!
 
 === Manual
-Download the https://github.com/emperorofmars/stf_blender/releases/latest[latest release] and add it under: `Edit` -> `Preferences` -> `Get Extensions` -> **Click on the top right most dropdown** -> `Install from Fisk...`
+Download the https://github.com/emperorofmars/stf_blender/releases/latest[latest release] and add it under: `Edit` -> `Preferences` -> `Get Extensions` -> **Click on the top right most dropdown** -> `Install from Disk...`
 
 ---
 
