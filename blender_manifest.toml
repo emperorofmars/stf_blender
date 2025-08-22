@@ -89,5 +89,6 @@ paths_exclude_pattern = [
 	"/readme.adoc",
 	"/LICENSE-APACHE2",
 	"/LICENSE-MIT",
-	"/packages/",
+	"/packages",
+	"/docs",
 ]
