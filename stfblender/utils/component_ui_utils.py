@@ -1,12 +1,23 @@
 import bpy
 
-from .component_utils import STF_Component_Ref, find_component_module, get_component_modules
+from ..base.stf_module_component import STF_Component_Ref
+from ..base.stf_registry import get_component_modules
+from .component_utils import find_component_module
 from .minsc import CopyToClipboard
 
 
 class STFDrawComponentList(bpy.types.UIList):
 	"""List of STF components"""
 	bl_idname = "COLLECTION_UL_stf_component_list"
+
+	def draw_item(self, context, layout, data, item, icon, active_data, active_propname):
+		layout.label(text=item.stf_type)
+		layout.label(text=item.stf_id)
+
+
+class STFDrawInstanceComponentList(bpy.types.UIList):
+	"""List of STF component instances"""
+	bl_idname = "COLLECTION_UL_stf_instance_component_list"
 
 	def draw_item(self, context, layout, data, item, icon, active_data, active_propname):
 		layout.label(text=item.stf_type)
@@ -129,7 +140,7 @@ def draw_instance_standin_components_ui(
 	row = layout.row()
 	if(len(stf_modules) > 0):
 		row = layout.row()
-		row.template_list(STFDrawComponentList.bl_idname, "", ref_holder, "stf_components", ref_holder, "stf_active_component_index")
+		row.template_list(STFDrawInstanceComponentList.bl_idname, "", ref_holder, "stf_components", ref_holder, "stf_active_component_index")
 		if(len(ref_holder.stf_components) > ref_holder.stf_active_component_index):
 			component_ref = ref_holder.stf_components[ref_holder.stf_active_component_index]
 

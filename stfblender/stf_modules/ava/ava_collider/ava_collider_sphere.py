@@ -61,6 +61,8 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 	load_json_button.component_id = component.stf_id
 
 
+"""Bone instance handling"""
+
 def _draw_component_instance(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: AVA_Collider_Sphere):
 	layout.prop(component, "radius")
 	layout.prop(component, "offset_position")
@@ -75,12 +77,14 @@ def _set_component_instance_standin(context: bpy.types.Context, component_ref: S
 	standin_component.offset_position = component.offset_position
 
 
-def _serialize_component_instance_standin_func(context: bpy.types.Context, component_ref: STF_Component_Ref, standin_component: STF_BlenderComponentModule, context_object: any) -> dict:
+def _serialize_component_instance_standin_func(context: STF_ExportContext, component_ref: STF_Component_Ref, standin_component: AVA_Collider_Sphere, context_object: any) -> dict:
 	return _serialize_json(standin_component)
 
-def _parse_component_instance_standin_func(context: bpy.types.Context, json_resource: dict, component_ref: STF_Component_Ref, standin_component: STF_BlenderComponentModule, context_object: any):
+def _parse_component_instance_standin_func(context: STF_ImportContext, json_resource: dict, component_ref: STF_Component_Ref, standin_component: AVA_Collider_Sphere, context_object: any):
 	_parse_json(standin_component, json_resource)
 
+
+"""Import export"""
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
 	component_ref, component = add_component(context_object, _blender_property_name, stf_id, _stf_type)
@@ -97,6 +101,8 @@ def _stf_export(context: STF_ExportContext, component: AVA_Collider_Sphere, cont
 	ret["offset_position"] = blender_translation_to_stf(offset_position)
 	return ret, component.stf_id
 
+
+"""Animation"""
 
 def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: any, application_object_property_index: int, data_path: str) -> tuple[list[str], Callable[[int, any], any], list[int]]:
 	if(match := re.search(r"^ava_collider_sphere\[(?P<component_index>[\d]+)\].enabled", data_path)):

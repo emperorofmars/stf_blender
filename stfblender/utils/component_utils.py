@@ -1,22 +1,7 @@
 import bpy
 
 from ..base.stf_module_component import STF_BlenderComponentModule, STF_Component_Ref, STF_BlenderComponentOverride
-from ..base.stf_registry import get_stf_modules
 from ..utils.id_utils import ensure_stf_id
-
-
-def get_component_modules(filter = None) -> list[STF_BlenderComponentModule]:
-	ret = []
-	for stf_module in get_stf_modules():
-		if(isinstance(stf_module, STF_BlenderComponentModule) or hasattr(stf_module, "blender_property_name") and hasattr(stf_module, "filter")):
-			if(hasattr(stf_module, "filter") and filter):
-				if(filter in getattr(stf_module, "filter")):
-					ret.append(stf_module)
-				else:
-					continue
-			else:
-				ret.append(stf_module)
-	return ret
 
 
 def find_component_module(stf_modules: list[STF_BlenderComponentModule], stf_type: str) -> STF_BlenderComponentModule:

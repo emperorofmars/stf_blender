@@ -31,6 +31,8 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 			layout.prop_search(component, "target_bone", component.target_object.data, "bones")
 
 
+"""Import export"""
+
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
 	component_ref, component = add_component(context_object, _blender_property_name, stf_id, _stf_type)
 	import_component_base(component, json_resource)
@@ -40,6 +42,8 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 		armature = context_object.id_data
 		bone_name = context_object.name
 		component_id = component_ref.stf_id
+
+		# let _get_component() -> STFEXP_Constraint_Twist
 		if(type(context_object) == bpy.types.Bone):
 			# Between bone-edit and object mode, references get destroyed, so we have to find the bone by name. Because Blender -.-
 			def _get_component() -> STFEXP_Constraint_Twist:
@@ -94,6 +98,43 @@ def _stf_export(context: STF_ExportContext, component: STFEXP_Constraint_Twist, 
 	return ret, component.stf_id
 
 
+"""Bone instance handling"""
+
+def _draw_component_instance(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: STFEXP_Constraint_Twist):
+	layout.prop(component, "weight")
+	layout.prop(component, "target_object")
+	if(component.target_object and type(component.target_object.data) == bpy.types.Armature):
+		layout.prop_search(component, "target_bone", component.target_object.data, "bones")
+
+
+def _set_component_instance_standin(context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: STFEXP_Constraint_Twist, standin_component: STFEXP_Constraint_Twist):
+	standin_component.weight = component.weight
+	standin_component.target_object = context_object
+	standin_component.target_bone = component.target_bone
+
+
+def _serialize_component_instance_standin_func(context: STF_ExportContext, component_ref: STF_Component_Ref, standin_component: STFEXP_Constraint_Twist, context_object: any) -> dict:
+	ret = {"weight": standin_component.weight }
+	if(standin_component.target_object):
+		if(type(standin_component.target_object.data) == bpy.types.Armature and standin_component.target_bone):
+			ret["target"] = [export_resource(ret, standin_component.target_object.stf_info.stf_id), "instance", export_resource(ret, standin_component.target_object.data.bones[standin_component.target_bone].stf_info.stf_id)]
+		else:
+			ret["target"] = [export_resource(ret, standin_component.target_object.stf_info.stf_id)]
+	return ret
+
+def _parse_component_instance_standin_func(context: STF_ImportContext, json_resource: dict, component_ref: STF_Component_Ref, standin_component: STFEXP_Constraint_Twist, context_object: any):
+	if("weight" in json_resource): standin_component.weight = json_resource["weight"]
+	if("target" in json_resource):
+		if(len(json_resource["target"]) > 0):
+			def _handle_target_bone():
+				standin_component.target_object = context.get_imported_resource(json_resource["target"][0])
+				if(standin_component.target_object and type(standin_component.target_object.data) == bpy.types.Armature):
+					standin_component.target_bone = context.get_imported_resource(json_resource["target"][2]).name
+			context.add_task(_handle_target_bone)
+
+
+"""Animation"""
+
 def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: any, application_object_property_index: int, data_path: str) -> tuple[list[str], Callable[[int, any], any], list[int]]:
 	if(match := re.search(r"^stfexp_constraint_twist\[(?P<component_index>[\d]+)\].weight", data_path)):
 		component = application_object.stfexp_constraint_twist[int(match.groupdict()["component_index"])]
@@ -140,6 +181,12 @@ class STF_Module_STFEXP_Constraint_Twist(STF_BlenderComponentModule):
 	single = False
 	filter = [bpy.types.Object, bpy.types.Bone]
 	draw_component_func = _draw_component
+
+	draw_component_instance_func = _draw_component_instance
+	set_component_instance_standin_func = _set_component_instance_standin
+
+	serialize_component_instance_standin_func = _serialize_component_instance_standin_func
+	parse_component_instance_standin_func = _parse_component_instance_standin_func
 
 
 register_stf_modules = [

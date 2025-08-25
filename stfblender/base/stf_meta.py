@@ -126,9 +126,7 @@ def draw_meta_editor(layout: bpy.types.UILayout, collection: bpy.types.Collectio
 	for custom_property in collection.stf_meta.custom_properties:
 		row = col.row(align=True)
 		row.prop(custom_property, "name", text="")
-		#row.separator(factor=2, type="SPACE")
 		row.prop(custom_property, "value", text="")
-		#row.separator(factor=1, type="SPACE")
 		if(not is_scene):
 			row.operator(STFRemoveMetaPropertyCollection.bl_idname, text="", icon="X")
 		else:
