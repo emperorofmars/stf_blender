@@ -225,7 +225,7 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 		return ret, blender_animation.stf_info.stf_id
 
 
-def __serialize_subtracks(context: STF_ExportContext, blender_animation: bpy.types.Action, fcurves: dict[int, bpy.types.FCurve], range: list[float], index_conversion: list[int], conversion_func: Callable[[int, any], any] = None) -> list:
+def __serialize_subtracks(context: STF_ExportContext, blender_animation: bpy.types.Action, fcurves: dict[int, bpy.types.FCurve], animation_range: list[float], index_conversion: list[int], conversion_func: Callable[[int, any], any] = None) -> list:
 	real_timepoints_set: set[float] = set()
 	# for each subtrack (i.e. the x,y,z components of a location), determine at wich times have a keyframe at any of these subtracks
 	for _, fcurve in fcurves.items():
@@ -243,18 +243,14 @@ def __serialize_subtracks(context: STF_ExportContext, blender_animation: bpy.typ
 		# let baked_values
 		if(blender_animation.stf_animation.bake):
 			baked_values = BytesIO()
+			for timepoint in range(int(animation_range[0]), int(animation_range[1] + 1)):
+				baked_values.write(serialize_float(conversion_func(index_conversion[fcurve.array_index], fcurve.evaluate(timepoint)) if conversion_func else fcurve.evaluate(timepoint), 4))
 
 		keyframe_index = 0
-		timepoint = range[0]
+		timepoint = animation_range[0]
 		for real_timepoint in real_timepoints:
 			prev_keyframe = fcurve.keyframe_points[keyframe_index - 1] if keyframe_index > 0 else None
 			next_keyframe = fcurve.keyframe_points[keyframe_index + 1] if keyframe_index + 1 < len(fcurve.keyframe_points) else None
-
-			# bake values if desired
-			if(blender_animation.stf_animation.bake):
-				while(timepoint < real_timepoint - 0.001):
-					baked_values.write(serialize_float(conversion_func(index_conversion[fcurve.array_index], fcurve.evaluate(timepoint)) if conversion_func else fcurve.evaluate(timepoint), 4))
-					timepoint += 1 # bake interval
 
 			# If is real keyframe, write source of truth values
 			if(fcurve.keyframe_points[keyframe_index].co.x == real_timepoint):
@@ -307,8 +303,6 @@ def __serialize_subtracks(context: STF_ExportContext, blender_animation: bpy.typ
 					] + left_tangent) # add the left tangent only if the interpolation of the previous keyframe makes sense for it to be added
 				# todo more interpolation types, for sure cubic & quatratic
 
-				if(blender_animation.stf_animation.bake):
-					baked_values.write(serialize_float(export_value, 4))
 				keyframe_index += 1
 			else:
 				# If one of the curves for this data_path doesn't contain a keyframe when the others do, bake it, regardles of the `bake` setting
@@ -317,9 +311,7 @@ def __serialize_subtracks(context: STF_ExportContext, blender_animation: bpy.typ
 					keyframe.co.x, # frame number
 					conversion_func(index_conversion[fcurve.array_index], fcurve.evaluate(real_timepoint)) if conversion_func else fcurve.evaluate(real_timepoint), #value
 					"linear", # interpolation type
-				]) # don't add the left tangent at all, since this is not a reak keyframe
-				if(blender_animation.stf_animation.bake):
-					baked_values.write(serialize_float(conversion_func(index_conversion[fcurve.array_index], fcurve.evaluate(real_timepoint)) if conversion_func else fcurve.evaluate(real_timepoint), 4))
+				]) # don't add the left tangent at all, since this is not a real keyframe
 
 			timepoint = real_timepoint + 1
 
