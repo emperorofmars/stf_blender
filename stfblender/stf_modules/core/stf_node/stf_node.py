@@ -77,7 +77,7 @@ def _can_handle_application_object_func(application_object: any) -> int:
 		return -1
 
 
-def _stf_export(context: STF_ExportContext, blender_object: any, context_object: any) -> tuple[dict, str]:
+def _stf_export(context: STF_ExportContext, blender_object: bpy.types.Object, context_object: bpy.types.Collection) -> tuple[dict, str]:
 	ensure_stf_id(context, blender_object)
 
 	json_resource = {
@@ -87,18 +87,10 @@ def _stf_export(context: STF_ExportContext, blender_object: any, context_object:
 
 	children = []
 	for child in blender_object.children:
-		# Child objects can be part of different collections. Only if none of its collections are enabled, do not export it.
-		object_exists = False
 		for collection in child.users_collection:
-			for layer_collection in bpy.context.view_layer.layer_collection.children:
-				if(collection.name == layer_collection.name):
-					if(not layer_collection.exclude):
-						object_exists = True
-						break
-			if(object_exists): break
-
-		if(object_exists and type(child) is bpy.types.Object):
-			children.append(context.serialize_resource(child, module_kind="node"))
+			if(collection == context_object):
+				children.append(context.serialize_resource(child, module_kind="node"))
+				break # break inner loop
 
 	json_resource["children"] = children
 
