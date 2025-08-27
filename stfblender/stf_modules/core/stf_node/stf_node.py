@@ -1,4 +1,5 @@
 import bpy
+import mathutils
 
 from ....base.stf_module import STF_Module
 from ....importer.stf_import_context import STF_ImportContext
@@ -35,31 +36,34 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	for collection in blender_object.users_collection:
 		collection.objects.unlink(blender_object)
 
+	blender_object.rotation_mode = "QUATERNION"
+
 	context_object.objects.link(blender_object)
+
+	matrix_local = trs_utils.stf_to_blender_matrix(json_resource["trs"])
+
+	def _handle_parenting():
+		if(blender_object.parent):
+			if("parent_binding" in json_resource and json_resource["parent_binding"] and len(json_resource["parent_binding"]) == 3):
+				bone: bpy.types.Bone = blender_object.parent.data.bones[(context.get_imported_resource(json_resource["parent_binding"][2])).name]
+				blender_object.parent_type = "BONE"
+				blender_object.parent_bone = bone.name
+				blender_object.matrix_basis = blender_object.parent.matrix_basis @ matrix_local
+				blender_object.matrix_parent_inverse = (blender_object.parent.matrix_basis @ mathutils.Matrix.Translation(bone.tail_local - bone.head_local) @ bone.matrix_local).inverted_safe()
+			else:
+				blender_object.parent_type = "OBJECT"
+				blender_object.matrix_basis = blender_object.parent.matrix_basis @ matrix_local
+				blender_object.matrix_parent_inverse = (blender_object.parent.matrix_basis @ matrix_local).inverted_safe()
+		else:
+			blender_object.matrix_basis = matrix_local
+	context.add_task(_handle_parenting)
 
 	for child_id in json_resource.get("children", []):
 		child: bpy.types.Object = context.import_resource(child_id, context_object, stf_kind="node")
 		if(child):
-			child.parent_type = "OBJECT"
 			child.parent = blender_object
 		else:
 			context.report(STFReport("Invalid Child: " + str(child_id), STFReportSeverity.Error, stf_id, json_resource["type"], blender_object))
-
-	if("parent_binding" in json_resource and json_resource["parent_binding"]):
-		def _parent_binding_callback():
-
-			if(len(json_resource["parent_binding"]) == 3):
-				# TODO deal with arbitrary depths of parent bindings and prefab instance bindings eventually
-				blender_object.parent = context.get_imported_resource(json_resource["parent_binding"][0])
-				blender_object.parent_type = "BONE"
-				blender_object.parent_bone = (context.get_imported_resource(json_resource["parent_binding"][2])).name
-			else:
-				context.report(STFReport("Invalid Parent Binding Target: " + str(json_resource["parent_binding"]), STFReportSeverity.Error, stf_id, json_resource["type"], blender_object))
-		context.add_task(_parent_binding_callback)
-
-	def _trs_callback():
-		trs_utils.trs_to_blender_object(json_resource["trs"], blender_object)
-	context.add_task(_trs_callback)
 
 	if("enabled" in json_resource and json_resource["enabled"] == False):
 		blender_object.hide_render = True
@@ -89,12 +93,12 @@ def _stf_export(context: STF_ExportContext, blender_object: bpy.types.Object, co
 	for child in blender_object.children:
 		for collection in child.users_collection:
 			if(collection == context_object):
-				children.append(context.serialize_resource(child, module_kind="node"))
+				children.append(context.serialize_resource(child, context_object, module_kind="node"))
 				break # break inner loop
 
 	json_resource["children"] = children
 
-	# TODO do this in a callback and check if the referenced resources are within the exported file
+	# TODO Check if the referenced resources are within the exported file
 	def _handle_parent_binding():
 		if(blender_object.parent):
 			match(blender_object.parent_type):
