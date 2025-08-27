@@ -32,11 +32,17 @@ def stf_node_resolve_property_path_to_stf_func(context: STF_ExportContext, appli
 	return None
 
 
-def stf_node_resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: bpy.types.Object) -> tuple[any, int, any, any, list[int], Callable[[int, any], any]]:
+
+def _convert_relative_translation_to_blender(parent_location: mathutils.Vector) -> Callable:
+	def _ret(index: int, value: float) -> float:
+		return convert_translation_to_blender(index, value) + parent_location[translation_index_conversion_to_stf[index]]
+	return _ret
+
+def stf_node_resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: any) -> tuple[any, int, any, any, list[int], Callable[[int, any], any]]:
 	blender_object = context.get_imported_resource(stf_path[0])
 	match(stf_path[1]):
 		case "t":
-			return blender_object, 0, "OBJECT", "location", translation_index_conversion_to_blender, convert_translation_to_blender
+			return blender_object, 0, "OBJECT", "location", translation_index_conversion_to_blender, _convert_relative_translation_to_blender(blender_object.parent.location if blender_object.parent else mathutils.Vector())
 		case "r":
 			return blender_object, 0, "OBJECT", "rotation_quaternion", rotation_index_conversion_to_blender, convert_rotation_to_blender
 		case "r_euler":

@@ -10,7 +10,7 @@ class STF_ImportContext:
 
 	def __init__(self, state: STF_ImportState):
 		self._state: STF_ImportState = state
-		self._tasks: list[Callable] = []
+		#self._tasks: list[Callable] = []
 
 	def get_json_resource(self, stf_id: str) -> dict:
 		return self._state.get_json_resource(stf_id)

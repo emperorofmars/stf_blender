@@ -45,11 +45,11 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	def _handle_parenting():
 		if(blender_object.parent):
 			if("parent_binding" in json_resource and json_resource["parent_binding"] and len(json_resource["parent_binding"]) == 3):
-				bone: bpy.types.Bone = blender_object.parent.data.bones[(context.get_imported_resource(json_resource["parent_binding"][2])).name]
+				bone: bpy.types.Bone = context.get_imported_resource(json_resource["parent_binding"][2]).get_bone()
 				blender_object.parent_type = "BONE"
 				blender_object.parent_bone = bone.name
 				blender_object.matrix_basis = blender_object.parent.matrix_basis @ matrix_local
-				blender_object.matrix_parent_inverse = (blender_object.parent.matrix_basis @ mathutils.Matrix.Translation(bone.tail_local - bone.head_local) @ bone.matrix_local).inverted_safe()
+				blender_object.matrix_parent_inverse = (blender_object.parent.matrix_basis @ mathutils.Matrix.Translation(bone.tail_local - bone.head_local) @ bone.matrix_local).inverted_safe() # Blender why
 			else:
 				blender_object.parent_type = "OBJECT"
 				blender_object.matrix_basis = blender_object.parent.matrix_basis @ matrix_local
