@@ -1,3 +1,4 @@
+import math
 import bpy
 import mathutils
 
@@ -48,7 +49,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 				bone: bpy.types.Bone = context.get_imported_resource(json_resource["parent_binding"][2]).get_bone()
 				blender_object.parent_type = "BONE"
 				blender_object.parent_bone = bone.name
-				blender_object.matrix_basis = blender_object.parent.matrix_basis @ matrix_local
+				blender_object.matrix_basis = blender_object.parent.matrix_basis @ bone.matrix_local @ mathutils.Matrix.Rotation(math.radians(-90), 4, "X") @ matrix_local
 				blender_object.matrix_parent_inverse = (blender_object.parent.matrix_basis @ mathutils.Matrix.Translation(bone.tail_local - bone.head_local) @ bone.matrix_local).inverted_safe() # Blender why
 			else:
 				blender_object.parent_type = "OBJECT"

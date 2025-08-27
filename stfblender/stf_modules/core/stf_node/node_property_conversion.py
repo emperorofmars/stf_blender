@@ -15,6 +15,7 @@ def _convert_relative_translation_to_stf(parent_location: mathutils.Vector) -> C
 
 def stf_node_resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: bpy.types.Object, application_object_property_index: int, data_path: str) -> tuple[list[str], Callable[[int, any], any], list[int]]:
 	if(match := re.search(r"^location", data_path)):
+		# todo handle bone parents
 		return [application_object.stf_info.stf_id, "t"], _convert_relative_translation_to_stf(application_object.parent.location if application_object.parent else mathutils.Vector()), translation_index_conversion_to_stf
 
 	if(match := re.search(r"^rotation_quaternion", data_path)):
@@ -42,6 +43,7 @@ def stf_node_resolve_stf_property_to_blender_func(context: STF_ImportContext, st
 	blender_object = context.get_imported_resource(stf_path[0])
 	match(stf_path[1]):
 		case "t":
+			# todo handle bone parents
 			return blender_object, 0, "OBJECT", "location", translation_index_conversion_to_blender, _convert_relative_translation_to_blender(blender_object.parent.location if blender_object.parent else mathutils.Vector())
 		case "r":
 			return blender_object, 0, "OBJECT", "rotation_quaternion", rotation_index_conversion_to_blender, convert_rotation_to_blender

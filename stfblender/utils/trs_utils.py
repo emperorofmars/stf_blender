@@ -1,3 +1,4 @@
+import math
 import bpy
 import mathutils
 
@@ -29,7 +30,10 @@ def blender_uv_to_stf(blender_vec: list[float]) -> list[float]:
 
 def blender_object_to_trs(blender_object: bpy.types.Object) -> list[list[float]]:
 	if(blender_object.parent):
-		t, r, s = (blender_object.parent.matrix_world.inverted_safe() @ blender_object.matrix_world).decompose()
+		if(blender_object.parent_type == "OBJECT"):
+			t, r, s = (blender_object.parent.matrix_world.inverted_safe() @ blender_object.matrix_world).decompose()
+		elif(blender_object.parent_type == "BONE" and blender_object.parent_bone):
+			t, r, s = ((blender_object.parent.matrix_world @ (blender_object.parent.data.bones[blender_object.parent_bone].matrix_local @ mathutils.Matrix.Rotation(math.radians(-90), 4, "X"))).inverted_safe() @ blender_object.matrix_world).decompose()
 	else:
 		t, r, s = blender_object.matrix_world.decompose()
 
