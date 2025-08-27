@@ -139,7 +139,7 @@ class STF_Module_STF_Node(STF_Module):
 	get_components_func = get_components_from_object
 
 	understood_application_property_path_types = [bpy.types.Object]
-	understood_application_property_path_parts = ["location", "rotation_quaternion", "scale", "hide_render"]
+	understood_application_property_path_parts = ["location", "rotation_quaternion", "rotation_euler", "scale", "hide_render"]
 	resolve_property_path_to_stf_func = stf_node_resolve_property_path_to_stf_func
 	resolve_stf_property_to_blender_func = stf_node_resolve_stf_property_to_blender_func
 

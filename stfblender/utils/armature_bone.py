@@ -10,5 +10,5 @@ class ArmatureBone:
 	def get_bone(self) -> bpy.types.Bone:
 		return self.armature.bones[self.name]
 
-	def get_edit_bone(self) -> bpy.types.Bone:
+	def get_edit_bone(self) -> bpy.types.EditBone:
 		return self.armature.edit_bones[self.name]

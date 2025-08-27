@@ -13,6 +13,9 @@ def stf_node_resolve_property_path_to_stf_func(context: STF_ExportContext, appli
 	if(match := re.search(r"^rotation_quaternion", data_path)):
 		return [application_object.stf_info.stf_id, "r"], convert_blender_rotation_to_stf, rotation_index_conversion_to_stf
 
+	if(match := re.search(r"^rotation_euler", data_path)):
+		return [application_object.stf_info.stf_id, "r_euler"], convert_translation_to_stf, translation_index_conversion_to_stf
+
 	if(match := re.search(r"^scale", data_path)):
 		return [application_object.stf_info.stf_id, "s"], convert_scale_to_stf, scale_index_conversion_to_stf
 
@@ -29,6 +32,8 @@ def stf_node_resolve_stf_property_to_blender_func(context: STF_ImportContext, st
 			return blender_object, 0, "OBJECT", "location", translation_index_conversion_to_blender, convert_translation_to_blender
 		case "r":
 			return blender_object, 0, "OBJECT", "rotation_quaternion", rotation_index_conversion_to_blender, convert_rotation_to_blender
+		case "r_euler":
+			return blender_object, 0, "OBJECT", "rotation_euler", translation_index_conversion_to_blender, convert_translation_to_blender
 		case "s":
 			return blender_object, 0, "OBJECT", "scale", scale_index_conversion_to_blender, convert_scale_to_blender
 		case "instance":

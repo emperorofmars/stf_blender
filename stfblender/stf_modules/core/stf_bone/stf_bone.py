@@ -108,6 +108,9 @@ def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_o
 	if(match := re.search(r"^rotation_quaternion", data_path)):
 		return [application_object.get_bone().stf_info.stf_id, "r"], convert_bone_rotation_to_stf, rotation_bone_index_conversion_to_stf
 
+	if(match := re.search(r"^rotation_euler", data_path)):
+		return [application_object.get_bone().stf_info.stf_id, "r_euler"], convert_bone_translation_to_stf, translation_bone_index_conversion_to_stf
+
 	if(match := re.search(r"^scale", data_path)):
 		return [application_object.get_bone().stf_info.stf_id, "s"], convert_bone_scale_to_stf, scale_bone_index_conversion_to_stf
 
@@ -123,6 +126,8 @@ def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: 
 			return None, 0, "OBJECT", "pose.bones[\"" + blender_object.name + "\"].location", translation_bone_index_conversion_to_blender, convert_bone_translation_to_blender
 		case "r":
 			return None, 0, "OBJECT", "pose.bones[\"" + blender_object.name + "\"].rotation_quaternion", rotation_index_bone_conversion_to_blender, convert_bone_rotation_to_blender
+		case "r_euler":
+			return None, 0, "OBJECT", "pose.bones[\"" + blender_object.name + "\"].rotation_euler", translation_bone_index_conversion_to_blender, convert_bone_translation_to_blender
 		case "s":
 			return None, 0, "OBJECT", "pose.bones[\"" + blender_object.name + "\"].scale", scale_bone_index_conversion_to_blender, convert_bone_scale_to_blender
 		case "components":
@@ -151,7 +156,7 @@ class STF_Module_STF_Bone(STF_Module):
 	get_components_holder_func = _get_components_holder_func
 
 	understood_application_property_path_types = [ArmatureBone]
-	understood_application_property_path_parts = ["location", "rotation_quaternion", "scale"]
+	understood_application_property_path_parts = ["location", "rotation_quaternion", "rotation_euler", "scale"]
 	resolve_property_path_to_stf_func = _resolve_property_path_to_stf_func
 	resolve_stf_property_to_blender_func = _resolve_stf_property_to_blender_func
 
