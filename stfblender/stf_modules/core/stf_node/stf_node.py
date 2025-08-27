@@ -53,7 +53,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 			else:
 				blender_object.parent_type = "OBJECT"
 				blender_object.matrix_basis = blender_object.parent.matrix_basis @ matrix_local
-				blender_object.matrix_parent_inverse = (blender_object.parent.matrix_basis @ matrix_local).inverted_safe()
+				blender_object.matrix_parent_inverse = blender_object.parent.matrix_basis.inverted_safe()
 		else:
 			blender_object.matrix_basis = matrix_local
 	context.add_task(_handle_parenting)
