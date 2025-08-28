@@ -7,16 +7,20 @@ from ....importer.stf_import_context import STF_ImportContext
 from ....utils.animation_conversion_utils import *
 
 
-def _convert_relative_translation_to_stf(parent_location: mathutils.Vector) -> Callable:
+def _convert_relative_translation_to_stf(application_object: bpy.types.Object) -> Callable:
+	parent_location = mathutils.Vector()
+	if(application_object.parent_type == "OBJECT" and application_object.parent):
+		parent_location = application_object.parent.location
+	elif(application_object.parent_type == "BONE" and application_object.parent and application_object.parent_bone):
+		parent_location = application_object.matrix_parent_inverse.inverted_safe().translation
 	def _ret(index: int, value: float) -> float:
 		return convert_translation_to_stf(index, value - parent_location[translation_index_conversion_to_blender[index]])
 	return _ret
 
-
 def stf_node_resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: bpy.types.Object, application_object_property_index: int, data_path: str) -> tuple[list[str], Callable[[int, any], any], list[int]]:
 	if(match := re.search(r"^location", data_path)):
 		# todo handle bone parents
-		return [application_object.stf_info.stf_id, "t"], _convert_relative_translation_to_stf(application_object.parent.location if application_object.parent else mathutils.Vector()), translation_index_conversion_to_stf
+		return [application_object.stf_info.stf_id, "t"], _convert_relative_translation_to_stf(application_object), translation_index_conversion_to_stf
 
 	if(match := re.search(r"^rotation_quaternion", data_path)):
 		return [application_object.stf_info.stf_id, "r"], convert_blender_rotation_to_stf, rotation_index_conversion_to_stf
@@ -33,10 +37,14 @@ def stf_node_resolve_property_path_to_stf_func(context: STF_ExportContext, appli
 	return None
 
 
-
-def _convert_relative_translation_to_blender(parent_location: mathutils.Vector) -> Callable:
+def _convert_relative_translation_to_blender(application_object: bpy.types.Object) -> Callable:
+	parent_location = mathutils.Vector()
+	if(application_object.parent_type == "OBJECT" and application_object.parent):
+		parent_location = application_object.parent.location
+	elif(application_object.parent_type == "BONE" and application_object.parent and application_object.parent_bone):
+		parent_location = application_object.matrix_parent_inverse.inverted_safe().translation
 	def _ret(index: int, value: float) -> float:
-		return convert_translation_to_blender(index, value) + parent_location[translation_index_conversion_to_stf[index]]
+		return convert_translation_to_stf(index, value) + parent_location[translation_index_conversion_to_blender[index]]
 	return _ret
 
 def stf_node_resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: any) -> tuple[any, int, any, any, list[int], Callable[[int, any], any]]:
@@ -44,7 +52,7 @@ def stf_node_resolve_stf_property_to_blender_func(context: STF_ImportContext, st
 	match(stf_path[1]):
 		case "t":
 			# todo handle bone parents
-			return blender_object, 0, "OBJECT", "location", translation_index_conversion_to_blender, _convert_relative_translation_to_blender(blender_object.parent.location if blender_object.parent else mathutils.Vector())
+			return blender_object, 0, "OBJECT", "location", translation_index_conversion_to_blender, _convert_relative_translation_to_blender(blender_object)
 		case "r":
 			return blender_object, 0, "OBJECT", "rotation_quaternion", rotation_index_conversion_to_blender, convert_rotation_to_blender
 		case "r_euler":
