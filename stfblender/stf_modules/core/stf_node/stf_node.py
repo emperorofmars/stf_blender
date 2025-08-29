@@ -48,7 +48,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 				pose_bone = blender_object.parent.pose.bones[bone.name]
 				blender_object.parent_type = "BONE"
 				blender_object.parent_bone = bone.name
-				blender_object.matrix_parent_inverse = (blender_object.parent.matrix_world @ pose_bone.matrix @ mathutils.Matrix.Translation(bone.tail_local - bone.head_local)).inverted_safe() # Blender why
+				blender_object.matrix_parent_inverse = (blender_object.parent.matrix_world @ mathutils.Matrix.Translation(pose_bone.tail - pose_bone.head) @ pose_bone.matrix).inverted_safe() # Blender why
 				blender_object.matrix_world = blender_object.parent.matrix_world @ pose_bone.matrix @ mathutils.Matrix.Rotation(math.radians(-90), 4, "X") @ matrix_local # Blender why
 			else:
 				blender_object.parent_type = "OBJECT"
