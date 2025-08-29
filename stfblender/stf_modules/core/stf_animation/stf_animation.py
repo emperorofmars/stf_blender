@@ -90,48 +90,147 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 					break
 
 			# Yay we can finally deal with curves
-
-			# todo handle subtrack values in one go
-
-			for subtrack_index, subtrack in enumerate(track.get("subtracks", [])):
-				fcurve: bpy.types.FCurve = selected_channelbag.fcurves.new(fcurve_target, index=index_conversion[subtrack_index])
-				for stf_keyframe in subtrack.get("keyframes", []):
-					# Only import full unbaked keyframes
-					is_source_keyframe = stf_keyframe[0]
-					if(is_source_keyframe):
-						timepoint = stf_keyframe[1]
-						value = stf_keyframe[2]
-						interpolation_type = stf_keyframe[3]
-						if(interpolation_type == "bezier"):
-							keyframe = fcurve.keyframe_points.insert(timepoint, value if not conversion_func else conversion_func(subtrack_index, value))
-							keyframe.interpolation = "BEZIER"
-							keyframe.handle_right_type = __handle_type_to_blender[stf_keyframe[4]]
-							keyframe.handle_right.x = keyframe.co.x + stf_keyframe[5][0]
-							keyframe.handle_right.y = (value + stf_keyframe[5][1]) if not conversion_func else conversion_func(subtrack_index, value + stf_keyframe[5][1])
-							
-							if(len(stf_keyframe) > 6):
-								keyframe.handle_left_type = __handle_type_to_blender[stf_keyframe[4]]
-								keyframe.handle_left.x = keyframe.co.x + stf_keyframe[6][0]
-								keyframe.handle_left.y = (value + stf_keyframe[6][1]) if not conversion_func else conversion_func(subtrack_index, value + stf_keyframe[6][1])
-						elif(interpolation_type == "constant"):
-							keyframe = fcurve.keyframe_points.insert(timepoint, value if not conversion_func else conversion_func(subtrack_index, value))
-							keyframe.interpolation = "CONSTANT"
-							if(len(stf_keyframe) > 4):
-								keyframe.handle_left_type = "ALIGNED"
-								keyframe.handle_left.x = keyframe.co.x + stf_keyframe[4][0]
-								keyframe.handle_left.y = (value + stf_keyframe[4][1]) if not conversion_func else conversion_func(subtrack_index, value + stf_keyframe[4][1])
-						elif(interpolation_type == "linear"):
-							keyframe = fcurve.keyframe_points.insert(timepoint, value if not conversion_func else conversion_func(subtrack_index, value))
-							keyframe.interpolation = "LINEAR"
-							if(len(stf_keyframe) > 4):
-								keyframe.handle_left_type = "ALIGNED"
-								keyframe.handle_left.x = keyframe.co.x + stf_keyframe[4][0]
-								keyframe.handle_left.y = (value + stf_keyframe[4][1]) if not conversion_func else conversion_func(subtrack_index, value + stf_keyframe[4][1])
-						# todo else warn about unsupported keyframe type
-					# else keyframe is baked and can be ignored
-				fcurve.keyframe_points.handles_recalc()
+			__parse_subtracks(track, selected_channelbag, fcurve_target, index_conversion, conversion_func)
 
 	return blender_animation
+
+"""
+def __parse_subtracks(track: dict, selected_channelbag: bpy.types.ActionChannelbag, fcurve_target: any, index_conversion: list[int], conversion_func: Callable[[list[float]], list[float]] = None):
+	for subtrack_index, subtrack in enumerate(track.get("subtracks", [])):
+		fcurve: bpy.types.FCurve = selected_channelbag.fcurves.new(fcurve_target, index=index_conversion[subtrack_index])
+		for stf_keyframe in subtrack.get("keyframes", []):
+			# Only import full unbaked keyframes
+			is_source_keyframe = stf_keyframe[0]
+			if(is_source_keyframe):
+				timepoint = stf_keyframe[1]
+				value = stf_keyframe[2]
+				interpolation_type = stf_keyframe[3]
+				if(interpolation_type == "bezier"):
+					keyframe = fcurve.keyframe_points.insert(timepoint, value if not conversion_func else conversion_func(subtrack_index, value))
+					keyframe.interpolation = "BEZIER"
+					keyframe.handle_right_type = __handle_type_to_blender[stf_keyframe[4]]
+					keyframe.handle_right.x = keyframe.co.x + stf_keyframe[5][0]
+					keyframe.handle_right.y = (value + stf_keyframe[5][1]) if not conversion_func else conversion_func(subtrack_index, value + stf_keyframe[5][1])
+					
+					if(len(stf_keyframe) > 6):
+						keyframe.handle_left_type = __handle_type_to_blender[stf_keyframe[4]]
+						keyframe.handle_left.x = keyframe.co.x + stf_keyframe[6][0]
+						keyframe.handle_left.y = (value + stf_keyframe[6][1]) if not conversion_func else conversion_func(subtrack_index, value + stf_keyframe[6][1])
+				elif(interpolation_type == "constant"):
+					keyframe = fcurve.keyframe_points.insert(timepoint, value if not conversion_func else conversion_func(subtrack_index, value))
+					keyframe.interpolation = "CONSTANT"
+					if(len(stf_keyframe) > 4):
+						keyframe.handle_left_type = "ALIGNED"
+						keyframe.handle_left.x = keyframe.co.x + stf_keyframe[4][0]
+						keyframe.handle_left.y = (value + stf_keyframe[4][1]) if not conversion_func else conversion_func(subtrack_index, value + stf_keyframe[4][1])
+				elif(interpolation_type == "linear"):
+					keyframe = fcurve.keyframe_points.insert(timepoint, value if not conversion_func else conversion_func(subtrack_index, value))
+					keyframe.interpolation = "LINEAR"
+					if(len(stf_keyframe) > 4):
+						keyframe.handle_left_type = "ALIGNED"
+						keyframe.handle_left.x = keyframe.co.x + stf_keyframe[4][0]
+						keyframe.handle_left.y = (value + stf_keyframe[4][1]) if not conversion_func else conversion_func(subtrack_index, value + stf_keyframe[4][1])
+				# todo else warn about unsupported keyframe type
+			# else keyframe is baked and can be ignored
+		fcurve.keyframe_points.handles_recalc()
+"""
+
+# todo handle subtrack values in one go
+def __parse_subtracks(track: dict, selected_channelbag: bpy.types.ActionChannelbag, fcurve_target: any, index_conversion: list[int], conversion_func: Callable[[list[float]], list[float]] = None):
+	subtracks = track.get("subtracks", [])
+	if(len(subtracks) == 0): return
+
+	num_frames = -1
+
+	fcurves: list[bpy.types.FCurve] = [None] * len(subtracks)
+	for subtrack_index, subtrack in enumerate(subtracks):
+		if(subtrack):
+			fcurves[subtrack_index] = selected_channelbag.fcurves.new(fcurve_target, index=index_conversion[subtrack_index])
+			num_frames = len(subtrack["keyframes"]) if len(subtrack["keyframes"]) > num_frames else num_frames
+	
+	if(num_frames <= 0): return
+
+	for keyframe_index in range(num_frames):
+		value_convert: list[float] = [None] * len(index_conversion)
+		left_tangent_convert: list[float] = [0] * len(index_conversion)
+		right_tangent_convert: list[float] = [0] * len(index_conversion)
+
+		for subtrack_index, subtrack in enumerate(subtracks):
+			if(not subtrack): continue
+
+			stf_keyframe = subtrack["keyframes"][keyframe_index]
+
+			value_convert[subtrack_index] = stf_keyframe[2]
+			interpolation_type = stf_keyframe[3]
+			if(interpolation_type == "bezier"):
+				right_tangent_convert[subtrack_index] = stf_keyframe[5][1]
+				if(len(stf_keyframe) > 6):
+					left_tangent_convert[subtrack_index] = stf_keyframe[6][1]
+			elif(interpolation_type == "constant" or interpolation_type == "linear"):
+				if(len(stf_keyframe) > 4):
+					left_tangent_convert[subtrack_index] = stf_keyframe[4][1]
+
+		for i in range(len(index_conversion)):
+			left_tangent_convert[i] += value_convert[i]
+			right_tangent_convert[i] += value_convert[i]
+
+		if(conversion_func):
+			value_convert = conversion_func(value_convert)
+			left_tangent_convert = conversion_func(left_tangent_convert)
+			right_tangent_convert = conversion_func(right_tangent_convert)
+
+		# todo create keyframe
+		for subtrack_index, subtrack in enumerate(subtracks):
+			if(not subtrack): continue
+			
+			stf_keyframe = subtrack["keyframes"][keyframe_index]
+			if(not stf_keyframe[0]): continue # Not source of truth, ignore
+			
+			keyframe = fcurve.keyframe_points.insert(stf_keyframe[1], value_convert[subtrack_index[index_conversion]])
+			# todo
+
+	for fcurve in fcurves:
+		if(fcurve):
+			fcurve.keyframe_points.handles_recalc()
+
+	# todo remove below
+	"""for subtrack_index, subtrack in subtrack:
+		fcurve: bpy.types.FCurve = selected_channelbag.fcurves.new(fcurve_target, index=index_conversion[subtrack_index])
+		for stf_keyframe in subtrack.get("keyframes", []):
+			# Only import full unbaked keyframes
+			is_source_keyframe = stf_keyframe[0]
+			if(is_source_keyframe):
+				timepoint = stf_keyframe[1]
+				value = stf_keyframe[2]
+				interpolation_type = stf_keyframe[3]
+				if(interpolation_type == "bezier"):
+					keyframe = fcurve.keyframe_points.insert(timepoint, value if not conversion_func else conversion_func(subtrack_index, value))
+					keyframe.interpolation = "BEZIER"
+					keyframe.handle_right_type = __handle_type_to_blender[stf_keyframe[4]]
+					keyframe.handle_right.x = keyframe.co.x + stf_keyframe[5][0]
+					keyframe.handle_right.y = (value + stf_keyframe[5][1]) if not conversion_func else conversion_func(subtrack_index, value + stf_keyframe[5][1])
+					
+					if(len(stf_keyframe) > 6):
+						keyframe.handle_left_type = __handle_type_to_blender[stf_keyframe[4]]
+						keyframe.handle_left.x = keyframe.co.x + stf_keyframe[6][0]
+						keyframe.handle_left.y = (value + stf_keyframe[6][1]) if not conversion_func else conversion_func(subtrack_index, value + stf_keyframe[6][1])
+				elif(interpolation_type == "constant"):
+					keyframe = fcurve.keyframe_points.insert(timepoint, value if not conversion_func else conversion_func(subtrack_index, value))
+					keyframe.interpolation = "CONSTANT"
+					if(len(stf_keyframe) > 4):
+						keyframe.handle_left_type = "ALIGNED"
+						keyframe.handle_left.x = keyframe.co.x + stf_keyframe[4][0]
+						keyframe.handle_left.y = (value + stf_keyframe[4][1]) if not conversion_func else conversion_func(subtrack_index, value + stf_keyframe[4][1])
+				elif(interpolation_type == "linear"):
+					keyframe = fcurve.keyframe_points.insert(timepoint, value if not conversion_func else conversion_func(subtrack_index, value))
+					keyframe.interpolation = "LINEAR"
+					if(len(stf_keyframe) > 4):
+						keyframe.handle_left_type = "ALIGNED"
+						keyframe.handle_left.x = keyframe.co.x + stf_keyframe[4][0]
+						keyframe.handle_left.y = (value + stf_keyframe[4][1]) if not conversion_func else conversion_func(subtrack_index, value + stf_keyframe[4][1])
+				# todo else warn about unsupported keyframe type
+			# else keyframe is baked and can be ignored
+		fcurve.keyframe_points.handles_recalc()"""
 
 
 def _stf_export(context: STF_ExportContext, application_object: any, context_object: any) -> tuple[dict, str]:
@@ -268,7 +367,7 @@ def __serialize_subtracks(context: STF_ExportContext, blender_animation: bpy.typ
 	for real_timepoint in real_timepoints:
 		value_convert: list[float] = [None] * len(index_conversion)
 		left_tangent_convert: list[float] = [0] * len(index_conversion)
-		right_tangents_convert: list[float] = [0] * len(index_conversion)
+		right_tangent_convert: list[float] = [0] * len(index_conversion)
 
 		# Gather value from subtracks
 		for _, fcurve in fcurves.items():
@@ -277,7 +376,7 @@ def __serialize_subtracks(context: STF_ExportContext, blender_animation: bpy.typ
 				keyframe = fcurve.keyframe_points[keyframe_indices[fcurve.array_index]]
 				value_convert[fcurve.array_index] = keyframe.co.y
 				left_tangent_convert[fcurve.array_index] = keyframe.handle_left.y
-				right_tangents_convert[fcurve.array_index] = keyframe.handle_right.y
+				right_tangent_convert[fcurve.array_index] = keyframe.handle_right.y
 			else:
 				# If one of the curves for this data_path doesn't contain a keyframe when the others do, bake it, regardles of the `bake` setting
 				value_convert[fcurve.array_index] = fcurve.evaluate(real_timepoint)
@@ -285,7 +384,7 @@ def __serialize_subtracks(context: STF_ExportContext, blender_animation: bpy.typ
 		# Convert values
 		value_convert = conversion_func(value_convert) if conversion_func else value_convert
 		left_tangent_convert = conversion_func(left_tangent_convert) if conversion_func else left_tangent_convert
-		right_tangents_convert = conversion_func(right_tangents_convert) if conversion_func else right_tangents_convert
+		right_tangent_convert = conversion_func(right_tangent_convert) if conversion_func else right_tangent_convert
 
 		# Write keyframes for subtracks
 		for _, fcurve in fcurves.items():
@@ -318,7 +417,7 @@ def __serialize_subtracks(context: STF_ExportContext, blender_animation: bpy.typ
 					stf_keyframe += [
 						"bezier", # interpolation type
 						__handle_type_to_stf.get(keyframe.handle_right_type, "split"), # tangent type
-						[(keyframe.handle_right.x - keyframe.co.x) / right_tangent_factor, (value_convert[index_conversion[fcurve.array_index]] - right_tangents_convert[index_conversion[fcurve.array_index]]) / right_tangent_factor], # right tangent values relative to keyframe
+						[(keyframe.handle_right.x - keyframe.co.x) / right_tangent_factor, (value_convert[index_conversion[fcurve.array_index]] - right_tangent_convert[index_conversion[fcurve.array_index]]) / right_tangent_factor], # right tangent values relative to keyframe
 					]
 					if(left_tangent):
 						stf_keyframe + left_tangent
