@@ -18,12 +18,12 @@ def convert_bone_translation_to_stf(value: list[float]): return value
 
 
 # Rotation
-rotation_index_conversion_to_stf = [3, 0, 2, 1]
+rotation_index_conversion_to_stf = [1, 3, 2, 0]
 convert_blender_rotation_to_stf = trs_utils.blender_rotation_to_stf
 
-rotation_bone_index_conversion_to_stf = [3, 0, 1, 2]
-def convert_bone_rotation_to_stf(value: list[float]): return value
-
+rotation_bone_index_conversion_to_stf = [1, 2, 3, 0]
+def convert_bone_rotation_to_stf(value: list[float]):
+	return [value[1], value[2], value[3], value[0]]
 
 # Rotation Euler
 rotation_euler_index_conversion_to_stf = [0, 2, 1]
@@ -76,7 +76,7 @@ def convert_bone_translation_to_blender(index: int, value: float) -> float:
 	return value
 
 # Rotation
-rotation_index_conversion_to_blender = [1, 3, 2, 0]
+rotation_index_conversion_to_blender = [3, 0, 2, 1]
 def convert_rotation_to_blender(index: int, value: float) -> Callable[[any], any]:
 	match(index):
 		case 0: return value
@@ -85,7 +85,7 @@ def convert_rotation_to_blender(index: int, value: float) -> Callable[[any], any
 		case 3: return value
 	return None
 
-rotation_index_bone_conversion_to_blender = [1, 2, 3, 0]
+rotation_index_bone_conversion_to_blender = [3, 0, 1, 2]
 def convert_bone_rotation_to_blender(index: int, value: float) -> Callable[[any], any]:
 	return value
 

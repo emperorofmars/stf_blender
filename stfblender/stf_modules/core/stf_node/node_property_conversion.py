@@ -9,9 +9,13 @@ from ....utils.animation_conversion_utils import *
 
 def _convert_relative_translation_to_stf(application_object: bpy.types.Object) -> Callable:
 	parent_location = mathutils.Vector()
+	# todo make this more proper, deal with parent_matrix_inverse and shit
 	if(application_object.parent_type == "OBJECT" and application_object.parent):
-		parent_location = application_object.parent.location
+		parent_location = application_object.parent.matrix_world.translation + (application_object.matrix_world.translation - application_object.location)
 	elif(application_object.parent_type == "BONE" and application_object.parent and application_object.parent_bone):
+		bone: bpy.types.PoseBone = application_object.parent.pose.bones[application_object.parent_bone]
+		bone_location = mathutils.Vector((bone.matrix_basis.translation[0], bone.matrix_basis.translation[2], bone.matrix_basis.translation[1]))
+		application_object.parent.matrix_world.translation + bone_location + (application_object.matrix_world.translation - application_object.location)
 		parent_location = application_object.matrix_parent_inverse.inverted_safe().translation
 	def _ret(value: list[float]) -> float:
 		value = [value[i] - parent_location[i] for i in range(len(value))]

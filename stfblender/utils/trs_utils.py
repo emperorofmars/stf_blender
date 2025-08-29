@@ -16,7 +16,7 @@ def blender_rotation_to_stf(blender_quat: mathutils.Quaternion | list[float]) ->
 
 def blender_rotation_euler_to_stf(blender_vec: mathutils.Vector | list[float]):
 	# x,y,z -> x,z,-y
-	return [blender_vec[0], blender_vec[2], -blender_vec[1]]
+	return [blender_vec[0], -blender_vec[2], -blender_vec[1]]
 
 def blender_scale_to_stf(blender_vec: mathutils.Vector | list[float]) -> list[float]:
 	# x,y,z -> x,z,y
@@ -46,7 +46,7 @@ def stf_rotation_to_blender(quat: list[float]) -> mathutils.Quaternion:
 
 def stf_rotation_euler_to_blender(vec: list[float]) -> mathutils.Vector:
 	# x,z,-y -> x,y,z
-	return mathutils.Vector((vec[0], -vec[2], vec[1]))
+	return mathutils.Vector((vec[0], -vec[2], -vec[1]))
 
 def stf_scale_to_blender(vec: list[float]) -> mathutils.Vector:
 	# x,z,y -> x,y,z
