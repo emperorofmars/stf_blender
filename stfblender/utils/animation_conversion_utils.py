@@ -60,61 +60,33 @@ def get_component_stf_path(application_object: any, component: STF_BlenderCompon
 Import
 """
 
-# TODO
-
 # Translation
 translation_index_conversion_to_blender = [0, 2, 1]
 convert_translation_to_blender = trs_utils.stf_translation_to_blender
-"""def convert_translation_to_blender(index: int, value: float) -> float:
-	match(index):
-		case 0: return value
-		case 1: return value
-		case 2: return -value
-	return None"""
 
 translation_bone_index_conversion_to_blender = [0, 1, 2]
 def convert_bone_translation_to_blender(value: list[float]): return value
-"""def convert_bone_translation_to_blender(index: int, value: float) -> float:
-	return value"""
 
 # Rotation
 rotation_index_conversion_to_blender = [3, 0, 2, 1]
 convert_rotation_to_blender = trs_utils.stf_rotation_to_blender
-"""def convert_rotation_to_blender(index: int, value: float) -> Callable[[any], any]:
-	match(index):
-		case 0: return value
-		case 1: return value
-		case 2: return -value
-		case 3: return value
-	return None"""
+
 
 rotation_index_bone_conversion_to_blender = [3, 0, 1, 2]
 def convert_bone_rotation_to_blender(value: list[float]): return value
-"""def convert_bone_rotation_to_blender(index: int, value: float) -> Callable[[any], any]:
-	return value"""
+
 
 # Rotation Euler
 rotation_euler_index_conversion_to_blender = [0, 2, 1]
 convert_rotation_euler_to_blender = trs_utils.stf_rotation_euler_to_blender
-"""def convert_rotation_euler_to_blender(index: int, value: float) -> float:
-	match(index):
-		case 0: return value
-		case 1: return value
-		case 2: return -value
-	return None"""
 
 rotation_euler_bone_index_conversion_to_blender = [0, 1, 2]
 def convert_bone_rotation_euler_to_blender(value: list[float]): return value
-"""def convert_bone_rotation_euler_to_blender(index: int, value: float) -> float:
-	return value"""
+
 
 # Scale
 scale_index_conversion_to_blender = [0, 2, 1]
 convert_scale_to_blender = trs_utils.stf_scale_to_blender
-"""def convert_scale_to_blender(index: int, value: float) -> float:
-	return value"""
 
 scale_bone_index_conversion_to_blender = [0, 1, 2]
 def convert_bone_scale_to_blender(value: list[float]): return value
-"""def convert_bone_scale_to_blender(index: int, value: float) -> float:
-	return value"""
