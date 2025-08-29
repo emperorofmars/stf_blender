@@ -104,7 +104,7 @@ def _stf_export(context: STF_ExportContext, component: AVA_Collider_Sphere, cont
 
 """Animation"""
 
-def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: any, application_object_property_index: int, data_path: str) -> tuple[list[str], Callable[[int, any], any], list[int]]:
+def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: any, application_object_property_index: int, data_path: str) -> tuple[list[str], Callable[[list[float]], list[float]], list[int]]:
 	if(match := re.search(r"^ava_collider_sphere\[(?P<component_index>[\d]+)\].enabled", data_path)):
 		component = application_object.ava_collider_sphere[int(match.groupdict()["component_index"])]
 		component_path = get_component_stf_path(application_object, component)
@@ -113,7 +113,7 @@ def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_o
 	return None
 
 
-def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: any) -> tuple[any, int, any, any, list[int], Callable[[int, any], any]]:
+def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: any) -> tuple[any, int, any, any, list[int], Callable[[list[float]], list[float]]]:
 	blender_object = context.get_imported_resource(stf_path[0])
 	# let component_index
 	for component_index, component in enumerate(application_object.ava_collider_sphere):
@@ -121,7 +121,7 @@ def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: 
 			break
 	match(stf_path[1]):
 		case "enabled":
-			return None, 0, "OBJECT", "ava_collider_sphere[" + str(component_index) + "].enabled", 0, None
+			return None, 0, "OBJECT", "ava_collider_sphere[" + str(component_index) + "].enabled", None, None
 	return None
 
 

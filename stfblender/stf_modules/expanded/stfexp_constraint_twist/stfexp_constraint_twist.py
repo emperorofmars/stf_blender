@@ -149,7 +149,7 @@ def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_o
 	return None
 
 
-def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: any) -> tuple[any, int, any, any, list[int], Callable[[int, any], any]]:
+def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: any) -> tuple[any, int, any, any, list[int], Callable[[list[float]], list[float]]]:
 	blender_object = context.get_imported_resource(stf_path[0])
 	# let component_index
 	for component_index, component in enumerate(application_object.stfexp_constraint_twist):

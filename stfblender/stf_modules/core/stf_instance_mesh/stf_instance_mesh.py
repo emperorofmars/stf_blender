@@ -125,7 +125,7 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 	return ret, blender_object.stf_instance.stf_id
 
 
-def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: any, application_object_property_index: int, data_path: str) -> tuple[list[str], Callable[[int, any], any], list[int]]:
+def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: any, application_object_property_index: int, data_path: str) -> tuple[list[str], Callable[[list[float]], list[float]], list[int]]:
 	import re
 	match = re.search(r"^key_blocks\[\"(?P<blendshape_name>[\w. -:,]+)\"\].value", data_path)
 	if(match and "blendshape_name" in match.groupdict()):
@@ -133,7 +133,7 @@ def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_o
 
 	return None
 
-def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: any) -> tuple[any, int, any, any, list[int], Callable[[int, any], any]]:
+def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: any) -> tuple[any, int, any, any, list[int], Callable[[list[float]], list[float]]]:
 	if(len(stf_path) == 4 and stf_path[1] == "blendshape" and stf_path[3] == "value"):
 		return None, 0, "KEY", "key_blocks[\"" + stf_path[2] + "\"].value", None, None
 	return None

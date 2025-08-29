@@ -46,10 +46,10 @@ class STF_Module:
 	understood_application_property_path_parts: list[str] = []
 
 	# (Export Context, Application Object, Application Object Property Index,, Application Path) -> (List of STF Path Elements, Function to Application translate animation keys to STF, Track index conversion table)
-	resolve_property_path_to_stf_func: Callable[[any, any, int, str], tuple[list[str], Callable[[int, any], any], list[int]]]
+	resolve_property_path_to_stf_func: Callable[[any, any, int, str], tuple[list[str], Callable[[list[float]], list[float]], list[int]]]
 
 	# (Import Context, Target Application Node, List of STF Path Elements, Base Target Application Object) -> (Application Object, Application Object Property Index, Property Type, Application Path, Property Index, Function to translate STF animation keys to the Application)
-	resolve_stf_property_to_blender_func: Callable[[any, list[str], any], tuple[any, int, any, any, list[int], Callable[[int, any], any]]]
+	resolve_stf_property_to_blender_func: Callable[[any, list[str], any], tuple[any, int, any, any, list[int], Callable[[list[float]], list[float]]]]
 
 	"""
 	Handling components if applicable. `get_components_func` must be assigned if the resource supports components
