@@ -69,8 +69,7 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 	blender_bone_def: ArmatureBone = application_object
 	ensure_stf_id(context, blender_bone_def.get_bone())
 
-	blender_armature_object: bpy.types.Object = context_object
-	blender_armature: bpy.types.Armature = context_object.data
+	blender_armature: bpy.types.Armature = context_object
 
 	# Once Blender enters into edit-mode, the Bone reference will be invalidated. Access by name instead.
 	blender_bone_name = blender_bone_def.name
@@ -87,11 +86,11 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 		ret["connected"] = blender_armature.bones[blender_bone_name].use_connect
 
 	for child in blender_child_bones:
-		children.append(context.serialize_resource(child, context_object=context_object))
+		children.append(context.serialize_resource(child, context_object, "node"))
 
-	blender_bone = blender_armature.bones[blender_bone_name]
+	blender_bone: bpy.types.Bone = blender_armature.bones[blender_bone_name]
 
-	t, r, s = (blender_bone.matrix_local @ mathutils.Matrix.Rotation(math.radians(-90), 4, "X")).decompose()
+	t, r, _ = (blender_bone.matrix_local @ mathutils.Matrix.Rotation(math.radians(-90), 4, "X")).decompose()
 
 	ret["translation"] = trs_utils.blender_translation_to_stf(t)
 	ret["rotation"] = trs_utils.blender_rotation_to_stf(r)

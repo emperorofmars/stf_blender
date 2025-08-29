@@ -49,7 +49,7 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 			root_bone_definitions.append(ArmatureBone(blender_armature, blender_bone.name))
 
 	for root_bone_definition in root_bone_definitions:
-		root_bones.append(context.serialize_resource(root_bone_definition, context_object=tmp_hook_object))
+		root_bones.append(context.serialize_resource(root_bone_definition, blender_armature, "node"))
 
 	return ret, blender_armature.stf_info.stf_id
 
