@@ -13,11 +13,12 @@ def _convert_relative_translation_to_stf(application_object: bpy.types.Object) -
 		parent_location = application_object.parent.location
 	elif(application_object.parent_type == "BONE" and application_object.parent and application_object.parent_bone):
 		parent_location = application_object.matrix_parent_inverse.inverted_safe().translation
-	def _ret(index: int, value: float) -> float:
-		return convert_translation_to_stf(index, value - parent_location[translation_index_conversion_to_blender[index]])
+	def _ret(value: list[float]) -> float:
+		value = [value[i] - parent_location[i] for i in range(len(value))]
+		return convert_translation_to_stf(value)
 	return _ret
 
-def stf_node_resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: bpy.types.Object, application_object_property_index: int, data_path: str) -> tuple[list[str], Callable[[int, any], any], list[int]]:
+def stf_node_resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: bpy.types.Object, application_object_property_index: int, data_path: str) -> tuple[list[str], Callable[[list[float]], list[float]], list[int]]:
 	if(match := re.search(r"^location", data_path)):
 		# todo handle bone parents
 		return [application_object.stf_info.stf_id, "t"], _convert_relative_translation_to_stf(application_object), translation_index_conversion_to_stf
@@ -44,7 +45,7 @@ def _convert_relative_translation_to_blender(application_object: bpy.types.Objec
 	elif(application_object.parent_type == "BONE" and application_object.parent and application_object.parent_bone):
 		parent_location = application_object.matrix_parent_inverse.inverted_safe().translation
 	def _ret(index: int, value: float) -> float:
-		return convert_translation_to_stf(index, value) + parent_location[translation_index_conversion_to_blender[index]]
+		return convert_translation_to_blender(index, value) + parent_location[translation_index_conversion_to_blender[index]]
 	return _ret
 
 def stf_node_resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: any) -> tuple[any, int, any, any, list[int], Callable[[int, any], any]]:

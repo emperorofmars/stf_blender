@@ -80,7 +80,7 @@ class STF_ExportContext:
 		return self._state.serialize_buffer(data)
 
 
-	def resolve_application_property_path(self, application_object: any, application_object_property_index: int, data_path: str) -> tuple[list[str], Callable[[int, any], any], list[int]]:
+	def resolve_application_property_path(self, application_object: any, application_object_property_index: int, data_path: str) -> tuple[list[str], Callable[[list[float]], list[float]], list[int]]:
 		if(application_object == None): return None
 
 		if(data_path.startswith(".")): data_path = data_path[1:]
