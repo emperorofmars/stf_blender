@@ -99,7 +99,7 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 	return ret, stf_id
 
 
-def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: ArmatureBone, application_object_property_index: int, data_path: str) -> tuple[list[str], Callable[[any], any], list[int]]:
+def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: ArmatureBone, application_object_property_index: int, data_path: str) -> tuple[list[str], Callable[[list[float]], list[float]], list[int]]:
 	import re
 	if(match := re.search(r"^location", data_path)):
 		return [application_object.get_bone().stf_info.stf_id, "t"], convert_bone_translation_to_stf, translation_bone_index_conversion_to_stf
@@ -116,7 +116,7 @@ def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_o
 	return None
 
 
-def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: any) -> tuple[any, int, any, any, list[int], Callable[[int, any], any]]:
+def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: any) -> tuple[any, int, any, any, list[int], Callable[[list[float]], list[float]]]:
 	blender_object = context.get_imported_resource(stf_path[0])
 	if(type(blender_object) is ArmatureBone):
 		blender_object = blender_object.armature.bones[blender_object.name]

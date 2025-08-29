@@ -48,11 +48,13 @@ def _convert_relative_translation_to_blender(application_object: bpy.types.Objec
 		parent_location = application_object.parent.location
 	elif(application_object.parent_type == "BONE" and application_object.parent and application_object.parent_bone):
 		parent_location = application_object.matrix_parent_inverse.inverted_safe().translation
-	def _ret(index: int, value: float) -> float:
-		return convert_translation_to_blender(index, value) + parent_location[translation_index_conversion_to_blender[index]]
+	def _ret(value: list[float]) -> float:
+		value = convert_translation_to_blender(value)
+		value = [value[i] + parent_location[i] for i in range(len(value))]
+		return value
 	return _ret
 
-def stf_node_resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: any) -> tuple[any, int, any, any, list[int], Callable[[int, any], any]]:
+def stf_node_resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: any) -> tuple[any, int, any, any, list[int], Callable[[list[float]], list[float]]]:
 	blender_object = context.get_imported_resource(stf_path[0])
 	match(stf_path[1]):
 		case "t":

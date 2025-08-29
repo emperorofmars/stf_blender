@@ -186,8 +186,8 @@ def __parse_subtracks(track: dict, selected_channelbag: bpy.types.ActionChannelb
 			stf_keyframe = subtrack["keyframes"][keyframe_index]
 			if(not stf_keyframe[0]): continue # Not source of truth, ignore
 			
-			keyframe = fcurve.keyframe_points.insert(stf_keyframe[1], value_convert[subtrack_index[index_conversion]])
-			# todo
+			keyframe = fcurves[subtrack_index].keyframe_points.insert(stf_keyframe[1], value_convert[index_conversion[subtrack_index]])
+			# todo interpolation and handles
 
 	for fcurve in fcurves:
 		if(fcurve):

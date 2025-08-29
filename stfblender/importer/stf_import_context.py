@@ -64,7 +64,7 @@ class STF_ImportContext:
 		return self._state.import_buffer(stf_id)
 
 
-	def resolve_stf_property_path(self, stf_path: list[str], application_object: any = None) -> tuple[any, int, any, any, list[int], Callable[[int, any], any]]:
+	def resolve_stf_property_path(self, stf_path: list[str], application_object: any = None) -> tuple[any, int, any, any, list[int], Callable[[list[float]], list[float]]]:
 		if(stf_path == None or len(stf_path) == 0): return None
 
 		if(selected_module := self._state.determine_property_resolution_module(stf_path[0])):
