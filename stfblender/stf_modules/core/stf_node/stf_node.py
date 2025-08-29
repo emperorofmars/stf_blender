@@ -36,27 +36,26 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	blender_object.name = json_resource.get("name", "STF Node")
 	for collection in blender_object.users_collection:
 		collection.objects.unlink(blender_object)
+	context_object.objects.link(blender_object)
 
 	blender_object.rotation_mode = "QUATERNION"
 
-	context_object.objects.link(blender_object)
-
-	matrix_local = trs_utils.stf_to_blender_matrix(json_resource["trs"])
-
 	def _handle_parenting():
+		matrix_local = trs_utils.stf_to_blender_matrix(json_resource["trs"])
 		if(blender_object.parent):
 			if("parent_binding" in json_resource and json_resource["parent_binding"] and len(json_resource["parent_binding"]) == 3):
 				bone: bpy.types.Bone = context.get_imported_resource(json_resource["parent_binding"][2]).get_bone()
+				pose_bone = blender_object.parent.pose.bones[bone.name]
 				blender_object.parent_type = "BONE"
 				blender_object.parent_bone = bone.name
-				blender_object.matrix_basis = blender_object.parent.matrix_basis @ bone.matrix_local @ mathutils.Matrix.Rotation(math.radians(-90), 4, "X") @ matrix_local
-				blender_object.matrix_parent_inverse = (blender_object.parent.matrix_basis @ mathutils.Matrix.Translation(bone.tail_local - bone.head_local) @ bone.matrix_local).inverted_safe() # Blender why
+				blender_object.matrix_parent_inverse = (blender_object.parent.matrix_world @ pose_bone.matrix @ mathutils.Matrix.Translation(bone.tail_local - bone.head_local)).inverted_safe() # Blender why
+				blender_object.matrix_world = blender_object.parent.matrix_world @ pose_bone.matrix @ mathutils.Matrix.Rotation(math.radians(-90), 4, "X") @ matrix_local # Blender why
 			else:
 				blender_object.parent_type = "OBJECT"
-				blender_object.matrix_basis = blender_object.parent.matrix_basis @ matrix_local
-				blender_object.matrix_parent_inverse = blender_object.parent.matrix_basis.inverted_safe()
+				blender_object.matrix_parent_inverse = blender_object.parent.matrix_world.inverted_safe()
+				blender_object.matrix_world = blender_object.parent.matrix_world @ matrix_local
 		else:
-			blender_object.matrix_basis = matrix_local
+			blender_object.matrix_world = matrix_local
 	context.add_task(_handle_parenting)
 
 	for child_id in json_resource.get("children", []):
@@ -112,7 +111,15 @@ def _stf_export(context: STF_ExportContext, blender_object: bpy.types.Object, co
 					context.report(STFReport("Unsupported object parent_type: " + str(blender_object.parent_type), STFReportSeverity.FatalError, blender_object.stf_info.stf_id, json_resource.get("type"), blender_object))
 	context.add_task(_handle_parent_binding)
 
-	json_resource["trs"] = trs_utils.blender_object_to_trs(blender_object)
+	# let t, r, s
+	if(blender_object.parent):
+		if(blender_object.parent_type == "OBJECT"):
+			t, r, s = (blender_object.parent.matrix_world.inverted_safe() @ blender_object.matrix_world).decompose()
+		elif(blender_object.parent_type == "BONE" and blender_object.parent_bone):
+			t, r, s = ((blender_object.parent.matrix_world @ (blender_object.parent.pose.bones[blender_object.parent_bone].matrix @ mathutils.Matrix.Rotation(math.radians(-90), 4, "X"))).inverted_safe() @ blender_object.matrix_world).decompose()
+	else:
+		t, r, s = blender_object.matrix_world.decompose()
+	json_resource["trs"] = trs_utils.blender_to_trs(t, r, s)
 
 	if(blender_object.hide_render):
 		json_resource["enabled"] = False

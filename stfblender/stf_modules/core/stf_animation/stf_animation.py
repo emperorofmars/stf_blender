@@ -322,6 +322,108 @@ def __serialize_subtracks(context: STF_ExportContext, blender_animation: bpy.typ
 
 	return ret
 
+"""
+# TODO WIP
+def __serialize_subtracks(context: STF_ExportContext, blender_animation: bpy.types.Action, fcurves: dict[int, bpy.types.FCurve], animation_range: list[float], index_conversion: list[int], conversion_func: Callable[[int, any], any] = None) -> list:
+	real_timepoints_set: set[float] = set()
+	# for each subtrack (i.e. the x,y,z components of a location), determine at wich times have a keyframe at any of these subtracks
+	for _, fcurve in fcurves.items():
+		for keyframe in fcurve.keyframe_points:
+			real_timepoints_set.add(keyframe.co.x)
+	real_timepoints = list(real_timepoints_set)
+	real_timepoints.sort()
+
+	ret = [None] * len(index_conversion)
+	for _, fcurve in fcurves.items():
+		ret[index_conversion[fcurve.array_index]] = {}
+
+	for real_timepoint in real_timepoints:
+		for _, fcurve in fcurves.items():
+			keyframes = []
+			# let baked_values
+			if(blender_animation.stf_animation.bake):
+				baked_values = BytesIO()
+				for timepoint in range(int(animation_range[0]), int(animation_range[1] + 1)):
+					baked_values.write(serialize_float(conversion_func(index_conversion[fcurve.array_index], fcurve.evaluate(timepoint)) if conversion_func else fcurve.evaluate(timepoint), 4))
+
+	keyframe_index = 0
+	timepoint = animation_range[0]
+	for real_timepoint in real_timepoints:
+		for _, fcurve in fcurves.items():
+			prev_keyframe = fcurve.keyframe_points[keyframe_index - 1] if keyframe_index > 0 else None
+			next_keyframe = fcurve.keyframe_points[keyframe_index + 1] if keyframe_index + 1 < len(fcurve.keyframe_points) else None
+
+			# If is real keyframe, write source of truth values
+			if(fcurve.keyframe_points[keyframe_index].co.x == real_timepoint):
+				keyframe = fcurve.keyframe_points[keyframe_index]
+
+				export_value = conversion_func(index_conversion[fcurve.array_index], keyframe.co.y) if conversion_func else keyframe.co.y
+
+				left_tangent = []
+				if(prev_keyframe and prev_keyframe.interpolation == "BEZIER"):
+					left_frame_offset = keyframe.co.x - prev_keyframe.co.x
+					left_tangent_factor = max(abs((keyframe.handle_left.x - keyframe.co.x) / left_frame_offset), 1)
+
+					export_tangent_left_value = conversion_func(index_conversion[fcurve.array_index], keyframe.handle_left.y) if conversion_func else keyframe.handle_left.y
+					left_tangent = [[(keyframe.handle_left.x - keyframe.co.x) / left_tangent_factor, (export_value - export_tangent_left_value) / left_tangent_factor]] # left tangent values relative to keyframe
+
+				if(keyframe.interpolation == "BEZIER"):
+					right_tangent_factor = 1
+					if(next_keyframe):
+						right_frame_offset = next_keyframe.co.x - keyframe.co.x
+						right_tangent_factor = max(abs((keyframe.handle_right.x - keyframe.co.x) / right_frame_offset), 1)
+
+					export_tangent_right_value = conversion_func(index_conversion[fcurve.array_index], keyframe.handle_right.y) if conversion_func else keyframe.handle_right.y
+
+					keyframes.append([
+						True, # is source of truth
+						keyframe.co.x, # frame number
+						export_value, #value
+						"bezier", # interpolation type
+						__handle_type_to_stf.get(keyframe.handle_right_type, "split"), # tangent type
+						[(keyframe.handle_right.x - keyframe.co.x) / right_tangent_factor, (export_value - export_tangent_right_value) / right_tangent_factor], # right tangent values relative to keyframe
+					] + left_tangent) # add the left tangent only if the interpolation of the previous keyframe makes sense for it to be added
+				elif(keyframe.interpolation == "CONSTANT"):
+					left_tangent_factor = 1
+					if(prev_keyframe):
+						left_frame_offset = keyframe.co.x - prev_keyframe.co.x
+						left_tangent_factor = max(abs((keyframe.handle_left.x - keyframe.co.x) / left_frame_offset), 1)
+
+					keyframes.append([
+						True, # is source of truth
+						keyframe.co.x, # frame number
+						export_value, #value
+						"constant", # interpolation type
+					] + left_tangent) # add the left tangent only if the interpolation of the previous keyframe makes sense for it to be added
+				elif(keyframe.interpolation == "LINEAR"):
+					keyframes.append([
+						True, # is source of truth
+						keyframe.co.x, # frame number
+						export_value, #value
+						"linear", # interpolation type
+					] + left_tangent) # add the left tangent only if the interpolation of the previous keyframe makes sense for it to be added
+				# todo more interpolation types, for sure cubic & quatratic
+
+				keyframe_index += 1
+			else:
+				# If one of the curves for this data_path doesn't contain a keyframe when the others do, bake it, regardles of the `bake` setting
+				keyframes.append([
+					False, # is source of truth, false because it's baked
+					keyframe.co.x, # frame number
+					conversion_func(index_conversion[fcurve.array_index], fcurve.evaluate(real_timepoint)) if conversion_func else fcurve.evaluate(real_timepoint), #value
+					"linear", # interpolation type
+				]) # don't add the left tangent at all, since this is not a real keyframe
+
+			timepoint = real_timepoint + 1
+
+		ret[index_conversion[fcurve.array_index]]["keyframes"] = keyframes
+		if(blender_animation.stf_animation.bake):
+			#ret[index_conversion[fcurve.array_index]]["bake_interval"] = 1
+			ret[index_conversion[fcurve.array_index]]["baked"] = context.serialize_buffer(baked_values.getbuffer())
+
+	return ret
+"""
+
 
 __handle_type_to_stf = {
 	"FREE": "split",

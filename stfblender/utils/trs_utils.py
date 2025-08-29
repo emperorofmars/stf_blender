@@ -4,6 +4,8 @@ import mathutils
 
 # Graciously referenced from: https://github.com/KhronosGroup/glTF-Blender-IO/blob/main/addons/io_scene_gltf2/blender/exp/nodes.py#L537
 
+""" Export """
+
 def blender_translation_to_stf(blender_vec: mathutils.Vector) -> list[float]:
 	# x,y,z -> x,z,-y
 	return [blender_vec[0], blender_vec[2], -blender_vec[1]]
@@ -28,17 +30,7 @@ def blender_uv_to_stf(blender_vec: list[float]) -> list[float]:
 	return [blender_vec[0], 1 - blender_vec[1]]
 
 
-def blender_object_to_trs(blender_object: bpy.types.Object) -> list[list[float]]:
-	if(blender_object.parent):
-		if(blender_object.parent_type == "OBJECT"):
-			t, r, s = (blender_object.parent.matrix_world.inverted_safe() @ blender_object.matrix_world).decompose()
-		elif(blender_object.parent_type == "BONE" and blender_object.parent_bone):
-			t, r, s = ((blender_object.parent.matrix_world @ (blender_object.parent.data.bones[blender_object.parent_bone].matrix_local @ mathutils.Matrix.Rotation(math.radians(-90), 4, "X"))).inverted_safe() @ blender_object.matrix_world).decompose()
-	else:
-		t, r, s = blender_object.matrix_world.decompose()
-
-	return blender_to_trs(t, r, s)
-
+""" Import """
 
 def stf_translation_to_blender(vec: list[float]) -> mathutils.Vector:
 	# x,z,-y -> x,y,z
@@ -60,3 +52,4 @@ def stf_to_blender_matrix(trs: list[list[float]]) -> mathutils.Matrix:
 
 def stf_uv_to_blender(stf_uv: list[float]) -> list[float]:
 	return mathutils.Vector((stf_uv[0], 1 - stf_uv[1]))
+
