@@ -71,9 +71,9 @@ def convert_bone_translation_to_blender(value: list[float]): return value
 rotation_index_conversion_to_blender = [3, 0, 2, 1]
 convert_rotation_to_blender = trs_utils.stf_rotation_to_blender
 
-
 rotation_index_bone_conversion_to_blender = [3, 0, 1, 2]
-def convert_bone_rotation_to_blender(value: list[float]): return value
+def convert_bone_rotation_to_blender(value: list[float]):
+	return [value[3], value[0], value[1], value[2]]
 
 
 # Rotation Euler
