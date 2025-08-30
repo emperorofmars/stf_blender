@@ -11,9 +11,9 @@ def _convert_relative_translation_to_stf(application_object: bpy.types.Object) -
 	parent_location = mathutils.Vector()
 	# todo make this more proper, deal with parent_matrix_inverse and shit
 	if(application_object.parent_type == "OBJECT" and application_object.parent):
-		parent_location = application_object.parent.matrix_world.translation + (application_object.matrix_world.translation - application_object.location)
+		parent_location = application_object.parent.matrix_world.translation - (application_object.matrix_world.translation - application_object.location)
 	elif(application_object.parent_type == "BONE" and application_object.parent and application_object.parent_bone):
-		# The animated value is the 'location'. Unfortunately, there is a very good chance it is completely bullshit, with (0, 0, 0) being a completely random point not at the world origin or the parent.
+		# The animated value is the 'location'. Unfortunately, there is a very good chance it is completely bullshit, with (0, 0, 0) being a completely random point, not at the world origin or the parent.
 		# This is due to the 'parent_matrix_inverse'. It should be a computed value, as should be the 'location'. The animated property here should be consistent in relation to something, be it the world origin or parent.
 		# ffs Blender
 		bone: bpy.types.PoseBone = application_object.parent.pose.bones[application_object.parent_bone]
