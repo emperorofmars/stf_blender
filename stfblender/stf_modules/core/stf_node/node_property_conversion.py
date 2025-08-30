@@ -13,6 +13,9 @@ def _convert_relative_translation_to_stf(application_object: bpy.types.Object) -
 	if(application_object.parent_type == "OBJECT" and application_object.parent):
 		parent_location = application_object.parent.matrix_world.translation + (application_object.matrix_world.translation - application_object.location)
 	elif(application_object.parent_type == "BONE" and application_object.parent and application_object.parent_bone):
+		# The animated value is the 'location'. Unfortunately, there is a very good chance it is completely bullshit, with (0, 0, 0) being a completely random point not at the world origin or the parent.
+		# This is due to the 'parent_matrix_inverse'. It should be a computed value, as should be the 'location'. The animated property here should be consistent in relation to something, be it the world origin or parent.
+		# ffs Blender
 		bone: bpy.types.PoseBone = application_object.parent.pose.bones[application_object.parent_bone]
 		head_location = (application_object.parent.matrix_world @ mathutils.Matrix.Translation(bone.tail - bone.head) @ bone.matrix).translation
 		parent_location = head_location - (application_object.matrix_world.translation - application_object.location)
@@ -47,9 +50,7 @@ def _convert_relative_translation_to_blender(application_object: bpy.types.Objec
 	if(application_object.parent_type == "OBJECT" and application_object.parent):
 		parent_location = application_object.parent.location
 	elif(application_object.parent_type == "BONE" and application_object.parent and application_object.parent_bone):
-		#bone: bpy.types.PoseBone = application_object.parent.pose.bones[application_object.parent_bone]
-		#parent_location = application_object.parent.matrix_world.translation + bone.matrix_basis.translation + (application_object.matrix_world.translation - application_object.location)
-		parent_location = application_object.matrix_parent_inverse.inverted_safe().translation
+		parent_location = application_object.matrix_parent_inverse.inverted_safe().translation # This is only correct at time of import. Afterward there is no guarantee of this being useful.
 
 	def _ret(value: list[float]) -> list[float]:
 		value = convert_translation_to_blender(value)[:]
