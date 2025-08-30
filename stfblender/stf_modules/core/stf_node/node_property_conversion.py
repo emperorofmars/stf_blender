@@ -14,9 +14,9 @@ def _convert_relative_translation_to_stf(application_object: bpy.types.Object) -
 		parent_location = application_object.parent.matrix_world.translation + (application_object.matrix_world.translation - application_object.location)
 	elif(application_object.parent_type == "BONE" and application_object.parent and application_object.parent_bone):
 		bone: bpy.types.PoseBone = application_object.parent.pose.bones[application_object.parent_bone]
-		bone_location = mathutils.Vector((bone.matrix_basis.translation[0], bone.matrix_basis.translation[2], bone.matrix_basis.translation[1]))
-		application_object.parent.matrix_world.translation + bone_location + (application_object.matrix_world.translation - application_object.location)
-		parent_location = application_object.matrix_parent_inverse.inverted_safe().translation
+		head_location = (application_object.parent.matrix_world @ mathutils.Matrix.Translation(bone.tail - bone.head) @ bone.matrix).translation
+		parent_location = head_location - (application_object.matrix_world.translation - application_object.location)
+
 	def _ret(value: list[float]) -> float:
 		value = [value[i] - parent_location[i] for i in range(len(value))]
 		return convert_translation_to_stf(value)
@@ -47,9 +47,8 @@ def _convert_relative_translation_to_blender(application_object: bpy.types.Objec
 	if(application_object.parent_type == "OBJECT" and application_object.parent):
 		parent_location = application_object.parent.location
 	elif(application_object.parent_type == "BONE" and application_object.parent and application_object.parent_bone):
-		bone: bpy.types.PoseBone = application_object.parent.pose.bones[application_object.parent_bone]
-		bone_location = mathutils.Vector((bone.matrix_basis.translation[0], bone.matrix_basis.translation[2], bone.matrix_basis.translation[1]))
-		application_object.parent.matrix_world.translation + bone_location + (application_object.matrix_world.translation - application_object.location)
+		#bone: bpy.types.PoseBone = application_object.parent.pose.bones[application_object.parent_bone]
+		#parent_location = application_object.parent.matrix_world.translation + bone.matrix_basis.translation + (application_object.matrix_world.translation - application_object.location)
 		parent_location = application_object.matrix_parent_inverse.inverted_safe().translation
 
 	def _ret(value: list[float]) -> list[float]:
