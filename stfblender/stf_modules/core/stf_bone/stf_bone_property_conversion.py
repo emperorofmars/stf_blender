@@ -9,39 +9,39 @@ from ....utils.armature_bone import ArmatureBone
 from ....utils.animation_conversion_utils import *
 
 
-def _create_translation_to_stf_func(application_object: ArmatureBone) -> Callable:
+def _create_translation_to_stf_func(blender_object: ArmatureBone) -> Callable:
 	offset = mathutils.Vector()
 	# In Blender, bones get animated relative to their own rest pose. In STF, bones are animated relative to their parent.
-	if(application_object.get_bone().parent):
-		offset = (application_object.get_bone().parent.matrix_local.inverted_safe() @ application_object.get_bone().matrix_local).translation
+	if(blender_object.get_bone().parent):
+		offset = (blender_object.get_bone().parent.matrix_local.inverted_safe() @ blender_object.get_bone().matrix_local).translation
 	else:
-		offset = application_object.get_bone().matrix_local.translation
+		offset = blender_object.get_bone().matrix_local.translation
 
 	def _ret(value: list[float]) -> float:
 		value = [value[i] + offset[i] for i in range(len(value))]
 		return convert_bone_translation_to_stf(value)
 	return _ret
 
-def _create_rotation_to_stf_func(application_object: ArmatureBone) -> Callable:
+def _create_rotation_to_stf_func(blender_object: ArmatureBone) -> Callable:
 	offset = mathutils.Quaternion()
 	# In Blender, bones get animated relative to their own rest pose. In STF, bones are animated relative to their parent.
-	if(application_object.get_bone().parent):
-		_, offset, _ = (application_object.get_bone().parent.matrix_local.inverted_safe() @ application_object.get_bone().matrix_local).decompose()
+	if(blender_object.get_bone().parent):
+		_, offset, _ = (blender_object.get_bone().parent.matrix_local.inverted_safe() @ blender_object.get_bone().matrix_local).decompose()
 	else:
-		_, offset, _ = application_object.get_bone().matrix_local.decompose()
+		_, offset, _ = blender_object.get_bone().matrix_local.decompose()
 
 	def _ret(value: list[float]) -> float:
 		value = mathutils.Quaternion(value)
 		return convert_bone_rotation_to_stf((value @ offset)[:])
 	return _ret
 
-def _create_rotation_euler_to_stf_func(application_object: ArmatureBone) -> Callable:
+def _create_rotation_euler_to_stf_func(blender_object: ArmatureBone) -> Callable:
 	offset = mathutils.Quaternion()
 	# In Blender, bones get animated relative to their own rest pose. In STF, bones are animated relative to their parent.
-	if(application_object.get_bone().parent):
-		_, offset, _ = (application_object.get_bone().parent.matrix_local.inverted_safe() @ application_object.get_bone().matrix_local).decompose()
+	if(blender_object.get_bone().parent):
+		_, offset, _ = (blender_object.get_bone().parent.matrix_local.inverted_safe() @ blender_object.get_bone().matrix_local).decompose()
 	else:
-		_, offset, _ = (application_object.get_bone().matrix_local @ mathutils.Matrix.Rotation(math.radians(-90), 4, "X")).decompose()
+		_, offset, _ = (blender_object.get_bone().matrix_local @ mathutils.Matrix.Rotation(math.radians(-90), 4, "X")).decompose()
 
 	def _ret(value: list[float]) -> float:
 		value = mathutils.Euler(value).to_quaternion()
@@ -49,22 +49,34 @@ def _create_rotation_euler_to_stf_func(application_object: ArmatureBone) -> Call
 		return convert_bone_rotation_euler_to_stf(value[:])
 	return _ret
 
-# todo scale
+
+def _create_scale_to_stf_func(blender_object: ArmatureBone) -> Callable:
+	offset = mathutils.Vector()
+	# In Blender, bones get animated relative to their own rest pose. In STF, bones are animated relative to their parent.
+	if(blender_object.get_bone().parent):
+		_, _, offset = (blender_object.get_bone().parent.matrix_local.inverted_safe() @ blender_object.get_bone().matrix_local).decompose()
+	else:
+		_, _, offset = blender_object.get_bone().matrix_local.decompose()
+
+	def _ret(value: list[float]) -> float:
+		value = [value[i] * offset[i] for i in range(len(value))]
+		return convert_bone_scale_to_stf(value)
+	return _ret
 
 
-def resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: ArmatureBone, application_object_property_index: int, data_path: str) -> tuple[list[str], Callable[[list[float]], list[float]], list[int]]:
+def resolve_property_path_to_stf_func(context: STF_ExportContext, blender_object: ArmatureBone, application_object_property_index: int, data_path: str) -> tuple[list[str], Callable[[list[float]], list[float]], list[int]]:
 	import re
 	if(match := re.search(r"^location", data_path)):
-		return [application_object.get_bone().stf_info.stf_id, "t"], _create_translation_to_stf_func(application_object), translation_bone_index_conversion_to_stf
+		return [blender_object.get_bone().stf_info.stf_id, "t"], _create_translation_to_stf_func(blender_object), translation_bone_index_conversion_to_stf
 
 	if(match := re.search(r"^rotation_quaternion", data_path)):
-		return [application_object.get_bone().stf_info.stf_id, "r"], _create_rotation_to_stf_func(application_object), rotation_bone_index_conversion_to_stf
+		return [blender_object.get_bone().stf_info.stf_id, "r"], _create_rotation_to_stf_func(blender_object), rotation_bone_index_conversion_to_stf
 
 	if(match := re.search(r"^rotation_euler", data_path)):
-		return [application_object.get_bone().stf_info.stf_id, "r_euler"], _create_rotation_euler_to_stf_func(application_object), rotation_euler_bone_index_conversion_to_stf
+		return [blender_object.get_bone().stf_info.stf_id, "r_euler"], _create_rotation_euler_to_stf_func(blender_object), rotation_euler_bone_index_conversion_to_stf
 
 	if(match := re.search(r"^scale", data_path)):
-		return [application_object.get_bone().stf_info.stf_id, "s"], convert_bone_scale_to_stf, scale_bone_index_conversion_to_stf
+		return [blender_object.get_bone().stf_info.stf_id, "s"], _create_scale_to_stf_func(blender_object), scale_bone_index_conversion_to_stf
 
 	return None
 
