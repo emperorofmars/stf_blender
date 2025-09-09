@@ -43,8 +43,8 @@ def _create_rotation_to_stf_func(blender_object: bpy.types.Object) -> Callable:
 	return _ret
 
 def _create_rotation_euler_to_stf_func(blender_object: bpy.types.Object) -> Callable:
-	# The animated value is the 'rotation_quaternion'. Unfortunately, there is a very good chance it is complete bullshit, with identity being a completely random orientation, not relative to the world origin or the parent.
-	# This is due to the 'parent_matrix_inverse'. It should be a computed value, as should be the 'rotation_quaternion'. The animated property here should be consistent in relation to something, be it the world origin or parent.
+	# The animated value is the 'rotation_euler'. Unfortunately, there is a very good chance it is complete bullshit, with identity being a completely random orientation, not relative to the world origin or the parent.
+	# This is due to the 'parent_matrix_inverse'. It should be a computed value, as should be the 'rotation_euler'. The animated property here should be consistent in relation to something, be it the world origin or parent.
 	# ffs Blender
 	offset = mathutils.Quaternion()
 	if(blender_object.parent_type == "OBJECT" and blender_object.parent):
@@ -60,8 +60,8 @@ def _create_rotation_euler_to_stf_func(blender_object: bpy.types.Object) -> Call
 	return _ret
 
 def _create_scale_to_stf_func(blender_object: bpy.types.Object) -> Callable:
-	# The animated value is the 'location'. Unfortunately, there is a very good chance it is complete bullshit, with (0, 0, 0) being a completely random point, not at the world origin or the parent.
-	# This is due to the 'parent_matrix_inverse'. It should be a computed value, as should be the 'location'. The animated property here should be consistent in relation to something, be it the world origin or parent.
+	# The animated value is the 'scale'. Unfortunately, there is a very good chance it is complete bullshit, with (1, 1, 1) being a completely random size, be it relative to the world or the parent.
+	# This is due to the 'parent_matrix_inverse'. It should be a computed value, as should be the 'scale'. The animated property here should be consistent in relation to something, be it the world origin or parent.
 	# ffs Blender
 	offset = mathutils.Vector([1, 1, 1])
 	if(blender_object.parent_type == "OBJECT" and blender_object.parent):

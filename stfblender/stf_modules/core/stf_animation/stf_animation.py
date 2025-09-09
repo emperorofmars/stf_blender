@@ -359,19 +359,19 @@ def __serialize_subtracks(context: STF_ExportContext, blender_animation: bpy.typ
 						[(keyframe.handle_right.x - keyframe.co.x) / right_tangent_factor, (value_convert[index_conversion[fcurve.array_index]] - right_tangent_convert[index_conversion[fcurve.array_index]]) / right_tangent_factor], # right tangent values relative to keyframe
 					]
 					if(left_tangent):
-						stf_keyframe + left_tangent
+						stf_keyframe = stf_keyframe + left_tangent
 
 				elif(keyframe.interpolation == "CONSTANT"):
 					stf_keyframe.append("constant")
 					# todo
 					if(left_tangent):
-						stf_keyframe + left_tangent
+						stf_keyframe = stf_keyframe + left_tangent
 
 				elif(keyframe.interpolation == "LINEAR"):
 					stf_keyframe.append("linear")
 					# todo
 					if(left_tangent):
-						stf_keyframe + left_tangent
+						stf_keyframe = stf_keyframe + left_tangent
 				# todo more interpolation types, for sure cubic & quatratic
 
 				# Finally write the stf_keyframe
