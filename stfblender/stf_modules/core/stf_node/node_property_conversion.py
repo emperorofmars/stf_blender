@@ -36,37 +36,14 @@ def _create_translation_to_stf_func(blender_object: bpy.types.Object) -> Callabl
 		pose_bone = blender_object.parent.pose.bones[blender_object.parent_bone]
 		bone = blender_object.parent.data.bones[blender_object.parent_bone]
 
-		"""#mat_inverse = blender_object.matrix_parent_inverse.copy()# @ mathutils.Matrix.Rotation(math.radians(90), 4, "X")
-		#mat_pose = mathutils.Matrix.Translation(pose_bone.tail - pose_bone.head) @ pose_bone.matrix @ mathutils.Matrix.Rotation(math.radians(-90), 4, "X")
-		#mat_pose = pose_bone.matrix @ mathutils.Matrix.Rotation(math.radians(90), 4, "X")
-		#mat_pose = mathutils.Matrix.Translation(pose_bone.tail - pose_bone.head) @ pose_bone.matrix @ mathutils.Matrix.Rotation(math.radians(-90), 4, "X")
+		# all of this is wrong
 
-		#mat_inverse = mathutils.Matrix.Translation(pose_bone.tail - pose_bone.head) @ pose_bone.matrix @ blender_object.matrix_parent_inverse
-
-		#mat_inverse = (mathutils.Matrix.Translation(pose_bone.tail - pose_bone.head) @ pose_bone.matrix) @ (blender_object.matrix_parent_inverse)
-
-		#mat_inverse = pose_bone.matrix @ blender_object.matrix_parent_inverse
-		mat_inverse = blender_object.matrix_parent_inverse.copy()
-		#mat_bone = bone.matrix_local
-		mat_bone = pose_bone.matrix
-
-		def _ret(value: list[float]) -> float:
-			return convert_translation_to_stf((mat_inverse @ mathutils.Matrix.Translation(value) @ mat_bone).translation)
-		return _ret"""
-	
-		"""mat = (blender_object.parent.matrix_world @ (blender_object.parent.pose.bones[blender_object.parent_bone].matrix @ mathutils.Matrix.Rotation(math.radians(-90), 4, "X"))).inverted_safe() @ blender_object.matrix_world
-		mat_inverse = blender_object.matrix_parent_inverse.copy()
-
-		def _ret(value: list[float]) -> float:
-			return convert_translation_to_stf(mat @ mathutils.Matrix.Translation(mathutils.Matrix.Translation(value)))"""
-		
-		mat_inverse = blender_object.matrix_parent_inverse.copy()
-		mat_bone = (blender_object.parent.matrix_world @ (blender_object.parent.pose.bones[blender_object.parent_bone].matrix @ mathutils.Matrix.Rotation(math.radians(-90), 4, "X"))).inverted_safe() @ blender_object.matrix_world
+		mat_inverse = pose_bone.matrix @ blender_object.matrix_parent_inverse.copy()
 
 		def _ret(value: list[float]) -> float:
 			return convert_translation_to_stf((mat_inverse @ mathutils.Matrix.Translation(value)).translation)
 		return _ret
-	
+
 	else:
 		return convert_translation_to_stf
 
@@ -94,7 +71,10 @@ def _create_rotation_to_stf_func(blender_object: bpy.types.Object) -> Callable:
 
 	# todo figure this out for bone parents
 	elif(blender_object.parent_type == "BONE" and blender_object.parent and blender_object.parent_bone):
-		quat_inverse = blender_object.matrix_parent_inverse.to_quaternion()
+		pose_bone = blender_object.parent.pose.bones[blender_object.parent_bone]
+		bone = blender_object.parent.data.bones[blender_object.parent_bone]
+
+		quat_inverse = (pose_bone.matrix @ blender_object.matrix_parent_inverse).to_quaternion()
 
 		def _ret(value: list[float]) -> float:
 			return convert_rotation_to_stf(quat_inverse @ mathutils.Quaternion(value))
@@ -122,7 +102,10 @@ def _create_rotation_euler_to_stf_func(blender_object: bpy.types.Object) -> Call
 
 	# todo figure this out for bone parents
 	elif(blender_object.parent_type == "BONE" and blender_object.parent and blender_object.parent_bone):
-		quat_inverse = blender_object.matrix_parent_inverse.to_quaternion()
+		pose_bone = blender_object.parent.pose.bones[blender_object.parent_bone]
+		bone = blender_object.parent.data.bones[blender_object.parent_bone]
+
+		quat_inverse = (pose_bone.matrix @ blender_object.matrix_parent_inverse).to_quaternion()
 
 		def _ret(value: list[float]) -> float:
 			return convert_rotation_euler_to_stf((quat_inverse @ mathutils.Euler(value).to_quaternion()).to_euler())
@@ -156,7 +139,6 @@ def stf_node_resolve_property_path_to_stf_func(context: STF_ExportContext, blend
 
 	if(match := re.search(r"^rotation_quaternion", data_path)):
 		return [blender_object.stf_info.stf_id, "r"], _create_rotation_to_stf_func(blender_object), rotation_index_conversion_to_stf
-		#return [blender_object.stf_info.stf_id, "r"], convert_rotation_to_stf, rotation_index_conversion_to_stf
 
 	if(match := re.search(r"^rotation_euler", data_path)):
 		return [blender_object.stf_info.stf_id, "r_euler"], _create_rotation_euler_to_stf_func(blender_object), rotation_euler_index_conversion_to_stf
@@ -203,6 +185,28 @@ def _create_translation_to_blender_func(blender_object: bpy.types.Object) -> Cal
 		return convert_translation_to_blender
 
 
+def _create_rotation_to_blender_func(blender_object: bpy.types.Object) -> Callable:
+	if(blender_object.parent_type == "OBJECT" and blender_object.parent):
+		parent_mat = blender_object.parent.matrix_world.copy()
+
+		def _ret(value: list[float]) -> float:
+			value = convert_rotation_to_blender(value)
+			return (parent_mat @ mathutils.Matrix.Rotation(value)).translation
+		return _ret
+
+	elif(blender_object.parent_type == "BONE" and blender_object.parent and blender_object.parent_bone):
+		#todo bones
+		parent_mat = blender_object.parent.matrix_world.copy()
+
+		def _ret(value: list[float]) -> float:
+			value = convert_rotation_to_blender(value)
+			return (parent_mat @ mathutils.Matrix.Rotation(value)).translation
+		return _ret
+	
+	else:
+		return convert_rotation_to_blender
+
+
 def stf_node_resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], blender_object: any) -> tuple[any, int, any, any, list[int], Callable[[list[float]], list[float]]]:
 	blender_object = context.get_imported_resource(stf_path[0])
 	match(stf_path[1]):
@@ -210,7 +214,7 @@ def stf_node_resolve_stf_property_to_blender_func(context: STF_ImportContext, st
 			# todo handle parenting everywhere
 			return blender_object, 0, "OBJECT", "location", translation_index_conversion_to_blender, _create_translation_to_blender_func(blender_object)
 		case "r":
-			return blender_object, 0, "OBJECT", "rotation_quaternion", rotation_index_conversion_to_blender, convert_rotation_to_blender
+			return blender_object, 0, "OBJECT", "rotation_quaternion", rotation_index_conversion_to_blender, _create_rotation_to_blender_func(blender_object)
 		case "r_euler":
 			return blender_object, 0, "OBJECT", "rotation_euler", rotation_euler_index_conversion_to_blender, convert_rotation_euler_to_blender
 		case "s":
