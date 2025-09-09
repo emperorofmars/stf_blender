@@ -28,7 +28,7 @@ def _create_rotation_to_stf_func(blender_object: ArmatureBone) -> Callable:
 	if(blender_object.get_bone().parent):
 		_, offset, _ = (blender_object.get_bone().parent.matrix_local.inverted_safe() @ blender_object.get_bone().matrix_local).decompose()
 	else:
-		_, offset, _ = blender_object.get_bone().matrix_local.decompose()
+		_, offset, _ = (blender_object.get_bone().matrix_local @ mathutils.Matrix.Rotation(math.radians(-90), 4, "X")).decompose()
 
 	def _ret(value: list[float]) -> float:
 		value = mathutils.Quaternion(value)

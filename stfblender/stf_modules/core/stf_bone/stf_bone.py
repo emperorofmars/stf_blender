@@ -67,7 +67,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 
 def _stf_export(context: STF_ExportContext, application_object: any, context_object: any) -> tuple[dict, str]:
 	blender_bone_def: ArmatureBone = application_object
-	ensure_stf_id(context, blender_bone_def.get_bone())
+	ensure_stf_id(context, blender_bone_def.get_bone(), blender_bone_def.get_bone().stf_info)
 
 	blender_armature: bpy.types.Armature = context_object
 

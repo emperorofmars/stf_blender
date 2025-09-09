@@ -39,7 +39,7 @@ def draw_stf_id_ui(layout: bpy.types.UILayout, context: bpy.types.Context, blend
 def ensure_stf_id(stf_context: any, blender_object: any, stf_prop_holder: any = None):
 	if(not stf_prop_holder and hasattr(blender_object, "stf_info")):
 		stf_prop_holder = blender_object.stf_info
-	else:
+	elif(not stf_prop_holder):
 		stf_prop_holder = blender_object
 
 	if(not stf_prop_holder.stf_id):

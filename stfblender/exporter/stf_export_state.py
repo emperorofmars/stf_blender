@@ -30,6 +30,7 @@ class STF_ExportState(STF_State_Base):
 		self._hooks: dict[any, list[STF_ExportComponentHook]] = modules[1]
 
 		self._resources: dict[any, str] = {} # original application object -> ID of exported STF Json resource
+		self._resources_inverse: dict[str, any] = {} # original application object -> ID of exported STF Json resource
 		self._exported_resources: dict[str, dict] = {} # ID -> exported STF Json resource
 		self._exported_buffers: dict[str, io.BytesIO] = {} # ID -> exported STF Json buffer
 
@@ -90,6 +91,7 @@ class STF_ExportState(STF_State_Base):
 	def register_id(self, application_object: any, id: str):
 		"""Register the ID for this object. The object has not been serialized yet."""
 		self._resources[application_object] = id
+		self._resources_inverse[id] = application_object
 
 
 	def register_serialized_resource(self, application_object: any, json_resource: dict, id: str):
@@ -116,7 +118,7 @@ class STF_ExportState(STF_State_Base):
 
 
 	def id_exists(self, id: str) -> bool:
-		return id in self._resources
+		return id in self._resources_inverse
 
 	def set_root_id(self, id: str):
 		self._root_id = id
