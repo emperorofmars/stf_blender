@@ -1,4 +1,3 @@
-from typing import Callable
 import bpy
 import mathutils
 import math
@@ -13,6 +12,7 @@ from ....utils.id_utils import ensure_stf_id
 from ....utils import trs_utils
 from ....utils.armature_bone import ArmatureBone
 from ....utils.animation_conversion_utils import *
+from .stf_bone_property_conversion import resolve_property_path_to_stf_func, resolve_stf_property_to_blender_func
 
 
 _stf_type = "stf.bone"
@@ -99,44 +99,6 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 	return ret, stf_id
 
 
-def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: ArmatureBone, application_object_property_index: int, data_path: str) -> tuple[list[str], Callable[[list[float]], list[float]], list[int]]:
-	import re
-	if(match := re.search(r"^location", data_path)):
-		return [application_object.get_bone().stf_info.stf_id, "t"], convert_bone_translation_to_stf, translation_bone_index_conversion_to_stf
-
-	if(match := re.search(r"^rotation_quaternion", data_path)):
-		return [application_object.get_bone().stf_info.stf_id, "r"], convert_bone_rotation_to_stf, rotation_bone_index_conversion_to_stf
-
-	if(match := re.search(r"^rotation_euler", data_path)):
-		return [application_object.get_bone().stf_info.stf_id, "r_euler"], convert_bone_rotation_euler_to_stf, rotation_euler_bone_index_conversion_to_stf
-
-	if(match := re.search(r"^scale", data_path)):
-		return [application_object.get_bone().stf_info.stf_id, "s"], convert_bone_scale_to_stf, scale_bone_index_conversion_to_stf
-
-	return None
-
-
-def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: any) -> tuple[any, int, any, any, list[int], Callable[[list[float]], list[float]]]:
-	blender_object = context.get_imported_resource(stf_path[0])
-	if(type(blender_object) is ArmatureBone):
-		blender_object = blender_object.armature.bones[blender_object.name]
-	match(stf_path[1]):
-		case "t":
-			return None, 0, "OBJECT", "pose.bones[\"" + blender_object.name + "\"].location", translation_bone_index_conversion_to_blender, convert_bone_translation_to_blender
-		case "r":
-			return None, 0, "OBJECT", "pose.bones[\"" + blender_object.name + "\"].rotation_quaternion", rotation_index_bone_conversion_to_blender, convert_bone_rotation_to_blender
-		case "r_euler":
-			return None, 0, "OBJECT", "pose.bones[\"" + blender_object.name + "\"].rotation_euler", rotation_euler_bone_index_conversion_to_blender, convert_bone_rotation_euler_to_blender
-		case "s":
-			return None, 0, "OBJECT", "pose.bones[\"" + blender_object.name + "\"].scale", scale_bone_index_conversion_to_blender, convert_bone_scale_to_blender
-		case "components":
-			return context.resolve_stf_property_path(stf_path[2:], application_object)
-		case "component_mods":
-			return context.resolve_stf_property_path(stf_path[2:], application_object)
-
-	return None
-
-
 def _get_components_from_object(application_object: ArmatureBone) -> list:
 	return get_components_from_object(application_object.get_bone())
 
@@ -156,8 +118,8 @@ class STF_Module_STF_Bone(STF_Module):
 
 	understood_application_property_path_types = [ArmatureBone]
 	understood_application_property_path_parts = ["location", "rotation_quaternion", "rotation_euler", "scale"]
-	resolve_property_path_to_stf_func = _resolve_property_path_to_stf_func
-	resolve_stf_property_to_blender_func = _resolve_stf_property_to_blender_func
+	resolve_property_path_to_stf_func = resolve_property_path_to_stf_func
+	resolve_stf_property_to_blender_func = resolve_stf_property_to_blender_func
 
 
 register_stf_modules = [

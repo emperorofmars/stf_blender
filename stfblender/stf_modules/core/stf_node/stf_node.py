@@ -116,7 +116,7 @@ def _stf_export(context: STF_ExportContext, blender_object: bpy.types.Object, co
 		if(blender_object.parent_type == "OBJECT"):
 			t, r, s = (blender_object.parent.matrix_world.inverted_safe() @ blender_object.matrix_world).decompose()
 		elif(blender_object.parent_type == "BONE" and blender_object.parent_bone):
-			t, r, s = ((blender_object.parent.matrix_world @ (blender_object.parent.pose.bones[blender_object.parent_bone].matrix @ mathutils.Matrix.Rotation(math.radians(-90), 4, "X"))).inverted_safe() @ blender_object.matrix_world).decompose()
+			t, r, s = ((blender_object.parent.matrix_world @ (blender_object.parent.pose.bones[blender_object.parent_bone].matrix @ mathutils.Matrix.Rotation(math.radians(-90), 4, "X"))).inverted_safe() @ blender_object.matrix_world).decompose() # Blender why
 	else:
 		t, r, s = blender_object.matrix_world.decompose()
 	json_resource["trs"] = trs_utils.blender_to_trs(t, r, s)

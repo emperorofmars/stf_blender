@@ -19,7 +19,7 @@ def convert_bone_translation_to_stf(value: list[float]): return value
 
 # Rotation
 rotation_index_conversion_to_stf = [1, 3, 2, 0]
-convert_blender_rotation_to_stf = trs_utils.blender_rotation_to_stf
+convert_rotation_to_stf = trs_utils.blender_rotation_to_stf
 
 rotation_bone_index_conversion_to_stf = [1, 2, 3, 0]
 def convert_bone_rotation_to_stf(value: list[float]):
