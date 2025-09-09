@@ -12,36 +12,29 @@ def _create_translation_to_stf_func(blender_object: bpy.types.Object) -> Callabl
 	# The animated value is the 'location'. Unfortunately, there is a very good chance it is complete bullshit, with (0, 0, 0) being a completely random point, not at the world origin or the parent.
 	# This is due to the 'parent_matrix_inverse'. It should be a computed value, as should be the 'location'. The animated property here should be consistent in relation to something, be it the world origin or parent.
 	# ffs Blender
-	"""
-	offset = mathutils.Vector()
-	if(blender_object.parent_type == "BONE" and blender_object.parent and blender_object.parent_bone):
-		t, _, _ = ((blender_object.parent.matrix_world @ (blender_object.parent.pose.bones[blender_object.parent_bone].matrix @ mathutils.Matrix.Rotation(math.radians(-90), 4, "X"))).inverted_safe() @ blender_object.matrix_world).decompose() # Blender why
-		offset = blender_object.location - t
-
-		def _ret(value: list[float]) -> float:
-			value = [value[i] - offset[i] for i in range(3)]
-			return convert_translation_to_stf(value)
-		return _ret
-	"""
 
 	if(blender_object.parent_type == "OBJECT" and blender_object.parent):
-		mat_inverse = blender_object.matrix_parent_inverse.copy()
+		offset = blender_object.matrix_parent_inverse.copy()
 
 		def _ret(value: list[float]) -> float:
-			return convert_translation_to_stf((mat_inverse @ mathutils.Matrix.Translation(value)).translation)
+			return convert_translation_to_stf((offset @ mathutils.Matrix.Translation(value)).translation)
 		return _ret
 
 	# todo figure this out for bone parents
 	elif(blender_object.parent_type == "BONE" and blender_object.parent and blender_object.parent_bone):
 		pose_bone = blender_object.parent.pose.bones[blender_object.parent_bone]
-		bone = blender_object.parent.data.bones[blender_object.parent_bone]
 
-		# all of this is wrong
-
-		mat_inverse = pose_bone.matrix @ blender_object.matrix_parent_inverse.copy()
+		# this is wrong
+		offset = pose_bone.matrix @ blender_object.matrix_parent_inverse
 
 		def _ret(value: list[float]) -> float:
-			return convert_translation_to_stf((mat_inverse @ mathutils.Matrix.Translation(value)).translation)
+			return convert_translation_to_stf((offset @ mathutils.Matrix.Translation(value)).translation)
+
+		# this kinda works, but only for the initial frame of animation
+		"""offset = (blender_object.parent.matrix_world @ (blender_object.parent.pose.bones[blender_object.parent_bone].matrix @ mathutils.Matrix.Rotation(math.radians(-90), 4, "X"))).inverted_safe() @ blender_object.matrix_world @ mathutils.Matrix.Translation(blender_object.location).inverted_safe()
+		def _ret(value: list[float]) -> float:
+			return convert_translation_to_stf((offset @ mathutils.Matrix.Translation(value)).translation)"""
+
 		return _ret
 
 	else:
@@ -63,21 +56,20 @@ def _create_rotation_to_stf_func(blender_object: bpy.types.Object) -> Callable:
 
 
 	if(blender_object.parent_type == "OBJECT" and blender_object.parent):
-		quat_inverse = blender_object.matrix_parent_inverse.to_quaternion()
+		offset = blender_object.matrix_parent_inverse.to_quaternion()
 
 		def _ret(value: list[float]) -> float:
-			return convert_rotation_to_stf(quat_inverse @ mathutils.Quaternion(value))
+			return convert_rotation_to_stf(offset @ mathutils.Quaternion(value))
 		return _ret
 
 	# todo figure this out for bone parents
 	elif(blender_object.parent_type == "BONE" and blender_object.parent and blender_object.parent_bone):
 		pose_bone = blender_object.parent.pose.bones[blender_object.parent_bone]
-		bone = blender_object.parent.data.bones[blender_object.parent_bone]
 
-		quat_inverse = (pose_bone.matrix @ blender_object.matrix_parent_inverse).to_quaternion()
+		offset = (pose_bone.matrix @ blender_object.matrix_parent_inverse).to_quaternion()
 
 		def _ret(value: list[float]) -> float:
-			return convert_rotation_to_stf(quat_inverse @ mathutils.Quaternion(value))
+			return convert_rotation_to_stf(offset @ mathutils.Quaternion(value))
 		return _ret
 
 	else:
@@ -103,7 +95,6 @@ def _create_rotation_euler_to_stf_func(blender_object: bpy.types.Object) -> Call
 	# todo figure this out for bone parents
 	elif(blender_object.parent_type == "BONE" and blender_object.parent and blender_object.parent_bone):
 		pose_bone = blender_object.parent.pose.bones[blender_object.parent_bone]
-		bone = blender_object.parent.data.bones[blender_object.parent_bone]
 
 		quat_inverse = (pose_bone.matrix @ blender_object.matrix_parent_inverse).to_quaternion()
 
