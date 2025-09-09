@@ -12,52 +12,124 @@ def _create_translation_to_stf_func(blender_object: bpy.types.Object) -> Callabl
 	# The animated value is the 'location'. Unfortunately, there is a very good chance it is complete bullshit, with (0, 0, 0) being a completely random point, not at the world origin or the parent.
 	# This is due to the 'parent_matrix_inverse'. It should be a computed value, as should be the 'location'. The animated property here should be consistent in relation to something, be it the world origin or parent.
 	# ffs Blender
+	"""
 	offset = mathutils.Vector()
-	if(blender_object.parent_type == "OBJECT" and blender_object.parent):
-		t, _, _ = (blender_object.parent.matrix_world.inverted_safe() @ blender_object.matrix_world).decompose()
-		offset = blender_object.location - t
-	elif(blender_object.parent_type == "BONE" and blender_object.parent and blender_object.parent_bone):
+	if(blender_object.parent_type == "BONE" and blender_object.parent and blender_object.parent_bone):
 		t, _, _ = ((blender_object.parent.matrix_world @ (blender_object.parent.pose.bones[blender_object.parent_bone].matrix @ mathutils.Matrix.Rotation(math.radians(-90), 4, "X"))).inverted_safe() @ blender_object.matrix_world).decompose() # Blender why
 		offset = blender_object.location - t
 
-	def _ret(value: list[float]) -> float:
-		value = [value[i] - offset[i] for i in range(3)]
-		return convert_translation_to_stf(value)
-	return _ret
+		def _ret(value: list[float]) -> float:
+			value = [value[i] - offset[i] for i in range(3)]
+			return convert_translation_to_stf(value)
+		return _ret
+	"""
+
+	if(blender_object.parent_type == "OBJECT" and blender_object.parent):
+		mat_inverse = blender_object.matrix_parent_inverse.copy()
+
+		def _ret(value: list[float]) -> float:
+			return convert_translation_to_stf((mat_inverse @ mathutils.Matrix.Translation(value)).translation)
+		return _ret
+
+	# todo figure this out for bone parents
+	elif(blender_object.parent_type == "BONE" and blender_object.parent and blender_object.parent_bone):
+		pose_bone = blender_object.parent.pose.bones[blender_object.parent_bone]
+		bone = blender_object.parent.data.bones[blender_object.parent_bone]
+
+		"""#mat_inverse = blender_object.matrix_parent_inverse.copy()# @ mathutils.Matrix.Rotation(math.radians(90), 4, "X")
+		#mat_pose = mathutils.Matrix.Translation(pose_bone.tail - pose_bone.head) @ pose_bone.matrix @ mathutils.Matrix.Rotation(math.radians(-90), 4, "X")
+		#mat_pose = pose_bone.matrix @ mathutils.Matrix.Rotation(math.radians(90), 4, "X")
+		#mat_pose = mathutils.Matrix.Translation(pose_bone.tail - pose_bone.head) @ pose_bone.matrix @ mathutils.Matrix.Rotation(math.radians(-90), 4, "X")
+
+		#mat_inverse = mathutils.Matrix.Translation(pose_bone.tail - pose_bone.head) @ pose_bone.matrix @ blender_object.matrix_parent_inverse
+
+		#mat_inverse = (mathutils.Matrix.Translation(pose_bone.tail - pose_bone.head) @ pose_bone.matrix) @ (blender_object.matrix_parent_inverse)
+
+		#mat_inverse = pose_bone.matrix @ blender_object.matrix_parent_inverse
+		mat_inverse = blender_object.matrix_parent_inverse.copy()
+		#mat_bone = bone.matrix_local
+		mat_bone = pose_bone.matrix
+
+		def _ret(value: list[float]) -> float:
+			return convert_translation_to_stf((mat_inverse @ mathutils.Matrix.Translation(value) @ mat_bone).translation)
+		return _ret"""
+	
+		"""mat = (blender_object.parent.matrix_world @ (blender_object.parent.pose.bones[blender_object.parent_bone].matrix @ mathutils.Matrix.Rotation(math.radians(-90), 4, "X"))).inverted_safe() @ blender_object.matrix_world
+		mat_inverse = blender_object.matrix_parent_inverse.copy()
+
+		def _ret(value: list[float]) -> float:
+			return convert_translation_to_stf(mat @ mathutils.Matrix.Translation(mathutils.Matrix.Translation(value)))"""
+		
+		mat_inverse = blender_object.matrix_parent_inverse.copy()
+		mat_bone = (blender_object.parent.matrix_world @ (blender_object.parent.pose.bones[blender_object.parent_bone].matrix @ mathutils.Matrix.Rotation(math.radians(-90), 4, "X"))).inverted_safe() @ blender_object.matrix_world
+
+		def _ret(value: list[float]) -> float:
+			return convert_translation_to_stf((mat_inverse @ mathutils.Matrix.Translation(value)).translation)
+		return _ret
+	
+	else:
+		return convert_translation_to_stf
 
 def _create_rotation_to_stf_func(blender_object: bpy.types.Object) -> Callable:
 	# The animated value is the 'rotation_quaternion'. Unfortunately, there is a very good chance it is complete bullshit, with identity being a completely random orientation, not relative to the world origin or the parent.
 	# This is due to the 'parent_matrix_inverse'. It should be a computed value, as should be the 'rotation_quaternion'. The animated property here should be consistent in relation to something, be it the world origin or parent.
 	# ffs Blender
-	offset = mathutils.Quaternion()
-	if(blender_object.parent_type == "OBJECT" and blender_object.parent):
-		_, r, _ = (blender_object.parent.matrix_world.inverted_safe() @ blender_object.matrix_world).decompose()
-		offset = blender_object.rotation_quaternion.inverted() @ r
-	elif(blender_object.parent_type == "BONE" and blender_object.parent and blender_object.parent_bone):
+	"""offset = mathutils.Quaternion()
+	if(blender_object.parent_type == "BONE" and blender_object.parent and blender_object.parent_bone):
 		_, r, _ = ((blender_object.parent.matrix_world @ (blender_object.parent.pose.bones[blender_object.parent_bone].matrix @ mathutils.Matrix.Rotation(math.radians(-90), 4, "X"))).inverted_safe() @ blender_object.matrix_world).decompose() # Blender why
 		offset = blender_object.rotation_quaternion.inverted() @ r
 
 	def _ret(value: list[float]) -> float:
 		value = mathutils.Quaternion(value)
-		return convert_rotation_to_stf((value @ offset)[:])
-	return _ret
+		return convert_rotation_to_stf(value @ offset)
+	"""
+
+
+	if(blender_object.parent_type == "OBJECT" and blender_object.parent):
+		quat_inverse = blender_object.matrix_parent_inverse.to_quaternion()
+
+		def _ret(value: list[float]) -> float:
+			return convert_rotation_to_stf(quat_inverse @ mathutils.Quaternion(value))
+		return _ret
+
+	# todo figure this out for bone parents
+	elif(blender_object.parent_type == "BONE" and blender_object.parent and blender_object.parent_bone):
+		quat_inverse = blender_object.matrix_parent_inverse.to_quaternion()
+
+		def _ret(value: list[float]) -> float:
+			return convert_rotation_to_stf(quat_inverse @ mathutils.Quaternion(value))
+		return _ret
+
+	else:
+		return convert_rotation_to_stf
 
 def _create_rotation_euler_to_stf_func(blender_object: bpy.types.Object) -> Callable:
 	# The animated value is the 'rotation_euler'. Unfortunately, there is a very good chance it is complete bullshit, with identity being a completely random orientation, not relative to the world origin or the parent.
 	# This is due to the 'parent_matrix_inverse'. It should be a computed value, as should be the 'rotation_euler'. The animated property here should be consistent in relation to something, be it the world origin or parent.
 	# ffs Blender
-	offset = mathutils.Quaternion()
-	if(blender_object.parent_type == "OBJECT" and blender_object.parent):
-		_, r, _ = (blender_object.parent.matrix_world.inverted_safe() @ blender_object.matrix_world).decompose()
-		offset = blender_object.rotation_quaternion.inverted() @ r
-	elif(blender_object.parent_type == "BONE" and blender_object.parent and blender_object.parent_bone):
+	"""
+	if(blender_object.parent_type == "BONE" and blender_object.parent and blender_object.parent_bone):
 		_, r, _ = ((blender_object.parent.matrix_world @ (blender_object.parent.pose.bones[blender_object.parent_bone].matrix @ mathutils.Matrix.Rotation(math.radians(-90), 4, "X"))).inverted_safe() @ blender_object.matrix_world).decompose() # Blender why
 		offset = blender_object.rotation_quaternion.inverted() @ r
+	"""
 
-	def _ret(value: list[float]) -> float:
-		value = mathutils.Euler(value).to_quaternion()
-		return convert_rotation_euler_to_stf((value @ offset).to_euler()[:])
-	return _ret
+	if(blender_object.parent_type == "OBJECT" and blender_object.parent):
+		quat_inverse = blender_object.matrix_parent_inverse.to_quaternion()
+
+		def _ret(value: list[float]) -> float:
+			return convert_rotation_euler_to_stf((quat_inverse @ mathutils.Euler(value).to_quaternion()).to_euler())
+		return _ret
+
+	# todo figure this out for bone parents
+	elif(blender_object.parent_type == "BONE" and blender_object.parent and blender_object.parent_bone):
+		quat_inverse = blender_object.matrix_parent_inverse.to_quaternion()
+
+		def _ret(value: list[float]) -> float:
+			return convert_rotation_euler_to_stf((quat_inverse @ mathutils.Euler(value).to_quaternion()).to_euler())
+		return _ret
+
+	else:
+		return convert_rotation_euler_to_stf
 
 def _create_scale_to_stf_func(blender_object: bpy.types.Object) -> Callable:
 	# The animated value is the 'scale'. Unfortunately, there is a very good chance it is complete bullshit, with (1, 1, 1) being a completely random size, be it relative to the world or the parent.
@@ -99,7 +171,7 @@ def stf_node_resolve_property_path_to_stf_func(context: STF_ExportContext, blend
 
 
 def _create_translation_to_blender_func(blender_object: bpy.types.Object) -> Callable:
-	parent_location = mathutils.Vector()
+	"""parent_location = mathutils.Vector()
 	if(blender_object.parent_type == "OBJECT" and blender_object.parent):
 		parent_location = blender_object.parent.location
 	elif(blender_object.parent_type == "BONE" and blender_object.parent and blender_object.parent_bone):
@@ -108,14 +180,34 @@ def _create_translation_to_blender_func(blender_object: bpy.types.Object) -> Cal
 	def _ret(value: list[float]) -> list[float]:
 		value = convert_translation_to_blender(value)[:]
 		value = [value[i] + parent_location[i] for i in range(len(value))]
-		return value
-	return _ret
+		return value"""
+
+	if(blender_object.parent_type == "OBJECT" and blender_object.parent):
+		parent_mat = blender_object.parent.matrix_world.copy()
+
+		def _ret(value: list[float]) -> float:
+			value = convert_translation_to_blender(value)
+			return (parent_mat @ mathutils.Matrix.Translation(value)).translation
+		return _ret
+
+	elif(blender_object.parent_type == "BONE" and blender_object.parent and blender_object.parent_bone):
+		#todo bones
+		parent_mat = blender_object.parent.matrix_world.copy()
+
+		def _ret(value: list[float]) -> float:
+			value = convert_translation_to_blender(value)
+			return (parent_mat @ mathutils.Matrix.Translation(value)).translation
+		return _ret
+	
+	else:
+		return convert_translation_to_blender
+
 
 def stf_node_resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], blender_object: any) -> tuple[any, int, any, any, list[int], Callable[[list[float]], list[float]]]:
 	blender_object = context.get_imported_resource(stf_path[0])
 	match(stf_path[1]):
 		case "t":
-			# todo handle bone parents
+			# todo handle parenting everywhere
 			return blender_object, 0, "OBJECT", "location", translation_index_conversion_to_blender, _create_translation_to_blender_func(blender_object)
 		case "r":
 			return blender_object, 0, "OBJECT", "rotation_quaternion", rotation_index_conversion_to_blender, convert_rotation_to_blender
