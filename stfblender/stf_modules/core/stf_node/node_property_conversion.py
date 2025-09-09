@@ -25,17 +25,51 @@ def _create_translation_to_stf_func(blender_object: bpy.types.Object) -> Callabl
 		return convert_translation_to_stf(value)
 	return _ret
 
+def _create_rotation_to_stf_func(blender_object: bpy.types.Object) -> Callable:
+	# The animated value is the 'rotation_quaternion'. Unfortunately, there is a very good chance it is complete bullshit, with identity being a completely random orientation, not relative to the world origin or the parent.
+	# This is due to the 'parent_matrix_inverse'. It should be a computed value, as should be the 'rotation_quaternion'. The animated property here should be consistent in relation to something, be it the world origin or parent.
+	# ffs Blender
+	offset = mathutils.Quaternion()
+	if(blender_object.parent_type == "OBJECT" and blender_object.parent):
+		_, r, _ = (blender_object.parent.matrix_world.inverted_safe() @ blender_object.matrix_world).decompose()
+		offset = blender_object.rotation_quaternion.inverted() @ r
+	elif(blender_object.parent_type == "BONE" and blender_object.parent and blender_object.parent_bone):
+		_, r, _ = ((blender_object.parent.matrix_world @ (blender_object.parent.pose.bones[blender_object.parent_bone].matrix @ mathutils.Matrix.Rotation(math.radians(-90), 4, "X"))).inverted_safe() @ blender_object.matrix_world).decompose() # Blender why
+		offset = blender_object.rotation_quaternion.inverted() @ r
+
+	def _ret(value: list[float]) -> float:
+		value = mathutils.Quaternion(value)
+		return convert_rotation_to_stf((value @ offset)[:])
+	return _ret
+
+def _create_rotation_euler_to_stf_func(blender_object: bpy.types.Object) -> Callable:
+	# The animated value is the 'rotation_quaternion'. Unfortunately, there is a very good chance it is complete bullshit, with identity being a completely random orientation, not relative to the world origin or the parent.
+	# This is due to the 'parent_matrix_inverse'. It should be a computed value, as should be the 'rotation_quaternion'. The animated property here should be consistent in relation to something, be it the world origin or parent.
+	# ffs Blender
+	offset = mathutils.Quaternion()
+	if(blender_object.parent_type == "OBJECT" and blender_object.parent):
+		_, r, _ = (blender_object.parent.matrix_world.inverted_safe() @ blender_object.matrix_world).decompose()
+		offset = blender_object.rotation_quaternion.inverted() @ r
+	elif(blender_object.parent_type == "BONE" and blender_object.parent and blender_object.parent_bone):
+		_, r, _ = ((blender_object.parent.matrix_world @ (blender_object.parent.pose.bones[blender_object.parent_bone].matrix @ mathutils.Matrix.Rotation(math.radians(-90), 4, "X"))).inverted_safe() @ blender_object.matrix_world).decompose() # Blender why
+		offset = blender_object.rotation_quaternion.inverted() @ r
+
+	def _ret(value: list[float]) -> float:
+		value = mathutils.Euler(value).to_quaternion()
+		return convert_rotation_euler_to_stf((value @ offset).to_euler()[:])
+	return _ret
+
 
 def stf_node_resolve_property_path_to_stf_func(context: STF_ExportContext, blender_object: bpy.types.Object, application_object_property_index: int, data_path: str) -> tuple[list[str], Callable[[list[float]], list[float]], list[int]]:
 	if(match := re.search(r"^location", data_path)):
 		return [blender_object.stf_info.stf_id, "t"], _create_translation_to_stf_func(blender_object), translation_index_conversion_to_stf
 
 	if(match := re.search(r"^rotation_quaternion", data_path)):
-		#return [application_object.stf_info.stf_id, "r"], _create_rotation_to_stf_func(application_object), rotation_index_conversion_to_stf
-		return [blender_object.stf_info.stf_id, "r"], convert_rotation_to_stf, rotation_index_conversion_to_stf
+		return [blender_object.stf_info.stf_id, "r"], _create_rotation_to_stf_func(blender_object), rotation_index_conversion_to_stf
+		#return [blender_object.stf_info.stf_id, "r"], convert_rotation_to_stf, rotation_index_conversion_to_stf
 
 	if(match := re.search(r"^rotation_euler", data_path)):
-		return [blender_object.stf_info.stf_id, "r_euler"], convert_rotation_euler_to_stf, rotation_euler_index_conversion_to_stf
+		return [blender_object.stf_info.stf_id, "r_euler"], _create_rotation_euler_to_stf_func(blender_object), rotation_euler_index_conversion_to_stf
 
 	if(match := re.search(r"^scale", data_path)):
 		return [blender_object.stf_info.stf_id, "s"], convert_scale_to_stf, scale_index_conversion_to_stf
