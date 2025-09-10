@@ -9,13 +9,17 @@ from ....utils.armature_bone import ArmatureBone
 from ....utils.animation_conversion_utils import *
 
 
+"""
+Export
+"""
+
 def _create_translation_to_stf_func(blender_object: ArmatureBone) -> Callable:
 	offset = mathutils.Vector()
 	# In Blender, bones get animated relative to their own rest pose. In STF, bones are animated relative to their parent.
 	if(blender_object.get_bone().parent):
 		offset = (blender_object.get_bone().parent.matrix_local.inverted_safe() @ blender_object.get_bone().matrix_local).translation
 	else:
-		offset = blender_object.get_bone().matrix_local.translation
+		offset = (mathutils.Matrix.Rotation(math.radians(-90), 4, "X") @ blender_object.get_bone().matrix_local).translation
 
 	def _ret(value: list[float]) -> float:
 		value = [value[i] + offset[i] for i in range(len(value))]
@@ -81,7 +85,9 @@ def resolve_property_path_to_stf_func(context: STF_ExportContext, blender_object
 	return None
 
 
-
+"""
+Import
+"""
 
 def _create_translation_to_blender_func(blender_object: ArmatureBone) -> Callable:
 	offset = mathutils.Vector()
@@ -89,12 +95,12 @@ def _create_translation_to_blender_func(blender_object: ArmatureBone) -> Callabl
 	if(blender_object.get_bone().parent):
 		offset = (blender_object.get_bone().parent.matrix_local.inverted_safe() @ blender_object.get_bone().matrix_local).translation
 	else:
-		offset = blender_object.get_bone().matrix_local.translation
+		offset = (mathutils.Matrix.Rotation(math.radians(-90), 4, "X") @ blender_object.get_bone().matrix_local).translation
 
 	def _ret(value: list[float]) -> float:
 		value = convert_bone_translation_to_blender(value)
-		value = [value[i] - offset[i] for i in range(len(value))]
-		return convert_bone_translation_to_blender(value)
+		return [value[i] - offset[i] for i in range(len(value))]
+		#return convert_bone_translation_to_blender(value)
 	return _ret
 
 def _create_rotation_to_blender_func(blender_object: ArmatureBone) -> Callable:

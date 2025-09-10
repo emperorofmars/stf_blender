@@ -35,7 +35,6 @@ def _create_translation_to_stf_func(blender_object: bpy.types.Object) -> Callabl
 	else:
 		return convert_translation_to_stf
 
-
 def _convert_bone_offset_rotation_to_stf(blender_object: bpy.types.Object) -> mathutils.Matrix:
 	return mathutils.Matrix.Rotation(math.radians(90), 4, "X") @ blender_object.matrix_parent_inverse
 
