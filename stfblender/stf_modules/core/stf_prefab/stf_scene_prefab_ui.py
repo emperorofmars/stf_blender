@@ -6,7 +6,7 @@ from ....utils.component_ui_utils import draw_components_ui, set_stf_component_f
 from ....base.stf_meta import draw_meta_editor
 from ....utils.minsc import draw_slot_link_warning
 from .... import package_key
-from ....utils.dev_utils import CleanupOp
+from ....utils.dev_utils import CleanupOp, UnfuckMatrixParentInverse
 
 
 class STFSetSceneCollectionAsRootOperator(bpy.types.Operator):
@@ -102,3 +102,8 @@ class STFSceneCollectionPanel(bpy.types.Panel):
 			self.layout.separator(factor=4, type="LINE")
 			self.layout.label(text="Development Helpers")
 			self.layout.operator(CleanupOp.bl_idname)
+
+			self.layout.separator(factor=2, type="SPACE")
+			self.layout.operator(UnfuckMatrixParentInverse.bl_idname)
+
+

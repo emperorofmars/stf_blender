@@ -62,3 +62,17 @@ class CleanupOp(bpy.types.Operator):
 		return {"FINISHED"}
 
 
+class UnfuckMatrixParentInverse(bpy.types.Operator):
+	"""Warning: this will pretty much fuck up all your animations!"""
+	bl_idname = "stf.unfuck_matrix_parent_inverse"
+	bl_label = "Unfuck matrix_parent_inverse"
+	bl_options = {"REGISTER", "UNDO"}
+
+	def execute(self, context):
+		for blender_object in bpy.data.objects[:]:
+			if(blender_object.parent):
+				tmp = blender_object.matrix_world.copy()
+				blender_object.matrix_parent_inverse = blender_object.parent.matrix_world.inverted_safe()
+				blender_object.matrix_world = tmp
+		return {"FINISHED"}
+
