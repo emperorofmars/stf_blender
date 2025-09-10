@@ -9,13 +9,16 @@ from ....utils.armature_bone import ArmatureBone
 from ....utils.animation_conversion_utils import *
 
 
+# In Blender, bones get animated relative to their own rest pose.
+# In STF, bones are animated relative to their parent.
+# At least Blenders values are consistent here.
+
 """
 Export
 """
 
 def _create_translation_to_stf_func(blender_object: ArmatureBone) -> Callable:
 	offset = mathutils.Vector()
-	# In Blender, bones get animated relative to their own rest pose. In STF, bones are animated relative to their parent.
 	if(blender_object.get_bone().parent):
 		offset = (blender_object.get_bone().parent.matrix_local.inverted_safe() @ blender_object.get_bone().matrix_local).translation
 	else:
@@ -28,7 +31,6 @@ def _create_translation_to_stf_func(blender_object: ArmatureBone) -> Callable:
 
 def _create_rotation_to_stf_func(blender_object: ArmatureBone) -> Callable:
 	offset = mathutils.Quaternion()
-	# In Blender, bones get animated relative to their own rest pose. In STF, bones are animated relative to their parent.
 	if(blender_object.get_bone().parent):
 		_, offset, _ = (blender_object.get_bone().parent.matrix_local.inverted_safe() @ blender_object.get_bone().matrix_local).decompose()
 	else:
@@ -41,7 +43,6 @@ def _create_rotation_to_stf_func(blender_object: ArmatureBone) -> Callable:
 
 def _create_rotation_euler_to_stf_func(blender_object: ArmatureBone) -> Callable:
 	offset = mathutils.Quaternion()
-	# In Blender, bones get animated relative to their own rest pose. In STF, bones are animated relative to their parent.
 	if(blender_object.get_bone().parent):
 		_, offset, _ = (blender_object.get_bone().parent.matrix_local.inverted_safe() @ blender_object.get_bone().matrix_local).decompose()
 	else:
@@ -56,7 +57,6 @@ def _create_rotation_euler_to_stf_func(blender_object: ArmatureBone) -> Callable
 
 def _create_scale_to_stf_func(blender_object: ArmatureBone) -> Callable:
 	offset = mathutils.Vector()
-	# In Blender, bones get animated relative to their own rest pose. In STF, bones are animated relative to their parent.
 	if(blender_object.get_bone().parent):
 		_, _, offset = (blender_object.get_bone().parent.matrix_local.inverted_safe() @ blender_object.get_bone().matrix_local).decompose()
 	else:
@@ -91,7 +91,6 @@ Import
 
 def _create_translation_to_blender_func(blender_object: ArmatureBone) -> Callable:
 	offset = mathutils.Vector()
-	# In Blender, bones get animated relative to their own rest pose. In STF, bones are animated relative to their parent.
 	if(blender_object.get_bone().parent):
 		offset = (blender_object.get_bone().parent.matrix_local.inverted_safe() @ blender_object.get_bone().matrix_local).translation
 	else:
@@ -105,7 +104,6 @@ def _create_translation_to_blender_func(blender_object: ArmatureBone) -> Callabl
 
 def _create_rotation_to_blender_func(blender_object: ArmatureBone) -> Callable:
 	offset = mathutils.Quaternion()
-	# In Blender, bones get animated relative to their own rest pose. In STF, bones are animated relative to their parent.
 	if(blender_object.get_bone().parent):
 		_, offset, _ = (blender_object.get_bone().parent.matrix_local.inverted_safe() @ blender_object.get_bone().matrix_local).inverted_safe().decompose()
 	else:
@@ -118,7 +116,6 @@ def _create_rotation_to_blender_func(blender_object: ArmatureBone) -> Callable:
 
 def _create_rotation_euler_to_blender_func(blender_object: ArmatureBone) -> Callable:
 	offset = mathutils.Quaternion()
-	# In Blender, bones get animated relative to their own rest pose. In STF, bones are animated relative to their parent.
 	if(blender_object.get_bone().parent):
 		_, offset, _ = (blender_object.get_bone().parent.matrix_local.inverted_safe() @ blender_object.get_bone().matrix_local).inverted_safe().decompose()
 	else:
@@ -131,7 +128,6 @@ def _create_rotation_euler_to_blender_func(blender_object: ArmatureBone) -> Call
 
 def _create_scale_to_blender_func(blender_object: ArmatureBone) -> Callable:
 	offset = mathutils.Vector()
-	# In Blender, bones get animated relative to their own rest pose. In STF, bones are animated relative to their parent.
 	if(blender_object.get_bone().parent):
 		_, _, offset = (blender_object.get_bone().parent.matrix_local.inverted_safe() @ blender_object.get_bone().matrix_local).inverted_safe().decompose()
 	else:
