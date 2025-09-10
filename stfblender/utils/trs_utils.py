@@ -1,5 +1,3 @@
-import math
-import bpy
 import mathutils
 
 # Graciously referenced from: https://github.com/KhronosGroup/glTF-Blender-IO/blob/main/addons/io_scene_gltf2/blender/exp/nodes.py#L537

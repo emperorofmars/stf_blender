@@ -48,7 +48,6 @@ def _create_rotation_to_stf_func(blender_object: bpy.types.Object) -> Callable:
 			return convert_rotation_to_stf((offset @ mathutils.Quaternion(value).to_matrix().to_4x4()).to_quaternion())
 		return _ret
 
-	# todo figure this out for bone parents
 	elif(blender_object.parent_type == "BONE" and blender_object.parent and blender_object.parent_bone):
 		offset = _convert_bone_offset_rotation_to_stf(blender_object)
 
@@ -67,7 +66,6 @@ def _create_rotation_euler_to_stf_func(blender_object: bpy.types.Object) -> Call
 			return convert_rotation_euler_to_stf((offset @ mathutils.Euler(value).to_matrix().to_4x4()).to_euler())
 		return _ret
 
-	# todo figure this out for bone parents
 	elif(blender_object.parent_type == "BONE" and blender_object.parent and blender_object.parent_bone):
 		offset = _convert_bone_offset_rotation_to_stf(blender_object)
 
