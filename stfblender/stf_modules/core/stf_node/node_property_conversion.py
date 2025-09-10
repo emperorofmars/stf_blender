@@ -7,15 +7,17 @@ from ....exporter.stf_export_context import STF_ExportContext
 from ....importer.stf_import_context import STF_ImportContext
 from ....utils.animation_conversion_utils import *
 
+# The values that get animated in Blender, like 'location' or 'rotation_quaternion', are likely to be nonsense when the object has a parent.
+# These properties likely won't be relative to the parent or world.
+# This is due to the 'parent_matrix_inverse', which should be a computed value that doesn't affect the object, and only used for display purposes.
+# The underlying animated properties should be always consistent, be it in relation to the world or parent. No matter what the UI displays.
+# This is insane. Blender why?
 
 """
 Export
 """
 
 def _create_translation_to_stf_func(blender_object: bpy.types.Object) -> Callable:
-	# The animated value is the 'location'. Unfortunately, there is a very good chance it is complete bullshit, with (0, 0, 0) being a completely random point, not at the world origin or the parent.
-	# This is due to the 'parent_matrix_inverse'. It should be a computed value, as should be the 'location'. The animated property here should be consistent in relation to something, be it the world origin or parent.
-	# Blender why?
 
 	if(blender_object.parent_type == "OBJECT" and blender_object.parent):
 		offset = blender_object.matrix_parent_inverse.copy()
@@ -39,10 +41,6 @@ def _convert_bone_offset_rotation_to_stf(blender_object: bpy.types.Object) -> ma
 	return mathutils.Matrix.Rotation(math.radians(90), 4, "X") @ blender_object.matrix_parent_inverse
 
 def _create_rotation_to_stf_func(blender_object: bpy.types.Object) -> Callable:
-	# The animated value is the 'rotation_quaternion'. Unfortunately, there is a very good chance it is complete bullshit, with identity being a completely random orientation, not relative to the world origin or the parent.
-	# This is due to the 'parent_matrix_inverse'. It should be a computed value, as should be the 'rotation_quaternion'. The animated property here should be consistent in relation to something, be it the world origin or parent.
-	# Blender why?
-
 	if(blender_object.parent_type == "OBJECT" and blender_object.parent):
 		offset = blender_object.matrix_parent_inverse.copy()
 
@@ -62,10 +60,6 @@ def _create_rotation_to_stf_func(blender_object: bpy.types.Object) -> Callable:
 		return convert_rotation_to_stf
 
 def _create_rotation_euler_to_stf_func(blender_object: bpy.types.Object) -> Callable:
-	# The animated value is the 'rotation_euler'. Unfortunately, there is a very good chance it is complete bullshit, with identity being a completely random orientation, not relative to the world origin or the parent.
-	# This is due to the 'parent_matrix_inverse'. It should be a computed value, as should be the 'rotation_euler'. The animated property here should be consistent in relation to something, be it the world origin or parent.
-	# Blender why?
-
 	if(blender_object.parent_type == "OBJECT" and blender_object.parent):
 		offset = blender_object.matrix_parent_inverse.copy()
 
@@ -85,10 +79,6 @@ def _create_rotation_euler_to_stf_func(blender_object: bpy.types.Object) -> Call
 		return convert_rotation_euler_to_stf
 
 def _create_scale_to_stf_func(blender_object: bpy.types.Object) -> Callable:
-	# The animated value is the 'scale'. Unfortunately, there is a very good chance it is complete bullshit, with (1, 1, 1) being a completely random size, be it relative to the world or the parent.
-	# This is due to the 'parent_matrix_inverse'. It should be a computed value, as should be the 'scale'. The animated property here should be consistent in relation to something, be it the world origin or parent.
-	# Blender why?
-
 	offset = mathutils.Vector([1, 1, 1])
 	if(blender_object.parent_type == "OBJECT" and blender_object.parent):
 		_, _, s = (blender_object.parent.matrix_world.inverted_safe() @ blender_object.matrix_world).decompose()
