@@ -41,6 +41,7 @@ def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, compo
 		for override in component.overrides:
 			col.label(text=override.target_id)
 
+
 	row = box.row()
 	row.operator(CopyToClipboard.bl_idname, text="Copy ID").text = component_ref.stf_id
 	row.operator(edit_op, text="Edit ID & Overrides").component_id = component_ref.stf_id
@@ -88,8 +89,6 @@ def draw_components_ui(
 		inject_ui: any = None
 		):
 	stf_modules = get_component_modules()
-
-	layout.label(text="Components", icon="GROUP")
 
 	row = layout.row(align=True)
 	row.prop(bpy.context.scene, "stf_component_modules", text="")

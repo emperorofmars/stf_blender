@@ -12,6 +12,4 @@ class STF_Extension_Preferences(bpy.types.AddonPreferences):
 		self.layout.label(text="Thanks for using STF!")
 		draw_slot_link_warning(self.layout)
 
-		self.layout.separator(factor=2, type="LINE")
-		self.layout.prop(self, "enable_dev_mode")
 

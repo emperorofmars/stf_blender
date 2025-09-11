@@ -5,8 +5,7 @@ from ....utils.component_utils import STFAddComponentOperatorBase, STFEditCompon
 from ....utils.component_ui_utils import draw_components_ui, set_stf_component_filter
 from ....base.stf_meta import draw_meta_editor
 from ....utils.minsc import draw_slot_link_warning
-from .... import package_key
-from ....utils.dev_utils import CleanupOp
+from ....utils.dev_utils import draw_dev_tools
 
 
 class STFSetCollectionAsRootOperator(bpy.types.Operator):
@@ -69,7 +68,6 @@ class STFCollectionPanel(bpy.types.Panel):
 			self.layout.label(text="Root")
 
 	def draw(self, context):
-		from ....exporter.exporter import ExportSTF
 		set_stf_component_filter(bpy.types.Collection)
 		self.layout.prop(context.collection, "stf_use_collection_as_prefab")
 
@@ -77,28 +75,31 @@ class STFCollectionPanel(bpy.types.Panel):
 			draw_slot_link_warning(self.layout)
 
 			# Export Functionality
+			from ....exporter.exporter import ExportSTF
 			if(context.scene.stf_root_collection == context.collection):
 				self.layout.operator(operator=ExportSTF.bl_idname, text="Export as STF", icon="EXPORT")
 			else:
 				self.layout.operator(STFSetCollectionAsRootOperator.bl_idname)
 				self.layout.operator(operator=ExportSTF.bl_idname, text="Export this Collection as STF").current_collection_as_root = True
 
-			self.layout.separator(factor=1, type="SPACE")
-
-			draw_meta_editor(self.layout.box(), context.collection, False)
-
-			self.layout.separator(factor=1, type="SPACE")
-
 			# Set ID
+			self.layout.separator(factor=1, type="SPACE")
 			draw_stf_id_ui(self.layout, context, context.collection, context.collection.stf_info, STFSetCollectionIDOperator.bl_idname)
 
-			self.layout.separator(factor=2, type="LINE")
+			# Asset metadata editor
+			self.layout.separator(factor=1, type="SPACE")
+			header, body = self.layout.panel("stf.prefab_meta", default_closed = True)
+			header.label(text="Asset Metadata")
+			if(body): draw_meta_editor(body.box(), context.collection, False)
 
 			# Components
-			draw_components_ui(self.layout, context, context.collection.stf_info, context.collection, STFAddCollectionComponentOperator.bl_idname, STFRemoveCollectionComponentOperator.bl_idname, STFEditCollectionComponentIdOperator.bl_idname)
+			self.layout.separator(factor=1, type="SPACE")
+			header, body = self.layout.panel("stf.prefab_components", default_closed = False)
+			header.label(text="STF Components", icon="GROUP")
+			if(body): draw_components_ui(self.layout, context, context.collection.stf_info, context.collection, STFAddCollectionComponentOperator.bl_idname, STFRemoveCollectionComponentOperator.bl_idname, STFEditCollectionComponentIdOperator.bl_idname)
 
 		# Dev Options
-		if(bpy.context.preferences.addons[package_key.package_key].preferences.enable_dev_mode):
-			self.layout.separator(factor=4, type="LINE")
-			self.layout.label(text="Development Helpers")
-			self.layout.operator(CleanupOp.bl_idname)
+		self.layout.separator(factor=3, type="LINE")
+		dev_header, dev_body = self.layout.panel("stf.devtools_collection", default_closed = True)
+		dev_header.label(text="Devtools")
+		if(dev_body): draw_dev_tools(dev_body)

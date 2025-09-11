@@ -28,10 +28,10 @@ def draw_stf_id_ui(layout: bpy.types.UILayout, context: bpy.types.Context, blend
 		layout.operator(set_id_op)
 
 	row = layout.row()
-	if(stf_prop_holder.stf_name or stf_prop_holder.stf_name_source_of_truth):
+	if(stf_prop_holder.stf_name_source_of_truth):
 		row.prop(stf_prop_holder, "stf_name", text="Name")
 	else:
-		row.label(text="Name: " + blender_object.name)
+		row.label(text="Name:    " + blender_object.name)
 	if(not is_instance):
 		row.prop(stf_prop_holder, "stf_name_source_of_truth", text="Override Name")
 

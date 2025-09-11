@@ -25,8 +25,10 @@ class STF_Instance_Mesh_Material(bpy.types.PropertyGroup):
 class STF_Instance_Mesh(bpy.types.PropertyGroup):
 	override_blendshape_values: bpy.props.BoolProperty(name="Override Blendshape Values", default=False) # type: ignore
 	blendshape_values: bpy.props.CollectionProperty(type=STF_Instance_Mesh_Blendshape_Value, name="Blendshape Values") # type: ignore
+	active_blendshape: bpy.props.IntProperty() # type: ignore
 	override_materials: bpy.props.BoolProperty(name="Override Materials", default=False) # type: ignore
 	materials: bpy.props.CollectionProperty(type=STF_Instance_Mesh_Material, name="Material Overrides") # type: ignore
+	active_material: bpy.props.IntProperty() # type: ignore
 
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:

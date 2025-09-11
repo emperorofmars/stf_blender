@@ -108,6 +108,14 @@ class AVA_Emote(bpy.types.PropertyGroup):
 
 class AVA_Emotes(STF_BlenderComponentBase):
 	emotes: bpy.props.CollectionProperty(type=AVA_Emote) # type: ignore
+	active_emote: bpy.props.IntProperty() # type: ignore
+
+
+class STFDrawAVAEmoteList(bpy.types.UIList):
+	bl_idname = "COLLECTION_UL_ava_emote_list"
+
+	def draw_item(self, context, layout: bpy.types.UILayout, data, item, icon, active_data, active_propname, index):
+		layout.label(text=item.custom_emote if item.emote == "custom" else str(item.emote))
 
 
 def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: AVA_Emotes):
@@ -121,43 +129,48 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 	add_button.component_id = component.stf_id
 	add_button.op = True
 
-	for index, emote in enumerate(component.emotes):
-		box = layout.box()
+	row = layout.row()
+	row.template_list(STFDrawAVAEmoteList.bl_idname, "", component, "emotes", component, "active_emote")
+	
+	remove_button = row.operator(Edit_AVA_Emotes.bl_idname, text="", icon="X")
+	remove_button.component_id = component.stf_id
+	remove_button.op = False
+	remove_button.index = component.active_emote
 
-		row = box.row()
-		row.prop(emote, "emote")
-		remove_button = row.operator(Edit_AVA_Emotes.bl_idname, text="", icon="X")
-		remove_button.component_id = component.stf_id
-		remove_button.op = False
-		remove_button.index = index
+	emote = component.emotes[component.active_emote]
 
-		if(emote.emote == "custom"):
-			box.prop(emote, "custom_emote")
+	box = layout.box()
 
-		layout.label(text="Note: the animation must have a valid 'Slot Link' target.")
-		box.prop(emote, "animation")
+	row = box.row()
+	row.prop(emote, "emote")
 
-		box.separator(factor=1, type="LINE")
-		box.prop(emote, "use_blendshape_fallback")
-		if(emote.use_blendshape_fallback):
-			box = box.box()
-			box.label(text="Blendshape Only Fallback")
+	if(emote.emote == "custom"):
+		box.prop(emote, "custom_emote")
 
-			add_button = box.operator(Edit_AVA_EmoteFallback.bl_idname, text="Add Blendshape")
-			add_button.component_id = component.stf_id
-			add_button.op = True
-			add_button.emote_index = index
-			for blendshape_index, blendshape in enumerate(emote.blendshape_fallback.values):
-				inner_row = box.row()
-				inner_row.prop(blendshape, "mesh_instance", text="")
-				if(blendshape.mesh_instance and type(blendshape.mesh_instance.data) == bpy.types.Mesh):
-					inner_row.prop_search(blendshape, "blendshape_name", blendshape.mesh_instance.data.shape_keys, "key_blocks", text="")
-					inner_row.prop(blendshape, "blendshape_value", text="")
-				remove_button = inner_row.operator(Edit_AVA_EmoteFallback.bl_idname, text="", icon="X")
-				remove_button.component_id = component.stf_id
-				remove_button.op = False
-				remove_button.emote_index = index
-				remove_button.blendshape_index = blendshape_index
+	box.prop(emote, "animation")
+	box.label(text="Note: the animation must have a valid 'Slot Link' targets.")
+
+	box.separator(factor=1, type="LINE")
+	box.prop(emote, "use_blendshape_fallback")
+	if(emote.use_blendshape_fallback):
+		box = box.box()
+		box.label(text="Blendshape Only Fallback")
+
+		add_button = box.operator(Edit_AVA_EmoteFallback.bl_idname, text="Add Blendshape")
+		add_button.component_id = component.stf_id
+		add_button.op = True
+		add_button.emote_index = component.active_emote
+		for blendshape_index, blendshape in enumerate(emote.blendshape_fallback.values):
+			inner_row = box.row()
+			inner_row.prop(blendshape, "mesh_instance", text="")
+			if(blendshape.mesh_instance and type(blendshape.mesh_instance.data) == bpy.types.Mesh):
+				inner_row.prop_search(blendshape, "blendshape_name", blendshape.mesh_instance.data.shape_keys, "key_blocks", text="")
+				inner_row.prop(blendshape, "blendshape_value", text="")
+			remove_button = inner_row.operator(Edit_AVA_EmoteFallback.bl_idname, text="", icon="X")
+			remove_button.component_id = component.stf_id
+			remove_button.op = False
+			remove_button.emote_index = component.active_emote
+			remove_button.blendshape_index = blendshape_index
 
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:

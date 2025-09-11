@@ -48,7 +48,7 @@ class STFMeshSpatialPanel(bpy.types.Panel):
 		if(context.object.find_armature()):
 			t, r, s = context.object.matrix_local.decompose()
 			if(t.length > 0.0001 or abs(r.x) > 0.0001 or abs(r.y) > 0.0001 or abs(r.z) > 0.0001 or abs((r.w - 1)) > 0.0001 or abs(s.x - 1) > 0.0001 or abs(s.y - 1) > 0.0001 or abs(s.z - 1) > 0.0001):
-				self.layout.label(text="Warning, origin not aligned with Armature! This will lead to differing output.")
+				self.layout.label(text="Warning, this mesh is not aligned with its Armature! This will lead to differing output.", icon="ERROR")
 
 		# Set ID
 		draw_stf_id_ui(self.layout, context, context.mesh, context.mesh.stf_info, STFSetMeshIDOperator.bl_idname)
@@ -56,4 +56,7 @@ class STFMeshSpatialPanel(bpy.types.Panel):
 		self.layout.separator(factor=2, type="LINE")
 
 		# Components
-		draw_components_ui(self.layout, context, context.mesh.stf_info, context.mesh, STFAddMeshComponentOperator.bl_idname, STFRemoveMeshComponentOperator.bl_idname, STFEditMeshComponentIdOperator.bl_idname)
+		self.layout.separator(factor=1, type="SPACE")
+		header, body = self.layout.panel("stf.mesh_components", default_closed = False)
+		header.label(text="STF Components", icon="GROUP")
+		if(body): draw_components_ui(self.layout, context, context.mesh.stf_info, context.mesh, STFAddMeshComponentOperator.bl_idname, STFRemoveMeshComponentOperator.bl_idname, STFEditMeshComponentIdOperator.bl_idname)

@@ -44,12 +44,16 @@ class ImportSTF(bpy.types.Operator, ImportHelper):
 				context.scene.stf_root_collection = root
 
 			if(len(stf_state._reports) > 0):
-				self.report({"WARNING"}, "STF asset imported with reports! (%.3f sec.)" % (time.time() - time_start))
+				result_str = "STF asset imported with reports! (%.3f sec.)" % (time.time() - time_start)
+				self.report({"WARNING"}, result_str)
+				print(result_str)
 				for report in stf_state._reports:
 					print(report.to_string() + "\n")
 					self.report({"WARNING"}, report.to_string())
 			else:
-				self.report({"INFO"}, "STF asset imported successfully! (%.3f sec.)" % (time.time() - time_start))
+				result_str = "STF asset imported successfully! (%.3f sec.)" % (time.time() - time_start)
+				self.report({"INFO"}, result_str)
+				print(result_str)
 			return {"FINISHED"}
 		except STFException as error:
 			self.report({"ERROR"}, str(error))

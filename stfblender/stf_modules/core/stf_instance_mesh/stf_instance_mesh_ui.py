@@ -38,6 +38,27 @@ class STFSetMeshInstanceIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
 	def poll(cls, context): return context.object.stf_instance is not None and context.object.data and type(context.object.data) is bpy.types.Mesh
 	def get_property(self, context): return context.object.stf_instance
 
+
+
+class STFDrawMeshInstanceBlendshapeList(bpy.types.UIList):
+	"""Override blendshapes on this meshinstance"""
+	bl_idname = "COLLECTION_UL_stf_instance_mesh_blendshapes"
+
+	def draw_item(self, context, layout: bpy.types.UILayout, data, item, icon, active_data, active_propname, index):
+		row = layout.row()
+		row.prop(item, "override", text=item.name)
+		row.prop(item, "value", text="Value")
+
+class STFDrawMeshInstanceMaterialList(bpy.types.UIList):
+	"""Override materials on this meshinstance"""
+	bl_idname = "COLLECTION_UL_stf_instance_mesh_materials"
+
+	def draw_item(self, context, layout: bpy.types.UILayout, data, item, icon, active_data, active_propname, index):
+		row = layout.row()
+		row.prop(item, "override")
+		row.prop(item, "material")
+
+
 class STFMeshInstancePanel(bpy.types.Panel):
 	"""STF options & export helper"""
 	bl_idname = "OBJECT_PT_stf_mesh_instance_editor"
@@ -51,6 +72,11 @@ class STFMeshInstancePanel(bpy.types.Panel):
 		return (context.object.stf_instance is not None and context.object.data and type(context.object.data) is bpy.types.Mesh)
 
 	def draw(self, context):
+		if(context.object.find_armature()):
+			t, r, s = context.object.matrix_local.decompose()
+			if(t.length > 0.0001 or abs(r.x) > 0.0001 or abs(r.y) > 0.0001 or abs(r.z) > 0.0001 or abs((r.w - 1)) > 0.0001 or abs(s.x - 1) > 0.0001 or abs(s.y - 1) > 0.0001 or abs(s.z - 1) > 0.0001):
+				self.layout.label(text="Warning, this mesh-instance is not aligned with its Armature! This will lead to differing output.", icon="ERROR")
+
 		# Set ID
 		draw_stf_id_ui(self.layout, context, context.object.stf_instance, context.object.stf_instance, STFSetMeshInstanceIDOperator.bl_idname, True)
 
@@ -60,12 +86,8 @@ class STFMeshInstancePanel(bpy.types.Panel):
 		self.layout.prop(context.object.stf_instance_mesh, "override_materials")
 		if(context.object.stf_instance_mesh.override_materials):
 			self.layout.operator(SetInstanceMaterials.bl_idname)
-			if(len(context.object.stf_instance_mesh.materials) > 1):
-				box = self.layout.box()
-				for material in context.object.stf_instance_mesh.materials:
-					row = box.row()
-					row.prop(material, "override")
-					row.prop(material, "material")
+
+			self.layout.template_list(STFDrawMeshInstanceMaterialList.bl_idname, "", context.object.stf_instance_mesh, "materials", context.object.stf_instance_mesh, "active_material")
 
 		self.layout.separator(factor=2, type="LINE")
 
@@ -74,10 +96,5 @@ class STFMeshInstancePanel(bpy.types.Panel):
 		if(context.object.stf_instance_mesh.override_blendshape_values):
 			self.layout.operator(SetInstanceBlendshapes.bl_idname)
 
-			if(len(context.object.stf_instance_mesh.blendshape_values) > 1):
-				box = self.layout.box()
-				for instance_blendshape in context.object.stf_instance_mesh.blendshape_values[1:]:
-					row = box.row()
-					row.prop(instance_blendshape, "override", text=instance_blendshape.name)
-					row.prop(instance_blendshape, "value", text="Value")
+			self.layout.template_list(STFDrawMeshInstanceBlendshapeList.bl_idname, "", context.object.stf_instance_mesh, "blendshape_values", context.object.stf_instance_mesh, "active_blendshape")
 

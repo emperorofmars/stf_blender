@@ -79,9 +79,13 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 						do_report = True
 						break
 			if(do_report):
-				self.report({"WARNING"}, "STF asset exported with reports! (%.3f sec.)" % (time.time() - time_start))
+				result_str = "STF asset exported with reports! (%.3f sec.)" % (time.time() - time_start)
+				self.report({"WARNING"}, result_str)
+				print(result_str)
 			else:
-				self.report({"INFO"}, "STF asset exported successfully! (%.3f sec.)" % (time.time() - time_start))
+				result_str = "STF asset exported successfully! (%.3f sec.)" % (time.time() - time_start)
+				self.report({"INFO"}, result_str)
+				print(result_str)
 			for report in stf_state._reports:
 				if(report.severity.value >= STFReportSeverity.Warn.value):
 					self.report({"WARNING"}, report.to_string())

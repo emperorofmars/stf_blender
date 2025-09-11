@@ -5,8 +5,7 @@ from ....utils.component_utils import STFAddComponentOperatorBase, STFEditCompon
 from ....utils.component_ui_utils import draw_components_ui, set_stf_component_filter
 from ....base.stf_meta import draw_meta_editor
 from ....utils.minsc import draw_slot_link_warning
-from .... import package_key
-from ....utils.dev_utils import CleanupOp, UnfuckMatrixParentInverse
+from ....utils.dev_utils import draw_dev_tools
 
 
 class STFSetSceneCollectionAsRootOperator(bpy.types.Operator):
@@ -83,27 +82,26 @@ class STFSceneCollectionPanel(bpy.types.Panel):
 				self.layout.operator(STFSetSceneCollectionAsRootOperator.bl_idname)
 				self.layout.operator(operator=ExportSTF.bl_idname, text="Export this Scene as STF root prefab").scene_collection_as_root = True
 
-			self.layout.separator(factor=1, type="SPACE")
-
-			draw_meta_editor(self.layout.box(), context.scene.collection, True)
-
-			self.layout.separator(factor=1, type="SPACE")
-
 			# Set ID
+			self.layout.separator(factor=1, type="SPACE")
 			draw_stf_id_ui(self.layout, context, context.scene.collection, context.scene.collection.stf_info, STFSetSceneCollectionIDOperator.bl_idname)
 
-			self.layout.separator(factor=2, type="LINE")
+			# Asset metadata editor
+			self.layout.separator(factor=1, type="SPACE")
+			header, body = self.layout.panel("stf.prefab_meta_scene", default_closed = True)
+			header.label(text="Asset Metadata")
+			if(body): draw_meta_editor(body.box(), context.scene.collection, True)
 
 			# Components
-			draw_components_ui(self.layout, context, context.scene.collection.stf_info, context.scene.collection, STFAddSceneCollectionComponentOperator.bl_idname, STFRemoveSceneCollectionComponentOperator.bl_idname, STFEditSceneCollectionComponentIdOperator.bl_idname)
+			self.layout.separator(factor=1, type="SPACE")
+			header, body = self.layout.panel("stf.prefab_components_scene", default_closed = False)
+			header.label(text="STF Components", icon="GROUP")
+			if(body): draw_components_ui(self.layout, context, context.scene.collection.stf_info, context.scene.collection, STFAddSceneCollectionComponentOperator.bl_idname, STFRemoveSceneCollectionComponentOperator.bl_idname, STFEditSceneCollectionComponentIdOperator.bl_idname)
 
 		# Dev Options
-		if(bpy.context.preferences.addons[package_key.package_key].preferences.enable_dev_mode):
-			self.layout.separator(factor=4, type="LINE")
-			self.layout.label(text="Development Helpers")
-			self.layout.operator(CleanupOp.bl_idname)
-
-			self.layout.separator(factor=2, type="SPACE")
-			self.layout.operator(UnfuckMatrixParentInverse.bl_idname)
+		self.layout.separator(factor=3, type="LINE")
+		dev_header, dev_body = self.layout.panel("stf.devtools_scene", default_closed = True)
+		dev_header.label(text="Devtools")
+		if(dev_body): draw_dev_tools(dev_body)
 
 

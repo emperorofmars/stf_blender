@@ -54,18 +54,35 @@ def cleanup_unreferenced_components():
 
 
 class CleanupOp(bpy.types.Operator):
+	"""Remove components and data-resources no longer referenced anywhere"""
 	bl_idname = "stf.cleanup_unreferenced_components"
 	bl_label = "Cleanup Unreferenced Components"
+	bl_options = {"REGISTER", "UNDO"}
 
 	def execute(self, context):
 		cleanup_unreferenced_components()
 		return {"FINISHED"}
 
 
+class QuaternionsEverywhere(bpy.types.Operator):
+	"""Warning: this will break existing non-quaternion animations!"""
+	bl_idname = "stf.set_everything_to_quaternion_rotation"
+	bl_label = "Set everything to use Quaternions (At your own risk!)"
+	bl_options = {"REGISTER", "UNDO"}
+
+	def execute(self, context):
+		for blender_object in bpy.data.objects[:]:
+			blender_object.rotation_mode = "QUATERNION"
+			if(type(blender_object.data) == bpy.types.Armature):
+				for bone in blender_object.pose.bones[:]:
+					bone.rotation_mode = "QUATERNION"
+		return {"FINISHED"}
+
+
 class UnfuckMatrixParentInverse(bpy.types.Operator):
 	"""Warning: this will pretty much fuck up all your animations!"""
 	bl_idname = "stf.unfuck_matrix_parent_inverse"
-	bl_label = "Unfuck matrix_parent_inverse"
+	bl_label = "Unfuck matrix_parent_inverse (Don't)"
 	bl_options = {"REGISTER", "UNDO"}
 
 	def execute(self, context):
@@ -76,3 +93,13 @@ class UnfuckMatrixParentInverse(bpy.types.Operator):
 				blender_object.matrix_world = tmp
 		return {"FINISHED"}
 
+
+def draw_dev_tools(layout: bpy.types.UILayout):
+	layout.label(text="Development Helpers")
+	layout.operator(CleanupOp.bl_idname)
+
+	layout.separator(factor=2, type="SPACE")
+	layout.operator(QuaternionsEverywhere.bl_idname)
+
+	layout.separator(factor=2, type="SPACE")
+	layout.operator(UnfuckMatrixParentInverse.bl_idname)

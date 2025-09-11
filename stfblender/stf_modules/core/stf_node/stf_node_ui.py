@@ -51,4 +51,7 @@ class STFNodePanel(bpy.types.Panel):
 		self.layout.separator(factor=2, type="LINE")
 
 		# Components
-		draw_components_ui(self.layout, context, context.object.stf_info, context.object, STFAddObjectComponentOperator.bl_idname, STFRemoveObjectComponentOperator.bl_idname, STFEditObjectComponentIdOperator.bl_idname)
+		self.layout.separator(factor=1, type="SPACE")
+		header, body = self.layout.panel("stf.node_components", default_closed = False)
+		header.label(text="STF Components", icon="GROUP")
+		if(body): draw_components_ui(self.layout, context, context.object.stf_info, context.object, STFAddObjectComponentOperator.bl_idname, STFRemoveObjectComponentOperator.bl_idname, STFEditObjectComponentIdOperator.bl_idname)
