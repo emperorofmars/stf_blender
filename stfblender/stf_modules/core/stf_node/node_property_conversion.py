@@ -106,7 +106,7 @@ def stf_node_resolve_property_path_to_stf_func(context: STF_ExportContext, blend
 		return [blender_object.stf_info.stf_id, "s"], _create_scale_to_stf_func(blender_object), scale_index_conversion_to_stf
 
 	if(match := re.search(r"^hide_render", data_path)):
-		return [blender_object.stf_info.stf_id, "enabled"], lambda v: [not v[0]], None
+		return [blender_object.stf_info.stf_id, "enabled"], lambda v: [0 if v[0] else 1], None
 
 	return None
 
