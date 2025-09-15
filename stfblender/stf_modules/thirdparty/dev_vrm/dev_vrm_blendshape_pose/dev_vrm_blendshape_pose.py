@@ -115,15 +115,36 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 				remove_button.index = value_index
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: bpy.types.Object) -> any:
-	resource_ref, resource = add_resource(context_object, _blender_property_name, stf_id, _stf_type)
+def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: bpy.types.Collection) -> any:
+	resource_ref, resource = add_resource(context.get_root_collection(), _blender_property_name, stf_id, _stf_type)
 	import_data_resource_base(resource, json_resource)
+
+	# todo
 
 	return resource
 
 
-def _stf_export(context: STF_ExportContext, resource: VRM_Blendshape_Pose, context_object: bpy.types.Object) -> tuple[dict, str]:
+def _stf_export(context: STF_ExportContext, resource: VRM_Blendshape_Pose, context_object: bpy.types.Collection) -> tuple[dict, str]:
 	ret = export_data_resource_base(context, _stf_type, resource)
+
+	target_dict: dict[str, dict[str, float]] = {}
+	ret["targets"] = target_dict
+
+	def _handle():
+		for target in resource.targets:
+			target: VRM_Blendshape_Pose_Target = target # Because syntax highlighting, srsly how vibecoded is all of this tooling? The type annotations are all there!
+			if(target.mesh_instance):
+				value_dict: dict[str, float] = {}
+				if(target.mesh_instance.stf_info.stf_id not in target_dict):
+					target_dict[target.mesh_instance.stf_info.stf_id] = value_dict
+				else:
+					value_dict = target_dict[target.mesh_instance.stf_info.stf_id]
+				for value in target.values:
+					value: VRM_Blendshape_Pose_Value = value # ffs
+					if(value.blendshape_name and value.blendshape_name not in value_dict):
+						value_dict[value.blendshape_name] = value.blendshape_value
+
+	context.add_task(_handle)
 
 	return ret, resource.stf_id
 

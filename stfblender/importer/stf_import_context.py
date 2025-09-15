@@ -10,6 +10,7 @@ class STF_ImportContext:
 
 	def __init__(self, state: STF_ImportState):
 		self._state: STF_ImportState = state
+		self._root_collection = None
 		#self._tasks: list[Callable] = []
 
 	def get_json_resource(self, stf_id: str) -> dict:
@@ -48,9 +49,8 @@ class STF_ImportContext:
 		if(module := self._state.determine_module(json_resource, stf_kind)):
 			application_object = module.import_func(self, json_resource, stf_id, context_object)
 			if(application_object):
-				self.__run_components(json_resource, module.get_components_holder_func(application_object) if hasattr(module, "get_components_holder_func") else application_object)
-
 				self.register_imported_resource(stf_id, application_object)
+				self.__run_components(json_resource, module.get_components_holder_func(application_object) if hasattr(module, "get_components_holder_func") else application_object)
 				return application_object
 			else:
 				self.report(STFReport("Resource import error", STFReportSeverity.Error, stf_id, module.stf_type, None))
@@ -85,11 +85,14 @@ class STF_ImportContext:
 	def get_root_id(self) -> str:
 		return self._state._file.definition.stf.root
 
+	def set_root_collection(self, root_collection: bpy.types.Collection):
+		self._root_collection = root_collection
+	
+	def get_root_collection(self) -> bpy.types.Collection:
+		return self._root_collection
+
 	def get_filename(self) -> str:
 		return self._state._file.filename
-
-	def get_root_context(self) -> any:
-		return self
 
 	def report(self, report: STFReport):
 		self._state.report(report)

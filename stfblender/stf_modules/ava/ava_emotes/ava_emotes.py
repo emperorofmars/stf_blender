@@ -7,7 +7,7 @@ from ....utils.component_utils import add_component, export_component_base, impo
 from ....base.stf_report import STFReport, STFReportSeverity
 from ....utils.reference_helper import export_resource
 from ....utils.minsc import draw_slot_link_warning
-from ....base.blender_grr import BlenderGRR, draw_blender_grr
+from ....base.blender_grr import BlenderGRR, draw_blender_grr, resolve_blender_grr
 
 
 _stf_type = "ava.emotes"
@@ -201,12 +201,10 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 
 			if("fallback" in json_emote):
 				blender_emote.use_blendshape_fallback = True
-				"""for fallback in json_emote["fallback"]:
-					if(mesh_instance := context.get_imported_resource(fallback["mesh_instance"])):
-						blender_fallback = blender_emote.blendshape_fallback.values.add()
-						blender_fallback.mesh_instance = mesh_instance
-						blender_fallback.blendshape_name = fallback["name"]
-						blender_fallback.blendshape_value = fallback["value"]"""
+				if(fallback_resource := context.import_resource(json_emote["fallback"], stf_kind="data")):
+					blender_emote.blendshape_fallback.reference_type = "stf_data_resource"
+					blender_emote.blendshape_fallback.collection = context.get_root_collection() # todo maybe handle root collection import?
+					blender_emote.blendshape_fallback.stf_data_resource_id = fallback_resource.stf_id
 
 	context.add_task(_handle)
 
@@ -229,17 +227,9 @@ def _stf_export(context: STF_ExportContext, component: AVA_Emotes, context_objec
 				json_emote = { "animation": export_resource(ret, animation_id) }
 				emotes[meaning] = json_emote
 
-				"""if(blender_emote.use_blendshape_fallback and len(blender_emote.blendshape_fallback.values) > 0):
-					fallback = []
-					for fallback_blendshape in blender_emote.blendshape_fallback.values:
-						if(fallback_blendshape.mesh_instance and fallback_blendshape.blendshape_name):
-							fallback.append({
-								"mesh_instance": export_resource(ret, context.get_resource_id(fallback_blendshape.mesh_instance)),
-								"name": fallback_blendshape.blendshape_name,
-								"value": fallback_blendshape.blendshape_value,
-							})
-
-					json_emote["fallback"] = fallback"""
+				if(blender_emote.use_blendshape_fallback):
+					if(fallback_resource := resolve_blender_grr(blender_emote.blendshape_fallback)):
+						json_emote["fallback"] = export_resource(ret, context.serialize_resource(fallback_resource))
 			else:
 				context.report(STFReport("Invalid Emote", STFReportSeverity.Info, component.stf_id, _stf_type, component))
 

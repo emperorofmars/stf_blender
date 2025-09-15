@@ -20,6 +20,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 		collection.stf_info.stf_name_source_of_truth = True
 	bpy.context.scene.collection.children.link(collection)
 	collection.stf_use_collection_as_prefab = True
+	context.set_root_collection(collection)
 
 	for node_id in json_resource.get("root_nodes", []):
 		context.import_resource(node_id, context_object=collection, stf_kind="node")

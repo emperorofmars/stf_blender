@@ -3,7 +3,7 @@ import bpy
 from .stf_module_component import STF_Component_Ref
 
 """
-Blender generic resource reference
+Blender Generic Resource Reference
 
 Bringing polymorphism to Blender
 """
@@ -63,6 +63,7 @@ class BlenderGRR(bpy.types.PropertyGroup):
 	blender_type: bpy.props.EnumProperty(name="Type", items=blender_type_values) # type: ignore
 
 	use_scene_collection: bpy.props.BoolProperty(default=False, name="Use Scene Collection") # type: ignore
+	scene: bpy.props.PointerProperty(type=bpy.types.Scene, name="Scene") # type: ignore
 	collection: bpy.props.PointerProperty(type=bpy.types.Collection, name="Collection") # type: ignore
 	object: bpy.props.PointerProperty(type=bpy.types.Object, name="Object") # type: ignore
 
@@ -76,7 +77,8 @@ def __draw_blender_collection_selection(layout: bpy.types.UILayout, grr: Blender
 		layout.prop(grr, "collection")
 		return bool(grr.collection)
 	else:
-		return True
+		layout.prop(grr, "scene")
+		return bool(grr.scene)
 
 
 def __draw_blender_type_selection(layout: bpy.types.UILayout, grr: BlenderGRR) -> bool:
@@ -106,4 +108,27 @@ def draw_blender_grr(layout: bpy.types.UILayout, grr: BlenderGRR):
 			if(grr.stf_data_resource_id):
 				layout.prop(grr, "stf_component_id")
 
+
+def __get_blender_property(holder: any, ref_holder: any, property_holder: any, target_id: str):
+	for resource_ref in ref_holder:
+		if(resource_ref.stf_id == target_id):
+			for resource in getattr(property_holder, resource_ref.blender_property_name):
+				if(resource.stf_id == resource_ref.stf_id):
+					return resource
+	return None
+
+
+def resolve_blender_grr(grr: BlenderGRR) -> any:
+	if(grr.reference_type == "blender"):
+		pass # todo return the resource based on the blender_type
+	elif(grr.reference_type == "stf_component"):
+		pass
+	elif(grr.reference_type == "stf_data_resource"):
+		if(grr.use_scene_collection and grr.scene):
+			return __get_blender_property(grr.scene.collection, grr.scene.collection.stf_data_refs, grr.scene.collection, grr.stf_data_resource_id)
+		elif(grr.collection):
+			return __get_blender_property(grr.collection, grr.collection.stf_data_refs, grr.collection, grr.stf_data_resource_id)
+	elif(grr.reference_type == "stf_data_resource_component"):
+		pass
+	return None
 
