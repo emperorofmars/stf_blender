@@ -17,9 +17,11 @@ def add_component(application_object: any, blender_property_name: str, stf_id: s
 	component_ref.stf_id = stf_id
 	component_ref.stf_type = stf_type
 	component_ref.blender_property_name = blender_property_name
+	component_ref.name = stf_id
 
 	new_component = getattr(application_object, blender_property_name).add()
 	new_component.stf_id = component_ref.stf_id
+	new_component.name = stf_id
 
 	return (component_ref, new_component)
 
@@ -109,6 +111,10 @@ class STFEditComponentOperatorBase:
 		return context.window_manager.invoke_props_dialog(self)
 
 	def execute(self, context):
+		if(not self.edit_component_id):
+			self.report({"ERROR"}, "ID can't be empty!")
+			return {"CANCELLED"}
+
 		components_refs = self.get_components_ref_property(context)
 		for component_ref in components_refs:
 			if(component_ref.stf_id == self.component_id):

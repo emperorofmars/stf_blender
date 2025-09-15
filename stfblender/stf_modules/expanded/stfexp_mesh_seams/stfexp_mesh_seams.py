@@ -43,8 +43,8 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	return component
 
 
-def _stf_export(context: STF_ExportContext, application_object: STFEXP_Mesh_Seams, context_object: bpy.types.Mesh) -> tuple[dict, str]:
-	ret = export_component_base(context, _stf_type, application_object)
+def _stf_export(context: STF_ExportContext, component: STFEXP_Mesh_Seams, context_object: bpy.types.Mesh) -> tuple[dict, str]:
+	ret = export_component_base(context, _stf_type, component)
 
 	indices_width = determine_indices_width(len(context_object.loops))
 
@@ -56,7 +56,7 @@ def _stf_export(context: STF_ExportContext, application_object: STFEXP_Mesh_Seam
 	ret["indices_width"] = indices_width
 	ret["seams"] = export_buffer(ret, context.serialize_buffer(buffer_seams.getvalue()))
 
-	return ret, application_object.stf_id
+	return ret, component.stf_id
 
 
 class STF_Module_STF_Mesh_Seams(STF_BlenderComponentModule):

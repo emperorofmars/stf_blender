@@ -3,6 +3,7 @@ import bpy
 from ....utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
 from ....utils.component_utils import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
 from ....utils.component_ui_utils import draw_components_ui, set_stf_component_filter
+from ....utils.data_resource_ui import draw_data_resources_ui
 from ....base.stf_meta import draw_meta_editor
 from ....utils.minsc import draw_slot_link_warning
 from ....utils.dev_utils import draw_dev_tools
@@ -97,6 +98,12 @@ class STFSceneCollectionPanel(bpy.types.Panel):
 			header, body = self.layout.panel("stf.prefab_components_scene", default_closed = False)
 			header.label(text="STF Components", icon="GROUP")
 			if(body): draw_components_ui(self.layout, context, context.scene.collection.stf_info, context.scene.collection, STFAddSceneCollectionComponentOperator.bl_idname, STFRemoveSceneCollectionComponentOperator.bl_idname, STFEditSceneCollectionComponentIdOperator.bl_idname)
+
+			# Data Resources
+			self.layout.separator(factor=1, type="SPACE")
+			header, body = self.layout.panel("stf.prefab_data_resources_scene", default_closed = False)
+			header.label(text="STF Data Resources", icon="GROUP")
+			if(body): draw_data_resources_ui(self.layout, context, context.scene.collection)
 
 		# Dev Options
 		self.layout.separator(factor=3, type="LINE")

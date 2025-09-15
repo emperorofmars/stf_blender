@@ -18,7 +18,6 @@ class VRC_AvatarColliders(STF_BlenderComponentBase):
 
 def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: VRC_AvatarColliders):
 	layout.prop(component, "data")
-	layout.label
 
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, context_object: any) -> any:

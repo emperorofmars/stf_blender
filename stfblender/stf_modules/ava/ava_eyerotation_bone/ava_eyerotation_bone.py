@@ -37,13 +37,13 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, parent
 	return component
 
 
-def _stf_export(context: STF_ExportContext, application_object: AVA_EyeRotation_Bone, parent_application_object: any) -> tuple[dict, str]:
-	ret = export_component_base(context, _stf_type, application_object)
-	ret["up"] = application_object.limit_up
-	ret["down"] = application_object.limit_down
-	ret["in"] = application_object.limit_in
-	ret["out"] = application_object.limit_out
-	return ret, application_object.stf_id
+def _stf_export(context: STF_ExportContext, component: AVA_EyeRotation_Bone, parent_application_object: any) -> tuple[dict, str]:
+	ret = export_component_base(context, _stf_type, component)
+	ret["up"] = component.limit_up
+	ret["down"] = component.limit_down
+	ret["in"] = component.limit_in
+	ret["out"] = component.limit_out
+	return ret, component.stf_id
 
 
 class STF_Module_AVA_EyeRotation_Bone(STF_BlenderComponentModule):

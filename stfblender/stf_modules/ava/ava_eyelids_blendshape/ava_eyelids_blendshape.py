@@ -124,19 +124,19 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, parent
 	return component
 
 
-def _stf_export(context: STF_ExportContext, application_object: AVA_Eyelids_Blendshape, parent_application_object: any) -> tuple[dict, str]:
-	ret = export_component_base(context, _stf_type, application_object)
+def _stf_export(context: STF_ExportContext, component: AVA_Eyelids_Blendshape, parent_application_object: any) -> tuple[dict, str]:
+	ret = export_component_base(context, _stf_type, component)
 
 	for shape_name, _ in _eyelid_shapes.items():
-		ret[shape_name] = getattr(application_object, "eyes_closed" if shape_name == "closed" else "look_" + shape_name)
+		ret[shape_name] = getattr(component, "eyes_closed" if shape_name == "closed" else "look_" + shape_name)
 
 	for shape_name, _ in _eyelid_shapes.items():
-		ret[shape_name + "_left"] = getattr(application_object, "eye_closed_left" if shape_name == "closed" else "look_" + shape_name + "_left")
+		ret[shape_name + "_left"] = getattr(component, "eye_closed_left" if shape_name == "closed" else "look_" + shape_name + "_left")
 
 	for shape_name, _ in _eyelid_shapes.items():
-		ret[shape_name + "_right"] = getattr(application_object, "eye_closed_right" if shape_name == "closed" else "look_" + shape_name + "_right")
+		ret[shape_name + "_right"] = getattr(component, "eye_closed_right" if shape_name == "closed" else "look_" + shape_name + "_right")
 
-	return ret, application_object.stf_id
+	return ret, component.stf_id
 
 
 class STF_Module_AVA_Eyelids_Blendshape(STF_BlenderComponentModule):

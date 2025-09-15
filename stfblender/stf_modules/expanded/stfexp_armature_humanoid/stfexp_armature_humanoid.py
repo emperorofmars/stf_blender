@@ -30,11 +30,11 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, parent
 	return component
 
 
-def _stf_export(context: STF_ExportContext, application_object: STFEXP_Armature_Humanoid, parent_application_object: any) -> tuple[dict, str]:
-	ret = export_component_base(context, _stf_type, application_object)
-	ret["locomotion_type"] = application_object.locomotion_type
-	ret["no_jaw"] = application_object.no_jaw
-	return ret, application_object.stf_id
+def _stf_export(context: STF_ExportContext, component: STFEXP_Armature_Humanoid, parent_application_object: any) -> tuple[dict, str]:
+	ret = export_component_base(context, _stf_type, component)
+	ret["locomotion_type"] = component.locomotion_type
+	ret["no_jaw"] = component.no_jaw
+	return ret, component.stf_id
 
 
 class STF_Module_STFEXP_Armature_Humanoid(STF_BlenderComponentModule):

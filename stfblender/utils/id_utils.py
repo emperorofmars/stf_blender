@@ -20,20 +20,31 @@ class STFSetIDOperatorBase:
 
 def draw_stf_id_ui(layout: bpy.types.UILayout, context: bpy.types.Context, blender_object: any, stf_prop_holder: any, set_id_op: str, is_instance: bool = False):
 	layout = layout.box()
+	flow = layout.split(factor=0.15)
+	flow.label(text="ID:")
 	if(stf_prop_holder.stf_id):
-		row = layout.row(align=True)
-		row.prop(stf_prop_holder, "stf_id")
-		row.operator(CopyToClipboard.bl_idname, text="Copy ID").text = stf_prop_holder.stf_id
+		row = flow.row(align=True)
+		row_l = row.row(align=True)
+		row_l.prop(stf_prop_holder, "stf_id", text="")
+		row_r = row.row(align=True)
+		row_r.alignment = "RIGHT"
+		row_r.operator(CopyToClipboard.bl_idname, text="Copy ID").text = stf_prop_holder.stf_id
 	else:
-		layout.operator(set_id_op)
+		flow.operator(set_id_op)
 
-	row = layout.row()
+	flow = layout.split(factor=0.15)
+	flow.label(text="Name:")
+	row = flow.row()
 	if(stf_prop_holder.stf_name_source_of_truth):
-		row.prop(stf_prop_holder, "stf_name", text="Name")
+		row.prop(stf_prop_holder, "stf_name", text="")
 	else:
-		row.label(text="Name:    " + blender_object.name)
+		sub = row.row()
+		sub.enabled = False
+		sub.prop(blender_object, "name", text="")
 	if(not is_instance):
-		row.prop(stf_prop_holder, "stf_name_source_of_truth", text="Override Name")
+		row_r = row.row()
+		row_r.alignment = "RIGHT"
+		row_r.prop(stf_prop_holder, "stf_name_source_of_truth", text="Override Name")
 
 
 def ensure_stf_id(stf_context: any, blender_object: any, stf_prop_holder: any = None):

@@ -2,6 +2,7 @@ import bpy
 
 from .stf_module import STF_Module
 from .stf_module_component import STF_BlenderComponentModule, STF_ExportComponentHook
+from .stf_module_data import STF_BlenderDataModule
 
 """
 Util to retrieve all existing STF-modules
@@ -70,7 +71,7 @@ def get_export_modules() -> tuple[dict[any, list[STF_Module]], dict[any, list[ST
 def get_component_modules(filter = None) -> list[STF_BlenderComponentModule]:
 	ret = []
 	for stf_module in get_stf_modules():
-		if(isinstance(stf_module, STF_BlenderComponentModule) or hasattr(stf_module, "blender_property_name") and hasattr(stf_module, "filter")):
+		if(hasattr(stf_module, "blender_property_name") and getattr(stf_module, "stf_kind") == "component"):
 			if(hasattr(stf_module, "filter") and filter):
 				if(filter in getattr(stf_module, "filter")):
 					ret.append(stf_module)
@@ -78,4 +79,11 @@ def get_component_modules(filter = None) -> list[STF_BlenderComponentModule]:
 					continue
 			else:
 				ret.append(stf_module)
+	return ret
+
+def get_blender_non_native_data_modules() -> list[STF_BlenderDataModule]:
+	ret = []
+	for stf_module in get_stf_modules():
+		if(hasattr(stf_module, "blender_property_name") and getattr(stf_module, "stf_kind") == "data"):
+			ret.append(stf_module)
 	return ret

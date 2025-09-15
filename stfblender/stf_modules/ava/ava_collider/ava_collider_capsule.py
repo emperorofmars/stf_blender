@@ -70,17 +70,17 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	return component
 
 
-def _stf_export(context: STF_ExportContext, application_object: AVA_Collider_Capsule, context_object: any) -> tuple[dict, str]:
-	ret = export_component_base(context, _stf_type, application_object)
-	ret["radius"] = application_object.radius
-	ret["height"] = application_object.height
+def _stf_export(context: STF_ExportContext, component: AVA_Collider_Capsule, context_object: any) -> tuple[dict, str]:
+	ret = export_component_base(context, _stf_type, component)
+	ret["radius"] = component.radius
+	ret["height"] = component.height
 
-	offset_position = mathutils.Vector(application_object.offset_position)
+	offset_position = mathutils.Vector(component.offset_position)
 	ret["offset_position"] = blender_translation_to_stf(offset_position)
 
-	offset_rotation = mathutils.Euler(application_object.offset_rotation)
+	offset_rotation = mathutils.Euler(component.offset_rotation)
 	ret["offset_rotation"] = blender_rotation_to_stf(offset_rotation.to_quaternion())
-	return ret, application_object.stf_id
+	return ret, component.stf_id
 
 
 class STF_Module_AVA_Collider_Capsule(STF_BlenderComponentModule):

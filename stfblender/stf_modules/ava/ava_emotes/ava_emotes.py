@@ -7,6 +7,7 @@ from ....utils.component_utils import add_component, export_component_base, impo
 from ....base.stf_report import STFReport, STFReportSeverity
 from ....utils.reference_helper import export_resource
 from ....utils.minsc import draw_slot_link_warning
+from ....base.blender_grr import BlenderGRR, draw_blender_grr
 
 
 _stf_type = "ava.emotes"
@@ -37,7 +38,7 @@ class Edit_AVA_Emotes(bpy.types.Operator):
 		self.report({"ERROR"}, "Couldn't edit Physbone")
 		return {"CANCELLED"}
 
-
+"""
 class Edit_AVA_EmoteFallback(bpy.types.Operator):
 	bl_idname = "stf.edit_ava_emote_fallback"
 	bl_label = "Edit"
@@ -63,7 +64,6 @@ class Edit_AVA_EmoteFallback(bpy.types.Operator):
 		self.report({"ERROR"}, "Couldn't edit Physbone")
 		return {"CANCELLED"}
 
-
 class AVA_FallbackBlendshape_Value(bpy.types.PropertyGroup):
 	mesh_instance: bpy.props.PointerProperty(type=bpy.types.Object, name="Meshinstance", poll=lambda s, o: o.data and type(o.data) == bpy.types.Mesh) # type: ignore
 	blendshape_name: bpy.props.StringProperty(name="Name") # type: ignore
@@ -71,6 +71,7 @@ class AVA_FallbackBlendshape_Value(bpy.types.PropertyGroup):
 
 class AVA_FallbackBlendshape_Emote(bpy.types.PropertyGroup):
 	values: bpy.props.CollectionProperty(type=AVA_FallbackBlendshape_Value) # type: ignore
+"""
 
 
 emote_values = (
@@ -103,7 +104,9 @@ class AVA_Emote(bpy.types.PropertyGroup):
 	animation: bpy.props.PointerProperty(type=bpy.types.Action, name="Animation") # type: ignore # todo select only actions with a valid slot-link setup
 
 	use_blendshape_fallback: bpy.props.BoolProperty(name="Provide Blendshape Only Fallback", default=False) # type: ignore
-	blendshape_fallback: bpy.props.PointerProperty(type=AVA_FallbackBlendshape_Emote, name="Blendshape Only Fallback") # type: ignore
+	blendshape_fallback: bpy.props.PointerProperty(type=BlenderGRR) # type: ignore
+
+	#blendshape_fallback: bpy.props.PointerProperty(type=AVA_FallbackBlendshape_Emote, name="Blendshape Only Fallback") # type: ignore
 
 
 class AVA_Emotes(STF_BlenderComponentBase):
@@ -131,6 +134,9 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 
 	row = layout.row()
 	row.template_list(STFDrawAVAEmoteList.bl_idname, "", component, "emotes", component, "active_emote")
+
+	if(component.active_emote >= len(component.emotes)):
+		return
 	
 	remove_button = row.operator(Edit_AVA_Emotes.bl_idname, text="", icon="X")
 	remove_button.component_id = component.stf_id
@@ -155,7 +161,10 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 	if(emote.use_blendshape_fallback):
 		box = box.box()
 		box.label(text="Blendshape Only Fallback")
+		box.use_property_split = True
+		draw_blender_grr(box, emote.blendshape_fallback)
 
+"""
 		add_button = box.operator(Edit_AVA_EmoteFallback.bl_idname, text="Add Blendshape")
 		add_button.component_id = component.stf_id
 		add_button.op = True
@@ -171,6 +180,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 			remove_button.op = False
 			remove_button.emote_index = component.active_emote
 			remove_button.blendshape_index = blendshape_index
+"""
 
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
@@ -188,15 +198,15 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 				blender_emote.emote = "custom"
 				blender_emote.custom_emote = meaning
 			blender_emote.animation = context.get_imported_resource(json_emote.get("animation"))
-			
+
 			if("fallback" in json_emote):
 				blender_emote.use_blendshape_fallback = True
-				for fallback in json_emote["fallback"]:
+				"""for fallback in json_emote["fallback"]:
 					if(mesh_instance := context.get_imported_resource(fallback["mesh_instance"])):
 						blender_fallback = blender_emote.blendshape_fallback.values.add()
 						blender_fallback.mesh_instance = mesh_instance
 						blender_fallback.blendshape_name = fallback["name"]
-						blender_fallback.blendshape_value = fallback["value"]
+						blender_fallback.blendshape_value = fallback["value"]"""
 
 	context.add_task(_handle)
 
@@ -219,7 +229,7 @@ def _stf_export(context: STF_ExportContext, component: AVA_Emotes, context_objec
 				json_emote = { "animation": export_resource(ret, animation_id) }
 				emotes[meaning] = json_emote
 
-				if(blender_emote.use_blendshape_fallback and len(blender_emote.blendshape_fallback.values) > 0):
+				"""if(blender_emote.use_blendshape_fallback and len(blender_emote.blendshape_fallback.values) > 0):
 					fallback = []
 					for fallback_blendshape in blender_emote.blendshape_fallback.values:
 						if(fallback_blendshape.mesh_instance and fallback_blendshape.blendshape_name):
@@ -229,7 +239,7 @@ def _stf_export(context: STF_ExportContext, component: AVA_Emotes, context_objec
 								"value": fallback_blendshape.blendshape_value,
 							})
 
-					json_emote["fallback"] = fallback
+					json_emote["fallback"] = fallback"""
 			else:
 				context.report(STFReport("Invalid Emote", STFReportSeverity.Info, component.stf_id, _stf_type, component))
 

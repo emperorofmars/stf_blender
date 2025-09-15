@@ -85,25 +85,25 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, parent
 	return component
 
 
-def _stf_export(context: STF_ExportContext, application_object: AVA_Avatar, parent_application_object: any) -> tuple[dict, str]:
-	ret = export_component_base(context, _stf_type, application_object)
+def _stf_export(context: STF_ExportContext, component: AVA_Avatar, parent_application_object: any) -> tuple[dict, str]:
+	ret = export_component_base(context, _stf_type, component)
 
-	if(application_object.viewport):
+	if(component.viewport):
 		def _handle_viewport():
-			ret["viewport"] = export_resource(ret, context.get_resource_id(application_object.viewport))
+			ret["viewport"] = export_resource(ret, context.get_resource_id(component.viewport))
 		context.add_task(_handle_viewport)
 		
-	if(application_object.primary_armature_instance and application_object.primary_armature_instance.data and type(application_object.primary_armature_instance.data) == bpy.types.Armature):
+	if(component.primary_armature_instance and component.primary_armature_instance.data and type(component.primary_armature_instance.data) == bpy.types.Armature):
 		def _handle_primary_armature_instance():
-			ret["primary_armature_instance"] = export_resource(ret, context.get_resource_id(application_object.primary_armature_instance))
+			ret["primary_armature_instance"] = export_resource(ret, context.get_resource_id(component.primary_armature_instance))
 		context.add_task(_handle_primary_armature_instance)
 		
-	if(application_object.primary_mesh_instance and application_object.primary_mesh_instance.data and type(application_object.primary_mesh_instance.data) == bpy.types.Mesh):
+	if(component.primary_mesh_instance and component.primary_mesh_instance.data and type(component.primary_mesh_instance.data) == bpy.types.Mesh):
 		def _handle_primary_mesh_instance():
-			ret["primary_mesh_instance"] = export_resource(ret, context.get_resource_id(application_object.primary_mesh_instance))
+			ret["primary_mesh_instance"] = export_resource(ret, context.get_resource_id(component.primary_mesh_instance))
 		context.add_task(_handle_primary_mesh_instance)
 
-	return ret, application_object.stf_id
+	return ret, component.stf_id
 
 
 class STF_Module_AVA_Avatar(STF_BlenderComponentModule):

@@ -89,13 +89,13 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, parent
 	return component
 
 
-def _stf_export(context: STF_ExportContext, application_object: AVA_Visemes_Blendshape, parent_application_object: any) -> tuple[dict, str]:
-	ret = export_component_base(context, _stf_type, application_object)
+def _stf_export(context: STF_ExportContext, component: AVA_Visemes_Blendshape, parent_application_object: any) -> tuple[dict, str]:
+	ret = export_component_base(context, _stf_type, component)
 
 	for viseme in _voice_visemes_15:
-		ret[viseme] = application_object["vis_" + viseme]
+		ret[viseme] = component["vis_" + viseme]
 
-	return ret, application_object.stf_id
+	return ret, component.stf_id
 
 
 class STF_Module_AVA_Visemes_Blendshape(STF_BlenderComponentModule):

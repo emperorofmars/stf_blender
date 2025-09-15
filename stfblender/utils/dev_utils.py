@@ -59,6 +59,9 @@ class CleanupOp(bpy.types.Operator):
 	bl_label = "Cleanup Unreferenced Components"
 	bl_options = {"REGISTER", "UNDO"}
 
+	def invoke(self, context, event):
+		return context.window_manager.invoke_confirm(self, event)
+
 	def execute(self, context):
 		cleanup_unreferenced_components()
 		return {"FINISHED"}
@@ -69,6 +72,9 @@ class QuaternionsEverywhere(bpy.types.Operator):
 	bl_idname = "stf.set_everything_to_quaternion_rotation"
 	bl_label = "Set everything to use Quaternions (At your own risk!)"
 	bl_options = {"REGISTER", "UNDO"}
+
+	def invoke(self, context, event):
+		return context.window_manager.invoke_confirm(self, event)
 
 	def execute(self, context):
 		for blender_object in bpy.data.objects[:]:
@@ -84,6 +90,9 @@ class UnfuckMatrixParentInverse(bpy.types.Operator):
 	bl_idname = "stf.unfuck_matrix_parent_inverse"
 	bl_label = "Unfuck matrix_parent_inverse (Don't)"
 	bl_options = {"REGISTER", "UNDO"}
+
+	def invoke(self, context, event):
+		return context.window_manager.invoke_confirm(self, event)
 
 	def execute(self, context):
 		for blender_object in bpy.data.objects[:]:

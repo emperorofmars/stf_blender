@@ -28,10 +28,10 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	return component
 
 
-def _stf_export(context: STF_ExportContext, application_object: AVA_SecondaryMotion, context_object: any) -> tuple[dict, str]:
-	ret = export_component_base(context, _stf_type, application_object)
-	ret["intensity"] = application_object.intensity
-	return ret, application_object.stf_id
+def _stf_export(context: STF_ExportContext, component: AVA_SecondaryMotion, context_object: any) -> tuple[dict, str]:
+	ret = export_component_base(context, _stf_type, component)
+	ret["intensity"] = component.intensity
+	return ret, component.stf_id
 
 
 class STF_Module_AVA_SecondaryMotion(STF_BlenderComponentModule):

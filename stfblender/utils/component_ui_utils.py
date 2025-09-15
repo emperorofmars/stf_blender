@@ -20,7 +20,7 @@ class STFDrawInstanceComponentList(bpy.types.UIList):
 	bl_idname = "COLLECTION_UL_stf_instance_component_list"
 
 	def draw_item(self, context, layout, data, item, icon, active_data, active_propname):
-		layout.label(text=item.stf_type)
+		layout.label(text=item.stf_type + " ( " + item.bone + " )")
 		layout.label(text=item.stf_id)
 
 
@@ -41,13 +41,17 @@ def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, compo
 		for override in component.overrides:
 			col.label(text=override.target_id)
 
-
-	row = box.row()
+	row = row.row()
+	row.alignment = "RIGHT"
 	row.operator(CopyToClipboard.bl_idname, text="Copy ID").text = component_ref.stf_id
 	row.operator(edit_op, text="Edit ID & Overrides").component_id = component_ref.stf_id
 
-	box.prop(component, "stf_name")
-	box.prop(component, "enabled")
+	row = box.row()
+	row_l = row.row()
+	row_l.alignment = "LEFT"
+	row_l.prop(component, "enabled")
+	row.separator(factor=5)
+	row.prop(component, "stf_name")
 	box.separator(factor=1, type="LINE")
 
 	stf_modules = get_component_modules()
@@ -95,7 +99,9 @@ def draw_components_ui(
 	selected_add_module = find_component_module(stf_modules, context.scene.stf_component_modules)
 	if(len(stf_modules) > 0):
 		if(selected_add_module):
-			add_button = row.operator(add_component_op)
+			row_l = row.row(align=True)
+			row_l.alignment = "RIGHT"
+			add_button = row_l.operator(add_component_op, icon="PLUS", text="Add Component")
 			add_button.stf_type = context.scene.stf_component_modules
 			add_button.property_name = selected_add_module.blender_property_name
 		else:
