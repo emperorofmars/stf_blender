@@ -38,42 +38,6 @@ class Edit_AVA_Emotes(bpy.types.Operator):
 		self.report({"ERROR"}, "Couldn't edit Physbone")
 		return {"CANCELLED"}
 
-"""
-class Edit_AVA_EmoteFallback(bpy.types.Operator):
-	bl_idname = "stf.edit_ava_emote_fallback"
-	bl_label = "Edit"
-	bl_options = {"REGISTER", "UNDO"}
-
-	component_id: bpy.props.StringProperty() # type: ignore
-
-	op: bpy.props.BoolProperty() # type: ignore
-	emote_index: bpy.props.IntProperty() # type: ignore
-	blendshape_index: bpy.props.IntProperty() # type: ignore
-
-	def execute(self, context):
-		if(self.op):
-			for component in context.collection.ava_emotes:
-				if(component.stf_id == self.component_id):
-					component.emotes[self.emote_index].blendshape_fallback.values.add()
-					return {"FINISHED"}
-		else:
-			for component in context.collection.ava_emotes:
-				if(component.stf_id == self.component_id):
-					component.emotes[self.emote_index].blendshape_fallback.values.remove(self.blendshape_index)
-					return {"FINISHED"}
-		self.report({"ERROR"}, "Couldn't edit Physbone")
-		return {"CANCELLED"}
-
-class AVA_FallbackBlendshape_Value(bpy.types.PropertyGroup):
-	mesh_instance: bpy.props.PointerProperty(type=bpy.types.Object, name="Meshinstance", poll=lambda s, o: o.data and type(o.data) == bpy.types.Mesh) # type: ignore
-	blendshape_name: bpy.props.StringProperty(name="Name") # type: ignore
-	blendshape_value: bpy.props.FloatProperty(name="Value", default=0, soft_min=0, soft_max=1, subtype="FACTOR") # type: ignore
-
-class AVA_FallbackBlendshape_Emote(bpy.types.PropertyGroup):
-	values: bpy.props.CollectionProperty(type=AVA_FallbackBlendshape_Value) # type: ignore
-"""
-
-
 emote_values = (
 	("smile", "Smile", ""),
 	("happy", "Happy", ""),
@@ -163,24 +127,6 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 		box.label(text="Blendshape Only Fallback")
 		box.use_property_split = True
 		draw_blender_grr(box, emote.blendshape_fallback)
-
-"""
-		add_button = box.operator(Edit_AVA_EmoteFallback.bl_idname, text="Add Blendshape")
-		add_button.component_id = component.stf_id
-		add_button.op = True
-		add_button.emote_index = component.active_emote
-		for blendshape_index, blendshape in enumerate(emote.blendshape_fallback.values):
-			inner_row = box.row()
-			inner_row.prop(blendshape, "mesh_instance", text="")
-			if(blendshape.mesh_instance and type(blendshape.mesh_instance.data) == bpy.types.Mesh):
-				inner_row.prop_search(blendshape, "blendshape_name", blendshape.mesh_instance.data.shape_keys, "key_blocks", text="")
-				inner_row.prop(blendshape, "blendshape_value", text="")
-			remove_button = inner_row.operator(Edit_AVA_EmoteFallback.bl_idname, text="", icon="X")
-			remove_button.component_id = component.stf_id
-			remove_button.op = False
-			remove_button.emote_index = component.active_emote
-			remove_button.blendshape_index = blendshape_index
-"""
 
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:

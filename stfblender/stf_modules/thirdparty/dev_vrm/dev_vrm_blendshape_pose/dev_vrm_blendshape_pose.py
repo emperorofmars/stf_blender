@@ -119,7 +119,17 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	resource_ref, resource = add_resource(context.get_root_collection(), _blender_property_name, stf_id, _stf_type)
 	import_data_resource_base(resource, json_resource)
 
-	# todo
+	def _handle():
+		for target_id, values in json_resource.get("targets", {}).items():
+			if(meshinstance := context.get_imported_resource(target_id)):
+				target = resource.targets.add()
+				target.mesh_instance = meshinstance
+				for blendshape_name, blendshape_value in values.items():
+					value = target.values.add()
+					value.blendshape_name = blendshape_name
+					value.blendshape_value = blendshape_value
+
+	context.add_task(_handle)
 
 	return resource
 
