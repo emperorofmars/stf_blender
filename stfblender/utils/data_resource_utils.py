@@ -1,6 +1,6 @@
 import bpy
 
-from ..base.stf_module_data import STF_BlenderDataModule, STF_BlenderDataResourceBase, STF_Data_Ref
+from ..base.stf_module_data import STF_BlenderDataResourceBase, STF_Data_Ref
 from .id_utils import ensure_stf_id
 
 

@@ -4,6 +4,29 @@ from ..base.stf_module_data import STF_BlenderDataModule, STF_BlenderDataResourc
 from ..base.stf_registry import get_blender_non_native_data_modules
 from .minsc import CopyToClipboard
 from .data_resource_utils import STFCreateDataResourceOperator, STFEditDataResourceOperator, STFRemoveDataResourceOperator
+from .component_ui_utils import draw_components_ui, set_stf_component_filter
+from .component_utils import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
+
+
+class STFAddDataResourceComponentOperator(bpy.types.Operator, STFAddComponentOperatorBase):
+	"""Add Component to Data-Resource"""
+	bl_idname = "stf.add_data_resource_component"
+	use_scene_collection: bpy.props.BoolProperty(default=False) # type: ignore
+	@classmethod
+	def poll(cls, context): return context.collection is not None
+	def get_property(self, context): return context.scene.collection if self.use_scene_collection else context.collection
+
+class STFRemoveDataResourceComponentOperator(bpy.types.Operator, STFRemoveComponentOperatorBase):
+	"""Remove selected component from Data-Resource"""
+	bl_idname = "stf.remove_data_resource_component"
+	use_scene_collection: bpy.props.BoolProperty(default=False) # type: ignore
+	def get_property(self, context): return context.scene.collection if self.use_scene_collection else context.collection
+
+class STFEditDataResourceComponentIdOperator(bpy.types.Operator, STFEditComponentOperatorBase):
+	"""Edit the ID and overrides of this Data-Resource"""
+	use_scene_collection: bpy.props.BoolProperty(default=False) # type: ignore
+	bl_idname = "stf.edit_data_resource_component_id"
+	def get_property(self, context): return context.scene.collection if self.use_scene_collection else context.collection
 
 
 def find_stf_module(stf_modules: list[STF_BlenderDataModule], stf_type: str) -> STF_BlenderDataModule:
@@ -59,6 +82,13 @@ def draw_resource(layout: bpy.types.UILayout, context: bpy.types.Context, resour
 			selected_module.draw_resource_func(box, context, resource_ref, collection, resource)
 		else:
 			pass
+
+		# Components
+		set_stf_component_filter(type(resource))
+		layout.separator(factor=1, type="SPACE")
+		header, body = layout.panel(resource_ref.stf_type + "_components", default_closed = False)
+		header.label(text=resource_ref.stf_type + " Components", icon="GROUP")
+		if(body): draw_components_ui(layout, context, resource, context.collection, STFAddDataResourceComponentOperator.bl_idname, STFRemoveDataResourceComponentOperator.bl_idname, STFEditDataResourceComponentIdOperator.bl_idname)
 	else:
 		box.label(text="Unknown Type")
 		box.label(text="Blender Property Name: " + resource_ref.blender_property_name)
@@ -101,8 +131,6 @@ def draw_data_resources_ui(
 					break
 		else:
 			layout.label(text="Invalid Resource: " + resource_ref.blender_property_name)
-
-		# todo components
 
 
 def _build_stf_data_resource_types_enum_callback(self, context) -> list:
