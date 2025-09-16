@@ -94,13 +94,13 @@ class STFCollectionPanel(bpy.types.Panel):
 			if(body): draw_meta_editor(body.box(), context.collection, False)
 
 			# Components
-			self.layout.separator(factor=1, type="SPACE")
+			self.layout.separator(factor=3, type="LINE")
 			header, body = self.layout.panel("stf.prefab_components", default_closed = False)
 			header.label(text="STF Components", icon="GROUP")
 			if(body): draw_components_ui(self.layout, context, context.collection.stf_info, context.collection, STFAddCollectionComponentOperator.bl_idname, STFRemoveCollectionComponentOperator.bl_idname, STFEditCollectionComponentIdOperator.bl_idname)
 
 			# Data Resources
-			self.layout.separator(factor=1, type="SPACE")
+			self.layout.separator(factor=3, type="LINE")
 			header, body = self.layout.panel("stf.prefab_data_resources", default_closed = False)
 			header.label(text="STF Data Resources", icon="GROUP")
 			if(body): draw_data_resources_ui(self.layout, context, context.collection)

@@ -142,7 +142,7 @@ def _stf_export(context: STF_ExportContext, resource: VRM_Blendshape_Pose, conte
 
 	def _handle():
 		for target in resource.targets:
-			target: VRM_Blendshape_Pose_Target = target # Because syntax highlighting, srsly how vibecoded is all of this tooling? The type annotations are all there!
+			target: VRM_Blendshape_Pose_Target = target # Because syntax highlighting
 			if(target.mesh_instance):
 				value_dict: dict[str, float] = {}
 				if(target.mesh_instance.stf_info.stf_id not in target_dict):
@@ -150,7 +150,7 @@ def _stf_export(context: STF_ExportContext, resource: VRM_Blendshape_Pose, conte
 				else:
 					value_dict = target_dict[target.mesh_instance.stf_info.stf_id]
 				for value in target.values:
-					value: VRM_Blendshape_Pose_Value = value # ffs
+					value: VRM_Blendshape_Pose_Value = value # Because syntax highlighting
 					if(value.blendshape_name and value.blendshape_name not in value_dict):
 						value_dict[value.blendshape_name] = value.blendshape_value
 
@@ -160,6 +160,7 @@ def _stf_export(context: STF_ExportContext, resource: VRM_Blendshape_Pose, conte
 
 
 class STF_Module_VRM_Blendshape_Pose(STF_BlenderDataModule):
+	"""Define a blendshape pose. This is useful for VR/V-Tubing avatars that get will get converted to VRM, since VRM doesn't support animations"""
 	stf_type = _stf_type
 	stf_kind = "data"
 	understood_application_types = [VRM_Blendshape_Pose]

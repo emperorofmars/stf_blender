@@ -100,7 +100,9 @@ class STFEditDataResourceOperator(bpy.types.Operator):
 				break
 
 		resource_type_list[target_component_index].stf_id = self.edit_id
+		resource_type_list[target_component_index].name = self.edit_id
 		resource_ref.stf_id = self.edit_id
+		resource_ref.name = self.edit_id
 		return {"FINISHED"}
 
 

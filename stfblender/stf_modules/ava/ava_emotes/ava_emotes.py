@@ -7,36 +7,45 @@ from ....utils.component_utils import add_component, export_component_base, impo
 from ....base.stf_report import STFReport, STFReportSeverity
 from ....utils.reference_helper import export_resource
 from ....utils.minsc import draw_slot_link_warning
-from ....base.blender_grr import BlenderGRR, draw_blender_grr, resolve_blender_grr
-
+from ....base.data_resource_reference import draw_blender_drr, is_blender_drr_valid, resolve_blender_drr, BlenderDRR
 
 _stf_type = "ava.emotes"
 _blender_property_name = "ava_emotes"
 
 
-class Edit_AVA_Emotes(bpy.types.Operator):
-	bl_idname = "stf.edit_ava_emotes"
-	bl_label = "Edit"
+class Add_AVA_Emotes(bpy.types.Operator):
+	"""Add a new emote"""
+	bl_idname = "stf.add_ava_emote"
+	bl_label = "Add Emote"
 	bl_options = {"REGISTER", "UNDO"}
 
 	component_id: bpy.props.StringProperty() # type: ignore
 
-	op: bpy.props.BoolProperty() # type: ignore
+	def execute(self, context):
+		for component in context.collection.ava_emotes:
+			if(component.stf_id == self.component_id):
+				component.emotes.add()
+				return {"FINISHED"}
+		self.report({"ERROR"}, "Couldn't add emote")
+		return {"CANCELLED"}
+
+class Remove_AVA_Emote(bpy.types.Operator):
+	"""Remove the currently selected emote"""
+	bl_idname = "stf.remove_ava_emote"
+	bl_label = "Remove"
+	bl_options = {"REGISTER", "UNDO"}
+
+	component_id: bpy.props.StringProperty() # type: ignore
 	index: bpy.props.IntProperty() # type: ignore
 
 	def execute(self, context):
-		if(self.op):
-			for component in context.collection.ava_emotes:
-				if(component.stf_id == self.component_id):
-					component.emotes.add()
-					return {"FINISHED"}
-		else:
-			for component in context.collection.ava_emotes:
-				if(component.stf_id == self.component_id):
-					component.emotes.remove(self.index)
-					return {"FINISHED"}
-		self.report({"ERROR"}, "Couldn't edit Physbone")
+		for component in context.collection.ava_emotes:
+			if(component.stf_id == self.component_id):
+				component.emotes.remove(self.index)
+				return {"FINISHED"}
+		self.report({"ERROR"}, "Couldn't remove emote")
 		return {"CANCELLED"}
+
 
 emote_values = (
 	("smile", "Smile", ""),
@@ -62,15 +71,13 @@ emote_values = (
 )
 
 class AVA_Emote(bpy.types.PropertyGroup):
-	emote: bpy.props.EnumProperty(name="Emote", items=emote_values) # type: ignore
+	emote: bpy.props.EnumProperty(name="Emote", items=emote_values, description="The semantic meaning of the mapped animation") # type: ignore
 	custom_emote: bpy.props.StringProperty(name="Custom Emote") # type: ignore
 
-	animation: bpy.props.PointerProperty(type=bpy.types.Action, name="Animation") # type: ignore # todo select only actions with a valid slot-link setup
+	animation: bpy.props.PointerProperty(type=bpy.types.Action, name="Animation", description="The animation which represents the emote") # type: ignore # todo select only actions with a valid slot-link setup
 
-	use_blendshape_fallback: bpy.props.BoolProperty(name="Provide Blendshape Only Fallback", default=False) # type: ignore
-	blendshape_fallback: bpy.props.PointerProperty(type=BlenderGRR) # type: ignore
-
-	#blendshape_fallback: bpy.props.PointerProperty(type=AVA_FallbackBlendshape_Emote, name="Blendshape Only Fallback") # type: ignore
+	use_blendshape_fallback: bpy.props.BoolProperty(name="Provide Blendshape Only Fallback", default=False, description="Some targets like VRM have a very limited system for avatar expressions. Provide a blendshape-only pose for these applications") # type: ignore
+	blendshape_fallback: bpy.props.PointerProperty(type=BlenderDRR) # type: ignore
 
 
 class AVA_Emotes(STF_BlenderComponentBase):
@@ -86,15 +93,11 @@ class STFDrawAVAEmoteList(bpy.types.UIList):
 
 
 def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: AVA_Emotes):
-	row = layout.row()
-	row.label(text="Emotes")
-	
 	if(not hasattr(bpy.types.Action, "slot_links")):
 		draw_slot_link_warning(layout)
 
-	add_button = layout.operator(Edit_AVA_Emotes.bl_idname, text="Add")
+	add_button = layout.operator(Add_AVA_Emotes.bl_idname)
 	add_button.component_id = component.stf_id
-	add_button.op = True
 
 	row = layout.row()
 	row.template_list(STFDrawAVAEmoteList.bl_idname, "", component, "emotes", component, "active_emote")
@@ -102,9 +105,8 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 	if(component.active_emote >= len(component.emotes)):
 		return
 	
-	remove_button = row.operator(Edit_AVA_Emotes.bl_idname, text="", icon="X")
+	remove_button = row.operator(Remove_AVA_Emote.bl_idname, text="", icon="X")
 	remove_button.component_id = component.stf_id
-	remove_button.op = False
 	remove_button.index = component.active_emote
 
 	emote = component.emotes[component.active_emote]
@@ -118,15 +120,17 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 		box.prop(emote, "custom_emote")
 
 	box.prop(emote, "animation")
-	box.label(text="Note: the animation must have a valid 'Slot Link' targets.")
+	box.label(text="Note: the animation must have valid 'Slot Link' targets.", icon="INFO_LARGE")
 
 	box.separator(factor=1, type="LINE")
 	box.prop(emote, "use_blendshape_fallback")
 	if(emote.use_blendshape_fallback):
 		box = box.box()
-		box.label(text="Blendshape Only Fallback")
+		box.label(text="Blendshape Only Fallback (For VRM)")
+		if(not is_blender_drr_valid(emote.blendshape_fallback, ["dev.vrm.blendshape_pose"])):
+			box.label(text="Create a 'dev.vrm.blendshape_pose' type resource in a Blender-Collection under 'STF Data Resources'.", icon="INFO_LARGE")
 		box.use_property_split = True
-		draw_blender_grr(box, emote.blendshape_fallback)
+		draw_blender_drr(box, emote.blendshape_fallback, ["dev.vrm.blendshape_pose"])
 
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
@@ -148,9 +152,10 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 			if("fallback" in json_emote):
 				blender_emote.use_blendshape_fallback = True
 				if(fallback_resource := context.import_resource(json_emote["fallback"], stf_kind="data")):
-					blender_emote.blendshape_fallback.reference_type = "stf_data_resource"
 					blender_emote.blendshape_fallback.collection = context.get_root_collection() # todo maybe handle root collection import?
 					blender_emote.blendshape_fallback.stf_data_resource_id = fallback_resource.stf_id
+				else:
+					context.report(STFReport("module: %s stf_id: %s, context-object: %s" % (_stf_type, stf_id, context_object), STFReportSeverity.Warn, stf_id, _stf_type, context_object))
 
 	context.add_task(_handle)
 
@@ -174,8 +179,14 @@ def _stf_export(context: STF_ExportContext, component: AVA_Emotes, context_objec
 				emotes[meaning] = json_emote
 
 				if(blender_emote.use_blendshape_fallback):
-					if(fallback_resource := resolve_blender_grr(blender_emote.blendshape_fallback)):
-						json_emote["fallback"] = export_resource(ret, context.serialize_resource(fallback_resource))
+					if(fallback_ret := resolve_blender_drr(blender_emote.blendshape_fallback)):
+						fallback_ref, fallback_resource = fallback_ret
+						if(fallback_ref.stf_type == "dev.vrm.blendshape_pose"):
+							json_emote["fallback"] = export_resource(ret, context.serialize_resource(fallback_resource))
+						else:
+							context.report(STFReport("module: %s stf_id: %s, context-object: %s :: blendshape fallback invalid resource type" % (_stf_type, component.stf_id, context_object), STFReportSeverity.Warn, component.stf_id, _stf_type, context_object))
+					else:
+						context.report(STFReport("module: %s stf_id: %s, context-object: %s :: failed to resolve blendshape fallback" % (_stf_type, component.stf_id, context_object), STFReportSeverity.Warn, component.stf_id, _stf_type, context_object))
 			else:
 				context.report(STFReport("Invalid Emote", STFReportSeverity.Info, component.stf_id, _stf_type, component))
 

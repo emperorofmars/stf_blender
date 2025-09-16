@@ -45,12 +45,15 @@ def draw_resource(layout: bpy.types.UILayout, context: bpy.types.Context, resour
 
 	if(selected_module):
 		if(selected_module.__doc__):
+			first = True
 			for line in selected_module.__doc__.split("\n"):
 				remaining = line
 				while(len(remaining) > 80):
-					box.label(text=remaining[:80])
+					box.label(text=remaining[:80], icon="INFO_LARGE" if first else "NONE")
 					remaining = remaining[80:]
-				box.label(text=remaining)
+					first = False
+				box.label(text=remaining, icon="INFO_LARGE" if first else "NONE")
+				first = False
 
 		if(hasattr(selected_module, "draw_resource_func")):
 			selected_module.draw_resource_func(box, context, resource_ref, collection, resource)
@@ -97,7 +100,9 @@ def draw_data_resources_ui(
 					draw_resource(layout, context, resource_ref, collection, resource)
 					break
 		else:
-			layout.label(text="Invalid Component: " + resource_ref.blender_property_name)
+			layout.label(text="Invalid Resource: " + resource_ref.blender_property_name)
+
+		# todo components
 
 
 def _build_stf_data_resource_types_enum_callback(self, context) -> list:

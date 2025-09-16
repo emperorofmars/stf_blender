@@ -94,13 +94,13 @@ class STFSceneCollectionPanel(bpy.types.Panel):
 			if(body): draw_meta_editor(body.box(), context.scene.collection, True)
 
 			# Components
-			self.layout.separator(factor=1, type="SPACE")
+			self.layout.separator(factor=3, type="LINE")
 			header, body = self.layout.panel("stf.prefab_components_scene", default_closed = False)
 			header.label(text="STF Components", icon="GROUP")
 			if(body): draw_components_ui(self.layout, context, context.scene.collection.stf_info, context.scene.collection, STFAddSceneCollectionComponentOperator.bl_idname, STFRemoveSceneCollectionComponentOperator.bl_idname, STFEditSceneCollectionComponentIdOperator.bl_idname)
 
 			# Data Resources
-			self.layout.separator(factor=1, type="SPACE")
+			self.layout.separator(factor=3, type="LINE")
 			header, body = self.layout.panel("stf.prefab_data_resources_scene", default_closed = False)
 			header.label(text="STF Data Resources", icon="GROUP")
 			if(body): draw_data_resources_ui(self.layout, context, context.scene.collection)

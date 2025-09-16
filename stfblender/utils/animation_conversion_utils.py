@@ -1,5 +1,4 @@
 import bpy
-from typing import Callable
 
 from ..base.stf_module_component import STF_BlenderComponentBase
 from ..utils import trs_utils

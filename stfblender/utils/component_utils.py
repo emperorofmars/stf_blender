@@ -123,7 +123,9 @@ class STFEditComponentOperatorBase:
 					for component in components:
 						if(component.stf_id == self.component_id):
 							component.stf_id = self.edit_component_id
+							component.name = self.edit_component_id
 							component_ref.stf_id = self.edit_component_id
+							component_ref.name = self.edit_component_id
 							component.overrides.clear()
 							for override in context.scene.workaround_for_blenders_datamodel__component_overrides:
 								if(override.target_id):

@@ -1,13 +1,14 @@
 import bpy
 
-from .stf_module_component import STF_Component_Ref
-
 """
 Blender Generic Resource Reference
 
 Bringing polymorphism to Blender
+
+This is a big TODO, making this complete, user friendly and nice to handle will take effort.
 """
 
+"""
 reference_type_values = (
 	("blender", "Blender Native Resource", ""),
 	("stf_component", "STF Component on Blender Resource", ""),
@@ -45,7 +46,7 @@ blender_type_values = (
 	("PALETTE","PALETTE",""),
 	("PARTICLE","PARTICLE",""),
 	("POINTCLOUD","POINTCLOUD",""),
-	#("SCENE","SCENE",""),
+	("SCENE","SCENE",""),
 	("SCREEN","SCREEN",""),
 	("SOUND","SOUND",""),
 	("SPEAKER","SPEAKER",""),
@@ -131,4 +132,4 @@ def resolve_blender_grr(grr: BlenderGRR) -> any:
 	elif(grr.reference_type == "stf_data_resource_component"):
 		pass
 	return None
-
+"""

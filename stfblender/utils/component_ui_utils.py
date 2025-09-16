@@ -63,12 +63,15 @@ def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, compo
 
 	if(selected_module):
 		if(selected_module.__doc__):
+			first = True
 			for line in selected_module.__doc__.split("\n"):
 				remaining = line
 				while(len(remaining) > 80):
-					box.label(text=remaining[:80])
+					box.label(text=remaining[:80], icon="INFO_LARGE" if first else "NONE")
 					remaining = remaining[80:]
-				box.label(text=remaining)
+					first = False
+				box.label(text=remaining, icon="INFO_LARGE" if first else "NONE")
+				first = False
 
 		if(hasattr(selected_module, "draw_component_instance_func")):
 			selected_module.draw_component_instance_func(box, context, component_ref, stf_application_object, component)
