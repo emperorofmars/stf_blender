@@ -1,6 +1,7 @@
 import bpy
 
 from ..base.stf_module_component import STF_BlenderComponentModule, STF_Component_Ref, STF_BlenderComponentOverride
+from ..base.stf_module_data import STF_BlenderDataResourceBase
 from ..utils.id_utils import ensure_stf_id
 
 
@@ -10,16 +11,20 @@ def find_component_module(stf_modules: list[STF_BlenderComponentModule], stf_typ
 			return stf_module
 
 
-def add_component(application_object: any, blender_property_name: str, stf_id: str, stf_type: str, components_ref_property: any = None) -> tuple[STF_Component_Ref, any]:
+def add_component(context_object: any, blender_property_name: str, stf_id: str, stf_type: str, components_ref_property: any = None) -> tuple[STF_Component_Ref, any]:
 	if(components_ref_property is None):
-		components_ref_property = application_object.stf_info.stf_components
+		if(isinstance(context_object, STF_BlenderDataResourceBase)): # jank, but works
+			components_ref_property = context_object.stf_components
+			context_object = context_object.id_data
+		else:
+			components_ref_property = context_object.stf_info.stf_components
 	component_ref: STF_Component_Ref = components_ref_property.add()
 	component_ref.stf_id = stf_id
 	component_ref.stf_type = stf_type
 	component_ref.blender_property_name = blender_property_name
 	component_ref.name = stf_id
 
-	new_component = getattr(application_object, blender_property_name).add()
+	new_component = getattr(context_object, blender_property_name).add()
 	new_component.stf_id = component_ref.stf_id
 	new_component.name = stf_id
 
