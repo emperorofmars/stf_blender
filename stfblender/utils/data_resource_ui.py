@@ -2,11 +2,11 @@ import bpy
 
 from ..base.stf_module_data import STF_BlenderDataModule, STF_BlenderDataResourceBase, STF_Data_Ref
 from ..base.stf_registry import get_blender_non_native_data_modules
-from ..base.stf_module_component import STF_Component_Ref
 from .minsc import CopyToClipboard
 from .data_resource_utils import STFCreateDataResourceOperator, STFEditDataResourceOperator, STFRemoveDataResourceOperator
 from .component_ui_utils import draw_components_ui, set_stf_component_filter
 from .component_utils import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
+
 
 def _get_data_resource_component_ref_property_collection(context) -> any:
 	for resource in getattr(context.scene.collection if stf_data_resource_use_scene_collection else context.collection, stf_data_resource_property):
@@ -30,7 +30,7 @@ class STFRemoveDataResourceComponentOperator(bpy.types.Operator, STFRemoveCompon
 	def get_components_ref_property(self, context) -> any: return _get_data_resource_component_ref_property_collection(context)
 
 class STFEditDataResourceComponentIdOperator(bpy.types.Operator, STFEditComponentOperatorBase):
-	"""Edit the ID and overrides of this Data-Resource"""
+	"""Edit the ID and overrides of this component"""
 	bl_idname = "stf.edit_data_resource_component_id"
 	@classmethod
 	def poll(cls, context): return context.scene is not None if stf_data_resource_use_scene_collection else context.collection is not None

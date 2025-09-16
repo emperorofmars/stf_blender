@@ -4,7 +4,6 @@ from ...base.stf_module_component import STF_BlenderComponentBase, STF_BlenderCo
 from ...exporter.stf_export_context import STF_ExportContext
 from ...importer.stf_import_context import STF_ImportContext
 from ...utils.component_utils import add_component, export_component_base, import_component_base
-from ..thirdparty.dev_vrm.dev_vrm_blendshape_pose.dev_vrm_blendshape_pose import VRM_Blendshape_Pose
 
 
 _stf_type = "placeholder.remove.me.data_resource"
@@ -41,7 +40,6 @@ class STF_Module_STF_Data_Resource_Component_Test(STF_BlenderComponentModule):
 
 	blender_property_name = _blender_property_name
 	single = False
-	filter = [VRM_Blendshape_Pose]
 	draw_component_func = _draw_component
 
 

@@ -51,12 +51,15 @@ class STFRemoveDataResourceOperator(bpy.types.Operator):
 		collection = context.scene.collection if self.use_scene_collection else context.collection
 		if(hasattr(collection, self.property_name)):
 			resource_type_list = getattr(collection, self.property_name)
-			target_component_index = None
-			for index, component in enumerate(resource_type_list):
-				if(component.stf_id == collection.stf_data_refs[self.index].stf_id):
-					target_component_index = index
+			for resource_index, resource in enumerate(resource_type_list):
+				if(resource.stf_id == collection.stf_data_refs[self.index].stf_id):
+					for component_ref in resource.stf_components:
+						for resource_component_index, resource_component in enumerate(getattr(collection, component_ref.blender_property_name)):
+							if(resource_component.stf_id == component_ref.stf_id):
+								getattr(collection, component_ref.blender_property_name).remove(resource_component_index)
+								break
+					resource_type_list.remove(resource_index)
 					break
-			resource_type_list.remove(target_component_index)
 
 		collection.stf_data_refs.remove(self.index)
 		return {"FINISHED"}
