@@ -41,7 +41,7 @@ class STFAddComponentOperatorBase:
 	def get_property(self, context) -> any:
 		pass
 
-	def get_components_ref_property(self, context) -> STF_Component_Ref:
+	def get_components_ref_property(self, context) -> any:
 		return self.get_property(context).stf_info.stf_components
 
 
