@@ -178,8 +178,8 @@ register_stf_modules = [
 
 
 def register():
-	bpy.types.Collection.dev_vrm_blendshape_pose = bpy.props.CollectionProperty(type=VRM_Blendshape_Pose) # type: ignore
+	setattr(bpy.types.Collection, _blender_property_name, bpy.props.CollectionProperty(type=VRM_Blendshape_Pose))
 
 def unregister():
-	if hasattr(bpy.types.Collection, "dev_vrm_blendshape_pose"):
-		del bpy.types.Collection.dev_vrm_blendshape_pose
+	if hasattr(bpy.types.Collection, _blender_property_name):
+		delattr(bpy.types.Collection, _blender_property_name)

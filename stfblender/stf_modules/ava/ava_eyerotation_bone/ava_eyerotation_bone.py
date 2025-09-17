@@ -68,9 +68,9 @@ register_stf_modules = [
 
 
 def register():
-	bpy.types.Armature.ava_eye_rotation_bone = bpy.props.CollectionProperty(type=AVA_EyeRotation_Bone) # type: ignore
+	setattr(bpy.types.Armature, _blender_property_name, bpy.props.CollectionProperty(type=AVA_EyeRotation_Bone))
 
 def unregister():
-	if hasattr(bpy.types.Armature, "ava_eye_rotation_bone"):
-		del bpy.types.Armature.ava_eye_rotation_bone
+	if hasattr(bpy.types.Armature, _blender_property_name):
+		delattr(bpy.types.Armature, _blender_property_name)
 

@@ -89,7 +89,6 @@ class HOOK_STFEXP_Mesh_Seams(STF_ExportComponentHook):
 	hook_apply_func = _hook_apply_func
 
 
-
 register_stf_modules = [
 	STF_Module_STF_Mesh_Seams,
 	HOOK_STFEXP_Mesh_Seams
@@ -97,8 +96,8 @@ register_stf_modules = [
 
 
 def register():
-	bpy.types.Mesh.stfexp_mesh_seams = bpy.props.CollectionProperty(type=STFEXP_Mesh_Seams) # type: ignore
+	setattr(bpy.types.Mesh, _blender_property_name, bpy.props.CollectionProperty(type=STFEXP_Mesh_Seams))
 
 def unregister():
-	if hasattr(bpy.types.Mesh, "stfexp_mesh_seams"):
-		del bpy.types.Mesh.stfexp_mesh_seams
+	if hasattr(bpy.types.Mesh, _blender_property_name):
+		delattr(bpy.types.Mesh, _blender_property_name)

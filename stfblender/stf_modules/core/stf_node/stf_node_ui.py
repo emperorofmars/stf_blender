@@ -45,6 +45,10 @@ class STFNodePanel(bpy.types.Panel):
 	def draw(self, context):
 		set_stf_component_filter(bpy.types.Object)
 
+		if(context.object.rotation_mode != "QUATERNION"):
+			self.layout.label(text="Please set the Rotation-Mode to 'Quaternion (WXYZ)'", icon="ERROR")
+			self.layout.separator(factor=2, type="LINE")
+
 		# Set ID
 		draw_stf_id_ui(self.layout, context, context.object, context.object.stf_info, STFSetObjectIDOperator.bl_idname)
 

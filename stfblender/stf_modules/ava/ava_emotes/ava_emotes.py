@@ -216,9 +216,8 @@ register_stf_modules = [
 
 
 def register():
-	bpy.types.Collection.ava_emotes = bpy.props.CollectionProperty(type=AVA_Emotes) # type: ignore
+	setattr(bpy.types.Collection, _blender_property_name, bpy.props.CollectionProperty(type=AVA_Emotes))
 
 def unregister():
-	if hasattr(bpy.types.Collection, "ava_emotes"):
-		del bpy.types.Collection.ava_emotes
-
+	if hasattr(bpy.types.Collection, _blender_property_name):
+		delattr(bpy.types.Collection, _blender_property_name)

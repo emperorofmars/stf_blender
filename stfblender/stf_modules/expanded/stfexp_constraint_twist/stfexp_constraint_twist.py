@@ -195,12 +195,11 @@ register_stf_modules = [
 
 
 def register():
-	bpy.types.Object.stfexp_constraint_twist = bpy.props.CollectionProperty(type=STFEXP_Constraint_Twist) # type: ignore
-	bpy.types.Bone.stfexp_constraint_twist = bpy.props.CollectionProperty(type=STFEXP_Constraint_Twist) # type: ignore
+	setattr(bpy.types.Object, _blender_property_name, bpy.props.CollectionProperty(type=STFEXP_Constraint_Twist))
+	setattr(bpy.types.Bone, _blender_property_name, bpy.props.CollectionProperty(type=STFEXP_Constraint_Twist))
 
 def unregister():
-	if hasattr(bpy.types.Object, "stfexp_constraint_twist"):
-		del bpy.types.Object.stfexp_constraint_twist
-	if hasattr(bpy.types.Bone, "stfexp_constraint_twist"):
-		del bpy.types.Bone.stfexp_constraint_twist
-
+	if hasattr(bpy.types.Object, _blender_property_name):
+		delattr(bpy.types.Object, _blender_property_name)
+	if hasattr(bpy.types.Bone, _blender_property_name):
+		delattr(bpy.types.Bone, _blender_property_name)

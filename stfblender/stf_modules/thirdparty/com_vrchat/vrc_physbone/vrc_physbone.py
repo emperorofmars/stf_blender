@@ -1,10 +1,13 @@
-import json
 import bpy
+import json
+import re
+from typing import Callable
 
 from .....base.stf_module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
 from .....exporter.stf_export_context import STF_ExportContext
 from .....importer.stf_import_context import STF_ImportContext
 from .....utils.component_utils import add_component, export_component_base, import_component_base
+from .....utils.animation_conversion_utils import get_component_stf_path
 
 
 _stf_type = "com.vrchat.physbone"
@@ -136,6 +139,28 @@ def _stf_export(context: STF_ExportContext, component: VRC_Physbone, context_obj
 		return None
 
 
+"""Animation"""
+
+def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: any, application_object_property_index: int, data_path: str) -> tuple[list[str], Callable[[list[float]], list[float]], list[int]]:
+	if(match := re.search(r"^vrc_physbone\[(?P<component_index>[\d]+)\].enabled", data_path)):
+		component = application_object.vrc_physbone[int(match.groupdict()["component_index"])]
+		component_path = get_component_stf_path(application_object, component)
+		if(component_path):
+			return component_path + ["enabled"], None, None
+	return None
+
+def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: any) -> tuple[any, int, any, any, list[int], Callable[[list[float]], list[float]]]:
+	blender_object = context.get_imported_resource(stf_path[0])
+	# let component_index
+	for component_index, component in enumerate(application_object.vrc_physbone):
+		if(component.stf_id == blender_object.stf_id):
+			break
+	match(stf_path[1]):
+		case "enabled":
+			return None, 0, "OBJECT", "vrc_physbone[" + str(component_index) + "].enabled", None, None
+	return None
+
+
 class STF_Module_VRC_Physbone(STF_BlenderComponentModule):
 	"""Represents a `VRCPhysbone`. Serialize the component in Unity and paste the Json-definition into the `Json Values` field.
 	You must manually set the ID's of referenced Collider components and the Objects/Bones that should be ignored by the Physbone"""
@@ -151,6 +176,11 @@ class STF_Module_VRC_Physbone(STF_BlenderComponentModule):
 	filter = [bpy.types.Object, bpy.types.Bone]
 	draw_component_func = _draw_component
 
+	understood_application_property_path_types = [bpy.types.Object]
+	understood_application_property_path_parts = [_blender_property_name]
+	resolve_property_path_to_stf_func = _resolve_property_path_to_stf_func
+	resolve_stf_property_to_blender_func = _resolve_stf_property_to_blender_func
+
 
 register_stf_modules = [
 	STF_Module_VRC_Physbone
@@ -158,12 +188,11 @@ register_stf_modules = [
 
 
 def register():
-	bpy.types.Object.vrc_physbone = bpy.props.CollectionProperty(type=VRC_Physbone) # type: ignore
-	bpy.types.Bone.vrc_physbone = bpy.props.CollectionProperty(type=VRC_Physbone) # type: ignore
+	setattr(bpy.types.Object, _blender_property_name, bpy.props.CollectionProperty(type=VRC_Physbone))
+	setattr(bpy.types.Bone, _blender_property_name, bpy.props.CollectionProperty(type=VRC_Physbone))
 
 def unregister():
-	if hasattr(bpy.types.Object, "vrc_physbone"):
-		del bpy.types.Object.vrc_physbone
-	if hasattr(bpy.types.Bone, "vrc_physbone"):
-		del bpy.types.Bone.vrc_physbone
-
+	if hasattr(bpy.types.Object, _blender_property_name):
+		delattr(bpy.types.Object, _blender_property_name)
+	if hasattr(bpy.types.Bone, _blender_property_name):
+		delattr(bpy.types.Bone, _blender_property_name)

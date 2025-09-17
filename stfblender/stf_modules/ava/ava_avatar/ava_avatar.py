@@ -128,9 +128,8 @@ register_stf_modules = [
 
 
 def register():
-	bpy.types.Collection.stf_ava_avatar = bpy.props.CollectionProperty(type=AVA_Avatar) # type: ignore
+	setattr(bpy.types.Collection, _blender_property_name, bpy.props.CollectionProperty(type=AVA_Avatar))
 
 def unregister():
-	if hasattr(bpy.types.Collection, "stf_ava_avatar"):
-		del bpy.types.Collection.stf_ava_avatar
-
+	if hasattr(bpy.types.Collection, _blender_property_name):
+		delattr(bpy.types.Collection, _blender_property_name)

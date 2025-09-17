@@ -59,7 +59,6 @@ class HOOK_Blender_Armature_Display(STF_ExportComponentHook):
 	hook_apply_func = _hook_apply_func
 
 
-
 register_stf_modules = [
 	STF_Module_Blender_Armature_Display,
 	HOOK_Blender_Armature_Display
@@ -67,8 +66,8 @@ register_stf_modules = [
 
 
 def register():
-	bpy.types.Armature.org_blender_armature_display = bpy.props.CollectionProperty(type=Blender_Armature_Display) # type: ignore
+	setattr(bpy.types.Armature, _blender_property_name, bpy.props.CollectionProperty(type=Blender_Armature_Display))
 
 def unregister():
-	if hasattr(bpy.types.Armature, "org_blender_armature_display"):
-		del bpy.types.Armature.org_blender_armature_display
+	if hasattr(bpy.types.Armature, _blender_property_name):
+		delattr(bpy.types.Armature, _blender_property_name)

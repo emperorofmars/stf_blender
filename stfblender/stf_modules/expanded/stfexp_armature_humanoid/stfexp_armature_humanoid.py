@@ -58,9 +58,8 @@ register_stf_modules = [
 
 
 def register():
-	bpy.types.Armature.stfexp_armature_humanoid = bpy.props.CollectionProperty(type=STFEXP_Armature_Humanoid) # type: ignore
+	setattr(bpy.types.Armature, _blender_property_name, bpy.props.CollectionProperty(type=STFEXP_Armature_Humanoid))
 
 def unregister():
-	if hasattr(bpy.types.Armature, "stfexp_armature_humanoid"):
-		del bpy.types.Armature.stfexp_armature_humanoid
-
+	if hasattr(bpy.types.Armature, _blender_property_name):
+		delattr(bpy.types.Armature, _blender_property_name)

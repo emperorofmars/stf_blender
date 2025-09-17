@@ -28,7 +28,6 @@ def _parse_json(component: AVA_Collider_Sphere, json_resource: dict):
 			offset_position[index] = json_resource["offset_position"][index]
 		component.offset_position = stf_translation_to_blender(offset_position)
 
-
 def _serialize_json(component: AVA_Collider_Sphere, json_resource: dict = {}) -> dict:
 	json_resource["radius"] = component.radius
 	offset_position = mathutils.Vector(component.offset_position)
@@ -63,15 +62,6 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 
 """Bone instance handling"""
 
-def _draw_component_instance(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: AVA_Collider_Sphere):
-	layout.prop(component, "radius")
-	layout.prop(component, "offset_position")
-	
-	load_json_button = layout.operator(AVA_Collider_Sphere_LoadJsonOperator.bl_idname)
-	load_json_button.blender_bone = type(component.id_data) == bpy.types.Armature
-	load_json_button.component_id = component.stf_id
-
-
 def _set_component_instance_standin(context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: AVA_Collider_Sphere, standin_component: AVA_Collider_Sphere):
 	standin_component.radius = component.radius
 	standin_component.offset_position = component.offset_position
@@ -84,7 +74,7 @@ def _parse_component_instance_standin_func(context: STF_ImportContext, json_reso
 	_parse_json(standin_component, json_resource)
 
 
-"""Import export"""
+"""Import & export"""
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
 	component_ref, component = add_component(context_object, _blender_property_name, stf_id, _stf_type)
@@ -92,13 +82,9 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	_parse_json(component, json_resource)
 	return component
 
-
 def _stf_export(context: STF_ExportContext, component: AVA_Collider_Sphere, context_object: any) -> tuple[dict, str]:
 	ret = export_component_base(context, _stf_type, component)
-	ret["radius"] = component.radius
-
-	offset_position = mathutils.Vector(component.offset_position)
-	ret["offset_position"] = blender_translation_to_stf(offset_position)
+	ret = _serialize_json(component, ret)
 	return ret, component.stf_id
 
 
@@ -111,7 +97,6 @@ def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_o
 		if(component_path):
 			return component_path + ["enabled"], None, None
 	return None
-
 
 def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: any) -> tuple[any, int, any, any, list[int], Callable[[list[float]], list[float]]]:
 	blender_object = context.get_imported_resource(stf_path[0])
@@ -134,17 +119,17 @@ class STF_Module_AVA_Collider_Sphere(STF_BlenderBoneComponentModule):
 	import_func = _stf_import
 	export_func = _stf_export
 
-	understood_application_property_path_types = [bpy.types.Object]
-	understood_application_property_path_parts = [_blender_property_name]
-	resolve_property_path_to_stf_func = _resolve_property_path_to_stf_func
-	resolve_stf_property_to_blender_func = _resolve_stf_property_to_blender_func
-
 	blender_property_name = _blender_property_name
 	single = False
 	filter = [bpy.types.Object, bpy.types.Bone]
 	draw_component_func = _draw_component
 
-	draw_component_instance_func = _draw_component_instance
+	understood_application_property_path_types = [bpy.types.Object]
+	understood_application_property_path_parts = [_blender_property_name]
+	resolve_property_path_to_stf_func = _resolve_property_path_to_stf_func
+	resolve_stf_property_to_blender_func = _resolve_stf_property_to_blender_func
+
+	draw_component_instance_func = _draw_component
 	set_component_instance_standin_func = _set_component_instance_standin
 
 	serialize_component_instance_standin_func = _serialize_component_instance_standin_func
@@ -157,12 +142,11 @@ register_stf_modules = [
 
 
 def register():
-	bpy.types.Object.ava_collider_sphere = bpy.props.CollectionProperty(type=AVA_Collider_Sphere) # type: ignore
-	bpy.types.Bone.ava_collider_sphere = bpy.props.CollectionProperty(type=AVA_Collider_Sphere) # type: ignore
+	setattr(bpy.types.Object, _blender_property_name, bpy.props.CollectionProperty(type=AVA_Collider_Sphere))
+	setattr(bpy.types.Bone, _blender_property_name, bpy.props.CollectionProperty(type=AVA_Collider_Sphere))
 
 def unregister():
-	if hasattr(bpy.types.Object, "ava_collider_sphere"):
-		del bpy.types.Object.ava_collider_sphere
-	if hasattr(bpy.types.Bone, "ava_collider_sphere"):
-		del bpy.types.Bone.ava_collider_sphere
-
+	if hasattr(bpy.types.Object, _blender_property_name):
+		delattr(bpy.types.Object, _blender_property_name)
+	if hasattr(bpy.types.Bone, _blender_property_name):
+		delattr(bpy.types.Bone, _blender_property_name)

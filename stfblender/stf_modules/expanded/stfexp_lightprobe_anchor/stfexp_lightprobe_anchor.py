@@ -79,9 +79,8 @@ register_stf_modules = [
 
 
 def register():
-	bpy.types.Object.stfexp_lightprobe_anchor = bpy.props.CollectionProperty(type=STFEXP_LightprobeAnchor) # type: ignore
+	setattr(bpy.types.Object, _blender_property_name, bpy.props.CollectionProperty(type=STFEXP_LightprobeAnchor))
 
 def unregister():
-	if hasattr(bpy.types.Object, "stfexp_lightprobe_anchor"):
-		del bpy.types.Object.stfexp_lightprobe_anchor
-
+	if hasattr(bpy.types.Object, _blender_property_name):
+		delattr(bpy.types.Object, _blender_property_name)

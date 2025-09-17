@@ -161,9 +161,8 @@ register_stf_modules = [
 
 
 def register():
-	bpy.types.Mesh.ava_eyelids_blendshape = bpy.props.CollectionProperty(type=AVA_Eyelids_Blendshape) # type: ignore
+	setattr(bpy.types.Mesh, _blender_property_name, bpy.props.CollectionProperty(type=AVA_Eyelids_Blendshape))
 
 def unregister():
-	if hasattr(bpy.types.Mesh, "ava_eyelids_blendshape"):
-		del bpy.types.Mesh.ava_eyelids_blendshape
-
+	if hasattr(bpy.types.Mesh, _blender_property_name):
+		delattr(bpy.types.Mesh, _blender_property_name)

@@ -116,8 +116,8 @@ register_stf_modules = [
 
 
 def register():
-	bpy.types.Mesh.stfexp_mesh_creases = bpy.props.CollectionProperty(type=STFEXP_Mesh_Creases) # type: ignore
+	setattr(bpy.types.Mesh, _blender_property_name, bpy.props.CollectionProperty(type=STFEXP_Mesh_Creases))
 
 def unregister():
-	if hasattr(bpy.types.Mesh, "stfexp_mesh_creases"):
-		del bpy.types.Mesh.stfexp_mesh_creases
+	if hasattr(bpy.types.Mesh, _blender_property_name):
+		delattr(bpy.types.Mesh, _blender_property_name)

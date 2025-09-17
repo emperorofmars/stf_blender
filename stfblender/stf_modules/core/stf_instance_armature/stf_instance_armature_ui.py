@@ -73,6 +73,15 @@ class STFArmatureInstancePanel(bpy.types.Panel):
 	def draw(self, context):
 		set_stf_component_filter(bpy.types.Bone)
 
+		non_quat_bones: list[str] = []
+		for pose_bone in context.object.pose.bones:
+			if(pose_bone.rotation_mode != "QUATERNION"):
+				non_quat_bones.append(pose_bone.name)
+		if(len(non_quat_bones) > 0):
+			self.layout.label(text="Please set the Rotation-Mode of all bones to 'Quaternion (WXYZ)'", icon="ERROR")
+			self.layout.label(text="The following bones are affected: %s" % non_quat_bones, icon="INFO")
+			self.layout.separator(factor=2, type="LINE")
+
 		# Set ID
 		draw_stf_id_ui(self.layout, context, context.object.stf_instance, context.object.stf_instance, STFSetArmatureInstanceIDOperator.bl_idname, True)
 
@@ -81,7 +90,7 @@ class STFArmatureInstancePanel(bpy.types.Panel):
 		# Components specific to this instance
 		self.layout.separator(factor=1, type="SPACE")
 		header, body = self.layout.panel("stf.instance_armature_components", default_closed = False)
-		header.label(text="STF Components", icon="GROUP")
+		header.label(text="Bone-Instance Components", icon="GROUP")
 		if(body): draw_components_ui(self.layout, context, context.object.stf_instance_armature, context.object, STFAddArmatureInstanceComponentOperator.bl_idname, STFRemoveArmatureInstanceComponentOperator.bl_idname, STFEditArmatureInstanceComponentIdOperator.bl_idname, _get_target_object_func, _inject_ui)
 
 		self.layout.separator(factor=4, type="LINE")

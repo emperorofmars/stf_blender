@@ -19,7 +19,7 @@ Intended for (not only) game development use-cases.
 **link:./docs/user_guide.adoc[Read the User Guide!]** ⭐ **https://stfform.at/[STF Website]**
 
 == Installation
-=== From Repository
+=== From Repository (preferred)
 Follow the steps on https://stfform.at[stfform.at]!
 
 === Manual

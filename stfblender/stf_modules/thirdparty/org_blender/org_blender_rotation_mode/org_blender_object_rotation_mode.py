@@ -68,8 +68,8 @@ register_stf_modules = [
 
 
 def register():
-	bpy.types.Object.org_blender_object_rotation_mode = bpy.props.CollectionProperty(type=Blender_Object_Rotation_Mode) # type: ignore
+	setattr(bpy.types.Object, _blender_property_name, bpy.props.CollectionProperty(type=Blender_Object_Rotation_Mode))
 
 def unregister():
-	if hasattr(bpy.types.Object, "org_blender_object_rotation_mode"):
-		del bpy.types.Object.org_blender_object_rotation_mode
+	if hasattr(bpy.types.Object, _blender_property_name):
+		delattr(bpy.types.Object, _blender_property_name)

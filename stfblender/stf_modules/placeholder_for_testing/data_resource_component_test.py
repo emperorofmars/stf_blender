@@ -49,9 +49,8 @@ register_stf_modules = [
 
 
 def register():
-	bpy.types.Collection.stf_data_resource_component_test = bpy.props.CollectionProperty(type=STF_Data_Resource_Component_Test) # type: ignore
+	setattr(bpy.types.Collection, _blender_property_name, bpy.props.CollectionProperty(type=STF_Data_Resource_Component_Test))
 
 def unregister():
-	if hasattr(bpy.types.Collection, "stf_data_resource_component_test"):
-		del bpy.types.Collection.stf_data_resource_component_test
-
+	if hasattr(bpy.types.Collection, _blender_property_name):
+		delattr(bpy.types.Collection, _blender_property_name)
