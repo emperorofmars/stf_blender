@@ -16,7 +16,7 @@ Intended for (not only) game development use-cases.
 
 **WIP implementation for Blender 4.4+. Do not use productively!**
 
-**link:./docs/user_guide.adoc[Read the User Guide!]** ⭐ **https://stfform.at/[STF Website]**
+**https://docs.stfform.at/guides/blender/index.html[Read the User Guide!]** ⭐ **https://stfform.at/[STF Website]**
 
 == Installation
 === From Repository (preferred)
