@@ -4,6 +4,7 @@ from ...base.stf_module_component import STF_BlenderComponentBase, STF_BlenderCo
 from ...exporter.stf_export_context import STF_ExportContext
 from ...importer.stf_import_context import STF_ImportContext
 from ...utils.component_utils import add_component, export_component_base, import_component_base
+from ...blender_grr.blender_resource_reference import BlenderResourceReference, draw_blender_resource_reference
 
 
 _stf_type = "placeholder.remove.me.data_resource"
@@ -11,11 +12,13 @@ _blender_property_name = "stf_data_resource_component_test"
 
 
 class STF_Data_Resource_Component_Test(STF_BlenderComponentBase):
-	pass
+	blender_reference: bpy.props.PointerProperty(type=BlenderResourceReference) # type: ignore
 
 
 def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: STF_Data_Resource_Component_Test):
+	layout.use_property_split = True
 	layout.label(text="Foo")
+	draw_blender_resource_reference(layout, component.blender_reference)
 
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:

@@ -13,10 +13,10 @@ class STFSetSceneCollectionAsRootOperator(bpy.types.Operator):
 	bl_options = {"REGISTER", "UNDO"}
 
 	@classmethod
-	def poll(cls, context):
+	def poll(cls, context: bpy.types.Context):
 		return context.scene is not None
 
-	def execute(self, context):
+	def execute(self, context: bpy.types.Context):
 		context.scene.stf_root_collection = None
 		if(not context.scene.collection.stf_info.stf_id):
 			import uuid
@@ -58,14 +58,14 @@ class STFSceneCollectionPanel(bpy.types.Panel):
 	bl_context = "scene"
 
 	@classmethod
-	def poll(cls, context):
+	def poll(cls, context: bpy.types.Context):
 		return (context.scene is not None)
 
-	def draw_header(self, context):
+	def draw_header(self, context: bpy.types.Context):
 		if(context.scene.stf_root_collection == context.scene.collection):
 			self.layout.label(text="Root")
 
-	def draw(self, context):
+	def draw(self, context: bpy.types.Context):
 		set_stf_component_filter(bpy.types.Collection)
 		self.layout.prop(context.scene.collection, "stf_use_collection_as_prefab")
 
