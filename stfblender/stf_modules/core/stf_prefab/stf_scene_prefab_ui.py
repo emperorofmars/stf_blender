@@ -1,12 +1,9 @@
 import bpy
 
-from ....utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
+from ....utils.id_utils import STFSetIDOperatorBase
 from ....utils.component_utils import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
-from ....utils.component_ui import draw_components_ui, set_stf_component_filter
-from ....utils.data_resource_ui import draw_data_resources_ui
-from ....base.stf_meta import draw_meta_editor
-from ....utils.minsc import draw_slot_link_warning
-from ....utils.dev_utils import draw_dev_tools
+from ....utils.component_ui import set_stf_component_filter
+from .draw_prefab_ui import draw_prefab_ui
 
 
 class STFSetSceneCollectionAsRootOperator(bpy.types.Operator):
@@ -69,46 +66,7 @@ class STFSceneCollectionPanel(bpy.types.Panel):
 			self.layout.label(text="Root")
 
 	def draw(self, context):
-		from ....exporter.exporter import ExportSTF
 		set_stf_component_filter(bpy.types.Collection)
 		self.layout.prop(context.scene.collection, "stf_use_collection_as_prefab")
 
-		if(context.scene.collection.stf_use_collection_as_prefab):
-			draw_slot_link_warning(self.layout)
-
-			# Export Functionality
-			if(context.scene.stf_root_collection == None):
-				self.layout.operator(operator=ExportSTF.bl_idname, text="Export as STF", icon="EXPORT")
-			else:
-				self.layout.operator(STFSetSceneCollectionAsRootOperator.bl_idname)
-				self.layout.operator(operator=ExportSTF.bl_idname, text="Export this Scene as STF root prefab").scene_collection_as_root = True
-
-			# Set ID
-			self.layout.separator(factor=1, type="SPACE")
-			draw_stf_id_ui(self.layout, context, context.scene.collection, context.scene.collection.stf_info, STFSetSceneCollectionIDOperator.bl_idname)
-
-			# Asset metadata editor
-			self.layout.separator(factor=1, type="SPACE")
-			header, body = self.layout.panel("stf.prefab_meta_scene", default_closed = True)
-			header.label(text="Asset Metadata")
-			if(body): draw_meta_editor(body.box(), context.scene.collection, True)
-
-			# Components
-			self.layout.separator(factor=3, type="LINE")
-			header, body = self.layout.panel("stf.prefab_components_scene", default_closed = False)
-			header.label(text="STF Components", icon="GROUP")
-			if(body): draw_components_ui(self.layout, context, context.scene.collection.stf_info, context.scene.collection, STFAddSceneCollectionComponentOperator.bl_idname, STFRemoveSceneCollectionComponentOperator.bl_idname, STFEditSceneCollectionComponentIdOperator.bl_idname)
-
-			# Data Resources
-			self.layout.separator(factor=3, type="LINE")
-			header, body = self.layout.panel("stf.prefab_data_resources_scene", default_closed = False)
-			header.label(text="STF Data Resources", icon="GROUP")
-			if(body): draw_data_resources_ui(self.layout, context, context.scene.collection)
-
-		# Dev Options
-		self.layout.separator(factor=3, type="LINE")
-		dev_header, dev_body = self.layout.panel("stf.devtools_scene", default_closed = True)
-		dev_header.label(text="Devtools")
-		if(dev_body): draw_dev_tools(dev_body)
-
-
+		draw_prefab_ui(self.layout, context, context.scene.collection, STFSetSceneCollectionAsRootOperator.bl_idname, STFSetSceneCollectionIDOperator.bl_idname, STFAddSceneCollectionComponentOperator.bl_idname, STFRemoveSceneCollectionComponentOperator.bl_idname, STFEditSceneCollectionComponentIdOperator.bl_idname)
