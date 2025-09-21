@@ -1,9 +1,12 @@
-import json
 import bpy
+import json
 
 from ..exporter.stf_export_context import STF_ExportContext
 from ..importer.stf_import_context import STF_ImportContext
 from ..base.stf_module import STF_Module
+
+
+_blender_property_name = "stf_json_fallback_data"
 
 
 class JsonFallbackData(bpy.types.PropertyGroup):
@@ -38,8 +41,8 @@ register_stf_modules = [
 
 
 def register():
-	# todo register on COllection
-	pass
+	setattr(bpy.types.Collection, _blender_property_name, bpy.props.CollectionProperty(type=JsonFallbackData))
 
 def unregister():
-	pass
+	if hasattr(bpy.types.Collection, _blender_property_name):
+		delattr(bpy.types.Collection, _blender_property_name)
