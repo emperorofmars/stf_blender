@@ -64,21 +64,22 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 	layout.use_property_split = True
 	layout.operator(AutomapVisemes.bl_idname).component_id = component.stf_id
 
-	layout.prop_search(component, "vis_sil", context_object.shape_keys, "key_blocks")
-	layout.prop_search(component, "vis_pp", context_object.shape_keys, "key_blocks")
-	layout.prop_search(component, "vis_ff", context_object.shape_keys, "key_blocks")
-	layout.prop_search(component, "vis_th", context_object.shape_keys, "key_blocks")
-	layout.prop_search(component, "vis_dd", context_object.shape_keys, "key_blocks")
-	layout.prop_search(component, "vis_kk", context_object.shape_keys, "key_blocks")
-	layout.prop_search(component, "vis_ch", context_object.shape_keys, "key_blocks")
-	layout.prop_search(component, "vis_ss", context_object.shape_keys, "key_blocks")
-	layout.prop_search(component, "vis_nn", context_object.shape_keys, "key_blocks")
-	layout.prop_search(component, "vis_rr", context_object.shape_keys, "key_blocks")
-	layout.prop_search(component, "vis_aa", context_object.shape_keys, "key_blocks")
-	layout.prop_search(component, "vis_e", context_object.shape_keys, "key_blocks")
-	layout.prop_search(component, "vis_ih", context_object.shape_keys, "key_blocks")
-	layout.prop_search(component, "vis_oh", context_object.shape_keys, "key_blocks")
-	layout.prop_search(component, "vis_ou", context_object.shape_keys, "key_blocks")
+	col = layout.column(align=True)
+	col.prop_search(component, "vis_sil", context_object.shape_keys, "key_blocks")
+	col.prop_search(component, "vis_pp", context_object.shape_keys, "key_blocks")
+	col.prop_search(component, "vis_ff", context_object.shape_keys, "key_blocks")
+	col.prop_search(component, "vis_th", context_object.shape_keys, "key_blocks")
+	col.prop_search(component, "vis_dd", context_object.shape_keys, "key_blocks")
+	col.prop_search(component, "vis_kk", context_object.shape_keys, "key_blocks")
+	col.prop_search(component, "vis_ch", context_object.shape_keys, "key_blocks")
+	col.prop_search(component, "vis_ss", context_object.shape_keys, "key_blocks")
+	col.prop_search(component, "vis_nn", context_object.shape_keys, "key_blocks")
+	col.prop_search(component, "vis_rr", context_object.shape_keys, "key_blocks")
+	col.prop_search(component, "vis_aa", context_object.shape_keys, "key_blocks")
+	col.prop_search(component, "vis_e", context_object.shape_keys, "key_blocks")
+	col.prop_search(component, "vis_ih", context_object.shape_keys, "key_blocks")
+	col.prop_search(component, "vis_oh", context_object.shape_keys, "key_blocks")
+	col.prop_search(component, "vis_ou", context_object.shape_keys, "key_blocks")
 
 
 

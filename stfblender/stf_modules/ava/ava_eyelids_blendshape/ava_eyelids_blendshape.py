@@ -86,27 +86,30 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 	layout.use_property_split = True
 	layout.operator(AutomapEyelids.bl_idname).component_id = component.stf_id
 
-	layout.prop_search(component, "eyes_closed", context_object.shape_keys, "key_blocks")
-	layout.prop_search(component, "look_up", context_object.shape_keys, "key_blocks")
-	layout.prop_search(component, "look_down", context_object.shape_keys, "key_blocks")
-	layout.prop_search(component, "look_left", context_object.shape_keys, "key_blocks")
-	layout.prop_search(component, "look_right", context_object.shape_keys, "key_blocks")
+	col = layout.column(align=True)
+	col.prop_search(component, "eyes_closed", context_object.shape_keys, "key_blocks")
+	col.prop_search(component, "look_up", context_object.shape_keys, "key_blocks")
+	col.prop_search(component, "look_down", context_object.shape_keys, "key_blocks")
+	col.prop_search(component, "look_left", context_object.shape_keys, "key_blocks")
+	col.prop_search(component, "look_right", context_object.shape_keys, "key_blocks")
 
 	layout.separator(factor=1)
 
-	layout.prop_search(component, "eye_closed_left", context_object.shape_keys, "key_blocks")
-	layout.prop_search(component, "look_up_left", context_object.shape_keys, "key_blocks")
-	layout.prop_search(component, "look_down_left", context_object.shape_keys, "key_blocks")
-	layout.prop_search(component, "look_left_left", context_object.shape_keys, "key_blocks")
-	layout.prop_search(component, "look_right_left", context_object.shape_keys, "key_blocks")
+	col = layout.column(align=True)
+	col.prop_search(component, "eye_closed_left", context_object.shape_keys, "key_blocks")
+	col.prop_search(component, "look_up_left", context_object.shape_keys, "key_blocks")
+	col.prop_search(component, "look_down_left", context_object.shape_keys, "key_blocks")
+	col.prop_search(component, "look_left_left", context_object.shape_keys, "key_blocks")
+	col.prop_search(component, "look_right_left", context_object.shape_keys, "key_blocks")
 	
 	layout.separator(factor=1)
 
-	layout.prop_search(component, "eye_closed_right", context_object.shape_keys, "key_blocks")
-	layout.prop_search(component, "look_up_right", context_object.shape_keys, "key_blocks")
-	layout.prop_search(component, "look_down_right", context_object.shape_keys, "key_blocks")
-	layout.prop_search(component, "look_left_right", context_object.shape_keys, "key_blocks")
-	layout.prop_search(component, "look_right_right", context_object.shape_keys, "key_blocks")
+	col = layout.column(align=True)
+	col.prop_search(component, "eye_closed_right", context_object.shape_keys, "key_blocks")
+	col.prop_search(component, "look_up_right", context_object.shape_keys, "key_blocks")
+	col.prop_search(component, "look_down_right", context_object.shape_keys, "key_blocks")
+	col.prop_search(component, "look_left_right", context_object.shape_keys, "key_blocks")
+	col.prop_search(component, "look_right_right", context_object.shape_keys, "key_blocks")
 
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, parent_application_object: any) -> any:

@@ -96,12 +96,13 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 	if(not hasattr(bpy.types.Action, "slot_links")):
 		draw_slot_link_warning(layout)
 
+	layout.use_property_split = True
+
 	add_button = layout.operator(Add_AVA_Emotes.bl_idname)
 	add_button.component_id = component.stf_id
 
 	row = layout.row()
 	row.template_list(STFDrawAVAEmoteList.bl_idname, "", component, "emotes", component, "active_emote")
-
 	if(component.active_emote >= len(component.emotes)):
 		return
 
@@ -112,7 +113,6 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 	emote = component.emotes[component.active_emote]
 
 	box = layout.box()
-
 	row = box.row()
 	row.prop(emote, "emote")
 
@@ -123,14 +123,16 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 	box.label(text="Note: the animation must have valid 'Slot Link' targets.", icon="INFO_LARGE")
 
 	box.separator(factor=1, type="LINE")
+	box.use_property_split = False
 	box.prop(emote, "use_blendshape_fallback")
+
 	if(emote.use_blendshape_fallback):
 		box = box.box()
 		box.label(text="Blendshape Only Fallback (For VRM)")
 		if(not is_blender_drr_valid(emote.blendshape_fallback, ["dev.vrm.blendshape_pose"])):
 			box.label(text="Create a 'dev.vrm.blendshape_pose' type resource in a Blender-Collection under 'STF Data Resources'.", icon="INFO_LARGE")
 		box.use_property_split = True
-		draw_blender_drr(box, emote.blendshape_fallback, ["dev.vrm.blendshape_pose"])
+		draw_blender_drr(box.column(align=True), emote.blendshape_fallback, ["dev.vrm.blendshape_pose"])
 
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:

@@ -85,8 +85,8 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 	add_button.op = True
 	for index, target in enumerate(resource.targets):
 		box = layout.box()
-		inner_row = box.row()
-		inner_row.prop(target, "mesh_instance", text="")
+		inner_row = box.row(align=True)
+		inner_row.prop(target, "mesh_instance", text="Mesh Instance", icon="MESH_DATA")
 
 		remove_button = inner_row.operator(Edit_VRM_Blendshape_Pose_Target.bl_idname, text="", icon="X")
 		remove_button.use_scene_collection = context_object == context.scene.collection
@@ -102,8 +102,10 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 			add_value_button.resource_id = resource.stf_id
 			add_value_button.op = True
 			add_value_button.target_index = index
+
+			col = box.column(align=True)
 			for value_index, value in enumerate(target.values):
-				row = box.row(align=True)
+				row = col.row(align=True)
 				row.prop_search(value, "blendshape_name", target.mesh_instance.data.shape_keys, "key_blocks", text="")
 				row.prop(value, "blendshape_value", text="")
 

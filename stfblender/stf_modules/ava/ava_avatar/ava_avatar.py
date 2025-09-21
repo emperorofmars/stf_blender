@@ -45,9 +45,12 @@ class CreateViewportObjectOperator(bpy.types.Operator):
 
 
 def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, parent_application_object: any, component: AVA_Avatar):
+	layout.use_property_split = True
 	if(component.viewport):
 		layout.prop(component, "viewport")
-		layout.operator(SetActiveObjectOperator.bl_idname, text="Select Viewport Object").target_name = "$ViewportFirstPerson"
+		row = layout.row()
+		row.alignment = "RIGHT"
+		row.operator(SetActiveObjectOperator.bl_idname, text="Select Viewport Object").target_name = "$ViewportFirstPerson"
 	else:
 		create_viewport_button = layout.operator(CreateViewportObjectOperator.bl_idname, text="Create Viewport Object")
 		create_viewport_button.blender_collection = parent_application_object.name
