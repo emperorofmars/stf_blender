@@ -4,6 +4,7 @@ from ..base.stf_module_component import STF_Component_Ref
 from ..base.stf_registry import get_component_modules
 from .component_utils import find_component_module
 from .minsc import CopyToClipboard
+from .draw_multiline_text import draw_multiline_text
 
 
 class STFDrawComponentList(bpy.types.UIList):
@@ -63,17 +64,7 @@ def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, compo
 
 	if(selected_module):
 		if(selected_module.__doc__):
-			first = True
-			docstr = selected_module.__doc__
-			docstr += "."
-			for line in docstr.split("\n"):
-				remaining = line
-				while(len(remaining) > 80):
-					box.label(text=remaining[:80], icon="INFO_LARGE" if first else "NONE")
-					remaining = remaining[80:]
-					first = False
-				box.label(text=remaining, icon="INFO_LARGE" if first else "NONE")
-				first = False
+			draw_multiline_text(box, selected_module.__doc__)
 
 		if(is_instance and hasattr(selected_module, "draw_component_instance_func")):
 			selected_module.draw_component_instance_func(box, context, component_ref, stf_application_object, component)

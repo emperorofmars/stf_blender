@@ -6,6 +6,7 @@ from .minsc import CopyToClipboard
 from .data_resource_utils import STFCreateDataResourceOperator, STFEditDataResourceOperator, STFRemoveDataResourceOperator
 from .component_ui import draw_components_ui, set_stf_component_filter
 from .component_utils import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
+from .draw_multiline_text import draw_multiline_text
 
 
 def _get_data_resource_component_ref_property_collection(context) -> any:
@@ -77,17 +78,8 @@ def draw_resource(layout: bpy.types.UILayout, context: bpy.types.Context, resour
 
 	if(selected_module):
 		if(selected_module.__doc__):
-			first = True
-			docstr = selected_module.__doc__
-			docstr += "."
-			for line in docstr.split("\n"):
-				remaining = line
-				while(len(remaining) > 80):
-					box.label(text=remaining[:80], icon="INFO_LARGE" if first else "NONE")
-					remaining = remaining[80:]
-					first = False
-				box.label(text=remaining, icon="INFO_LARGE" if first else "NONE")
-				first = False
+			draw_multiline_text(box, selected_module.__doc__)
+			
 
 		if(hasattr(selected_module, "draw_resource_func")):
 			selected_module.draw_resource_func(box, context, resource_ref, collection, resource)
