@@ -86,19 +86,26 @@ def draw_components_ui(
 		remove_component_op: str,
 		edit_component_id_op: str,
 		get_target_object_func: any = None,
-		inject_ui: any = None
+		inject_ui: any = None,
+		is_data_resource_component: bool = False
 		):
 	stf_modules = get_component_modules()
 
+	available_component_modules = context.scene.stf_data_resource_component_modules if is_data_resource_component else context.scene.stf_component_modules
+
 	row = layout.row(align=True)
-	row.prop(bpy.context.scene, "stf_component_modules", text="")
-	selected_add_module = find_component_module(stf_modules, context.scene.stf_component_modules)
+	if(is_data_resource_component):
+		row.prop(bpy.context.scene, "stf_data_resource_component_modules", text="")
+	else:
+		row.prop(bpy.context.scene, "stf_component_modules", text="")
+
+	selected_add_module = find_component_module(stf_modules, available_component_modules)
 	if(len(stf_modules) > 0):
 		if(selected_add_module):
 			row_l = row.row(align=True)
 			row_l.alignment = "RIGHT"
 			add_button = row_l.operator(add_component_op, icon="PLUS", text="Add Component")
-			add_button.stf_type = context.scene.stf_component_modules
+			add_button.stf_type = available_component_modules
 			add_button.property_name = selected_add_module.blender_property_name
 		else:
 			row.separator(factor=1)
@@ -164,9 +171,16 @@ def set_stf_component_filter(filter = None):
 	global stf_component_filter
 	stf_component_filter = filter
 
+stf_data_resource_component_filter = None
+def set_stf_data_resource_component_filter(filter = None):
+	global stf_data_resource_component_filter
+	stf_data_resource_component_filter = filter
 
 def _build_stf_component_types_enum_callback(self, context) -> list:
 	return [((stf_module.stf_type, stf_module.stf_type, stf_module.__doc__ if stf_module.__doc__ else "")) for stf_module in get_component_modules(stf_component_filter)]
+
+def _build_stf_data_resource_component_types_enum_callback(self, context) -> list:
+	return [((stf_module.stf_type, stf_module.stf_type, stf_module.__doc__ if stf_module.__doc__ else "")) for stf_module in get_component_modules(stf_data_resource_component_filter)]
 
 def register():
 	bpy.types.Scene.stf_component_modules = bpy.props.EnumProperty(
@@ -179,7 +193,19 @@ def register():
 		set=None,
 		update=None,
 	)
+	bpy.types.Scene.stf_data_resource_component_modules = bpy.props.EnumProperty(
+		items=_build_stf_data_resource_component_types_enum_callback,
+		name="Available STF Components",
+		description="Select STF component to add",
+		options={"SKIP_SAVE"},
+		default=None,
+		get=None,
+		set=None,
+		update=None,
+	)
 
 def unregister():
+	if hasattr(bpy.types.Scene, "stf_data_resource_component_modules"):
+		del bpy.types.Scene.stf_data_resource_component_modules
 	if hasattr(bpy.types.Scene, "stf_component_modules"):
 		del bpy.types.Scene.stf_component_modules

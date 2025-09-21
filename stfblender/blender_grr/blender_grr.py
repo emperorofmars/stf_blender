@@ -1,6 +1,6 @@
 import bpy
 
-from .data_resource_reference import BlenderDRR
+from .stf_data_resource_reference import STFDataResourceReference
 from .blender_resource_reference import BlenderResourceReference, blender_type_values
 
 """
@@ -25,7 +25,7 @@ class BlenderGRR(bpy.types.PropertyGroup):
 
 	blender_type: bpy.props.EnumProperty(name="Type", items=blender_type_values) # type: ignore
 
-	data_resource_reference: bpy.props.PointerProperty(type=BlenderDRR, name="STF Data-Resource Reference") # type: ignore
+	data_resource_reference: bpy.props.PointerProperty(type=STFDataResourceReference, name="STF Data-Resource Reference") # type: ignore
 	blender_resource_reference: bpy.props.PointerProperty(type=BlenderResourceReference, name="Blender Resource Reference") # type: ignore
 
 

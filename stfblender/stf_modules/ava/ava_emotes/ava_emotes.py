@@ -7,7 +7,7 @@ from ....utils.component_utils import add_component, export_component_base, impo
 from ....base.stf_report import STFReport, STFReportSeverity
 from ....utils.reference_helper import export_resource
 from ....utils.minsc import draw_slot_link_warning
-from ....blender_grr.data_resource_reference import draw_blender_drr, is_blender_drr_valid, resolve_blender_drr, BlenderDRR
+from ....blender_grr.stf_data_resource_reference import draw_blender_drr, is_blender_drr_valid, resolve_blender_drr, STFDataResourceReference
 
 _stf_type = "ava.emotes"
 _blender_property_name = "ava_emotes"
@@ -77,7 +77,7 @@ class AVA_Emote(bpy.types.PropertyGroup):
 	animation: bpy.props.PointerProperty(type=bpy.types.Action, name="Animation", description="The animation which represents the emote") # type: ignore # todo select only actions with a valid slot-link setup
 
 	use_blendshape_fallback: bpy.props.BoolProperty(name="Provide Blendshape Only Fallback", default=False, description="Some targets like VRM have a very limited system for avatar expressions. Provide a blendshape-only pose for these applications") # type: ignore
-	blendshape_fallback: bpy.props.PointerProperty(type=BlenderDRR) # type: ignore
+	blendshape_fallback: bpy.props.PointerProperty(type=STFDataResourceReference) # type: ignore
 
 
 class AVA_Emotes(STF_BlenderComponentBase):
@@ -104,7 +104,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 
 	if(component.active_emote >= len(component.emotes)):
 		return
-	
+
 	remove_button = row.operator(Remove_AVA_Emote.bl_idname, text="", icon="X")
 	remove_button.component_id = component.stf_id
 	remove_button.index = component.active_emote

@@ -4,7 +4,7 @@ from ..base.stf_module_data import STF_BlenderDataModule, STF_BlenderDataResourc
 from ..base.stf_registry import get_blender_non_native_data_modules
 from .minsc import CopyToClipboard
 from .data_resource_utils import STFCreateDataResourceOperator, STFEditDataResourceOperator, STFRemoveDataResourceOperator
-from .component_ui import draw_components_ui, set_stf_component_filter
+from .component_ui import draw_components_ui, set_stf_component_filter, set_stf_data_resource_component_filter
 from .component_utils import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
 from .draw_multiline_text import draw_multiline_text
 
@@ -87,12 +87,12 @@ def draw_resource(layout: bpy.types.UILayout, context: bpy.types.Context, resour
 			pass
 
 		# Components
-		set_stf_component_filter(type(resource))
+		set_stf_data_resource_component_filter(type(resource))
 		set_stf_data_resource_property(collection == context.scene.collection, resource_ref.blender_property_name, resource_ref.stf_id)
 		layout.separator(factor=1, type="SPACE")
 		header, body = layout.panel(resource_ref.stf_type + "_components", default_closed = False)
 		header.label(text=resource_ref.stf_type + " Components", icon="GROUP")
-		if(body): draw_components_ui(layout, context, resource, collection, STFAddDataResourceComponentOperator.bl_idname, STFRemoveDataResourceComponentOperator.bl_idname, STFEditDataResourceComponentIdOperator.bl_idname)
+		if(body): draw_components_ui(layout, context, resource, collection, STFAddDataResourceComponentOperator.bl_idname, STFRemoveDataResourceComponentOperator.bl_idname, STFEditDataResourceComponentIdOperator.bl_idname, is_data_resource_component=True)
 	else:
 		box.label(text="Unknown Type")
 		box.label(text="Blender Property Name: " + resource_ref.blender_property_name)
