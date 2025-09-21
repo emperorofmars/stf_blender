@@ -17,6 +17,7 @@ class STFEXP_LightprobeAnchor(STF_BlenderComponentBase):
 
 
 def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, parent_application_object: any, component: STFEXP_LightprobeAnchor):
+	layout.use_property_split = True
 	layout.prop(component, "anchor_object")
 	if(component.anchor_object and type(component.anchor_object.data) == bpy.types.Armature):
 		layout.prop_search(component, "anghor_bone", component.anchor_object.data, "bones")

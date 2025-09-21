@@ -5,7 +5,7 @@ from .stf_instance_armature import InstanceModComponentRef
 from .stf_instance_armature_utils import UpdateArmatureInstanceComponentStandins
 from ....utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
 from ....utils.component_utils import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
-from ....utils.component_ui_utils import draw_components_ui, draw_instance_standin_components_ui, set_stf_component_filter
+from ....utils.component_ui import draw_components_ui, draw_instance_standin_components_ui, set_stf_component_filter
 
 
 class STFSetArmatureInstanceIDOperator(bpy.types.Operator, STFSetIDOperatorBase):

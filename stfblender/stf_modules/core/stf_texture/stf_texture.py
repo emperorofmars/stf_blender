@@ -22,6 +22,7 @@ class STF_Texture(STF_BlenderComponentBase):
 
 
 def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, parent_application_object: any, component: STF_Texture):
+	layout.use_property_split = True
 	layout.prop(component, "width")
 	layout.prop(component, "height")
 	layout.prop(component, "downscale_priority")

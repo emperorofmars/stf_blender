@@ -18,6 +18,7 @@ class AVA_EyeRotation_Bone(STF_BlenderComponentBase):
 
 
 def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, parent_application_object: any, component: AVA_EyeRotation_Bone):
+	layout.use_property_split = True
 	layout.prop(component, "limit_up")
 	layout.prop(component, "limit_down")
 	layout.prop(component, "limit_in")

@@ -4,7 +4,7 @@ from ..base.stf_module_data import STF_BlenderDataModule, STF_BlenderDataResourc
 from ..base.stf_registry import get_blender_non_native_data_modules
 from .minsc import CopyToClipboard
 from .data_resource_utils import STFCreateDataResourceOperator, STFEditDataResourceOperator, STFRemoveDataResourceOperator
-from .component_ui_utils import draw_components_ui, set_stf_component_filter
+from .component_ui import draw_components_ui, set_stf_component_filter
 from .component_utils import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
 
 
@@ -78,7 +78,9 @@ def draw_resource(layout: bpy.types.UILayout, context: bpy.types.Context, resour
 	if(selected_module):
 		if(selected_module.__doc__):
 			first = True
-			for line in selected_module.__doc__.split("\n"):
+			docstr = selected_module.__doc__
+			docstr += "."
+			for line in docstr.split("\n"):
 				remaining = line
 				while(len(remaining) > 80):
 					box.label(text=remaining[:80], icon="INFO_LARGE" if first else "NONE")

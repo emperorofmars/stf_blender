@@ -79,30 +79,34 @@ class AVA_Eyelids_Blendshape(STF_BlenderComponentBase):
 	look_right_right: bpy.props.StringProperty(name="Right Right") # type: ignore
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, parent_application_object: any, component: AVA_Eyelids_Blendshape):
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: AVA_Eyelids_Blendshape):
+	if(not context_object or type(context_object) is not bpy.types.Mesh):
+		return
+
+	layout.use_property_split = True
 	layout.operator(AutomapEyelids.bl_idname).component_id = component.stf_id
 
-	layout.prop(component, "eyes_closed")
-	layout.prop(component, "look_up")
-	layout.prop(component, "look_down")
-	layout.prop(component, "look_left")
-	layout.prop(component, "look_right")
+	layout.prop_search(component, "eyes_closed", context_object.shape_keys, "key_blocks")
+	layout.prop_search(component, "look_up", context_object.shape_keys, "key_blocks")
+	layout.prop_search(component, "look_down", context_object.shape_keys, "key_blocks")
+	layout.prop_search(component, "look_left", context_object.shape_keys, "key_blocks")
+	layout.prop_search(component, "look_right", context_object.shape_keys, "key_blocks")
 
 	layout.separator(factor=1)
 
-	layout.prop(component, "eye_closed_left")
-	layout.prop(component, "look_up_left")
-	layout.prop(component, "look_down_left")
-	layout.prop(component, "look_left_left")
-	layout.prop(component, "look_right_left")
+	layout.prop_search(component, "eye_closed_left", context_object.shape_keys, "key_blocks")
+	layout.prop_search(component, "look_up_left", context_object.shape_keys, "key_blocks")
+	layout.prop_search(component, "look_down_left", context_object.shape_keys, "key_blocks")
+	layout.prop_search(component, "look_left_left", context_object.shape_keys, "key_blocks")
+	layout.prop_search(component, "look_right_left", context_object.shape_keys, "key_blocks")
 	
 	layout.separator(factor=1)
 
-	layout.prop(component, "eye_closed_right")
-	layout.prop(component, "look_up_right")
-	layout.prop(component, "look_down_right")
-	layout.prop(component, "look_left_right")
-	layout.prop(component, "look_right_right")
+	layout.prop_search(component, "eye_closed_right", context_object.shape_keys, "key_blocks")
+	layout.prop_search(component, "look_up_right", context_object.shape_keys, "key_blocks")
+	layout.prop_search(component, "look_down_right", context_object.shape_keys, "key_blocks")
+	layout.prop_search(component, "look_left_right", context_object.shape_keys, "key_blocks")
+	layout.prop_search(component, "look_right_right", context_object.shape_keys, "key_blocks")
 
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, parent_application_object: any) -> any:

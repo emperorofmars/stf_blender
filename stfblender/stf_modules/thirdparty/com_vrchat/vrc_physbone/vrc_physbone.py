@@ -67,14 +67,15 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 
 	row = box.row()
 	row.label(text="Colliders")
-	add_button = row.operator(Edit_VRC_Physbone.bl_idname, text="Add")
+	add_button = row.operator(Edit_VRC_Physbone.bl_idname, text="Add", icon="PLUS")
 	add_button.blender_bone = type(component.id_data) == bpy.types.Armature
 	add_button.component_id = component.stf_id
 	add_button.op = "add"
 	add_button.property = "colliders"
 
 	for index, collider in enumerate(component.colliders):
-		row = box.row()
+		row = box.row(align=True)
+		row.use_property_split = True
 		row.prop(collider, "id")
 		remove_button = row.operator(Edit_VRC_Physbone.bl_idname, text="", icon="X")
 		remove_button.blender_bone = type(component.id_data) == bpy.types.Armature
@@ -83,15 +84,17 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 		remove_button.index = index
 		remove_button.property = "colliders"
 
+	box = layout.box()
 	row = box.row()
 	row.label(text="Ignores")
-	add_button = row.operator(Edit_VRC_Physbone.bl_idname, text="Add")
+	add_button = row.operator(Edit_VRC_Physbone.bl_idname, text="Add", icon="PLUS")
 	add_button.blender_bone = type(component.id_data) == bpy.types.Armature
 	add_button.component_id = component.stf_id
 	add_button.op = "add"
 	add_button.property = "ignores"
 	for index, ignore in enumerate(component.ignores):
-		row = box.row()
+		row = box.row(align=True)
+		row.use_property_split = True
 		row.prop(ignore, "id")
 		remove_button = row.operator(Edit_VRC_Physbone.bl_idname, text="", icon="X")
 		remove_button.blender_bone = type(component.id_data) == bpy.types.Armature

@@ -24,7 +24,7 @@ class STFDrawInstanceComponentList(bpy.types.UIList):
 		layout.label(text=item.stf_id)
 
 
-def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, stf_application_object: any, component: any, edit_op: str, inject_ui = None):
+def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, stf_application_object: any, component: any, edit_op: str, is_instance: bool, inject_ui = None):
 	box = layout.box()
 	row = box.row()
 	row.label(text=component_ref.stf_type + "  -  ID: " + component_ref.stf_id + " ")
@@ -64,7 +64,9 @@ def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, compo
 	if(selected_module):
 		if(selected_module.__doc__):
 			first = True
-			for line in selected_module.__doc__.split("\n"):
+			docstr = selected_module.__doc__
+			docstr += "."
+			for line in docstr.split("\n"):
 				remaining = line
 				while(len(remaining) > 80):
 					box.label(text=remaining[:80], icon="INFO_LARGE" if first else "NONE")
@@ -73,9 +75,9 @@ def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, compo
 				box.label(text=remaining, icon="INFO_LARGE" if first else "NONE")
 				first = False
 
-		if(hasattr(selected_module, "draw_component_instance_func")):
+		if(is_instance and hasattr(selected_module, "draw_component_instance_func")):
 			selected_module.draw_component_instance_func(box, context, component_ref, stf_application_object, component)
-		elif(hasattr(selected_module, "draw_component_func")):
+		elif(not is_instance and hasattr(selected_module, "draw_component_func")):
 			selected_module.draw_component_func(box, context, component_ref, stf_application_object, component)
 		else:
 			pass
@@ -126,7 +128,7 @@ def draw_components_ui(
 						target_object = component_holder
 						if(get_target_object_func):
 							target_object = get_target_object_func(component_holder, component_ref)
-						draw_component(layout, context, component_ref, target_object, component, edit_component_id_op, inject_ui)
+						draw_component(layout, context, component_ref, target_object, component, edit_component_id_op, False, inject_ui)
 						break
 			else:
 				layout.label(text="Invalid Component: " + component_ref.blender_property_name)
@@ -158,7 +160,7 @@ def draw_instance_standin_components_ui(
 						target_object = component_holder
 						if(get_target_object_func):
 							target_object = get_target_object_func(component_holder, component_ref)
-						draw_component(layout, context, component_ref, target_object, component, edit_component_id_op, inject_ui)
+						draw_component(layout, context, component_ref, target_object, component, edit_component_id_op, True, inject_ui)
 						break
 			else:
 				layout.label(text="Invalid Component: " + component_ref.blender_property_name)

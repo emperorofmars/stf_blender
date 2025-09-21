@@ -22,7 +22,9 @@ class STFEXP_Constraint_Twist(STF_BlenderComponentBase):
 
 
 def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: STFEXP_Constraint_Twist):
+	layout.use_property_split = True
 	layout.prop(component, "weight")
+	layout.label(text="If no target is selected, the parent of the parent will be assumed.", icon="INFO")
 	if(type(context_object) == bpy.types.Bone):
 		layout.prop_search(component, "target_bone", context_object.id_data, "bones", text="Target")
 	else:
@@ -101,7 +103,9 @@ def _stf_export(context: STF_ExportContext, component: STFEXP_Constraint_Twist, 
 """Bone instance handling"""
 
 def _draw_component_instance(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: STFEXP_Constraint_Twist):
+	layout.use_property_split = True
 	layout.prop(component, "weight")
+	layout.label(text="If no target is selected, the parent of the parent will be assumed.", icon="INFO")
 	layout.prop(component, "target_object")
 	if(component.target_object and type(component.target_object.data) == bpy.types.Armature):
 		layout.prop_search(component, "target_bone", component.target_object.data, "bones")

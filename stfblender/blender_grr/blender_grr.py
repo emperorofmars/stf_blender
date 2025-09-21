@@ -1,5 +1,8 @@
 import bpy
 
+from .data_resource_reference import BlenderDRR
+from .blender_resource_reference import BlenderResourceReference, blender_type_values
+
 """
 Blender Generic Resource Reference
 
@@ -8,7 +11,7 @@ Bringing polymorphism to Blender
 This is a big TODO, making this complete, user friendly and nice to handle will take effort.
 """
 
-"""
+
 reference_type_values = (
 	("blender", "Blender Native Resource", ""),
 	("stf_component", "STF Component on Blender Resource", ""),
@@ -16,57 +19,15 @@ reference_type_values = (
 	("stf_data_resource_component", "STF Component on STF Data Resource", ""),
 )
 
-blender_type_values = (
-	("ACTION","ACTION",""),
-	("ARMATURE","ARMATURE",""),
-	("BRUSH","BRUSH",""),
-	("CACHEFILE","CACHEFILE",""),
-	("CAMERA","CAMERA",""),
-	("COLLECTION","COLLECTION",""),
-	("CURVE","CURVE",""),
-	("CURVES","CURVES",""),
-	("FONT","FONT",""),
-	("GREASEPENCIL","GREASEPENCIL",""),
-	("GREASEPENCIL_V3","GREASEPENCIL_V3",""),
-	("IMAGE","IMAGE",""),
-	("KEY","KEY",""),
-	("LATTICE","LATTICE",""),
-	("LIBRARY","LIBRARY",""),
-	("LIGHT","LIGHT",""),
-	("LIGHT_PROBE","LIGHT_PROBE",""),
-	("LINESTYLE","LINESTYLE",""),
-	("MASK","MASK",""),
-	("MATERIAL","MATERIAL",""),
-	("MESH","MESH",""),
-	("META","META",""),
-	("MOVIECLIP","MOVIECLIP",""),
-	("NODETREE","NODETREE",""),
-	("OBJECT","OBJECT",""),
-	("PAINTCURVE","PAINTCURVE",""),
-	("PALETTE","PALETTE",""),
-	("PARTICLE","PARTICLE",""),
-	("POINTCLOUD","POINTCLOUD",""),
-	("SCENE","SCENE",""),
-	("SCREEN","SCREEN",""),
-	("SOUND","SOUND",""),
-	("SPEAKER","SPEAKER",""),
-	("TEXT","TEXT",""),
-	("TEXTURE","TEXTURE",""),
-	("VOLUME","VOLUME",""),
-	("WINDOWMANAGER","WINDOWMANAGER",""),
-	("WORKSPACE","WORKSPACE",""),
-	("WORLD","WORLD",""),
-)
-
 
 class BlenderGRR(bpy.types.PropertyGroup):
 	reference_type: bpy.props.EnumProperty(name="Reference Type", items=reference_type_values) # type: ignore
+
 	blender_type: bpy.props.EnumProperty(name="Type", items=blender_type_values) # type: ignore
 
-	use_scene_collection: bpy.props.BoolProperty(default=False, name="Use Scene Collection") # type: ignore
-	scene: bpy.props.PointerProperty(type=bpy.types.Scene, name="Scene") # type: ignore
-	collection: bpy.props.PointerProperty(type=bpy.types.Collection, name="Collection") # type: ignore
-	object: bpy.props.PointerProperty(type=bpy.types.Object, name="Object") # type: ignore
+	data_resource_reference: bpy.props.PointerProperty(type=BlenderDRR, name="STF Data-Resource Reference") # type: ignore
+	blender_resource_reference: bpy.props.PointerProperty(type=BlenderResourceReference, name="Blender Resource Reference") # type: ignore
+
 
 	stf_data_resource_id: bpy.props.StringProperty(name="Resource ID") # type: ignore
 	stf_component_id: bpy.props.StringProperty(name="Component ID") # type: ignore
@@ -132,4 +93,4 @@ def resolve_blender_grr(grr: BlenderGRR) -> any:
 	elif(grr.reference_type == "stf_data_resource_component"):
 		pass
 	return None
-"""
+

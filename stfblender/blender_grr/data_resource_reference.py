@@ -1,6 +1,6 @@
 import bpy
 
-from .stf_module_data import STF_BlenderDataResourceBase, STF_Data_Ref
+from ..base.stf_module_data import STF_BlenderDataResourceBase, STF_Data_Ref
 
 """
 Blender Data Resource Reference

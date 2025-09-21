@@ -16,6 +16,7 @@ class STFEXP_Armature_Humanoid(STF_BlenderComponentBase):
 
 
 def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, parent_application_object: any, component: STFEXP_Armature_Humanoid):
+	layout.use_property_split = True
 	layout.prop(component, "locomotion_type")
 	layout.prop(component, "no_jaw")
 

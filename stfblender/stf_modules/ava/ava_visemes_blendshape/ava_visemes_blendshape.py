@@ -57,24 +57,28 @@ class AutomapVisemes(bpy.types.Operator):
 		return {"FINISHED"}
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, parent_application_object: any, component: AVA_Visemes_Blendshape):
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: AVA_Visemes_Blendshape):
+	if(not context_object or type(context_object) is not bpy.types.Mesh):
+		return
+
+	layout.use_property_split = True
 	layout.operator(AutomapVisemes.bl_idname).component_id = component.stf_id
 
-	layout.prop(component, "vis_sil")
-	layout.prop(component, "vis_pp")
-	layout.prop(component, "vis_ff")
-	layout.prop(component, "vis_th")
-	layout.prop(component, "vis_dd")
-	layout.prop(component, "vis_kk")
-	layout.prop(component, "vis_ch")
-	layout.prop(component, "vis_ss")
-	layout.prop(component, "vis_nn")
-	layout.prop(component, "vis_rr")
-	layout.prop(component, "vis_aa")
-	layout.prop(component, "vis_e")
-	layout.prop(component, "vis_ih")
-	layout.prop(component, "vis_oh")
-	layout.prop(component, "vis_ou")
+	layout.prop_search(component, "vis_sil", context_object.shape_keys, "key_blocks")
+	layout.prop_search(component, "vis_pp", context_object.shape_keys, "key_blocks")
+	layout.prop_search(component, "vis_ff", context_object.shape_keys, "key_blocks")
+	layout.prop_search(component, "vis_th", context_object.shape_keys, "key_blocks")
+	layout.prop_search(component, "vis_dd", context_object.shape_keys, "key_blocks")
+	layout.prop_search(component, "vis_kk", context_object.shape_keys, "key_blocks")
+	layout.prop_search(component, "vis_ch", context_object.shape_keys, "key_blocks")
+	layout.prop_search(component, "vis_ss", context_object.shape_keys, "key_blocks")
+	layout.prop_search(component, "vis_nn", context_object.shape_keys, "key_blocks")
+	layout.prop_search(component, "vis_rr", context_object.shape_keys, "key_blocks")
+	layout.prop_search(component, "vis_aa", context_object.shape_keys, "key_blocks")
+	layout.prop_search(component, "vis_e", context_object.shape_keys, "key_blocks")
+	layout.prop_search(component, "vis_ih", context_object.shape_keys, "key_blocks")
+	layout.prop_search(component, "vis_oh", context_object.shape_keys, "key_blocks")
+	layout.prop_search(component, "vis_ou", context_object.shape_keys, "key_blocks")
 
 
 

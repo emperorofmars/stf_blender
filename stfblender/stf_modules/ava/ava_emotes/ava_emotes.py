@@ -7,7 +7,7 @@ from ....utils.component_utils import add_component, export_component_base, impo
 from ....base.stf_report import STFReport, STFReportSeverity
 from ....utils.reference_helper import export_resource
 from ....utils.minsc import draw_slot_link_warning
-from ....base.data_resource_reference import draw_blender_drr, is_blender_drr_valid, resolve_blender_drr, BlenderDRR
+from ....blender_grr.data_resource_reference import draw_blender_drr, is_blender_drr_valid, resolve_blender_drr, BlenderDRR
 
 _stf_type = "ava.emotes"
 _blender_property_name = "ava_emotes"
