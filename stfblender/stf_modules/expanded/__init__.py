@@ -1,9 +1,9 @@
 
-from .stfexp_mesh_seams import stfexp_mesh_seams
-from .stfexp_mesh_creases import stfexp_mesh_creases
-from .stfexp_armature_humanoid import stfexp_armature_humanoid
-from .stfexp_constraint_twist import stfexp_constraint_twist
-from .stfexp_lightprobe_anchor import stfexp_lightprobe_anchor
+from . import stfexp_mesh_seams
+from . import stfexp_mesh_creases
+from . import stfexp_armature_humanoid
+from . import stfexp_constraint_twist
+from . import stfexp_lightprobe_anchor
 
 register_stf_modules = \
 	stfexp_mesh_seams.register_stf_modules + \
