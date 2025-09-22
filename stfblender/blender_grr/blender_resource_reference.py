@@ -1,12 +1,10 @@
 import bpy
 
-
 """
 Blender Resource Reference
 
 Bringing polymorphism to Blender
 """
-
 
 blender_type_values = (
 	("ACTION","Action","","ACTION",0),
@@ -92,8 +90,10 @@ def draw_blender_resource_reference(layout: bpy.types.UILayout, brr: BlenderReso
 	if(brr.blender_type and hasattr(brr, brr.blender_type.lower())):
 		layout.prop(brr, brr.blender_type.lower())
 
-
 def resolve_blender_resource_reference(brr: BlenderResourceReference) -> bpy.types.ID | None:
 	if(brr.blender_type and hasattr(brr, brr.blender_type.lower())):
 		return getattr(brr, brr.blender_type.lower())
 	return None
+
+def validate_blender_resource_reference(brr: BlenderResourceReference) -> bool:
+	return brr and resolve_blender_resource_reference(brr)

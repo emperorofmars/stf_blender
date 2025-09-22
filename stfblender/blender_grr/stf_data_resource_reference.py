@@ -3,7 +3,7 @@ import bpy
 from ..base.stf_module_data import STF_BlenderDataResourceBase, STF_Data_Ref
 
 """
-Blender Data-Resource Reference
+STF Data-Resource Reference
 
 Bringing polymorphism to Blender
 """
@@ -24,23 +24,44 @@ def __draw_blender_collection_selection(layout: bpy.types.UILayout, drr: STFData
 		layout.prop(drr, "scene")
 		return drr.scene.collection if drr.scene else None
 
-def draw_blender_drr(layout: bpy.types.UILayout, drr: STFDataResourceReference, type_filter: list[str] = []):
+def draw_stf_data_resource_reference(layout: bpy.types.UILayout, drr: STFDataResourceReference, type_filter: list[str] = []):
 	if(collection := __draw_blender_collection_selection(layout, drr)):
-
+		# let resource_ref
 		for resource_ref in collection.stf_data_refs:
 			if(resource_ref.stf_id == drr.stf_data_resource_id):
 				break
+		else:
+			resource_ref = None
+		# let resource
 		for resource in collection.dev_vrm_blendshape_pose:
 			if(resource.stf_id == drr.stf_data_resource_id):
 				break
+		else:
+			resource = None
 
-		layout.prop_search(drr, "stf_data_resource_id", collection, "stf_data_refs", icon="ERROR" if resource_ref and type_filter and resource_ref.stf_type not in type_filter else "NONE")
-		row = layout.row()
+		layout.prop_search(drr, "stf_data_resource_id", collection, "stf_data_refs", icon="ERROR" if not resource_ref or type_filter and resource_ref.stf_type not in type_filter else "NONE")
+
+		#row = layout.row()
 		if(resource_ref and type_filter and resource_ref.stf_type not in type_filter):
-			row.label(text="Invalid Type: " + resource_ref.stf_type, icon="ERROR")
+			split = layout.split(factor=0.4)
+			row = split.row()
+			if(layout.use_property_split):
+				row.alignment = "RIGHT"
+			row.label(text="Invalid Type", icon="ERROR")
+			split.label(text=resource_ref.stf_type)
 		elif(resource_ref and resource):
-			row.label(text="Selected: " + resource_ref.stf_type, icon="INFO")
-			row.label(text="Name: " + resource.stf_name)
+			split = layout.split(factor=0.4)
+			row = split.row()
+			if(layout.use_property_split):
+				row.alignment = "RIGHT"
+			row.label(text="Type   ")
+			split.label(text=resource_ref.stf_type)
+			split = layout.split(factor=0.4)
+			row = split.row()
+			if(layout.use_property_split):
+				row.alignment = "RIGHT"
+			row.label(text="Name   ")
+			split.label(text=resource.stf_name)
 
 
 def __get_blender_property(ref_holder: any, property_holder: any, target_id: str) -> tuple[STF_Data_Ref, STF_BlenderDataResourceBase]:
@@ -51,7 +72,7 @@ def __get_blender_property(ref_holder: any, property_holder: any, target_id: str
 					return resource_ref, resource
 	return None
 
-def resolve_blender_drr(drr: STFDataResourceReference) -> tuple[STF_Data_Ref, STF_BlenderDataResourceBase]:
+def resolve_stf_data_resource_reference(drr: STFDataResourceReference) -> tuple[STF_Data_Ref, STF_BlenderDataResourceBase]:
 	if(drr.use_scene_collection and drr.scene):
 		return __get_blender_property(drr.scene.collection.stf_data_refs, drr.scene.collection, drr.stf_data_resource_id)
 	elif(not drr.use_scene_collection and drr.collection):
@@ -59,9 +80,10 @@ def resolve_blender_drr(drr: STFDataResourceReference) -> tuple[STF_Data_Ref, ST
 	else:
 		return None
 
-def is_blender_drr_valid(drr: STFDataResourceReference, valid_types: list[str] = []) -> bool:
-	if(res := resolve_blender_drr(drr)):
-		resource_ref, resource = res
-		if(not valid_types or resource_ref.stf_type in valid_types):
-			return True
+def validate_stf_data_resource_reference(drr: STFDataResourceReference, valid_types: list[str] = []) -> bool:
+	if(drr):
+		if(res := resolve_stf_data_resource_reference(drr)):
+			resource_ref, resource = res
+			if(not valid_types or resource_ref.stf_type in valid_types):
+				return True
 	return False

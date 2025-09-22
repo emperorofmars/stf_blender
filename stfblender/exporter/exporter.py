@@ -27,7 +27,7 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 	debug: bpy.props.BoolProperty(name="Export Debug Json File", default=True, description="Useful for inspection the exported file in a text-editor") # type: ignore
 
 
-	def invoke(self, context, event):
+	def invoke(self, context: bpy.types.Context, event):
 		if(self.scene_collection_as_root):
 			context.scene.stf_collection_selector = None
 		elif(self.current_collection_as_root):
@@ -37,7 +37,7 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 		return ExportHelper.invoke(self, context, event)
 
 
-	def execute(self, context):
+	def execute(self, context: bpy.types.Context):
 		import time
 		time_start = time.time()
 		context.window.cursor_set("WAIT")
@@ -101,7 +101,7 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 			context.window.cursor_set("DEFAULT")
 
 
-	def draw(self, context):
+	def draw(self, context: bpy.types.Context):
 		self.layout.label(text="STF version: " + get_stf_version())
 		self.layout.separator(factor=1, type="SPACE")
 
@@ -128,7 +128,7 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 		self.layout.prop(self.export_settings, property="stf_mesh_blendshape_normals")
 
 
-def export_button(self, context):
+def export_button(self, context: bpy.types.Context):
 	self.layout.operator(ExportSTF.bl_idname, text="STF (.stf)")
 
 

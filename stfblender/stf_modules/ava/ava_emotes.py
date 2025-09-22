@@ -7,7 +7,7 @@ from ...utils.component_utils import add_component, export_component_base, impor
 from ...base.stf_report import STFReport, STFReportSeverity
 from ...utils.reference_helper import export_resource
 from ...utils.minsc import draw_slot_link_warning
-from ...blender_grr.stf_data_resource_reference import draw_blender_drr, is_blender_drr_valid, resolve_blender_drr, STFDataResourceReference
+from ...blender_grr.stf_data_resource_reference import draw_stf_data_resource_reference, validate_stf_data_resource_reference, resolve_stf_data_resource_reference, STFDataResourceReference
 
 _stf_type = "ava.emotes"
 _blender_property_name = "ava_emotes"
@@ -129,10 +129,10 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 	if(emote.use_blendshape_fallback):
 		box = box.box()
 		box.label(text="Blendshape Only Fallback (For VRM)")
-		if(not is_blender_drr_valid(emote.blendshape_fallback, ["dev.vrm.blendshape_pose"])):
+		if(not validate_stf_data_resource_reference(emote.blendshape_fallback, ["dev.vrm.blendshape_pose"])):
 			box.label(text="Create a 'dev.vrm.blendshape_pose' type resource in a Blender-Collection under 'STF Data Resources'.", icon="INFO_LARGE")
 		box.use_property_split = True
-		draw_blender_drr(box.column(align=True), emote.blendshape_fallback, ["dev.vrm.blendshape_pose"])
+		draw_stf_data_resource_reference(box.column(align=True), emote.blendshape_fallback, ["dev.vrm.blendshape_pose"])
 
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
@@ -181,7 +181,7 @@ def _stf_export(context: STF_ExportContext, component: AVA_Emotes, context_objec
 				emotes[meaning] = json_emote
 
 				if(blender_emote.use_blendshape_fallback):
-					if(fallback_ret := resolve_blender_drr(blender_emote.blendshape_fallback)):
+					if(fallback_ret := resolve_stf_data_resource_reference(blender_emote.blendshape_fallback)):
 						fallback_ref, fallback_resource = fallback_ret
 						if(fallback_ref.stf_type == "dev.vrm.blendshape_pose"):
 							json_emote["fallback"] = export_resource(ret, context.serialize_resource(fallback_resource))

@@ -17,10 +17,10 @@ class ImportSTF(bpy.types.Operator, ImportHelper):
 
 	filter_glob: bpy.props.StringProperty(default="*.stf", options={"HIDDEN"}) # type: ignore
 
-	def invoke(self, context, event):
+	def invoke(self, context: bpy.types.Context, event):
 		return ImportHelper.invoke_popup(self, context)
 
-	def execute(self, context):
+	def execute(self, context: bpy.types.Context):
 		import time
 		time_start = time.time()
 		context.window.cursor_set("WAIT")
@@ -54,6 +54,9 @@ class ImportSTF(bpy.types.Operator, ImportHelper):
 				result_str = "STF asset imported successfully! (%.3f sec.)" % (time.time() - time_start)
 				self.report({"INFO"}, result_str)
 				print(result_str)
+
+			# Select the imported assets Collection
+			bpy.context.view_layer.active_layer_collection = context.view_layer.layer_collection.children[root.name]
 			return {"FINISHED"}
 		except STFException as error:
 			self.report({"ERROR"}, str(error))
@@ -65,14 +68,14 @@ class ImportSTF(bpy.types.Operator, ImportHelper):
 					bpy.data.objects.remove(trash)
 			context.window.cursor_set("DEFAULT")
 
-	def draw(self, context):
+	def draw(self, context: bpy.types.Context):
 		self.layout.label(text="STF version: " + get_stf_version())
 		self.layout.separator(factor=1, type="SPACE")
 
 		draw_slot_link_warning(self.layout)
 
 
-def import_button(self, context):
+def import_button(self, context: bpy.types.Context):
 	self.layout.operator(ImportSTF.bl_idname, text="STF (.stf)")
 
 def register():
