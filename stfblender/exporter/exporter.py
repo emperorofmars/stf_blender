@@ -109,9 +109,9 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 
 		self.layout.prop_search(bpy.context.scene, "stf_collection_selector", bpy.data, "collections", text="Root")
 		if(bpy.context.scene.stf_collection_selector):
-			self.layout.label(text="Remove Collection to export the entire Scene")
+			self.layout.label(text="Remove Collection to export the entire Scene", icon="INFO")
 		else:
-			self.layout.label(text="Exporting full Scene")
+			self.layout.label(text="Exporting full Scene", icon="INFO")
 
 		self.layout.separator(factor=2, type="LINE")
 

@@ -16,11 +16,11 @@ Intended for (not only) game development use-cases.
 
 **WIP implementation for Blender 4.4+. Do not use productively!**
 
-**https://docs.stfform.at/guides/blender/index.html[Read the User Guide!]** ⭐ **https://stfform.at/[STF Website]**
+**https://docs.stfform.at/guides/blender/blender.html[Read the User Guide!]** ⭐ **https://docs.stfform.at/[STF Website]**
 
 == Installation
 === From Repository (preferred)
-Follow the steps on https://stfform.at[stfform.at]!
+Follow the steps on https://docs.stfform.at/installation/blender.html[docs.stfform.at]!
 
 === Manual
 Download the https://github.com/emperorofmars/stf_blender/releases/latest[latest release] and add it under: `Edit` -> `Preferences` -> `Get Extensions` -> **Click on the top right most dropdown** -> `Install from Disk...`
