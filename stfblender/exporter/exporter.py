@@ -131,8 +131,9 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 
 
 	def draw(self, context: bpy.types.Context):
-		self.layout.use_property_split = True
 		called_from_collection_exporter = not context.space_data or context.space_data.type != "FILE_BROWSER" # Invoked as Collection Exporter
+		if(called_from_collection_exporter):
+			self.layout.use_property_split = True
 
 		if(not called_from_collection_exporter):
 			self.layout.operator(OpenWebpage.bl_idname, text="Open User Guide", icon="HELP").url = "https://docs.stfform.at/guides/blender/blender.html"
