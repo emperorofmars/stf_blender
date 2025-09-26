@@ -19,7 +19,6 @@ class STF_Import_Result:
 		self.import_time = import_time
 		self.warnings = warnings
 
-
 def import_stf_file(filepath: str) -> STF_Import_Result:
 	import time
 	time_start = time.time()
@@ -52,54 +51,7 @@ def import_stf_file(filepath: str) -> STF_Import_Result:
 				bpy.data.objects.remove(trash)
 
 
-def _import_multiple_stf_files(self, context: bpy.types.Context):
-	context.window.cursor_modal_set("WAIT")
-	try:
-		results: list[STF_Import_Result] = []
-		for file in self.files:
-			results.append(import_stf_file(os.path.join(self.directory, file.name)))
-		total_time = 0
-		total_successes = 0
-		last_success = None
-		for result in results:
-			if(result.success):
-				total_successes += 1
-				total_time += result.import_time
-				if(result.collection): last_success = result.collection
-				if(result.warnings and len(result.warnings) > 0):
-					for report in result.warnings:
-						print(result.filepath + " :: " + report.to_string() + "\n")
-						self.report({"WARNING"}, result.filepath + " :: " + report.to_string())
-			else:
-				self.report({"ERROR"}, result.filepath + " :: " + result.error_message)
-
-		if(total_successes == len(results)):
-			# let result_str
-			if(total_successes == 1):
-				result_str = "STF asset \"" + results[0].filepath + "\" imported successfully! (%.3f sec.)" % total_time
-			else:
-				result_str = str(len(results)) + "STF assets imported successfully! (%.3f sec.)" % total_time
-			self.report({"INFO"}, result_str)
-			print(result_str)
-		if(last_success):
-			if(not context.scene.stf_root_collection):
-				context.scene.stf_root_collection = last_success
-			# Select the imported assets Collection
-			bpy.context.view_layer.active_layer_collection = context.view_layer.layer_collection.children[last_success.name]
-		return {"FINISHED"}
-	finally:
-		context.window.cursor_modal_restore()
-
-
-def _draw_stf_import_ui(self, context: bpy.types.Context):
-		self.layout.operator(OpenWebpage.bl_idname, text="Open User Guide", icon="HELP").url = "https://docs.stfform.at/guides/blender/blender.html"
-		self.layout.label(text="STF version: " + get_stf_version())
-		self.layout.separator(factor=1, type="SPACE")
-
-		draw_slot_link_warning(self.layout)
-
-
-class ImportSTF_UI(bpy.types.Operator, ImportHelper):
+class ImportSTF(bpy.types.Operator, ImportHelper):
 	"""Import an STF file (.stf)"""
 	bl_idname = "stf.import"
 	bl_label = "Import STF"
@@ -110,42 +62,61 @@ class ImportSTF_UI(bpy.types.Operator, ImportHelper):
 	directory: bpy.props.StringProperty(subtype="DIR_PATH") # type: ignore
 	files: bpy.props.CollectionProperty(name="File Paths", type=bpy.types.OperatorFileListElement) # type: ignore
 
+
 	def invoke(self, context: bpy.types.Context, event: bpy.types.Event):
+		self.invoking_from_ui = True
 		return ImportHelper.invoke_popup(self, context)
 
-	def execute(self, context: bpy.types.Context):
-		return _import_multiple_stf_files(self, context)
-
-	def draw(self, context: bpy.types.Context):
-		_draw_stf_import_ui(self, context)
-
-
-class ImportSTF_FH(bpy.types.Operator, ImportHelper):
-	"""Import an STF file (.stf)"""
-	bl_idname = "stf.import_fh"
-	bl_label = "Import STF"
-	bl_options = {"PRESET", "REGISTER", "UNDO"}
-
-	filter_glob: bpy.props.StringProperty(default="*.stf", options={"HIDDEN"}) # type: ignore
-
-	directory: bpy.props.StringProperty(subtype="DIR_PATH", options={"HIDDEN", "SKIP_SAVE", "SKIP_PRESET"}) # type: ignore
-	files: bpy.props.CollectionProperty(name="File Paths", type=bpy.types.OperatorFileListElement) # type: ignore
-
-	def invoke(self, context: bpy.types.Context, event: bpy.types.Event):
-		if(len(self.files) == 0):
-			return ImportHelper.invoke_popup(self, context)
-		else:
-			return self.execute(context)
 
 	def execute(self, context: bpy.types.Context):
-		return _import_multiple_stf_files(self, context)
+		context.window.cursor_modal_set("WAIT")
+		try:
+			results: list[STF_Import_Result] = []
+			for file in self.files:
+				results.append(import_stf_file(os.path.join(self.directory, file.name)))
+			total_time = 0
+			total_successes = 0
+			last_success = None
+			for result in results:
+				if(result.success):
+					total_successes += 1
+					total_time += result.import_time
+					if(result.collection): last_success = result.collection
+					if(result.warnings and len(result.warnings) > 0):
+						for report in result.warnings:
+							print(result.filepath + " :: " + report.to_string() + "\n")
+							self.report({"WARNING"}, result.filepath + " :: " + report.to_string())
+				else:
+					self.report({"ERROR"}, result.filepath + " :: " + result.error_message)
+
+			if(total_successes == len(results)):
+				# let result_str
+				if(total_successes == 1):
+					result_str = "STF asset \"" + results[0].filepath + "\" imported successfully! (%.3f sec.)" % total_time
+				else:
+					result_str = str(len(results)) + "STF assets imported successfully! (%.3f sec.)" % total_time
+				self.report({"INFO"}, result_str)
+				print(result_str)
+			if(last_success):
+				if(not context.scene.stf_root_collection):
+					context.scene.stf_root_collection = last_success
+				# Select the imported assets Collection
+				bpy.context.view_layer.active_layer_collection = context.view_layer.layer_collection.children[last_success.name]
+			return {"FINISHED"}
+		finally:
+			context.window.cursor_modal_restore()
+
 
 	def draw(self, context: bpy.types.Context):
-		_draw_stf_import_ui(self, context)
+		self.layout.operator(OpenWebpage.bl_idname, text="Open User Guide", icon="HELP").url = "https://docs.stfform.at/guides/blender/blender.html"
+		self.layout.label(text="STF version: " + get_stf_version())
+		self.layout.separator(factor=1, type="SPACE")
+
+		draw_slot_link_warning(self.layout)
 
 
 def import_button(self, context: bpy.types.Context):
-	self.layout.operator(ImportSTF_UI.bl_idname, text="STF (.stf)")
+	self.layout.operator(ImportSTF.bl_idname, text="STF (.stf)")
 
 
 def register():

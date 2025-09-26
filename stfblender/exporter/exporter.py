@@ -17,7 +17,6 @@ class STF_Export_Result:
 		self.export_time = export_time
 		self.warnings = warnings
 
-
 def export_stf_file(collection: bpy.types.Collection, filepath: str, export_settings: STF_ExportSettings, debug: bool = False) -> STF_Export_Result:
 	import time
 	time_start = time.time()
@@ -60,7 +59,6 @@ def export_stf_file(collection: bpy.types.Collection, filepath: str, export_sett
 		for trash in trash_objects:
 			if(trash is not None):
 				bpy.data.objects.remove(trash)
-
 
 
 class ExportSTF(bpy.types.Operator, ExportHelper):

@@ -57,7 +57,7 @@ def get_all_submodules(directory):
 
 def iter_submodules(path, package_name):
 	for name in sorted(iter_submodule_names(path)):
-		if(name.startswith("stf_blender_module_template")): # Skip stf template
+		if(name.startswith("stf_blender_module_template") or name.startswith("testsuite")): # Skip stf template
 			continue
 		yield importlib.import_module("." + name, package_name)
 
