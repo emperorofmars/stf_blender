@@ -13,3 +13,11 @@ python311 -m pip install -r requirements.txt
 python311 test.py
 ```
 
+<!--
+Commands to build the extension:
+Change the Blender version in the path accordingly.
+* Windows
+	* Git Bash
+		C:\\'Program Files'\\'Blender Foundation'\\'Blender 4.5'\\blender.exe -P test.py -b
+
+-->

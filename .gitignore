@@ -12,3 +12,6 @@ __pycache__
 
 
 packages
+
+testsuite/output/*
+!testsuite/output/.gitkeep

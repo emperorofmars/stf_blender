@@ -53,7 +53,7 @@ def import_stf_file(filepath: str) -> STF_Import_Result:
 
 class ImportSTF(bpy.types.Operator, ImportHelper):
 	"""Import an STF file (.stf)"""
-	bl_idname = "stf.import"
+	bl_idname = "stf.import_files"
 	bl_label = "Import STF"
 	bl_options = {"PRESET", "REGISTER", "UNDO"}
 

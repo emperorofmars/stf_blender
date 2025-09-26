@@ -37,8 +37,13 @@ All source-code in this repository, except when noted in individual files and/or
 * GNU General Public License v3.0 or later (LICENSE-GPL3+ or https://www.gnu.org/licenses/gpl-3.0-standalone.html[])
 
 
-// Command to build the extension with a default Windows Blender installation:
+// Commands to build the extension:
 // Change the Blender version in the path accordingly.
-// C:\'Program Files'\'Blender Foundation'\'Blender 4.5'\blender.exe --command extension build
+// * Windows
+// 	* Powershell
+// 		C:\'Program Files'\'Blender Foundation'\'Blender 4.5'\blender.exe --command extension build
 //
-// C:\'Program Files'\'Blender Foundation'\'Blender 4.5'\blender.exe --command extension server-generate --repo-dir=./packages --html
+// 		C:\'Program Files'\'Blender Foundation'\'Blender 4.5'\blender.exe --command extension server-generate --repo-dir=./packages --html
+// 	* Git Bash
+// 		C:\\'Program Files'\\'Blender Foundation'\\'Blender 4.5'\\blender.exe --command extension build
+//
