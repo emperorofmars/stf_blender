@@ -2,9 +2,8 @@
 Requires a local Blender installation with the STF extension enabled.
 
 ## Run Tests
-Change the Blender version in the path accordingly.
-
-Run in the `testsuite` directory!
+Run in the `testsuite` directory!\
+*Change the Blender version in the path accordingly.*
 
 * Windows
 	* Git Bash
