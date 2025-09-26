@@ -1,6 +1,6 @@
 # STF Blender
 **Squirrel Transfer Format - Modular 3D File-Format**\
-*Intended for (not only) game development use-cases.*
+*Intended for (not only) games-development use-cases.*
 
 **WIP implementation for Blender 4.4+. Do not use productively!**
 

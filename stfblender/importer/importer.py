@@ -71,9 +71,13 @@ class ImportSTF(bpy.types.Operator, ImportHelper):
 	def execute(self, context: bpy.types.Context):
 		context.window.cursor_modal_set("WAIT")
 		try:
+			result_str = ""
 			results: list[STF_Import_Result] = []
 			for file in self.files:
-				results.append(import_stf_file(os.path.join(self.directory, file.name)))
+				ret = import_stf_file(os.path.join(self.directory, file.name))
+				results.append(ret)
+				result_str = "STF asset \"" + ret.filepath + "\" imported successfully! (%.3f sec.)" % ret.import_time
+				print(result_str)
 			total_time = 0
 			total_successes = 0
 			last_success = None
@@ -91,10 +95,8 @@ class ImportSTF(bpy.types.Operator, ImportHelper):
 
 			if(total_successes == len(results)):
 				# let result_str
-				if(total_successes == 1):
-					result_str = "STF asset \"" + results[0].filepath + "\" imported successfully! (%.3f sec.)" % total_time
-				else:
-					result_str = str(len(results)) + "STF assets imported successfully! (%.3f sec.)" % total_time
+				if(total_successes > 1):
+					result_str = str(len(results)) + " STF assets imported successfully! (%.3f sec.)" % total_time
 				self.report({"INFO"}, result_str)
 				print(result_str)
 			if(last_success):
