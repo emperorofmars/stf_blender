@@ -83,7 +83,6 @@ class STFEXP_HumanoidMappingsList(bpy.types.UIList):
 		layout.label(text=_get_display_name(item.name), icon="NONE" if item.bone else "ERROR")
 		layout.label(text=item.bone if item.bone else "Not Mapped!")
 
-
 def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: bpy.types.Armature, component: STFEXP_Armature_Humanoid):
 	layout.use_property_split = True
 	layout.prop(component, "locomotion_type")
