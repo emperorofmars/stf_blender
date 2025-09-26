@@ -1,2 +1,0 @@
--i https://download.blender.org/pypi/
-bpy==4.5.*

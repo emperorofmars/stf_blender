@@ -1,23 +1,13 @@
 # STF Blender Test Suite
-Uses Blender as a Python Module
+Requires a local Blender installation with the STF extension enabled.
 
-Required Python version as of Blender 4.5 is 3.11
-
-## Setup
-```sh
-python311 -m pip install -r requirements.txt
-```
-
-## Run
-```sh
-python311 test.py
-```
-
-<!--
-Commands to build the extension:
+## Run Tests
 Change the Blender version in the path accordingly.
+
+Run in the `testsuite` directory!
+
 * Windows
 	* Git Bash
+		```sh
 		C:\\'Program Files'\\'Blender Foundation'\\'Blender 4.5'\\blender.exe -P test.py -b
-
--->
+		```
