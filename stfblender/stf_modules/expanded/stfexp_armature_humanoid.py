@@ -10,17 +10,71 @@ _stf_type = "stfexp.armature.humanoid"
 _blender_property_name = "stfexp_armature_humanoid"
 
 
-_humanoid_bones = (
-	("hip", "Hip", ""),
-	("spine", "Spine", ""),
-	("chest", "Chest", ""),
-	("chest_upper", "Upper Chest", ""),
-	("neck", "Neck", ""),
-	("head", "Head", ""),
-	("jaw", "Jaw", ""),
-	("eye_l", "Left Eye", ""),
-	("eye_r", "Right Eye", ""),
-)
+_mappings_left_side = ["left", "_l", ".l", "-l", " l"]
+_mappings_right_side = ["right", "_r", ".r", "-r", " l"]
+
+# (humanoid_name, display_name, matching_elements)
+_humanoid_bones = [
+	("hip", "Hip", [["hip", "hips"]]),
+	("spine", "Spine", [["spine"]]),
+	("chest", "Chest", [["chest"]]),
+	("upper_chest", "Upper Chest", [["upper"], ["chest"]]),
+	("neck", "Neck", [["neck"]]),
+	("head", "Head", [["head"]]),
+	("jaw", "Jaw", [["jaw"]]),
+	("eye.l", "Left Eye", [["eye"], _mappings_left_side]),
+	("eye.r", "Right Eye", [["eye"], _mappings_right_side]),
+
+	("shoulder.l", "Left Shoulder", [["shoulder"], _mappings_left_side]),
+	("upper_arm.l", "Left Upper Arm", [["upper"], ["arm"], _mappings_left_side]),
+	("lower_arm.l", "Left Lower Arm", [["lower"], ["arm"], _mappings_left_side]),
+	("wrist.l", "Left Wrist", [["hand", "wrist"], _mappings_left_side]),
+	("thumb_1.l", "Left Thumb Proximal", [["thumb"], ["1", "proximal"], _mappings_left_side]),
+	("thumb_2.l", "Left Thumb Intermediate", [["thumb"], ["2", "intermediate"], _mappings_left_side]),
+	("thumb_3.l", "Left Thumb Distal", [["thumb"], ["3", "distal"], _mappings_left_side]),
+	("index_1.l", "Left Index Proximal", [["index"], ["1", "proximal"], _mappings_left_side]),
+	("index_2.l", "Left Index Intermediate", [["index"], ["2", "intermediate"], _mappings_left_side]),
+	("index_3.l", "Left Index Distal", [["index"], ["3", "distal"], _mappings_left_side]),
+	("middle_1.l", "Left Middle Proximal", [["middle"], ["1", "proximal"], _mappings_left_side]),
+	("middle_2.l", "Left Middle Intermediate", [["middle"], ["2", "intermediate"], _mappings_left_side]),
+	("middle_3.l", "Left Middle Distal", [["middle"], ["3", "distal"], _mappings_left_side]),
+	("ring_1.l", "Left Ring Proximal", [["ring"], ["1", "proximal"], _mappings_left_side]),
+	("ring_2.l", "Left Ring Intermediate", [["ring"], ["2", "intermediate"], _mappings_left_side]),
+	("ring_3.l", "Left Ring Distal", [["ring"], ["3", "distal"], _mappings_left_side]),
+	("little_1.l", "Left Little Proximal", [["little"], ["1", "proximal"], _mappings_left_side]),
+	("little_2.l", "Left Little Intermediate", [["little"], ["2", "intermediate"], _mappings_left_side]),
+	("little_3.l", "Left Little Distal", [["little"], ["3", "distal"], _mappings_left_side]),
+
+	("shoulder.r", "Right Shoulder", [["shoulder"], _mappings_right_side]),
+	("upper_arm.r", "Right Upper Arm", [["upper"], ["arm"], _mappings_right_side]),
+	("lower_arm.r", "Right Lower Arm", [["lower"], ["arm"], _mappings_right_side]),
+	("wrist.r", "Right Wrist", [["hand", "wrist"], _mappings_right_side]),
+	("thumb_1.r", "Right Thumb Proximal", [["thumb"], ["1", "proximal"], _mappings_right_side]),
+	("thumb_2.r", "Right Thumb Intermediate", [["thumb"], ["2", "intermediate"], _mappings_right_side]),
+	("thumb_3.r", "Right Thumb Distal", [["thumb"], ["3", "distal"], _mappings_right_side]),
+	("index_1.r", "Right Index Proximal", [["index"], ["1", "proximal"], _mappings_right_side]),
+	("index_2.r", "Right Index Intermediate", [["index"], ["2", "intermediate"], _mappings_right_side]),
+	("index_3.r", "Right Index Distal", [["index"], ["3", "distal"], _mappings_right_side]),
+	("middle_1.r", "Right Middle Proximal", [["middle"], ["1", "proximal"], _mappings_right_side]),
+	("middle_2.r", "Right Middle Intermediate", [["middle"], ["2", "intermediate"], _mappings_right_side]),
+	("middle_3.r", "Right Middle Distal", [["middle"], ["3", "distal"], _mappings_right_side]),
+	("ring_1.r", "Right Ring Proximal", [["ring"], ["1", "proximal"], _mappings_right_side]),
+	("ring_2.r", "Right Ring Intermediate", [["ring"], ["2", "intermediate"], _mappings_right_side]),
+	("ring_3.r", "Right Ring Distal", [["ring"], ["3", "distal"], _mappings_right_side]),
+	("little_1.r", "Right Little Proximal", [["little"], ["1", "proximal"], _mappings_right_side]),
+	("little_2.r", "Right Little Intermediate", [["little"], ["2", "intermediate"], _mappings_right_side]),
+	("little_3.r", "Right Little Distal", [["little"], ["3", "distal"], _mappings_right_side]),
+
+	("upper_leg.l", "Left Upper Leg", [["leg"], ["upper"], _mappings_left_side]),
+	("lower_leg.l", "Left Lower Leg", [["leg"], ["lower"], _mappings_left_side]),
+	("foot.l", "Left Foot", [["foot"], _mappings_left_side]),
+	("toes.l", "Left Toes", [["toes"], _mappings_left_side]),
+
+	("upper_leg.r", "Right Upper Leg", [["leg"], ["upper"], _mappings_right_side]),
+	("lower_leg.r", "Right Lower Leg", [["leg"], ["lower"], _mappings_right_side]),
+	("foot.r", "Right Foot", [["foot"], _mappings_right_side]),
+	("toes.r", "Right Toes", [["toes"], _mappings_right_side]),
+]
 
 def _get_display_name(humanoid_name: str) -> str:
 	for bone in _humanoid_bones:
@@ -51,6 +105,7 @@ def _setup_humanoid_collection(component: STFEXP_Armature_Humanoid):
 
 
 class ResetHumanoidCollectionOperator(bpy.types.Operator):
+	"""Setup empty humanoid mappings. Will overwrite any existing values"""
 	bl_idname = "stf.stfexp_armature_humanoid_reset_collection"
 	bl_label = "Reset"
 	bl_options = {"REGISTER", "UNDO"}
@@ -88,7 +143,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 	layout.prop(component, "locomotion_type")
 	layout.prop(component, "no_jaw")
 
-	layout.operator(ResetHumanoidCollectionOperator.bl_idname)
+	layout.operator(ResetHumanoidCollectionOperator.bl_idname, icon="WARNING_LARGE")
 
 	mapped = 0
 	for mapping in component.bone_mappings:
