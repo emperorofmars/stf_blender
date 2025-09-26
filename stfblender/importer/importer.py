@@ -6,7 +6,7 @@ from .stf_import_state import STF_ImportState
 from ..base.stf_report import STFException
 from .stf_import_context import STF_ImportContext
 from ..base.stf_file import STF_File
-from ..utils.misc import draw_slot_link_warning, get_stf_version
+from ..utils.misc import OpenWebpage, draw_slot_link_warning, get_stf_version
 
 
 class ImportSTF(bpy.types.Operator, ImportHelper):
@@ -69,6 +69,7 @@ class ImportSTF(bpy.types.Operator, ImportHelper):
 			context.window.cursor_set("DEFAULT")
 
 	def draw(self, context: bpy.types.Context):
+		self.layout.operator(OpenWebpage.bl_idname, text="Open User Guide", icon="HELP").url = "https://docs.stfform.at/guides/blender/blender.html"
 		self.layout.label(text="STF version: " + get_stf_version())
 		self.layout.separator(factor=1, type="SPACE")
 

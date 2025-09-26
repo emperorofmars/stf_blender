@@ -6,7 +6,7 @@ from ..base.stf_report import STFReportSeverity
 from ..base.stf_registry import get_export_modules
 from .stf_export_state import STF_ExportState
 from .stf_export_context import STF_ExportContext
-from ..utils.misc import draw_slot_link_warning, get_stf_version
+from ..utils.misc import OpenWebpage, draw_slot_link_warning, get_stf_version
 from .export_settings import STF_ExportSettings
 
 
@@ -102,6 +102,7 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 
 
 	def draw(self, context: bpy.types.Context):
+		self.layout.operator(OpenWebpage.bl_idname, text="Open User Guide", icon="HELP").url = "https://docs.stfform.at/guides/blender/blender.html"
 		self.layout.label(text="STF version: " + get_stf_version())
 		self.layout.separator(factor=1, type="SPACE")
 
