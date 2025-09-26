@@ -6,7 +6,7 @@ from .stf_import_state import STF_ImportState
 from ..base.stf_report import STFException
 from .stf_import_context import STF_ImportContext
 from ..base.stf_file import STF_File
-from ..utils.minsc import draw_slot_link_warning, get_stf_version
+from ..utils.misc import draw_slot_link_warning, get_stf_version
 
 
 class ImportSTF(bpy.types.Operator, ImportHelper):

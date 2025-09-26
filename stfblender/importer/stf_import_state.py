@@ -1,10 +1,14 @@
 import bpy
+import logging
 
 from ..base.stf_report import STFReportSeverity, STFReport
 from ..base.stf_file import STF_File
 from ..base.stf_module import STF_Module
 from ..base.stf_definition import STF_Meta_AssetInfo
 from ..base.stf_state_base import STF_State_Base
+
+
+_logger = logging.getLogger(__name__)
 
 
 class STF_ImportState(STF_State_Base):
@@ -42,6 +46,7 @@ class STF_ImportState(STF_State_Base):
 			case "stf.buffer.included":
 				return self._file.buffers_included[buffer.index]
 			case _:
+				_logger.fatal("Invalid buffer type: " + buffer.type, stack_info=True)
 				self.report(STFReport("Invalid buffer type: " + buffer.type, severity=STFReportSeverity.FatalError))
 		return None
 

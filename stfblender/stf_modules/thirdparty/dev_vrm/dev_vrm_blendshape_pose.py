@@ -4,7 +4,7 @@ from ....base.stf_module_data import STF_BlenderDataResourceBase, STF_BlenderDat
 from ....exporter.stf_export_context import STF_ExportContext
 from ....importer.stf_import_context import STF_ImportContext
 from ....utils.data_resource_utils import add_resource, export_data_resource_base, get_components_from_data_resource, import_data_resource_base
-
+from ....utils.reference_helper import register_exported_resource, import_resource
 
 _stf_type = "dev.vrm.blendshape_pose"
 _blender_property_name = "dev_vrm_blendshape_pose"
@@ -58,7 +58,7 @@ class Edit_VRM_Blendshape_Pose_Value(bpy.types.Operator):
 		else:
 			self.report({"ERROR"}, "Couldn't find resource")
 			return {"CANCELLED"}
-		
+
 		if(self.op):
 			resource.targets[self.target_index].values.add()
 		else:
@@ -122,8 +122,9 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	import_data_resource_base(resource, json_resource)
 
 	def _handle():
-		for target_id, values in json_resource.get("targets", {}).items():
-			if(meshinstance := context.get_imported_resource(target_id)):
+		for target_id_index_as_str_because_its_a_json_key, values in json_resource.get("targets", {}).items():
+			target_id_index = int(target_id_index_as_str_because_its_a_json_key)
+			if(meshinstance := import_resource(context, json_resource, target_id_index, "node")):
 				target = resource.targets.add()
 				target.mesh_instance = meshinstance
 				for blendshape_name, blendshape_value in values.items():
@@ -147,10 +148,11 @@ def _stf_export(context: STF_ExportContext, resource: VRM_Blendshape_Pose, conte
 			target: VRM_Blendshape_Pose_Target = target # Because syntax highlighting
 			if(target.mesh_instance):
 				value_dict: dict[str, float] = {}
-				if(target.mesh_instance.stf_info.stf_id not in target_dict):
-					target_dict[target.mesh_instance.stf_info.stf_id] = value_dict
+				mesh_id_index = register_exported_resource(ret, target.mesh_instance.stf_info.stf_id)
+				if(mesh_id_index not in target_dict):
+					target_dict[mesh_id_index] = value_dict
 				else:
-					value_dict = target_dict[target.mesh_instance.stf_info.stf_id]
+					value_dict = target_dict[mesh_id_index]
 				for value in target.values:
 					value: VRM_Blendshape_Pose_Value = value # Because syntax highlighting
 					if(value.blendshape_name and value.blendshape_name not in value_dict):

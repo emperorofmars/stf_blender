@@ -1,8 +1,12 @@
 import bpy
+import logging
 from typing import Callable
 
 from .stf_import_state import STF_ImportState
 from ..base.stf_report import STFReportSeverity, STFReport
+
+
+_logger = logging.getLogger(__name__)
 
 
 class STF_ImportContext:
@@ -33,6 +37,7 @@ class STF_ImportContext:
 						application_component_object = component_result
 						self.register_imported_resource(component_id, application_component_object)
 					else:
+						_logger.error("Component import error", stack_info=True)
 						self.report(STFReport("Component import error", STFReportSeverity.Error, component_id, json_component.get("type"), application_object))
 				else:
 					self.report(STFReport("No STF_Module registered for component", STFReportSeverity.Warn, component_id, json_component.get("type")))
@@ -44,7 +49,8 @@ class STF_ImportContext:
 
 		json_resource = self.get_json_resource(stf_id)
 		if(not json_resource or type(json_resource) is not dict or "type" not in json_resource):
-			self.report(STFReport("Invalid JSON resource", STFReportSeverity.FatalError, stf_id))
+			_logger.fatal("Invalid JSON resource", stack_info=True)
+			self.report(STFReport("Invalid JSON resource", STFReportSeverity.FatalError, stf_id, application_object=context_object))
 
 		if(module := self._state.determine_module(json_resource, stf_kind)):
 			application_object = module.import_func(self, json_resource, stf_id, context_object)
@@ -53,6 +59,7 @@ class STF_ImportContext:
 				self.__run_components(json_resource, module.get_components_holder_func(application_object) if hasattr(module, "get_components_holder_func") else application_object)
 				return application_object
 			else:
+				_logger.error("Resource import error", stack_info=True)
 				self.report(STFReport("Resource import error", STFReportSeverity.Error, stf_id, module.stf_type, None))
 		else:
 			# TODO json fallback

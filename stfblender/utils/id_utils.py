@@ -1,7 +1,7 @@
 import bpy
 import uuid
 
-from ..utils.minsc import CopyToClipboard
+from .misc import CopyToClipboard
 from ..base.stf_report import STFReportSeverity, STFReport
 
 

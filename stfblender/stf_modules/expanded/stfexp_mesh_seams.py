@@ -7,7 +7,7 @@ from ...utils.component_utils import add_component, export_component_base, impor
 from ...exporter.stf_export_context import STF_ExportContext
 from ...importer.stf_import_context import STF_ImportContext
 from ...utils.buffer_utils import determine_indices_width, parse_uint, serialize_uint
-from ...utils.reference_helper import export_buffer
+from ...utils.reference_helper import register_exported_buffer, import_buffer
 
 
 _stf_type = "stfexp.mesh.seams"
@@ -19,7 +19,7 @@ class STFEXP_Mesh_Seams(STF_BlenderComponentBase):
 
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: bpy.types.Mesh) -> any:
-	buffer_seams = BytesIO(context.import_buffer(json_resource["seams"]))
+	buffer_seams = BytesIO(import_buffer(context, json_resource, json_resource["seams"]))
 
 	indices_width: int = json_resource.get("indices_width", 4)
 
@@ -54,7 +54,7 @@ def _stf_export(context: STF_ExportContext, component: STFEXP_Mesh_Seams, contex
 			for edge_vertex_index in edge.vertices:
 				buffer_seams.write(serialize_uint(edge_vertex_index, indices_width))
 	ret["indices_width"] = indices_width
-	ret["seams"] = export_buffer(ret, context.serialize_buffer(buffer_seams.getvalue()))
+	ret["seams"] = register_exported_buffer(ret, context.serialize_buffer(buffer_seams.getvalue()))
 
 	return ret, component.stf_id
 

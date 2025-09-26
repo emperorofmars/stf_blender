@@ -4,7 +4,7 @@ from ...base.stf_module_component import STF_BlenderComponentBase, STF_BlenderCo
 from ...exporter.stf_export_context import STF_ExportContext
 from ...importer.stf_import_context import STF_ImportContext
 from ...utils.component_utils import add_component, export_component_base, import_component_base
-from ...utils.reference_helper import export_resource
+from ...utils.reference_helper import register_exported_resource, import_resource
 
 
 _stf_type = "stfexp.lightprobe_anchor"
@@ -13,14 +13,14 @@ _blender_property_name = "stfexp_lightprobe_anchor"
 
 class STFEXP_LightprobeAnchor(STF_BlenderComponentBase):
 	anchor_object: bpy.props.PointerProperty(type=bpy.types.Object, name="Anchor Object") # type: ignore
-	anghor_bone: bpy.props.StringProperty(name="Anchor Bone") # type: ignore
+	anchor_bone: bpy.props.StringProperty(name="Anchor Bone") # type: ignore
 
 
 def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, parent_application_object: any, component: STFEXP_LightprobeAnchor):
 	layout.use_property_split = True
 	layout.prop(component, "anchor_object")
 	if(component.anchor_object and type(component.anchor_object.data) == bpy.types.Armature):
-		layout.prop_search(component, "anghor_bone", component.anchor_object.data, "bones")
+		layout.prop_search(component, "anchor_bone", component.anchor_object.data, "bones")
 
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, parent_application_object: any) -> any:
@@ -30,15 +30,14 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, parent
 	if("anchor" in json_resource):
 		if(len(json_resource["anchor"]) == 1):
 			def _handle_target_object():
-				component.anchor_object = context.get_imported_resource(json_resource["anchor"][0])
+				component.anchor_object = import_resource(context, json_resource, json_resource["anchor"][0], "node")
 			context.add_task(_handle_target_object)
 		elif(len(json_resource["anchor"]) == 3):
 			def _handle_target_object():
-				component.anchor_object = context.get_imported_resource(json_resource["anchor"][0])
+				component.anchor_object = import_resource(context, json_resource, json_resource["anchor"][0], "node")
+				if(bone := import_resource(context, json_resource, json_resource["anchor"][2]), "node"):
+					component.anchor_bone = bone.name
 			context.add_task(_handle_target_object)
-			def _handle_target_bone():
-				component.anghor_bone = context.get_imported_resource(json_resource["anchor"][2]).name
-			context.add_task(_handle_target_bone)
 
 	return component
 
@@ -48,10 +47,10 @@ def _stf_export(context: STF_ExportContext, component: STFEXP_LightprobeAnchor, 
 
 	if(component.anchor_object):
 		def _handle():
-			if(type(component.anchor_object.data) == bpy.types.Armature and component.anghor_bone):
-				ret["anchor"] = [export_resource(ret, component.anchor_object.stf_info.stf_id), "instance", export_resource(ret, component.anchor_object.data.bones[component.anghor_bone].stf_info.stf_id)]
+			if(type(component.anchor_object.data) == bpy.types.Armature and component.anchor_bone):
+				ret["anchor"] = [register_exported_resource(ret, component.anchor_object.stf_info.stf_id), "instance", register_exported_resource(ret, component.anchor_object.data.bones[component.anchor_bone].stf_info.stf_id)]
 			else:
-				ret["anchor"] = [export_resource(ret, component.anchor_object.stf_info.stf_id)]
+				ret["anchor"] = [register_exported_resource(ret, component.anchor_object.stf_info.stf_id)]
 
 		context.add_task(_handle)
 

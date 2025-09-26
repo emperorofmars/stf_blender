@@ -8,7 +8,7 @@ from ...utils.component_utils import add_component, export_component_base, impor
 from ...exporter.stf_export_context import STF_ExportContext
 from ...importer.stf_import_context import STF_ImportContext
 from ...utils.buffer_utils import determine_indices_width, determine_pack_format_float
-from ...utils.reference_helper import export_buffer
+from ...utils.reference_helper import register_exported_buffer, import_buffer
 
 
 _stf_type = "stfexp.mesh.creases"
@@ -20,17 +20,17 @@ class STFEXP_Mesh_Creases(STF_BlenderComponentBase):
 
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: bpy.types.Mesh) -> any:
-	buffer_edge_creases = BytesIO(context.import_buffer(json_resource["edge_creases"]))
+	buffer_edge_creases = BytesIO(import_buffer(context, json_resource, json_resource["edge_creases"]))
 
 	if("vertex_creases" in json_resource):
-		buffer_vertex_creases = np.frombuffer(context.import_buffer(json_resource["vertex_creases"]), dtype=determine_pack_format_float(4))
+		buffer_vertex_creases = np.frombuffer(import_buffer(context, json_resource, json_resource["vertex_creases"]), dtype=determine_pack_format_float(4))
 		vertex_creases_attribute = context_object.attributes.new("crease_vert", "FLOAT", "POINT")
 		vertex_creases_attribute.data.foreach_set("value", buffer_vertex_creases)
-	
+
 	if("edge_creases" in json_resource):
 		indices_width: int = json_resource.get("indices_width", 4)
-		buffer_edge_creases = np.frombuffer(context.import_buffer(json_resource["edge_creases"]), dtype=determine_pack_format_float(4))
-		buffer_edges = np.frombuffer(context.import_buffer(json_resource["edges"]), dtype=determine_pack_format_float(indices_width))
+		buffer_edge_creases = np.frombuffer(import_buffer(context, json_resource, json_resource["edge_creases"]), dtype=determine_pack_format_float(4))
+		buffer_edges = np.frombuffer(import_buffer(context, json_resource, json_resource["edges"]), dtype=determine_pack_format_float(indices_width))
 		buffer_edges = np.reshape(buffer_edges, (-1, 2))
 
 		edge_dict: dict[int, dict[int, int]] = {}
@@ -63,15 +63,15 @@ def _stf_export(context: STF_ExportContext, component: STFEXP_Mesh_Creases, cont
 	if(context_object.vertex_creases):
 		buffer_vertex_creases = np.zeros(len(context_object.vertex_creases.data), dtype=determine_pack_format_float(4))
 		context_object.vertex_creases.data.foreach_get("value", buffer_vertex_creases)
-		ret["vertex_creases"] = export_buffer(ret, context.serialize_buffer(buffer_vertex_creases.tobytes()))
+		ret["vertex_creases"] = register_exported_buffer(ret, context.serialize_buffer(buffer_vertex_creases.tobytes()))
 
 	if(context_object.edge_creases):
 		buffer_edge_creases = np.zeros(len(context_object.edge_creases.data), dtype=determine_pack_format_float(4))
 		context_object.edge_creases.data.foreach_get("value", buffer_edge_creases)
-		ret["edge_creases"] = export_buffer(ret, context.serialize_buffer(buffer_edge_creases.tobytes()))
+		ret["edge_creases"] = register_exported_buffer(ret, context.serialize_buffer(buffer_edge_creases.tobytes()))
 
 		buffer_edges = np.array(context_object.edge_keys, dtype=determine_pack_format_float(indices_width))
-		ret["edges"] = export_buffer(ret, context.serialize_buffer(buffer_edges.tobytes()))
+		ret["edges"] = register_exported_buffer(ret, context.serialize_buffer(buffer_edges.tobytes()))
 		ret["indices_width"] = indices_width
 
 	return ret, component.stf_id

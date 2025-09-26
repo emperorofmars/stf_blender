@@ -1,9 +1,13 @@
 import bpy
+import logging
 from typing import Callable
 
 from .stf_export_state import STF_ExportState
 from ..base.stf_definition import STF_Meta_AssetInfo
 from ..base.stf_report import STFReportSeverity, STFReport
+
+
+_logger = logging.getLogger(__name__)
 
 
 class STF_ExportContext:
@@ -41,6 +45,7 @@ class STF_ExportContext:
 						self._state.register_serialized_resource(component, component_json_resource, component_id)
 						json_resource["components"].append(component_id)
 					else:
+						_logger.error("Export Component Failed", stack_info=True)
 						self.report(STFReport("Export Component Failed", STFReportSeverity.Error, stf_id, selected_module.stf_type, application_object))
 				else:
 					self.report(STFReport("Unsupported Component", STFReportSeverity.Warn, None, None, application_object))
@@ -70,9 +75,13 @@ class STF_ExportContext:
 
 				return resource_id
 			else:
+				if(export_fail_severity.value >= STFReportSeverity.Error.value):
+					_logger.error("Resource Export Failed", stack_info=True)
 				self.report(STFReport("Resource Export Failed", export_fail_severity, None, selected_module.stf_type, application_object))
 		else:
-			self.report(STFReport("NO Module Found", export_fail_severity, None, None, application_object))
+			if(export_fail_severity.value >= STFReportSeverity.Error.value):
+				_logger.error("No Module Found", stack_info=True)
+			self.report(STFReport("No Module Found", export_fail_severity, None, None, application_object))
 		return None
 
 

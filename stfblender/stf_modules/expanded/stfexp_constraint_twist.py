@@ -7,7 +7,7 @@ from ...exporter.stf_export_context import STF_ExportContext
 from ...importer.stf_import_context import STF_ImportContext
 from ...utils.component_utils import add_component, export_component_base, import_component_base
 from ...utils.armature_bone import ArmatureBone
-from ...utils.reference_helper import export_resource
+from ...utils.reference_helper import register_exported_resource, import_resource
 from ...utils.animation_conversion_utils import get_component_stf_path
 
 
@@ -56,7 +56,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 			def _get_component() -> STFEXP_Constraint_Twist:
 				return component
 
-		if(len(json_resource["target"]) == 1 and type(context_object) == bpy.types.Bone):
+		if(len(json_resource["target"]) == 1 and type(context_object) == bpy.types.Bone): # This constraint sits on a Bone and can target only another Bone within the sam Armature resource.
 			def _handle_target_bone():
 				for bone in armature.bones:
 					if(bone.stf_info.stf_id == json_resource["target"][0]):
@@ -64,20 +64,18 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 						constraint.target_bone = bone.name
 						break
 			context.add_task(_handle_target_bone)
-		elif(len(json_resource["target"]) == 1):
+		elif(len(json_resource["target"]) == 1): # Target is a Blender Object
 			def _handle_target_object():
 				constraint = _get_component()
-				constraint.target_object = context.get_imported_resource(json_resource["target"][0])
+				constraint.target_object = import_resource(context, json_resource, json_resource["target"][0], "node")
 			context.add_task(_handle_target_object)
-		elif(len(json_resource["target"]) == 3):
+		elif(len(json_resource["target"]) == 3): # Node -> armature instance -> bone
 			def _handle_target_object():
 				constraint = _get_component()
-				constraint.target_object = context.get_imported_resource(json_resource["target"][0])
+				constraint.target_object = import_resource(context, json_resource, json_resource["target"][0], "node")
+				if(bone := import_resource(context, json_resource, json_resource["target"][2]), "node"):
+					constraint.target_bone = bone.name
 			context.add_task(_handle_target_object)
-			def _handle_target_bone():
-				constraint = _get_component()
-				constraint.target_bone = context.get_imported_resource(json_resource["target"][2]).name
-			context.add_task(_handle_target_bone)
 
 	return component
 
@@ -89,12 +87,12 @@ def _stf_export(context: STF_ExportContext, component: STFEXP_Constraint_Twist, 
 	def _handle():
 		if(type(context_object) == ArmatureBone):
 			if((context_object.armature == component.target_object or not component.target_object) and component.target_bone):
-				ret["target"] = [export_resource(ret, context_object.armature.bones[component.target_bone].stf_info.stf_id)]
+				ret["target"] = [register_exported_resource(ret, context_object.armature.bones[component.target_bone].stf_info.stf_id)]
 		elif(component.target_object):
 			if(type(component.target_object.data) == bpy.types.Armature and component.target_bone):
-				ret["target"] = [export_resource(ret, component.target_object.stf_info.stf_id), "instance", export_resource(ret, component.target_object.data.bones[component.target_bone].stf_info.stf_id)]
+				ret["target"] = [register_exported_resource(ret, component.target_object.stf_info.stf_id), "instance", register_exported_resource(ret, component.target_object.data.bones[component.target_bone].stf_info.stf_id)]
 			else:
-				ret["target"] = [export_resource(ret, component.target_object.stf_info.stf_id)]
+				ret["target"] = [register_exported_resource(ret, component.target_object.stf_info.stf_id)]
 	context.add_task(_handle)
 
 	return ret, component.stf_id
@@ -121,9 +119,9 @@ def _serialize_component_instance_standin_func(context: STF_ExportContext, compo
 	ret = {"weight": standin_component.weight }
 	if(standin_component.target_object):
 		if(type(standin_component.target_object.data) == bpy.types.Armature and standin_component.target_bone):
-			ret["target"] = [export_resource(ret, standin_component.target_object.stf_info.stf_id), "instance", export_resource(ret, standin_component.target_object.data.bones[standin_component.target_bone].stf_info.stf_id)]
+			ret["target"] = [register_exported_resource(ret, standin_component.target_object.stf_info.stf_id), "instance", register_exported_resource(ret, standin_component.target_object.data.bones[standin_component.target_bone].stf_info.stf_id)]
 		else:
-			ret["target"] = [export_resource(ret, standin_component.target_object.stf_info.stf_id)]
+			ret["target"] = [register_exported_resource(ret, standin_component.target_object.stf_info.stf_id)]
 	return ret
 
 def _parse_component_instance_standin_func(context: STF_ImportContext, json_resource: dict, component_ref: STF_Component_Ref, standin_component: STFEXP_Constraint_Twist, context_object: any):

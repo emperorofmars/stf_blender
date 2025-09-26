@@ -6,7 +6,7 @@ from ..base.stf_report import STFReportSeverity
 from ..base.stf_registry import get_export_modules
 from .stf_export_state import STF_ExportState
 from .stf_export_context import STF_ExportContext
-from ..utils.minsc import draw_slot_link_warning, get_stf_version
+from ..utils.misc import draw_slot_link_warning, get_stf_version
 from .export_settings import STF_ExportSettings
 
 

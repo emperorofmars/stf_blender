@@ -8,6 +8,7 @@ from ....exporter.stf_export_context import STF_ExportContext
 from ....importer.stf_import_context import STF_ImportContext
 from ....utils.component_utils import add_component, export_component_base, import_component_base
 from ....utils.animation_conversion_utils import get_component_stf_path
+from ....utils.reference_helper import register_exported_resource, get_resource_id
 
 
 _stf_type = "com.vrchat.physbone"
@@ -111,13 +112,13 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	import_component_base(component, json_resource)
 	component.values = json.dumps(json_resource["values"])
 
-	for ignore in json_resource.get("ignores", []):
+	for ignore_id in json_resource.get("ignores", []):
 		new_ignore = component.ignores.add()
-		new_ignore.id = ignore
+		new_ignore.id = get_resource_id(json_resource, ignore_id)
 
-	for collider in json_resource.get("colliders", []):
+	for collider_id in json_resource.get("colliders", []):
 		new_collider = component.colliders.add()
-		new_collider.id = collider
+		new_collider.id = get_resource_id(json_resource, collider_id)
 
 	return component
 
@@ -129,12 +130,12 @@ def _stf_export(context: STF_ExportContext, component: VRC_Physbone, context_obj
 
 		ignores = []
 		for ignore in component.ignores:
-			ignores.append(ignore.id)
+			ignores.append(register_exported_resource(ret, ignore.id))
 		ret["ignores"] = ignores
 
 		colliders = []
 		for collider in component.colliders:
-			colliders.append(collider.id)
+			colliders.append(register_exported_resource(ret, collider.id))
 		ret["colliders"] = colliders
 
 		return ret, component.stf_id

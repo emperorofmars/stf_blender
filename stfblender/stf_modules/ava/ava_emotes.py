@@ -5,8 +5,8 @@ from ...exporter.stf_export_context import STF_ExportContext
 from ...importer.stf_import_context import STF_ImportContext
 from ...utils.component_utils import add_component, export_component_base, import_component_base
 from ...base.stf_report import STFReport, STFReportSeverity
-from ...utils.reference_helper import export_resource
-from ...utils.minsc import draw_slot_link_warning
+from ...utils.reference_helper import register_exported_resource, import_resource
+from ...utils.misc import draw_slot_link_warning
 from ...blender_grr.stf_data_resource_reference import draw_stf_data_resource_reference, validate_stf_data_resource_reference, resolve_stf_data_resource_reference, STFDataResourceReference
 
 _stf_type = "ava.emotes"
@@ -58,10 +58,10 @@ emote_values = (
 	("grumpy", "Grumpy", ""),
 	("suspicious", "Suspicious", ""),
 	("disappointed", "Disappointed", ""),
-	("surpriced", "Surpriced", ""),
+	("surprised", "Surprised", ""),
 	("scared", "Scared", ""),
 	("disgusted", "Disgusted", ""),
-	("embarassed", "Embarassed", ""),
+	("embarrassed", "Embarrassed", ""),
 	("dumb", "Dumb", ""),
 	("silly", "Silly", ""),
 	("evil", "Evil", ""),
@@ -149,11 +149,11 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 			else:
 				blender_emote.emote = "custom"
 				blender_emote.custom_emote = meaning
-			blender_emote.animation = context.get_imported_resource(json_emote.get("animation"))
+			blender_emote.animation = import_resource(context, json_resource, json_emote.get("animation"), "data")
 
 			if("fallback" in json_emote):
 				blender_emote.use_blendshape_fallback = True
-				if(fallback_resource := context.import_resource(json_emote["fallback"], stf_kind="data")):
+				if(fallback_resource := import_resource(context, json_resource, json_emote["fallback"], "data")):
 					blender_emote.blendshape_fallback.collection = context.get_root_collection() # todo maybe handle root collection import?
 					blender_emote.blendshape_fallback.stf_data_resource_id = fallback_resource.stf_id
 				else:
@@ -177,14 +177,14 @@ def _stf_export(context: STF_ExportContext, component: AVA_Emotes, context_objec
 			animation_id = context.get_resource_id(blender_emote.animation)
 
 			if(meaning and animation_id):
-				json_emote = { "animation": export_resource(ret, animation_id) }
+				json_emote = { "animation": register_exported_resource(ret, animation_id) }
 				emotes[meaning] = json_emote
 
 				if(blender_emote.use_blendshape_fallback):
 					if(fallback_ret := resolve_stf_data_resource_reference(blender_emote.blendshape_fallback)):
 						fallback_ref, fallback_resource = fallback_ret
 						if(fallback_ref.stf_type == "dev.vrm.blendshape_pose"):
-							json_emote["fallback"] = export_resource(ret, context.serialize_resource(fallback_resource))
+							json_emote["fallback"] = register_exported_resource(ret, context.serialize_resource(fallback_resource))
 						else:
 							context.report(STFReport("module: %s stf_id: %s, context-object: %s :: blendshape fallback invalid resource type" % (_stf_type, component.stf_id, context_object), STFReportSeverity.Warn, component.stf_id, _stf_type, context_object))
 					else:

@@ -4,7 +4,7 @@ from ....utils.id_utils import draw_stf_id_ui
 from ....utils.component_ui import draw_components_ui, set_stf_component_filter
 from ....utils.data_resource_ui import draw_data_resources_ui
 from ....base.stf_meta import draw_meta_editor
-from ....utils.minsc import draw_slot_link_warning
+from ....utils.misc import draw_slot_link_warning
 from ....utils.dev_utils import draw_dev_tools
 
 

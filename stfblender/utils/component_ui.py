@@ -3,7 +3,7 @@ import bpy
 from ..base.stf_module_component import STF_Component_Ref
 from ..base.stf_registry import get_component_modules
 from .component_utils import find_component_module
-from .minsc import CopyToClipboard
+from .misc import CopyToClipboard
 from .draw_multiline_text import draw_multiline_text
 
 

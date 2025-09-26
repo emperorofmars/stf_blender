@@ -1,5 +1,6 @@
 import bpy
 import io
+import logging
 from enum import Enum
 
 from ..base.stf_definition import STF_Buffer_Included, STF_JsonDefinition, STF_Meta_AssetInfo
@@ -8,7 +9,10 @@ from ..base.stf_module import STF_Module
 from ..base.stf_module_component import STF_ExportComponentHook
 from ..base.stf_file import STF_File
 from ..base.stf_state_base import STF_State_Base
-from ..utils.minsc import get_stf_version
+from ..utils.misc import get_stf_version
+
+
+_logger = logging.getLogger(__name__)
 
 
 class STF_Buffer_Mode(Enum):
@@ -97,11 +101,14 @@ class STF_ExportState(STF_State_Base):
 	def register_serialized_resource(self, application_object: any, json_resource: dict, id: str):
 		"""Now register the fully serialized object."""
 		if(type(id) is not str):
+			_logger.error("Invalid Resource ID", stack_info=True)
 			self.report(STFReport("Invalid Resource ID", STFReportSeverity.Error, id, json_resource.get("type"), application_object))
 		if(id in self._exported_resources):
+			_logger.fatal("Duplicate Resource ID", stack_info=True)
 			self.report(STFReport("Duplicate Resource ID", STFReportSeverity.FatalError, id, json_resource.get("type"), application_object))
 			return
 		if("referenced_resources" in json_resource and id in json_resource["referenced_resources"]):
+			_logger.fatal("Resource recursion detected!", stack_info=True)
 			self.report(STFReport("Resource recursion detected!", STFReportSeverity.FatalError, id, json_resource.get("type"), application_object))
 			return
 		# TODO check for resource loops

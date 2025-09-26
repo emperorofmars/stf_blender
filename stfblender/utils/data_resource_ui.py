@@ -2,7 +2,7 @@ import bpy
 
 from ..base.stf_module_data import STF_BlenderDataModule, STF_BlenderDataResourceBase, STF_Data_Ref
 from ..base.stf_registry import get_blender_non_native_data_modules
-from .minsc import CopyToClipboard
+from .misc import CopyToClipboard
 from .data_resource_utils import STFCreateDataResourceOperator, STFEditDataResourceOperator, STFRemoveDataResourceOperator
 from .component_ui import draw_components_ui, set_stf_component_filter, set_stf_data_resource_component_filter
 from .component_utils import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase

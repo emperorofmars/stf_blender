@@ -48,10 +48,10 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 
 	for blender_object in collection.all_objects[:]:
 		if(type(blender_object) is bpy.types.Object and blender_object.parent == None):
-			root_nodes.append(context.serialize_resource(blender_object, module_kind="node", context_object=collection))
+			root_nodes.append(context.serialize_resource(blender_object, context_object=collection, module_kind="node", export_fail_severity=STFReportSeverity.FatalError))
 
 	for action in bpy.data.actions:
-		if(stf_animation_id := context.serialize_resource(action, module_kind="data", context_object=collection, export_fail_severity=STFReportSeverity.Debug)):
+		if(stf_animation_id := context.serialize_resource(action, context_object=collection, module_kind="data", export_fail_severity=STFReportSeverity.Debug)):
 			animations.append(stf_animation_id)
 
 	return ret, collection.stf_info.stf_id
