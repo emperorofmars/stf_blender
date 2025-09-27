@@ -28,7 +28,7 @@ _humanoid_bones = [
 
 	("shoulder.l", "Left Shoulder", [["shoulder"], _mappings_left_side], [[-15, 30],[-15, 15],False]),
 	("upper_arm.l", "Left Upper Arm", [["upper"], ["arm"], _mappings_left_side], [[-60, 100],[-100, 100],[-90, 90]]),
-	("lower_arm.l", "Left Lower Arm", [["lower"], ["arm"], _mappings_left_side], [[-80, 80],False],[-90, 90]),
+	("lower_arm.l", "Left Lower Arm", [["lower"], ["arm"], _mappings_left_side], [[-80, 80],False,[-90, 90]]),
 	("wrist.l", "Left Wrist", [["hand", "wrist"], _mappings_left_side], [[-80, 80],[-40, 40],False]),
 
 	("thumb_1.l", "Left Thumb Proximal", [["thumb"], ["1", "proximal"], _mappings_left_side], [[-20, 20],[-25, 25],False]),
@@ -49,7 +49,7 @@ _humanoid_bones = [
 
 	("shoulder.r", "Right Shoulder", [["shoulder"], _mappings_right_side], [[-15, 30],[-15, 15],False]),
 	("upper_arm.r", "Right Upper Arm", [["upper"], ["arm"], _mappings_right_side], [[-60, 100],[-100, 100],[-90, 90]]),
-	("lower_arm.r", "Right Lower Arm", [["lower"], ["arm"], _mappings_right_side], [[-80, 80],False],[-90, 90]),
+	("lower_arm.r", "Right Lower Arm", [["lower"], ["arm"], _mappings_right_side], [[-80, 80],False,[-90, 90]]),
 	("wrist.r", "Right Wrist", [["hand", "wrist"], _mappings_right_side], [[-80, 80],[-40, 40],False]),
 
 	("thumb_1.r", "Right Thumb Proximal", [["thumb"], ["1", "proximal"], _mappings_right_side], [[-20, 20],[-25, 25],False]),
@@ -92,13 +92,13 @@ class HumanoidBone(bpy.types.PropertyGroup):
 	set_rotation_limits: bpy.props.BoolProperty(name="Set Rotation Limits", default=False) # type: ignore
 
 	p_min: bpy.props.FloatProperty(name="Primary Min", subtype="ANGLE", default=math.radians(-60), soft_min=math.radians(-180), soft_max=math.radians(0), precision=2) # type: ignore
-	p_center: bpy.props.FloatProperty(name="Primary Center", subtype="ANGLE", default=0, soft_min=math.radians(-180), soft_max=math.radians(0), precision=2) # type: ignore
+	p_center: bpy.props.FloatProperty(name="Primary Center", subtype="ANGLE", default=0, soft_min=math.radians(-180), soft_max=math.radians(180), precision=2) # type: ignore
 	p_max: bpy.props.FloatProperty(name="Primary Max", subtype="ANGLE", default=math.radians(60), soft_min=math.radians(0), soft_max=math.radians(180), precision=2) # type: ignore
 	s_min: bpy.props.FloatProperty(name="Secondary Min", subtype="ANGLE", default=math.radians(-60), soft_min=math.radians(-180), soft_max=math.radians(0), precision=2) # type: ignore
-	s_center: bpy.props.FloatProperty(name="Primary Center", subtype="ANGLE", default=0, soft_min=math.radians(-180), soft_max=math.radians(0), precision=2) # type: ignore
+	s_center: bpy.props.FloatProperty(name="Primary Center", subtype="ANGLE", default=0, soft_min=math.radians(-180), soft_max=math.radians(180), precision=2) # type: ignore
 	s_max: bpy.props.FloatProperty(name="Secondary Max", subtype="ANGLE", default=math.radians(60), soft_min=math.radians(0), soft_max=math.radians(180), precision=2) # type: ignore
 	t_min: bpy.props.FloatProperty(name="Twist Min", subtype="ANGLE", default=math.radians(-90), soft_min=math.radians(-180), soft_max=math.radians(0), precision=2) # type: ignore
-	t_center: bpy.props.FloatProperty(name="Primary Center", subtype="ANGLE", default=0, soft_min=math.radians(-180), soft_max=math.radians(0), precision=2) # type: ignore
+	t_center: bpy.props.FloatProperty(name="Primary Center", subtype="ANGLE", default=0, soft_min=math.radians(-180), soft_max=math.radians(180), precision=2) # type: ignore
 	t_max: bpy.props.FloatProperty(name="Twist Max", subtype="ANGLE", default=math.radians(90), soft_min=math.radians(0), soft_max=math.radians(180), precision=2) # type: ignore
 
 
@@ -258,25 +258,39 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 	layout.template_list(STFEXP_HumanoidMappingsList.bl_idname, "", component, "bone_mappings", component, "active_bone_mapping")
 	if(len(component.bone_mappings) > component.active_bone_mapping):
 		mapping = component.bone_mappings[component.active_bone_mapping]
-		layout.prop_search(mapping, "bone", context_object, "bones")
-
 		for mapping_definition in _humanoid_bones:
 			if(mapping.name == mapping_definition[0]):
 				break
-		
+		else:
+			return
+
+		layout.prop_search(mapping, "bone", context_object, "bones")
+
 		if(mapping_definition[3] and len(mapping_definition[3]) == 3):
 			layout.prop(mapping, "set_rotation_limits")
 			if(mapping.set_rotation_limits):
 				col = layout.column(align=True)
 				if(mapping_definition[3][0]):
-					col.prop(mapping, "p_min")
-					col.prop(mapping, "p_max")
+					row = col.row(align=True)
+					row.use_property_split = False
+					row.label(text="Primary Axis")
+					row.prop(mapping, "p_min", text="Min")
+					row.prop(mapping, "p_center", text="Center")
+					row.prop(mapping, "p_max", text="Max")
 				if(mapping_definition[3][1]):
-					col.prop(mapping, "s_min")
-					col.prop(mapping, "s_max")
+					row = col.row(align=True)
+					row.use_property_split = False
+					row.label(text="Secondary Axis")
+					row.prop(mapping, "s_min", text="Min")
+					row.prop(mapping, "s_center", text="Center")
+					row.prop(mapping, "s_max", text="Max")
 				if(mapping_definition[3][2]):
-					col.prop(mapping, "t_min")
-					col.prop(mapping, "t_max")
+					row = col.row(align=True)
+					row.use_property_split = False
+					row.label(text="Twist")
+					row.prop(mapping, "t_min", text="Min")
+					row.prop(mapping, "t_center", text="Center")
+					row.prop(mapping, "t_max", text="Max")
 
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, context_object: any) -> any:
@@ -289,10 +303,29 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, contex
 
 	if("mappings" in json_resource):
 		_setup_humanoid_collection(component)
-		for humanoid_name, mapping in json_resource["mappings"].items():
-			if("target" in mapping and humanoid_name in component.bone_mappings):
-				if(target := context.get_imported_resource(mapping["target"])):
+		for humanoid_name, json_mapping in json_resource["mappings"].items():
+			for mapping_definition in _humanoid_bones:
+				if(humanoid_name == mapping_definition[0]):
+					break
+			else:
+				continue
+			if("target" in json_mapping and humanoid_name in component.bone_mappings):
+				if(target := context.get_imported_resource(json_mapping["target"])):
 					component.bone_mappings[humanoid_name].bone = target.get_bone().name
+					if("rotation_limits" in json_mapping):
+						component.bone_mappings[humanoid_name].set_rotation_limits = True
+						if("primary" in json_mapping["rotation_limits"] and len(json_mapping["rotation_limits"]["primary"]) == 3):
+							component.bone_mappings[humanoid_name].p_min = json_mapping["rotation_limits"]["primary"][0]
+							component.bone_mappings[humanoid_name].p_center = json_mapping["rotation_limits"]["primary"][1]
+							component.bone_mappings[humanoid_name].p_max = json_mapping["rotation_limits"]["primary"][0]
+						if("secondary" in json_mapping["rotation_limits"] and len(json_mapping["rotation_limits"]["secondary"]) == 3):
+							component.bone_mappings[humanoid_name].s_min = json_mapping["rotation_limits"]["secondary"][0]
+							component.bone_mappings[humanoid_name].s_center = json_mapping["rotation_limits"]["secondary"][1]
+							component.bone_mappings[humanoid_name].s_max = json_mapping["rotation_limits"]["secondary"][0]
+						if("twist" in json_mapping["rotation_limits"] and len(json_mapping["rotation_limits"]["twist"]) == 3):
+							component.bone_mappings[humanoid_name].t_min = json_mapping["rotation_limits"]["twist"][0]
+							component.bone_mappings[humanoid_name].t_center = json_mapping["rotation_limits"]["twist"][1]
+							component.bone_mappings[humanoid_name].t_max = json_mapping["rotation_limits"]["twist"][0]
 
 	return component
 
@@ -304,10 +337,23 @@ def _stf_export(context: STF_ExportContext, component: STFEXP_Armature_Humanoid,
 
 	mappings: dict[str, dict] = {}
 	for mapping in component.bone_mappings:
+		for mapping_definition in _humanoid_bones:
+			if(mapping.name == mapping_definition[0]):
+				break
+		else:
+			continue
 		if(mapping.bone):
-			mappings[mapping.name] = {
-				"target": context_object.bones[mapping.bone].stf_info.stf_id
-			}
+			json_mapping = { "target": context_object.bones[mapping.bone].stf_info.stf_id }
+			if(mapping.set_rotation_limits and mapping_definition[3] and len(mapping_definition[3]) == 3):
+				json_limits = {}
+				if(mapping_definition[3][0]):
+					json_limits["primary"] = [mapping.p_min, mapping.p_center, mapping.p_max]
+				if(mapping_definition[3][1]):
+					json_limits["secondary"] = [mapping.s_min, mapping.s_center, mapping.s_max]
+				if(mapping_definition[3][2]):
+					json_limits["twist"] = [mapping.t_min, mapping.t_center, mapping.t_max]
+				json_mapping["rotation_limits"] = json_limits
+			mappings[mapping.name] = json_mapping
 	if(len(mappings) > 0):
 		ret["mappings"] = mappings
 
