@@ -91,7 +91,7 @@ class HumanoidBone(bpy.types.PropertyGroup):
 
 class STFEXP_Armature_Humanoid(STF_BlenderComponentBase):
 	locomotion_type: bpy.props.EnumProperty(items=[("planti", "Plantigrade", ""),("digi", "Digitigrade", "")], name="Locomotion Type", default="planti") # type: ignore
-	no_jaw: bpy.props.BoolProperty(name="No Jaw Mapping", default=False) # type: ignore
+	no_jaw: bpy.props.BoolProperty(name="Ignore Jaw Mapping", default=False) # type: ignore
 
 	bone_mappings: bpy.props.CollectionProperty(type=HumanoidBone, name="Humanoid Mappings") # type: ignore
 	active_bone_mapping: bpy.props.IntProperty() # type: ignore
@@ -102,6 +102,28 @@ def _setup_humanoid_collection(component: STFEXP_Armature_Humanoid):
 	for bone in _humanoid_bones:
 		mapping: HumanoidBone = component.bone_mappings.add()
 		mapping.name = bone[0]
+
+def _map_humanoid_bones(component: STFEXP_Armature_Humanoid, armature: bpy.types.Armature):
+	if(len(component.bone_mappings) != len(_humanoid_bones)):
+		_setup_humanoid_collection(component)
+	
+	for bone_mapping in _humanoid_bones:
+		and_conditions = bone_mapping[2]
+		candidate = None
+		for bone in armature.bones:
+			for and_condition in and_conditions:
+				for or_condition in and_condition:
+					if(or_condition in bone.name.lower()):
+						break
+				else:
+					break
+			else:
+				if(not candidate or len(candidate) > len(bone.name)):
+					candidate = bone.name
+		if(candidate):
+			component.bone_mappings[bone_mapping[0]].bone = candidate
+		else:
+			component.bone_mappings[bone_mapping[0]].bone = ""
 
 
 class ResetHumanoidCollectionOperator(bpy.types.Operator):
@@ -130,6 +152,32 @@ class ResetHumanoidCollectionOperator(bpy.types.Operator):
 		_setup_humanoid_collection(component)
 		return {"FINISHED"}
 
+class MapHumanoidCollectionOperator(bpy.types.Operator):
+	"""Setup humanoid mappings. Will overwrite any existing bone mappings"""
+	bl_idname = "stf.stfexp_armature_humanoid_map_collection"
+	bl_label = "Map"
+	bl_options = {"REGISTER", "UNDO"}
+
+	component_id: bpy.props.StringProperty() # type: ignore
+
+	@classmethod
+	def poll(cls, context):
+		return context.armature is not None
+	
+	def invoke(self, context, event):
+		return context.window_manager.invoke_confirm(self, event)
+
+	def execute(self, context):
+		# let component
+		for component in context.armature.stfexp_armature_humanoid:
+			component.stf_id == self.component_id
+			break
+		else:
+			self.report({"ERROR"}, "Failed")
+			return {"CANCELLED"}
+		_map_humanoid_bones(component, context.armature)
+		return {"FINISHED"}
+
 
 class STFEXP_HumanoidMappingsList(bpy.types.UIList):
 	bl_idname = "COLLECTION_UL_stfexp_humanoid_mappings_list"
@@ -143,7 +191,9 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 	layout.prop(component, "locomotion_type")
 	layout.prop(component, "no_jaw")
 
-	layout.operator(ResetHumanoidCollectionOperator.bl_idname, icon="WARNING_LARGE")
+	row = layout.row()
+	row.operator(ResetHumanoidCollectionOperator.bl_idname, icon="WARNING_LARGE")
+	row.operator(MapHumanoidCollectionOperator.bl_idname)
 
 	mapped = 0
 	for mapping in component.bone_mappings:
