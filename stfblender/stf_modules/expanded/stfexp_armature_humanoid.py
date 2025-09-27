@@ -1,4 +1,5 @@
 import bpy
+import math
 
 from ...base.stf_module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
 from ...exporter.stf_export_context import STF_ExportContext
@@ -90,12 +91,15 @@ class HumanoidBone(bpy.types.PropertyGroup):
 
 	set_rotation_limits: bpy.props.BoolProperty(name="Set Rotation Limits", default=False) # type: ignore
 
-	p_min: bpy.props.FloatProperty(name="Primary Min", subtype="ANGLE", default=-60, soft_min=-180, soft_max=0, precision=2) # type: ignore
-	p_max: bpy.props.FloatProperty(name="Primary Max", subtype="ANGLE", default=60, soft_min=0, soft_max=180, precision=2) # type: ignore
-	s_min: bpy.props.FloatProperty(name="Secondary Min", subtype="ANGLE", default=-60, soft_min=-180, soft_max=0, precision=2) # type: ignore
-	s_max: bpy.props.FloatProperty(name="Secondary Max", subtype="ANGLE", default=60, soft_min=0, soft_max=180, precision=2) # type: ignore
-	t_min: bpy.props.FloatProperty(name="Twist Min", subtype="ANGLE", default=-90, soft_min=-180, soft_max=0, precision=2) # type: ignore
-	t_max: bpy.props.FloatProperty(name="Twist Max", subtype="ANGLE", default=90, soft_min=0, soft_max=180, precision=2) # type: ignore
+	p_min: bpy.props.FloatProperty(name="Primary Min", subtype="ANGLE", default=math.radians(-60), soft_min=math.radians(-180), soft_max=math.radians(0), precision=2) # type: ignore
+	p_center: bpy.props.FloatProperty(name="Primary Center", subtype="ANGLE", default=0, soft_min=math.radians(-180), soft_max=math.radians(0), precision=2) # type: ignore
+	p_max: bpy.props.FloatProperty(name="Primary Max", subtype="ANGLE", default=math.radians(60), soft_min=math.radians(0), soft_max=math.radians(180), precision=2) # type: ignore
+	s_min: bpy.props.FloatProperty(name="Secondary Min", subtype="ANGLE", default=math.radians(-60), soft_min=math.radians(-180), soft_max=math.radians(0), precision=2) # type: ignore
+	s_center: bpy.props.FloatProperty(name="Primary Center", subtype="ANGLE", default=0, soft_min=math.radians(-180), soft_max=math.radians(0), precision=2) # type: ignore
+	s_max: bpy.props.FloatProperty(name="Secondary Max", subtype="ANGLE", default=math.radians(60), soft_min=math.radians(0), soft_max=math.radians(180), precision=2) # type: ignore
+	t_min: bpy.props.FloatProperty(name="Twist Min", subtype="ANGLE", default=math.radians(-90), soft_min=math.radians(-180), soft_max=math.radians(0), precision=2) # type: ignore
+	t_center: bpy.props.FloatProperty(name="Primary Center", subtype="ANGLE", default=0, soft_min=math.radians(-180), soft_max=math.radians(0), precision=2) # type: ignore
+	t_max: bpy.props.FloatProperty(name="Twist Max", subtype="ANGLE", default=math.radians(90), soft_min=math.radians(0), soft_max=math.radians(180), precision=2) # type: ignore
 
 
 class HumanoidSettings(bpy.types.PropertyGroup):
@@ -126,6 +130,16 @@ def _setup_humanoid_collection(component: STFEXP_Armature_Humanoid):
 	for bone in _humanoid_bones:
 		mapping: HumanoidBone = component.bone_mappings.add()
 		mapping.name = bone[0]
+		if(bone[3] and len(bone[3]) == 3):
+			if(bone[3][0]):
+				mapping.p_min = math.radians(bone[3][0][0])
+				mapping.p_max = math.radians(bone[3][0][1])
+			if(bone[3][1]):
+				mapping.s_min = math.radians(bone[3][1][0])
+				mapping.s_max = math.radians(bone[3][1][1])
+			if(bone[3][2]):
+				mapping.t_min = math.radians(bone[3][2][0])
+				mapping.t_max = math.radians(bone[3][2][1])
 
 def _map_humanoid_bones(component: STFEXP_Armature_Humanoid, armature: bpy.types.Armature):
 	if(len(component.bone_mappings) != len(_humanoid_bones)):
@@ -213,14 +227,15 @@ class STFEXP_HumanoidMappingsList(bpy.types.UIList):
 def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: bpy.types.Armature, component: STFEXP_Armature_Humanoid):
 	layout.use_property_split = True
 
-	layout.prop(component.settings, "arm_stretch")
-	layout.prop(component.settings, "upper_arm_twist")
-	layout.prop(component.settings, "lower_arm_twist")
-	layout.prop(component.settings, "leg_stretch")
-	layout.prop(component.settings, "upper_leg_twist")
-	layout.prop(component.settings, "lower_leg_twist")
-	layout.prop(component.settings, "feet_spacing")
-	layout.prop(component.settings, "use_translation")
+	col = layout.column(align=True)
+	col.prop(component.settings, "arm_stretch")
+	col.prop(component.settings, "upper_arm_twist")
+	col.prop(component.settings, "lower_arm_twist")
+	col.prop(component.settings, "leg_stretch")
+	col.prop(component.settings, "upper_leg_twist")
+	col.prop(component.settings, "lower_leg_twist")
+	col.prop(component.settings, "feet_spacing")
+	col.prop(component.settings, "use_translation")
 
 	layout.separator(factor=2, type="LINE")
 
@@ -244,14 +259,24 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 	if(len(component.bone_mappings) > component.active_bone_mapping):
 		mapping = component.bone_mappings[component.active_bone_mapping]
 		layout.prop_search(mapping, "bone", context_object, "bones")
-		layout.prop(mapping, "set_rotation_limits")
-		if(mapping.set_rotation_limits):
-			layout.prop(mapping, "p_min")
-			layout.prop(mapping, "p_max")
-			layout.prop(mapping, "s_min")
-			layout.prop(mapping, "s_max")
-			layout.prop(mapping, "t_min")
-			layout.prop(mapping, "t_max")
+
+		for mapping_definition in _humanoid_bones:
+			if(mapping.name == mapping_definition[0]):
+				break
+		
+		if(mapping_definition[3] and len(mapping_definition[3]) == 3):
+			layout.prop(mapping, "set_rotation_limits")
+			if(mapping.set_rotation_limits):
+				col = layout.column(align=True)
+				if(mapping_definition[3][0]):
+					col.prop(mapping, "p_min")
+					col.prop(mapping, "p_max")
+				if(mapping_definition[3][1]):
+					col.prop(mapping, "s_min")
+					col.prop(mapping, "s_max")
+				if(mapping_definition[3][2]):
+					col.prop(mapping, "t_min")
+					col.prop(mapping, "t_max")
 
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, context_object: any) -> any:
