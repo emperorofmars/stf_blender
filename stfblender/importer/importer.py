@@ -11,10 +11,9 @@ from ..utils.misc import OpenWebpage, draw_slot_link_warning, get_stf_version
 
 
 class STF_Import_Result:
-	def __init__(self, success: bool, filepath: str, collection: bpy.types.Collection = None, error_message: str = None, warnings: list[STFReport] = [], import_time: float = -1):
+	def __init__(self, success: bool, collection: bpy.types.Collection = None, error_message: str = None, warnings: list[STFReport] = [], import_time: float = -1):
 		self.success = success
 		self.collection = collection
-		self.filepath = filepath
 		self.error_message = error_message
 		self.import_time = import_time
 		self.warnings = warnings
@@ -39,11 +38,11 @@ def import_stf_file(filepath: str) -> STF_Import_Result:
 
 		root.stf_meta.from_stf_meta_assetInfo(stf_file.definition.stf.asset_info)
 
-		return STF_Import_Result(True, filepath, collection = root, import_time=time.time() - time_start, warnings=stf_state._reports)
+		return STF_Import_Result(True, collection = root, import_time=time.time() - time_start, warnings=stf_state._reports)
 	except STFException as error:
-		return STF_Import_Result(False, filepath, error_message=str(error))
+		return STF_Import_Result(False, error_message=str(error))
 	except Exception as error:
-		return STF_Import_Result(False, filepath, error_message=str(error))
+		return STF_Import_Result(False, error_message=str(error))
 	finally:
 		if(file is not None and not file.closed): file.close()
 		for trash in trash_objects:
@@ -72,31 +71,31 @@ class ImportSTF(bpy.types.Operator, ImportHelper):
 		context.window.cursor_modal_set("WAIT")
 		try:
 			result_str = ""
-			results: list[STF_Import_Result] = []
-			for file in self.files:
-				ret = import_stf_file(os.path.join(self.directory, file.name))
-				results.append(ret)
-				result_str = "STF asset \"" + ret.filepath + "\" imported successfully! (%.3f sec.)" % ret.import_time
-				print(result_str)
 			total_time = 0
 			total_successes = 0
 			last_success = None
-			for result in results:
+			for file in self.files:
+				filepath = os.path.join(self.directory, file.name)
+				result = import_stf_file(filepath)
 				if(result.success):
 					total_successes += 1
 					total_time += result.import_time
 					if(result.collection): last_success = result.collection
+
 					if(result.warnings and len(result.warnings) > 0):
 						for report in result.warnings:
 							print(result.filepath + " :: " + report.to_string() + "\n")
 							self.report({"WARNING"}, result.filepath + " :: " + report.to_string())
-				else:
-					self.report({"ERROR"}, result.filepath + " :: " + result.error_message)
 
-			if(total_successes == len(results)):
-				# let result_str
+					result_str = "STF asset \"" + filepath + "\" imported successfully! (%.3f sec.)" % result.import_time
+					if(len(self.files) > 1):
+						print(result_str)
+				else:
+					self.report({"ERROR"}, filepath + " :: " + result.error_message)
+
+			if(total_successes == len(self.files)):
 				if(total_successes > 1):
-					result_str = str(len(results)) + " STF assets imported successfully! (%.3f sec.)" % total_time
+					result_str = str(len(self.files)) + " STF assets imported successfully! (%.3f sec.)" % total_time
 				self.report({"INFO"}, result_str)
 				print(result_str)
 			if(last_success):
