@@ -301,6 +301,16 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, contex
 	component.locomotion_type = json_resource.get("locomotion_type", "planti")
 	component.no_jaw = json_resource.get("no_jaw", False)
 
+	if("settings" in json_resource):
+		component.settings.arm_stretch = json_resource["settings"]["arm_stretch"]
+		component.settings.upper_arm_twist = json_resource["settings"]["upper_arm_twist"]
+		component.settings.lower_arm_twist = json_resource["settings"]["lower_arm_twist"]
+		component.settings.leg_stretch = json_resource["settings"]["leg_stretch"]
+		component.settings.upper_leg_twist = json_resource["settings"]["upper_leg_twist"]
+		component.settings.lower_leg_twist = json_resource["settings"]["lower_leg_twist"]
+		component.settings.feet_spacing = json_resource["settings"]["feet_spacing"]
+		component.settings.use_translation = json_resource["settings"]["use_translation"]
+
 	if("mappings" in json_resource):
 		_setup_humanoid_collection(component)
 		for humanoid_name, json_mapping in json_resource["mappings"].items():
@@ -334,6 +344,17 @@ def _stf_export(context: STF_ExportContext, component: STFEXP_Armature_Humanoid,
 	ret = export_component_base(context, _stf_type, component)
 	ret["locomotion_type"] = component.locomotion_type
 	ret["no_jaw"] = component.no_jaw
+
+	ret["settings"] = {
+		"arm_stretch": component.settings.arm_stretch,
+		"upper_arm_twist": component.settings.upper_arm_twist,
+		"lower_arm_twist": component.settings.lower_arm_twist,
+		"leg_stretch": component.settings.leg_stretch,
+		"upper_leg_twist": component.settings.upper_leg_twist,
+		"lower_leg_twist": component.settings.lower_leg_twist,
+		"feet_spacing": component.settings.feet_spacing,
+		"use_translation": component.settings.use_translation,
+	}
 
 	mappings: dict[str, dict] = {}
 	for mapping in component.bone_mappings:
