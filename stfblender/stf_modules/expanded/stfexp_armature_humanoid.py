@@ -191,6 +191,8 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 	layout.prop(component, "locomotion_type")
 	layout.prop(component, "no_jaw")
 
+	layout.separator(factor=2, type="LINE")
+
 	row = layout.row()
 	row.operator(ResetHumanoidCollectionOperator.bl_idname, icon="WARNING_LARGE")
 	row.operator(MapHumanoidCollectionOperator.bl_idname)
@@ -205,14 +207,23 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 	layout.template_list(STFEXP_HumanoidMappingsList.bl_idname, "", component, "bone_mappings", component, "active_bone_mapping")
 	if(len(component.bone_mappings) > component.active_bone_mapping):
 		layout.prop_search(component.bone_mappings[component.active_bone_mapping], "bone", context_object, "bones")
+		layout.label(text="Muscle limits TBD")
 
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, context_object: any) -> any:
 	component_ref, component = add_component(context_object, _blender_property_name, id, _stf_type)
+	component: STFEXP_Armature_Humanoid = component
 	import_component_base(component, json_resource)
 
 	component.locomotion_type = json_resource.get("locomotion_type", "planti")
 	component.no_jaw = json_resource.get("no_jaw", False)
+
+	if("mappings" in json_resource):
+		_setup_humanoid_collection(component)
+		for humanoid_name, mapping in json_resource["mappings"].items():
+			if("target" in mapping and humanoid_name in component.bone_mappings):
+				if(target := context.get_imported_resource(mapping["target"])):
+					component.bone_mappings[humanoid_name].bone = target.get_bone().name
 
 	return component
 
@@ -221,6 +232,16 @@ def _stf_export(context: STF_ExportContext, component: STFEXP_Armature_Humanoid,
 	ret = export_component_base(context, _stf_type, component)
 	ret["locomotion_type"] = component.locomotion_type
 	ret["no_jaw"] = component.no_jaw
+
+	mappings: dict[str, dict] = {}
+	for mapping in component.bone_mappings:
+		if(mapping.bone):
+			mappings[mapping.name] = {
+				"target": context_object.bones[mapping.bone].stf_info.stf_id
+			}
+	if(len(mappings) > 0):
+		ret["mappings"] = mappings
+
 	return ret, component.stf_id
 
 
