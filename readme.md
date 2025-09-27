@@ -21,9 +21,8 @@ Add it under: `Edit` -> `Preferences` -> `Get Extensions` -> **Click on the top 
 ## License
 All source-code in this repository, except when noted in individual files and/or directories, is licensed under either:
 
-* MIT License (LICENSE-MIT or http://opensource.org/licenses/MIT)
+* MIT License (LICENSE-MIT or <https://opensource.org/license/MIT>)
 * Apache License, Version 2.0 (LICENSE-APACHE2 or http://www.apache.org/licenses/LICENSE-2.0)
-* GNU General Public License v3.0 or later (LICENSE-GPL3+ or https://www.gnu.org/licenses/gpl-3.0-standalone.html)
 
 <!--
 **Commands to build the extension.**\
