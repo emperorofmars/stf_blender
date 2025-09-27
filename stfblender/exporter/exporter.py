@@ -134,7 +134,7 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 			self.layout.use_property_split = True
 
 		if(not called_from_collection_exporter):
-			self.layout.operator(OpenWebpage.bl_idname, text="Open User Guide", icon="HELP").url = "https://docs.stfform.at/guides/blender/blender.html"
+			self.layout.operator(OpenWebpage.bl_idname, text="Open User Guide", icon="HELP").url = "https://docs.stfform.at/guide/blender.html"
 			self.layout.label(text="STF version: " + get_stf_version())
 			self.layout.separator(factor=1, type="SPACE")
 

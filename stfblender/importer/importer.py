@@ -109,7 +109,7 @@ class ImportSTF(bpy.types.Operator, ImportHelper):
 
 
 	def draw(self, context: bpy.types.Context):
-		self.layout.operator(OpenWebpage.bl_idname, text="Open User Guide", icon="HELP").url = "https://docs.stfform.at/guides/blender/blender.html"
+		self.layout.operator(OpenWebpage.bl_idname, text="Open User Guide", icon="HELP").url = "https://docs.stfform.at/guide/blender.html"
 		self.layout.label(text="STF version: " + get_stf_version())
 		self.layout.separator(factor=1, type="SPACE")
 

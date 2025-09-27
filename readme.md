@@ -4,7 +4,7 @@
 
 **WIP implementation for Blender 4.4+. Do not use productively!**
 
-**[Read the User Guide!](https://docs.stfform.at/guides/blender/blender.html)** ⭐ **[STF Website](https://docs.stfform.at/)**
+**[Read the User Guide!](https://docs.stfform.at/guide/blender.html)** ⭐ **[STF Website](https://docs.stfform.at/)**
 
 ## Installation
 ### From Repository (preferred)
