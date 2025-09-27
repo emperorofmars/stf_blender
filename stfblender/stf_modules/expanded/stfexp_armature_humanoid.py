@@ -13,7 +13,7 @@ _blender_property_name = "stfexp_armature_humanoid"
 _mappings_left_side = ["left", "_l", ".l", "-l", " l"]
 _mappings_right_side = ["right", "_r", ".r", "-r", " l"]
 
-# (humanoid_name, display_name, matching_elements)
+# (humanoid_name, display_name, matching_conditions)
 _humanoid_bones = [
 	("hip", "Hip", [["hip", "hips"]]),
 	("spine", "Spine", [["spine"]]),
@@ -86,7 +86,15 @@ def _get_display_name(humanoid_name: str) -> str:
 class HumanoidBone(bpy.types.PropertyGroup):
 	#humanoid_name: bpy.props.EnumProperty(items=_humanoid_bones, name="Humanoid Name", description="E.g. 'Hip', 'LeftUpperArm', 'LeftFingerIndex1', ...") # type: ignore
 	bone: bpy.props.StringProperty(name="Bone", description="Bone on the Armature that maps onto the humanoid name") # type: ignore
-	# todo rotation limits
+
+	set_rotation_limits: bpy.props.BoolProperty(name="Set Rotation Limits", default=False) # type: ignore
+
+	p_min: bpy.props.FloatProperty(name="Primary Min", subtype="ANGLE", default=0, soft_min=-180, soft_max=0, precision=2) # type: ignore
+	p_max: bpy.props.FloatProperty(name="Primary Max", subtype="ANGLE", default=0, soft_min=0, soft_max=180, precision=2) # type: ignore
+	s_min: bpy.props.FloatProperty(name="Secondary Min", subtype="ANGLE", default=0, soft_min=-180, soft_max=0, precision=2) # type: ignore
+	s_max: bpy.props.FloatProperty(name="Secondary Max", subtype="ANGLE", default=0, soft_min=0, soft_max=180, precision=2) # type: ignore
+	t_min: bpy.props.FloatProperty(name="Twist Min", subtype="ANGLE", default=0, soft_min=-180, soft_max=0, precision=2) # type: ignore
+	t_max: bpy.props.FloatProperty(name="Twist Max", subtype="ANGLE", default=0, soft_min=0, soft_max=180, precision=2) # type: ignore
 
 
 class STFEXP_Armature_Humanoid(STF_BlenderComponentBase):
@@ -95,6 +103,16 @@ class STFEXP_Armature_Humanoid(STF_BlenderComponentBase):
 
 	bone_mappings: bpy.props.CollectionProperty(type=HumanoidBone, name="Humanoid Mappings") # type: ignore
 	active_bone_mapping: bpy.props.IntProperty() # type: ignore
+
+	arm_stretch: bpy.props.FloatProperty(name="Arm Stretch", default=0, soft_min=0, soft_max=1, precision=2) # type: ignore
+	upper_arm_twist: bpy.props.FloatProperty(name="Upper Arm Twist", default=0, soft_min=0, soft_max=1, precision=2) # type: ignore
+	lower_arm_twist: bpy.props.FloatProperty(name="Lower Arm Twist", default=0, soft_min=0, soft_max=1, precision=2) # type: ignore
+	leg_stretch: bpy.props.FloatProperty(name="Leg Stretch", default=0, soft_min=0, soft_max=1, precision=2) # type: ignore
+	upper_leg_twist: bpy.props.FloatProperty(name="Upper Leg Twist", default=0, soft_min=0, soft_max=1, precision=2) # type: ignore
+	lower_leg_twist: bpy.props.FloatProperty(name="Lower Leg Twist", default=0, soft_min=0, soft_max=1, precision=2) # type: ignore
+
+	feet_spacing: bpy.props.FloatProperty(name="Feet Spacing") # type: ignore
+	use_translation: bpy.props.BoolProperty(name="Feet Spacing", default=False) # type: ignore
 
 
 def _setup_humanoid_collection(component: STFEXP_Armature_Humanoid):
@@ -188,6 +206,18 @@ class STFEXP_HumanoidMappingsList(bpy.types.UIList):
 
 def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: bpy.types.Armature, component: STFEXP_Armature_Humanoid):
 	layout.use_property_split = True
+
+	layout.prop(component, "arm_stretch")
+	layout.prop(component, "upper_arm_twist")
+	layout.prop(component, "lower_arm_twist")
+	layout.prop(component, "leg_stretch")
+	layout.prop(component, "upper_leg_twist")
+	layout.prop(component, "lower_leg_twist")
+	layout.prop(component, "feet_spacing")
+	layout.prop(component, "use_translation")
+
+	layout.separator(factor=2, type="LINE")
+
 	layout.prop(component, "locomotion_type")
 	layout.prop(component, "no_jaw")
 
@@ -206,8 +236,16 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 
 	layout.template_list(STFEXP_HumanoidMappingsList.bl_idname, "", component, "bone_mappings", component, "active_bone_mapping")
 	if(len(component.bone_mappings) > component.active_bone_mapping):
-		layout.prop_search(component.bone_mappings[component.active_bone_mapping], "bone", context_object, "bones")
-		layout.label(text="Muscle limits TBD")
+		mapping = component.bone_mappings[component.active_bone_mapping]
+		layout.prop_search(mapping, "bone", context_object, "bones")
+		layout.prop(mapping, "set_rotation_limits")
+		if(mapping.set_rotation_limits):
+			layout.prop(mapping, "p_min")
+			layout.prop(mapping, "p_max")
+			layout.prop(mapping, "s_min")
+			layout.prop(mapping, "s_max")
+			layout.prop(mapping, "t_min")
+			layout.prop(mapping, "t_max")
 
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, context_object: any) -> any:
