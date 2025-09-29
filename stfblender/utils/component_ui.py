@@ -30,22 +30,22 @@ def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, compo
 	row = box.row()
 	row.label(text=component_ref.stf_type + "  -  ID: " + component_ref.stf_id + " ")
 
-	if(inject_ui):
-		if(not inject_ui(box, context, component_ref, stf_application_object, component)):
-			return
+	row = row.row()
+	row.alignment = "RIGHT"
+	row.operator(CopyToClipboard.bl_idname, text="Copy ID", icon="DUPLICATE").text = component_ref.stf_id
+	row.operator(edit_op, text="Edit ID & Overrides", icon="MODIFIER").component_id = component_ref.stf_id
 
 	if(component.overrides):
 		box.label(text="Overrides:")
 		row_inner = box.row()
 		row_inner.separator(factor=2.0)
-		col = row_inner.column()
+		col = row_inner.column(align=True)
 		for override in component.overrides:
 			col.label(text=override.target_id)
 
-	row = row.row()
-	row.alignment = "RIGHT"
-	row.operator(CopyToClipboard.bl_idname, text="Copy ID").text = component_ref.stf_id
-	row.operator(edit_op, text="Edit ID & Overrides").component_id = component_ref.stf_id
+	if(inject_ui):
+		if(not inject_ui(box, context, component_ref, stf_application_object, component)):
+			return
 
 	row = box.row()
 	row_l = row.row()

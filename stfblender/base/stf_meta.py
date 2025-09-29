@@ -4,21 +4,21 @@ from .stf_definition import STF_Meta_AssetInfo
 
 
 class STF_KV(bpy.types.PropertyGroup):
-	name: bpy.props.StringProperty(name="Name") # type: ignore
-	value: bpy.props.StringProperty(name="Value") # type: ignore
+	name: bpy.props.StringProperty(name="Name", options=set()) # type: ignore
+	value: bpy.props.StringProperty(name="Value", options=set()) # type: ignore
 
 
 class STF_Meta(bpy.types.PropertyGroup):
-	"""Metainformation about the STF asset"""
-	asset_name: bpy.props.StringProperty(name="Asset Name") # type: ignore
-	version: bpy.props.StringProperty(name="Version") # type: ignore
-	url: bpy.props.StringProperty(name="Asset URL") # type: ignore
-	author: bpy.props.StringProperty(name="Author(s)") # type: ignore
-	license: bpy.props.StringProperty(name="License") # type: ignore
-	license_url: bpy.props.StringProperty(name="License URL") # type: ignore
-	documentation_url: bpy.props.StringProperty(name="Documentation URL") # type: ignore
+	"""Meta-Information about the STF asset"""
+	asset_name: bpy.props.StringProperty(name="Asset Name", options=set()) # type: ignore
+	version: bpy.props.StringProperty(name="Version", options=set()) # type: ignore
+	url: bpy.props.StringProperty(name="Asset URL", options=set()) # type: ignore
+	author: bpy.props.StringProperty(name="Author(s)", options=set()) # type: ignore
+	license: bpy.props.StringProperty(name="License", options=set()) # type: ignore
+	license_url: bpy.props.StringProperty(name="License URL", options=set()) # type: ignore
+	documentation_url: bpy.props.StringProperty(name="Documentation URL", options=set()) # type: ignore
 
-	custom_properties: bpy.props.CollectionProperty(type=STF_KV, name="Type") # type: ignore
+	custom_properties: bpy.props.CollectionProperty(type=STF_KV, name="Type", options=set()) # type: ignore
 
 	def to_stf_meta_assetInfo(self) -> STF_Meta_AssetInfo:
 		ret = STF_Meta_AssetInfo()
@@ -139,8 +139,8 @@ def draw_meta_editor(layout: bpy.types.UILayout, collection: bpy.types.Collectio
 
 
 def register():
-	bpy.types.Scene.stf_root_collection = bpy.props.PointerProperty(type=bpy.types.Collection, name="Root Collection") # type: ignore
-	bpy.types.Collection.stf_meta = bpy.props.PointerProperty(type=STF_Meta, name="STF Meta") # type: ignore
+	bpy.types.Scene.stf_root_collection = bpy.props.PointerProperty(type=bpy.types.Collection, name="Root Collection", options=set()) # type: ignore
+	bpy.types.Collection.stf_meta = bpy.props.PointerProperty(type=STF_Meta, name="STF Meta", options=set()) # type: ignore
 
 def unregister():
 	if hasattr(bpy.types.Scene, "stf_root_collection"):

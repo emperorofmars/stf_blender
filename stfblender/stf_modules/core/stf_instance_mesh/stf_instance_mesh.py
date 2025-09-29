@@ -14,21 +14,21 @@ _stf_type = "stf.instance.mesh"
 
 
 class STF_Instance_Mesh_Blendshape_Value(bpy.types.PropertyGroup):
-	name: bpy.props.StringProperty(name="Name") # type: ignore
-	override: bpy.props.BoolProperty(name="Override", default=False) # type: ignore
+	name: bpy.props.StringProperty(name="Name", options=set()) # type: ignore
+	override: bpy.props.BoolProperty(name="Override", default=False, options=set()) # type: ignore
 	value: bpy.props.FloatProperty(name="Value", default=0, soft_min=0, soft_max=1, subtype="FACTOR") # type: ignore
 
 class STF_Instance_Mesh_Material(bpy.types.PropertyGroup):
-	override: bpy.props.BoolProperty(name="Override", default=False) # type: ignore
+	override: bpy.props.BoolProperty(name="Override", default=False, options=set()) # type: ignore
 	material: bpy.props.PointerProperty(type=bpy.types.Material, name="Material") # type: ignore
 
 class STF_Instance_Mesh(bpy.types.PropertyGroup):
-	override_blendshape_values: bpy.props.BoolProperty(name="Override Blendshape Values", default=False) # type: ignore
-	blendshape_values: bpy.props.CollectionProperty(type=STF_Instance_Mesh_Blendshape_Value, name="Blendshape Values") # type: ignore
-	active_blendshape: bpy.props.IntProperty() # type: ignore
-	override_materials: bpy.props.BoolProperty(name="Override Materials", default=False) # type: ignore
-	materials: bpy.props.CollectionProperty(type=STF_Instance_Mesh_Material, name="Material Overrides") # type: ignore
-	active_material: bpy.props.IntProperty() # type: ignore
+	override_blendshape_values: bpy.props.BoolProperty(name="Override Blendshape Values", default=False, options=set()) # type: ignore
+	blendshape_values: bpy.props.CollectionProperty(type=STF_Instance_Mesh_Blendshape_Value, name="Blendshape Values", options=set()) # type: ignore
+	active_blendshape: bpy.props.IntProperty(options=set()) # type: ignore
+	override_materials: bpy.props.BoolProperty(name="Override Materials", default=False, options=set()) # type: ignore
+	materials: bpy.props.CollectionProperty(type=STF_Instance_Mesh_Material, name="Material Overrides", options=set()) # type: ignore
+	active_material: bpy.props.IntProperty(options=set()) # type: ignore
 
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
@@ -163,7 +163,7 @@ register_stf_modules = [
 
 
 def register():
-	bpy.types.Object.stf_instance_mesh = bpy.props.PointerProperty(type=STF_Instance_Mesh) # type: ignore
+	bpy.types.Object.stf_instance_mesh = bpy.props.PointerProperty(type=STF_Instance_Mesh, options=set()) # type: ignore
 
 def unregister():
 	if hasattr(bpy.types.Object, "stf_instance_mesh"):

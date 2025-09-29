@@ -71,13 +71,13 @@ emote_values = (
 )
 
 class AVA_Emote(bpy.types.PropertyGroup):
-	emote: bpy.props.EnumProperty(name="Emote", items=emote_values, description="The semantic meaning of the mapped animation") # type: ignore
-	custom_emote: bpy.props.StringProperty(name="Custom Emote") # type: ignore
+	emote: bpy.props.EnumProperty(name="Emote", items=emote_values, description="The semantic meaning of the mapped animation", options=set()) # type: ignore
+	custom_emote: bpy.props.StringProperty(name="Custom Emote", options=set()) # type: ignore
 
-	animation: bpy.props.PointerProperty(type=bpy.types.Action, name="Animation", description="The animation which represents the emote") # type: ignore # todo select only actions with a valid slot-link setup
+	animation: bpy.props.PointerProperty(type=bpy.types.Action, name="Animation", description="The animation which represents the emote", options=set()) # type: ignore # todo select only actions with a valid slot-link setup
 
-	use_blendshape_fallback: bpy.props.BoolProperty(name="Provide Blendshape Only Fallback", default=False, description="Some targets like VRM have a very limited system for avatar expressions. Provide a blendshape-only pose for these applications") # type: ignore
-	blendshape_fallback: bpy.props.PointerProperty(type=STFDataResourceReference) # type: ignore
+	use_blendshape_fallback: bpy.props.BoolProperty(name="Provide Blendshape Only Fallback", default=False, description="Some targets like VRM have a very limited system for avatar expressions. Provide a blendshape-only pose for these applications", options=set()) # type: ignore
+	blendshape_fallback: bpy.props.PointerProperty(type=STFDataResourceReference, options=set()) # type: ignore
 
 
 class AVA_Emotes(STF_BlenderComponentBase):
@@ -98,7 +98,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 
 	layout.use_property_split = True
 
-	add_button = layout.operator(Add_AVA_Emotes.bl_idname)
+	add_button = layout.operator(Add_AVA_Emotes.bl_idname, icon="ADD")
 	add_button.component_id = component.stf_id
 
 	row = layout.row()
@@ -218,7 +218,7 @@ register_stf_modules = [
 
 
 def register():
-	setattr(bpy.types.Collection, _blender_property_name, bpy.props.CollectionProperty(type=AVA_Emotes))
+	setattr(bpy.types.Collection, _blender_property_name, bpy.props.CollectionProperty(type=AVA_Emotes, options=set()))
 
 def unregister():
 	if hasattr(bpy.types.Collection, _blender_property_name):

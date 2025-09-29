@@ -73,7 +73,7 @@ register_stf_modules = [
 
 def register():
 	boilerplate_register(bpy.types.Collection, "data")
-	bpy.types.Collection.stf_use_collection_as_prefab = bpy.props.BoolProperty(name="Use As STF Prefab", default=False)
+	bpy.types.Collection.stf_use_collection_as_prefab = bpy.props.BoolProperty(name="Use As STF Prefab", default=False, options=set())
 
 def unregister():
 	boilerplate_unregister(bpy.types.Collection, "data")

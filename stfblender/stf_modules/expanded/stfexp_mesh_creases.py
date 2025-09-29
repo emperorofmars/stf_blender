@@ -116,7 +116,7 @@ register_stf_modules = [
 
 
 def register():
-	setattr(bpy.types.Mesh, _blender_property_name, bpy.props.CollectionProperty(type=STFEXP_Mesh_Creases))
+	setattr(bpy.types.Mesh, _blender_property_name, bpy.props.CollectionProperty(type=STFEXP_Mesh_Creases, options=set()))
 
 def unregister():
 	if hasattr(bpy.types.Mesh, _blender_property_name):

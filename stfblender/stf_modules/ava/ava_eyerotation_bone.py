@@ -11,10 +11,10 @@ _blender_property_name = "ava_eye_rotation_bone"
 
 
 class AVA_EyeRotation_Bone(STF_BlenderComponentBase):
-	limit_up: bpy.props.FloatProperty(name="Up", default=15) # type: ignore
-	limit_down: bpy.props.FloatProperty(name="Down", default=12) # type: ignore
-	limit_in: bpy.props.FloatProperty(name="In", default=15) # type: ignore
-	limit_out: bpy.props.FloatProperty(name="Out", default=16) # type: ignore
+	limit_up: bpy.props.FloatProperty(name="Up", default=15, options=set()) # type: ignore
+	limit_down: bpy.props.FloatProperty(name="Down", default=12, options=set()) # type: ignore
+	limit_in: bpy.props.FloatProperty(name="In", default=15, options=set()) # type: ignore
+	limit_out: bpy.props.FloatProperty(name="Out", default=16, options=set()) # type: ignore
 
 
 def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, parent_application_object: any, component: AVA_EyeRotation_Bone):
@@ -70,7 +70,7 @@ register_stf_modules = [
 
 
 def register():
-	setattr(bpy.types.Armature, _blender_property_name, bpy.props.CollectionProperty(type=AVA_EyeRotation_Bone))
+	setattr(bpy.types.Armature, _blender_property_name, bpy.props.CollectionProperty(type=AVA_EyeRotation_Bone, options=set()))
 
 def unregister():
 	if hasattr(bpy.types.Armature, _blender_property_name):

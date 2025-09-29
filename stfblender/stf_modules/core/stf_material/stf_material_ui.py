@@ -133,35 +133,40 @@ class STFMaterialSpatialPanel(bpy.types.Panel):
 		header.label(text="STF Components", icon="GROUP")
 		if(body): draw_components_ui(self.layout, context, context.material.stf_info, context.material, STFAddMaterialComponentOperator.bl_idname, STFRemoveMaterialComponentOperator.bl_idname, STFEditMaterialComponentIdOperator.bl_idname)
 
-		self.layout.separator(factor=2, type="LINE")
+		self.layout.separator(factor=3, type="LINE")
 
-		self.layout.prop(context.material, "stf_is_source_of_truth")
+		self.layout.use_property_split = True
+		self.layout.prop(context.material.stf_material, "stf_is_source_of_truth")
+		self.layout.use_property_split = False
 
+		self.layout.separator(factor=1, type="SPACE")
 		row = self.layout.row()
-		row.operator(STFConvertBlenderMaterialToSTF.bl_idname)
-		row.operator(STFConvertSTFMaterialToBlender.bl_idname)
-		row.operator(STFClearMaterial.bl_idname)
+		row.operator(STFConvertBlenderMaterialToSTF.bl_idname, icon="WARNING_LARGE" if context.material.stf_material.stf_is_source_of_truth else "NONE")
+		row.operator(STFConvertSTFMaterialToBlender.bl_idname, icon="WARNING_LARGE" if not context.material.stf_material.stf_is_source_of_truth else "NONE")
+		row.operator(STFClearMaterial.bl_idname, icon="WARNING_LARGE" if context.material.stf_material.stf_is_source_of_truth else "NONE")
 
 		# STF Material Properties
 
 		self.layout.separator(factor=2, type="LINE")
-		self.layout.label(text="Style Hints")
+		box = self.layout.box()
+		box.label(text="Style Hints")
 		if(len(context.material.stf_material.style_hints)):
-			row = self.layout.row()
+			row = box.row()
 			row.separator(factor=2.0)
 			col = row.column(align=True)
 			for style_hint_index, style_hint in enumerate(context.material.stf_material.style_hints):
 				row_inner = col.row(align=True)
 				row_inner.prop(style_hint, "value", text="")
 				row_inner.operator(STFMaterialHintRemove.bl_idname, text="", icon="X").index = style_hint_index
-		self.layout.operator(STFMaterialHintAdd.bl_idname)
+		box.operator(STFMaterialHintAdd.bl_idname, icon="ADD")
 
-		self.layout.separator(factor=2, type="LINE")
-		self.layout.label(text="Shader Targets")
+		self.layout.separator(factor=1, type="SPACE")
+		box = self.layout.box()
+		box.label(text="Shader Targets")
 		if(len(context.material.stf_material.shader_targets)):
-			row = self.layout.row()
+			row = box.row()
 			row.separator(factor=2.0)
-			col = row.column()
+			col = row.box().column()
 			for target_index, shader_target in enumerate(context.material.stf_material.shader_targets):
 				col_outer = col.column()
 				row_inner = col_outer.row(align=True)
@@ -177,10 +182,8 @@ class STFMaterialSpatialPanel(bpy.types.Panel):
 						btn = row_value.operator(STFMaterialShaderTargetShaderRemove.bl_idname, text="", icon="X")
 						btn.index = target_index
 						btn.index_shader = shader_index
-				col_outer.operator(STFMaterialShaderTargetShaderAdd.bl_idname).index = target_index
-				if(len(shader_target.shaders)):
-					col_outer.separator(factor=1.0)
-		self.layout.operator(STFMaterialShaderTargetAdd.bl_idname)
+				col_outer.operator(STFMaterialShaderTargetShaderAdd.bl_idname, icon="ADD").index = target_index
+		box.operator(STFMaterialShaderTargetAdd.bl_idname, icon="ADD")
 
 		self.layout.separator(factor=2, type="LINE")
 		# TODO list properties by group, allow for custom hot-loaded code to draw entire groups, only list properties manually like this in an 'advanced view'
@@ -194,31 +197,32 @@ class STFMaterialSpatialPanel(bpy.types.Panel):
 		row.prop(context.scene, "stf_material_value_modules", text="")
 		row.operator(STFAddMaterialProperty.bl_idname, icon="ADD")
 
-		self.layout.separator(factor=2, type="SPACE")
+		box = self.layout.box()
+		box.use_property_split = True
 
 		if(len(context.material.stf_material.properties) > context.material.stf_material.active_property_index):
 			row_property_list.operator(STFRemoveMaterialProperty.bl_idname, text="", icon="X").index = context.material.stf_material.active_property_index
 
 			# Draw property
 			prop: STF_Material_Property = context.material.stf_material.properties[context.material.stf_material.active_property_index]
-			self.layout.prop(prop, "property_type") # TODO handle understood property types
-			self.layout.prop(prop, "multi_value")
+			box.prop(prop, "property_type") # TODO handle understood property types
+			box.prop(prop, "multi_value")
 
 			# Draw property value(s)
 			if(prop.multi_value):
-				self.layout.separator(factor=1, type="SPACE")
-				row_value_list = self.layout.row(align=True)
+				box.separator(factor=1, type="SPACE")
+				row_value_list = box.row(align=True)
 				row_value_list.template_list(STFDrawMaterialPropertyValueList.bl_idname, "", prop, "values", prop, "active_value_index")
 			if(value := _find_value(context, prop)):
 				if(prop.multi_value):
 					if(len(prop.values) > 1):
 						row_value_list.operator(STFRemoveMaterialPropertyValue.bl_idname, text="", icon="X").index = context.material.stf_material.active_property_index
-					self.layout.operator(STFAddMaterialPropertyValue.bl_idname).index = context.material.stf_material.active_property_index
+					box.operator(STFAddMaterialPropertyValue.bl_idname).index = context.material.stf_material.active_property_index
 
-				self.layout.separator(factor=1, type="SPACE")
-				_draw_value(self.layout, context, prop, value)
+				box.separator(factor=1, type="LINE")
+				_draw_value(box, context, prop, value)
 			else:
-				self.layout.operator(STFAddMaterialPropertyValue.bl_idname).index = context.material.stf_material.active_property_index
+				box.operator(STFAddMaterialPropertyValue.bl_idname).index = context.material.stf_material.active_property_index
 
 
 def _find_value(context: bpy.types.Context, prop: STF_Material_Property):

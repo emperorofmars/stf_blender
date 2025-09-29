@@ -87,42 +87,42 @@ def _get_display_name(humanoid_name: str) -> str:
 
 
 class HumanoidBone(bpy.types.PropertyGroup):
-	bone: bpy.props.StringProperty(name="Bone", description="Bone on the Armature that maps onto the humanoid name") # type: ignore
+	bone: bpy.props.StringProperty(name="Bone", description="Bone on the Armature that maps onto the humanoid name", options=set()) # type: ignore
 
-	set_rotation_limits: bpy.props.BoolProperty(name="Set Rotation Limits", default=False) # type: ignore
+	set_rotation_limits: bpy.props.BoolProperty(name="Set Rotation Limits", default=False, options=set()) # type: ignore
 
-	p_min: bpy.props.FloatProperty(name="Primary Min", subtype="ANGLE", default=math.radians(-60), soft_min=math.radians(-180), soft_max=math.radians(0), precision=2) # type: ignore
-	p_center: bpy.props.FloatProperty(name="Primary Center", subtype="ANGLE", default=0, soft_min=math.radians(-180), soft_max=math.radians(180), precision=2) # type: ignore
-	p_max: bpy.props.FloatProperty(name="Primary Max", subtype="ANGLE", default=math.radians(60), soft_min=math.radians(0), soft_max=math.radians(180), precision=2) # type: ignore
-	s_min: bpy.props.FloatProperty(name="Secondary Min", subtype="ANGLE", default=math.radians(-60), soft_min=math.radians(-180), soft_max=math.radians(0), precision=2) # type: ignore
-	s_center: bpy.props.FloatProperty(name="Primary Center", subtype="ANGLE", default=0, soft_min=math.radians(-180), soft_max=math.radians(180), precision=2) # type: ignore
-	s_max: bpy.props.FloatProperty(name="Secondary Max", subtype="ANGLE", default=math.radians(60), soft_min=math.radians(0), soft_max=math.radians(180), precision=2) # type: ignore
-	t_min: bpy.props.FloatProperty(name="Twist Min", subtype="ANGLE", default=math.radians(-90), soft_min=math.radians(-180), soft_max=math.radians(0), precision=2) # type: ignore
-	t_center: bpy.props.FloatProperty(name="Primary Center", subtype="ANGLE", default=0, soft_min=math.radians(-180), soft_max=math.radians(180), precision=2) # type: ignore
-	t_max: bpy.props.FloatProperty(name="Twist Max", subtype="ANGLE", default=math.radians(90), soft_min=math.radians(0), soft_max=math.radians(180), precision=2) # type: ignore
+	p_min: bpy.props.FloatProperty(name="Primary Min", subtype="ANGLE", default=math.radians(-60), soft_min=math.radians(-180), soft_max=math.radians(0), precision=2, options=set()) # type: ignore
+	p_center: bpy.props.FloatProperty(name="Primary Center", subtype="ANGLE", default=0, soft_min=math.radians(-180), soft_max=math.radians(180), precision=2, options=set()) # type: ignore
+	p_max: bpy.props.FloatProperty(name="Primary Max", subtype="ANGLE", default=math.radians(60), soft_min=math.radians(0), soft_max=math.radians(180), precision=2, options=set()) # type: ignore
+	s_min: bpy.props.FloatProperty(name="Secondary Min", subtype="ANGLE", default=math.radians(-60), soft_min=math.radians(-180), soft_max=math.radians(0), precision=2, options=set()) # type: ignore
+	s_center: bpy.props.FloatProperty(name="Primary Center", subtype="ANGLE", default=0, soft_min=math.radians(-180), soft_max=math.radians(180), precision=2, options=set()) # type: ignore
+	s_max: bpy.props.FloatProperty(name="Secondary Max", subtype="ANGLE", default=math.radians(60), soft_min=math.radians(0), soft_max=math.radians(180), precision=2, options=set()) # type: ignore
+	t_min: bpy.props.FloatProperty(name="Twist Min", subtype="ANGLE", default=math.radians(-90), soft_min=math.radians(-180), soft_max=math.radians(0), precision=2, options=set()) # type: ignore
+	t_center: bpy.props.FloatProperty(name="Primary Center", subtype="ANGLE", default=0, soft_min=math.radians(-180), soft_max=math.radians(180), precision=2, options=set()) # type: ignore
+	t_max: bpy.props.FloatProperty(name="Twist Max", subtype="ANGLE", default=math.radians(90), soft_min=math.radians(0), soft_max=math.radians(180), precision=2, options=set()) # type: ignore
 
 
 class HumanoidSettings(bpy.types.PropertyGroup):
-	arm_stretch: bpy.props.FloatProperty(name="Arm Stretch", default=0.053, soft_min=0, soft_max=1, precision=3) # type: ignore
-	upper_arm_twist: bpy.props.FloatProperty(name="Upper Arm Twist", default=0.5, soft_min=0, soft_max=1, precision=2) # type: ignore
-	lower_arm_twist: bpy.props.FloatProperty(name="Lower Arm Twist", default=0.5, soft_min=0, soft_max=1, precision=2) # type: ignore
-	leg_stretch: bpy.props.FloatProperty(name="Leg Stretch", default=0.05, soft_min=0, soft_max=1, precision=3) # type: ignore
-	upper_leg_twist: bpy.props.FloatProperty(name="Upper Leg Twist", default=0.5, soft_min=0, soft_max=1, precision=2) # type: ignore
-	lower_leg_twist: bpy.props.FloatProperty(name="Lower Leg Twist", default=0.5, soft_min=0, soft_max=1, precision=2) # type: ignore
+	arm_stretch: bpy.props.FloatProperty(name="Arm Stretch", default=0.053, soft_min=0, soft_max=1, precision=3, options=set()) # type: ignore
+	upper_arm_twist: bpy.props.FloatProperty(name="Upper Arm Twist", default=0.5, soft_min=0, soft_max=1, precision=2, options=set()) # type: ignore
+	lower_arm_twist: bpy.props.FloatProperty(name="Lower Arm Twist", default=0.5, soft_min=0, soft_max=1, precision=2, options=set()) # type: ignore
+	leg_stretch: bpy.props.FloatProperty(name="Leg Stretch", default=0.05, soft_min=0, soft_max=1, precision=3, options=set()) # type: ignore
+	upper_leg_twist: bpy.props.FloatProperty(name="Upper Leg Twist", default=0.5, soft_min=0, soft_max=1, precision=2, options=set()) # type: ignore
+	lower_leg_twist: bpy.props.FloatProperty(name="Lower Leg Twist", default=0.5, soft_min=0, soft_max=1, precision=2, options=set()) # type: ignore
 
-	feet_spacing: bpy.props.FloatProperty(name="Feet Spacing", default=0, soft_min=0, soft_max=1, precision=2) # type: ignore
-	use_translation: bpy.props.BoolProperty(name="Feet Spacing", default=False) # type: ignore
+	feet_spacing: bpy.props.FloatProperty(name="Feet Spacing", default=0, soft_min=0, soft_max=1, precision=2, options=set()) # type: ignore
+	use_translation: bpy.props.BoolProperty(name="Feet Spacing", default=False, options=set()) # type: ignore
 
 
 
 class STFEXP_Armature_Humanoid(STF_BlenderComponentBase):
-	locomotion_type: bpy.props.EnumProperty(items=[("planti", "Plantigrade", ""),("digi", "Digitigrade", "")], name="Locomotion Type", default="planti") # type: ignore
-	no_jaw: bpy.props.BoolProperty(name="Ignore Jaw Mapping", default=False) # type: ignore
+	locomotion_type: bpy.props.EnumProperty(items=[("planti", "Plantigrade", ""),("digi", "Digitigrade", "")], name="Locomotion Type", default="planti", options=set()) # type: ignore
+	no_jaw: bpy.props.BoolProperty(name="Ignore Jaw Mapping", default=False, options=set()) # type: ignore
 
-	bone_mappings: bpy.props.CollectionProperty(type=HumanoidBone, name="Humanoid Mappings") # type: ignore
+	bone_mappings: bpy.props.CollectionProperty(type=HumanoidBone, name="Humanoid Mappings", options=set()) # type: ignore
 	active_bone_mapping: bpy.props.IntProperty() # type: ignore
 	
-	settings: bpy.props.PointerProperty(type=HumanoidSettings, name="Humanoid Settings") # type: ignore
+	settings: bpy.props.PointerProperty(type=HumanoidSettings, name="Humanoid Settings", options=set()) # type: ignore
 
 
 def _setup_humanoid_collection(component: STFEXP_Armature_Humanoid):
@@ -246,7 +246,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 
 	row = layout.row()
 	row.operator(ResetHumanoidCollectionOperator.bl_idname, icon="WARNING_LARGE")
-	row.operator(MapHumanoidCollectionOperator.bl_idname)
+	row.operator(MapHumanoidCollectionOperator.bl_idname, icon="LOOP_FORWARDS")
 
 	mapped = 0
 	for mapping in component.bone_mappings:
@@ -264,7 +264,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 		else:
 			return
 
-		layout.prop_search(mapping, "bone", context_object, "bones")
+		layout.prop_search(mapping, "bone", context_object, "bones", text="Mapped Bone")
 
 		if(mapping_definition[3] and len(mapping_definition[3]) == 3):
 			layout.prop(mapping, "set_rotation_limits")

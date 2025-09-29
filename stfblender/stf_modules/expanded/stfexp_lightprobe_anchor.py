@@ -12,8 +12,8 @@ _blender_property_name = "stfexp_lightprobe_anchor"
 
 
 class STFEXP_LightprobeAnchor(STF_BlenderComponentBase):
-	anchor_object: bpy.props.PointerProperty(type=bpy.types.Object, name="Anchor Object") # type: ignore
-	anchor_bone: bpy.props.StringProperty(name="Anchor Bone") # type: ignore
+	anchor_object: bpy.props.PointerProperty(type=bpy.types.Object, name="Anchor Object", options=set()) # type: ignore
+	anchor_bone: bpy.props.StringProperty(name="Anchor Bone", options=set()) # type: ignore
 
 
 def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, parent_application_object: any, component: STFEXP_LightprobeAnchor):

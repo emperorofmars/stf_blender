@@ -28,7 +28,7 @@ def draw_stf_id_ui(layout: bpy.types.UILayout, context: bpy.types.Context, blend
 		row_l.prop(stf_prop_holder, "stf_id", text="")
 		row_r = row.row(align=True)
 		row_r.alignment = "RIGHT"
-		row_r.operator(CopyToClipboard.bl_idname, text="Copy ID").text = stf_prop_holder.stf_id
+		row_r.operator(CopyToClipboard.bl_idname, text="Copy ID", icon="DUPLICATE").text = stf_prop_holder.stf_id
 	else:
 		flow.operator(set_id_op)
 

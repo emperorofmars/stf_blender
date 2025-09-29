@@ -3,7 +3,7 @@ import bpy
 
 
 class STF_Material_Value_Base(bpy.types.PropertyGroup):
-	value_id: bpy.props.IntProperty() # type: ignore
+	value_id: bpy.props.IntProperty(options=set()) # type: ignore
 
 
 class STF_Material_Value_Module_Base:
@@ -21,7 +21,7 @@ class STF_Material_Value_Module_Base:
 
 class STF_Material_Value_Ref(bpy.types.PropertyGroup): # Bringing polymorphism to Blender
 	"""References the 'value_id' of the actual value property, whose property-name is unknown by this piece of code."""
-	value_id: bpy.props.IntProperty() # type: ignore
+	value_id: bpy.props.IntProperty(options=set()) # type: ignore
 
 
 class STF_Material_Property(bpy.types.PropertyGroup):
@@ -30,34 +30,34 @@ class STF_Material_Property(bpy.types.PropertyGroup):
 	The property type must be unique within a material.
 	A property can have one or more values. Available value types are contained in './stf_blender_material_values'. Maybe these could become hot-loadable at some point.
 	"""
-	property_type: bpy.props.StringProperty(name="Property ID", description="IDs like `albedo.texture` or `metallic.value`") # type: ignore
-	multi_value: bpy.props.BoolProperty(name="Allows Multiple Values", default=False, description="Sometimes you want multiple values. I.e. if you want to have multiple decals.") # type: ignore
+	property_type: bpy.props.StringProperty(name="Property ID", description="IDs like `albedo.texture` or `metallic.value`", options=set()) # type: ignore
+	multi_value: bpy.props.BoolProperty(name="Allows Multiple Values", default=False, description="Sometimes you want multiple values. I.e. if you want to have multiple decals.", options=set()) # type: ignore
 
-	value_property_name: bpy.props.StringProperty() # type: ignore
-	value_type: bpy.props.StringProperty() # type: ignore
-	values: bpy.props.CollectionProperty(type=STF_Material_Value_Ref) # type: ignore
-	active_value_index: bpy.props.IntProperty() # type: ignore
+	value_property_name: bpy.props.StringProperty(options=set()) # type: ignore
+	value_type: bpy.props.StringProperty(options=set()) # type: ignore
+	values: bpy.props.CollectionProperty(type=STF_Material_Value_Ref, options=set()) # type: ignore
+	active_value_index: bpy.props.IntProperty(options=set()) # type: ignore
 
 
 class StringProperty(bpy.types.PropertyGroup):
-	value: bpy.props.StringProperty() # type: ignore
+	value: bpy.props.StringProperty(options=set()) # type: ignore
 
 class ShaderTarget(bpy.types.PropertyGroup):
-	target: bpy.props.StringProperty(name="Target Application") # type: ignore
-	shaders: bpy.props.CollectionProperty(type=StringProperty, name="Target Shader") # type: ignore
+	target: bpy.props.StringProperty(name="Target Application", options=set()) # type: ignore
+	shaders: bpy.props.CollectionProperty(type=StringProperty, name="Target Shader", options=set()) # type: ignore
 
 class STF_Material_Definition(bpy.types.PropertyGroup):
 	"""This object merely holds all the meta information for a material"""
-	stf_is_source_of_truth: bpy.props.BoolProperty(name="STF Material Is Source Of Truth", default=False, description="Whether to use the explicit STF material definition, or to convert the Blender material, overwriting any existing STF material properties") # type: ignore
-	style_hints: bpy.props.CollectionProperty(type=StringProperty, name="Style Hints") # type: ignore
-	shader_targets: bpy.props.CollectionProperty(type=ShaderTarget, name="Shader Targets") # type: ignore
-	properties: bpy.props.CollectionProperty(type=STF_Material_Property, name="STF Material Properties") # type: ignore
-	active_property_index: bpy.props.IntProperty() # type: ignore
-	property_value_refs: bpy.props.CollectionProperty(type=STF_Material_Value_Ref, name="STF Material Values") # type: ignore
+	stf_is_source_of_truth: bpy.props.BoolProperty(name="STF Material Is Source Of Truth", default=False, description="Whether to use the explicit STF material definition, or to convert the Blender material, overwriting any existing STF material properties", options=set()) # type: ignore
+	style_hints: bpy.props.CollectionProperty(type=StringProperty, name="Style Hints", options=set()) # type: ignore
+	shader_targets: bpy.props.CollectionProperty(type=ShaderTarget, name="Shader Targets", options=set()) # type: ignore
+	properties: bpy.props.CollectionProperty(type=STF_Material_Property, name="STF Material Properties", options=set()) # type: ignore
+	active_property_index: bpy.props.IntProperty(options=set()) # type: ignore
+	property_value_refs: bpy.props.CollectionProperty(type=STF_Material_Value_Ref, name="STF Material Values", options=set()) # type: ignore
 
 
 def register():
-	bpy.types.Material.stf_material = bpy.props.PointerProperty(type=STF_Material_Definition, name="STF Material")
+	bpy.types.Material.stf_material = bpy.props.PointerProperty(type=STF_Material_Definition, name="STF Material", options=set())
 
 def unregister():
 	if hasattr(bpy.types.Material, "stf_material"):

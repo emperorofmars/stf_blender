@@ -61,8 +61,8 @@ def draw_resource(layout: bpy.types.UILayout, context: bpy.types.Context, resour
 
 	row = row.row()
 	row.alignment = "RIGHT"
-	row.operator(CopyToClipboard.bl_idname, text="Copy ID").text = resource_ref.stf_id
-	edit_button = row.operator(STFEditDataResourceOperator.bl_idname, text="Edit ID")
+	row.operator(CopyToClipboard.bl_idname, text="Copy ID", icon="DUPLICATE").text = resource_ref.stf_id
+	edit_button = row.operator(STFEditDataResourceOperator.bl_idname, text="Edit ID", icon="MODIFIER")
 	edit_button.use_scene_collection = collection == context.scene.collection
 	edit_button.resource_id = resource_ref.stf_id
 

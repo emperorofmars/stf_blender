@@ -13,9 +13,9 @@ _blender_property_name = "stf_ava_avatar"
 
 
 class AVA_Avatar(STF_BlenderComponentBase):
-	viewport: bpy.props.PointerProperty(type=bpy.types.Object, name="Viewport") # type: ignore
-	primary_armature_instance: bpy.props.PointerProperty(type=bpy.types.Object, name="Primary Armature Instance") # type: ignore
-	primary_mesh_instance: bpy.props.PointerProperty(type=bpy.types.Object, name="Primary Mesh Instance") # type: ignore
+	viewport: bpy.props.PointerProperty(type=bpy.types.Object, name="Viewport", options=set()) # type: ignore
+	primary_armature_instance: bpy.props.PointerProperty(type=bpy.types.Object, name="Primary Armature Instance", options=set()) # type: ignore
+	primary_mesh_instance: bpy.props.PointerProperty(type=bpy.types.Object, name="Primary Mesh Instance", options=set()) # type: ignore
 
 
 class CreateViewportObjectOperator(bpy.types.Operator):
@@ -50,9 +50,9 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 		layout.prop(component, "viewport")
 		row = layout.row()
 		row.alignment = "RIGHT"
-		row.operator(SetActiveObjectOperator.bl_idname, text="Select Viewport Object").target_name = "$ViewportFirstPerson"
+		row.operator(SetActiveObjectOperator.bl_idname, text="Select Viewport Object", icon="EYEDROPPER").target_name = "$ViewportFirstPerson"
 	else:
-		create_viewport_button = layout.operator(CreateViewportObjectOperator.bl_idname, text="Create Viewport Object")
+		create_viewport_button = layout.operator(CreateViewportObjectOperator.bl_idname, text="Create Viewport Object", icon="ADD")
 		create_viewport_button.blender_collection = parent_application_object.name
 		create_viewport_button.component_id = component.stf_id
 

@@ -16,12 +16,12 @@ _blender_property_name = "vrc_physbone"
 
 # todo: this is quite jank, make this able to select the object/armature->bone/component etc..
 class PhysboneReference(bpy.types.PropertyGroup):
-	id: bpy.props.StringProperty(name="ID") # type: ignore
+	id: bpy.props.StringProperty(name="ID", options=set()) # type: ignore
 
 class VRC_Physbone(STF_BlenderComponentBase):
-	ignores: bpy.props.CollectionProperty(type=PhysboneReference, name="Ignored Children") # type: ignore
-	colliders: bpy.props.CollectionProperty(type=PhysboneReference, name="Colliders") # type: ignore
-	values: bpy.props.StringProperty(name="Json Values") # type: ignore
+	ignores: bpy.props.CollectionProperty(type=PhysboneReference, name="Ignored Children", options=set()) # type: ignore
+	colliders: bpy.props.CollectionProperty(type=PhysboneReference, name="Colliders", options=set()) # type: ignore
+	values: bpy.props.StringProperty(name="Json Values", options=set()) # type: ignore
 
 
 class Edit_VRC_Physbone(bpy.types.Operator):
@@ -64,19 +64,18 @@ class Edit_VRC_Physbone(bpy.types.Operator):
 
 
 def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: VRC_Physbone):
-	box = layout.box()
-
+	box = layout.box().column(align=True)
 	row = box.row()
 	row.label(text="Colliders")
-	add_button = row.operator(Edit_VRC_Physbone.bl_idname, text="Add", icon="PLUS")
+	add_button = row.operator(Edit_VRC_Physbone.bl_idname, text="Add", icon="ADD")
 	add_button.blender_bone = type(component.id_data) == bpy.types.Armature
 	add_button.component_id = component.stf_id
 	add_button.op = "add"
 	add_button.property = "colliders"
-
+	box.separator(factor=1)
 	for index, collider in enumerate(component.colliders):
 		row = box.row(align=True)
-		row.use_property_split = True
+		#row.use_property_split = True
 		row.prop(collider, "id")
 		remove_button = row.operator(Edit_VRC_Physbone.bl_idname, text="", icon="X")
 		remove_button.blender_bone = type(component.id_data) == bpy.types.Armature
@@ -85,17 +84,18 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 		remove_button.index = index
 		remove_button.property = "colliders"
 
-	box = layout.box()
+	box = layout.box().column(align=True)
 	row = box.row()
 	row.label(text="Ignores")
-	add_button = row.operator(Edit_VRC_Physbone.bl_idname, text="Add", icon="PLUS")
+	add_button = row.operator(Edit_VRC_Physbone.bl_idname, text="Add", icon="ADD")
 	add_button.blender_bone = type(component.id_data) == bpy.types.Armature
 	add_button.component_id = component.stf_id
 	add_button.op = "add"
 	add_button.property = "ignores"
+	box.separator(factor=1)
 	for index, ignore in enumerate(component.ignores):
 		row = box.row(align=True)
-		row.use_property_split = True
+		#row.use_property_split = True
 		row.prop(ignore, "id")
 		remove_button = row.operator(Edit_VRC_Physbone.bl_idname, text="", icon="X")
 		remove_button.blender_bone = type(component.id_data) == bpy.types.Armature
@@ -104,7 +104,10 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 		remove_button.index = index
 		remove_button.property = "ignores"
 
-	layout.prop(component, "values")
+	layout.separator(factor=1)
+	col = layout.column(align=True)
+	col.label(text="Json Data:", icon="PASTEDOWN")
+	col.prop(component, "values", text="")
 
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:

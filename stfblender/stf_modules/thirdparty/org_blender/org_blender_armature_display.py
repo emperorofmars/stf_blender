@@ -66,7 +66,7 @@ register_stf_modules = [
 
 
 def register():
-	setattr(bpy.types.Armature, _blender_property_name, bpy.props.CollectionProperty(type=Blender_Armature_Display))
+	setattr(bpy.types.Armature, _blender_property_name, bpy.props.CollectionProperty(type=Blender_Armature_Display, options=set()))
 
 def unregister():
 	if hasattr(bpy.types.Armature, _blender_property_name):

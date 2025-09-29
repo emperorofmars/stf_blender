@@ -106,8 +106,8 @@ register_stf_modules = [
 
 
 def register():
-	setattr(bpy.types.Object, _blender_property_name, bpy.props.CollectionProperty(type=AVA_SecondaryMotion))
-	setattr(bpy.types.Bone, _blender_property_name, bpy.props.CollectionProperty(type=AVA_SecondaryMotion))
+	setattr(bpy.types.Object, _blender_property_name, bpy.props.CollectionProperty(type=AVA_SecondaryMotion, options=set()))
+	setattr(bpy.types.Bone, _blender_property_name, bpy.props.CollectionProperty(type=AVA_SecondaryMotion, options=set()))
 
 def unregister():
 	if hasattr(bpy.types.Object, _blender_property_name):

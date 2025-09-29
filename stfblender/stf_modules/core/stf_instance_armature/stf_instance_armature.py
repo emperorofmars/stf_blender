@@ -18,9 +18,9 @@ _stf_type = "stf.instance.armature"
 
 
 class STF_Instance_Armature(bpy.types.PropertyGroup):
-	stf_components: bpy.props.CollectionProperty(type=InstanceModComponentRef) # type: ignore
-	stf_active_component_index: bpy.props.IntProperty() # type: ignore
-	use_bone_component_overrides: bpy.props.BoolProperty(name="Enable Bone-Component Overrides", default=False) # type: ignore
+	stf_components: bpy.props.CollectionProperty(type=InstanceModComponentRef, options=set()) # type: ignore
+	stf_active_component_index: bpy.props.IntProperty(options=set()) # type: ignore
+	use_bone_component_overrides: bpy.props.BoolProperty(name="Enable Bone-Component Overrides", default=False, options=set()) # type: ignore
 
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:

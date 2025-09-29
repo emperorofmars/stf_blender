@@ -13,11 +13,11 @@ _blender_property_name = "stf_texture"
 
 class STF_Texture(STF_BlenderComponentBase):
 	"""Define information on how an image is to be uploaded to the GPU"""
-	width: bpy.props.IntProperty(name="Width", default=1024, min=1) # type: ignore
-	height: bpy.props.IntProperty(name="Height", default=1024, min=1) # type: ignore
-	downscale_priority: bpy.props.IntProperty(name="Downscale Priority", default=0, min=-1) # type: ignore
-	quality: bpy.props.FloatProperty(name="Quality", default=1, min=0, max=1) # type: ignore
-	mipmaps: bpy.props.BoolProperty(name="Mipmaps", default=True) # type: ignore
+	width: bpy.props.IntProperty(name="Width", default=1024, min=1, options=set()) # type: ignore
+	height: bpy.props.IntProperty(name="Height", default=1024, min=1, options=set()) # type: ignore
+	downscale_priority: bpy.props.IntProperty(name="Downscale Priority", default=0, min=-1, options=set()) # type: ignore
+	quality: bpy.props.FloatProperty(name="Quality", default=1, min=0, max=1, options=set()) # type: ignore
+	mipmaps: bpy.props.BoolProperty(name="Mipmaps", default=True, options=set()) # type: ignore
 	# TODO much more
 
 
@@ -75,7 +75,7 @@ register_stf_modules = [
 
 
 def register():
-	setattr(bpy.types.Image, _blender_property_name, bpy.props.CollectionProperty(type=STF_Texture))
+	setattr(bpy.types.Image, _blender_property_name, bpy.props.CollectionProperty(type=STF_Texture, options=set()))
 
 def unregister():
 	if hasattr(bpy.types.Image, _blender_property_name):

@@ -9,21 +9,21 @@ Components aren't natively supported by Blender, they are stored by the Blender-
 
 class STF_BlenderComponentOverride(bpy.types.PropertyGroup):
 	"""If this component is parsed by a game-engine, the target component should be ignored"""
-	target_id: bpy.props.StringProperty(name="Target ID") # type: ignore
+	target_id: bpy.props.StringProperty(name="Target ID", options=set()) # type: ignore
 
 class STF_Component_Ref(bpy.types.PropertyGroup): # Bringing polymorphism to Blender
 	"""Defines the ID, by which the correct component in the `blender_property_name` property of the appropriate Blender construct can be found"""
-	stf_type: bpy.props.StringProperty(name="Type") # type: ignore
-	stf_id: bpy.props.StringProperty(name="ID") # type: ignore
-	blender_property_name: bpy.props.StringProperty(name="Blender Property Name") # type: ignore
+	stf_type: bpy.props.StringProperty(name="Type", options=set()) # type: ignore
+	stf_id: bpy.props.StringProperty(name="ID", options=set()) # type: ignore
+	blender_property_name: bpy.props.StringProperty(name="Blender Property Name", options=set()) # type: ignore
 
 
 class STF_BlenderComponentBase(bpy.types.PropertyGroup):
 	"""Base class for stf component property-groups"""
-	stf_id: bpy.props.StringProperty(name="ID", description="Universally unique ID") # type: ignore
-	stf_name: bpy.props.StringProperty(name="STF Name", description="Optional component name") # type: ignore
-	overrides: bpy.props.CollectionProperty(type=STF_BlenderComponentOverride, name="Overrides", description="If this component is parsed by a game-engine, these components should be ignored") # type: ignore
-	enabled: bpy.props.BoolProperty(name="Enabled", default=True) # type: ignore
+	stf_id: bpy.props.StringProperty(name="ID", description="Universally unique ID", options=set()) # type: ignore
+	stf_name: bpy.props.StringProperty(name="STF Name", description="Optional component name", options=set()) # type: ignore
+	overrides: bpy.props.CollectionProperty(type=STF_BlenderComponentOverride, name="Overrides", description="If this component is parsed by a game-engine, these components should be ignored", options=set()) # type: ignore
+	enabled: bpy.props.BoolProperty(name="Enabled", default=True, options={"ANIMATABLE"}) # type: ignore
 
 
 class STF_BlenderComponentModule(STF_Module):

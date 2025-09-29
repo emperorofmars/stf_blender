@@ -12,10 +12,10 @@ _stf_type = stf_animation_type
 
 
 class STF_Animation(bpy.types.PropertyGroup):
-	exclude: bpy.props.BoolProperty(name="Exclude from STF export", default=False) # type: ignore
-	bake: bpy.props.BoolProperty(name="Bake Animation on Export", default=True) # type: ignore
-	fps_override: bpy.props.BoolProperty(name="FPS Override", default=False) # type: ignore
-	fps: bpy.props.FloatProperty(name="FPS", default=30) # type: ignore
+	exclude: bpy.props.BoolProperty(name="Exclude from STF export", default=False, options=set()) # type: ignore
+	bake: bpy.props.BoolProperty(name="Bake Animation on Export", default=True, options=set()) # type: ignore
+	fps_override: bpy.props.BoolProperty(name="FPS Override", default=False, options=set()) # type: ignore
+	fps: bpy.props.FloatProperty(name="FPS", default=30, options=set()) # type: ignore
 
 
 
@@ -36,7 +36,7 @@ register_stf_modules = [
 
 def register():
 	boilerplate_register(bpy.types.Action, "data")
-	bpy.types.Action.stf_animation = bpy.props.PointerProperty(type=STF_Animation)
+	bpy.types.Action.stf_animation = bpy.props.PointerProperty(type=STF_Animation, options=set())
 
 def unregister():
 	if hasattr(bpy.types.Action, "stf_animation"):

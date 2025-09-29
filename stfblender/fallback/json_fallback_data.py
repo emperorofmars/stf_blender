@@ -41,7 +41,7 @@ register_stf_modules = [
 
 
 def register():
-	setattr(bpy.types.Collection, _blender_property_name, bpy.props.CollectionProperty(type=JsonFallbackData))
+	setattr(bpy.types.Collection, _blender_property_name, bpy.props.CollectionProperty(type=JsonFallbackData, options=set()))
 
 def unregister():
 	if hasattr(bpy.types.Collection, _blender_property_name):

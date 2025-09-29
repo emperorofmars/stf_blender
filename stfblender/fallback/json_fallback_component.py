@@ -11,14 +11,14 @@ _blender_property_name = "stf_json_fallback_component"
 
 
 class JsonFallbackComponent(STF_BlenderComponentBase):
-	stf_type: bpy.props.StringProperty(name="STF Type") # type: ignore
-	json: bpy.props.StringProperty(name="Raw Json") # type: ignore
+	stf_type: bpy.props.StringProperty(name="STF Type", options=set()) # type: ignore
+	json: bpy.props.StringProperty(name="Raw Json", options=set()) # type: ignore
 	#referenced_resources:
 	#referenced_buffers:
 
 
 def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: JsonFallbackComponent):
-	layout.prop(component, "json")
+	layout.prop(component, "json", options=set())
 	#layout.prop(component, "referenced_resources")
 	#layout.prop(component, "referenced_buffers")
 

@@ -64,6 +64,7 @@ class AVA_Collider_Capsule_LoadJsonOperator(ComponentLoadJsonOperatorBase, bpy.t
 
 
 def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: AVA_Collider_Capsule):
+	layout.use_property_split = True
 	layout.prop(component, "radius")
 	layout.prop(component, "height")
 	layout.prop(component, "offset_position")

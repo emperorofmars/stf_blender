@@ -67,19 +67,19 @@ class Edit_VRM_Blendshape_Pose_Value(bpy.types.Operator):
 
 
 class VRM_Blendshape_Pose_Value(bpy.types.PropertyGroup):
-	blendshape_name: bpy.props.StringProperty(name="Name") # type: ignore
-	blendshape_value: bpy.props.FloatProperty(name="Value", default=0, soft_min=0, soft_max=1, subtype="FACTOR") # type: ignore
+	blendshape_name: bpy.props.StringProperty(name="Name", options=set()) # type: ignore
+	blendshape_value: bpy.props.FloatProperty(name="Value", default=0, soft_min=0, soft_max=1, subtype="FACTOR", options=set()) # type: ignore
 
 class VRM_Blendshape_Pose_Target(bpy.types.PropertyGroup):
-	mesh_instance: bpy.props.PointerProperty(type=bpy.types.Object, name="Meshinstance", poll=lambda _, o: o.data and type(o.data) == bpy.types.Mesh) # type: ignore
-	values: bpy.props.CollectionProperty(type=VRM_Blendshape_Pose_Value) # type: ignore
+	mesh_instance: bpy.props.PointerProperty(type=bpy.types.Object, name="Meshinstance", poll=lambda _, o: o.data and type(o.data) == bpy.types.Mesh, options=set()) # type: ignore
+	values: bpy.props.CollectionProperty(type=VRM_Blendshape_Pose_Value, options=set()) # type: ignore
 
 class VRM_Blendshape_Pose(STF_BlenderDataResourceBase):
-	targets: bpy.props.CollectionProperty(type=VRM_Blendshape_Pose_Target) # type: ignore
+	targets: bpy.props.CollectionProperty(type=VRM_Blendshape_Pose_Target, options=set()) # type: ignore
 
 
 def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Data_Ref, context_object: bpy.types.Collection, resource: VRM_Blendshape_Pose):
-	add_button = layout.operator(Edit_VRM_Blendshape_Pose_Target.bl_idname, text="Add Target")
+	add_button = layout.operator(Edit_VRM_Blendshape_Pose_Target.bl_idname, text="Add Target", icon="ADD")
 	add_button.use_scene_collection = context_object == context.scene.collection
 	add_button.resource_id = resource.stf_id
 	add_button.op = True
@@ -97,7 +97,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 		row = box.row()
 		row.label(text="Blendshapes")
 		if(target.mesh_instance and type(target.mesh_instance.data) == bpy.types.Mesh):
-			add_value_button = row.operator(Edit_VRM_Blendshape_Pose_Value.bl_idname, icon="PLUS", text="Add Value")
+			add_value_button = row.operator(Edit_VRM_Blendshape_Pose_Value.bl_idname, icon="ADD", text="Add Value")
 			add_value_button.use_scene_collection = context_object == context.scene.collection
 			add_value_button.resource_id = resource.stf_id
 			add_value_button.op = True
@@ -182,7 +182,7 @@ register_stf_modules = [
 
 
 def register():
-	setattr(bpy.types.Collection, _blender_property_name, bpy.props.CollectionProperty(type=VRM_Blendshape_Pose))
+	setattr(bpy.types.Collection, _blender_property_name, bpy.props.CollectionProperty(type=VRM_Blendshape_Pose, options=set()))
 
 def unregister():
 	if hasattr(bpy.types.Collection, _blender_property_name):

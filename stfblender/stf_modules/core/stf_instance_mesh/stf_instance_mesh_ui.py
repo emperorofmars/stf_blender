@@ -83,18 +83,18 @@ class STFMeshInstancePanel(bpy.types.Panel):
 		self.layout.separator(factor=2, type="LINE")
 
 		# Materials per Instance
-		self.layout.prop(context.object.stf_instance_mesh, "override_materials")
+		self.layout.prop(context.object.stf_instance_mesh, "override_materials", text="Use Instance Materials")
 		if(context.object.stf_instance_mesh.override_materials):
-			self.layout.operator(SetInstanceMaterials.bl_idname)
+			self.layout.operator(SetInstanceMaterials.bl_idname, text="Update Materials", icon="LOOP_FORWARDS")
 
 			self.layout.template_list(STFDrawMeshInstanceMaterialList.bl_idname, "", context.object.stf_instance_mesh, "materials", context.object.stf_instance_mesh, "active_material")
 
 		self.layout.separator(factor=2, type="LINE")
 
 		# Blendshape Values per Instance
-		self.layout.prop(context.object.stf_instance_mesh, "override_blendshape_values")
+		self.layout.prop(context.object.stf_instance_mesh, "override_blendshape_values", text="Use Instance Shape Keys")
 		if(context.object.stf_instance_mesh.override_blendshape_values):
-			self.layout.operator(SetInstanceBlendshapes.bl_idname)
+			self.layout.operator(SetInstanceBlendshapes.bl_idname, text="Update Shape Keys", icon="LOOP_FORWARDS")
 
 			self.layout.template_list(STFDrawMeshInstanceBlendshapeList.bl_idname, "", context.object.stf_instance_mesh, "blendshape_values", context.object.stf_instance_mesh, "active_blendshape")
 

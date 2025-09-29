@@ -14,21 +14,21 @@ _voice_visemes_15 = ["sil", "aa", "ch", "dd", "e", "ff", "ih", "kk", "nn", "oh",
 _voice_visemes_15_prefixes = ["", "vis.", "vis_", "vis ", "vrc.", "vrc_", "vrc "]
 
 class AVA_Visemes_Blendshape(STF_BlenderComponentBase):
-	vis_sil: bpy.props.StringProperty(name="Sil") # type: ignore
-	vis_pp: bpy.props.StringProperty(name="PP") # type: ignore
-	vis_ff: bpy.props.StringProperty(name="FF") # type: ignore
-	vis_th: bpy.props.StringProperty(name="TH") # type: ignore
-	vis_dd: bpy.props.StringProperty(name="DD") # type: ignore
-	vis_kk: bpy.props.StringProperty(name="KK") # type: ignore
-	vis_ch: bpy.props.StringProperty(name="CH") # type: ignore
-	vis_ss: bpy.props.StringProperty(name="SS") # type: ignore
-	vis_nn: bpy.props.StringProperty(name="NN") # type: ignore
-	vis_rr: bpy.props.StringProperty(name="RR") # type: ignore
-	vis_aa: bpy.props.StringProperty(name="AA") # type: ignore
-	vis_e: bpy.props.StringProperty(name="E") # type: ignore
-	vis_ih: bpy.props.StringProperty(name="IH") # type: ignore
-	vis_oh: bpy.props.StringProperty(name="OH") # type: ignore
-	vis_ou: bpy.props.StringProperty(name="OU") # type: ignore
+	vis_sil: bpy.props.StringProperty(name="Sil", options=set()) # type: ignore
+	vis_pp: bpy.props.StringProperty(name="PP", options=set()) # type: ignore
+	vis_ff: bpy.props.StringProperty(name="FF", options=set()) # type: ignore
+	vis_th: bpy.props.StringProperty(name="TH", options=set()) # type: ignore
+	vis_dd: bpy.props.StringProperty(name="DD", options=set()) # type: ignore
+	vis_kk: bpy.props.StringProperty(name="KK", options=set()) # type: ignore
+	vis_ch: bpy.props.StringProperty(name="CH", options=set()) # type: ignore
+	vis_ss: bpy.props.StringProperty(name="SS", options=set()) # type: ignore
+	vis_nn: bpy.props.StringProperty(name="NN", options=set()) # type: ignore
+	vis_rr: bpy.props.StringProperty(name="RR", options=set()) # type: ignore
+	vis_aa: bpy.props.StringProperty(name="AA", options=set()) # type: ignore
+	vis_e: bpy.props.StringProperty(name="E", options=set()) # type: ignore
+	vis_ih: bpy.props.StringProperty(name="IH", options=set()) # type: ignore
+	vis_oh: bpy.props.StringProperty(name="OH", options=set()) # type: ignore
+	vis_ou: bpy.props.StringProperty(name="OU", options=set()) # type: ignore
 
 
 class AutomapVisemes(bpy.types.Operator):
@@ -62,7 +62,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 		return
 
 	layout.use_property_split = True
-	layout.operator(AutomapVisemes.bl_idname).component_id = component.stf_id
+	layout.operator(AutomapVisemes.bl_idname, icon="LOOP_FORWARDS").component_id = component.stf_id
 
 	col = layout.column(align=True)
 	col.prop_search(component, "vis_sil", context_object.shape_keys, "key_blocks")
@@ -125,7 +125,7 @@ register_stf_modules = [
 
 
 def register():
-	setattr(bpy.types.Mesh, _blender_property_name, bpy.props.CollectionProperty(type=AVA_Visemes_Blendshape))
+	setattr(bpy.types.Mesh, _blender_property_name, bpy.props.CollectionProperty(type=AVA_Visemes_Blendshape, options=set()))
 
 def unregister():
 	if hasattr(bpy.types.Mesh, _blender_property_name):

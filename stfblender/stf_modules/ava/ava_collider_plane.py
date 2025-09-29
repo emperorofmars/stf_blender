@@ -58,6 +58,7 @@ class AVA_Collider_Plane_LoadJsonOperator(ComponentLoadJsonOperatorBase, bpy.typ
 
 
 def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: AVA_Collider_Plane):
+	layout.use_property_split = True
 	layout.prop(component, "offset_position")
 	layout.prop(component, "offset_rotation")
 	

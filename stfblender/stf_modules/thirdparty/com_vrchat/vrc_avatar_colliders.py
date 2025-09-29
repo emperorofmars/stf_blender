@@ -13,11 +13,13 @@ _blender_property_name = "com_vrchat_avatar_colliders"
 
 
 class VRC_AvatarColliders(STF_BlenderComponentBase):
-	data: bpy.props.StringProperty(name="Data") # type: ignore
+	data: bpy.props.StringProperty(name="Data", options=set()) # type: ignore
 
 
 def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: VRC_AvatarColliders):
-	layout.prop(component, "data")
+	col = layout.column(align=True)
+	col.label(text="Json Data:", icon="PASTEDOWN")
+	col.prop(component, "data", text="")
 
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, context_object: any) -> any:

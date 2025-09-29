@@ -1,6 +1,7 @@
 import bpy
 
 from ...base.stf_module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
+from ...base.stf_module_data import STF_BlenderDataResourceBase
 from ...exporter.stf_export_context import STF_ExportContext
 from ...importer.stf_import_context import STF_ImportContext
 from ...utils.component_utils import add_component, export_component_base, import_component_base
@@ -50,6 +51,7 @@ class STF_Module_STF_Data_Resource_Component_Test(STF_BlenderComponentModule):
 	blender_property_name = _blender_property_name
 	single = False
 	draw_component_func = _draw_component
+	filter_all_data_modules = True
 
 
 register_stf_modules = [

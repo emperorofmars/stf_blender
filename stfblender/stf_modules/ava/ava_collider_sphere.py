@@ -52,6 +52,7 @@ class AVA_Collider_Sphere_LoadJsonOperator(ComponentLoadJsonOperatorBase, bpy.ty
 
 
 def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: AVA_Collider_Sphere):
+	layout.use_property_split = True
 	layout.prop(component, "radius")
 	layout.prop(component, "offset_position")
 	

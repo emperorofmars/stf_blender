@@ -249,7 +249,7 @@ class ComponentLoadJsonOperatorBase():
 
 
 def register():
-	bpy.types.Scene.workaround_for_blenders_datamodel__component_overrides = bpy.props.CollectionProperty(type=STF_BlenderComponentOverride) # type: ignore
+	bpy.types.Scene.workaround_for_blenders_datamodel__component_overrides = bpy.props.CollectionProperty(type=STF_BlenderComponentOverride, options=set()) # type: ignore
 
 def unregister():
 	if hasattr(bpy.types.Scene, "workaround_for_blenders_datamodel__component_overrides"):

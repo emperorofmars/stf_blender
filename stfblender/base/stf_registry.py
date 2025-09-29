@@ -2,7 +2,7 @@ import bpy
 
 from .stf_module import STF_Module
 from .stf_module_component import STF_BlenderComponentModule, STF_ExportComponentHook
-from .stf_module_data import STF_BlenderDataModule
+from .stf_module_data import STF_BlenderDataModule, STF_BlenderDataResourceBase
 
 """
 Util to retrieve all existing STF-modules
@@ -74,6 +74,11 @@ def get_component_modules(filter = None) -> list[STF_BlenderComponentModule]:
 		if(hasattr(stf_module, "blender_property_name") and getattr(stf_module, "stf_kind") == "component"):
 			if(hasattr(stf_module, "filter") and filter):
 				if(filter in getattr(stf_module, "filter")):
+					ret.append(stf_module)
+				else:
+					continue
+			elif(hasattr(stf_module, "filter_all_data_modules")):
+				if(getattr(stf_module, "filter_all_data_modules") and filter is STF_BlenderDataResourceBase):
 					ret.append(stf_module)
 				else:
 					continue
