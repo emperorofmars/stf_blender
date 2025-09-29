@@ -78,7 +78,7 @@ def get_component_modules(filter = None) -> list[STF_BlenderComponentModule]:
 				else:
 					continue
 			elif(hasattr(stf_module, "filter_all_data_modules")):
-				if(getattr(stf_module, "filter_all_data_modules") and filter is STF_BlenderDataResourceBase):
+				if(getattr(stf_module, "filter_all_data_modules") and stf_module.stf_kind == "data"):
 					ret.append(stf_module)
 				else:
 					continue
