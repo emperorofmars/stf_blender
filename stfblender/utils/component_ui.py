@@ -1,7 +1,7 @@
 import bpy
 
 from ..base.stf_module_component import STF_Component_Ref
-from ..base.stf_registry import get_component_modules
+from ..base.stf_registry import get_all_component_modules, get_component_modules, get_data_component_modules
 from .component_utils import find_component_module
 from .misc import CopyToClipboard
 from .draw_multiline_text import draw_multiline_text
@@ -55,7 +55,7 @@ def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, compo
 	row.prop(component, "stf_name")
 	box.separator(factor=1, type="LINE")
 
-	stf_modules = get_component_modules()
+	stf_modules = get_all_component_modules()
 	selected_module = None
 	for stf_module in stf_modules:
 		if(stf_module.stf_type == component_ref.stf_type):
@@ -89,7 +89,7 @@ def draw_components_ui(
 		inject_ui: any = None,
 		is_data_resource_component: bool = False
 		):
-	stf_modules = get_component_modules()
+	stf_modules = get_data_component_modules() if is_data_resource_component else get_component_modules()
 
 	available_component_modules = context.scene.stf_data_resource_component_modules if is_data_resource_component else context.scene.stf_component_modules
 
@@ -180,7 +180,7 @@ def _build_stf_component_types_enum_callback(self, context) -> list:
 	return [((stf_module.stf_type, stf_module.stf_type, stf_module.__doc__ if stf_module.__doc__ else "")) for stf_module in get_component_modules(stf_component_filter)]
 
 def _build_stf_data_resource_component_types_enum_callback(self, context) -> list:
-	return [((stf_module.stf_type, stf_module.stf_type, stf_module.__doc__ if stf_module.__doc__ else "")) for stf_module in get_component_modules(stf_data_resource_component_filter)]
+	return [((stf_module.stf_type, stf_module.stf_type, stf_module.__doc__ if stf_module.__doc__ else "")) for stf_module in get_data_component_modules(stf_data_resource_component_filter)]
 
 def register():
 	bpy.types.Scene.stf_component_modules = bpy.props.EnumProperty(

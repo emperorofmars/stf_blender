@@ -13,10 +13,8 @@ _stf_type = stf_animation_type
 
 class STF_Animation(bpy.types.PropertyGroup):
 	exclude: bpy.props.BoolProperty(name="Exclude from STF export", default=False, options=set()) # type: ignore
-	bake: bpy.props.BoolProperty(name="Bake Animation on Export", default=True, options=set()) # type: ignore
 	fps_override: bpy.props.BoolProperty(name="FPS Override", default=False, options=set()) # type: ignore
 	fps: bpy.props.FloatProperty(name="FPS", default=30, options=set()) # type: ignore
-
 
 
 class STF_Module_STF_Animation(STF_Module):

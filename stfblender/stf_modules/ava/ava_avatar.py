@@ -12,10 +12,15 @@ _stf_type = "ava.avatar"
 _blender_property_name = "stf_ava_avatar"
 
 
+def _poll_armature_instance(self, blender_object: bpy.types.Object) -> bool:
+	return blender_object.data and type(blender_object.data) == bpy.types.Armature
+def _poll_mesh_instance(self, blender_object: bpy.types.Object) -> bool:
+	return blender_object.data and type(blender_object.data) == bpy.types.Armature
+
 class AVA_Avatar(STF_BlenderComponentBase):
-	viewport: bpy.props.PointerProperty(type=bpy.types.Object, name="Viewport", options=set()) # type: ignore
-	primary_armature_instance: bpy.props.PointerProperty(type=bpy.types.Object, name="Primary Armature Instance", options=set()) # type: ignore
-	primary_mesh_instance: bpy.props.PointerProperty(type=bpy.types.Object, name="Primary Mesh Instance", options=set()) # type: ignore
+	viewport: bpy.props.PointerProperty(type=bpy.types.Object, name="Viewport", description="This Object's location will be used to determine the viewport location", options=set()) # type: ignore
+	primary_armature_instance: bpy.props.PointerProperty(type=bpy.types.Object, name="Main Armature Instance", description="Armature instance for humanoid IK, eye-rotations, ...", options=set(), poll=_poll_armature_instance) # type: ignore
+	primary_mesh_instance: bpy.props.PointerProperty(type=bpy.types.Object, name="Main Mesh Instance", description="Mesh instance for facial visemes", options=set(), poll=_poll_mesh_instance) # type: ignore
 
 
 class CreateViewportObjectOperator(bpy.types.Operator):
@@ -56,13 +61,13 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 		create_viewport_button.blender_collection = parent_application_object.name
 		create_viewport_button.component_id = component.stf_id
 
-	layout.prop(component, "primary_armature_instance")
+	layout.prop(component, "primary_armature_instance", icon="ARMATURE_DATA")
 	if(component.primary_armature_instance and (not component.primary_armature_instance.data or type(component.primary_armature_instance.data) != bpy.types.Armature)):
-		layout.label(text="Warning! The Object isn't an Armature!")
+		layout.label(text="Warning! The Object doesn't instantiate an Armature!")
 
-	layout.prop(component, "primary_mesh_instance")
+	layout.prop(component, "primary_mesh_instance", icon="MESH_DATA")
 	if(component.primary_mesh_instance and (not component.primary_mesh_instance.data or type(component.primary_mesh_instance.data) != bpy.types.Mesh)):
-		layout.label(text="Warning! The Object isn't an Mesh!")
+		layout.label(text="Warning! The Object doesn't instantiate a Mesh!")
 
 
 
@@ -110,7 +115,7 @@ def _stf_export(context: STF_ExportContext, component: AVA_Avatar, parent_applic
 
 
 class STF_Module_AVA_Avatar(STF_BlenderComponentModule):
-	"""Represents a VR or V-tubing avatar model"""
+	"""Represents a VR & V-tubing avatar model"""
 	stf_type = _stf_type
 	stf_kind = "component"
 	understood_application_types = [AVA_Avatar]

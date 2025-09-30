@@ -58,10 +58,6 @@ class STFAnimationSpatialPanel(bpy.types.Panel):
 		draw_stf_id_ui(self.layout, context, context.active_action, context.active_action.stf_info, STFSetAnimationIDOperator.bl_idname)
 
 		self.layout.separator(factor=2, type="LINE")
-		
-		self.layout.prop(context.active_action.stf_animation, "bake")
-
-		self.layout.separator(factor=2, type="LINE")
 
 		# Components
 		self.layout.separator(factor=1, type="SPACE")

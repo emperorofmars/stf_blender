@@ -36,7 +36,6 @@ def stf_animation_export(context: STF_ExportContext, application_object: any, co
 		"name": blender_animation.stf_info.stf_name if blender_animation.stf_info.stf_name_source_of_truth else blender_animation.name,
 		"loop": "cycle" if blender_animation.use_cyclic else "none", # todo create ui for this setting
 		"fps": bpy.context.scene.render.fps if not blender_animation.stf_animation.fps_override else blender_animation.animation.stf_fps,
-		"bake_on_export": blender_animation.stf_animation.bake
 	}
 	if(blender_animation.use_frame_range):
 		ret["range"] = [blender_animation.frame_start, blender_animation.frame_end]
@@ -118,27 +117,26 @@ def __serialize_subtracks(context: STF_ExportContext, blender_animation: bpy.typ
 	for _, fcurve in fcurves.items():
 		ret[index_conversion[fcurve.array_index]] = {"keyframes": []}
 
-	# Bake values if desired
-	if(blender_animation.stf_animation.bake):
-		baked_values: list[BytesIO | None] = [None] * len(index_conversion)
-		# Create buffer for each subtrack
-		for _, fcurve in fcurves.items():
-			baked_values[index_conversion[fcurve.array_index]] = BytesIO()
+	# Bake values
+	baked_values: list[BytesIO | None] = [None] * len(index_conversion)
+	# Create buffer for each subtrack
+	for _, fcurve in fcurves.items():
+		baked_values[index_conversion[fcurve.array_index]] = BytesIO()
 
-		for timepoint in range(int(animation_range[0]), int(animation_range[1] + 1)):
-			value_convert = [None] * len(index_conversion)
-			# Get evaluated value from each subtrack
-			for _, fcurve in fcurves.items():
-				value_convert[fcurve.array_index] = fcurve.evaluate(timepoint)
-			# Convert value
-			value_convert = conversion_func(value_convert) if conversion_func else value_convert
-			# Write buffers
-			for _, fcurve in fcurves.items():
-				baked_values[index_conversion[fcurve.array_index]].write(serialize_float(value_convert[index_conversion[fcurve.array_index]], 4))
-		# Serialize buffers for each subtrack
+	for timepoint in range(int(animation_range[0]), int(animation_range[1] + 1)):
+		value_convert = [None] * len(index_conversion)
+		# Get evaluated value from each subtrack
 		for _, fcurve in fcurves.items():
-			if(ret[index_conversion[fcurve.array_index]]):
-				ret[index_conversion[fcurve.array_index]]["baked"] = context.serialize_buffer(baked_values[index_conversion[fcurve.array_index]].getbuffer())
+			value_convert[fcurve.array_index] = fcurve.evaluate(timepoint)
+		# Convert value
+		value_convert = conversion_func(value_convert) if conversion_func else value_convert
+		# Write buffers
+		for _, fcurve in fcurves.items():
+			baked_values[index_conversion[fcurve.array_index]].write(serialize_float(value_convert[index_conversion[fcurve.array_index]], 4))
+	# Serialize buffers for each subtrack
+	for _, fcurve in fcurves.items():
+		if(ret[index_conversion[fcurve.array_index]]):
+			ret[index_conversion[fcurve.array_index]]["baked"] = context.serialize_buffer(baked_values[index_conversion[fcurve.array_index]].getbuffer())
 
 	# Convert keyframes
 	keyframe_indices: list[int] = [0] * len(index_conversion)

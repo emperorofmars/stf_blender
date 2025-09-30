@@ -19,7 +19,14 @@ class VRC_AvatarColliders(STF_BlenderComponentBase):
 def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: VRC_AvatarColliders):
 	col = layout.column(align=True)
 	col.label(text="Json Data:", icon="PASTEDOWN")
-	col.prop(component, "data", text="")
+
+	json_error = False
+	try:
+		json.loads(component.data)
+	except:
+		json_error = True
+	col.alert = json_error
+	col.prop(component, "data", text="", icon="ERROR" if json_error else "NONE")
 
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, context_object: any) -> any:

@@ -84,7 +84,6 @@ class BlenderResourceReference(bpy.types.PropertyGroup):
 	workspace: bpy.props.PointerProperty(type=bpy.types.WorkSpace, name="Workspace") # type: ignore
 	world: bpy.props.PointerProperty(type=bpy.types.World, name="World") # type: ignore
 
-
 def draw_blender_resource_reference(layout: bpy.types.UILayout, brr: BlenderResourceReference):
 	layout.prop(brr, "blender_type")
 	if(brr.blender_type and hasattr(brr, brr.blender_type.lower())):

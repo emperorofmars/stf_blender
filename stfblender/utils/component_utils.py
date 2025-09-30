@@ -1,3 +1,4 @@
+import json
 import bpy
 
 from ..base.stf_module_component import STF_BlenderComponentModule, STF_Component_Ref, STF_BlenderComponentOverride
@@ -245,7 +246,14 @@ class ComponentLoadJsonOperatorBase():
 		layout: bpy.types.UILayout = self.layout
 		layout.label(text="Paste json setup string.")
 		layout.label(text="(This will overwrite your current values)")
-		layout.prop(self, "json_string", text="")
+
+		json_error = False
+		try:
+			json.loads(self.json_string)
+		except:
+			json_error = True
+		layout.alert = json_error
+		layout.prop(self, "json_string", text="", icon="ERROR" if json_error else "NONE")
 
 
 def register():

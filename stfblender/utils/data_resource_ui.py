@@ -88,7 +88,6 @@ def draw_resource(layout: bpy.types.UILayout, context: bpy.types.Context, resour
 
 		# Components
 		set_stf_data_resource_component_filter(type(resource))
-		print(type(resource))
 		set_stf_data_resource_property(collection == context.scene.collection, resource_ref.blender_property_name, resource_ref.stf_id)
 		layout.separator(factor=1, type="SPACE")
 		header, body = layout.panel(resource_ref.stf_type + "_components", default_closed = False)

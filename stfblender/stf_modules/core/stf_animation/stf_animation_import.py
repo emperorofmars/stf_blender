@@ -9,13 +9,6 @@ from ....base.stf_report import STFReportSeverity, STFReport
 _stf_type = stf_animation_type
 
 
-class STF_Animation(bpy.types.PropertyGroup):
-	exclude: bpy.props.BoolProperty(name="Exclude from STF export", default=False) # type: ignore
-	bake: bpy.props.BoolProperty(name="Bake Animation on Export", default=True) # type: ignore
-	fps_override: bpy.props.BoolProperty(name="FPS Override", default=False) # type: ignore
-	fps: bpy.props.FloatProperty(name="FPS", default=30) # type: ignore
-
-
 def stf_animation_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
 	if(not hasattr(bpy.types.Action, "slot_links")):
 		context.report(STFReport("Slot-Link is required to import animations!", STFReportSeverity.Warn, stf_id, _stf_type))
@@ -38,8 +31,6 @@ def stf_animation_import(context: STF_ImportContext, json_resource: dict, stf_id
 		blender_animation.use_frame_range = True
 		blender_animation.frame_start = json_resource["range"][0]
 		blender_animation.frame_end = json_resource["range"][1]
-
-	blender_animation.stf_animation.bake = json_resource.get("bake_on_export", True)
 
 	# All of this is a mess
 

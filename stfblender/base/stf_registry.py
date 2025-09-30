@@ -68,7 +68,31 @@ def get_export_modules() -> tuple[dict[any, list[STF_Module]], dict[any, list[ST
 	return (ret_modules, ret_hooks)
 
 
+def get_all_component_modules() -> list[STF_BlenderComponentModule]:
+	ret = []
+	for stf_module in get_stf_modules():
+		if(hasattr(stf_module, "blender_property_name") and getattr(stf_module, "stf_kind") == "component"):
+			ret.append(stf_module)
+	return ret
+
+
 def get_component_modules(filter = None) -> list[STF_BlenderComponentModule]:
+	ret = []
+	for stf_module in get_stf_modules():
+		if(hasattr(stf_module, "blender_property_name") and getattr(stf_module, "stf_kind") == "component"):
+			if(hasattr(stf_module, "filter_all_data_modules") and getattr(stf_module, "filter_all_data_modules")):
+				continue
+			elif(hasattr(stf_module, "filter") and filter):
+				if(filter in getattr(stf_module, "filter")):
+					ret.append(stf_module)
+				else:
+					continue
+			else:
+				ret.append(stf_module)
+	return ret
+
+
+def get_data_component_modules(filter = None) -> list[STF_BlenderComponentModule]:
 	ret = []
 	for stf_module in get_stf_modules():
 		if(hasattr(stf_module, "blender_property_name") and getattr(stf_module, "stf_kind") == "component"):
@@ -78,7 +102,7 @@ def get_component_modules(filter = None) -> list[STF_BlenderComponentModule]:
 				else:
 					continue
 			elif(hasattr(stf_module, "filter_all_data_modules")):
-				if(getattr(stf_module, "filter_all_data_modules") and stf_module.stf_kind == "data"):
+				if(getattr(stf_module, "filter_all_data_modules")):
 					ret.append(stf_module)
 				else:
 					continue
