@@ -32,6 +32,8 @@ class AVA_Autosetup_Operator(bpy.types.Operator):
 			return {"CANCELLED"}
 
 
+# Hide in release until its more complete.
+
 class AVA_Autosetup_Panel(bpy.types.Panel):
 	bl_idname = "OBJECT_PT_ava_autosetup"
 	bl_label = "STF-AVA Autosetup"
