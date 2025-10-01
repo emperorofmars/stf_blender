@@ -1,7 +1,7 @@
 import json
 import bpy
 
-from ..base.stf_module_component import STF_BlenderComponentModule, STF_Component_Ref, STF_BlenderComponentOverride
+from ..base.stf_module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref, STF_BlenderComponentOverride
 from ..base.stf_module_data import STF_BlenderDataResourceBase
 from ..utils.id_utils import ensure_stf_id
 
@@ -12,7 +12,7 @@ def find_component_module(stf_modules: list[STF_BlenderComponentModule], stf_typ
 			return stf_module
 
 
-def add_component(context_object: any, blender_property_name: str, stf_id: str, stf_type: str, components_ref_property: any = None) -> tuple[STF_Component_Ref, any]:
+def add_component(context_object: any, blender_property_name: str, stf_id: str, stf_type: str, components_ref_property: any = None) -> tuple[STF_Component_Ref, STF_BlenderComponentBase]:
 	if(components_ref_property is None):
 		if(isinstance(context_object, STF_BlenderDataResourceBase)): # jank, but works
 			components_ref_property = context_object.stf_components
@@ -68,12 +68,12 @@ class STFRemoveComponentOperatorBase:
 
 		if(hasattr(target, self.property_name)):
 			component_type_list = getattr(target, self.property_name)
-			target_component_index = None
-			for index, component in enumerate(component_type_list):
+			for target_component_index, component in enumerate(component_type_list):
 				if(component.stf_id == component_ref.stf_id):
-					target_component_index = index
+					component_type_list.remove(target_component_index)
 					break
-			component_type_list.remove(target_component_index)
+			else:
+				self.report({"INFO"}, "No component was referenced")
 
 		self.get_components_ref_property(context).remove(self.index)
 		return {"FINISHED"}
