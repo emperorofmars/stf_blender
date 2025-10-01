@@ -83,11 +83,13 @@ def stf_animation_export(context: STF_ExportContext, application_object: any, co
 										if(fcurve):
 											index_conversion.append(fcurve.array_index)
 
-								sub_tracks = __serialize_subtracks(context, blender_animation, fcurves, ret["range"], index_conversion, conversion_func)
+								interpolation, timepoints, sub_tracks = __serialize_subtracks(context, blender_animation, fcurves, ret["range"], index_conversion, conversion_func)
 
 								stf_tracks.append({
 									"target": target,
-									"subtracks": sub_tracks
+									"timepoints": timepoints,
+									"subtracks": sub_tracks,
+									"interpolation": interpolation,
 								})
 							else:
 								context.report(STFReport("Invalid FCurve data_path: " + fcurve.data_path, STFReportSeverity.Debug, None, _stf_type, blender_animation))
@@ -103,7 +105,7 @@ def stf_animation_export(context: STF_ExportContext, application_object: any, co
 		return ret, blender_animation.stf_info.stf_id
 
 
-def __serialize_subtracks(context: STF_ExportContext, blender_animation: bpy.types.Action, fcurves: dict[int, bpy.types.FCurve], animation_range: list[float], index_conversion: list[int], conversion_func: Callable[[list[float]], list[float]] = None) -> list:
+def __serialize_subtracks(context: STF_ExportContext, blender_animation: bpy.types.Action, fcurves: dict[int, bpy.types.FCurve], animation_range: list[float], index_conversion: list[int], conversion_func: Callable[[list[float]], list[float]] = None) -> tuple[str, list, list]:
 	real_timepoints_set: set[float] = set()
 	# for each subtrack (i.e. the x,y,z components of a location), determine at wich times have a keyframe at any of these subtracks
 	for _, fcurve in fcurves.items():
@@ -116,6 +118,8 @@ def __serialize_subtracks(context: STF_ExportContext, blender_animation: bpy.typ
 	ret: list[dict | None] = [None] * len(index_conversion)
 	for _, fcurve in fcurves.items():
 		ret[index_conversion[fcurve.array_index]] = {"keyframes": []}
+
+	interpolation: str = None
 
 	# Bake values
 	baked_values: list[BytesIO | None] = [None] * len(index_conversion)
@@ -170,11 +174,13 @@ def __serialize_subtracks(context: STF_ExportContext, blender_animation: bpy.typ
 				prev_keyframe = fcurve.keyframe_points[keyframe_indices[fcurve.array_index] - 1] if keyframe_indices[fcurve.array_index] > 0 else None
 				next_keyframe = fcurve.keyframe_points[keyframe_indices[fcurve.array_index] + 1] if keyframe_indices[fcurve.array_index] + 1 < len(fcurve.keyframe_points) else None
 
-				value = value_convert[index_conversion[fcurve.array_index]]
+				if(not interpolation):
+					interpolation = keyframe.interpolation
+				elif(keyframe.interpolation != interpolation):
+					interpolation = "mixed"
 
 				stf_keyframe = [
 					True, # is source of truth, false because it's baked
-					keyframe.co.x, # frame number
 					value_convert[index_conversion[fcurve.array_index]], #value
 				]
 
@@ -221,6 +227,14 @@ def __serialize_subtracks(context: STF_ExportContext, blender_animation: bpy.typ
 					value_convert[index_conversion[fcurve.array_index]], #value
 				]) # don't add the left tangent at all, since this is not a real keyframe
 
-	return ret
+	match(interpolation):
+		case "mixed": interpolation = "mixed"
+		case "BEZIER": interpolation = "bezier"
+		case "CONSTANT": interpolation = "constant"
+		case "LINEAR": interpolation = "linear"
+		case "QUAD": interpolation = "quadratic"
+		case "CUBIC": interpolation = "cubic"
+		case _: interpolation = "unknown"
 
+	return interpolation, real_timepoints, ret
 

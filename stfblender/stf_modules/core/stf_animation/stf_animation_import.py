@@ -82,7 +82,8 @@ def stf_animation_import(context: STF_ImportContext, json_resource: dict, stf_id
 
 def __parse_subtracks(track: dict, selected_channelbag: bpy.types.ActionChannelbag, fcurve_target: any, index_conversion: list[int], conversion_func: Callable[[list[float]], list[float]] = None):
 	subtracks = track.get("subtracks", [])
-	if(len(subtracks) == 0): return
+	timepoints = track.get("timepoints", [])
+	if(len(subtracks) == 0 or len(timepoints) == 0): return
 
 	num_frames = -1
 
@@ -103,23 +104,24 @@ def __parse_subtracks(track: dict, selected_channelbag: bpy.types.ActionChannelb
 			if(not subtrack): continue
 
 			stf_keyframe = subtrack["keyframes"][keyframe_index]
+			timepoint = timepoints[keyframe_index]
 
 			has_left_tangent = False
 			left_tangent_index = 0
 
-			value_convert[subtrack_index] = stf_keyframe[2]
-			interpolation_type = stf_keyframe[3]
+			value_convert[subtrack_index] = stf_keyframe[1]
+			interpolation_type = stf_keyframe[2]
 			if(interpolation_type == "bezier"):
-				right_tangent_convert[subtrack_index] = stf_keyframe[5][1]
-				if(len(stf_keyframe) > 6):
+				right_tangent_convert[subtrack_index] = stf_keyframe[4][1]
+				if(len(stf_keyframe) > 5):
 					has_left_tangent = True
-					left_tangent_index = 6
-					left_tangent_convert[subtrack_index] = stf_keyframe[6][1]
+					left_tangent_index = 5
+					left_tangent_convert[subtrack_index] = stf_keyframe[5][1]
 			elif(interpolation_type in ["constant", "linear", "quadratic", "cubic"]):
-				if(len(stf_keyframe) > 4):
+				if(len(stf_keyframe) > 3):
 					has_left_tangent = True
 					left_tangent_index = 4
-					left_tangent_convert[subtrack_index] = stf_keyframe[4][1]
+					left_tangent_convert[subtrack_index] = stf_keyframe[3][1]
 
 		for i in range(len(index_conversion)):
 			left_tangent_convert[i] += value_convert[i]
@@ -136,13 +138,13 @@ def __parse_subtracks(track: dict, selected_channelbag: bpy.types.ActionChannelb
 			stf_keyframe = subtrack["keyframes"][keyframe_index]
 			if(not stf_keyframe[0]): continue # Not source of truth, ignore
 			
-			keyframe = fcurves[subtrack_index].keyframe_points.insert(stf_keyframe[1], value_convert[index_conversion[subtrack_index]])
+			keyframe = fcurves[subtrack_index].keyframe_points.insert(timepoint, value_convert[index_conversion[subtrack_index]])
 
-			interpolation_type = stf_keyframe[3]
+			interpolation_type = stf_keyframe[2]
 			if(interpolation_type == "bezier"):
 				keyframe.interpolation = "BEZIER"
-				keyframe.handle_right_type = handle_type_to_blender[stf_keyframe[4]]
-				keyframe.handle_right.x = keyframe.co.x + stf_keyframe[5][0]
+				keyframe.handle_right_type = handle_type_to_blender[stf_keyframe[3]]
+				keyframe.handle_right.x = keyframe.co.x + stf_keyframe[4][0]
 				keyframe.handle_right.y = right_tangent_convert[index_conversion[subtrack_index]]
 			elif(interpolation_type == "constant"):
 				keyframe.interpolation = "CONSTANT"
