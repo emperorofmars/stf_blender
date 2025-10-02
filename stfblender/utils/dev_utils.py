@@ -57,7 +57,7 @@ class CleanupOp(bpy.types.Operator):
 	"""Remove components and data-resources no longer referenced anywhere"""
 	bl_idname = "stf.cleanup_unreferenced_components"
 	bl_label = "Cleanup Unreferenced Components"
-	bl_options = {"REGISTER", "UNDO"}
+	bl_options = {"REGISTER", "UNDO", "INTERNAL"}
 
 	def invoke(self, context, event):
 		return context.window_manager.invoke_confirm(self, event)
@@ -71,7 +71,7 @@ class QuaternionsEverywhere(bpy.types.Operator):
 	"""Warning: this will break existing non-quaternion animations!"""
 	bl_idname = "stf.set_everything_to_quaternion_rotation"
 	bl_label = "Set everything to use Quaternions (At your own risk!)"
-	bl_options = {"REGISTER", "UNDO"}
+	bl_options = {"REGISTER", "UNDO", "INTERNAL"}
 
 	def invoke(self, context, event):
 		return context.window_manager.invoke_confirm(self, event)
@@ -89,7 +89,7 @@ class UnfuckMatrixParentInverse(bpy.types.Operator):
 	"""Warning: this will pretty much fuck up all your animations!"""
 	bl_idname = "stf.unfuck_matrix_parent_inverse"
 	bl_label = "Unfuck matrix_parent_inverse (Don't)"
-	bl_options = {"REGISTER", "UNDO"}
+	bl_options = {"REGISTER", "UNDO", "INTERNAL"}
 
 	def invoke(self, context, event):
 		return context.window_manager.invoke_confirm(self, event)

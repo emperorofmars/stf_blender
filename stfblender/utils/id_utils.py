@@ -8,7 +8,7 @@ from ..base.stf_report import STFReportSeverity, STFReport
 class STFSetIDOperatorBase:
 	"""Set STF-ID"""
 	bl_label = "Set STF-ID"
-	bl_options = {"REGISTER", "UNDO"}
+	bl_options = {"REGISTER", "UNDO", "INTERNAL"}
 
 	def execute(self, context):
 		self.get_property(context).stf_id = str(uuid.uuid4())

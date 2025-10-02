@@ -56,6 +56,7 @@ class STFCollectionPanel(bpy.types.Panel):
 	bl_region_type = "WINDOW"
 	bl_space_type = "PROPERTIES"
 	bl_context = "collection"
+	bl_order = -10
 
 	@classmethod
 	def poll(cls, context: bpy.types.Context):

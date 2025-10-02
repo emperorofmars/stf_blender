@@ -29,21 +29,7 @@ def stf_animation_export(context: STF_ExportContext, application_object: any, co
 		context.report(STFReport("No valid Slot Link target specified!", STFReportSeverity.Debug, blender_animation.stf_info.stf_id, _stf_type, application_object))
 		return None
 
-	ensure_stf_id(context, blender_animation)
-
-	ret = {
-		"type": _stf_type,
-		"name": blender_animation.stf_info.stf_name if blender_animation.stf_info.stf_name_source_of_truth else blender_animation.name,
-		"loop": "cycle" if blender_animation.use_cyclic else "none", # todo create ui for this setting
-		"fps": bpy.context.scene.render.fps if not blender_animation.stf_animation.fps_override else blender_animation.animation.stf_fps,
-	}
-	if(blender_animation.use_frame_range):
-		ret["range"] = [blender_animation.frame_start, blender_animation.frame_end]
-	else:
-		ret["range"] = [blender_animation.frame_range[0], blender_animation.frame_range[1]]
-
-	# todo enable users to select how to deal with interpolation & baking in more detail
-
+	animation_range = [blender_animation.frame_start, blender_animation.frame_end] if blender_animation.use_frame_range else [blender_animation.frame_range[0], blender_animation.frame_range[1]]
 	stf_tracks = []
 
 	# All of this is a mess
@@ -83,7 +69,7 @@ def stf_animation_export(context: STF_ExportContext, application_object: any, co
 										if(fcurve):
 											index_conversion.append(fcurve.array_index)
 
-								interpolation, timepoints, sub_tracks = __serialize_subtracks(context, blender_animation, fcurves, ret["range"], index_conversion, conversion_func)
+								interpolation, timepoints, sub_tracks = __serialize_subtracks(context, blender_animation, fcurves, animation_range, index_conversion, conversion_func)
 
 								stf_tracks.append({
 									"target": target,
@@ -96,12 +82,19 @@ def stf_animation_export(context: STF_ExportContext, application_object: any, co
 					else:
 						context.report(STFReport("Invalid Animation Target", STFReportSeverity.Debug, None, _stf_type, blender_animation))
 
-	ret["tracks"] = stf_tracks
-
 	if(len(stf_tracks) == 0):
 		context.report(STFReport("Empty Animation", STFReportSeverity.Debug, None, _stf_type, blender_animation))
 		return None
 	else:
+		ensure_stf_id(context, blender_animation)
+		ret = {
+			"type": _stf_type,
+			"name": blender_animation.stf_info.stf_name if blender_animation.stf_info.stf_name_source_of_truth else blender_animation.name,
+			"loop": "cycle" if blender_animation.use_cyclic else "none", # todo create ui for this setting
+			"fps": bpy.context.scene.render.fps if not blender_animation.stf_animation.fps_override else blender_animation.animation.stf_fps,
+			"range": animation_range,
+			"tracks": stf_tracks,
+		}
 		return ret, blender_animation.stf_info.stf_id
 
 

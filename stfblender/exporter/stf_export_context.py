@@ -91,6 +91,8 @@ class STF_ExportContext:
 
 	def resolve_application_property_path(self, application_object: any, application_object_property_index: int, data_path: str) -> tuple[list[str], Callable[[list[float]], list[float]], list[int]]:
 		if(application_object == None): return None
+		if(type(application_object) == bpy.types.Object and not self.get_resource_id(application_object)):
+			return None
 
 		if(data_path.startswith(".")): data_path = data_path[1:]
 
@@ -101,7 +103,7 @@ class STF_ExportContext:
 
 
 	def add_task(self, task: Callable):
-		"""Add a task which will be execuded after everything else."""
+		"""Will be executed after all other resources have been exported"""
 		self._state._tasks.append(task)
 
 	def add_cleanup_task(self, task: Callable):

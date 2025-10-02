@@ -81,6 +81,7 @@ class STF_ImportContext:
 
 
 	def add_task(self, task: Callable):
+		"""Will be executed after all other resources have been exported"""
 		self._state._tasks.append(task)
 
 	def add_cleanup_task(self, task: Callable):

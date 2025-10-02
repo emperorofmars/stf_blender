@@ -22,7 +22,7 @@ class STFCreateDataResourceOperator(bpy.types.Operator):
 	"""Create a new STF data resource"""
 	bl_idname = "stf.create_data_resource"
 	bl_label = "Create New Resource"
-	bl_options = {"REGISTER", "UNDO"}
+	bl_options = {"REGISTER", "UNDO", "INTERNAL"}
 
 	use_scene_collection: bpy.props.BoolProperty(default=False) # type: ignore
 	stf_type: bpy.props.StringProperty(name="Type") # type: ignore
@@ -38,7 +38,7 @@ class STFRemoveDataResourceOperator(bpy.types.Operator):
 	"""Remove this STF data-resource"""
 	bl_idname = "stf.remove_data_resource"
 	bl_label = "Remove Resource"
-	bl_options = {"REGISTER", "UNDO"}
+	bl_options = {"REGISTER", "UNDO", "INTERNAL"}
 
 	use_scene_collection: bpy.props.BoolProperty(default=False) # type: ignore
 	index: bpy.props.IntProperty(name="Resource Index", default=-1) # type: ignore
@@ -69,7 +69,7 @@ class STFEditDataResourceOperator(bpy.types.Operator):
 	"""Edit the ID of a data-resource"""
 	bl_idname = "stf.edit_data_resource"
 	bl_label = "Edit ID"
-	bl_options = {"REGISTER", "UNDO"}
+	bl_options = {"REGISTER", "UNDO", "INTERNAL"}
 
 	use_scene_collection: bpy.props.BoolProperty(default=False) # type: ignore
 	resource_id: bpy.props.StringProperty() # type: ignore

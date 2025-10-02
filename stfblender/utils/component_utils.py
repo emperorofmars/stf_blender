@@ -34,7 +34,7 @@ def add_component(context_object: any, blender_property_name: str, stf_id: str, 
 class STFAddComponentOperatorBase:
 	"""Base class to add an STF component to a Blender object"""
 	bl_label = "Add Component"
-	bl_options = {"REGISTER", "UNDO"}
+	bl_options = {"REGISTER", "UNDO", "INTERNAL"}
 
 	stf_type: bpy.props.StringProperty(name="Type") # type: ignore
 	property_name: bpy.props.StringProperty() # type: ignore
@@ -54,7 +54,7 @@ class STFAddComponentOperatorBase:
 class STFRemoveComponentOperatorBase:
 	"""Base class to remove an STF component from a Blender object"""
 	bl_label = "Remove Component"
-	bl_options = {"REGISTER", "UNDO"}
+	bl_options = {"REGISTER", "UNDO", "INTERNAL"}
 
 	index: bpy.props.IntProperty(name = "component_index", default=-1) # type: ignore
 	property_name: bpy.props.StringProperty() # type: ignore
@@ -88,7 +88,7 @@ class STFRemoveComponentOperatorBase:
 class STFEditComponentOperatorBase:
 	"""Base class to edit a components ID"""
 	bl_label = "Edit ID"
-	bl_options = {"REGISTER", "UNDO"}
+	bl_options = {"REGISTER", "UNDO", "INTERNAL"}
 
 	component_id: bpy.props.StringProperty() # type: ignore
 	edit_component_id: bpy.props.StringProperty(name="ID") # type: ignore
@@ -163,7 +163,7 @@ class AddOverrideToComponent(bpy.types.Operator):
 	"""Add override to component"""
 	bl_idname = "stf.add_override_to_component"
 	bl_label = "Add"
-	bl_options = {"REGISTER", "UNDO"}
+	bl_options = {"REGISTER", "UNDO", "INTERNAL"}
 
 	def execute(self, context):
 		bpy.context.scene.workaround_for_blenders_datamodel__component_overrides.add()
@@ -173,7 +173,7 @@ class RemoveOverrideFromComponent(bpy.types.Operator):
 	"""Add override to component"""
 	bl_idname = "stf.remove_override_from_component"
 	bl_label = "Remove"
-	bl_options = {"REGISTER", "UNDO"}
+	bl_options = {"REGISTER", "UNDO", "INTERNAL"}
 
 	index: bpy.props.IntProperty(default=-1) # type: ignore
 
@@ -213,7 +213,7 @@ def export_component_base(stf_context: any, stf_type: str, component: any) -> di
 
 class ComponentLoadJsonOperatorBase():
 	bl_label = "Set from Json"
-	bl_options = {"REGISTER", "UNDO"}
+	bl_options = {"REGISTER", "UNDO", "INTERNAL"}
 
 	component_id: bpy.props.StringProperty() # type: ignore
 
