@@ -90,8 +90,8 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 
 
 	def execute(self, context: bpy.types.Context):
-		called_from_collection_exporter = not context.space_data or context.space_data.type != "FILE_BROWSER"
 		context.window.cursor_modal_set("WAIT")
+		called_from_collection_exporter = not context.space_data or context.space_data.type != "FILE_BROWSER"
 		try:
 			# let collection
 			if(called_from_collection_exporter): # Invoked as Collection Exporter

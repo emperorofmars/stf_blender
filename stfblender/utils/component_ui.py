@@ -1,6 +1,7 @@
 import bpy
+from typing import Callable
 
-from ..base.stf_module_component import STF_Component_Ref
+from ..base.stf_module_component import InstanceModComponentRef, STF_Component_Ref
 from ..base.stf_registry import find_component_module, get_all_component_modules, get_component_modules, get_data_component_modules
 from .misc import CopyToClipboard
 from .draw_multiline_text import draw_multiline_text
@@ -10,7 +11,7 @@ class STFDrawComponentList(bpy.types.UIList):
 	"""List of STF components"""
 	bl_idname = "COLLECTION_UL_stf_component_list"
 
-	def draw_item(self, context, layout, data, item, icon, active_data, active_propname):
+	def draw_item(self, context: bpy.types.Context, layout: bpy.types.UILayout, data: STF_Component_Ref, item, icon, active_data, active_propname):
 		layout.label(text=item.stf_type)
 		layout.label(text=item.stf_id)
 
@@ -19,12 +20,12 @@ class STFDrawInstanceComponentList(bpy.types.UIList):
 	"""List of STF component instances"""
 	bl_idname = "COLLECTION_UL_stf_instance_component_list"
 
-	def draw_item(self, context, layout, data, item, icon, active_data, active_propname):
+	def draw_item(self, context: bpy.types.Context, layout: bpy.types.UILayout, data, item: InstanceModComponentRef, icon, active_data, active_propname):
 		layout.label(text=item.stf_type + " ( " + item.bone + " )")
 		layout.label(text=item.stf_id)
 
 
-def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, stf_application_object: any, component: any, edit_op: str, is_instance: bool, inject_ui = None):
+def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, stf_application_object: any, component: any, edit_op: str, is_instance: bool, inject_ui: Callable = None):
 	box = layout.box()
 	row = box.row()
 	row.label(text=component_ref.stf_type + "  -  ID: " + component_ref.stf_id + " ")
@@ -84,7 +85,7 @@ def draw_components_ui(
 		add_component_op: str,
 		remove_component_op: str,
 		edit_component_id_op: str,
-		get_target_object_func: any = None,
+		get_target_object_func: Callable = None,
 		inject_ui: any = None,
 		is_data_resource_component: bool = False
 		):
@@ -141,8 +142,8 @@ def draw_instance_standin_components_ui(
 		ref_holder: any,
 		component_holder: any,
 		edit_component_id_op: str,
-		get_target_object_func: any = None,
-		inject_ui: any = None
+		get_target_object_func: Callable = None,
+		inject_ui: Callable = None
 		):
 	stf_modules = get_component_modules()
 

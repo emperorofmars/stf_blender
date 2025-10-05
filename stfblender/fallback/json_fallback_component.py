@@ -60,7 +60,7 @@ register_stf_modules = [
 
 
 def register():
-	# register whereever components are allowed
+	# register wherever components are allowed
 	setattr(bpy.types.Action, _blender_property_name, bpy.props.CollectionProperty(type=JsonFallbackComponent))
 	setattr(bpy.types.Armature, _blender_property_name, bpy.props.CollectionProperty(type=JsonFallbackComponent))
 	setattr(bpy.types.Brush, _blender_property_name, bpy.props.CollectionProperty(type=JsonFallbackComponent))

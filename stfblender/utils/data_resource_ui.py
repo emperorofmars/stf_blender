@@ -9,7 +9,7 @@ from .component_utils import STFAddComponentOperatorBase, STFEditComponentOperat
 from .draw_multiline_text import draw_multiline_text
 
 
-def _get_data_resource_component_ref_property_collection(context) -> any:
+def _get_data_resource_component_ref_property_collection(context: bpy.types.Context) -> any:
 	for resource in getattr(context.scene.collection if stf_data_resource_use_scene_collection else context.collection, stf_data_resource_property):
 		if(resource.stf_id == stf_data_resource_id):
 			return resource.stf_components
@@ -43,7 +43,7 @@ class STFDrawDataResourceList(bpy.types.UIList):
 	"""List of STF data-resources"""
 	bl_idname = "COLLECTION_UL_stf_data_resource_list"
 
-	def draw_item(self, context, layout, data, item, icon, active_data, active_propname):
+	def draw_item(self, context: bpy.types.Context, layout: bpy.types.UILayout, data, item: STF_Data_Ref, icon, active_data, active_propname):
 		layout.label(text=item.stf_type)
 		layout.label(text=item.stf_id)
 
