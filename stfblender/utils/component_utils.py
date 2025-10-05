@@ -1,15 +1,9 @@
 import json
 import bpy
 
-from ..base.stf_module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref, STF_BlenderComponentOverride
+from ..base.stf_module_component import STF_BlenderComponentBase, STF_Component_Ref, STF_BlenderComponentOverride
 from ..base.stf_module_data import STF_BlenderDataResourceBase
 from ..utils.id_utils import ensure_stf_id
-
-
-def find_component_module(stf_modules: list[STF_BlenderComponentModule], stf_type: str) -> STF_BlenderComponentModule:
-	for stf_module in stf_modules:
-		if(stf_module.stf_type == stf_type):
-			return stf_module
 
 
 def add_component(context_object: any, blender_property_name: str, stf_id: str, stf_type: str, components_ref_property: any = None) -> tuple[STF_Component_Ref, STF_BlenderComponentBase]:

@@ -2,7 +2,8 @@ import bpy
 
 from .stf_module import STF_Module
 from .stf_module_component import STF_BlenderComponentModule, STF_ExportComponentHook
-from .stf_module_data import STF_BlenderDataModule, STF_BlenderDataResourceBase
+from .stf_module_data import STF_BlenderDataModule
+from ..fallback.json_fallback_component import STF_Module_JsonFallbackComponent
 
 """
 Util to retrieve all existing STF-modules
@@ -116,3 +117,10 @@ def get_blender_non_native_data_modules() -> list[STF_BlenderDataModule]:
 		if(hasattr(stf_module, "blender_property_name") and getattr(stf_module, "stf_kind") == "data"):
 			ret.append(stf_module)
 	return ret
+
+def find_component_module(stf_modules: list[STF_BlenderComponentModule], stf_type: str) -> STF_BlenderComponentModule:
+	for stf_module in stf_modules:
+		if(stf_module.stf_type == stf_type):
+			return stf_module
+	if(stf_type == "fallback"):
+		return STF_Module_JsonFallbackComponent

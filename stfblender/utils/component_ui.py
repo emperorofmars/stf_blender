@@ -1,8 +1,7 @@
 import bpy
 
 from ..base.stf_module_component import STF_Component_Ref
-from ..base.stf_registry import get_all_component_modules, get_component_modules, get_data_component_modules
-from .component_utils import find_component_module
+from ..base.stf_registry import find_component_module, get_all_component_modules, get_component_modules, get_data_component_modules
 from .misc import CopyToClipboard
 from .draw_multiline_text import draw_multiline_text
 
@@ -100,36 +99,38 @@ def draw_components_ui(
 		row.prop(bpy.context.scene, "stf_component_modules", text="")
 
 	selected_add_module = find_component_module(stf_modules, available_component_modules)
-	if(len(stf_modules) > 0):
-		if(selected_add_module):
-			row_l = row.row(align=True)
-			row_l.alignment = "RIGHT"
-			add_button = row_l.operator(add_component_op, icon="PLUS", text="Add Component")
-			add_button.stf_type = available_component_modules
-			add_button.property_name = selected_add_module.blender_property_name
+	if(selected_add_module.stf_type == None): # Fallback
+		row2 = layout.row(align=True)
+		row2.label(text="Manually specify type") # todo
+	elif(selected_add_module):
+		row_l = row.row(align=True)
+		row_l.alignment = "RIGHT"
+		add_button = row_l.operator(add_component_op, icon="PLUS", text="Add Component")
+		add_button.stf_type = available_component_modules
+		add_button.property_name = selected_add_module.blender_property_name
+	else:
+		row.separator(factor=1)
+		row.label(text="Please select a component type")
+
+	row = layout.row(align=True)
+	row.template_list(STFDrawComponentList.bl_idname, "", ref_holder, "stf_components", ref_holder, "stf_active_component_index")
+	if(len(ref_holder.stf_components) > ref_holder.stf_active_component_index):
+		component_ref = ref_holder.stf_components[ref_holder.stf_active_component_index]
+
+		remove_button = row.operator(remove_component_op, icon="X", text="")
+		remove_button.index = ref_holder.stf_active_component_index
+		remove_button.property_name = component_ref.blender_property_name
+
+		if(hasattr(component_holder, component_ref.blender_property_name)):
+			for component in getattr(component_holder, component_ref.blender_property_name):
+				if(component.stf_id == component_ref.stf_id):
+					target_object = component_holder
+					if(get_target_object_func):
+						target_object = get_target_object_func(component_holder, component_ref)
+					draw_component(layout, context, component_ref, target_object, component, edit_component_id_op, False, inject_ui)
+					break
 		else:
-			row.separator(factor=1)
-			row.label(text="Please select a component type")
-
-		row = layout.row(align=True)
-		row.template_list(STFDrawComponentList.bl_idname, "", ref_holder, "stf_components", ref_holder, "stf_active_component_index")
-		if(len(ref_holder.stf_components) > ref_holder.stf_active_component_index):
-			component_ref = ref_holder.stf_components[ref_holder.stf_active_component_index]
-
-			remove_button = row.operator(remove_component_op, icon="X", text="")
-			remove_button.index = ref_holder.stf_active_component_index
-			remove_button.property_name = component_ref.blender_property_name
-
-			if(hasattr(component_holder, component_ref.blender_property_name)):
-				for component in getattr(component_holder, component_ref.blender_property_name):
-					if(component.stf_id == component_ref.stf_id):
-						target_object = component_holder
-						if(get_target_object_func):
-							target_object = get_target_object_func(component_holder, component_ref)
-						draw_component(layout, context, component_ref, target_object, component, edit_component_id_op, False, inject_ui)
-						break
-			else:
-				layout.label(text="Invalid Component: " + component_ref.blender_property_name)
+			layout.label(text="Invalid Component: " + component_ref.blender_property_name)
 	else:
 		layout.label(text="No Components For This Type Available")
 
@@ -177,10 +178,10 @@ def set_stf_data_resource_component_filter(filter = None):
 	stf_data_resource_component_filter = filter
 
 def _build_stf_component_types_enum_callback(self, context) -> list:
-	return [((stf_module.stf_type, stf_module.stf_type, stf_module.__doc__ if stf_module.__doc__ else "")) for stf_module in get_component_modules(stf_component_filter)]
+	return [((stf_module.stf_type, stf_module.stf_type, stf_module.__doc__ if stf_module.__doc__ else "")) for stf_module in get_component_modules(stf_component_filter)] + [("fallback", "Json Fallback", "Manual fallback for unsupported types")]
 
 def _build_stf_data_resource_component_types_enum_callback(self, context) -> list:
-	return [((stf_module.stf_type, stf_module.stf_type, stf_module.__doc__ if stf_module.__doc__ else "")) for stf_module in get_data_component_modules(stf_data_resource_component_filter)]
+	return [((stf_module.stf_type, stf_module.stf_type, stf_module.__doc__ if stf_module.__doc__ else "")) for stf_module in get_data_component_modules(stf_data_resource_component_filter)] + [("fallback", "Json Fallback", "Manual fallback for unsupported types")]
 
 def register():
 	bpy.types.Scene.stf_component_modules = bpy.props.EnumProperty(

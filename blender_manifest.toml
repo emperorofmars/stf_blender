@@ -93,4 +93,5 @@ paths_exclude_pattern = [
 	"/LICENSE-MIT",
 	"/packages",
 	"/docs",
+	"/out",
 ]
