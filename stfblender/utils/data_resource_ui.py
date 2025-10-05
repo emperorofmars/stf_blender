@@ -1,10 +1,10 @@
 import bpy
 
-from ..base.stf_module_data import STF_BlenderDataModule, STF_BlenderDataResourceBase, STF_Data_Ref
-from ..base.stf_registry import get_blender_non_native_data_modules
+from ..base.stf_module_data import STF_BlenderDataResourceBase, STF_Data_Ref
+from ..base.stf_registry import find_data_module, get_blender_non_native_data_modules
 from .misc import CopyToClipboard
 from .data_resource_utils import STFCreateDataResourceOperator, STFEditDataResourceOperator, STFRemoveDataResourceOperator
-from .component_ui import draw_components_ui, set_stf_component_filter, set_stf_data_resource_component_filter
+from .component_ui import draw_components_ui, set_stf_data_resource_component_filter
 from .component_utils import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
 from .draw_multiline_text import draw_multiline_text
 
@@ -37,12 +37,6 @@ class STFEditDataResourceComponentIdOperator(bpy.types.Operator, STFEditComponen
 	def poll(cls, context): return context.scene is not None if stf_data_resource_use_scene_collection else context.collection is not None
 	def get_property(self, context): return context.scene.collection if stf_data_resource_use_scene_collection else context.collection
 	def get_components_ref_property(self, context) -> any: return _get_data_resource_component_ref_property_collection(context)
-
-
-def find_stf_module(stf_modules: list[STF_BlenderDataModule], stf_type: str) -> STF_BlenderDataModule:
-	for stf_module in stf_modules:
-		if(stf_module.stf_type == stf_type):
-			return stf_module
 
 
 class STFDrawDataResourceList(bpy.types.UIList):
@@ -105,9 +99,12 @@ def draw_data_resources_ui(
 		):
 	row = layout.row(align=True)
 	row.prop(bpy.context.scene, "stf_data_modules", text="")
-	selected_add_module = find_stf_module(get_blender_non_native_data_modules(), context.scene.stf_data_modules)
+	selected_add_module = find_data_module(get_blender_non_native_data_modules(), context.scene.stf_data_modules)
 
-	if(selected_add_module):
+	if(selected_add_module and selected_add_module.stf_type == None): # Fallback
+		row2 = layout.row(align=True)
+		row2.label(text="Manually specify type") # todo
+	elif(selected_add_module):
 		row_l = row.row(align=True)
 		row_l.alignment = "RIGHT"
 		add_button = row_l.operator(STFCreateDataResourceOperator.bl_idname, icon="PLUS", text="Create Resource")
@@ -150,7 +147,7 @@ def set_stf_data_resource_property(use_scene_collection: bool, blender_property:
 
 
 def _build_stf_data_resource_types_enum_callback(self, context) -> list:
-	return [((stf_module.stf_type, stf_module.stf_type, stf_module.__doc__ if stf_module.__doc__ else "")) for stf_module in get_blender_non_native_data_modules()]
+	return [((stf_module.stf_type, stf_module.stf_type, stf_module.__doc__ if stf_module.__doc__ else "")) for stf_module in get_blender_non_native_data_modules()] + [("fallback", "Json Fallback", "Manual fallback for unsupported types")]
 
 def register():
 	bpy.types.Scene.stf_data_modules = bpy.props.EnumProperty(

@@ -99,7 +99,7 @@ def draw_components_ui(
 		row.prop(bpy.context.scene, "stf_component_modules", text="")
 
 	selected_add_module = find_component_module(stf_modules, available_component_modules)
-	if(selected_add_module.stf_type == None): # Fallback
+	if(selected_add_module and selected_add_module.stf_type == None): # Fallback
 		row2 = layout.row(align=True)
 		row2.label(text="Manually specify type") # todo
 	elif(selected_add_module):
