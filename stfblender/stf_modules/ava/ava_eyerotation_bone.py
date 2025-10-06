@@ -1,4 +1,5 @@
 import bpy
+import math
 
 from ...base.stf_module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
 from ...exporter.stf_export_context import STF_ExportContext
@@ -11,10 +12,10 @@ _blender_property_name = "ava_eye_rotation_bone"
 
 
 class AVA_EyeRotation_Bone(STF_BlenderComponentBase):
-	limit_up: bpy.props.FloatProperty(name="Up", default=15, options=set()) # type: ignore
-	limit_down: bpy.props.FloatProperty(name="Down", default=12, options=set()) # type: ignore
-	limit_in: bpy.props.FloatProperty(name="In", default=15, options=set()) # type: ignore
-	limit_out: bpy.props.FloatProperty(name="Out", default=16, options=set()) # type: ignore
+	limit_up: bpy.props.FloatProperty(name="Up", subtype="ANGLE", default=math.radians(15), options=set(), soft_min=0, soft_max=math.radians(60)) # type: ignore
+	limit_down: bpy.props.FloatProperty(name="Down", subtype="ANGLE", default=math.radians(12), options=set(), soft_min=0, soft_max=math.radians(60)) # type: ignore
+	limit_in: bpy.props.FloatProperty(name="In", subtype="ANGLE", default=math.radians(15), options=set(), soft_min=0, soft_max=math.radians(60)) # type: ignore
+	limit_out: bpy.props.FloatProperty(name="Out", subtype="ANGLE", default=math.radians(16), options=set(), soft_min=0, soft_max=math.radians(60)) # type: ignore
 
 
 def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, parent_application_object: any, component: AVA_EyeRotation_Bone):
@@ -31,10 +32,10 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, parent
 	component_ref, component = add_component(parent_application_object, _blender_property_name, id, _stf_type)
 	import_component_base(component, json_resource)
 
-	component.limit_up = json_resource.get("up", 15)
-	component.limit_down = json_resource.get("down", 12)
-	component.limit_in = json_resource.get("in", 15)
-	component.limit_out = json_resource.get("out", 16)
+	component.limit_up = json_resource.get("up", math.radians(15))
+	component.limit_down = json_resource.get("down", math.radians(12))
+	component.limit_in = json_resource.get("in", math.radians(15))
+	component.limit_out = json_resource.get("out", math.radians(16))
 
 	return component
 

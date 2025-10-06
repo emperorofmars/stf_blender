@@ -53,14 +53,16 @@ class STFRemoveDataResourceOperator(bpy.types.Operator):
 			resource_type_list = getattr(collection, self.property_name)
 			for resource_index, resource in enumerate(resource_type_list):
 				if(resource.stf_id == collection.stf_data_refs[self.index].stf_id):
+					# Remove components
 					for component_ref in resource.stf_components:
 						for resource_component_index, resource_component in enumerate(getattr(collection, component_ref.blender_property_name)):
 							if(resource_component.stf_id == component_ref.stf_id):
 								getattr(collection, component_ref.blender_property_name).remove(resource_component_index)
 								break
+					# Remove resource
 					resource_type_list.remove(resource_index)
 					break
-
+		# Remove resource reference
 		collection.stf_data_refs.remove(self.index)
 		return {"FINISHED"}
 

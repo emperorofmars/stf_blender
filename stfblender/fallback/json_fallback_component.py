@@ -5,22 +5,33 @@ from ..base.stf_module_component import STF_BlenderComponentBase, STF_BlenderCom
 from ..exporter.stf_export_context import STF_ExportContext
 from ..importer.stf_import_context import STF_ImportContext
 from ..utils.component_utils import add_component
+from .json_fallback_properties import _fallback_component_blender_property_name
 
 
-_blender_property_name = "stf_json_fallback_component"
+_blender_property_name = _fallback_component_blender_property_name
 
 
 class JsonFallbackComponent(STF_BlenderComponentBase):
 	stf_type: bpy.props.StringProperty(name="STF Type", options=set()) # type: ignore
-	json: bpy.props.StringProperty(name="Raw Json", options=set()) # type: ignore
+	json: bpy.props.StringProperty(name="Raw Json", default="{\"type\": \"\"}", options=set()) # type: ignore
 	#referenced_resources:
-	#referenced_buffers:
+	#buffers:
 
 
 def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: JsonFallbackComponent):
-	layout.prop(component, "json", options=set())
+	col = layout.column(align=True)
+	col.label(text="Json Data:", icon="PASTEDOWN")
+
+	json_error = False
+	try:
+		json.loads(component.json)
+	except:
+		json_error = True
+	col.alert = json_error
+	col.prop(component, "json", text="", icon="ERROR" if json_error else "NONE")
+
 	#layout.prop(component, "referenced_resources")
-	#layout.prop(component, "referenced_buffers")
+	#layout.prop(component, "buffers")
 
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, context_object: any) -> any:
@@ -30,7 +41,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, contex
 	component.json = json.dumps(json_resource)
 
 	#component.referenced_resources = json_resource.get("referenced_resources")
-	#component.referenced_buffers = json_resource.get("referenced_buffers")
+	#component.referenced_buffers = json_resource.get("buffers")
 
 	return component
 
@@ -40,6 +51,8 @@ def _stf_export(context: STF_ExportContext, component: JsonFallbackComponent, co
 
 
 class STF_Module_JsonFallbackComponent(STF_BlenderComponentModule):
+	"""This type is not supported.
+	You have to edit the raw json string, resource references and base64 encoded binary buffers"""
 	stf_type = None
 	stf_kind = "component"
 	understood_application_types = [JsonFallbackComponent]
@@ -60,7 +73,7 @@ register_stf_modules = [
 
 
 def register():
-	# register wherever components are allowed
+	# register wherever components could be possibly added
 	setattr(bpy.types.Action, _blender_property_name, bpy.props.CollectionProperty(type=JsonFallbackComponent))
 	setattr(bpy.types.Armature, _blender_property_name, bpy.props.CollectionProperty(type=JsonFallbackComponent))
 	setattr(bpy.types.Brush, _blender_property_name, bpy.props.CollectionProperty(type=JsonFallbackComponent))

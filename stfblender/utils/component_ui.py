@@ -5,6 +5,7 @@ from ..base.stf_module_component import InstanceModComponentRef, STF_Component_R
 from ..base.stf_registry import find_component_module, get_all_component_modules, get_component_modules, get_data_component_modules
 from .misc import CopyToClipboard
 from .draw_multiline_text import draw_multiline_text
+from ..fallback.json_fallback_component import STF_Module_JsonFallbackComponent
 
 
 class STFDrawComponentList(bpy.types.UIList):
@@ -57,10 +58,13 @@ def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, compo
 
 	stf_modules = get_all_component_modules()
 	selected_module = None
-	for stf_module in stf_modules:
-		if(stf_module.stf_type == component_ref.stf_type):
-			selected_module = stf_module
-			break
+	if(component_ref.blender_property_name == STF_Module_JsonFallbackComponent.blender_property_name):
+		selected_module = STF_Module_JsonFallbackComponent
+	else:
+		for stf_module in stf_modules:
+			if(stf_module.stf_type == component_ref.stf_type):
+				selected_module = stf_module
+				break
 
 	if(selected_module):
 		if(selected_module.__doc__):
@@ -102,7 +106,17 @@ def draw_components_ui(
 	selected_add_module = find_component_module(stf_modules, available_component_modules)
 	if(selected_add_module and selected_add_module.stf_type == None): # Fallback
 		row2 = layout.row(align=True)
-		row2.label(text="Manually specify type") # todo
+		row2_l = row2.row(align=True)
+		if(not bpy.context.scene.stf_fallback_component_type or len(bpy.context.scene.stf_fallback_component_type) < 3 or "." not in bpy.context.scene.stf_fallback_component_type):
+			row2_l.alert = True
+		row2_l.prop(bpy.context.scene, "stf_fallback_component_type")
+		row2_r = row2.row(align=True)
+		row2_r.alignment = "RIGHT"
+		if(not bpy.context.scene.stf_fallback_component_type or len(bpy.context.scene.stf_fallback_component_type) < 3 or "." not in bpy.context.scene.stf_fallback_component_type):
+			row2_r.enabled = False
+		add_button = row2_r.operator(add_component_op, icon="PLUS", text="Add Fallback Component")
+		add_button.stf_type = bpy.context.scene.stf_fallback_component_type
+		add_button.property_name = selected_add_module.blender_property_name
 	elif(selected_add_module):
 		row_l = row.row(align=True)
 		row_l.alignment = "RIGHT"
@@ -205,9 +219,12 @@ def register():
 		set=None,
 		update=None,
 	)
+	bpy.types.Scene.stf_fallback_component_type = bpy.props.StringProperty(name="Type", description="Type of unsupported component", options=set())
 
 def unregister():
 	if hasattr(bpy.types.Scene, "stf_data_resource_component_modules"):
 		del bpy.types.Scene.stf_data_resource_component_modules
 	if hasattr(bpy.types.Scene, "stf_component_modules"):
 		del bpy.types.Scene.stf_component_modules
+	if hasattr(bpy.types.Scene, "stf_fallback_component_type"):
+		del bpy.types.Scene.stf_fallback_component_type

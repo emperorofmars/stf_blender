@@ -4,7 +4,7 @@ import bpy
 from ....base.stf_module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
 from ....exporter.stf_export_context import STF_ExportContext
 from ....importer.stf_import_context import STF_ImportContext
-from ....utils.component_utils import add_component, import_component_base
+from ....utils.component_utils import add_component, export_component_base, import_component_base
 from ....utils.id_utils import ensure_stf_id
 
 
@@ -31,18 +31,15 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, context_object: any) -> any:
 	component_ref, component = add_component(context_object, _blender_property_name, id, _stf_type)
-	component.data = json.dumps(json_resource)
 	import_component_base(component, json_resource)
+	component.data = json.dumps(json_resource["values"])
 	return component
 
 
 def _stf_export(context: STF_ExportContext, component: VRC_AvatarColliders, context_object: any) -> tuple[dict, str]:
+	ret = export_component_base(context, _stf_type, component)
 	try:
-		ensure_stf_id(context, component, component)
-		ret = json.loads(component.data)
-		ret["type"] = _stf_type
-		ret["name"] = component.stf_name
-		ret["overrides"] = [override.target_id for override in component.overrides]
+		ret["values"] = json.loads(component.data)
 		return ret, component.stf_id
 	except:
 		return None

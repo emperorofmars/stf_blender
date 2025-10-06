@@ -6,6 +6,7 @@ from .misc import CopyToClipboard
 from .data_resource_utils import STFCreateDataResourceOperator, STFEditDataResourceOperator, STFRemoveDataResourceOperator
 from .component_ui import draw_components_ui, set_stf_data_resource_component_filter
 from .component_utils import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
+from ..fallback.json_fallback_data import STF_Module_JsonFallbackData
 from .draw_multiline_text import draw_multiline_text
 
 
@@ -65,10 +66,13 @@ def draw_resource(layout: bpy.types.UILayout, context: bpy.types.Context, resour
 
 	stf_modules = get_blender_non_native_data_modules()
 	selected_module = None
-	for stf_module in stf_modules:
-		if(stf_module.stf_type == resource_ref.stf_type):
-			selected_module = stf_module
-			break
+	if(resource_ref.blender_property_name == STF_Module_JsonFallbackData.blender_property_name):
+		selected_module = STF_Module_JsonFallbackData
+	else:
+		for stf_module in stf_modules:
+			if(stf_module.stf_type == resource_ref.stf_type):
+				selected_module = stf_module
+				break
 
 	if(selected_module):
 		if(selected_module.__doc__):
@@ -103,7 +107,18 @@ def draw_data_resources_ui(
 
 	if(selected_add_module and selected_add_module.stf_type == None): # Fallback
 		row2 = layout.row(align=True)
-		row2.label(text="Manually specify type") # todo
+		row2_l = row2.row(align=True)
+		if(not bpy.context.scene.stf_fallback_data_type or len(bpy.context.scene.stf_fallback_data_type) < 3 or "." not in bpy.context.scene.stf_fallback_data_type):
+			row2_l.alert = True
+		row2_l.prop(bpy.context.scene, "stf_fallback_data_type")
+		row2_r = row2.row(align=True)
+		row2_r.alignment = "RIGHT"
+		if(not bpy.context.scene.stf_fallback_data_type or len(bpy.context.scene.stf_fallback_data_type) < 3 or "." not in bpy.context.scene.stf_fallback_data_type):
+			row2_r.enabled = False
+		add_button = row2_r.operator(STFCreateDataResourceOperator.bl_idname, icon="PLUS", text="Add Fallback Resource")
+		add_button.use_scene_collection = collection == context.scene.collection
+		add_button.stf_type = bpy.context.scene.stf_fallback_data_type
+		add_button.property_name = selected_add_module.blender_property_name
 	elif(selected_add_module):
 		row_l = row.row(align=True)
 		row_l.alignment = "RIGHT"
@@ -160,7 +175,10 @@ def register():
 		set=None,
 		update=None,
 	)
+	bpy.types.Scene.stf_fallback_data_type = bpy.props.StringProperty(name="Type", description="Type of unsupported resource", options=set())
 
 def unregister():
 	if hasattr(bpy.types.Scene, "stf_data_modules"):
 		del bpy.types.Scene.stf_data_modules
+	if hasattr(bpy.types.Scene, "stf_fallback_data_type"):
+		del bpy.types.Scene.stf_fallback_data_type
