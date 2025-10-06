@@ -1,18 +1,16 @@
 import bpy
 import json
 
-from ..base.stf_module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
-from ..exporter.stf_export_context import STF_ExportContext
-from ..importer.stf_import_context import STF_ImportContext
-from ..utils.component_utils import add_component
-from .json_fallback_properties import _fallback_component_blender_property_name
+from ...base.stf_module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
+from ...exporter.stf_export_context import STF_ExportContext
+from ...importer.stf_import_context import STF_ImportContext
+from ...utils.component_utils import add_component
 
 
-_blender_property_name = _fallback_component_blender_property_name
+_blender_property_name = "stf_json_fallback_component"
 
 
 class JsonFallbackComponent(STF_BlenderComponentBase):
-	stf_type: bpy.props.StringProperty(name="STF Type", options=set()) # type: ignore
 	json: bpy.props.StringProperty(name="Raw Json", default="{\"type\": \"\"}", options=set()) # type: ignore
 	#referenced_resources:
 	#buffers:
@@ -24,8 +22,12 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 
 	json_error = False
 	try:
-		json.loads(component.json)
+		json_resource = json.loads(component.json)
+		if("type" not in json_resource or json_resource["type"] != component_ref.stf_type):
+			col.label(text="Invalid 'type' in Json", icon="ERROR")
+			json_error = True
 	except:
+		col.label(text="Json Invalid", icon="ERROR")
 		json_error = True
 	col.alert = json_error
 	col.prop(component, "json", text="", icon="ERROR" if json_error else "NONE")
@@ -37,17 +39,22 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, context_object: any) -> any:
 	component_ref, component = add_component(context_object, _blender_property_name, id, json_resource["type"])
 
-	component.stf_type = json_resource["type"]
 	component.json = json.dumps(json_resource)
 
 	#component.referenced_resources = json_resource.get("referenced_resources")
-	#component.referenced_buffers = json_resource.get("buffers")
+	#component.buffers = json_resource.get("referenced_buffers")
 
 	return component
 
 
 def _stf_export(context: STF_ExportContext, component: JsonFallbackComponent, context_object: any) -> tuple[dict, str]:
-	return json.loads(component.json), component.stf_id, context
+	try:
+		ret = json.loads(component.json)
+		if("type" not in ret or not ret["type"]):
+			return None
+		return ret, component.stf_id
+	except:
+		return None
 
 
 class STF_Module_JsonFallbackComponent(STF_BlenderComponentModule):
@@ -61,7 +68,6 @@ class STF_Module_JsonFallbackComponent(STF_BlenderComponentModule):
 
 	blender_property_name = _blender_property_name
 	single = False
-	filter = None
 	draw_component_func = _draw_component
 
 	like_types = []

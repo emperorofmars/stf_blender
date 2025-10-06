@@ -5,7 +5,7 @@ from .stf_instance_armature import InstanceModComponentRef
 from .stf_instance_armature_utils import UpdateArmatureInstanceComponentStandins
 from ....utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
 from ....utils.component_utils import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
-from ....utils.component_ui import draw_components_ui, draw_instance_standin_components_ui, set_stf_component_filter
+from ....utils.component_ui import draw_components_ui, draw_instance_standin_components_ui, set_stf_component_filter, set_stf_component_instance_filter
 
 
 class STFSetArmatureInstanceIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
@@ -71,7 +71,7 @@ class STFArmatureInstancePanel(bpy.types.Panel):
 		return (context.object.stf_instance_armature is not None and context.object.data and type(context.object.data) is bpy.types.Armature)
 
 	def draw(self, context):
-		set_stf_component_filter(bpy.types.Bone)
+		set_stf_component_instance_filter(bpy.types.Bone)
 
 		non_quat_bones: list[str] = []
 		for pose_bone in context.object.pose.bones:
@@ -91,11 +91,11 @@ class STFArmatureInstancePanel(bpy.types.Panel):
 		self.layout.separator(factor=1, type="SPACE")
 		header, body = self.layout.panel("stf.instance_armature_components", default_closed = False)
 		header.label(text="Bone-Instance Components", icon="GROUP")
-		if(body): draw_components_ui(self.layout, context, context.object.stf_instance_armature, context.object, STFAddArmatureInstanceComponentOperator.bl_idname, STFRemoveArmatureInstanceComponentOperator.bl_idname, STFEditArmatureInstanceComponentIdOperator.bl_idname, _get_target_object_func, _inject_ui)
+		if(body): draw_components_ui(self.layout, context, context.object.stf_instance_armature, context.object, STFAddArmatureInstanceComponentOperator.bl_idname, STFRemoveArmatureInstanceComponentOperator.bl_idname, STFEditArmatureInstanceComponentIdOperator.bl_idname, _get_target_object_func, _inject_ui, is_component_instance = True)
 
 		self.layout.separator(factor=4, type="LINE")
 
-		# todo standins for components on bones
+		# Standins for components on bones, so they can be animated and changed per instance
 		self.layout.prop(context.object.stf_instance_armature_component_standins, "use_bone_component_overrides")
 		if(context.object.stf_instance_armature_component_standins.use_bone_component_overrides):
 			self.layout.label(text="Override and animate values of components on bones.")

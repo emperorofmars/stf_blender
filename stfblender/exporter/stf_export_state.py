@@ -23,8 +23,8 @@ class STF_Buffer_Mode(Enum):
 
 class STF_ExportState(STF_State_Base):
 	"""
-	Hold all the data from an export run.
-	Each context must have access to the same STF_ExportState instance.
+	Holds all the data from an export run.
+	Gets passed to the STF_ExportContext.
 	"""
 
 	def __init__(self, asset_info: STF_Meta_AssetInfo, modules: tuple[dict[any, list[STF_Module]], dict[any, list[STF_ExportComponentHook]]], trash_objects: list[bpy.types.Object] = [], fail_on_severity: STFReportSeverity = STFReportSeverity.FatalError, permit_id_reassignment: bool = True, metric_multiplier: float = 1, settings: any = None):
@@ -55,13 +55,20 @@ class STF_ExportState(STF_State_Base):
 
 		for module in self._modules.get(type(application_object), []):
 			if(hasattr(module, "can_handle_application_object_func")):
-				prio = module.can_handle_application_object_func(application_object)
-				if(prio > selected_priority and (module_kind == None or module.stf_kind == module_kind)):
+				priority = module.can_handle_application_object_func(application_object)
+				if(priority > selected_priority and (module_kind == None or module.stf_kind == module_kind)):
 					selected_module = module
-					selected_priority = prio
+					selected_priority = priority
 			elif(1 > selected_priority):
 				selected_module = module
 				selected_priority = 1
+
+		"""if(not selected_module):
+			if(module_kind == "data"):
+				return STF_Module_JsonFallbackData
+			elif(module_kind == "component"):
+				return STF_Module_JsonFallbackComponent"""
+
 		return selected_module
 
 

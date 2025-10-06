@@ -5,7 +5,7 @@ from ..base.stf_module_component import InstanceModComponentRef, STF_Component_R
 from ..base.stf_registry import find_component_module, get_all_component_modules, get_component_modules, get_data_component_modules
 from .misc import CopyToClipboard
 from .draw_multiline_text import draw_multiline_text
-from ..fallback.json_fallback_component import STF_Module_JsonFallbackComponent
+from ..stf_modules.fallback.json_fallback_component import STF_Module_JsonFallbackComponent
 
 
 class STFDrawComponentList(bpy.types.UIList):
@@ -91,16 +91,21 @@ def draw_components_ui(
 		edit_component_id_op: str,
 		get_target_object_func: Callable = None,
 		inject_ui: any = None,
-		is_data_resource_component: bool = False
+		is_data_resource_component: bool = False,
+		is_component_instance: bool = False
 		):
 	stf_modules = get_data_component_modules() if is_data_resource_component else get_component_modules()
 
-	available_component_modules = context.scene.stf_data_resource_component_modules if is_data_resource_component else context.scene.stf_component_modules
-
 	row = layout.row(align=True)
+	# let available_component_modules
 	if(is_data_resource_component):
+		available_component_modules = context.scene.stf_data_resource_component_modules
 		row.prop(bpy.context.scene, "stf_data_resource_component_modules", text="")
+	elif(is_component_instance):
+		available_component_modules = context.scene.stf_component_instance_modules
+		row.prop(bpy.context.scene, "stf_component_instance_modules", text="")
 	else:
+		available_component_modules = context.scene.stf_component_modules
 		row.prop(bpy.context.scene, "stf_component_modules", text="")
 
 	selected_add_module = find_component_module(stf_modules, available_component_modules)
@@ -187,6 +192,12 @@ def set_stf_component_filter(filter = None):
 	global stf_component_filter
 	stf_component_filter = filter
 
+
+stf_component_instance_filter = None
+def set_stf_component_instance_filter(filter = None):
+	global stf_component_instance_filter
+	stf_component_instance_filter = filter
+
 stf_data_resource_component_filter = None
 def set_stf_data_resource_component_filter(filter = None):
 	global stf_data_resource_component_filter
@@ -195,12 +206,25 @@ def set_stf_data_resource_component_filter(filter = None):
 def _build_stf_component_types_enum_callback(self, context) -> list:
 	return [((stf_module.stf_type, stf_module.stf_type, stf_module.__doc__ if stf_module.__doc__ else "")) for stf_module in get_component_modules(stf_component_filter)] + [("fallback", "Json Fallback", "Manual fallback for unsupported types")]
 
+def _build_stf_component_instance_types_enum_callback(self, context) -> list:
+	return [((stf_module.stf_type, stf_module.stf_type, stf_module.__doc__ if stf_module.__doc__ else "")) for stf_module in get_component_modules(stf_component_instance_filter)] + [("fallback", "Json Fallback", "Manual fallback for unsupported types")]
+
 def _build_stf_data_resource_component_types_enum_callback(self, context) -> list:
 	return [((stf_module.stf_type, stf_module.stf_type, stf_module.__doc__ if stf_module.__doc__ else "")) for stf_module in get_data_component_modules(stf_data_resource_component_filter)] + [("fallback", "Json Fallback", "Manual fallback for unsupported types")]
 
 def register():
 	bpy.types.Scene.stf_component_modules = bpy.props.EnumProperty(
 		items=_build_stf_component_types_enum_callback,
+		name="Available STF Components",
+		description="Select STF component to add",
+		options={"SKIP_SAVE"},
+		default=None,
+		get=None,
+		set=None,
+		update=None,
+	)
+	bpy.types.Scene.stf_component_instance_modules = bpy.props.EnumProperty(
+		items=_build_stf_component_instance_types_enum_callback,
 		name="Available STF Components",
 		description="Select STF component to add",
 		options={"SKIP_SAVE"},
@@ -226,5 +250,7 @@ def unregister():
 		del bpy.types.Scene.stf_data_resource_component_modules
 	if hasattr(bpy.types.Scene, "stf_component_modules"):
 		del bpy.types.Scene.stf_component_modules
+	if hasattr(bpy.types.Scene, "stf_component_instance_modules"):
+		del bpy.types.Scene.stf_component_instance_modules
 	if hasattr(bpy.types.Scene, "stf_fallback_component_type"):
 		del bpy.types.Scene.stf_fallback_component_type

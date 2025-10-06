@@ -6,7 +6,7 @@ from .misc import CopyToClipboard
 from .data_resource_utils import STFCreateDataResourceOperator, STFEditDataResourceOperator, STFRemoveDataResourceOperator
 from .component_ui import draw_components_ui, set_stf_data_resource_component_filter
 from .component_utils import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
-from ..fallback.json_fallback_data import STF_Module_JsonFallbackData
+from ..stf_modules.fallback.json_fallback_data import STF_Module_JsonFallbackData
 from .draw_multiline_text import draw_multiline_text
 
 

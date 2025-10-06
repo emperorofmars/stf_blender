@@ -3,8 +3,8 @@ import bpy
 from .stf_module import STF_Module
 from .stf_module_component import STF_BlenderComponentModule, STF_ExportComponentHook
 from .stf_module_data import STF_BlenderDataModule
-from ..fallback.json_fallback_component import STF_Module_JsonFallbackComponent
-from ..fallback.json_fallback_data import STF_Module_JsonFallbackData
+#from ..stf_modules.fallback.json_fallback_component import STF_Module_JsonFallbackComponent
+#from ..stf_modules.fallback.json_fallback_data import STF_Module_JsonFallbackData
 
 """
 Util to retrieve all existing STF-modules
@@ -81,10 +81,10 @@ def get_all_component_modules() -> list[STF_BlenderComponentModule]:
 def get_component_modules(filter = None) -> list[STF_BlenderComponentModule]:
 	ret = []
 	for stf_module in get_stf_modules():
-		if(hasattr(stf_module, "blender_property_name") and getattr(stf_module, "stf_kind") == "component"):
+		if(hasattr(stf_module, "stf_type") and getattr(stf_module, "stf_type") and hasattr(stf_module, "blender_property_name") and getattr(stf_module, "stf_kind") == "component"):
 			if(hasattr(stf_module, "filter_all_data_modules") and getattr(stf_module, "filter_all_data_modules")):
 				continue
-			elif(hasattr(stf_module, "filter") and filter):
+			elif(hasattr(stf_module, "filter") and getattr(stf_module, "filter") and filter):
 				if(filter in getattr(stf_module, "filter")):
 					ret.append(stf_module)
 				else:
@@ -97,8 +97,8 @@ def get_component_modules(filter = None) -> list[STF_BlenderComponentModule]:
 def get_data_component_modules(filter = None) -> list[STF_BlenderComponentModule]:
 	ret = []
 	for stf_module in get_stf_modules():
-		if(hasattr(stf_module, "blender_property_name") and getattr(stf_module, "stf_kind") == "component"):
-			if(hasattr(stf_module, "filter") and filter):
+		if(hasattr(stf_module, "stf_type") and getattr(stf_module, "stf_type") and hasattr(stf_module, "blender_property_name") and getattr(stf_module, "stf_kind") == "component"):
+			if(hasattr(stf_module, "filter") and getattr(stf_module, "filter") and filter):
 				if(filter in getattr(stf_module, "filter")):
 					ret.append(stf_module)
 				else:
@@ -115,9 +115,15 @@ def get_data_component_modules(filter = None) -> list[STF_BlenderComponentModule
 def get_blender_non_native_data_modules() -> list[STF_BlenderDataModule]:
 	ret = []
 	for stf_module in get_stf_modules():
-		if(hasattr(stf_module, "blender_property_name") and getattr(stf_module, "stf_kind") == "data"):
+		if(hasattr(stf_module, "stf_type") and getattr(stf_module, "stf_type") and hasattr(stf_module, "blender_property_name") and getattr(stf_module, "stf_kind") == "data"):
 			ret.append(stf_module)
 	return ret
+
+
+def get_fallback_module(stf_kind: str) -> STF_Module:
+	for stf_module in get_stf_modules():
+		if(hasattr(stf_module, "stf_type") and stf_module.stf_type == None and stf_module.stf_kind == stf_kind):
+			return stf_module
 
 
 def find_component_module(stf_modules: list[STF_BlenderComponentModule], stf_type: str) -> STF_BlenderComponentModule:
@@ -125,12 +131,12 @@ def find_component_module(stf_modules: list[STF_BlenderComponentModule], stf_typ
 		if(stf_module.stf_type == stf_type):
 			return stf_module
 	if(stf_type == "fallback"):
-		return STF_Module_JsonFallbackComponent
+		return get_fallback_module("component")
 
 def find_data_module(stf_modules: list[STF_BlenderDataModule], stf_type: str) -> STF_BlenderDataModule:
 	for stf_module in stf_modules:
 		if(stf_module.stf_type == stf_type):
 			return stf_module
 	if(stf_type == "fallback"):
-		return STF_Module_JsonFallbackData
+		return get_fallback_module("data")
 

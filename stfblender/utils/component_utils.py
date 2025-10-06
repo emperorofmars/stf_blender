@@ -4,7 +4,6 @@ import bpy
 from ..base.stf_module_component import STF_BlenderComponentBase, STF_Component_Ref, STF_BlenderComponentOverride
 from ..base.stf_module_data import STF_BlenderDataResourceBase
 from ..utils.id_utils import ensure_stf_id
-from ..fallback.json_fallback_properties import _fallback_component_blender_property_name
 
 
 def add_component(context_object: any, blender_property_name: str, stf_id: str, stf_type: str, components_ref_property: any = None) -> tuple[STF_Component_Ref, STF_BlenderComponentBase]:
@@ -24,7 +23,7 @@ def add_component(context_object: any, blender_property_name: str, stf_id: str, 
 	new_component.stf_id = component_ref.stf_id
 	new_component.name = stf_id
 
-	if(blender_property_name == _fallback_component_blender_property_name):
+	if(blender_property_name == "stf_json_fallback_component"):
 		new_component.json = "{\"type\": \"" + stf_type + "\"}"
 
 	return (component_ref, new_component)

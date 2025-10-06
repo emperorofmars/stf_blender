@@ -15,6 +15,9 @@ def add_resource(collection: bpy.types.Collection, blender_property_name: str, s
 	new_resource.stf_id = resource_ref.stf_id
 	new_resource.name = stf_id
 
+	if(blender_property_name == "stf_json_fallback_data"):
+		new_resource.json = "{\"type\": \"" + stf_type + "\"}"
+
 	return (resource_ref, new_resource)
 
 

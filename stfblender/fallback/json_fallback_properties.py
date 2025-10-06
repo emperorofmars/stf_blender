@@ -1,3 +1,0 @@
-
-_fallback_component_blender_property_name = "stf_json_fallback_component"
-_fallback_data_blender_property_name = "stf_json_fallback_data"
