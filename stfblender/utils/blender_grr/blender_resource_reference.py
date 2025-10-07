@@ -84,14 +84,22 @@ class BlenderResourceReference(bpy.types.PropertyGroup):
 	workspace: bpy.props.PointerProperty(type=bpy.types.WorkSpace, name="Workspace") # type: ignore
 	world: bpy.props.PointerProperty(type=bpy.types.World, name="World") # type: ignore
 
+	bone_name: bpy.props.StringProperty(name="Bone (Optional)") # type: ignore
+
+
 def draw_blender_resource_reference(layout: bpy.types.UILayout, brr: BlenderResourceReference):
 	layout.prop(brr, "blender_type")
 	if(brr.blender_type and hasattr(brr, brr.blender_type.lower())):
 		layout.prop(brr, brr.blender_type.lower())
+		if(brr.blender_type == "ARMATURE" and brr.armature):
+			layout.prop_search(brr, "bone_name", brr.armature, "bones", icon="BONE_DATA")
 
 def resolve_blender_resource_reference(brr: BlenderResourceReference) -> bpy.types.ID | None:
 	if(brr.blender_type and hasattr(brr, brr.blender_type.lower())):
-		return getattr(brr, brr.blender_type.lower())
+		if(brr.blender_type == "ARMATURE" and brr.armature and brr.bone_name):
+			return brr.armature.bones[brr.bone_name]
+		else:
+			return getattr(brr, brr.blender_type.lower())
 	return None
 
 def validate_blender_resource_reference(brr: BlenderResourceReference) -> bool:

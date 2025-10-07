@@ -140,7 +140,7 @@ def draw_fallback(layout: bpy.types.UILayout, resource_ref: STF_Component_Ref | 
 		remove_resource_button.blender_id_property = resource_ref.id_data.id_type
 
 		box.use_property_split = True
-		draw_blender_grr(box, resource.referenced_resources[resource.active_referenced_resource])
+		draw_blender_grr(box.column(align=True), resource.referenced_resources[resource.active_referenced_resource])
 
 	layout.separator(factor=1)
 

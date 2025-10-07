@@ -33,9 +33,10 @@ def draw_stf_data_resource_reference(layout: bpy.types.UILayout, drr: STFDataRes
 		else:
 			resource_ref = None
 		# let resource
-		for resource in collection.dev_vrm_blendshape_pose:
-			if(resource.stf_id == drr.stf_data_resource_id):
-				break
+		if(resource_ref):
+			for resource in getattr(collection, resource_ref.blender_property_name):
+				if(resource.stf_id == drr.stf_data_resource_id):
+					break
 		else:
 			resource = None
 
