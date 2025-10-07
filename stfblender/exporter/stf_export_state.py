@@ -123,12 +123,12 @@ class STF_ExportState(STF_State_Base):
 		self._exported_resources[id] = json_resource
 
 
-	def serialize_buffer(self, data: bytes) -> str:
+	def serialize_buffer(self, data: bytes, buffer_id: str = None) -> str:
 		"""Register a serialized buffer."""
 		import uuid
-		id = str(uuid.uuid4())
-		self._exported_buffers[id] = data
-		return id
+		buffer_id = buffer_id if buffer_id else str(uuid.uuid4())
+		self._exported_buffers[buffer_id] = data
+		return buffer_id
 
 
 	def id_exists(self, id: str) -> bool:

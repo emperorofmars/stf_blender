@@ -7,7 +7,7 @@ from ...utils.component_utils import add_component, export_component_base, impor
 from ...base.stf_report import STFReport, STFReportSeverity
 from ...utils.reference_helper import register_exported_resource, import_resource
 from ...utils.misc import draw_slot_link_warning
-from ...blender_grr.stf_data_resource_reference import draw_stf_data_resource_reference, validate_stf_data_resource_reference, resolve_stf_data_resource_reference, STFDataResourceReference
+from ...utils.blender_grr.stf_data_resource_reference import draw_stf_data_resource_reference, validate_stf_data_resource_reference, resolve_stf_data_resource_reference, STFDataResourceReference
 
 _stf_type = "ava.emotes"
 _blender_property_name = "ava_emotes"
@@ -88,7 +88,7 @@ class AVA_Emotes(STF_BlenderComponentBase):
 class STFDrawAVAEmoteList(bpy.types.UIList):
 	bl_idname = "COLLECTION_UL_ava_emote_list"
 
-	def draw_item(self, context, layout: bpy.types.UILayout, data, item, icon, active_data, active_propname, index):
+	def draw_item(self, context: bpy.types.Context, layout: bpy.types.UILayout, data, item: AVA_Emote, icon, active_data, active_propname, index):
 		layout.label(text=item.custom_emote if item.emote == "custom" else str(item.emote))
 
 

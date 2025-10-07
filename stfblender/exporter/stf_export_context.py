@@ -85,8 +85,8 @@ class STF_ExportContext:
 		return None
 
 
-	def serialize_buffer(self, data: bytes) -> str:
-		return self._state.serialize_buffer(data)
+	def serialize_buffer(self, data: bytes, buffer_id: str = None) -> str:
+		return self._state.serialize_buffer(data, buffer_id)
 
 
 	def resolve_application_property_path(self, application_object: any, application_object_property_index: int, data_path: str) -> tuple[list[str], Callable[[list[float]], list[float]], list[int]]:

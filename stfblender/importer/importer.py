@@ -2,7 +2,7 @@ import bpy
 import os
 from bpy_extras.io_utils import ImportHelper
 
-from ..base.stf_registry import get_import_modules
+from ..base.stf_registry import get_import_modules, get_import_modules_fallback
 from .stf_import_state import STF_ImportState
 from ..base.stf_report import STFException, STFReport
 from .stf_import_context import STF_ImportContext
@@ -28,7 +28,7 @@ def import_stf_file(filepath: str) -> STF_Import_Result:
 		file = open(filepath, "rb")
 		stf_file = STF_File.parse(file)
 
-		stf_state = STF_ImportState(stf_file, get_import_modules(), trash_objects)
+		stf_state = STF_ImportState(stf_file, get_import_modules(), get_import_modules_fallback(), trash_objects)
 		stf_context = STF_ImportContext(stf_state)
 		root: bpy.types.Collection = stf_context.import_resource(stf_context.get_root_id(), "data")
 		stf_state.run_tasks()
@@ -84,8 +84,8 @@ class ImportSTF(bpy.types.Operator, ImportHelper):
 
 					if(result.warnings and len(result.warnings) > 0):
 						for report in result.warnings:
-							print(result.filepath + " :: " + report.to_string() + "\n")
-							self.report({"WARNING"}, result.filepath + " :: " + report.to_string())
+							print(filepath + " :: " + report.to_string() + "\n")
+							self.report({"WARNING"}, filepath + " :: " + report.to_string())
 
 					result_str = "STF asset \"" + filepath + "\" imported successfully! (%.3f sec.)" % result.import_time
 					if(len(self.files) > 1):

@@ -17,13 +17,13 @@ class STF_ImportState(STF_State_Base):
 	Each context must have access to the same STF_ImportState instance.
 	"""
 
-	def __init__(self, file: STF_File, modules: dict[str, STF_Module], trash_objects: list[bpy.types.Object] = [], fail_on_severity: STFReportSeverity = STFReportSeverity.FatalError, fallback_modules: dict[str, STF_Module] = {}):
+	def __init__(self, file: STF_File, modules: dict[str, STF_Module], fallback_modules: dict[str, STF_Module] = {}, trash_objects: list[bpy.types.Object] = [], fail_on_severity: STFReportSeverity = STFReportSeverity.FatalError):
 		super().__init__(fail_on_severity)
 
 		self._file = file
 
 		self._modules: dict[str, STF_Module] = modules
-		self._fallback_modules = fallback_modules
+		self._fallback_modules: dict[str, STF_Module] = fallback_modules
 
 		self._imported_resources: dict[str, any] = {} # ID | list of IDs -> imported object
 		self._asset_info: STF_Meta_AssetInfo

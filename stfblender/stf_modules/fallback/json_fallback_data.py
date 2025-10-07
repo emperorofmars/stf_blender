@@ -4,7 +4,10 @@ import json
 from ...exporter.stf_export_context import STF_ExportContext
 from ...importer.stf_import_context import STF_ImportContext
 from ...base.stf_module_data import STF_BlenderDataModule, STF_BlenderDataResourceBase, STF_Data_Ref
-from ...utils.data_resource_utils import get_components_from_data_resource
+from ...utils.data_resource_utils import add_resource, export_data_resource_base, get_components_from_data_resource, import_data_resource_base
+from ...utils.blender_grr.blender_grr import BlenderGRR
+from .json_fallback_buffer import STF_FallbackBuffer
+from .json_fallback_ui import draw_fallback
 
 
 _blender_property_name = "stf_json_fallback_data"
@@ -12,42 +15,35 @@ _blender_property_name = "stf_json_fallback_data"
 
 class JsonFallbackData(STF_BlenderDataResourceBase):
 	json: bpy.props.StringProperty(name="Raw Json") # type: ignore
-	#referenced_resources:
-	#buffers:
+	referenced_resources: bpy.props.CollectionProperty(type=BlenderGRR, name="Referenced Resources", options=set()) # type: ignore
+	active_referenced_resource: bpy.props.IntProperty() # type: ignore
+	buffers: bpy.props.CollectionProperty(type=STF_FallbackBuffer, name="Buffers", options=set()) # type: ignore
+	active_buffer: bpy.props.IntProperty() # type: ignore
 
 
 def _draw_resource(layout: bpy.types.UILayout, context: bpy.types.Context, resource_ref: STF_Data_Ref, context_object: bpy.types.Collection, resource: JsonFallbackData):
-	col = layout.column(align=True)
-	col.label(text="Json Data:", icon="PASTEDOWN")
-
-	json_error = False
-	try:
-		json_resource = json.loads(resource.json)
-		if("type" not in json_resource or json_resource["type"] != resource_ref.stf_type):
-			col.label(text="Invalid 'type' in Json", icon="ERROR")
-			json_error = True
-	except:
-		col.label(text="Json Invalid", icon="ERROR")
-		json_error = True
-	col.alert = json_error
-	col.prop(resource, "json", text="", icon="ERROR" if json_error else "NONE")
-
-	#layout.prop(component, "referenced_resources")
-	#layout.prop(component, "buffers")
+	draw_fallback(layout, resource_ref, resource)
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, context_object: any) -> any:
-	"""fallback.stf_type = json_resource["type"]
-	fallback.json = json.dumps(json_resource)
-	return fallback"""
-	pass
+def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: bpy.types.Collection) -> any:
+	resource_ref, resource = add_resource(context_object, _blender_property_name, stf_id, json_resource["type"])
+	import_data_resource_base(resource, json_resource)
+
+	resource.json = json.dumps(json_resource)
+
+	#resource.referenced_resources = json_resource.get("referenced_resources")
+	#resource.buffers = json_resource.get("referenced_buffers")
+
+	return resource
 
 
 def _stf_export(context: STF_ExportContext, resource: JsonFallbackData, context_object: any) -> tuple[dict, str]:
 	try:
-		ret = json.loads(resource.json)
-		if("type" not in ret or not ret["type"]):
+		json_resource = json.loads(resource.json)
+		if("type" not in json_resource or not json_resource["type"]):
 			return None
+		ret = export_data_resource_base(context, json_resource["type"], resource)
+		ret = ret | json_resource
 		return ret, resource.stf_id
 	except:
 		return None

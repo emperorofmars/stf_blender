@@ -35,14 +35,21 @@ def is_priority_higher(a: STF_Module, b: STF_Module) -> bool:
 
 def get_import_modules() -> dict[str, STF_Module]:
 	stf_modules = get_stf_modules()
-
 	ret_modules = {}
-
 	for stf_module in stf_modules:
 		if(hasattr(stf_module, "stf_type") and hasattr(stf_module, "import_func")):
 			if(not ret_modules.get(stf_module.stf_type) or is_priority_higher(ret_modules[stf_module.stf_type], stf_module)):
 				ret_modules[stf_module.stf_type] = stf_module
+	return ret_modules
 
+
+def get_import_modules_fallback() -> dict[str, STF_Module]:
+	stf_modules = get_stf_modules()
+	ret_modules = {}
+	for stf_module in stf_modules:
+		if(hasattr(stf_module, "stf_type") and not getattr(stf_module, "stf_type") and hasattr(stf_module, "import_func")):
+			if(not ret_modules.get(stf_module.stf_kind) or is_priority_higher(ret_modules[stf_module.stf_kind], stf_module)):
+				ret_modules[stf_module.stf_kind] = stf_module
 	return ret_modules
 
 

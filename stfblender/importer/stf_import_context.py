@@ -62,8 +62,7 @@ class STF_ImportContext:
 				_logger.error("Resource import error", stack_info=True)
 				self.report(STFReport("Resource import error", STFReportSeverity.Error, stf_id, module.stf_type, None))
 		else:
-			# TODO json fallback
-			self.report(STFReport("No STF_Module registered", STFReportSeverity.Warn, stf_id, json_resource.get("type")))
+			self.report(STFReport("Could not process resource: " + stf_id, STFReportSeverity.FatalError, stf_id, json_resource.get("type")))
 		return None
 
 

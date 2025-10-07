@@ -5,7 +5,7 @@ from ...base.stf_module_data import STF_BlenderDataResourceBase
 from ...exporter.stf_export_context import STF_ExportContext
 from ...importer.stf_import_context import STF_ImportContext
 from ...utils.component_utils import add_component, export_component_base, import_component_base
-from ...blender_grr import BlenderResourceReference, draw_blender_resource_reference, STFDataResourceReference, draw_stf_data_resource_reference, BlenderGRR, draw_blender_grr
+from ...utils.blender_grr import BlenderResourceReference, draw_blender_resource_reference, STFDataResourceReference, draw_stf_data_resource_reference, BlenderGRR, draw_blender_grr
 
 
 _stf_type = "placeholder.remove.me.data_resource"
