@@ -21,13 +21,9 @@ reference_type_values = (
 class BlenderGRR(bpy.types.PropertyGroup):
 	reference_type: bpy.props.EnumProperty(name="Reference Type", items=reference_type_values) # type: ignore
 
-	#blender_type: bpy.props.EnumProperty(name="Type", items=blender_type_values, default="OBJECT") # type: ignore
-
 	blender_resource_reference: bpy.props.PointerProperty(type=BlenderResourceReference, name="Blender Resource Reference") # type: ignore
 	stf_data_resource_reference: bpy.props.PointerProperty(type=STFDataResourceReference, name="STF Data-Resource Reference") # type: ignore
 
-
-	stf_data_resource_id: bpy.props.StringProperty(name="Resource ID") # type: ignore
 	stf_component_id: bpy.props.StringProperty(name="Component ID") # type: ignore
 
 

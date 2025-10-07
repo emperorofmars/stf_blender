@@ -12,9 +12,9 @@ class STF_FallbackBuffer(bpy.types.PropertyGroup):
 
 def encode_buffer(context: STF_ImportContext, buffer_id: str, stf_fallback: bpy.types.CollectionProperty):
 	blender_buffer = stf_fallback.buffers.add()
+	blender_buffer.name = buffer_id
+	blender_buffer.stf_id = buffer_id
 	if(buffer := context.import_buffer(buffer_id)):
-		blender_buffer.name = buffer_id
-		blender_buffer.stf_id = buffer_id
 		blender_buffer.buffer_base64 = base64.standard_b64encode(buffer).decode("ascii") # I hate this
 
 

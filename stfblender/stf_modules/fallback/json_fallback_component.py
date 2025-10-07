@@ -54,12 +54,11 @@ def _stf_export(context: STF_ExportContext, component: JsonFallbackComponent, co
 		ret["referenced_resources"] = []
 		ret["referenced_buffers"] = []
 
-		for referenced_resource in component.referenced_resources:
-			referenced_resource: BlenderGRR = referenced_resource
-			if(blender_resource := resolve_blender_grr(referenced_resource)):
-				def _handle():
+		def _handle():
+			for referenced_resource in component.referenced_resources:
+				if(blender_resource := resolve_blender_grr(referenced_resource)):
 					register_exported_resource(ret, context.serialize_resource(blender_resource))
-				context.add_task(_handle)
+		context.add_task(_handle)
 		
 		for buffer in component.buffers:
 			register_exported_buffer(ret, decode_buffer(context, buffer))
