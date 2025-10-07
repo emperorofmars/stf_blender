@@ -42,6 +42,26 @@ def draw_blender_grr(layout: bpy.types.UILayout, grr: BlenderGRR):
 		case "stf_data_resource": draw_stf_data_resource_reference(layout, grr.stf_data_resource_reference)
 		case "stf_component":
 			layout.prop(grr, "component_reference_type")
+
+			def _draw_component_info(component_holder: any, component_ref: any):
+					# let component
+					for component in getattr(component_holder, component_ref.blender_property_name):
+						if(component.stf_id == grr.stf_component_id):
+							break
+					split = layout.split(factor=0.4)
+					row = split.row()
+					if(layout.use_property_split):
+						row.alignment = "RIGHT"
+					row.label(text="Type   ")
+					split.label(text=component_ref.stf_type)
+					if(component):
+						split = layout.split(factor=0.4)
+						row = split.row()
+						if(layout.use_property_split):
+							row.alignment = "RIGHT"
+						row.label(text="Name   ")
+						split.label(text=component.stf_name)
+
 			match(grr.component_reference_type):
 				case "blender":
 					draw_blender_resource_reference(layout, grr.blender_resource_reference)
@@ -51,23 +71,7 @@ def draw_blender_grr(layout: bpy.types.UILayout, grr: BlenderGRR):
 
 						if(grr.stf_component_id and grr.stf_component_id in component_holder.stf_info.stf_components):
 							component_ref = component_holder.stf_info.stf_components[grr.stf_component_id]
-							# let component
-							for component in getattr(component_holder, component_ref.blender_property_name):
-								if(component.stf_id == grr.stf_component_id):
-									break
-							split = layout.split(factor=0.4)
-							row = split.row()
-							if(layout.use_property_split):
-								row.alignment = "RIGHT"
-							row.label(text="Type   ")
-							split.label(text=component_ref.stf_type)
-							if(component):
-								split = layout.split(factor=0.4)
-								row = split.row()
-								if(layout.use_property_split):
-									row.alignment = "RIGHT"
-								row.label(text="Name   ")
-								split.label(text=component.stf_name)
+							_draw_component_info(component_holder, component_ref)
 
 				case "stf_data_resource":
 					draw_stf_data_resource_reference(layout, grr.stf_data_resource_reference)
@@ -78,23 +82,7 @@ def draw_blender_grr(layout: bpy.types.UILayout, grr: BlenderGRR):
 
 						if(grr.stf_component_id and grr.stf_component_id in component_holder.stf_components):
 							component_ref = component_holder.stf_components[grr.stf_component_id]
-							# let component
-							for component in getattr(component_holder.id_data, component_ref.blender_property_name):
-								if(component.stf_id == grr.stf_component_id):
-									break
-							split = layout.split(factor=0.4)
-							row = split.row()
-							if(layout.use_property_split):
-								row.alignment = "RIGHT"
-							row.label(text="Type   ")
-							split.label(text=component_ref.stf_type)
-							if(component):
-								split = layout.split(factor=0.4)
-								row = split.row()
-								if(layout.use_property_split):
-									row.alignment = "RIGHT"
-								row.label(text="Name   ")
-								split.label(text=component.stf_name)
+							_draw_component_info(component_holder, component_ref)
 
 
 def resolve_blender_grr(grr: BlenderGRR) -> any:
