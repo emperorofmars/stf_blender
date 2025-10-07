@@ -2,6 +2,7 @@ import bpy
 
 from .stf_data_resource_reference import STFDataResourceReference, draw_stf_data_resource_reference, resolve_stf_data_resource_reference, validate_stf_data_resource_reference
 from .blender_resource_reference import BlenderResourceReference, blender_type_values, draw_blender_resource_reference, resolve_blender_resource_reference, validate_blender_resource_reference
+from ...importer.stf_import_context import STF_ImportContext
 
 """
 Blender Generic Resource Reference
@@ -20,7 +21,7 @@ reference_type_values = (
 class BlenderGRR(bpy.types.PropertyGroup):
 	reference_type: bpy.props.EnumProperty(name="Reference Type", items=reference_type_values) # type: ignore
 
-	blender_type: bpy.props.EnumProperty(name="Type", items=blender_type_values) # type: ignore
+	#blender_type: bpy.props.EnumProperty(name="Type", items=blender_type_values, default="OBJECT") # type: ignore
 
 	blender_resource_reference: bpy.props.PointerProperty(type=BlenderResourceReference, name="Blender Resource Reference") # type: ignore
 	stf_data_resource_reference: bpy.props.PointerProperty(type=STFDataResourceReference, name="STF Data-Resource Reference") # type: ignore
@@ -47,6 +48,9 @@ def resolve_blender_grr(grr: BlenderGRR) -> any:
 				return ret[1]
 		case "stf_component": pass
 	return None
+
+def construct_blender_grr(context: STF_ImportContext, stf_id: str, grr: BlenderGRR):
+	pass
 
 def validate_blender_grr(grr: BlenderGRR) -> bool:
 	if(not grr):

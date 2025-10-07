@@ -46,7 +46,7 @@ blender_type_values = (
 
 
 class BlenderResourceReference(bpy.types.PropertyGroup):
-	blender_type: bpy.props.EnumProperty(name="Type", items=blender_type_values) # type: ignore
+	blender_type: bpy.props.EnumProperty(name="Type", items=blender_type_values, default="OBJECT") # type: ignore
 
 	action: bpy.props.PointerProperty(type=bpy.types.Action, name="Action") # type: ignore
 	armature: bpy.props.PointerProperty(type=bpy.types.Armature, name="Armature") # type: ignore

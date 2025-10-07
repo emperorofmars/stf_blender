@@ -5,9 +5,9 @@ from ...base.stf_module_component import STF_BlenderComponentBase, STF_BlenderCo
 from ...exporter.stf_export_context import STF_ExportContext
 from ...importer.stf_import_context import STF_ImportContext
 from ...utils.component_utils import add_component, export_component_base, import_component_base
-from ...utils.blender_grr.blender_grr import BlenderGRR, resolve_blender_grr
+from ...utils.blender_grr.blender_grr import BlenderGRR, construct_blender_grr, resolve_blender_grr
 from ...utils.reference_helper import register_exported_buffer, register_exported_resource
-from .json_fallback_buffer import STF_FallbackBuffer, decode_buffer
+from .json_fallback_buffer import STF_FallbackBuffer, decode_buffer, encode_buffer
 from .json_fallback_ui import draw_fallback
 
 
@@ -28,12 +28,17 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, context_object: any) -> any:
 	component_ref, component = add_component(context_object, _blender_property_name, id, json_resource["type"])
+	component: JsonFallbackComponent = component
 	import_component_base(component, json_resource)
 
 	component.json = json.dumps(json_resource)
 
-	#component.referenced_resources = json_resource.get("referenced_resources")
-	#component.buffers = json_resource.get("referenced_buffers")
+	for resource_id in json_resource.get("referenced_resources", []):
+		resource_grr = component.referenced_resources.add()
+		construct_blender_grr(context, resource_id, resource_grr)
+
+	for buffer_id in json_resource.get("referenced_buffers", []):
+		encode_buffer(context, buffer_id, component)
 
 	return component
 
@@ -53,10 +58,7 @@ def _stf_export(context: STF_ExportContext, component: JsonFallbackComponent, co
 			referenced_resource: BlenderGRR = referenced_resource
 			if(blender_resource := resolve_blender_grr(referenced_resource)):
 				def _handle():
-					if(ref_id := context.get_resource_id(blender_resource)):
-						register_exported_resource(ret, ref_id)
-					else:
-						register_exported_resource(ret, context.serialize_resource(blender_resource))
+					register_exported_resource(ret, context.serialize_resource(blender_resource))
 				context.add_task(_handle)
 		
 		for buffer in component.buffers:
