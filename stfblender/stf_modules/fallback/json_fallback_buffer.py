@@ -18,5 +18,5 @@ def encode_buffer(context: STF_ImportContext, buffer_id: str, stf_fallback: bpy.
 		blender_buffer.buffer_base64 = base64.standard_b64encode(buffer) # I hate this
 
 
-def decode_buffer(context: STF_ExportContext, stf_fallback: STF_FallbackBuffer):
-	context.serialize_buffer(base64.standard_b64decode(stf_fallback.buffer_base64), stf_fallback.stf_id)
+def decode_buffer(context: STF_ExportContext, stf_fallback: STF_FallbackBuffer) -> str:
+	return context.serialize_buffer(base64.standard_b64decode(stf_fallback.buffer_base64), stf_fallback.stf_id)

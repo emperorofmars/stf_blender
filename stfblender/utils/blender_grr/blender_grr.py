@@ -41,7 +41,10 @@ def draw_blender_grr(layout: bpy.types.UILayout, grr: BlenderGRR):
 def resolve_blender_grr(grr: BlenderGRR) -> any:
 	match(grr.reference_type):
 		case "blender": return resolve_blender_resource_reference(grr.blender_resource_reference)
-		case "stf_data_resource": return resolve_stf_data_resource_reference(grr.stf_data_resource_reference)
+		case "stf_data_resource":
+			ret = resolve_stf_data_resource_reference(grr.stf_data_resource_reference)
+			if(ret):
+				return ret[1]
 		case "stf_component": pass
 	return None
 

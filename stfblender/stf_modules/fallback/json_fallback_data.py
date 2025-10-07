@@ -5,8 +5,9 @@ from ...exporter.stf_export_context import STF_ExportContext
 from ...importer.stf_import_context import STF_ImportContext
 from ...base.stf_module_data import STF_BlenderDataModule, STF_BlenderDataResourceBase, STF_Data_Ref
 from ...utils.data_resource_utils import add_resource, export_data_resource_base, get_components_from_data_resource, import_data_resource_base
-from ...utils.blender_grr.blender_grr import BlenderGRR
-from .json_fallback_buffer import STF_FallbackBuffer
+from ...utils.reference_helper import register_exported_buffer, register_exported_resource
+from ...utils.blender_grr.blender_grr import BlenderGRR, resolve_blender_grr
+from .json_fallback_buffer import STF_FallbackBuffer, decode_buffer
 from .json_fallback_ui import draw_fallback
 
 
@@ -44,12 +45,31 @@ def _stf_export(context: STF_ExportContext, resource: JsonFallbackData, context_
 			return None
 		ret = export_data_resource_base(context, json_resource["type"], resource)
 		ret = ret | json_resource
+
+		ret["referenced_resources"] = []
+		ret["referenced_buffers"] = []
+
+		for referenced_resource in resource.referenced_resources:
+			referenced_resource: BlenderGRR = referenced_resource
+			if(blender_resource := resolve_blender_grr(referenced_resource)):
+				def _handle():
+					if(ref_id := context.get_resource_id(blender_resource)):
+						register_exported_resource(ret, ref_id)
+					else:
+						register_exported_resource(ret, context.serialize_resource(blender_resource))
+				context.add_task(_handle)
+		
+		for buffer in resource.buffers:
+			register_exported_buffer(ret, decode_buffer(context, buffer))
+
 		return ret, resource.stf_id
 	except:
 		return None
 
 
 class STF_Module_JsonFallbackData(STF_BlenderDataModule):
+	"""This type is not supported.
+	You have to edit the raw json string, resource references and base64 encoded binary buffers"""
 	stf_type = None
 	stf_kind = "data"
 	understood_application_types = [JsonFallbackData]

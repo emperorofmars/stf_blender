@@ -5,8 +5,9 @@ from ...base.stf_module_component import STF_BlenderComponentBase, STF_BlenderCo
 from ...exporter.stf_export_context import STF_ExportContext
 from ...importer.stf_import_context import STF_ImportContext
 from ...utils.component_utils import add_component, export_component_base, import_component_base
-from ...utils.blender_grr.blender_grr import BlenderGRR
-from .json_fallback_buffer import STF_FallbackBuffer
+from ...utils.blender_grr.blender_grr import BlenderGRR, resolve_blender_grr
+from ...utils.reference_helper import register_exported_buffer, register_exported_resource
+from .json_fallback_buffer import STF_FallbackBuffer, decode_buffer
 from .json_fallback_ui import draw_fallback
 
 
@@ -44,6 +45,23 @@ def _stf_export(context: STF_ExportContext, component: JsonFallbackComponent, co
 			return None
 		ret = export_component_base(context, json_component["type"], component)
 		ret = ret | json_component
+
+		ret["referenced_resources"] = []
+		ret["referenced_buffers"] = []
+
+		for referenced_resource in component.referenced_resources:
+			referenced_resource: BlenderGRR = referenced_resource
+			if(blender_resource := resolve_blender_grr(referenced_resource)):
+				def _handle():
+					if(ref_id := context.get_resource_id(blender_resource)):
+						register_exported_resource(ret, ref_id)
+					else:
+						register_exported_resource(ret, context.serialize_resource(blender_resource))
+				context.add_task(_handle)
+		
+		for buffer in component.buffers:
+			register_exported_buffer(ret, decode_buffer(context, buffer))
+
 		return ret, component.stf_id
 	except:
 		return None
