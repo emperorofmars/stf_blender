@@ -6,9 +6,9 @@ from .stf_dependency_import import stfblender
 _stf_type = "my_custom.namespaced.brush"
 
 
-def _stf_import(context: stfblender.importer.stf_import_context.STF_ImportContext, json_resource: dict, id: str, context_object: any) -> any:
+def _stf_import(context: stfblender.importer.stf_import_context.STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
 	application_object = bpy.data.brushes.new(json_resource.get("name", "My Custom Brush"))
-	application_object.stf_info.stf_id = id
+	application_object.stf_info.stf_id = stf_id
 	if(json_resource.get("name")):
 		application_object.stf_info.stf_name = json_resource["name"]
 		application_object.stf_info.stf_name_source_of_truth = True

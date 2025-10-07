@@ -2,7 +2,7 @@ import bpy
 
 from .stf_data_resource_reference import STFDataResourceReference, draw_stf_data_resource_reference, resolve_stf_data_resource_reference, validate_stf_data_resource_reference
 from .blender_resource_reference import BlenderResourceReference, draw_blender_resource_reference, resolve_blender_resource_reference, validate_blender_resource_reference
-from ...base.stf_module_data import STF_BlenderDataResourceBase
+from ...base.stf_module_data import STF_BlenderDataResourceBase, STF_Data_Ref
 from ...base.stf_module_component import STF_BlenderComponentBase
 from ...utils.armature_bone import ArmatureBone
 
@@ -125,9 +125,7 @@ def resolve_blender_grr(grr: BlenderGRR) -> any:
 	return None
 
 
-def construct_blender_grr(generic_resource: any, grr: BlenderGRR):
-	print(type(generic_resource), " : ", isinstance(generic_resource, bpy.types.ID), " - ", isinstance(generic_resource, STF_BlenderComponentBase))
-
+def construct_blender_grr(generic_resource: any, grr: BlenderGRR, force_resource_id: str = None):
 	if(isinstance(generic_resource, bpy.types.ID)):
 		grr.reference_type = "blender"
 		grr.blender_resource_reference.blender_type = generic_resource.id_type
@@ -139,11 +137,35 @@ def construct_blender_grr(generic_resource: any, grr: BlenderGRR):
 		grr.blender_resource_reference.bone_name = generic_resource.get_bone().name
 	elif(isinstance(generic_resource, STF_BlenderDataResourceBase)):
 		grr.reference_type = "stf_data_resource"
-		# todo
+		grr.stf_data_resource_reference.collection = generic_resource.id_data
+		grr.stf_data_resource_reference.stf_data_resource_id = generic_resource.stf_id
 	elif(isinstance(generic_resource, STF_BlenderComponentBase)):
 		grr.reference_type = "stf_component"
-		# todo
-
+		target_id = force_resource_id if force_resource_id else generic_resource.stf_id
+		# try if component sits on a stf-data-resource
+		if(type(generic_resource.id_data) == bpy.types.Collection):
+			for data_resource_ref in generic_resource.id_data.stf_data_refs:
+				data_resource_ref: STF_Data_Ref = data_resource_ref
+				for data_resource in getattr(generic_resource.id_data, data_resource_ref.blender_property_name):
+					for component_ref in data_resource.stf_components:
+						if(component_ref.stf_id == target_id):
+							grr.component_reference_type = "stf_data_resource"
+							grr.stf_data_resource_reference.collection = generic_resource.id_data
+							grr.stf_data_resource_reference.stf_data_resource_id = data_resource_ref.stf_id
+							grr.stf_component_id = target_id
+							return
+		# else component sits on a blender native resource
+		grr.component_reference_type = "blender"
+		grr.blender_resource_reference.blender_type = generic_resource.id_data.id_type
+		grr.blender_resource_reference[generic_resource.id_data.id_type.lower()] = generic_resource.id_data
+		# if the id_data this component sits on is an armature, it can be referenced by one of its bones
+		if(type(generic_resource.id_data) == bpy.types.Armature):
+			for bone in generic_resource.id_data.bones:
+				for component_ref in bone.stf_info.stf_components:
+					if(component_ref.stf_id == target_id):
+						grr.blender_resource_reference.bone_name = bone.name
+						break
+		grr.stf_component_id = target_id
 	return
 
 

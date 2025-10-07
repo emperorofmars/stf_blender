@@ -14,14 +14,14 @@ def add_component(context_object: any, blender_property_name: str, stf_id: str, 
 		else:
 			components_ref_property = context_object.stf_info.stf_components
 	component_ref: STF_Component_Ref = components_ref_property.add()
+	component_ref.name = stf_id
 	component_ref.stf_id = stf_id
 	component_ref.stf_type = stf_type
 	component_ref.blender_property_name = blender_property_name
-	component_ref.name = stf_id
 
 	new_component = getattr(context_object, blender_property_name).add()
-	new_component.stf_id = component_ref.stf_id
 	new_component.name = stf_id
+	new_component.stf_id = component_ref.stf_id
 
 	if(blender_property_name == "stf_json_fallback_component"):
 		new_component.json = "{\"type\": \"" + stf_type + "\"}"
@@ -190,7 +190,7 @@ def get_components_from_object(application_object: any) -> list:
 						ret.append(component)
 	return ret
 
-def import_component_base(component: any, json_resource: any):
+def import_component_base(component: any, json_resource: dict):
 	if("name" in json_resource): component.stf_name = json_resource["name"]
 	if("overrides" in json_resource):
 		for override in json_resource["overrides"]:
