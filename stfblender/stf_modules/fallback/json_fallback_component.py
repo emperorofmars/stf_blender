@@ -33,9 +33,12 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, contex
 
 	component.json = json.dumps(json_resource)
 
-	for resource_id in json_resource.get("referenced_resources", []):
-		resource_grr = component.referenced_resources.add()
-		construct_blender_grr(context, resource_id, resource_grr)
+	def _handle():
+		for resource_id in json_resource.get("referenced_resources", []):
+			resource_grr = component.referenced_resources.add()
+			if(referenced_resource := context.import_resource(resource_id)):
+				construct_blender_grr(referenced_resource, resource_grr)
+	context.add_task(_handle)
 
 	for buffer_id in json_resource.get("referenced_buffers", []):
 		encode_buffer(context, buffer_id, component)

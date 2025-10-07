@@ -1,8 +1,10 @@
 import bpy
 
 from .stf_data_resource_reference import STFDataResourceReference, draw_stf_data_resource_reference, resolve_stf_data_resource_reference, validate_stf_data_resource_reference
-from .blender_resource_reference import BlenderResourceReference, blender_type_values, draw_blender_resource_reference, resolve_blender_resource_reference, validate_blender_resource_reference
-from ...importer.stf_import_context import STF_ImportContext
+from .blender_resource_reference import BlenderResourceReference, draw_blender_resource_reference, resolve_blender_resource_reference, validate_blender_resource_reference
+from ...base.stf_module_data import STF_BlenderDataResourceBase
+from ...base.stf_module_component import STF_BlenderComponentBase
+from ...utils.armature_bone import ArmatureBone
 
 """
 Blender Generic Resource Reference
@@ -102,12 +104,47 @@ def resolve_blender_grr(grr: BlenderGRR) -> any:
 			ret = resolve_stf_data_resource_reference(grr.stf_data_resource_reference)
 			if(ret):
 				return ret[1]
-		case "stf_component": pass
+		case "stf_component":
+			match(grr.component_reference_type):
+				case "blender":
+					component_holder = resolve_blender_resource_reference(grr.blender_resource_reference)
+					if(grr.stf_component_id and grr.stf_component_id in component_holder.stf_info.stf_components):
+						component_ref = component_holder.stf_info.stf_components[grr.stf_component_id]
+						for component in getattr(component_holder, component_ref.blender_property_name):
+							if(component.stf_id == grr.stf_component_id):
+								return component
+				case "stf_data_resource":
+					component_holder_ret = resolve_stf_data_resource_reference(grr.stf_data_resource_reference)
+					if(component_holder_ret):
+						_, component_holder = component_holder_ret
+						if(grr.stf_component_id and grr.stf_component_id in component_holder.stf_components):
+							component_ref = component_holder.stf_components[grr.stf_component_id]
+							for component in getattr(component_holder.id_data, component_ref.blender_property_name):
+								if(component.stf_id == grr.stf_component_id):
+									return component
 	return None
 
 
-def construct_blender_grr(context: STF_ImportContext, stf_id: str, grr: BlenderGRR):
-	pass
+def construct_blender_grr(generic_resource: any, grr: BlenderGRR):
+	print(type(generic_resource), " : ", isinstance(generic_resource, bpy.types.ID), " - ", isinstance(generic_resource, STF_BlenderComponentBase))
+
+	if(isinstance(generic_resource, bpy.types.ID)):
+		grr.reference_type = "blender"
+		grr.blender_resource_reference.blender_type = generic_resource.id_type
+		grr.blender_resource_reference[generic_resource.id_type.lower()] = generic_resource
+	if(isinstance(generic_resource, ArmatureBone)):
+		grr.reference_type = "blender"
+		grr.blender_resource_reference.blender_type = "ARMATURE"
+		grr.blender_resource_reference.armature = generic_resource.armature
+		grr.blender_resource_reference.bone_name = generic_resource.get_bone().name
+	elif(isinstance(generic_resource, STF_BlenderDataResourceBase)):
+		grr.reference_type = "stf_data_resource"
+		# todo
+	elif(isinstance(generic_resource, STF_BlenderComponentBase)):
+		grr.reference_type = "stf_component"
+		# todo
+
+	return
 
 
 def validate_blender_grr(grr: BlenderGRR) -> bool:
