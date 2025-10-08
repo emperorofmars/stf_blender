@@ -3,7 +3,7 @@ schema_version = "1.0.0"
 # Example of manifest file for a Blender extension
 # Change the values according to your extension
 id = "stf_blender"
-version = "0.0.13"
+version = "0.0.14"
 name = "STF - Squirrel Transfer Format"
 tagline = "Modular 3D File-Format"
 maintainer = "Mars (https://squirrelbite.com)"

@@ -33,7 +33,7 @@ class AVA_Autosetup_Operator(bpy.types.Operator):
 
 
 # Hide in release until its more complete.
-"""
+
 class AVA_Autosetup_Panel(bpy.types.Panel):
 	bl_idname = "OBJECT_PT_ava_autosetup"
 	bl_label = "STF-AVA Autosetup"
@@ -58,7 +58,7 @@ class AVA_Autosetup_Panel(bpy.types.Panel):
 		if(context.scene.ava_autosetup.use_scene_collection or context.scene.ava_autosetup.target_collection):
 			self.layout.label(text="Pre-existing STF components will be removed!", icon="WARNING_LARGE")
 			self.layout.operator(AVA_Autosetup_Operator.bl_idname, icon="KEY_RETURN")
-"""
+
 
 def register():
 	bpy.types.Scene.ava_autosetup = bpy.props.PointerProperty(type=AVA_Autosetup_Data, options=set())
