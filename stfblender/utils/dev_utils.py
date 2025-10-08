@@ -102,13 +102,3 @@ class UnfuckMatrixParentInverse(bpy.types.Operator):
 				blender_object.matrix_world = tmp
 		return {"FINISHED"}
 
-
-def draw_dev_tools(layout: bpy.types.UILayout):
-	layout.label(text="Development Helpers")
-	layout.operator(CleanupOp.bl_idname)
-
-	layout.separator(factor=2, type="SPACE")
-	layout.operator(QuaternionsEverywhere.bl_idname)
-
-	layout.separator(factor=2, type="SPACE")
-	layout.operator(UnfuckMatrixParentInverse.bl_idname)

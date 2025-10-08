@@ -2,10 +2,8 @@ import bpy
 
 from ....utils.id_utils import draw_stf_id_ui
 from ....utils.component_ui import draw_components_ui, set_stf_component_filter
-from ....utils.data_resource_ui import draw_data_resources_ui
 from ....base.stf_meta import draw_meta_editor
-from ....utils.misc import OpenWebpage, draw_slot_link_warning
-from ....utils.dev_utils import draw_dev_tools
+from ....utils.misc import draw_slot_link_warning
 
 
 def draw_prefab_ui(layout: bpy.types.UILayout, context: bpy.types.Context, collection: bpy.types.Collection, operator_set_as_root: str, operator_set_id: str, operator_add_component: str, operator_remove_component: str, operator_edit_component_id: str):
@@ -41,8 +39,3 @@ def draw_prefab_ui(layout: bpy.types.UILayout, context: bpy.types.Context, colle
 		header.label(text="STF Components", icon="GROUP")
 		if(body): draw_components_ui(layout, context, collection.stf_info, collection, operator_add_component, operator_remove_component, operator_edit_component_id)
 
-	# Dev Options
-	layout.separator(factor=3, type="LINE")
-	dev_header, dev_body = layout.panel("stf.devtools_collection", default_closed = True)
-	dev_header.label(text="Devtools")
-	if(dev_body): draw_dev_tools(dev_body)
