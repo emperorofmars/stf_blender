@@ -37,7 +37,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
 	component_ref, component = add_component(context_object, _blender_property_name, stf_id, _stf_type)
-	import_component_base(component, json_resource)
+	import_component_base(context, component, json_resource, context_object)
 	component.weight = json_resource.get("weight")
 
 	if("target" in json_resource):

@@ -296,7 +296,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, context_object: any) -> any:
 	component_ref, component = add_component(context_object, _blender_property_name, id, _stf_type)
 	component: STFEXP_Armature_Humanoid = component
-	import_component_base(component, json_resource)
+	import_component_base(context, component, json_resource)
 
 	component.locomotion_type = json_resource.get("locomotion_type", "planti")
 	component.no_jaw = json_resource.get("no_jaw", False)

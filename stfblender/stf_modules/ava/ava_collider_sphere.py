@@ -79,7 +79,7 @@ def _parse_component_instance_standin_func(context: STF_ImportContext, json_reso
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
 	component_ref, component = add_component(context_object, _blender_property_name, stf_id, _stf_type)
-	import_component_base(component, json_resource)
+	import_component_base(context, component, json_resource, context_object)
 	_parse_json(component, json_resource)
 	return component
 

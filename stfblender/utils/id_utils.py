@@ -25,10 +25,14 @@ def draw_stf_id_ui(layout: bpy.types.UILayout, context: bpy.types.Context, blend
 	if(stf_prop_holder.stf_id):
 		row = flow.row(align=True)
 		row_l = row.row(align=True)
-		row_l.prop(stf_prop_holder, "stf_id", text="")
-		row_r = row.row(align=True)
+		if(context.scene.stf_edit_resource_id):
+			row_l.prop(stf_prop_holder, "stf_id", text="")
+		else:
+			row_l.label(text=stf_prop_holder.stf_id)
+		row_r = row.row(align=False)
 		row_r.alignment = "RIGHT"
-		row_r.operator(CopyToClipboard.bl_idname, text="Copy ID", icon="DUPLICATE").text = stf_prop_holder.stf_id
+		row_r.operator(CopyToClipboard.bl_idname, text="", icon="DUPLICATE").text = stf_prop_holder.stf_id
+		row_r.prop(context.scene, "stf_edit_resource_id", text="", icon="MODIFIER")
 	else:
 		flow.operator(set_id_op)
 
@@ -62,3 +66,12 @@ def ensure_stf_id(stf_context: any, blender_object: any, stf_prop_holder: any = 
 	elif(stf_context.id_exists(stf_prop_holder.stf_id) and not stf_context._state._permit_id_reassignment):
 		stf_context.report(STFReport("Duplicate ID", STFReportSeverity.FatalError, stf_prop_holder.stf_id, None, blender_object))
 	stf_context.register_id(blender_object, stf_prop_holder.stf_id)
+
+
+def register():
+	bpy.types.Scene.stf_edit_resource_id = bpy.props.BoolProperty(name="Edit ID", description="Toggle the editing of the ID", default=False)
+
+def unregister():
+	if hasattr(bpy.types.Scene, "stf_edit_resource_id"):
+		del bpy.types.Scene.stf_edit_resource_id
+

@@ -1,9 +1,14 @@
-import json
 import bpy
+import json
+from typing import Callable
 
-from ..base.stf_module_component import STF_BlenderComponentBase, STF_Component_Ref, STF_BlenderComponentOverride
+from ..exporter.stf_export_context import STF_ExportContext
+from ..importer.stf_import_context import STF_ImportContext
+from ..base.stf_module_component import STF_BlenderComponentBase, STF_Component_Ref
 from ..base.stf_module_data import STF_BlenderDataResourceBase
-from ..utils.id_utils import ensure_stf_id
+from ..base.blender_grr.prelude import *
+from .id_utils import ensure_stf_id
+from .armature_bone import ArmatureBone
 
 
 def add_component(context_object: any, blender_property_name: str, stf_id: str, stf_type: str, components_ref_property: any = None) -> tuple[STF_Component_Ref, STF_BlenderComponentBase]:
@@ -92,25 +97,6 @@ class STFEditComponentOperatorBase:
 
 	def invoke(self, context, event):
 		self.edit_component_id = self.component_id
-
-		context.scene.workaround_for_blenders_datamodel__component_overrides.clear()
-		
-		found_overrides = False
-		components_refs = self.get_components_ref_property(context)
-		for component_ref in components_refs:
-			if(component_ref.stf_id == self.component_id):
-				if(hasattr(self.get_property(context), component_ref.blender_property_name)):
-					components = getattr(self.get_property(context), component_ref.blender_property_name)
-					for component in components:
-						if(component.stf_id == self.component_id):
-							for override in component.overrides:
-								added = context.scene.workaround_for_blenders_datamodel__component_overrides.add()
-								added.target_id = override.target_id
-							found_overrides = True
-							break
-					if(found_overrides): break
-			if(found_overrides): break
-
 		return context.window_manager.invoke_props_dialog(self)
 
 	def execute(self, context):
@@ -129,10 +115,6 @@ class STFEditComponentOperatorBase:
 							component.name = self.edit_component_id
 							component_ref.stf_id = self.edit_component_id
 							component_ref.name = self.edit_component_id
-							component.overrides.clear()
-							for override in context.scene.workaround_for_blenders_datamodel__component_overrides:
-								if(override.target_id):
-									component.overrides.add().target_id = override.target_id
 							return {"FINISHED"}
 
 		self.report({"ERROR"}, "Couldn't change Component ID")
@@ -141,13 +123,6 @@ class STFEditComponentOperatorBase:
 	def draw(self, context):
 		layout: bpy.types.UILayout = self.layout
 		layout.prop(self, "edit_component_id")
-
-		layout.label(text="Overrides:")
-		for index, override in enumerate(context.scene.workaround_for_blenders_datamodel__component_overrides):
-			row = layout.row()
-			row.prop(override, "target_id", text="Target ID")
-			row.operator(RemoveOverrideFromComponent.bl_idname, text="", icon="X").index = index
-		layout.operator(AddOverrideToComponent.bl_idname)
 
 	def get_property(self, context) -> any:
 		pass
@@ -162,9 +137,24 @@ class AddOverrideToComponent(bpy.types.Operator):
 	bl_label = "Add"
 	bl_options = {"REGISTER", "UNDO", "INTERNAL"}
 
-	def execute(self, context):
-		bpy.context.scene.workaround_for_blenders_datamodel__component_overrides.add()
-		return {"FINISHED"}
+	blender_id_type: bpy.props.StringProperty() # type: ignore
+	blender_property_name: bpy.props.StringProperty() # type: ignore
+	bone_name: bpy.props.StringProperty() # type: ignore
+	component_id: bpy.props.StringProperty() # type: ignore
+
+	def execute(self, context: bpy.types.Context):
+		blender_id = getattr(context, self.blender_id_type.lower())
+		if(self.bone_name):
+			for bone in blender_id.bones:
+				if(bone.name == self.bone_name):
+					blender_id = bone
+					break
+		for component in getattr(blender_id, self.blender_property_name):
+			if(component.stf_id == self.component_id):
+				override: BlenderGRR = component.overrides.add()
+				override.reference_type = "stf_component"
+				return {"FINISHED"}
+		return {"CANCELLED"}
 
 class RemoveOverrideFromComponent(bpy.types.Operator):
 	"""Add override to component"""
@@ -172,11 +162,40 @@ class RemoveOverrideFromComponent(bpy.types.Operator):
 	bl_label = "Remove"
 	bl_options = {"REGISTER", "UNDO", "INTERNAL"}
 
+	blender_id_type: bpy.props.StringProperty() # type: ignore
+	blender_property_name: bpy.props.StringProperty() # type: ignore
+	bone_name: bpy.props.StringProperty() # type: ignore
+	component_id: bpy.props.StringProperty() # type: ignore
 	index: bpy.props.IntProperty(default=-1) # type: ignore
 
-	def execute(self, context):
-		bpy.context.scene.workaround_for_blenders_datamodel__component_overrides.remove(self.index)
-		return {"FINISHED"}
+	def execute(self, context: bpy.types.Context):
+		blender_id = getattr(context, self.blender_id_type.lower())
+		if(self.bone_name):
+			for bone in blender_id.bones:
+				if(bone.name == self.bone_name):
+					blender_id = bone
+					break
+		for component in getattr(blender_id, self.blender_property_name):
+			if(component.stf_id == self.component_id):
+				component.overrides.remove(self.index)
+				return {"FINISHED"}
+		return {"CANCELLED"}
+
+
+def preserve_component_reference(component: STF_BlenderComponentBase, context_object: any) -> Callable:
+	if(type(context_object) == bpy.types.Bone):
+		armature_bone = ArmatureBone(component.id_data, context_object.name)
+		component_id = component.stf_id
+		def _get_component() -> STF_BlenderComponentBase:
+			for component_ref in armature_bone.get_bone().stf_info.stf_components:
+				if(component_ref.stf_id == component_id):
+					for component in getattr(armature_bone.get_bone(), component_ref.blender_property_name):
+						if(component.stf_id == component_id):
+							return component
+	else:
+		def _get_component() -> STF_BlenderComponentBase:
+			return component
+	return _get_component
 
 
 def get_components_from_object(application_object: any) -> list:
@@ -190,22 +209,45 @@ def get_components_from_object(application_object: any) -> list:
 						ret.append(component)
 	return ret
 
-def import_component_base(component: any, json_resource: dict):
+
+def import_component_base(context: STF_ImportContext, component: STF_BlenderComponentBase, json_resource: dict, context_object: any = None):
 	if("name" in json_resource): component.stf_name = json_resource["name"]
 	if("overrides" in json_resource):
-		for override in json_resource["overrides"]:
-			component.overrides.add().target_id = override
+		_get_component = preserve_component_reference(component, context_object)
+
+		def _handle():
+			component = _get_component()
+			for override_id in json_resource["overrides"]:
+				#print(override_id)
+				override: BlenderGRR = component.overrides.add()
+				if(override_resource := context.import_resource(override_id, stf_kind="component")):
+					construct_blender_grr(override_resource, override, override_id)
+				else: # fallback if something went fucky
+					override.reference_type = "stf_component"
+					override.stf_component_id = override_id
+		context.add_task(_handle)
 	if("enabled" in json_resource):
 		component.enabled = json_resource["enabled"]
 
-def export_component_base(stf_context: any, stf_type: str, component: any) -> dict:
-	ensure_stf_id(stf_context, component, component)
+def export_component_base(context: STF_ExportContext, stf_type: str, component: STF_BlenderComponentBase) -> dict:
+	ensure_stf_id(context, component, component)
 	ret = { "type": stf_type }
 	if(component.stf_name): ret["name"] = component.stf_name
-	if(component.overrides): ret["overrides"] = [override.target_id for override in component.overrides]
+	if(component.overrides and len(component.overrides) > 0):
+		def _handle():
+			overrides_list = []
+			for override in component.overrides:
+				if(resolved := resolve_blender_grr(override)):
+					if(resolved_id := context.serialize_resource(resolved)):
+						overrides_list.append(resolved_id)
+						continue
+				if(override.stf_component_id): # fallback if something went fucky
+					overrides_list.append(override.stf_component_id)
+			if(len(overrides_list)):
+				ret["overrides"] = overrides_list
+		context.add_task(_handle)
 	if(component.enabled == False): ret["enabled"] = False
 	return ret
-
 
 
 class ComponentLoadJsonOperatorBase():
@@ -251,11 +293,3 @@ class ComponentLoadJsonOperatorBase():
 			json_error = True
 		layout.alert = json_error
 		layout.prop(self, "json_string", text="", icon="ERROR" if json_error else "NONE")
-
-
-def register():
-	bpy.types.Scene.workaround_for_blenders_datamodel__component_overrides = bpy.props.CollectionProperty(type=STF_BlenderComponentOverride, options=set()) # type: ignore
-
-def unregister():
-	if hasattr(bpy.types.Scene, "workaround_for_blenders_datamodel__component_overrides"):
-		del bpy.types.Scene.workaround_for_blenders_datamodel__component_overrides

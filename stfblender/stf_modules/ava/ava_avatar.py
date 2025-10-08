@@ -73,7 +73,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, parent_application_object: any) -> any:
 	component_ref, component = add_component(parent_application_object, _blender_property_name, id, _stf_type)
-	import_component_base(component, json_resource)
+	import_component_base(context, component, json_resource)
 
 	if("viewport" in json_resource):
 		def _handle_viewport():

@@ -1,8 +1,10 @@
 import bpy
 from typing import Callable
 
-from ..base.stf_module_component import InstanceModComponentRef, STF_Component_Ref
+from .component_utils import AddOverrideToComponent, RemoveOverrideFromComponent
+from ..base.stf_module_component import InstanceModComponentRef, STF_BlenderComponentBase, STF_Component_Ref
 from ..base.stf_registry import find_component_module, get_all_component_modules, get_component_modules, get_data_component_modules
+from ..base.blender_grr.prelude import *
 from .misc import CopyToClipboard
 from .draw_multiline_text import draw_multiline_text
 from ..stf_modules.fallback.json_fallback_component import STF_Module_JsonFallbackComponent
@@ -26,36 +28,61 @@ class STFDrawInstanceComponentList(bpy.types.UIList):
 		layout.label(text=item.stf_id)
 
 
-def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, stf_application_object: any, component: any, edit_op: str, is_instance: bool, inject_ui: Callable = None):
+def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, stf_application_object: any, component: STF_BlenderComponentBase, edit_op: str, is_instance: bool, inject_ui: Callable = None):
 	box = layout.box()
+	# Component header info
 	row = box.row()
-	row.label(text=component_ref.stf_type + "  -  ID: " + component_ref.stf_id + " ")
+	row_l = row.row()
+	row_l.alignment = "LEFT"
+	row_l.label(text=component_ref.stf_type)
+	row_r = row.row()
+	row_r.alignment = "RIGHT"
+	row_r.label(text="ID: " + component_ref.stf_id)
+	row_r.operator(CopyToClipboard.bl_idname, text="", icon="DUPLICATE").text = component_ref.stf_id
+	row_r.operator(edit_op, text="", icon="MODIFIER").component_id = component_ref.stf_id
 
-	row = row.row()
-	row.alignment = "RIGHT"
-	row.operator(CopyToClipboard.bl_idname, text="Copy ID", icon="DUPLICATE").text = component_ref.stf_id
-	row.operator(edit_op, text="Edit ID & Overrides", icon="MODIFIER").component_id = component_ref.stf_id
-
-	if(component.overrides):
-		box.label(text="Overrides:")
-		row_inner = box.row()
-		row_inner.separator(factor=2.0)
-		col = row_inner.column(align=True)
-		for override in component.overrides:
-			col.label(text=override.target_id)
-
-	if(inject_ui):
-		if(not inject_ui(box, context, component_ref, stf_application_object, component)):
-			return
-
+	# enabled & name
 	row = box.row()
 	row_l = row.row()
 	row_l.alignment = "LEFT"
 	row_l.prop(component, "enabled")
 	row.separator(factor=5)
 	row.prop(component, "stf_name")
+
+	# overrides
+	header, body = box.panel("stf.component_overrides_" + str(component_ref.stf_type) + str(component_ref.stf_id) + str(is_instance), default_closed = True)
+	header.label(text="Component Overrides (" + str(len(component.overrides)) + ")", icon="COPY_ID")
+	if(body):
+		overrides_box = body.box()
+		row = overrides_box.row()
+		row_l = row.row(); row_l.alignment = "LEFT"; row_l.label(text="Overrides:")
+		row_r = row.row(); row_r.alignment = "RIGHT"; add_button = row_r.operator(AddOverrideToComponent.bl_idname, icon="PLUS")
+		add_button.blender_id_type = component.id_data.id_type
+		add_button.blender_property_name = component_ref.blender_property_name
+		if(type(stf_application_object) == bpy.types.Bone):
+			add_button.bone_name = stf_application_object.name
+		add_button.component_id = component_ref.stf_id
+
+		overrides_box.use_property_split = True
+		for index, override in enumerate(component.overrides):
+			row = overrides_box.row()
+			draw_blender_grr(row.column(align=True), override, "stf_component")
+			remove_button = row.operator(RemoveOverrideFromComponent.bl_idname, text="", icon="X")
+			remove_button.blender_id_type = component.id_data.id_type
+			remove_button.blender_property_name = component_ref.blender_property_name
+			if(type(stf_application_object) == bpy.types.Bone):
+				remove_button.bone_name = stf_application_object.name
+			remove_button.component_id = component_ref.stf_id
+			remove_button.index = index
+
 	box.separator(factor=1, type="LINE")
 
+	# relevant for component instances & standins
+	if(inject_ui):
+		if(not inject_ui(box, context, component_ref, stf_application_object, component)):
+			return
+
+	# determine the components module and call its appropriate draw function
 	stf_modules = get_all_component_modules()
 	selected_module = None
 	if(component_ref.blender_property_name == STF_Module_JsonFallbackComponent.blender_property_name):

@@ -4,6 +4,7 @@ from typing import Callable
 
 from .stf_import_state import STF_ImportState
 from ..base.stf_report import STFReportSeverity, STFReport
+from ..base.stf_module_component import STF_Component_Editmode_Resistant_Reference
 
 
 _logger = logging.getLogger(__name__)
@@ -35,7 +36,7 @@ class STF_ImportContext:
 					component_result = component_module.import_func(self, json_component, component_id, application_object)
 					if(component_result):
 						application_component_object = component_result
-						self.register_imported_resource(component_id, application_component_object)
+						self.register_imported_resource(component_id, STF_Component_Editmode_Resistant_Reference(application_component_object, application_object))
 					else:
 						_logger.error("Component import error", stack_info=True)
 						self.report(STFReport("Component import error", STFReportSeverity.Error, component_id, json_component.get("type"), application_object))
@@ -45,7 +46,10 @@ class STF_ImportContext:
 
 	def import_resource(self, stf_id: str, context_object: any = None, stf_kind: str = "data") -> any:
 		if(stf_id in self._state._imported_resources):
-			return self._state._imported_resources[stf_id]
+			if(type(self._state._imported_resources[stf_id]) == STF_Component_Editmode_Resistant_Reference):
+				return self._state._imported_resources[stf_id].get()
+			else:
+				return self._state._imported_resources[stf_id]
 
 		json_resource = self.get_json_resource(stf_id)
 		if(not json_resource or type(json_resource) is not dict or "type" not in json_resource):

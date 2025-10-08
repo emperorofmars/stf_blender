@@ -2,14 +2,12 @@ import bpy
 from typing import Callable
 
 from .stf_module import STF_Module
+from ..base.blender_grr.blender_grr import BlenderGRR
+from ..utils.armature_bone import ArmatureBone
 
 """
 Components aren't natively supported by Blender, they are stored by the Blender-ID-thingy they belong to.
 """
-
-class STF_BlenderComponentOverride(bpy.types.PropertyGroup):
-	"""If this component is parsed by a game-engine, the target component should be ignored"""
-	target_id: bpy.props.StringProperty(name="Target ID", options=set()) # type: ignore
 
 class STF_Component_Ref(bpy.types.PropertyGroup): # Bringing polymorphism to Blender
 	"""Defines the ID, by which the correct component in the `blender_property_name` property of the appropriate Blender construct can be found"""
@@ -22,7 +20,7 @@ class STF_BlenderComponentBase(bpy.types.PropertyGroup):
 	"""Base class for stf component property-groups"""
 	stf_id: bpy.props.StringProperty(name="ID", description="Universally unique ID", options=set()) # type: ignore
 	stf_name: bpy.props.StringProperty(name="STF Name", description="Optional component name", options=set()) # type: ignore
-	overrides: bpy.props.CollectionProperty(type=STF_BlenderComponentOverride, name="Overrides", description="If this component is parsed by a game-engine, these components should be ignored", options=set()) # type: ignore
+	overrides: bpy.props.CollectionProperty(type=BlenderGRR, name="Overrides", description="If this component is parsed by a game-engine, these components should be ignored", options=set()) # type: ignore
 	enabled: bpy.props.BoolProperty(name="Enabled", default=True, options={"ANIMATABLE"}) # type: ignore
 
 
@@ -33,6 +31,24 @@ class STF_BlenderComponentModule(STF_Module):
 	# (layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: STF_BlenderComponentBase) -> None
 	draw_component_func: Callable[[bpy.types.UILayout, bpy.types.Context, STF_Component_Ref, any, any], None]
 
+
+class STF_Component_Editmode_Resistant_Reference:
+	def __init__(self, component: STF_BlenderComponentBase, context_object: any):
+		if(type(context_object) == bpy.types.Bone):
+			self.armature_bone = ArmatureBone(component.id_data, context_object.name)
+			self.component_id = component.stf_id
+		else:
+			self.component = component
+	def get(self) -> STF_BlenderComponentBase:
+		if(hasattr(self, "component")):
+			return self.component
+		else:
+			for component_ref in self.armature_bone.get_bone().stf_info.stf_components:
+				if(component_ref.stf_id == self.component_id):
+					for component in getattr(self.armature_bone.get_bone(), component_ref.blender_property_name):
+						if(component.stf_id == self.component_id):
+							return component
+		return None
 
 
 class InstanceModComponentRef(STF_Component_Ref):

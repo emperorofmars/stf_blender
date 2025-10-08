@@ -4,8 +4,8 @@ import json
 from ...base.stf_module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
 from ...exporter.stf_export_context import STF_ExportContext
 from ...importer.stf_import_context import STF_ImportContext
-from ...utils.component_utils import add_component, export_component_base, import_component_base
-from ...utils.blender_grr.blender_grr import BlenderGRR, construct_blender_grr, resolve_blender_grr
+from ...utils.component_utils import add_component, export_component_base, import_component_base, preserve_component_reference
+from ...base.blender_grr.prelude import BlenderGRR, construct_blender_grr, resolve_blender_grr
 from ...utils.reference_helper import register_exported_buffer, register_exported_resource
 from .json_fallback_buffer import STF_FallbackBuffer, decode_buffer, encode_buffer
 from .json_fallback_ui import draw_fallback
@@ -29,15 +29,18 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, context_object: any) -> any:
 	component_ref, component = add_component(context_object, _blender_property_name, id, json_resource["type"])
 	component: JsonFallbackComponent = component
-	import_component_base(component, json_resource)
+	import_component_base(context, component, json_resource, context_object)
 
 	component.json = json.dumps(json_resource)
 
+	_get_component = preserve_component_reference(component, context_object)
+
 	def _handle():
+		component = _get_component()
 		for resource_id in json_resource.get("referenced_resources", []):
 			resource_grr = component.referenced_resources.add()
 			if(referenced_resource := context.import_resource(resource_id)):
-				construct_blender_grr(referenced_resource, resource_grr, resource_id)
+				construct_blender_grr(referenced_resource, resource_grr)
 	context.add_task(_handle)
 
 	for buffer_id in json_resource.get("referenced_buffers", []):
@@ -102,7 +105,7 @@ def register():
 	setattr(bpy.types.Curve, _blender_property_name, bpy.props.CollectionProperty(type=JsonFallbackComponent))
 	setattr(bpy.types.Curves, _blender_property_name, bpy.props.CollectionProperty(type=JsonFallbackComponent))
 	setattr(bpy.types.GreasePencil, _blender_property_name, bpy.props.CollectionProperty(type=JsonFallbackComponent))
-	setattr(bpy.types.GreasePencilv3, _blender_property_name, bpy.props.CollectionProperty(type=JsonFallbackComponent))
+	#setattr(bpy.types.GreasePencilv3, _blender_property_name, bpy.props.CollectionProperty(type=JsonFallbackComponent))
 	setattr(bpy.types.Key, _blender_property_name, bpy.props.CollectionProperty(type=JsonFallbackComponent))
 	setattr(bpy.types.Lattice, _blender_property_name, bpy.props.CollectionProperty(type=JsonFallbackComponent))
 	setattr(bpy.types.Library, _blender_property_name, bpy.props.CollectionProperty(type=JsonFallbackComponent))
@@ -139,7 +142,6 @@ def unregister():
 	if hasattr(bpy.types.Curve, _blender_property_name): delattr(bpy.types.Curve, _blender_property_name)
 	if hasattr(bpy.types.Curves, _blender_property_name): delattr(bpy.types.Curves, _blender_property_name)
 	if hasattr(bpy.types.GreasePencil, _blender_property_name): delattr(bpy.types.GreasePencil, _blender_property_name)
-	if hasattr(bpy.types.GreasePencilv3, _blender_property_name): delattr(bpy.types.GreasePencilv3, _blender_property_name)
 	if hasattr(bpy.types.Key, _blender_property_name): delattr(bpy.types.Key, _blender_property_name)
 	if hasattr(bpy.types.Lattice, _blender_property_name): delattr(bpy.types.Lattice, _blender_property_name)
 	if hasattr(bpy.types.Library, _blender_property_name): delattr(bpy.types.Library, _blender_property_name)

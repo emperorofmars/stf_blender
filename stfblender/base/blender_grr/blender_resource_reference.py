@@ -15,7 +15,6 @@ blender_type_values = (
 	("CURVE","Curve","","CURVE_DATA",5),
 	("CURVES","Curves","","CURVES",6),
 	("GREASEPENCIL","Greasepencil","","OUTLINER_DATA_GREASEPENCIL",7),
-	("GREASEPENCIL_V3","Greasepencil V3","","OUTLINER_DATA_GREASEPENCIL",8),
 	("IMAGE","Image","","IMAGE_DATA",9),
 	("KEY","Key","Shapekey / Blendshape","SHAPEKEY_DATA",10),
 	("LATTICE","Lattice","","LATTICE_DATA",11),
@@ -56,7 +55,6 @@ class BlenderResourceReference(bpy.types.PropertyGroup):
 	curve: bpy.props.PointerProperty(type=bpy.types.Curve, name="Curve") # type: ignore
 	curves: bpy.props.PointerProperty(type=bpy.types.Curves, name="Curves") # type: ignore
 	greasepencil: bpy.props.PointerProperty(type=bpy.types.GreasePencil, name="Greasepencil") # type: ignore
-	greasepencil_v3: bpy.props.PointerProperty(type=bpy.types.GreasePencilv3, name="Greasepencil V3") # type: ignore
 	image: bpy.props.PointerProperty(type=bpy.types.Image, name="Image") # type: ignore
 	key: bpy.props.PointerProperty(type=bpy.types.Key, name="Key") # type: ignore
 	lattice: bpy.props.PointerProperty(type=bpy.types.Lattice, name="Lattice") # type: ignore
@@ -85,6 +83,13 @@ class BlenderResourceReference(bpy.types.PropertyGroup):
 	world: bpy.props.PointerProperty(type=bpy.types.World, name="World") # type: ignore
 
 	bone_name: bpy.props.StringProperty(name="Bone (Optional)") # type: ignore
+
+
+def pretty_print_blender_resource_reference(brr: BlenderResourceReference) -> str:
+	if(brr.blender_type):
+		for t in blender_type_values:
+			if(t[0] == brr.blender_type):
+				return t[1] + " \"" + str(brr[brr.blender_type.lower()]) + "\""
 
 
 def draw_blender_resource_reference(layout: bpy.types.UILayout, brr: BlenderResourceReference):
