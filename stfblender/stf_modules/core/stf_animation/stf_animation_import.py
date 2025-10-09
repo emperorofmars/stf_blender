@@ -77,6 +77,8 @@ def stf_animation_import(context: STF_ImportContext, json_resource: dict, stf_id
 			# Yay we can finally deal with curves
 			__parse_subtracks(track, selected_channelbag, fcurve_target, index_conversion, conversion_func)
 
+	blender_animation.use_fake_user = True
+
 	return blender_animation
 
 

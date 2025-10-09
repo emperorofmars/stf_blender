@@ -1,6 +1,6 @@
 import bpy
 
-from ....utils.data_resource_ui import draw_data_resources_ui
+from .data_resource_ui import draw_data_resources_ui
 
 
 class STFDataResourcesCollectionPanel(bpy.types.Panel):

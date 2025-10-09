@@ -71,3 +71,4 @@ class STFCollectionPanel(bpy.types.Panel):
 		self.layout.prop(context.collection, "stf_use_collection_as_prefab")
 
 		draw_prefab_ui(self.layout, context, context.collection, STFSetCollectionAsRootOperator.bl_idname, STFSetCollectionIDOperator.bl_idname, STFAddCollectionComponentOperator.bl_idname, STFRemoveCollectionComponentOperator.bl_idname, STFEditCollectionComponentIdOperator.bl_idname)
+
