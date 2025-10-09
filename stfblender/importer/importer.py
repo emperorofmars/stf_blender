@@ -80,7 +80,9 @@ class ImportSTF(bpy.types.Operator, ImportHelper):
 				if(result.success):
 					total_successes += 1
 					total_time += result.import_time
-					if(result.collection): last_success = result.collection
+					if(result.collection):
+						last_success = result.collection
+						result.collection.color_tag = "COLOR_07"
 
 					if(result.warnings and len(result.warnings) > 0):
 						for report in result.warnings:

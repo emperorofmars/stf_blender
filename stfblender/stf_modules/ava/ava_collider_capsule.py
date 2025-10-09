@@ -39,7 +39,7 @@ def _parse_json(component: AVA_Collider_Capsule, json_resource: dict):
 
 def _serialize_json(component: AVA_Collider_Capsule, json_resource: dict = {}) -> dict:
 	json_resource["radius"] = component.radius
-	json_resource["radius"] = component.height
+	json_resource["height"] = component.height
 	offset_position = mathutils.Vector(component.offset_position)
 	json_resource["offset_position"] = blender_translation_to_stf(offset_position)
 	offset_rotation = mathutils.Euler(component.offset_rotation)
@@ -79,7 +79,9 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 
 def _set_component_instance_standin(context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: AVA_Collider_Capsule, standin_component: AVA_Collider_Capsule):
 	standin_component.radius = component.radius
+	standin_component.height = component.height
 	standin_component.offset_position = component.offset_position
+	standin_component.offset_rotation = component.offset_rotation
 
 
 def _serialize_component_instance_standin_func(context: STF_ExportContext, component_ref: STF_Component_Ref, standin_component: AVA_Collider_Capsule, context_object: any) -> dict:

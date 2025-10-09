@@ -53,13 +53,18 @@ def draw_resource(layout: bpy.types.UILayout, context: bpy.types.Context, resour
 	box = layout.box()
 	row = box.row()
 	row.label(text=resource_ref.stf_type + "  -  ID: " + resource_ref.stf_id + " ")
-
-	row = row.row()
-	row.alignment = "RIGHT"
-	row.operator(CopyToClipboard.bl_idname, text="Copy ID", icon="DUPLICATE").text = resource_ref.stf_id
-	edit_button = row.operator(STFEditDataResourceOperator.bl_idname, text="Edit ID", icon="MODIFIER")
-	edit_button.use_scene_collection = collection == context.scene.collection
-	edit_button.resource_id = resource_ref.stf_id
+	
+	box = layout.box()
+	# Component header info
+	row = box.row()
+	row_l = row.row()
+	row_l.alignment = "LEFT"
+	row_l.label(text=resource_ref.stf_type)
+	row_r = row.row()
+	row_r.alignment = "RIGHT"
+	row_r.label(text="ID: " + resource_ref.stf_id)
+	row_r.operator(CopyToClipboard.bl_idname, text="", icon="DUPLICATE").text = resource_ref.stf_id
+	row_r.operator(STFEditDataResourceOperator.bl_idname, text="", icon="MODIFIER").resource_id = resource_ref.stf_id
 
 	box.prop(resource, "stf_name")
 	box.separator(factor=1, type="LINE")
