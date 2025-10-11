@@ -24,7 +24,7 @@ class STFDrawInstanceComponentList(bpy.types.UIList):
 	bl_idname = "COLLECTION_UL_stf_instance_component_list"
 
 	def draw_item(self, context: bpy.types.Context, layout: bpy.types.UILayout, data, item: InstanceModComponentRef, icon, active_data, active_propname):
-		layout.label(text=item.stf_type + " ( " + item.bone + " )")
+		layout.label(text=item.stf_type + " ( " + item.bone + " )", icon="PROP_ON" if item.override else "PROP_OFF")
 		layout.label(text=item.stf_id)
 
 
