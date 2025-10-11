@@ -183,7 +183,7 @@ class RemoveOverrideFromComponent(bpy.types.Operator):
 
 
 def preserve_component_reference(component: STF_BlenderComponentBase, context_object: any) -> Callable:
-	if(type(context_object) == bpy.types.Bone):
+	if(type(context_object) == bpy.types.Bone and type(component.id_data) == bpy.types.Armature):
 		armature_bone = ArmatureBone(component.id_data, context_object.name)
 		component_id = component.stf_id
 		def _get_component() -> STF_BlenderComponentBase:

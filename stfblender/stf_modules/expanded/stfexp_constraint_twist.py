@@ -5,10 +5,11 @@ from typing import Callable
 from ...base.stf_module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
 from ...exporter.stf_export_context import STF_ExportContext
 from ...importer.stf_import_context import STF_ImportContext
-from ...utils.component_utils import add_component, export_component_base, import_component_base
+from ...utils.component_utils import add_component, export_component_base, import_component_base, preserve_component_reference
 from ...utils.armature_bone import ArmatureBone
 from ...utils.reference_helper import register_exported_resource, import_resource
 from ...utils.animation_conversion_utils import get_component_stf_path
+from ...base.blender_grr.stf_node_path_selector import NodePathSelector, draw_node_path_selector, node_path_selector_from_stf, node_path_selector_to_stf
 
 
 _stf_type = "stfexp.constraint.twist"
@@ -17,20 +18,16 @@ _blender_property_name = "stfexp_constraint_twist"
 
 class STFEXP_Constraint_Twist(STF_BlenderComponentBase):
 	weight: bpy.props.FloatProperty(name="Weight", default=0.5) # type: ignore
-	target_object: bpy.props.PointerProperty(type=bpy.types.Object, name="Target Object") # type: ignore
-	target_bone: bpy.props.StringProperty(name="Target Bone") # type: ignore
+	target: bpy.props.PointerProperty(name="Target", type=NodePathSelector) # type: ignore
 
 
 def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: STFEXP_Constraint_Twist):
 	layout.use_property_split = True
 	layout.prop(component, "weight")
 	layout.label(text="If no target is selected, the parent of the parent will be assumed.", icon="INFO")
-	if(type(context_object) == bpy.types.Bone):
-		layout.prop_search(component, "target_bone", context_object.id_data, "bones", text="Target")
-	else:
-		layout.prop(component, "target_object")
-		if(component.target_object and type(component.target_object.data) == bpy.types.Armature):
-			layout.prop_search(component, "target_bone", component.target_object.data, "bones")
+	col = layout.column(align=True)
+	col.use_property_split = True
+	draw_node_path_selector(col, component.target)
 
 
 """Import export"""
@@ -41,41 +38,11 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	component.weight = json_resource.get("weight")
 
 	if("target" in json_resource):
-		armature = context_object.id_data
-		bone_name = context_object.name
-		component_id = component_ref.stf_id
-
-		# let _get_component() -> STFEXP_Constraint_Twist
-		if(type(context_object) == bpy.types.Bone):
-			# Between bone-edit and object mode, references get destroyed, so we have to find the bone by name. Because Blender -.-
-			def _get_component() -> STFEXP_Constraint_Twist:
-				for constraint in armature.bones[bone_name].stfexp_constraint_twist:
-					if(constraint.stf_id == component_id):
-						return constraint
-		else:
-			def _get_component() -> STFEXP_Constraint_Twist:
-				return component
-
-		if(len(json_resource["target"]) == 1 and type(context_object) == bpy.types.Bone): # This constraint sits on a Bone and can target only another Bone within the sam Armature resource.
-			def _handle_target_bone():
-				for bone in armature.bones:
-					if(bone.stf_info.stf_id == json_resource["target"][0]):
-						constraint = _get_component()
-						constraint.target_bone = bone.name
-						break
-			context.add_task(_handle_target_bone)
-		elif(len(json_resource["target"]) == 1): # Target is a Blender Object
-			def _handle_target_object():
-				constraint = _get_component()
-				constraint.target_object = import_resource(context, json_resource, json_resource["target"][0], "node")
-			context.add_task(_handle_target_object)
-		elif(len(json_resource["target"]) == 3): # Node -> armature instance -> bone
-			def _handle_target_object():
-				constraint = _get_component()
-				constraint.target_object = import_resource(context, json_resource, json_resource["target"][0], "node")
-				if(bone := import_resource(context, json_resource, json_resource["target"][2]), "node"):
-					constraint.target_bone = bone.name
-			context.add_task(_handle_target_object)
+		_get_component = preserve_component_reference(component, context_object)
+		def _handle():
+			component = _get_component()
+			node_path_selector_from_stf(context, json_resource, json_resource["target"], component.target)
+		context.add_task(_handle)
 
 	return component
 
@@ -84,15 +51,11 @@ def _stf_export(context: STF_ExportContext, component: STFEXP_Constraint_Twist, 
 	ret = export_component_base(context, _stf_type, component)
 	ret["weight"] = component.weight
 
+	_get_component = preserve_component_reference(component, context_object)
 	def _handle():
-		if(type(context_object) == ArmatureBone):
-			if((context_object.armature == component.target_object or not component.target_object) and component.target_bone):
-				ret["target"] = [register_exported_resource(ret, context_object.armature.bones[component.target_bone].stf_info.stf_id)]
-		elif(component.target_object):
-			if(type(component.target_object.data) == bpy.types.Armature and component.target_bone):
-				ret["target"] = [register_exported_resource(ret, component.target_object.stf_info.stf_id), "instance", register_exported_resource(ret, component.target_object.data.bones[component.target_bone].stf_info.stf_id)]
-			else:
-				ret["target"] = [register_exported_resource(ret, component.target_object.stf_info.stf_id)]
+		component = _get_component()
+		if(target_ret := node_path_selector_to_stf(context, component.target, ret)):
+			ret["target"] = target_ret
 	context.add_task(_handle)
 
 	return ret, component.stf_id
@@ -104,35 +67,34 @@ def _draw_component_instance(layout: bpy.types.UILayout, context: bpy.types.Cont
 	layout.use_property_split = True
 	layout.prop(component, "weight")
 	layout.label(text="If no target is selected, the parent of the parent will be assumed.", icon="INFO")
-	layout.prop(component, "target_object")
-	if(component.target_object and type(component.target_object.data) == bpy.types.Armature):
-		layout.prop_search(component, "target_bone", component.target_object.data, "bones")
+
+	col = layout.column(align=True)
+	col.use_property_split = True
+	draw_node_path_selector(col, component.target)
 
 
 def _set_component_instance_standin(context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: STFEXP_Constraint_Twist, standin_component: STFEXP_Constraint_Twist):
 	standin_component.weight = component.weight
-	standin_component.target_object = context_object
-	standin_component.target_bone = component.target_bone
+	standin_component.target.target_object = context_object
+	standin_component.target.target_bone = component.target.target_bone 
 
 
 def _serialize_component_instance_standin_func(context: STF_ExportContext, component_ref: STF_Component_Ref, standin_component: STFEXP_Constraint_Twist, context_object: any) -> dict:
-	ret = {"weight": standin_component.weight }
-	if(standin_component.target_object):
-		if(type(standin_component.target_object.data) == bpy.types.Armature and standin_component.target_bone):
-			ret["target"] = [register_exported_resource(ret, standin_component.target_object.stf_info.stf_id), "instance", register_exported_resource(ret, standin_component.target_object.data.bones[standin_component.target_bone].stf_info.stf_id)]
-		else:
-			ret["target"] = [register_exported_resource(ret, standin_component.target_object.stf_info.stf_id)]
+	ret = { "weight": standin_component.weight }
+	def _handle():
+		if(target_ret := node_path_selector_to_stf(context, standin_component.target, ret)):
+			ret["target"] = target_ret
+	context.add_task(_handle)
 	return ret
 
 def _parse_component_instance_standin_func(context: STF_ImportContext, json_resource: dict, component_ref: STF_Component_Ref, standin_component: STFEXP_Constraint_Twist, context_object: any):
 	if("weight" in json_resource): standin_component.weight = json_resource["weight"]
-	if("target" in json_resource):
-		if(len(json_resource["target"]) > 0):
-			def _handle_target_bone():
-				standin_component.target_object = context.get_imported_resource(json_resource["target"][0])
-				if(standin_component.target_object and type(standin_component.target_object.data) == bpy.types.Armature):
-					standin_component.target_bone = context.get_imported_resource(json_resource["target"][2]).name
-			context.add_task(_handle_target_bone)
+	if("target" in json_resource and len(json_resource["target"]) > 0):
+		_get_component = preserve_component_reference(standin_component, context_object)
+		def _handle():
+			standin_component = _get_component()
+			node_path_selector_from_stf(context, json_resource, json_resource["target"], standin_component.target)
+		context.add_task(_handle)
 
 
 """Animation"""
