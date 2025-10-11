@@ -36,27 +36,20 @@ def draw_stf_data_resource_reference(layout: bpy.types.UILayout, drr: STFDataRes
 
 		layout.prop_search(drr, "stf_data_resource_id", collection, "stf_data_refs", icon="ERROR" if not resource_ref or type_filter and resource_ref.stf_type not in type_filter else "NONE")
 
-		#row = layout.row()
 		if(resource_ref and type_filter and resource_ref.stf_type not in type_filter):
-			split = layout.split(factor=0.4)
-			row = split.row()
+			info_layout = layout
 			if(layout.use_property_split):
-				row.alignment = "RIGHT"
-			row.label(text="Invalid Type", icon="ERROR")
-			split.label(text=resource_ref.stf_type)
+				split = layout.split(factor=0.4)
+				split.row()
+				info_layout = split.row()
+			info_layout.label(text="Invalid Type: " + resource_ref.stf_type, icon="ERROR")
 		elif(resource_ref and resource):
-			split = layout.split(factor=0.4)
-			row = split.row()
+			info_layout = layout
 			if(layout.use_property_split):
-				row.alignment = "RIGHT"
-			row.label(text="Type   ")
-			split.label(text=resource_ref.stf_type)
-			split = layout.split(factor=0.4)
-			row = split.row()
-			if(layout.use_property_split):
-				row.alignment = "RIGHT"
-			row.label(text="Name   ")
-			split.label(text=resource.stf_name)
+				split = layout.split(factor=0.4)
+				split.row()
+				info_layout = split.row()
+			info_layout.label(text=resource_ref.stf_type + " - " + (resource.stf_name if resource.stf_name and len(resource.stf_name) > 0 else "Unnamed"))
 
 
 def __get_blender_property(ref_holder: any, property_holder: any, target_id: str) -> tuple[STF_Data_Ref, STF_BlenderDataResourceBase]:

@@ -6,21 +6,20 @@ from typing import Callable
 from ....base.stf_module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
 from ....exporter.stf_export_context import STF_ExportContext
 from ....importer.stf_import_context import STF_ImportContext
-from ....utils.component_utils import add_component, export_component_base, import_component_base
+from ....utils.component_utils import add_component, export_component_base, import_component_base, preserve_component_reference
 from ....utils.animation_conversion_utils import get_component_stf_path
 from ....utils.reference_helper import register_exported_resource, get_resource_id
+from ....base.blender_grr.stf_node_path_selector import NodePathSelector, draw_node_path_selector, node_path_selector_from_stf, node_path_selector_to_stf
+from ....base.blender_grr.stf_node_path_component_selector import NodePathComponentSelector, draw_node_path_component_selector, node_path_component_selector_from_stf, node_path_component_selector_to_stf
 
 
 _stf_type = "com.vrchat.physbone"
 _blender_property_name = "vrc_physbone"
 
 # todo: this is quite jank, make this able to select the object/armature->bone/component etc..
-class PhysboneReference(bpy.types.PropertyGroup):
-	id: bpy.props.StringProperty(name="ID", options=set()) # type: ignore
-
 class VRC_Physbone(STF_BlenderComponentBase):
-	ignores: bpy.props.CollectionProperty(type=PhysboneReference, name="Ignored Children", options=set()) # type: ignore
-	colliders: bpy.props.CollectionProperty(type=PhysboneReference, name="Colliders", options=set()) # type: ignore
+	ignores: bpy.props.CollectionProperty(type=NodePathSelector, name="Ignored Children", options=set()) # type: ignore
+	colliders: bpy.props.CollectionProperty(type=NodePathComponentSelector, name="Colliders", options=set()) # type: ignore
 	values: bpy.props.StringProperty(name="Json Values", options=set()) # type: ignore
 
 
@@ -74,9 +73,12 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 	add_button.property = "colliders"
 	box.separator(factor=1)
 	for index, collider in enumerate(component.colliders):
+		if(index > 0):
+			box.separator(factor=1)
 		row = box.row(align=True)
-		#row.use_property_split = True
-		row.prop(collider, "id")
+		col = row.column(align=True)
+		col.use_property_split = True
+		draw_node_path_component_selector(col, collider)
 		remove_button = row.operator(Edit_VRC_Physbone.bl_idname, text="", icon="X")
 		remove_button.blender_bone = type(component.id_data) == bpy.types.Armature
 		remove_button.component_id = component.stf_id
@@ -95,8 +97,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 	box.separator(factor=1)
 	for index, ignore in enumerate(component.ignores):
 		row = box.row(align=True)
-		#row.use_property_split = True
-		row.prop(ignore, "id")
+		draw_node_path_selector(row, ignore)
 		remove_button = row.operator(Edit_VRC_Physbone.bl_idname, text="", icon="X")
 		remove_button.blender_bone = type(component.id_data) == bpy.types.Armature
 		remove_button.component_id = component.stf_id
@@ -121,13 +122,20 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	import_component_base(context, component, json_resource, context_object)
 	component.values = json.dumps(json_resource["values"])
 
-	for ignore_id in json_resource.get("ignores", []):
-		new_ignore = component.ignores.add()
-		new_ignore.id = get_resource_id(json_resource, ignore_id)
+	_get_component = preserve_component_reference(component, context_object)
+	def _handle():
+		component = _get_component()
+		for ignore_path in json_resource.get("ignores", []):
+			print(ignore_path)
+			new_ignore = component.ignores.add()
+			node_path_selector_from_stf(context, json_resource, ignore_path, new_ignore)
 
-	for collider_id in json_resource.get("colliders", []):
-		new_collider = component.colliders.add()
-		new_collider.id = get_resource_id(json_resource, collider_id)
+		for collider_path in json_resource.get("colliders", []):
+			print(collider_path)
+			new_collider = component.colliders.add()
+			node_path_component_selector_from_stf(context, json_resource, collider_path, new_collider)
+
+	context.add_task(_handle)
 
 	return component
 
@@ -137,15 +145,22 @@ def _stf_export(context: STF_ExportContext, component: VRC_Physbone, context_obj
 	try:
 		ret["values"] = json.loads(component.values)
 
-		ignores = []
-		for ignore in component.ignores:
-			ignores.append(register_exported_resource(ret, ignore.id))
-		ret["ignores"] = ignores
+		_get_component = preserve_component_reference(component, context_object)
+		def _handle():
+			component = _get_component()
 
-		colliders = []
-		for collider in component.colliders:
-			colliders.append(register_exported_resource(ret, collider.id))
-		ret["colliders"] = colliders
+			ignores = []
+			for ignore in component.ignores:
+				if(ignore_ret := node_path_selector_to_stf(context, ignore, ret)):
+					ignores.append(ignore_ret)
+			ret["ignores"] = ignores
+
+			colliders = []
+			for collider in component.colliders:
+				if(collider_ret := node_path_component_selector_to_stf(context, collider, ret)):
+					colliders.append(collider_ret)
+			ret["colliders"] = colliders
+		context.add_task(_handle)
 
 		return ret, component.stf_id
 	except Exception:

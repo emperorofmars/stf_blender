@@ -4,8 +4,9 @@ from .blender_grr import BlenderGRR
 from .stf_data_resource_reference_utils import draw_stf_data_resource_reference, resolve_stf_data_resource_reference, validate_stf_data_resource_reference
 from .blender_resource_reference import draw_blender_resource_reference, pretty_print_blender_resource_reference, resolve_blender_resource_reference, validate_blender_resource_reference
 from ...base.stf_module_data import STF_BlenderDataResourceBase, STF_Data_Ref
-from ...base.stf_module_component import STF_BlenderComponentBase
+from ...base.stf_module_component import STF_BlenderComponentBase, STF_Component_Ref
 from ...utils.armature_bone import ArmatureBone
+from .utils import draw_component_info
 
 """
 Blender Generic Resource Reference
@@ -37,25 +38,6 @@ def draw_blender_grr(layout: bpy.types.UILayout, grr: BlenderGRR, reference_type
 			if(not reference_type_filter or reference_type_filter == "stf_component"):
 				layout.prop(grr, "component_reference_type")
 
-				def _draw_component_info(component_holder: any, component_ref: any):
-						# let component
-						for component in getattr(component_holder, component_ref.blender_property_name):
-							if(component.stf_id == grr.stf_component_id):
-								break
-						split = layout.split(factor=0.4)
-						row = split.row()
-						if(layout.use_property_split):
-							row.alignment = "RIGHT"
-						row.label(text="Type   ")
-						split.label(text=component_ref.stf_type)
-						if(component):
-							split = layout.split(factor=0.4)
-							row = split.row()
-							if(layout.use_property_split):
-								row.alignment = "RIGHT"
-							row.label(text="Name   ")
-							split.label(text=component.stf_name)
-
 				match(grr.component_reference_type):
 					case "blender":
 						draw_blender_resource_reference(layout, grr.blender_resource_reference)
@@ -64,8 +46,7 @@ def draw_blender_grr(layout: bpy.types.UILayout, grr: BlenderGRR, reference_type
 							layout.prop_search(grr, "stf_component_id", component_holder.stf_info, "stf_components", icon="ERROR" if not grr.stf_component_id or grr.stf_component_id not in component_holder.stf_info.stf_components else "NONE")
 
 							if(grr.stf_component_id and grr.stf_component_id in component_holder.stf_info.stf_components):
-								component_ref = component_holder.stf_info.stf_components[grr.stf_component_id]
-								_draw_component_info(component_holder, component_ref)
+								draw_component_info(layout, component_holder, component_holder.stf_info, grr.stf_component_id)
 
 					case "stf_data_resource":
 						draw_stf_data_resource_reference(layout, grr.stf_data_resource_reference)
@@ -75,8 +56,7 @@ def draw_blender_grr(layout: bpy.types.UILayout, grr: BlenderGRR, reference_type
 							layout.prop_search(grr, "stf_component_id", component_holder, "stf_components", icon="ERROR" if not grr.stf_component_id or grr.stf_component_id not in component_holder.stf_components else "NONE")
 
 							if(grr.stf_component_id and grr.stf_component_id in component_holder.stf_components):
-								component_ref = component_holder.stf_components[grr.stf_component_id]
-								_draw_component_info(component_holder.id_data, component_ref)
+								draw_component_info(layout, component_holder, component_holder.stf_info, grr.stf_component_id)
 
 
 def resolve_blender_grr(grr: BlenderGRR) -> any:
@@ -91,7 +71,7 @@ def resolve_blender_grr(grr: BlenderGRR) -> any:
 				case "blender":
 					component_holder = resolve_blender_resource_reference(grr.blender_resource_reference)
 					if(grr.stf_component_id and grr.stf_component_id in component_holder.stf_info.stf_components):
-						component_ref = component_holder.stf_info.stf_components[grr.stf_component_id]
+						component_ref: STF_Component_Ref = component_holder.stf_info.stf_components[grr.stf_component_id]
 						for component in getattr(component_holder, component_ref.blender_property_name):
 							if(component.stf_id == grr.stf_component_id):
 								return component
@@ -100,7 +80,7 @@ def resolve_blender_grr(grr: BlenderGRR) -> any:
 					if(component_holder_ret):
 						_, component_holder = component_holder_ret
 						if(grr.stf_component_id and grr.stf_component_id in component_holder.stf_components):
-							component_ref = component_holder.stf_components[grr.stf_component_id]
+							component_ref: STF_Component_Ref = component_holder.stf_components[grr.stf_component_id]
 							for component in getattr(component_holder.id_data, component_ref.blender_property_name):
 								if(component.stf_id == grr.stf_component_id):
 									return component
