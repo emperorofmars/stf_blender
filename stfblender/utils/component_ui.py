@@ -75,10 +75,9 @@ def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, compo
 			remove_button.component_id = component_ref.stf_id
 			remove_button.index = index
 
-	box.separator(factor=1, type="LINE")
-
 	# relevant for component instances & standins
 	if(inject_ui):
+		box.separator(factor=1, type="LINE")
 		if(not inject_ui(box, context, component_ref, stf_application_object, component)):
 			return
 
@@ -95,15 +94,19 @@ def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, compo
 
 	if(selected_module):
 		if(selected_module.__doc__):
+			box.separator(factor=1, type="LINE")
 			draw_multiline_text(box, selected_module.__doc__)
 
 		if(is_instance and hasattr(selected_module, "draw_component_instance_func")):
+			box.separator(factor=1, type="LINE")
 			selected_module.draw_component_instance_func(box, context, component_ref, stf_application_object, component)
 		elif(not is_instance and hasattr(selected_module, "draw_component_func")):
+			box.separator(factor=1, type="LINE")
 			selected_module.draw_component_func(box, context, component_ref, stf_application_object, component)
 		else:
 			pass
 	else:
+		box.separator(factor=1, type="LINE")
 		box.label(text="Unknown Type")
 		box.label(text="Blender Property Name: " + component_ref.blender_property_name)
 

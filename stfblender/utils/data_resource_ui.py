@@ -67,7 +67,6 @@ def draw_resource(layout: bpy.types.UILayout, context: bpy.types.Context, resour
 	row_r.operator(STFEditDataResourceOperator.bl_idname, text="", icon="MODIFIER").resource_id = resource_ref.stf_id
 
 	box.prop(resource, "stf_name")
-	box.separator(factor=1, type="LINE")
 
 	stf_modules = get_blender_non_native_data_modules()
 	selected_module = None
@@ -81,10 +80,12 @@ def draw_resource(layout: bpy.types.UILayout, context: bpy.types.Context, resour
 
 	if(selected_module):
 		if(selected_module.__doc__):
+			box.separator(factor=1, type="LINE")
 			draw_multiline_text(box, selected_module.__doc__)
 			
 
 		if(hasattr(selected_module, "draw_resource_func")):
+			box.separator(factor=1, type="LINE")
 			selected_module.draw_resource_func(box, context, resource_ref, collection, resource)
 		else:
 			pass

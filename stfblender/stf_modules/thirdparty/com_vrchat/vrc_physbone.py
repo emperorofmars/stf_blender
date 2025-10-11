@@ -8,7 +8,6 @@ from ....exporter.stf_export_context import STF_ExportContext
 from ....importer.stf_import_context import STF_ImportContext
 from ....utils.component_utils import add_component, export_component_base, import_component_base, preserve_component_reference
 from ....utils.animation_conversion_utils import get_component_stf_path
-from ....utils.reference_helper import register_exported_resource, get_resource_id
 from ....base.blender_grr.stf_node_path_selector import NodePathSelector, draw_node_path_selector, node_path_selector_from_stf, node_path_selector_to_stf
 from ....base.blender_grr.stf_node_path_component_selector import NodePathComponentSelector, draw_node_path_component_selector, node_path_component_selector_from_stf, node_path_component_selector_to_stf
 
