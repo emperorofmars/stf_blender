@@ -6,7 +6,7 @@ from ..exporter.stf_export_context import STF_ExportContext
 from ..importer.stf_import_context import STF_ImportContext
 from ..base.stf_module_component import STF_BlenderComponentBase, STF_Component_Ref
 from ..base.stf_module_data import STF_BlenderDataResourceBase
-from ..base.blender_grr.prelude import *
+from ..base.blender_grr import *
 from .id_utils import ensure_stf_id
 from .armature_bone import ArmatureBone
 

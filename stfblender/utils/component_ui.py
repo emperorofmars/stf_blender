@@ -4,7 +4,7 @@ from typing import Callable
 from .component_utils import AddOverrideToComponent, RemoveOverrideFromComponent
 from ..base.stf_module_component import InstanceModComponentRef, STF_BlenderComponentBase, STF_Component_Ref
 from ..base.stf_registry import find_component_module, get_all_component_modules, get_component_modules, get_data_component_modules
-from ..base.blender_grr.prelude import *
+from ..base.blender_grr import *
 from .misc import CopyToClipboard
 from .draw_multiline_text import draw_multiline_text
 from ..stf_modules.fallback.json_fallback_component import STF_Module_JsonFallbackComponent

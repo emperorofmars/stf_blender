@@ -3,7 +3,7 @@ import json
 
 from ...base.stf_module_component import STF_Component_Ref
 from ...base.stf_module_data import STF_Data_Ref
-from ...base.blender_grr.prelude import BlenderGRR, draw_blender_grr
+from ...base.blender_grr import BlenderGRR, draw_blender_grr
 
 
 class FallbackResourcesAdd(bpy.types.Operator):

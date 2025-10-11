@@ -7,7 +7,7 @@ from ...utils.component_utils import add_component, export_component_base, impor
 from ...base.stf_report import STFReport, STFReportSeverity
 from ...utils.reference_helper import register_exported_resource, import_resource
 from ...utils.misc import draw_slot_link_warning
-from ...base.blender_grr.prelude import *
+from ...base.blender_grr import *
 
 _stf_type = "ava.emotes"
 _blender_property_name = "ava_emotes"

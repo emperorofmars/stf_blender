@@ -5,7 +5,7 @@ from ...base.stf_module_data import STF_BlenderDataResourceBase
 from ...exporter.stf_export_context import STF_ExportContext
 from ...importer.stf_import_context import STF_ImportContext
 from ...utils.component_utils import add_component, export_component_base, import_component_base
-from ...base.blender_grr.prelude import *
+from ...base.blender_grr import *
 
 
 _stf_type = "placeholder.remove.me.data_resource"
