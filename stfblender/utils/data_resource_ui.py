@@ -82,7 +82,6 @@ def draw_resource(layout: bpy.types.UILayout, context: bpy.types.Context, resour
 		if(selected_module.__doc__):
 			box.separator(factor=1, type="LINE")
 			draw_multiline_text(box, selected_module.__doc__)
-			
 
 		if(hasattr(selected_module, "draw_resource_func")):
 			box.separator(factor=1, type="LINE")

@@ -65,6 +65,7 @@ def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, compo
 
 		overrides_box.use_property_split = True
 		for index, override in enumerate(component.overrides):
+			if(index > 0): overrides_box.separator(factor=1, type="LINE")
 			row = overrides_box.row()
 			draw_blender_grr(row.column(align=True), override, "stf_component")
 			remove_button = row.operator(RemoveOverrideFromComponent.bl_idname, text="", icon="X")

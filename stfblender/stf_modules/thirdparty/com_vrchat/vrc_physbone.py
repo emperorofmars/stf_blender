@@ -10,6 +10,7 @@ from ....utils.component_utils import add_component, export_component_base, impo
 from ....utils.animation_conversion_utils import get_component_stf_path
 from ....base.blender_grr.stf_node_path_selector import NodePathSelector, draw_node_path_selector, node_path_selector_from_stf, node_path_selector_to_stf
 from ....base.blender_grr.stf_node_path_component_selector import NodePathComponentSelector, draw_node_path_component_selector, node_path_component_selector_from_stf, node_path_component_selector_to_stf
+from ....utils.helpers import create_add_button, create_remove_button
 
 
 _stf_type = "com.vrchat.physbone"
@@ -22,87 +23,30 @@ class VRC_Physbone(STF_BlenderComponentBase):
 	values: bpy.props.StringProperty(name="Json Values", options=set()) # type: ignore
 
 
-class Edit_VRC_Physbone(bpy.types.Operator):
-	bl_idname = "stf.edit_vrc_physbone"
-	bl_label = "Edit"
-	bl_options = {"REGISTER", "UNDO"}
-
-	component_id: bpy.props.StringProperty() # type: ignore
-	blender_bone: bpy.props.BoolProperty() # type: ignore
-
-	op: bpy.props.StringProperty() # type: ignore
-	property: bpy.props.StringProperty() # type: ignore
-	index: bpy.props.IntProperty() # type: ignore
-
-	def execute(self, context):
-		if(self.op == "add"):
-			if(not self.blender_bone):
-				for pb in context.object.vrc_physbone:
-					if(pb.stf_id == self.component_id):
-						getattr(pb, self.property).add()
-						return {"FINISHED"}
-			else:
-				for pb in context.bone.vrc_physbone:
-					if(pb.stf_id == self.component_id):
-						getattr(pb, self.property).add()
-						return {"FINISHED"}
-		elif(self.op == "remove"):
-			if(not self.blender_bone):
-				for pb in context.object.vrc_physbone:
-					if(pb.stf_id == self.component_id):
-						getattr(pb, self.property).remove(self.index)
-						return {"FINISHED"}
-			else:
-				for pb in context.bone.vrc_physbone:
-					if(pb.stf_id == self.component_id):
-						getattr(pb, self.property).remove(self.index)
-						return {"FINISHED"}
-		self.report({"ERROR"}, "Couldn't edit Physbone")
-		return {"CANCELLED"}
-
-
 def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: VRC_Physbone):
 	box = layout.box().column(align=True)
 	row = box.row()
 	row.label(text="Colliders")
-	add_button = row.operator(Edit_VRC_Physbone.bl_idname, text="Add", icon="ADD")
-	add_button.blender_bone = type(component.id_data) == bpy.types.Armature
-	add_button.component_id = component.stf_id
-	add_button.op = "add"
-	add_button.property = "colliders"
+	create_add_button(row, "bone" if type(component.id_data) == bpy.types.Armature else "object", _blender_property_name, component.stf_id, "colliders")
 	box.separator(factor=1)
 	for index, collider in enumerate(component.colliders):
 		if(index > 0):
-			box.separator(factor=1)
+			box.separator(factor=1, type="LINE")
 		row = box.row(align=True)
 		col = row.column(align=True)
 		col.use_property_split = True
 		draw_node_path_component_selector(col, collider)
-		remove_button = row.operator(Edit_VRC_Physbone.bl_idname, text="", icon="X")
-		remove_button.blender_bone = type(component.id_data) == bpy.types.Armature
-		remove_button.component_id = component.stf_id
-		remove_button.op = "remove"
-		remove_button.index = index
-		remove_button.property = "colliders"
+		create_remove_button(row, "bone" if type(component.id_data) == bpy.types.Armature else "object", _blender_property_name, component.stf_id, "colliders", index)
 
 	box = layout.box().column(align=True)
 	row = box.row()
 	row.label(text="Ignores")
-	add_button = row.operator(Edit_VRC_Physbone.bl_idname, text="Add", icon="ADD")
-	add_button.blender_bone = type(component.id_data) == bpy.types.Armature
-	add_button.component_id = component.stf_id
-	add_button.op = "add"
-	add_button.property = "ignores"
+	create_add_button(row, "bone" if type(component.id_data) == bpy.types.Armature else "object", _blender_property_name, component.stf_id, "ignores")
 	box.separator(factor=1)
 	for index, ignore in enumerate(component.ignores):
 		row = box.row(align=True)
 		draw_node_path_selector(row, ignore)
-		remove_button = row.operator(Edit_VRC_Physbone.bl_idname, text="", icon="X")
-		remove_button.blender_bone = type(component.id_data) == bpy.types.Armature
-		remove_button.component_id = component.stf_id
-		remove_button.op = "remove"
-		remove_button.index = index
-		remove_button.property = "ignores"
+		create_remove_button(row, "bone" if type(component.id_data) == bpy.types.Armature else "object", _blender_property_name, component.stf_id, "ignores", index)
 
 	layout.separator(factor=1)
 	col = layout.column(align=True)
@@ -125,12 +69,10 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	def _handle():
 		component = _get_component()
 		for ignore_path in json_resource.get("ignores", []):
-			print(ignore_path)
 			new_ignore = component.ignores.add()
 			node_path_selector_from_stf(context, json_resource, ignore_path, new_ignore)
 
 		for collider_path in json_resource.get("colliders", []):
-			print(collider_path)
 			new_collider = component.colliders.add()
 			node_path_component_selector_from_stf(context, json_resource, collider_path, new_collider)
 

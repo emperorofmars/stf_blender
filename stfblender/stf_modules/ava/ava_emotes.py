@@ -8,43 +8,11 @@ from ...base.stf_report import STFReport, STFReportSeverity
 from ...utils.reference_helper import register_exported_resource, import_resource
 from ...utils.misc import draw_slot_link_warning
 from ...base.blender_grr import *
+from ...utils.helpers import create_add_button, create_remove_button
+
 
 _stf_type = "ava.emotes"
 _blender_property_name = "ava_emotes"
-
-
-class Add_AVA_Emotes(bpy.types.Operator):
-	"""Add a new emote"""
-	bl_idname = "stf.add_ava_emote"
-	bl_label = "Add Emote"
-	bl_options = {"REGISTER", "UNDO"}
-
-	component_id: bpy.props.StringProperty() # type: ignore
-
-	def execute(self, context):
-		for component in context.collection.ava_emotes:
-			if(component.stf_id == self.component_id):
-				component.emotes.add()
-				return {"FINISHED"}
-		self.report({"ERROR"}, "Couldn't add emote")
-		return {"CANCELLED"}
-
-class Remove_AVA_Emote(bpy.types.Operator):
-	"""Remove the currently selected emote"""
-	bl_idname = "stf.remove_ava_emote"
-	bl_label = "Remove"
-	bl_options = {"REGISTER", "UNDO"}
-
-	component_id: bpy.props.StringProperty() # type: ignore
-	index: bpy.props.IntProperty() # type: ignore
-
-	def execute(self, context):
-		for component in context.collection.ava_emotes:
-			if(component.stf_id == self.component_id):
-				component.emotes.remove(self.index)
-				return {"FINISHED"}
-		self.report({"ERROR"}, "Couldn't remove emote")
-		return {"CANCELLED"}
 
 
 emote_values = (
@@ -89,7 +57,12 @@ class STFDrawAVAEmoteList(bpy.types.UIList):
 	bl_idname = "COLLECTION_UL_ava_emote_list"
 
 	def draw_item(self, context: bpy.types.Context, layout: bpy.types.UILayout, data, item: AVA_Emote, icon, active_data, active_propname, index):
-		layout.label(text=item.custom_emote if item.emote == "custom" else str(item.emote))
+		layout.label(text=item.custom_emote.capitalize() if item.emote == "custom" else str(item.emote).capitalize())
+		layout.label(text=item.animation.name, icon="ACTION")
+		if(item.use_blendshape_fallback and validate_stf_data_resource_reference(item.blendshape_fallback)):
+			layout.label(text="Has Fallback", icon="CHECKMARK")
+		else:
+			layout.label(text="No Fallback", icon="X")
 
 
 def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: AVA_Emotes):
@@ -98,17 +71,14 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 
 	layout.use_property_split = True
 
-	add_button = layout.operator(Add_AVA_Emotes.bl_idname, icon="ADD")
-	add_button.component_id = component.stf_id
+	create_add_button(layout, "collection" if context_object != context.scene.collection else True, _blender_property_name, component.stf_id, "emotes", text="Add Emote")
 
 	row = layout.row()
 	row.template_list(STFDrawAVAEmoteList.bl_idname, "", component, "emotes", component, "active_emote")
 	if(component.active_emote >= len(component.emotes)):
 		return
 
-	remove_button = row.operator(Remove_AVA_Emote.bl_idname, text="", icon="X")
-	remove_button.component_id = component.stf_id
-	remove_button.index = component.active_emote
+	create_remove_button(row, "collection" if context_object != context.scene.collection else True, _blender_property_name, component.stf_id, "emotes", component.active_emote)
 
 	emote = component.emotes[component.active_emote]
 

@@ -3,7 +3,7 @@ import bpy
 from ..base.stf_registry import get_stf_modules
 
 
-def clean_id_things(id_thingy: any):
+def clean_id_thingy(id_thingy: any):
 	valid_component_ids = []
 	if(hasattr(id_thingy, "stf_info")):
 		for ref in id_thingy.stf_info.stf_components:
@@ -13,6 +13,9 @@ def clean_id_things(id_thingy: any):
 			valid_component_ids.append(ref.stf_id)
 	if(hasattr(id_thingy, "stf_instance_armature_component_standins")):
 		for ref in id_thingy.stf_instance_armature_component_standins.stf_components:
+			valid_component_ids.append(ref.stf_id)
+	if(hasattr(id_thingy, "stf_data_refs")):
+		for ref in id_thingy.stf_data_refs:
 			valid_component_ids.append(ref.stf_id)
 
 	check_properties = []
@@ -36,21 +39,21 @@ def clean_id_things(id_thingy: any):
 
 def cleanup_unreferenced_components():
 	for blender_thingy in bpy.data.collections:
-		clean_id_things(blender_thingy)
+		clean_id_thingy(blender_thingy)
 	for blender_thingy in bpy.data.objects:
-		clean_id_things(blender_thingy)
+		clean_id_thingy(blender_thingy)
 	for blender_thingy in bpy.data.armatures:
-		clean_id_things(blender_thingy)
+		clean_id_thingy(blender_thingy)
 		for bone in blender_thingy.bones:
-			clean_id_things(bone)
+			clean_id_thingy(bone)
 	for blender_thingy in bpy.data.materials:
-		clean_id_things(blender_thingy)
+		clean_id_thingy(blender_thingy)
 	for blender_thingy in bpy.data.images:
-		clean_id_things(blender_thingy)
+		clean_id_thingy(blender_thingy)
 	for blender_thingy in bpy.data.actions:
-		clean_id_things(blender_thingy)
+		clean_id_thingy(blender_thingy)
 	for blender_thingy in bpy.data.meshes:
-		clean_id_things(blender_thingy)
+		clean_id_thingy(blender_thingy)
 
 
 class CleanupOp(bpy.types.Operator):

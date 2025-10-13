@@ -10,9 +10,9 @@ class NodePathSelector(bpy.types.PropertyGroup):
 	target_bone: bpy.props.StringProperty(name="Bone (Optional)") # type: ignore
 
 
-def draw_node_path_selector(layout: bpy.types.UILayout, nps: NodePathSelector):
+def draw_node_path_selector(layout: bpy.types.UILayout, nps: NodePathSelector, text: str = "Target"):
 	if(type(nps.id_data) == bpy.types.Armature):
-		layout.prop_search(nps, "target_bone", nps.id_data, "bones", text="Target")
+		layout.prop_search(nps, "target_bone", nps.id_data, "bones", text=text)
 	else:
 		layout.prop(nps, "target_object")
 		if(nps.target_object and type(nps.target_object.data) == bpy.types.Armature):
