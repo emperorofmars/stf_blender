@@ -7,6 +7,8 @@ from . import stfexp_lightprobe_anchor
 from . import stfexp_collider_sphere
 from . import stfexp_collider_capsule
 from . import stfexp_collider_plane
+from . import stfexp_camera
+from . import stfexp_light
 
 register_stf_modules = \
 	stfexp_mesh_seams.register_stf_modules + \
@@ -16,4 +18,6 @@ register_stf_modules = \
 	stfexp_lightprobe_anchor.register_stf_modules + \
 	stfexp_collider_sphere.register_stf_modules + \
 	stfexp_collider_capsule.register_stf_modules + \
-	stfexp_collider_plane.register_stf_modules
+	stfexp_collider_plane.register_stf_modules + \
+	stfexp_camera.register_stf_modules + \
+	stfexp_light.register_stf_modules
