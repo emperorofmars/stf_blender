@@ -12,6 +12,10 @@ from ....utils.boilerplate import boilerplate_register, boilerplate_unregister
 _stf_type = "stf.image"
 
 
+class STF_Image(bpy.types.PropertyGroup):
+	is_normal_map: bpy.props.BoolProperty(name="Is Normal-Map", default=False, options=set()) # type: ignore
+
+
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
 	blender_image = bpy.data.images.new(json_resource.get("name", "STF Image"), 8, 8)
 	blender_image.stf_info.stf_id = stf_id
@@ -51,6 +55,14 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 			"data_type": "non_color" if blender_image.colorspace_settings.name == "Non-Color" else "color"
 		}
 
+		if(blender_image.stf_image.is_normal_map):
+			ret["data_type"] = "normal"
+		else:
+			match blender_image.colorspace_settings.name:
+				case "sRGB": ret["data_type"] = "color"
+				case "Non-Color": ret["data_type"] = "non_color"
+				case _: ret["data_type"] = None
+
 		return ret, blender_image.stf_info.stf_id
 	except Exception as error:
 		context.report(STFReport("Could not export image: " + str(blender_image.filepath), STFReportSeverity.Error, blender_image.stf_info.stf_id, _stf_type, blender_image))
@@ -74,6 +86,10 @@ register_stf_modules = [
 
 def register():
 	boilerplate_register(bpy.types.Image, "data")
+	bpy.types.Image.stf_image = bpy.props.PointerProperty(type=STF_Image, options=set())
+
 
 def unregister():
+	if hasattr(bpy.types.Image, "stf_image"):
+		del bpy.types.Image.stf_image
 	boilerplate_unregister(bpy.types.Image, "data")

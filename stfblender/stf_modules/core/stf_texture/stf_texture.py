@@ -13,21 +13,22 @@ _blender_property_name = "stf_texture"
 
 class STF_Texture(STF_BlenderComponentBase):
 	"""Define information on how an image is to be uploaded to the GPU"""
-	width: bpy.props.IntProperty(name="Width", default=1024, min=1, options=set()) # type: ignore
-	height: bpy.props.IntProperty(name="Height", default=1024, min=1, options=set()) # type: ignore
+	width: bpy.props.IntProperty(name="Width", subtype="PIXEL", default=1024, min=1, options=set()) # type: ignore
+	height: bpy.props.IntProperty(name="Height", subtype="PIXEL", default=1024, min=1, options=set()) # type: ignore
 	downscale_priority: bpy.props.IntProperty(name="Downscale Priority", default=0, min=-1, options=set()) # type: ignore
-	quality: bpy.props.FloatProperty(name="Quality", default=1, min=0, max=1, options=set()) # type: ignore
+	quality: bpy.props.FloatProperty(name="Quality", subtype="FACTOR", default=1, min=0, max=1, options=set()) # type: ignore
 	mipmaps: bpy.props.BoolProperty(name="Mipmaps", default=True, options=set()) # type: ignore
 	# TODO much more
 
 
 def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, parent_application_object: any, component: STF_Texture):
-	layout.use_property_split = True
-	layout.prop(component, "width")
-	layout.prop(component, "height")
-	layout.prop(component, "downscale_priority")
-	layout.prop(component, "quality")
-	layout.prop(component, "mipmaps")
+	col = layout.column(align=True)
+	col.use_property_split = True
+	col.prop(component, "width")
+	col.prop(component, "height")
+	col.prop(component, "downscale_priority")
+	col.prop(component, "quality")
+	col.prop(component, "mipmaps")
 
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:

@@ -49,6 +49,10 @@ class STFImageSpatialPanel(bpy.types.Panel):
 		# Set ID
 		draw_stf_id_ui(self.layout, context, context.edit_image, context.edit_image.stf_info, STFSetImageIDOperator.bl_idname)
 
+		self.layout.separator(factor=1, type="SPACE")
+
+		self.layout.prop(context.edit_image.stf_image, "is_normal_map")
+
 		self.layout.separator(factor=2, type="LINE")
 
 		# Components
