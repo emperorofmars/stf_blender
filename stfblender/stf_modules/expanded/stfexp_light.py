@@ -27,7 +27,6 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	blender_object.stf_instance.stf_id = stf_id
 	if(json_resource.get("name")):
 		blender_object.stf_instance.stf_name = json_resource["name"]
-		blender_object.stf_instance.stf_name_source_of_truth = True
 	context.register_imported_resource(stf_id, (blender_object, blender_light))
 
 	if(not blender_object or type(blender_object) is not bpy.types.Object):
@@ -46,8 +45,21 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 			if("radius" in json_resource): blender_light.shadow_soft_size = json_resource["radius"]
 			if("angle" in json_resource): blender_light.spot_size = json_resource["angle"]
 		case "area":
-			if("width" in json_resource): blender_light.size = json_resource["width"]
-			if("height" in json_resource): blender_light.size_y = json_resource["height"]
+			match(json_resource.get("area_shape", "square")):
+				case "square":
+					blender_light.shape = "SQUARE"
+					if("size" in json_resource): blender_light.size = json_resource["size"]
+				case "disc":
+					blender_light.shape = "DISK"
+					if("size" in json_resource): blender_light.size = json_resource["size"]
+				case "rectangle":
+					blender_light.shape = "RECTANGLE"
+					if("width" in json_resource): blender_light.size = json_resource["width"]
+					if("height" in json_resource): blender_light.size_y = json_resource["height"]
+				case "ellipsis":
+					blender_light.shape = "ELLIPSE"
+					if("width" in json_resource): blender_light.size = json_resource["width"]
+					if("height" in json_resource): blender_light.size_y = json_resource["height"]
 
 	return blender_object
 
@@ -80,8 +92,21 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 			ret["angle"] = blender_light.spot_size
 		case "AREA":
 			ret["light_type"] = "area"
-			ret["width"] = blender_light.size
-			ret["height"] = blender_light.size_y
+			match(blender_light.shape):
+				case "SQUARE":
+					ret["area_shape"] = "square"
+					ret["size"] = blender_light.size
+				case "DISK":
+					ret["area_shape"] = "disc"
+					ret["size"] = blender_light.size
+				case "RECTANGLE":
+					ret["area_shape"] = "rectangle"
+					ret["width"] = blender_light.size
+					ret["height"] = blender_light.size_y
+				case "ELLIPSE":
+					ret["area_shape"] = "ellipsis"
+					ret["width"] = blender_light.size
+					ret["height"] = blender_light.size_y
 
 	ret["brightness"] = blender_light.energy
 	ret["color"] = blender_light.color[:]

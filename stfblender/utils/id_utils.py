@@ -39,7 +39,7 @@ def draw_stf_id_ui(layout: bpy.types.UILayout, context: bpy.types.Context, blend
 	flow = layout.split(factor=0.15)
 	flow.label(text="Name:")
 	row = flow.row()
-	if(stf_prop_holder.stf_name_source_of_truth):
+	if(not hasattr(stf_prop_holder, "stf_name_source_of_truth") or stf_prop_holder.stf_name_source_of_truth):
 		row.prop(stf_prop_holder, "stf_name", text="")
 	else:
 		sub = row.row()

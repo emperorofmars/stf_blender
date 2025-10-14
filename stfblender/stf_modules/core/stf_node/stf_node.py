@@ -19,7 +19,7 @@ _stf_type = "stf.node"
 class STF_Instance(bpy.types.PropertyGroup):
 	stf_id: bpy.props.StringProperty(name="ID", options=set()) # type: ignore
 	stf_name: bpy.props.StringProperty(name="Name", options=set()) # type: ignore
-	stf_name_source_of_truth: bpy.props.BoolProperty(name="STF Name Is Source Of Truth", default=True, options=set()) # type: ignore
+	enabled: bpy.props.BoolProperty(name="Enabled", default=True, options=set()) # type: ignore
 
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:

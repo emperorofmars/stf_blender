@@ -32,7 +32,6 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	blender_object.stf_instance.stf_id = stf_id
 	if(json_resource.get("name")):
 		blender_object.stf_instance.stf_name = json_resource["name"]
-		blender_object.stf_instance.stf_name_source_of_truth = True
 
 	bpy.context.scene.collection.objects.link(blender_object)
 	context.register_imported_resource(stf_id, (blender_object, blender_armature))
