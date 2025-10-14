@@ -114,7 +114,6 @@ class HumanoidSettings(bpy.types.PropertyGroup):
 	use_translation: bpy.props.BoolProperty(name="Feet Spacing", default=False, options=set()) # type: ignore
 
 
-
 class STFEXP_Armature_Humanoid(STF_BlenderComponentBase):
 	locomotion_type: bpy.props.EnumProperty(items=[("planti", "Plantigrade", ""),("digi", "Digitigrade", "")], name="Locomotion Type", default="planti", options=set()) # type: ignore
 	no_jaw: bpy.props.BoolProperty(name="Ignore Jaw Mapping", default=False, options=set()) # type: ignore
