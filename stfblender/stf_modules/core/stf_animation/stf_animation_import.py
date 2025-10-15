@@ -10,7 +10,7 @@ _stf_type = stf_animation_type
 
 
 def stf_animation_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
-	if(not hasattr(bpy.types.Action, "slot_links")):
+	if(not hasattr(bpy.types.Action, "slot_link")):
 		context.report(STFReport("Slot-Link is required to import animations!", STFReportSeverity.Warn, stf_id, _stf_type))
 		return
 
@@ -47,7 +47,7 @@ def stf_animation_import(context: STF_ImportContext, json_resource: dict, stf_id
 					index_conversion.append(track_index)
 
 			selected_slot_link = None
-			for slot_link in blender_animation.slot_links:
+			for slot_link in blender_animation.slot_link.links:
 				if(slot_link.target == target_object and slot_link.datablock_index == application_object_property_index):
 					for slot in blender_animation.slots:
 						if(slot.handle == slot_link.slot_handle and slot.target_id_type == slot_type):
@@ -59,7 +59,7 @@ def stf_animation_import(context: STF_ImportContext, json_resource: dict, stf_id
 			selected_channelbag = None
 			if(not selected_slot_link):
 				blender_slot = blender_animation.slots.new(slot_type, target_object.name + " - " + slot_type)
-				selected_slot_link = blender_animation.slot_links.add()
+				selected_slot_link = blender_animation.slot_link.links.add()
 				selected_slot_link.slot_handle = blender_slot.handle
 				selected_slot_link.target = target_object
 				selected_slot_link.datablock_index = application_object_property_index

@@ -18,11 +18,11 @@ def stf_animation_export(context: STF_ExportContext, application_object: any, co
 	if(blender_animation.is_action_legacy):
 		context.report(STFReport("Ignoring legacy animation: " + blender_animation.name, STFReportSeverity.Debug, blender_animation.stf_info.stf_id, _stf_type, application_object))
 		return None
-	if(not hasattr(blender_animation, "slot_links")):
+	if(not hasattr(blender_animation, "slot_link")):
 		context.report(STFReport("Slot-Link is required to export animations!", STFReportSeverity.Debug, blender_animation.stf_info.stf_id, _stf_type, application_object))
 		return None
 
-	for slot_link in blender_animation.slot_links:
+	for slot_link in blender_animation.slot_link.links:
 		if(slot_link.target):
 			break
 	else:
@@ -41,7 +41,7 @@ def stf_animation_export(context: STF_ExportContext, application_object: any, co
 				for channelbag in strip.channelbags:
 					# Get the target for this set of animation tracks from the Slot Link extension. (Why can't you be normal Blender?)
 					selected_slot_link = None
-					for slot_link in blender_animation.slot_links:
+					for slot_link in blender_animation.slot_link.links:
 						if(slot_link.slot_handle == channelbag.slot_handle):
 							selected_slot_link = slot_link
 							break

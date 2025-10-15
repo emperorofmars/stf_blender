@@ -46,7 +46,7 @@ class STFAnimationSpatialPanel(bpy.types.Panel):
 	def draw(self, context):
 		set_stf_component_filter(bpy.types.Action)
 
-		if(not hasattr(bpy.types.Action, "slot_links")):
+		if(not hasattr(bpy.types.Action, "slot_link")):
 			draw_slot_link_warning(self.layout)
 			return
 

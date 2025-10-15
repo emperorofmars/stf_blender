@@ -2,7 +2,7 @@ import bpy
 
 
 def draw_slot_link_warning(layout: bpy.types.UILayout):
-	if(not hasattr(bpy.types.Action, "slot_links")):
+	if(not hasattr(bpy.types.Action, "slot_link")):
 		layout.separator(factor=1, type="SPACE")
 		box = layout.box()
 		box.label(text="Note: The 'Slot Link' extension is required to import & export animations!")
