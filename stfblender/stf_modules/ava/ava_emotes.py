@@ -58,7 +58,7 @@ class STFDrawAVAEmoteList(bpy.types.UIList):
 
 	def draw_item(self, context: bpy.types.Context, layout: bpy.types.UILayout, data, item: AVA_Emote, icon, active_data, active_propname, index):
 		layout.label(text=item.custom_emote.capitalize() if item.emote == "custom" else str(item.emote).capitalize())
-		layout.label(text=item.animation.name, icon="ACTION")
+		if(item.animation): layout.label(text=item.animation.name, icon="ACTION")
 		if(item.use_blendshape_fallback and validate_stf_data_resource_reference(item.blendshape_fallback)):
 			layout.label(text="Has Fallback", icon="CHECKMARK")
 		else:

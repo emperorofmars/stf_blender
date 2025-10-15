@@ -36,7 +36,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	if("color" in json_resource): blender_light.color = tuple(json_resource["color"])
 	if("temperature" in json_resource): blender_light.temperature = json_resource["temperature"]
 
-	match(blender_light.type):
+	match(json_resource.get("light_type")):
 		case "point":
 			if("radius" in json_resource): blender_light.shadow_soft_size = json_resource["radius"]
 		case "directional":
@@ -116,7 +116,7 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 	return ret, blender_object.stf_instance.stf_id
 
 
-# todo animation support for lens/angle values
+# todo animation support for brightness, color, etc
 
 
 class STF_Module_STFEXP_Light(STF_Module):
