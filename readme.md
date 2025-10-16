@@ -2,7 +2,7 @@
 **Squirrel Transfer Format - Modular 3D File-Format**\
 *Intended for (not only) games-development use-cases.*
 
-**WIP implementation for Blender 4.4+. Do not use productively!**
+**WIP implementation for Blender 4.5+. Do not use productively!**
 
 **[Read the User Guide!](https://docs.stfform.at/guide/blender.html)** ⭐ **[STF Website](https://docs.stfform.at/)**
 

@@ -92,16 +92,11 @@ def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_o
 
 
 def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: any) -> tuple[any, int, any, any, list[int], Callable[[list[float]], list[float]]]:
-	blender_object = context.get_imported_resource(stf_path[0])
-	"""# let component_index
-	for component_index, component in enumerate(application_object.stfexp_constraint_twist):
-		if(component.stf_id == blender_object.stf_id):
-			break
 	match(stf_path[1]):
 		case "weight":
-			return None, 0, "OBJECT", "stfexp_constraint_twist[" + str(component_index) + "].weight", 0, None
+			return None, 0, "CAMERA", "lens", 0, None
 		case "enabled":
-			return None, 0, "OBJECT", "stfexp_constraint_twist[" + str(component_index) + "].enabled", 0, None"""
+			return None, 0, "CAMERA", "ortho_scale", 0, None
 	return None
 
 
@@ -114,6 +109,7 @@ class STF_Module_STFEXP_Camera(STF_Module):
 	export_func = _stf_export
 	can_handle_application_object_func = _can_handle_application_object_func
 
+	# todo
 	"""understood_application_property_path_types = [bpy.types.Object]
 	understood_application_property_path_parts = ["lens", "ortho_scale"]
 	resolve_property_path_to_stf_func = _resolve_property_path_to_stf_func
