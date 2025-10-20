@@ -9,21 +9,27 @@ for m in {m.module for m in bpy.context.preferences.extensions.repos}:
 		__installed_and_enabled_stf_extensions.append(m)
 	elif(loaded_state and m == "user_default"):
 		__installed_and_enabled_stf_extensions.append(m)
+	elif(loaded_state and m == "blender_stfform_at"):
+		__installed_and_enabled_stf_extensions.append(m)
 	elif(loaded_state and m == "blender_org"):
 		__installed_and_enabled_stf_extensions.append(m)
 
-if("vscode_development" in __installed_and_enabled_stf_extensions):
-	print("Enabling Custom STF Modules for development extension.")
-	selected_stf_extension = "bl_ext.vscode_development.stf_blender"
-elif(len(__installed_and_enabled_stf_extensions) == 1):
-	print("Enabling Custom STF Modules!")
-	selected_stf_extension = "bl_ext." + __installed_and_enabled_stf_extensions[0] + ".stf_blender"
+if(len(__installed_and_enabled_stf_extensions) == 1):
+	if("vscode_development" in __installed_and_enabled_stf_extensions):
+		print("Enabling custom STF modules for development extension.")
+		selected_stf_extension = "bl_ext.vscode_development.stf_blender"
+	elif("blender_stfform_at" in __installed_and_enabled_stf_extensions):
+		print("Enabling custom STF modules for official STF distribution.")
+		selected_stf_extension = "bl_ext.blender_stfform_at.stf_blender"
+	else:
+		print("Enabling STF modules for user STF install!")
+		selected_stf_extension = "bl_ext." + __installed_and_enabled_stf_extensions[0] + ".stf_blender"
 elif(len(__installed_and_enabled_stf_extensions) > 1):
-	print("Warning: STF Module detected more than one enabled STF extension! Using the first one from the '" + __installed_and_enabled_stf_extensions[0] + "' repository")
+	print("Warning: Detected more than one enabled STF extension! Using the first one from the '" + __installed_and_enabled_stf_extensions[0] + "' repository")
 	selected_stf_extension = "bl_ext." + __installed_and_enabled_stf_extensions[0] + ".stf_blender"
 else:
 	selected_stf_extension = None
-	print("No STF Extension detected. Not enabling Custom STF Modules!")
+	print("No STF extension detected. Not enabling custom STF modules!")
 
 if(selected_stf_extension):
 	import importlib

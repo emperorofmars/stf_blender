@@ -11,7 +11,7 @@ class SqueakComponent(stfblender.base.stf_module_component.STF_BlenderComponentB
 	squeak: bpy.props.BoolProperty(name="Squeak", default=True) # type: ignore
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: stfblender.utils.component_utils.STF_BlenderComponentModule, context_object: any, component: SqueakComponent):
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: stfblender.base.stf_module_component.STF_Component_Ref, context_object: any, component: SqueakComponent):
 	layout.prop(component, "squeak")
 
 

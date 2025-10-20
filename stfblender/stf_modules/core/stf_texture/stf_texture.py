@@ -21,7 +21,7 @@ class STF_Texture(STF_BlenderComponentBase):
 	# TODO much more
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, parent_application_object: any, component: STF_Texture):
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: STF_Texture):
 	col = layout.column(align=True)
 	col.use_property_split = True
 	col.prop(component, "width")
