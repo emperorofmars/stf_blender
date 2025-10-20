@@ -188,10 +188,10 @@ class STF_Module_STFEXP_Camera(STF_Module):
 	export_func = _stf_export
 	can_handle_application_object_func = _can_handle_application_object_func
 
-	"""understood_application_property_path_types = [bpy.types.Object]
+	understood_application_property_path_types = [bpy.types.Object]
 	understood_application_property_path_parts = ["lens", "ortho_scale"]
 	resolve_property_path_to_stf_func = _resolve_property_path_to_stf_func
-	resolve_stf_property_to_blender_func = _resolve_stf_property_to_blender_func"""
+	resolve_stf_property_to_blender_func = _resolve_stf_property_to_blender_func
 
 
 register_stf_modules = [
