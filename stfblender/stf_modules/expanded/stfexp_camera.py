@@ -144,7 +144,7 @@ def _get__convert_lens_to_fov_func(camera: bpy.types.Camera) -> Callable:
 			return [_h_fov_to_v_fov(camera, 0, value[0])]
 	else:
 		def _ret(value: list[float]) -> list[float]:
-			return [_h_fov_to_v_fov(camera, 2 * math.atan(camera.sensor_height / (2 * value[0])), 0)] # convert fov to lens # todo test this
+			return [_h_fov_to_v_fov(camera, 2 * math.atan(camera.sensor_height / (2 * value[0])), 0)] # convert lens to fov # todo test this
 	return _ret
 
 def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: any, application_object_property_index: int, data_path: str) -> tuple[list[str], Callable[[int, any], any], list[int]]:
@@ -165,7 +165,7 @@ def _get__convert_fov_to_blender_func(camera: bpy.types.Camera) -> Callable:
 			return [_v_fov_to_h_fov(camera, value[0])]
 	else:
 		def _ret(value: list[float]) -> list[float]:
-			return [_v_fov_to_h_fov(camera, value[0])] # convert fov to lens # todo
+			return [_v_fov_to_h_fov(camera, value[0])] # convert fov to lens # todo fov to lens
 	return _ret
 
 def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: any) -> tuple[any, int, any, any, list[int], Callable[[list[float]], list[float]]]:
@@ -188,10 +188,10 @@ class STF_Module_STFEXP_Camera(STF_Module):
 	export_func = _stf_export
 	can_handle_application_object_func = _can_handle_application_object_func
 
-	understood_application_property_path_types = [bpy.types.Object]
+	"""understood_application_property_path_types = [bpy.types.Object]
 	understood_application_property_path_parts = ["lens", "ortho_scale"]
 	resolve_property_path_to_stf_func = _resolve_property_path_to_stf_func
-	resolve_stf_property_to_blender_func = _resolve_stf_property_to_blender_func
+	resolve_stf_property_to_blender_func = _resolve_stf_property_to_blender_func"""
 
 
 register_stf_modules = [
