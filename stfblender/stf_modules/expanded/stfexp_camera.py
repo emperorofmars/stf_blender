@@ -41,20 +41,6 @@ class STFEXP_Camera_Panel(bpy.types.Panel):
 Import
 """
 
-"""def _v_fov_to_h_fov(camera: bpy.types.Camera, cur_fov: float):
-	if(bpy.context.scene.render.resolution_x / bpy.context.scene.render.resolution_y >= 1):
-		if(camera.type == "ORTHO"):
-			# convert vertical fov to horizontal
-			return 2 * math.atan((0.5 * bpy.context.scene.render.resolution_x) / (0.5 * bpy.context.scene.render.resolution_y / math.tan(cur_fov / 2)))
-		else:
-			# convert vertical ortho_scale
-			return cur_fov * (bpy.context.scene.render.resolution_x / bpy.context.scene.render.resolution_y)
-	else:
-	if(camera.type == "ORTHO"):
-		return cur_fov
-	else:
-		return cur_fov"""
-
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
 	blender_camera = bpy.data.cameras.new(json_resource.get("name", "STFEXP Camera"))
 	blender_object = bpy.data.objects.new(json_resource.get("name", "STF Node"), blender_camera)
