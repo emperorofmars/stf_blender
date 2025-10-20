@@ -41,7 +41,7 @@ class STFEXP_Camera_Panel(bpy.types.Panel):
 Import
 """
 
-def _v_fov_to_h_fov(camera: bpy.types.Camera, cur_fov: float):
+"""def _v_fov_to_h_fov(camera: bpy.types.Camera, cur_fov: float):
 	if(bpy.context.scene.render.resolution_x / bpy.context.scene.render.resolution_y >= 1):
 		if(camera.type == "ORTHO"):
 			# convert vertical fov to horizontal
@@ -50,10 +50,10 @@ def _v_fov_to_h_fov(camera: bpy.types.Camera, cur_fov: float):
 			# convert vertical ortho_scale
 			return cur_fov * (bpy.context.scene.render.resolution_x / bpy.context.scene.render.resolution_y)
 	else:
-		if(camera.type == "ORTHO"):
-			return cur_fov
-		else:
-			return cur_fov
+	if(camera.type == "ORTHO"):
+		return cur_fov
+	else:
+		return cur_fov"""
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
 	blender_camera = bpy.data.cameras.new(json_resource.get("name", "STFEXP Camera"))
@@ -66,24 +66,17 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	if(not blender_object or type(blender_object) is not bpy.types.Object):
 		context.report(STFReport("Failed to import camera", STFReportSeverity.Error, stf_id, _stf_type, context_object))
 
+	blender_camera.sensor_fit = "VERTICAL"
+
 	match(json_resource.get("projection", "perspective")):
 		case "perspective":
 			blender_camera.type = "PERSP"
-			"""if(bpy.context.scene.render.resolution_x / bpy.context.scene.render.resolution_y <= 1):
-				# vertical fov
-				blender_camera.angle = json_resource.get("fov", 40)
-			else:
-				# convert vertical fov to horizontal
-				blender_camera.angle = 2 * math.atan((0.5 * bpy.context.scene.render.resolution_x) / (0.5 * bpy.context.scene.render.resolution_y / math.tan(json_resource.get("fov", 40) / 2)))"""
-			blender_camera.angle = _v_fov_to_h_fov(blender_camera, json_resource.get("fov", 40))
+			#blender_camera.angle = _v_fov_to_h_fov(blender_camera, json_resource.get("fov", 40))
+			blender_camera.angle = json_resource.get("fov", 40)
 		case "orthographic":
 			blender_camera.type = "ORTHO"
-			"""if(bpy.context.scene.render.resolution_x / bpy.context.scene.render.resolution_y <= 1):
-				blender_camera.ortho_scale = json_resource.get("fov", 6)
-			else:
-				# convert vertical ortho_scale
-				blender_camera.ortho_scale = json_resource.get("fov", 6) * (bpy.context.scene.render.resolution_x / bpy.context.scene.render.resolution_y)"""
-			blender_camera.ortho_scale = _v_fov_to_h_fov(blender_camera, json_resource.get("fov", 40))
+			#blender_camera.ortho_scale = _v_fov_to_h_fov(blender_camera, json_resource.get("fov", 40))
+			blender_camera.ortho_scale = json_resource.get("fov", 40)
 
 	return blender_object
 
@@ -137,6 +130,11 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 Animation
 """
 
+def _is_sensor_fit_horizontal(camera: bpy.types.Camera) -> bool:
+	if(camera.sensor_fit == "VERTICAL"): return False
+	else: return True
+
+
 def _get__convert_lens_to_fov_func(camera: bpy.types.Camera) -> Callable:
 	# let _ret
 	if(camera.type == "ORTHO"):
@@ -144,13 +142,13 @@ def _get__convert_lens_to_fov_func(camera: bpy.types.Camera) -> Callable:
 			return [_h_fov_to_v_fov(camera, 0, value[0])]
 	else:
 		def _ret(value: list[float]) -> list[float]:
-			return [_h_fov_to_v_fov(camera, 2 * math.atan(camera.sensor_height / (2 * value[0])), 0)] # convert lens to fov # todo test this
+			return [_h_fov_to_v_fov(camera, 2 * math.atan((camera.sensor_width if _is_sensor_fit_horizontal(camera) else camera.sensor_height) / (2 * value[0])), 0)] # convert lens to fov
 	return _ret
 
 def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: any, application_object_property_index: int, data_path: str) -> tuple[list[str], Callable[[int, any], any], list[int]]:
 	if(application_object.data.type == "ORTHO"):
 		if(match := re.search(r"^ortho_scale", data_path)):
-			return [application_object.stf_info.stf_id, "instance", "fov"], None, None
+			return [application_object.stf_info.stf_id, "instance", "fov"], _get__convert_lens_to_fov_func(application_object.data), None
 	elif(application_object.data.type == "PERSP"):
 		if(match := re.search(r"^lens", data_path)):
 			return [application_object.stf_info.stf_id, "instance", "fov"], _get__convert_lens_to_fov_func(application_object.data), None
@@ -159,21 +157,15 @@ def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_o
 
 
 def _get__convert_fov_to_blender_func(camera: bpy.types.Camera) -> Callable:
-	# let _ret
-	if(camera.type == "ORTHO"):
-		def _ret(value: list[float]) -> list[float]:
-			return [_v_fov_to_h_fov(camera, value[0])]
-	else:
-		def _ret(value: list[float]) -> list[float]:
-			return [_v_fov_to_h_fov(camera, value[0])] # convert fov to lens # todo fov to lens
+	def _ret(value: list[float]) -> list[float]:
+		return [(camera.sensor_width if _is_sensor_fit_horizontal(camera) else camera.sensor_height) / (2 * math.tan(value[0] / 2))] # convert fov to lens
 	return _ret
 
 def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: any) -> tuple[any, int, any, any, list[int], Callable[[list[float]], list[float]]]:
-	print(application_object)
 	match(stf_path[1]):
 		case "fov":
 			if(application_object.data.type == "ORTHO"):
-				return None, 0, "CAMERA", "ortho_scale", 0, _get__convert_fov_to_blender_func(application_object.data)
+				return None, 0, "CAMERA", "ortho_scale", 0, None
 			elif(application_object.data.type == "PERSP"):
 				return None, 0, "CAMERA", "lens", 0, _get__convert_fov_to_blender_func(application_object.data)
 	return None
