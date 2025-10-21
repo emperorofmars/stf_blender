@@ -1,4 +1,6 @@
 import bpy
+import re
+from typing import Callable
 
 from ...exporter.stf_export_context import STF_ExportContext
 from ...importer.stf_import_context import STF_ImportContext
@@ -33,6 +35,10 @@ class STFEXP_Light_Panel(bpy.types.Panel):
 		# Set ID
 		draw_stf_id_ui(self.layout, context, context.object.stf_instance, context.object.stf_instance, STFSetSTFEXPLightIDOperator.bl_idname, True)
 
+
+"""
+Import
+"""
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
 	blender_light_type = "POINT"
@@ -73,6 +79,10 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	return blender_object
 
 
+"""
+Export
+"""
+
 def _can_handle_application_object_func(application_object: any) -> int:
 	if(type(application_object) == tuple and type(application_object[0]) == bpy.types.Object and isinstance(application_object[1], bpy.types.Light) and application_object[1].type in ["POINT", "SUN", "SPOT"]):
 		return 1000
@@ -110,8 +120,43 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 	return ret, blender_object.stf_instance.stf_id
 
 
-# todo animation support for brightness, color, etc
+"""
+Animation
+"""
 
+def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: any, application_object_property_index: int, data_path: str) -> tuple[list[str], Callable[[int, any], any], list[int]]:
+	if(match := re.search(r"^temperature", data_path)):
+		return [application_object.stf_info.stf_id, "instance", "temperature"], None, None
+	elif(match := re.search(r"^color", data_path)):
+		return [application_object.stf_info.stf_id, "instance", "color"], None, None
+	elif(match := re.search(r"^energy", data_path)):
+		return [application_object.stf_info.stf_id, "instance", "brightness"], None, None # todo converter
+	elif(match := re.search(r"^shadow_soft_size", data_path)):
+		return [application_object.stf_info.stf_id, "instance", "range"], None, None
+	elif(match := re.search(r"^spot_size", data_path)):
+		return [application_object.stf_info.stf_id, "instance", "spot_angle"], None, None
+	# todo enabled maybe?
+	return None
+
+
+def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: any) -> tuple[any, int, any, any, list[int], Callable[[list[float]], list[float]]]:
+	match(stf_path[1]):
+		case "temperature":
+			return None, 0, "LIGHT", "temperature", 0, None
+		case "color":
+			return None, 0, "LIGHT", "color", 0, None
+		case "brightness":
+			return None, 0, "LIGHT", "energy", 0, None # todo converter
+		case "range":
+			return None, 0, "LIGHT", "shadow_soft_size", 0, None
+		case "spot_angle":
+			return None, 0, "LIGHT", "spot_size", 0, None
+	return None
+
+
+"""
+Definition
+"""
 
 class STF_Module_STFEXP_Light(STF_Module):
 	stf_type = _stf_type
@@ -121,6 +166,11 @@ class STF_Module_STFEXP_Light(STF_Module):
 	import_func = _stf_import
 	export_func = _stf_export
 	can_handle_application_object_func = _can_handle_application_object_func
+
+	understood_application_property_path_types = [bpy.types.Object]
+	understood_application_property_path_parts = ["temperature", "color", "energy", "shadow_soft_size", "spot_size"]
+	resolve_property_path_to_stf_func = _resolve_property_path_to_stf_func
+	resolve_stf_property_to_blender_func = _resolve_stf_property_to_blender_func
 
 
 register_stf_modules = [

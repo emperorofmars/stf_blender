@@ -1,6 +1,9 @@
 from typing import Callable
 import bpy
 
+from ....exporter.stf_export_context import STF_ExportContext
+from ....importer.stf_import_context import STF_ImportContext
+
 
 class STF_Material_Value_Base(bpy.types.PropertyGroup):
 	value_id: bpy.props.IntProperty(options=set()) # type: ignore
@@ -15,6 +18,10 @@ class STF_Material_Value_Module_Base:
 
 	# (STF Context, Blender Material, Blender STF Material Value) -> Json Value
 	value_export_func: Callable[[any, bpy.types.Material, STF_Material_Value_Base], any]
+
+	# Animation import export
+	resolve_property_path_to_stf_func: Callable[[STF_ExportContext, str, STF_Material_Value_Base], tuple[list, Callable[[int, any], any], list[int]]]
+	resolve_stf_property_to_blender_func: Callable[[STF_ImportContext, list[str]], tuple[str, list[int], Callable[[list[float]], list[float]]]]
 
 	draw_func: Callable[[bpy.types.UILayout, bpy.types.Context, bpy.types.Material, STF_Material_Value_Base], None]
 
@@ -53,7 +60,6 @@ class STF_Material_Definition(bpy.types.PropertyGroup):
 	shader_targets: bpy.props.CollectionProperty(type=ShaderTarget, name="Shader Targets", options=set()) # type: ignore
 	properties: bpy.props.CollectionProperty(type=STF_Material_Property, name="STF Material Properties", options=set()) # type: ignore
 	active_property_index: bpy.props.IntProperty(options=set()) # type: ignore
-	property_value_refs: bpy.props.CollectionProperty(type=STF_Material_Value_Ref, name="STF Material Values", options=set()) # type: ignore
 
 
 def register():

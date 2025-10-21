@@ -56,7 +56,6 @@ def clear_stf_material(blender_material: bpy.types.Material):
 	for mat_property in blender_material.stf_material.properties:
 		if(hasattr(blender_material, mat_property.value_property_name)):
 			getattr(blender_material, mat_property.value_property_name).clear()
-	blender_material.stf_material.property_value_refs.clear()
 	blender_material.stf_material.active_property_index = 0
 	blender_material.stf_material.properties.clear()
 

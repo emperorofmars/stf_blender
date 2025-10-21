@@ -157,6 +157,10 @@ def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: 
 	return None
 
 
+"""
+Definition
+"""
+
 class STF_Module_STFEXP_Camera(STF_Module):
 	stf_type = _stf_type
 	stf_kind = "instance"
