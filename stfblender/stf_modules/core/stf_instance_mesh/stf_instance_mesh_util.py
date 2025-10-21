@@ -23,18 +23,3 @@ def set_instance_blendshapes(blender_object: bpy.types.Object):
 				blender_object.stf_instance_mesh.blendshape_values.remove(instance_index)
 	else:
 		blender_object.stf_instance_mesh.blendshape_values.clear()
-
-
-
-def set_instance_materials(blender_object: bpy.types.Object):
-	blender_mesh: bpy.types.Mesh = blender_object.data
-	while(len(blender_object.stf_instance_mesh.materials) < len(blender_mesh.materials)):
-		blender_object.stf_instance_mesh.materials.add()
-
-	while(len(blender_object.stf_instance_mesh.materials) > len(blender_mesh.materials)):
-		blender_object.stf_instance_mesh.materials.remove(len(blender_object.stf_instance_mesh.materials) - 1)
-
-	for material_index in range(len(blender_mesh.materials)):
-		if(not blender_object.stf_instance_mesh.materials[material_index].override):
-			blender_object.stf_instance_mesh.materials[material_index].material = blender_mesh.materials[material_index]
-

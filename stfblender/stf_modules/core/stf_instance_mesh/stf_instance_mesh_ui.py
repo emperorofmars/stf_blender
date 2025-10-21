@@ -1,21 +1,8 @@
 import bpy
 
 from ....utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
-from .stf_instance_mesh_util import set_instance_blendshapes, set_instance_materials
+from .stf_instance_mesh_util import set_instance_blendshapes
 
-
-class SetInstanceMaterials(bpy.types.Operator):
-	"""Override the Materials of the Mesh"""
-	bl_idname = "stf.set_mesh_instance_materials"
-	bl_label = "Set Materials per Instance"
-	bl_options = {"REGISTER", "UNDO"}
-
-	@classmethod
-	def poll(cls, context): return context.object.stf_instance is not None and context.object.data and type(context.object.data) is bpy.types.Mesh
-
-	def execute(self, context):
-		set_instance_materials(context.object)
-		return {"FINISHED"}
 
 class SetInstanceBlendshapes(bpy.types.Operator):
 	"""Override the Blendshape values of the Mesh"""
@@ -39,7 +26,6 @@ class STFSetMeshInstanceIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
 	def get_property(self, context): return context.object.stf_instance
 
 
-
 class STFDrawMeshInstanceBlendshapeList(bpy.types.UIList):
 	"""Override blendshapes on this meshinstance"""
 	bl_idname = "COLLECTION_UL_stf_instance_mesh_blendshapes"
@@ -48,15 +34,6 @@ class STFDrawMeshInstanceBlendshapeList(bpy.types.UIList):
 		row = layout.row()
 		row.prop(item, "override", text=item.name)
 		row.prop(item, "value", text="Value")
-
-class STFDrawMeshInstanceMaterialList(bpy.types.UIList):
-	"""Override materials on this meshinstance"""
-	bl_idname = "COLLECTION_UL_stf_instance_mesh_materials"
-
-	def draw_item(self, context, layout: bpy.types.UILayout, data, item, icon, active_data, active_propname, index):
-		row = layout.row()
-		row.prop(item, "override")
-		row.prop(item, "material")
 
 
 class STFMeshInstancePanel(bpy.types.Panel):
@@ -79,15 +56,6 @@ class STFMeshInstancePanel(bpy.types.Panel):
 
 		# Set ID
 		draw_stf_id_ui(self.layout, context, context.object.stf_instance, context.object.stf_instance, STFSetMeshInstanceIDOperator.bl_idname, True)
-
-		self.layout.separator(factor=2, type="LINE")
-
-		# Materials per Instance
-		self.layout.prop(context.object.stf_instance_mesh, "override_materials", text="Use Instance Materials")
-		if(context.object.stf_instance_mesh.override_materials):
-			self.layout.operator(SetInstanceMaterials.bl_idname, text="Update Materials", icon="LOOP_FORWARDS")
-
-			self.layout.template_list(STFDrawMeshInstanceMaterialList.bl_idname, "", context.object.stf_instance_mesh, "materials", context.object.stf_instance_mesh, "active_material")
 
 		self.layout.separator(factor=2, type="LINE")
 

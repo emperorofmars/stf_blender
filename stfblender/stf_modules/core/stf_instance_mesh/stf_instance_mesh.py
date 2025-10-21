@@ -7,7 +7,7 @@ from ....base.stf_module import STF_Module
 from ....utils.id_utils import ensure_stf_id
 from ....base.stf_report import STFReportSeverity, STFReport
 from ....utils.component_utils import get_components_from_object
-from .stf_instance_mesh_util import set_instance_blendshapes, set_instance_materials
+from .stf_instance_mesh_util import set_instance_blendshapes
 
 
 _stf_type = "stf.instance.mesh"
@@ -18,17 +18,17 @@ class STF_Instance_Mesh_Blendshape_Value(bpy.types.PropertyGroup):
 	override: bpy.props.BoolProperty(name="Override", default=False, options=set()) # type: ignore
 	value: bpy.props.FloatProperty(name="Value", default=0, soft_min=0, soft_max=1, subtype="FACTOR") # type: ignore
 
-class STF_Instance_Mesh_Material(bpy.types.PropertyGroup):
+"""class STF_Instance_Mesh_Material(bpy.types.PropertyGroup):
 	override: bpy.props.BoolProperty(name="Override", default=False, options=set()) # type: ignore
-	material: bpy.props.PointerProperty(type=bpy.types.Material, name="Material") # type: ignore
+	material: bpy.props.PointerProperty(type=bpy.types.Material, name="Material") # type: ignore"""
 
 class STF_Instance_Mesh(bpy.types.PropertyGroup):
 	override_blendshape_values: bpy.props.BoolProperty(name="Override Blendshape Values", default=False, options=set()) # type: ignore
 	blendshape_values: bpy.props.CollectionProperty(type=STF_Instance_Mesh_Blendshape_Value, name="Blendshape Values", options=set()) # type: ignore
 	active_blendshape: bpy.props.IntProperty(options=set()) # type: ignore
-	override_materials: bpy.props.BoolProperty(name="Override Materials", default=False, options=set()) # type: ignore
+	"""override_materials: bpy.props.BoolProperty(name="Override Materials", default=False, options=set()) # type: ignore
 	materials: bpy.props.CollectionProperty(type=STF_Instance_Mesh_Material, name="Material Overrides", options=set()) # type: ignore
-	active_material: bpy.props.IntProperty(options=set()) # type: ignore
+	active_material: bpy.props.IntProperty(options=set()) # type: ignore"""
 
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
@@ -61,13 +61,11 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 				instance_blendshape.override = True
 
 	if("materials" in json_resource):
-		set_instance_materials(blender_object)
-		blender_object.stf_instance_mesh.override_materials = True
 		for material_index, material_id in enumerate(json_resource["materials"]):
-			if(material_id):
-				material: STF_Instance_Mesh_Material = blender_object.stf_instance_mesh.materials[material_index]
-				material.material = context.import_resource(material_id, stf_kind="data")
-				material.override = True
+			if(material_id and len(blender_object.material_slots) > material_index):
+				if(material := context.import_resource(material_id, stf_kind="data")):
+					blender_object.material_slots[material_index].link = "OBJECT"
+					blender_object.material_slots[material_index].material = material
 
 	return blender_object
 
@@ -94,7 +92,6 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 
 	if(len(blender_armatures) == 1 and blender_armatures[0] and blender_armatures[0].object and blender_armatures[0].object.data):
 		# TODO check if the armature instance is in the export
-
 		# The armature has to be passed, because in Blenders datamodel the relationship between mesh and armature loose.
 		ret["mesh"] = context.serialize_resource(blender_mesh, blender_armatures[0].object.data, module_kind="data")
 		ret["armature_instance"] = context.serialize_resource(blender_armatures[0].object, module_kind="node")
@@ -103,14 +100,13 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 	else:
 		ret["mesh"] = context.serialize_resource(blender_mesh, module_kind="data")
 
-	if(blender_object.stf_instance_mesh.override_materials):
-		material_slots = []
-		for material_index, instance_material in enumerate(blender_object.stf_instance_mesh.materials):
-			if(instance_material.override and instance_material.material):
-				material_slots.append(context.serialize_resource(instance_material.material, module_kind="data"))
-			else:
-				material_slots.append(None)
-		ret["materials"] = material_slots
+	material_slots = []
+	for material_slot in blender_object.material_slots:
+		if(material_slot.material and material_slot.link == "OBJECT"):
+			material_slots.append(context.serialize_resource(material_slot.material, module_kind="data"))
+		else:
+			material_slots.append(None)
+	ret["materials"] = material_slots
 
 	if(blender_mesh.shape_keys and len(blender_mesh.shape_keys.key_blocks) > 1 and blender_object.stf_instance_mesh.override_blendshape_values):
 		blendshape_values = []
