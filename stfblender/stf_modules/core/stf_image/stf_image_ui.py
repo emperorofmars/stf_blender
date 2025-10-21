@@ -31,6 +31,20 @@ class STFEditImageComponentIdOperator(bpy.types.Operator, STFEditComponentOperat
 	def get_property(self, context): return context.edit_image
 
 
+class STFImageFixColorspace(bpy.types.Operator):
+	"""Set the Color Space to Non-Color"""
+	bl_idname = "stf.image_fix_colorspace_non_color"
+	bl_label = "Fix Color Space"
+	bl_options = {"REGISTER", "UNDO"}
+
+	@classmethod
+	def poll(cls, context): return context.edit_image is not None
+
+	def execute(self, context):
+		context.edit_image.colorspace_settings.name = "Non-Color"
+		return {"FINISHED"}
+
+
 class STFImageSpatialPanel(bpy.types.Panel):
 	"""STF options & export helper"""
 	bl_idname = "OBJECT_PT_stf_image_editor"
@@ -52,6 +66,12 @@ class STFImageSpatialPanel(bpy.types.Panel):
 		self.layout.separator(factor=1, type="SPACE")
 
 		self.layout.prop(context.edit_image.stf_image, "is_normal_map")
+		if(context.edit_image.stf_image.is_normal_map and context.edit_image.colorspace_settings.name != "Non-Color"):
+			warn_row = self.layout.row()
+			warn_row.alert = True
+			warn_row.label(text="Invalid Color Space!", icon="WARNING_LARGE")
+			warn_row.operator(STFImageFixColorspace.bl_idname)
+			self.layout.label(text="A Normal-Maps Color Space must be Non-Color!", icon="INFO_LARGE")
 
 		self.layout.separator(factor=2, type="LINE")
 

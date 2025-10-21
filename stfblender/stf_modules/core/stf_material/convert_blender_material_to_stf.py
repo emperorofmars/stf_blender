@@ -26,6 +26,7 @@ def convert_texture(blender_material: bpy.types.Material, socket: bpy.types.Node
 				_, _, value = add_property(blender_material, texture_property, STF_Material_Value_Module_Image)
 				value.image = texture_node.image
 				return True
+	return False
 
 def convert_texture_or_color(blender_material: bpy.types.Material, socket: bpy.types.NodeSocket, texture_property: str, color_property: str):
 	if(not convert_texture(blender_material, socket, texture_property)):

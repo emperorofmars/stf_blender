@@ -20,6 +20,32 @@ def set_image_value(blender_material: bpy.types.Material, surface: bpy.types.Sha
 			return True
 	return False
 
+def set_color_value(blender_material: bpy.types.Material, surface: bpy.types.ShaderNode, property: STF_Material_Property, target_input: str | int, position_index_v = 0, position_index_h = 0) -> bool:
+	property: STF_Material_Property = property
+	if(property.value_type == "color"):
+		value_id = property.values[0].value_id
+		## let value
+		for value in getattr(blender_material, property.value_property_name):
+			if(value.value_id == value_id):
+				break
+		if(value):
+			surface.inputs[target_input].default_value = value.color
+			return True
+	return False
+
+def set_float_value(blender_material: bpy.types.Material, surface: bpy.types.ShaderNode, property: STF_Material_Property, target_input: str | int, position_index_v = 0, position_index_h = 0) -> bool:
+	property: STF_Material_Property = property
+	if(property.value_type == "float"):
+		value_id = property.values[0].value_id
+		## let value
+		for value in getattr(blender_material, property.value_property_name):
+			if(value.value_id == value_id):
+				break
+		if(value):
+			surface.inputs[target_input].default_value = value.number
+			return True
+	return False
+
 
 def stf_material_to_blender(blender_material: bpy.types.Material):
 	blender_material.use_nodes = True
@@ -40,10 +66,16 @@ def stf_material_to_blender(blender_material: bpy.types.Material):
 		property: STF_Material_Property = property
 		if(property.property_type == "albedo.texture" and property.value_type == "image"):
 			node_position_index += set_image_value(blender_material, surface, property, "Base Color", position_index_v = node_position_index)
+		elif(property.property_type == "albedo.color" and property.value_type == "color"):
+			node_position_index += set_color_value(blender_material, surface, property, "Base Color", position_index_v = node_position_index)
 		elif(property.property_type == "roughness.texture" and property.value_type == "image"):
 			node_position_index += set_image_value(blender_material, surface, property, "Roughness", position_index_v = node_position_index)
+		elif(property.property_type == "roughness.value" and property.value_type == "float"):
+			node_position_index += set_float_value(blender_material, surface, property, "Roughness", position_index_v = node_position_index)
 		elif(property.property_type == "metallic.texture" and property.value_type == "image"):
 			node_position_index += set_image_value(blender_material, surface, property, "Metallic", position_index_v = node_position_index)
+		elif(property.property_type == "metallic.value" and property.value_type == "float"):
+			node_position_index += set_float_value(blender_material, surface, property, "Metallic", position_index_v = node_position_index)
 		elif(property.property_type == "normal.texture" and property.value_type == "image"):
 			normal_node = blender_material.node_tree.nodes.new("ShaderNodeNormalMap")
 			normal_node.location.y = node_position_index * -300

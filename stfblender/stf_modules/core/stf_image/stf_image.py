@@ -13,7 +13,7 @@ _stf_type = "stf.image"
 
 
 class STF_Image(bpy.types.PropertyGroup):
-	is_normal_map: bpy.props.BoolProperty(name="Is Normal-Map", default=False, options=set()) # type: ignore
+	is_normal_map: bpy.props.BoolProperty(name="Use as Normal-Map", default=False, options=set()) # type: ignore
 
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
@@ -28,6 +28,15 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	blender_image.source = "FILE"
 
 	if("data_type" in json_resource):
+		match(json_resource["data_type"]):
+			case "color":
+				blender_image.colorspace_settings.name = "sRGB"
+			case "non_color":
+				blender_image.colorspace_settings.name = "Non-Color"
+			case "normal":
+				blender_image.colorspace_settings.name = "Non-Color"
+				blender_image.stf_image.is_normal_map = True
+
 		if(json_resource["data_type"] == "non_color"):
 			blender_image.colorspace_settings.name = "Non-Color"
 
