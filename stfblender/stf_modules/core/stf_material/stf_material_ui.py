@@ -188,64 +188,67 @@ class STFMaterialSpatialPanel(bpy.types.Panel):
 
 		# Hints
 		self.layout.separator(factor=2, type="LINE")
-		box = self.layout.box()
-		header_row = box.row()
-		header_row_l = header_row.row()
-		header_row_l.alignment = "LEFT"
-		header_row_l.label(text="Style Hints")
-		header_row_r = header_row.row()
-		header_row_r.alignment = "RIGHT"
-		header_row_r.operator(STFMaterialHintAdd.bl_idname, icon="ADD")
-		if(len(context.material.stf_material.style_hints)):
-			row = box.row()
-			row.separator(factor=2.0)
-			col = row.column(align=True)
-			for style_hint_index, style_hint in enumerate(context.material.stf_material.style_hints):
-				row_inner = col.row(align=True)
-				alert = not style_hint.value or style_hint.value.strip() == ""
-				row_inner.alert = alert
-				row_inner.prop(style_hint, "value", text="", icon="WARNING_LARGE" if alert else "NONE", placeholder="realistic / cartoony / outline / etc..")
-				row_inner.operator(STFMaterialHintRemove.bl_idname, text="", icon="X").index = style_hint_index
-
-		box = self.layout.box()
-		header_row = box.row()
-		header_row_l = header_row.row()
-		header_row_l.alignment = "LEFT"
-		header_row_l.label(text="Shader Targets")
-		header_row_r = header_row.row()
-		header_row_r.alignment = "RIGHT"
-		header_row_r.operator(STFMaterialShaderTargetAdd.bl_idname, icon="ADD")
-		if(len(context.material.stf_material.shader_targets)):
-			for target_index, shader_target in enumerate(context.material.stf_material.shader_targets):
+		header, body = self.layout.panel("stf.material_hints", default_closed = False)
+		header.label(text="Shader Hints", icon="GROUP")
+		if(body): 
+			box = body.box()
+			header_row = box.row()
+			header_row_l = header_row.row()
+			header_row_l.alignment = "LEFT"
+			header_row_l.label(text="Style Hints")
+			header_row_r = header_row.row()
+			header_row_r.alignment = "RIGHT"
+			header_row_r.operator(STFMaterialHintAdd.bl_idname, icon="ADD")
+			if(len(context.material.stf_material.style_hints)):
 				row = box.row()
-				col_outer = row.box().column()
-				row_header = col_outer.row()
-				row_header_l = row_header.row()
-				alert = not shader_target.target or shader_target.target.strip() == ""
-				row_header_l.alert = alert
-				row_header_l.prop(shader_target, "target", text="Application", placeholder="blender / unity / godot / etc..", icon="WARNING_LARGE" if alert else "NONE")
-				row_header_r = row_header.row()
-				row_header_r.alignment = "RIGHT"
-				row_header_r.operator(STFMaterialShaderTargetRemove.bl_idname, text="", icon="X").index = target_index
-				row_add = col_outer.row()
-				row_add.alignment = "RIGHT"
-				row_add.operator(STFMaterialShaderTargetShaderAdd.bl_idname, icon="ADD").index = target_index
-				col_outer.separator(factor=1.0)
-				if(len(shader_target.shaders)):
-					row_inner = col_outer.row()
-					row_inner.separator(factor=4.0)
-					col_inner = row_inner.column(align=True)
-					for shader_index, shader in enumerate(shader_target.shaders):
-						row_value = col_inner.row(align=True)
-						alert = not shader.value or shader.value.strip() == ""
-						row_value.alert = alert
-						row_value.prop(shader, "value", text="", placeholder="ShaderNodeBsdfPrincipled / PoiyomiToon / etc..", icon="WARNING_LARGE" if alert else "NONE")
-						btn = row_value.operator(STFMaterialShaderTargetShaderRemove.bl_idname, text="", icon="X")
-						btn.index = target_index
-						btn.index_shader = shader_index
+				row.separator(factor=2.0)
+				col = row.column(align=True)
+				for style_hint_index, style_hint in enumerate(context.material.stf_material.style_hints):
+					row_inner = col.row(align=True)
+					alert = not style_hint.value or style_hint.value.strip() == ""
+					row_inner.alert = alert
+					row_inner.prop(style_hint, "value", text="", icon="WARNING_LARGE" if alert else "NONE", placeholder="realistic / cartoony / outline / etc..")
+					row_inner.operator(STFMaterialHintRemove.bl_idname, text="", icon="X").index = style_hint_index
+
+			box = body.box()
+			header_row = box.row()
+			header_row_l = header_row.row()
+			header_row_l.alignment = "LEFT"
+			header_row_l.label(text="Shader Targets")
+			header_row_r = header_row.row()
+			header_row_r.alignment = "RIGHT"
+			header_row_r.operator(STFMaterialShaderTargetAdd.bl_idname, icon="ADD")
+			if(len(context.material.stf_material.shader_targets)):
+				for target_index, shader_target in enumerate(context.material.stf_material.shader_targets):
+					row = box.row()
+					col_outer = row.box().column()
+					row_header = col_outer.row()
+					row_header_l = row_header.row()
+					alert = not shader_target.target or shader_target.target.strip() == ""
+					row_header_l.alert = alert
+					row_header_l.prop(shader_target, "target", text="Application", placeholder="blender / unity / godot / etc..", icon="WARNING_LARGE" if alert else "NONE")
+					row_header_r = row_header.row()
+					row_header_r.alignment = "RIGHT"
+					row_header_r.operator(STFMaterialShaderTargetRemove.bl_idname, text="", icon="X").index = target_index
+					row_add = col_outer.row()
+					row_add.alignment = "RIGHT"
+					row_add.operator(STFMaterialShaderTargetShaderAdd.bl_idname, icon="ADD").index = target_index
+					col_outer.separator(factor=1.0)
+					if(len(shader_target.shaders)):
+						row_inner = col_outer.row()
+						row_inner.separator(factor=4.0)
+						col_inner = row_inner.column(align=True)
+						for shader_index, shader in enumerate(shader_target.shaders):
+							row_value = col_inner.row(align=True)
+							alert = not shader.value or shader.value.strip() == ""
+							row_value.alert = alert
+							row_value.prop(shader, "value", text="", placeholder="ShaderNodeBsdfPrincipled / PoiyomiToon / etc..", icon="WARNING_LARGE" if alert else "NONE")
+							btn = row_value.operator(STFMaterialShaderTargetShaderRemove.bl_idname, text="", icon="X")
+							btn.index = target_index
+							btn.index_shader = shader_index
 
 		# Components
-		self.layout.separator(factor=3, type="LINE")
+		self.layout.separator(factor=2, type="LINE")
 		header, body = self.layout.panel("stf.material_components", default_closed = True)
 		header.label(text="STF Components", icon="GROUP")
 		if(body): draw_components_ui(self.layout, context, context.material.stf_info, context.material, STFAddMaterialComponentOperator.bl_idname, STFRemoveMaterialComponentOperator.bl_idname, STFEditMaterialComponentIdOperator.bl_idname)

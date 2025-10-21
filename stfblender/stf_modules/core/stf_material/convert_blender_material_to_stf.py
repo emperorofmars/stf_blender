@@ -14,7 +14,7 @@ def convert_principled_bsdf_to_stf(blender_material: bpy.types.Material, node: b
 	hint.value = "pbr"
 
 	shader_target: ShaderTarget = blender_material.stf_material.shader_targets.add()
-	shader_target.target = "stfblender"
+	shader_target.target = "blender"
 	shader = shader_target.shaders.add()
 	shader.value = "ShaderNodeBsdfPrincipled"
 
