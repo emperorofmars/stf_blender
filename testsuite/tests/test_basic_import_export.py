@@ -1,14 +1,8 @@
 import bpy
 import unittest
 
-#from ._stf_setup import setup_stf_extension, cleanup_stf_extension
-
 
 class TestBasicImportExport(unittest.TestCase):
-
-	"""@classmethod
-	def setUpClass(cls):
-		setup_stf_extension()"""
 
 	def test_import(self):
 		try:
@@ -28,6 +22,3 @@ class TestBasicImportExport(unittest.TestCase):
 		except Exception as e:
 			self.fail(str(e))
 
-	"""@classmethod
-	def tearDownClass(cls):
-		cleanup_stf_extension()"""
