@@ -5,18 +5,53 @@ from ..base.stf_registry import get_stf_modules
 
 def clean_id_thingy(id_thingy: any):
 	valid_component_ids = []
+	cleaned_component_refs = 0
 	if(hasattr(id_thingy, "stf_info")):
+		i = 0
+		while i < len(id_thingy.stf_info.stf_components):
+			if(id_thingy.stf_info.stf_components[i].stf_id not in valid_component_ids):
+				id_thingy.stf_info.stf_components.remove(i)
+				cleaned_component_refs += 1
+			i += 1
 		for ref in id_thingy.stf_info.stf_components:
-			valid_component_ids.append(ref.stf_id)
+			if(hasattr(id_thingy, ref.blender_property_name)):
+				valid_component_ids.append(ref.stf_id)
+
 	if(hasattr(id_thingy, "stf_instance_armature")):
+		i = 0
+		while i < len(id_thingy.stf_instance_armature.stf_components):
+			if(id_thingy.stf_instance_armature.stf_components[i].stf_id not in valid_component_ids):
+				id_thingy.stf_instance_armature.stf_components.remove(i)
+				cleaned_component_refs += 1
+			i += 1
+
 		for ref in id_thingy.stf_instance_armature.stf_components:
-			valid_component_ids.append(ref.stf_id)
+			if(hasattr(id_thingy, ref.blender_property_name)):
+				valid_component_ids.append(ref.stf_id)
+
 	if(hasattr(id_thingy, "stf_instance_armature_component_standins")):
+		i = 0
+		while i < len(id_thingy.stf_instance_armature_component_standins.stf_components):
+			if(id_thingy.stf_instance_armature_component_standins.stf_components[i].stf_id not in valid_component_ids):
+				id_thingy.stf_instance_armature_component_standins.stf_components.remove(i)
+				cleaned_component_refs += 1
+			i += 1
+
 		for ref in id_thingy.stf_instance_armature_component_standins.stf_components:
-			valid_component_ids.append(ref.stf_id)
+			if(hasattr(id_thingy, ref.blender_property_name)):
+				valid_component_ids.append(ref.stf_id)
+
 	if(hasattr(id_thingy, "stf_data_refs")):
+		i = 0
+		while i < len(id_thingy.stf_data_refs):
+			if(id_thingy.stf_data_refs[i].stf_id not in valid_component_ids):
+				id_thingy.stf_data_refs.remove(i)
+				cleaned_component_refs += 1
+			i += 1
+
 		for ref in id_thingy.stf_data_refs:
-			valid_component_ids.append(ref.stf_id)
+			if(hasattr(id_thingy, ref.blender_property_name)):
+				valid_component_ids.append(ref.stf_id)
 
 	check_properties = []
 	for stf_module in get_stf_modules():
@@ -33,8 +68,8 @@ def clean_id_thingy(id_thingy: any):
 					components.remove(i)
 					cleaned_components += 1
 				i += 1
-	if(cleaned_components > 0):
-		print(id_thingy, " : ", cleaned_components)
+	if(cleaned_components > 0 or cleaned_component_refs > 0):
+		print(id_thingy, " : ", cleaned_components, " - ", cleaned_component_refs)
 
 
 def cleanup_unreferenced_components():

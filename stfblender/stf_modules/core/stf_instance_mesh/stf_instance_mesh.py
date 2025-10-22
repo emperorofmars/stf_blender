@@ -18,17 +18,10 @@ class STF_Instance_Mesh_Blendshape_Value(bpy.types.PropertyGroup):
 	override: bpy.props.BoolProperty(name="Override", default=False, options=set()) # type: ignore
 	value: bpy.props.FloatProperty(name="Value", default=0, soft_min=0, soft_max=1, subtype="FACTOR") # type: ignore
 
-"""class STF_Instance_Mesh_Material(bpy.types.PropertyGroup):
-	override: bpy.props.BoolProperty(name="Override", default=False, options=set()) # type: ignore
-	material: bpy.props.PointerProperty(type=bpy.types.Material, name="Material") # type: ignore"""
-
 class STF_Instance_Mesh(bpy.types.PropertyGroup):
 	override_blendshape_values: bpy.props.BoolProperty(name="Override Blendshape Values", default=False, options=set()) # type: ignore
 	blendshape_values: bpy.props.CollectionProperty(type=STF_Instance_Mesh_Blendshape_Value, name="Blendshape Values", options=set()) # type: ignore
 	active_blendshape: bpy.props.IntProperty(options=set()) # type: ignore
-	"""override_materials: bpy.props.BoolProperty(name="Override Materials", default=False, options=set()) # type: ignore
-	materials: bpy.props.CollectionProperty(type=STF_Instance_Mesh_Material, name="Material Overrides", options=set()) # type: ignore
-	active_material: bpy.props.IntProperty(options=set()) # type: ignore"""
 
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
@@ -76,7 +69,7 @@ def _can_handle_application_object_func(application_object: any) -> int:
 	else:
 		return -1
 
-def _stf_export(context: STF_ExportContext, application_object: any, context_object: any) -> tuple[dict, str]:
+def _stf_export(context: STF_ExportContext, application_object: any, context_object: bpy.types.Collection) -> tuple[dict, str]:
 	blender_object: bpy.types.Object = application_object[0]
 	blender_mesh: bpy.types.Mesh = application_object[1]
 	
@@ -91,12 +84,15 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 			blender_armatures.append(modifier)
 
 	if(len(blender_armatures) == 1 and blender_armatures[0] and blender_armatures[0].object and blender_armatures[0].object.data):
-		# TODO check if the armature instance is in the export
-		# The armature has to be passed, because in Blenders datamodel the relationship between mesh and armature loose.
+		if(not context_object.is_embedded_data and context_object not in blender_armatures[0].object.users_collection):
+			context.report(STFReport("Armature sits outside the exported asset", severity=STFReportSeverity.FatalError, stf_id=blender_object.stf_info.stf_id, stf_type=_stf_type, application_object=blender_object))
+			return None
+		# The armature has to be passed, because in Blenders datamodel, the relationship between mesh and armature is loose.
 		ret["mesh"] = context.serialize_resource(blender_mesh, blender_armatures[0].object.data, module_kind="data")
 		ret["armature_instance"] = context.serialize_resource(blender_armatures[0].object, module_kind="node")
 	elif(len(blender_armatures) > 1):
-		context.report(STFReport("More than one Armature per mesh is not supported!", severity=STFReportSeverity.FatalError, stf_id=blender_object.stf_id, stf_type=_stf_type, application_object=blender_object))
+		context.report(STFReport("More than one Armature per mesh is not supported!", severity=STFReportSeverity.FatalError, stf_id=blender_object.stf_info.stf_id, stf_type=_stf_type, application_object=blender_object))
+		return None
 	else:
 		ret["mesh"] = context.serialize_resource(blender_mesh, module_kind="data")
 

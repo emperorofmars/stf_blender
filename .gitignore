@@ -15,5 +15,7 @@ packages
 
 testsuite/output/*
 !testsuite/output/.gitkeep
+testsuite/report/*
+!testsuite/report/.gitkeep
 
 out

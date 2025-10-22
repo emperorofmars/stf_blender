@@ -226,7 +226,7 @@ class STFMaterialSpatialPanel(bpy.types.Panel):
 					row_header_l = row_header.row()
 					alert = not shader_target.target or shader_target.target.strip() == ""
 					row_header_l.alert = alert
-					row_header_l.prop(shader_target, "target", text="Application", placeholder="blender / unity / godot / etc..", icon="WARNING_LARGE" if alert else "NONE")
+					row_header_l.prop(shader_target, "target", text="Application", placeholder="blender | unity | godot | etc..", icon="WARNING_LARGE" if alert else "NONE")
 					row_header_r = row_header.row()
 					row_header_r.alignment = "RIGHT"
 					row_header_r.operator(STFMaterialShaderTargetRemove.bl_idname, text="", icon="X").index = target_index
@@ -242,7 +242,7 @@ class STFMaterialSpatialPanel(bpy.types.Panel):
 							row_value = col_inner.row(align=True)
 							alert = not shader.value or shader.value.strip() == ""
 							row_value.alert = alert
-							row_value.prop(shader, "value", text="", placeholder="ShaderNodeBsdfPrincipled / PoiyomiToon / etc..", icon="WARNING_LARGE" if alert else "NONE")
+							row_value.prop(shader, "value", text="", placeholder="ShaderNodeBsdfPrincipled | .poiyomi/Poiyomi Toon | etc..", icon="WARNING_LARGE" if alert else "NONE")
 							btn = row_value.operator(STFMaterialShaderTargetShaderRemove.bl_idname, text="", icon="X")
 							btn.index = target_index
 							btn.index_shader = shader_index

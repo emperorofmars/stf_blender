@@ -3,6 +3,7 @@ import mathutils
 import math
 from typing import Callable
 
+from .stf_instance_armature_utils import parse_standin, serialize_standin, update_armature_instance_component_standins
 from ....base.stf_module import STF_Module
 from ....base.stf_module_component import InstanceModComponentRef
 from ....base.stf_report import STFReportSeverity, STFReport
@@ -11,7 +12,7 @@ from ....importer.stf_import_context import STF_ImportContext
 from ....utils.id_utils import ensure_stf_id
 from ....utils.animation_conversion_utils import *
 from ....utils.armature_bone import ArmatureBone
-from .stf_instance_armature_utils import parse_standin, serialize_standin, update_armature_instance_component_standins
+from ....utils.trs_utils import close_enough
 
 
 _stf_type = "stf.instance.armature"
@@ -106,11 +107,18 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 	if(blender_object.pose):
 		stf_pose: dict[str, list[list[float]]] = {}
 		for blender_pose in blender_object.pose.bones:
+			# let t, r, s
 			if blender_pose.parent:
 				t, r, s = (blender_pose.parent.matrix.inverted_safe() @ blender_pose.matrix).decompose()
 			else:
 				t, r, s = (mathutils.Matrix.Rotation(math.radians(-90), 4, "X") @ blender_pose.matrix).decompose()
-			stf_pose[blender_armature.bones[blender_pose.name].stf_info.stf_id] = [[t[0], t[1], t[2]], [r[1], r[2], r[3], r[0]], [s[0], s[1], s[2]]] # already in armature space
+
+			# already in armature space, so no trs_utils conversion
+			stf_pose[blender_armature.bones[blender_pose.name].stf_info.stf_id] = [
+				[close_enough(t[0]), close_enough(t[1]), close_enough(t[2])],
+				[close_enough(r[1]), close_enough(r[2]), close_enough(r[3]), close_enough(r[0], 1)],
+				[close_enough(s[0], 1), close_enough(s[1], 1), close_enough(s[2], 1)]
+			]
 		ret["pose"] = stf_pose
 
 	# components that exist on bones of this armature instance

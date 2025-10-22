@@ -22,4 +22,4 @@ register_stf_modules = \
 	+ stf_bone.register_stf_modules \
 	+ stf_image.register_stf_modules \
 	+ stf_texture.register_stf_modules \
-	+ stf_animation.register_stf_modules \
+	+ stf_animation.register_stf_modules

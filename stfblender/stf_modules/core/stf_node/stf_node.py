@@ -92,13 +92,12 @@ def _stf_export(context: STF_ExportContext, blender_object: bpy.types.Object, co
 	children = []
 	for child in blender_object.children:
 		for collection in child.users_collection:
-			if(collection == context_object):
+			if(context_object.is_embedded_data or collection == context_object):
 				children.append(context.serialize_resource(child, context_object, module_kind="node"))
 				break # break inner loop
 
 	json_resource["children"] = children
 
-	# TODO Check if the referenced resources are within the exported file
 	def _handle_parent_binding():
 		if(blender_object.parent):
 			match(blender_object.parent_type):
@@ -125,7 +124,7 @@ def _stf_export(context: STF_ExportContext, blender_object: bpy.types.Object, co
 		json_resource["enabled"] = False
 
 	if(blender_object.data):
-		instance_id = context.serialize_resource((blender_object, blender_object.data), module_kind="instance")
+		instance_id = context.serialize_resource((blender_object, blender_object.data), context_object, module_kind="instance")
 		if(instance_id):
 			json_resource["instance"] = instance_id
 

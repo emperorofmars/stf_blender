@@ -15,8 +15,8 @@ default_export_options: dict = {
 	"export_normals": True,
 	"export_colors": True,
 	"export_blendshape_normals": True,
-	"float_treshhold": 0.0001,
-	"float_treshhold_blendshape": 0.0001,
+	"float_threshold": 0.0001,
+	"float_threshold_blendshape": 0.0001,
 }
 
 
@@ -69,13 +69,13 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 	# Prepare optimization of splits
 	def compareUVs(a: int, b: int) -> bool:
 		for uv_layer in blender_mesh.uv_layers:
-			if ((uv_layer.uv[a].vector - uv_layer.uv[b].vector).length > export_options["float_treshhold"]):
+			if ((uv_layer.uv[a].vector - uv_layer.uv[b].vector).length > export_options["float_threshold"]):
 				return False
 		return True
 	
 	def compareColors(a: int, b: int) -> bool:
 		if(not export_options["export_colors"] or not blender_mesh.color_attributes.active_color or blender_mesh.color_attributes.active_color.domain != "CORNER"): return True
-		return (mathutils.Vector(blender_mesh.color_attributes.active_color.data[a].color[:]) - mathutils.Vector(blender_mesh.color_attributes.active_color.data[b].color[:])).length < export_options["float_treshhold"]
+		return (mathutils.Vector(blender_mesh.color_attributes.active_color.data[a].color[:]) - mathutils.Vector(blender_mesh.color_attributes.active_color.data[b].color[:])).length < export_options["float_threshold"]
 
 	verts_to_split: dict[int, list] = {}
 	deduped_split_indices: list[int] = []
@@ -89,7 +89,7 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 			for candidate_index in range(len(verts_to_split[loop.vertex_index])):
 				split_candidate = verts_to_split[loop.vertex_index][candidate_index]
 				if (
-					(loop.normal - blender_mesh.loops[split_candidate].normal).length < export_options["float_treshhold"]
+					(loop.normal - blender_mesh.loops[split_candidate].normal).length < export_options["float_threshold"]
 					and compareUVs(loop.index, split_candidate)
 					and compareColors(loop.index, split_candidate)
 				):
@@ -218,7 +218,7 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 		for vertex in blender_mesh.vertices:
 			group_arr = []
 			for channel, group in enumerate(vertex.groups):
-				if(group.group in group_to_bone_index and group.weight > export_options["float_treshhold_blendshape"]):
+				if(group.group in group_to_bone_index and group.weight > export_options["float_threshold_blendshape"]):
 					group_arr.append((group_to_bone_index[group.group], group.weight))
 			group_arr.sort(key=lambda e: e[1], reverse=True)
 			max_len_weights_per_vertex = max(max_len_weights_per_vertex, len(group_arr))
@@ -303,7 +303,7 @@ def export_stf_mesh(context: STF_ExportContext, application_object: any, parent_
 			blendshape_offsets_buffer -= buffer_vertices
 
 			blendshape_offset_lengths = np.linalg.norm(blendshape_offsets_buffer, 1, 1)
-			blendshape_offset_lengths_valid = np.where(blendshape_offset_lengths > export_options["float_treshhold_blendshape"], True, False)
+			blendshape_offset_lengths_valid = np.where(blendshape_offset_lengths > export_options["float_threshold_blendshape"], True, False)
 			num_valid = np.count_nonzero(blendshape_offset_lengths_valid)
 			indexed = num_valid < len(blender_mesh.vertices) * 0.75
 			# let blendhshape_indices_buffer

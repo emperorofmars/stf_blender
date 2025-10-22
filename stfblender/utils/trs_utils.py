@@ -2,23 +2,31 @@ import mathutils
 
 # Graciously referenced from: https://github.com/KhronosGroup/glTF-Blender-IO/blob/main/addons/io_scene_gltf2/blender/exp/nodes.py#L537
 
+
+def close_enough(value: float, target: float = 0, threshold: float = 0.00001) -> float:
+	if(abs(value - target) < threshold):
+		return target
+	else:
+		return value
+
+
 """ Export """
 
 def blender_translation_to_stf(blender_vec: mathutils.Vector | list[float]) -> list[float]:
 	# x,y,z -> x,z,-y
-	return [blender_vec[0], blender_vec[2], -blender_vec[1]]
+	return [close_enough(blender_vec[0]), close_enough(blender_vec[2]), close_enough(-blender_vec[1])]
 
 def blender_rotation_to_stf(blender_quat: mathutils.Quaternion | list[float]) -> list[float]:
 	# w,x,y,z -> x,z,-y,w
-	return [blender_quat[1], blender_quat[3], -blender_quat[2], blender_quat[0]]
+	return [close_enough(blender_quat[1]), close_enough(blender_quat[3]), close_enough(-blender_quat[2]), close_enough(blender_quat[0], 1)]
 
 def blender_rotation_euler_to_stf(blender_vec: mathutils.Vector | list[float]):
 	# x,y,z -> x,z,-y
-	return [blender_vec[0], -blender_vec[2], -blender_vec[1]]
+	return [close_enough(blender_vec[0]), close_enough(-blender_vec[2]), close_enough(-blender_vec[1])]
 
 def blender_scale_to_stf(blender_vec: mathutils.Vector | list[float]) -> list[float]:
 	# x,y,z -> x,z,y
-	return [blender_vec[0], blender_vec[2], blender_vec[1]]
+	return [close_enough(blender_vec[0], 1), close_enough(blender_vec[2], 1), close_enough(blender_vec[1], 1)]
 
 def blender_to_trs(t: mathutils.Vector | list[float], r: mathutils.Quaternion | list[float], s: mathutils.Vector | list[float]) -> list[list[float]]:
 	return [

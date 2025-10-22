@@ -31,10 +31,10 @@ All source-code in this repository, except when noted in individual files and/or
 * Windows Git Bash
 	* Build Extension
 		```sh
-		C:\\'Program Files'\\'Blender Foundation'\\'Blender 4.5'\\blender.exe --command extension build --output-dir=./packages
+		"C:\Program Files\Blender Foundation\Blender 4.5\blender.exe" --command extension build --output-dir=./packages
 		```
 	* Generate Repository Json
 		```sh
-		C:\\'Program Files'\\'Blender Foundation'\\'Blender 4.5'\\blender.exe --command extension server-generate --repo-dir=./packages
+		"C:\Program Files\Blender Foundation\Blender 4.5\blender.exe" --command extension server-generate --repo-dir=./packages
 		```
 -->
