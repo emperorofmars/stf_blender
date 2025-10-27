@@ -10,7 +10,6 @@ from ..stf_modules.fallback.json_fallback_data import STF_Module_JsonFallbackDat
 from .draw_multiline_text import draw_multiline_text
 
 
-
 class STFDrawDataResourceList(bpy.types.UIList):
 	"""List of STF data-resources"""
 	bl_idname = "COLLECTION_UL_stf_data_resource_list"

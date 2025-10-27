@@ -37,6 +37,50 @@ class STFEditMaterialComponentIdOperator(bpy.types.Operator, STFEditComponentOpe
 
 class STFDrawMaterialPropertyList(bpy.types.UIList):
 	bl_idname = "COLLECTION_UL_stf_material_list"
+
+	sort_reverse: bpy.props.BoolProperty(default=False, name="Reverse") # type: ignore
+	sort_by: bpy.props.EnumProperty(items=[("original", "Added Order", "", "SORTSIZE", 0),("property_type", "ID", "", "NONE", 1),("value_type", "Type", "", "NONE", 2)], name="Sort by")# type: ignore
+	filter_id: bpy.props.StringProperty(name="Filter Property ID")# type: ignore
+	filter_type: bpy.props.EnumProperty(items=[("none", "None", "", "NONE", 0),("color", "Color", "", "COLOR", 1),("float", "Float", "", "NONE", 2),("int", "Int", "", "NONE", 3),("image", "Image", "", "IMAGE", 4)], default="none", name="Filter Type")# type: ignore
+
+	def draw_filter(self, context: bpy.types.Context, layout: bpy.types.UILayout):
+		row = layout.row(align=True)
+		row_l = row.row(align=True)
+		row_l.alignment = "LEFT"
+		row.prop(self, "filter_id", text="", placeholder="Filter ID", icon="FILTER")
+		row.prop(self, "filter_type", text="", placeholder="Filter Type", icon="FILTER")
+		row.prop(self, "sort_by", text="", icon="SORTSIZE")
+		row_r = row.row(align=True)
+		row_r.alignment = "RIGHT"
+		row_r.prop(self, "sort_reverse", text="", icon="SORT_DESC" if self.sort_reverse else "SORT_ASC")
+
+	def filter_items(self, context: bpy.types.Context, data, propname: str):
+		items: list[STF_Material_Property] = getattr(data, propname)
+
+		filter = [self.bitflag_filter_item] * len(items)
+		if(self.filter_id or self.filter_type):
+			for idx, item in enumerate(items):
+				filter_match = True
+				if(self.filter_id and not (self.filter_id.lower() in item.property_type.lower() or item.property_type.lower() in self.filter_id.lower())):
+					filter_match = False
+				if(self.filter_type != "none" and self.filter_type != item.value_type):
+					filter_match = False
+				if(not filter_match):
+					filter[idx] = ~self.bitflag_filter_item
+
+		_sort = [(idx, item) for idx, item in enumerate(items)]
+		def _sort_func(item: tuple[int, STF_Material_Property]):
+			match(self.sort_by):
+				case "property_type":
+					return item[1].property_type
+				case "value_type":
+					print(item[1].value_type)
+					return item[1].value_type
+				case _:
+					return item[0]
+		sortorder = bpy.types.UI_UL_list.sort_items_helper(_sort, _sort_func, self.sort_reverse)
+		return filter, sortorder
+
 	def draw_item(self, context, layout, data, item: STF_Material_Property, icon, active_data, active_propname, index: int):
 		alert = not item.property_type or item.property_type.strip() == ""
 		layout.alert = alert
@@ -149,13 +193,13 @@ class STFMaterialSpatialPanel(bpy.types.Panel):
 		# TODO list properties by group, allow for custom hot-loaded code to draw entire groups, only list properties manually like this in an 'advanced view'
 		self.layout.label(text="STF Material Properties")
 
-		# Draw List of ungrouped properties
-		row_property_list = self.layout.row(align=True)
-		row_property_list.template_list(STFDrawMaterialPropertyList.bl_idname, "", context.material.stf_material, "properties", context.material.stf_material, "active_property_index")
-
 		row = self.layout.row(align=True)
 		row.prop(context.scene, "stf_material_value_modules", text="")
 		row.operator(STFAddMaterialProperty.bl_idname, icon="ADD")
+
+		# Draw List of properties
+		row_property_list = self.layout.row(align=True)
+		row_property_list.template_list(STFDrawMaterialPropertyList.bl_idname, "", context.material.stf_material, "properties", context.material.stf_material, "active_property_index")
 
 		box = self.layout.box()
 		box.use_property_split = True

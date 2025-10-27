@@ -56,6 +56,49 @@ class AVA_Emotes(STF_BlenderComponentBase):
 class STFDrawAVAEmoteList(bpy.types.UIList):
 	bl_idname = "COLLECTION_UL_ava_emote_list"
 
+	sort_reverse: bpy.props.BoolProperty(default=False, name="Reverse") # type: ignore
+	sort_by: bpy.props.EnumProperty(items=[("original", "Added Order", "", "SORTSIZE", 0),("emote", "Emote", "", "NONE", 1)], name="Sort by")# type: ignore
+	filter_emote: bpy.props.StringProperty(name="Filter Emote")# type: ignore
+
+	def draw_filter(self, context: bpy.types.Context, layout: bpy.types.UILayout):
+		row = layout.row(align=True)
+		row_l = row.row(align=True)
+		row_l.alignment = "LEFT"
+		row.prop(self, "filter_emote", text="", placeholder="Filter Emote", icon="FILTER")
+		row.prop(self, "sort_by", text="", icon="SORTSIZE")
+		row_r = row.row(align=True)
+		row_r.alignment = "RIGHT"
+		row_r.prop(self, "sort_reverse", text="", icon="SORT_DESC" if self.sort_reverse else "SORT_ASC")
+
+	def filter_items(self, context: bpy.types.Context, data, propname: str):
+		items: list[AVA_Emote] = getattr(data, propname)
+
+		filter = [self.bitflag_filter_item] * len(items)
+		if(self.filter_emote):
+			for idx, item in enumerate(items):
+				filter_match = True
+				if(self.filter_emote):
+					if(item.emote != "custom" and not (self.filter_emote.lower() in item.emote.lower() or item.emote.lower() in self.filter_emote.lower())):
+						filter_match = False
+					elif( not (self.filter_emote.lower() in item.custom_emote.lower() or item.custom_emote.lower() in self.filter_emote.lower())):
+						filter_match = False
+				if(not filter_match):
+					filter[idx] = ~self.bitflag_filter_item
+
+		_sort = [(idx, item) for idx, item in enumerate(items)]
+		def _sort_func(item: tuple[int, AVA_Emote]):
+			match(self.sort_by):
+				case "emote":
+					if(item[1].emote != "custom"):
+						return item[1].emote
+					else:
+						return item[1].custom_emote
+				case _:
+					return item[0]
+		sortorder = bpy.types.UI_UL_list.sort_items_helper(_sort, _sort_func, self.sort_reverse)
+
+		return filter, sortorder
+
 	def draw_item(self, context: bpy.types.Context, layout: bpy.types.UILayout, data, item: AVA_Emote, icon, active_data, active_propname, index):
 		layout.label(text=item.custom_emote.capitalize() if item.emote == "custom" else str(item.emote).capitalize())
 		if(item.animation): layout.label(text=item.animation.name, icon="ACTION")
@@ -73,7 +116,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 
 	create_add_button(layout, "collection" if context_object != context.scene.collection else True, _blender_property_name, component.stf_id, "emotes", text="Add Emote")
 
-	row = layout.row()
+	row = layout.row(align=True)
 	row.template_list(STFDrawAVAEmoteList.bl_idname, "", component, "emotes", component, "active_emote")
 	if(component.active_emote >= len(component.emotes)):
 		return
