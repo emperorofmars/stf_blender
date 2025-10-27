@@ -21,7 +21,7 @@ class STFSetIDOperatorBase:
 def draw_stf_id_ui(layout: bpy.types.UILayout, context: bpy.types.Context, blender_object: any, stf_prop_holder: any, set_id_op: str, is_instance: bool = False):
 	layout = layout.box()
 	flow = layout.split(factor=0.15)
-	flow.label(text="ID:")
+	flow.label(text="ID:", icon="TAG")
 	if(stf_prop_holder.stf_id):
 		row = flow.row(align=True)
 		row_l = row.row(align=True)
@@ -37,7 +37,7 @@ def draw_stf_id_ui(layout: bpy.types.UILayout, context: bpy.types.Context, blend
 		flow.operator(set_id_op)
 
 	flow = layout.split(factor=0.15)
-	flow.label(text="Name:")
+	flow.label(text="Name:", icon="FILE_TEXT")
 	row = flow.row()
 	if(not hasattr(stf_prop_holder, "stf_name_source_of_truth") or stf_prop_holder.stf_name_source_of_truth):
 		row.prop(stf_prop_holder, "stf_name", text="")

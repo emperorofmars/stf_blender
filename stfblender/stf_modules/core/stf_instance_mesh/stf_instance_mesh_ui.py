@@ -1,5 +1,7 @@
 import bpy
 
+from .stf_instance_mesh import STF_Instance_Mesh_Blendshape_Value
+
 from ....utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
 from .stf_instance_mesh_util import set_instance_blendshapes
 
@@ -30,10 +32,20 @@ class STFDrawMeshInstanceBlendshapeList(bpy.types.UIList):
 	"""Override blendshapes on this meshinstance"""
 	bl_idname = "COLLECTION_UL_stf_instance_mesh_blendshapes"
 
-	def draw_item(self, context, layout: bpy.types.UILayout, data, item, icon, active_data, active_propname, index):
+	def draw_item(self, context, layout: bpy.types.UILayout, data, item: STF_Instance_Mesh_Blendshape_Value, icon, active_data, active_propname, index):
+		if(item.name == "Basis"):
+			layout.label(text="Basis")
+			return
+		layout.prop(item, "override", text=item.name)
 		row = layout.row()
-		row.prop(item, "override", text=item.name)
-		row.prop(item, "value", text="Value")
+		if(not item.override):
+			row.enabled = False
+			if(item.id_data.data.shape_keys and item.id_data.data.shape_keys.key_blocks and item.name in item.id_data.data.shape_keys.key_blocks):
+				row.prop(item.id_data.data.shape_keys.key_blocks[item.name], "value", text="Value")
+			else:
+				row.label(text="Invalid Value")
+		else:
+			row.prop(item, "value", text="Value")
 
 
 class STFMeshInstancePanel(bpy.types.Panel):

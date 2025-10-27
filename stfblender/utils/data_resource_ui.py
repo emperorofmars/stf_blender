@@ -10,6 +10,89 @@ from ..stf_modules.fallback.json_fallback_data import STF_Module_JsonFallbackDat
 from .draw_multiline_text import draw_multiline_text
 
 
+
+class STFDrawDataResourceList(bpy.types.UIList):
+	"""List of STF data-resources"""
+	bl_idname = "COLLECTION_UL_stf_data_resource_list"
+
+	sort_reverse: bpy.props.BoolProperty(default=False, name="Reverse") # type: ignore
+	sort_by: bpy.props.EnumProperty(items=[("original", "Added Order", "", "SORTSIZE", 0),("stf_type", "Component Type", "", "GROUP", 1),("stf_name", "Name", "", "FILE_TEXT", 2)], name="Sort by")# type: ignore
+	filter_name: bpy.props.StringProperty(name="Filter Name")# type: ignore
+	filter_type: bpy.props.StringProperty(name="Filter Type")# type: ignore
+
+	def draw_filter(self, context: bpy.types.Context, layout: bpy.types.UILayout):
+		row = layout.row(align=True)
+		row_l = row.row(align=True)
+		row_l.alignment = "LEFT"
+		row.prop(self, "filter_type", text="", placeholder="Filter Type", icon="FILTER")
+		row.prop(self, "filter_name", text="", placeholder="Filter Name", icon="FILTER")
+		row.prop(self, "sort_by", text="", icon="SORTSIZE")
+		row_r = row.row(align=True)
+		row_r.alignment = "RIGHT"
+		row_r.prop(self, "sort_reverse", text="", icon="SORT_DESC" if self.sort_reverse else "SORT_ASC")
+
+	def filter_items(self, context: bpy.types.Context, data, propname: str):
+		items: list[STF_Data_Ref] = getattr(data, propname)
+
+		filter = [self.bitflag_filter_item] * len(items)
+		if(self.filter_name or self.filter_type):
+			for idx, item in enumerate(items):
+				filter_match = True
+				if(self.filter_name):
+					if(hasattr(item.id_data, item.blender_property_name)):
+						for resource in getattr(item.id_data, item.blender_property_name):
+							if(resource.stf_id == item.stf_id):
+								if(not resource.stf_name or not (self.filter_name.lower() in resource.stf_name.lower() or resource.stf_name.lower() in self.filter_name.lower())):
+									filter_match = False
+								break
+				if(self.filter_type and not (self.filter_type.lower() in item.stf_type.lower() or item.stf_type.lower() in self.filter_type.lower())):
+					filter_match = False
+				if(not filter_match):
+					filter[idx] = ~self.bitflag_filter_item
+
+		_sort = [(idx, item) for idx, item in enumerate(items)]
+		def _sort_func(item: tuple[int, STF_Data_Ref]):
+			match(self.sort_by):
+				case "stf_name":
+					if(hasattr(item[1].id_data, item[1].blender_property_name)):
+						for resource in getattr(item[1].id_data, item[1].blender_property_name):
+							if(resource.stf_id == item[1].stf_id):
+								return resource.stf_name
+					return ""
+				case "stf_type":
+					return item[1].stf_type
+				case _:
+					return item[0]
+		sortorder = bpy.types.UI_UL_list.sort_items_helper(_sort, _sort_func, self.sort_reverse)
+
+		return filter, sortorder
+
+	def draw_item(self, context: bpy.types.Context, layout: bpy.types.UILayout, data, item: STF_Data_Ref, icon, active_data, active_propname):
+		component = None
+		if(hasattr(item.id_data, item.blender_property_name)):
+			for component in getattr(item.id_data, item.blender_property_name):
+				if(component.stf_id == item.stf_id):
+					break
+		split = layout.split(factor=0.4)
+		split.label(text=item.stf_type, icon="GROUP")
+		row = split.split(factor=0.5)
+		row_l = row.row()
+		if(component):
+			if(component.stf_name):
+				row_l.label(text=component.stf_name, icon="FILE_TEXT")
+			else:
+				row_l.alert = True
+				row_l.label(text="Unnamed", icon="FILE_TEXT")
+		else:
+			layout.alert = True
+			row_l.label(text="Invalid Resource!", icon="ERROR")
+
+		row_r = row.row()
+		row_r.alignment = "RIGHT"
+		row_r.label(text=item.stf_id[:8] + "..")
+		row_r.operator(CopyToClipboard.bl_idname, text="", icon="DUPLICATE", emboss=False).text = item.stf_id
+
+
 def _get_data_resource_component_ref_property_collection(context: bpy.types.Context) -> any:
 	for resource in getattr(context.scene.collection if stf_data_resource_use_scene_collection else context.collection, stf_data_resource_property):
 		if(resource.stf_id == stf_data_resource_id):
@@ -38,15 +121,6 @@ class STFEditDataResourceComponentIdOperator(bpy.types.Operator, STFEditComponen
 	def poll(cls, context): return context.scene is not None if stf_data_resource_use_scene_collection else context.collection is not None
 	def get_property(self, context): return context.scene.collection if stf_data_resource_use_scene_collection else context.collection
 	def get_components_ref_property(self, context) -> any: return _get_data_resource_component_ref_property_collection(context)
-
-
-class STFDrawDataResourceList(bpy.types.UIList):
-	"""List of STF data-resources"""
-	bl_idname = "COLLECTION_UL_stf_data_resource_list"
-
-	def draw_item(self, context: bpy.types.Context, layout: bpy.types.UILayout, data, item: STF_Data_Ref, icon, active_data, active_propname):
-		layout.label(text=item.stf_type)
-		layout.label(text=item.stf_id)
 
 
 def draw_resource(layout: bpy.types.UILayout, context: bpy.types.Context, resource_ref: STF_Data_Ref, collection: bpy.types.Collection, resource: STF_BlenderDataResourceBase):

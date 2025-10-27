@@ -30,6 +30,25 @@ class STFEditObjectComponentIdOperator(bpy.types.Operator, STFEditComponentOpera
 	def get_property(self, context): return context.object
 
 
+class STFNodeFixRotationMode(bpy.types.Operator):
+	"""Set the rotation-mode to Quaternion"""
+	bl_idname = "stf.node_fix_rotation_mode"
+	bl_label = "Set the rotation-mode to Quaternion"
+	bl_description = "Warning, this will break rotation-animations for this Object"
+	bl_options = {"REGISTER", "UNDO"}
+
+	@classmethod
+	def poll(cls, context):
+		return context.object is not None and context.object.rotation_mode != "QUATERNION"
+
+	def invoke(self, context, event):
+		return context.window_manager.invoke_confirm(self, event, title="Set the rotation-mode to Quaternion", message=self.bl_description)
+
+	def execute(self, context: bpy.types.Context):
+		context.object.rotation_mode = "QUATERNION"
+		return {"FINISHED"}
+
+
 class STFNodePanel(bpy.types.Panel):
 	"""STF options & export helper"""
 	bl_idname = "OBJECT_PT_stf_node_editor"
@@ -40,22 +59,34 @@ class STFNodePanel(bpy.types.Panel):
 
 	@classmethod
 	def poll(cls, context):
-		return (context.object is not None)
+		return context.object is not None
 
 	def draw(self, context):
+		layout = self.layout
 		set_stf_component_filter(bpy.types.Object)
 
 		if(context.object.rotation_mode != "QUATERNION"):
-			self.layout.label(text="Please set the Rotation-Mode to 'Quaternion (WXYZ)'", icon="ERROR")
-			self.layout.separator(factor=2, type="LINE")
+			row = layout.row()
+			row.alert = True
+			row_icon = row.row()
+			row_icon.alignment = "LEFT"
+			row_icon.label(icon="ERROR")
+			col = row.column()
+			col.label(text="Please set the Rotation-Mode to 'Quaternion (WXYZ)'")
+			col.label(text="Doing so ensures consistency across game-engines.")
+			col.label(text="Be aware that existing rotation animations will break!")
+			row_fix = col.row()
+			row_fix.alignment = "LEFT"
+			row_fix.operator(STFNodeFixRotationMode.bl_idname)
+			layout.separator(factor=2, type="LINE")
 
 		# Set ID
-		draw_stf_id_ui(self.layout, context, context.object, context.object.stf_info, STFSetObjectIDOperator.bl_idname)
+		draw_stf_id_ui(layout, context, context.object, context.object.stf_info, STFSetObjectIDOperator.bl_idname)
 
-		self.layout.separator(factor=2, type="LINE")
+		layout.separator(factor=2, type="LINE")
 
 		# Components
-		self.layout.separator(factor=1, type="SPACE")
-		header, body = self.layout.panel("stf.node_components", default_closed = False)
+		layout.separator(factor=1, type="SPACE")
+		header, body = layout.panel("stf.node_components", default_closed = False)
 		header.label(text="STF Components", icon="GROUP")
-		if(body): draw_components_ui(self.layout, context, context.object.stf_info, context.object, STFAddObjectComponentOperator.bl_idname, STFRemoveObjectComponentOperator.bl_idname, STFEditObjectComponentIdOperator.bl_idname)
+		if(body): draw_components_ui(layout, context, context.object.stf_info, context.object, STFAddObjectComponentOperator.bl_idname, STFRemoveObjectComponentOperator.bl_idname, STFEditObjectComponentIdOperator.bl_idname)

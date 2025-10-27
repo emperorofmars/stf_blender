@@ -14,18 +14,142 @@ class STFDrawComponentList(bpy.types.UIList):
 	"""List of STF components"""
 	bl_idname = "COLLECTION_UL_stf_component_list"
 
-	def draw_item(self, context: bpy.types.Context, layout: bpy.types.UILayout, data: STF_Component_Ref, item, icon, active_data, active_propname):
-		layout.label(text=item.stf_type)
-		layout.label(text=item.stf_id)
+	sort_reverse: bpy.props.BoolProperty(default=False, name="Reverse") # type: ignore
+	sort_by: bpy.props.EnumProperty(items=[("original", "Added Order", "", "SORTSIZE", 0),("stf_type", "Component Type", "", "GROUP", 1),("stf_name", "Name", "", "FILE_TEXT", 2)], name="Sort by")# type: ignore
+	filter_name: bpy.props.StringProperty(name="Filter Name")# type: ignore
+	filter_type: bpy.props.StringProperty(name="Filter Type")# type: ignore
+
+	def draw_filter(self, context: bpy.types.Context, layout: bpy.types.UILayout):
+		row = layout.row(align=True)
+		row_l = row.row(align=True)
+		row_l.alignment = "LEFT"
+		row.prop(self, "filter_type", text="", placeholder="Filter Type", icon="FILTER")
+		global stf_component_filter
+		if(stf_component_filter != bpy.types.Bone):
+			row.prop(self, "filter_name", text="", placeholder="Filter Name", icon="FILTER")
+		row.prop(self, "sort_by", text="", icon="SORTSIZE")
+		row_r = row.row(align=True)
+		row_r.alignment = "RIGHT"
+		row_r.prop(self, "sort_reverse", text="", icon="SORT_DESC" if self.sort_reverse else "SORT_ASC")
+
+	def filter_items(self, context: bpy.types.Context, data, propname: str):
+		items: list[InstanceModComponentRef] = getattr(data, propname)
+
+		filter = [self.bitflag_filter_item] * len(items)
+		if(self.filter_name or self.filter_type):
+			for idx, item in enumerate(items):
+				filter_match = True
+				if(self.filter_name):
+					global stf_component_filter
+					if(hasattr(item.id_data, item.blender_property_name) and stf_component_filter != bpy.types.Bone):
+						for component in getattr(item.id_data, item.blender_property_name):
+							if(component.stf_id == item.stf_id):
+								if(not component.stf_name or not (self.filter_name.lower() in component.stf_name.lower() or component.stf_name.lower() in self.filter_name.lower())):
+									filter_match = False
+								break
+				if(self.filter_type and not (self.filter_type.lower() in item.stf_type.lower() or item.stf_type.lower() in self.filter_type.lower())):
+					filter_match = False
+				if(not filter_match):
+					filter[idx] = ~self.bitflag_filter_item
+
+		_sort = [(idx, item) for idx, item in enumerate(items)]
+		def _sort_func(item: tuple[int, InstanceModComponentRef]):
+			match(self.sort_by):
+				case "stf_name":
+					global stf_component_filter
+					if(hasattr(item[1].id_data, item[1].blender_property_name) and stf_component_filter != bpy.types.Bone):
+						for component in getattr(item[1].id_data, item[1].blender_property_name):
+							if(component.stf_id == item[1].stf_id):
+								return component.stf_name
+					return ""
+				case "stf_type":
+					return item[1].stf_type
+				case _:
+					return item[0]
+		sortorder = bpy.types.UI_UL_list.sort_items_helper(_sort, _sort_func, self.sort_reverse)
+
+		return filter, sortorder
+
+	def draw_item(self, context: bpy.types.Context, layout: bpy.types.UILayout, data, item: STF_Component_Ref, icon, active_data, active_propname):
+		global stf_component_filter
+		component = None
+		if(hasattr(item.id_data, item.blender_property_name) and stf_component_filter != bpy.types.Bone):
+			for component in getattr(item.id_data, item.blender_property_name):
+				if(component.stf_id == item.stf_id):
+					break
+		split = layout.split(factor=0.4)
+		split.label(text=item.stf_type, icon="GROUP")
+		row = split.split(factor=0.5)
+		row_l = row.row()
+		if(component):
+			if(component.stf_name):
+				row_l.label(text=component.stf_name, icon="FILE_TEXT")
+			else:
+				row_l.alert = True
+				row_l.label(text="Unnamed", icon="FILE_TEXT")
+		elif(stf_component_filter != bpy.types.Bone):
+			layout.alert = True
+			row_l.label(text="Invalid Component!", icon="ERROR")
+
+		row_r = row.row()
+		row_r.alignment = "RIGHT"
+		row_r.label(text=item.stf_id[:8] + "..")
+		row_r.operator(CopyToClipboard.bl_idname, text="", icon="DUPLICATE", emboss=False).text = item.stf_id
 
 
 class STFDrawInstanceComponentList(bpy.types.UIList):
 	"""List of STF component instances"""
 	bl_idname = "COLLECTION_UL_stf_instance_component_list"
 
+	sort_reverse: bpy.props.BoolProperty(default=False, name="Reverse") # type: ignore
+	sort_by: bpy.props.EnumProperty(items=[("bone", "Bone", "", "BONE_DATA", 0),("stf_type", "Component Type", "", "GROUP", 1)], name="Sort by")# type: ignore
+	filter_bone: bpy.props.StringProperty(name="Filter Bone")# type: ignore
+	filter_type: bpy.props.StringProperty(name="Filter Type")# type: ignore
+
+	def draw_filter(self, context: bpy.types.Context, layout: bpy.types.UILayout):
+		row = layout.row(align=True)
+		row_l = row.row(align=True)
+		row_l.alignment = "LEFT"
+		row.prop(self, "filter_bone", text="", placeholder="Filter Bone", icon="FILTER")
+		row.prop(self, "filter_type", text="", placeholder="Filter Type", icon="FILTER")
+		row.prop(self, "sort_by", text="", icon="SORTSIZE")
+		row_r = row.row(align=True)
+		row_r.alignment = "RIGHT"
+		row_r.prop(self, "sort_reverse", text="", icon="SORT_DESC" if self.sort_reverse else "SORT_ASC")
+
+	def filter_items(self, context: bpy.types.Context, data, propname: str):
+		items: list[InstanceModComponentRef] = getattr(data, propname)
+
+		filter = [self.bitflag_filter_item] * len(items)
+		if(self.filter_bone or self.filter_type):
+			for idx, item in enumerate(items):
+				filter_match = True
+				if(self.filter_bone and not (self.filter_bone.lower() in item.bone.lower() or item.bone.lower() in self.filter_bone.lower())):
+					filter_match = False
+				if(self.filter_type and not (self.filter_type.lower() in item.stf_type.lower() or item.stf_type.lower() in self.filter_type.lower())):
+					filter_match = False
+				if(not filter_match):
+					filter[idx] = ~self.bitflag_filter_item
+			filter[idx] = ~self.bitflag_filter_item
+
+		_sort = [(idx, item) for idx, item in enumerate(items)]
+		def _sort_func(item: tuple[int, InstanceModComponentRef]):
+			return item[1][self.sort_by] + (item[1].stf_type if self.sort_by == "bone" else item[1].bone)
+		sortorder = bpy.types.UI_UL_list.sort_items_helper(_sort, _sort_func, self.sort_reverse)
+
+		return filter, sortorder
+
 	def draw_item(self, context: bpy.types.Context, layout: bpy.types.UILayout, data, item: InstanceModComponentRef, icon, active_data, active_propname):
-		layout.label(text=item.stf_type + " ( " + item.bone + " )", icon="PROP_ON" if item.override else "PROP_OFF")
-		layout.label(text=item.stf_id)
+		split = layout.split(factor=0.75)
+		row = split.split(factor=0.5)
+		row_l = row.row()
+		row_l.label(icon="CHECKMARK" if item.override else "X")
+		row_l.label(text=item.bone, icon="BONE_DATA")
+		row.label(text=item.stf_type, icon="GROUP")
+		row_r = split.row()
+		row_r.alignment = "RIGHT"
+		row_r.label(text=item.stf_id[:8] + "..")
+		row_r.operator(CopyToClipboard.bl_idname, text="", icon="DUPLICATE", emboss=False).text = item.stf_id
 
 
 def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, stf_application_object: any, component: STF_BlenderComponentBase, edit_op: str, is_instance: bool, inject_ui: Callable = None):
@@ -37,7 +161,7 @@ def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, compo
 	row_l.label(text=component_ref.stf_type)
 	row_r = row.row()
 	row_r.alignment = "RIGHT"
-	row_r.label(text="ID: " + component_ref.stf_id)
+	row_r.label(text="ID: " + component_ref.stf_id, icon="TAG")
 	row_r.operator(CopyToClipboard.bl_idname, text="", icon="DUPLICATE").text = component_ref.stf_id
 	row_r.operator(edit_op, text="", icon="MODIFIER").component_id = component_ref.stf_id
 
@@ -182,8 +306,6 @@ def draw_components_ui(
 					break
 		else:
 			layout.label(text="Invalid Component: " + component_ref.blender_property_name)
-	else:
-		layout.label(text="No Components For This Type Available")
 
 
 def draw_instance_standin_components_ui(
@@ -196,33 +318,27 @@ def draw_instance_standin_components_ui(
 		inject_ui: Callable = None
 		):
 	stf_modules = get_component_modules()
-
 	row = layout.row()
-	if(len(stf_modules) > 0):
-		row = layout.row()
-		row.template_list(STFDrawInstanceComponentList.bl_idname, "", ref_holder, "stf_components", ref_holder, "stf_active_component_index")
-		if(len(ref_holder.stf_components) > ref_holder.stf_active_component_index):
-			component_ref = ref_holder.stf_components[ref_holder.stf_active_component_index]
+	row.template_list(STFDrawInstanceComponentList.bl_idname, "", ref_holder, "stf_components", ref_holder, "stf_active_component_index")
+	if(len(ref_holder.stf_components) > ref_holder.stf_active_component_index):
+		component_ref = ref_holder.stf_components[ref_holder.stf_active_component_index]
 
-			if(hasattr(component_holder, component_ref.blender_property_name)):
-				for component in getattr(component_holder, component_ref.blender_property_name):
-					if(component.stf_id == component_ref.stf_id):
-						target_object = component_holder
-						if(get_target_object_func):
-							target_object = get_target_object_func(component_holder, component_ref)
-						draw_component(layout, context, component_ref, target_object, component, edit_component_id_op, True, inject_ui)
-						break
-			else:
-				layout.label(text="Invalid Component: " + component_ref.blender_property_name)
-	else:
-		layout.label(text="No Components For This Type Available")
+		if(hasattr(component_holder, component_ref.blender_property_name)):
+			for component in getattr(component_holder, component_ref.blender_property_name):
+				if(component.stf_id == component_ref.stf_id):
+					target_object = component_holder
+					if(get_target_object_func):
+						target_object = get_target_object_func(component_holder, component_ref)
+					draw_component(layout, context, component_ref, target_object, component, edit_component_id_op, True, inject_ui)
+					break
+		else:
+			layout.label(text="Invalid Component: " + component_ref.blender_property_name)
 
 
 stf_component_filter = None
 def set_stf_component_filter(filter = None):
 	global stf_component_filter
 	stf_component_filter = filter
-
 
 stf_component_instance_filter = None
 def set_stf_component_instance_filter(filter = None):

@@ -54,8 +54,28 @@ def _inject_ui(layout: bpy.types.UILayout, context: bpy.types.Context, component
 def _inject_standin_ui(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: InstanceModComponentRef, context_object: any, component: any) -> bool:
 	layout.label(text="Target Bone: " + component_ref.bone)
 	layout.prop(component_ref, "override")
-	layout.separator(type="LINE", factor=1)
 	return True
+
+
+class STFArmatureInstanceFixRotationMode(bpy.types.Operator):
+	"""Set the rotation-mode to Quaternion for all PoseBones"""
+	bl_idname = "stf.instance_armature_fix_rotation_mode"
+	bl_label = "Set the rotation-mode to Quaternion for all PoseBones"
+	bl_description = "Warning, this will break rotation-animations for this Armature instance"
+	bl_options = {"REGISTER", "UNDO"}
+
+	@classmethod
+	def poll(cls, context):
+		return context.object is not None and context.object.stf_instance_armature is not None and context.object.data and type(context.object.data) is bpy.types.Armature
+
+	def invoke(self, context, event):
+		return context.window_manager.invoke_confirm(self, event, title="Set the rotation-mode to Quaternion for all PoseBones", message=self.bl_description)
+
+	def execute(self, context: bpy.types.Context):
+		for pose_bone in context.object.pose.bones:
+			if(pose_bone.rotation_mode != "QUATERNION"):
+				pose_bone.rotation_mode = "QUATERNION"
+		return {"FINISHED"}
 
 
 class STFArmatureInstancePanel(bpy.types.Panel):
@@ -67,40 +87,53 @@ class STFArmatureInstancePanel(bpy.types.Panel):
 	bl_context = "object"
 
 	@classmethod
-	def poll(cls, context):
-		return (context.object.stf_instance_armature is not None and context.object.data and type(context.object.data) is bpy.types.Armature)
+	def poll(cls, context: bpy.types.Context):
+		return context.object is not None and context.object.stf_instance_armature is not None and context.object.data and type(context.object.data) is bpy.types.Armature
 
-	def draw(self, context):
+	def draw(self, context: bpy.types.Context):
+		layout = self.layout
 		set_stf_component_instance_filter(bpy.types.Bone)
 
-		non_quat_bones: list[str] = []
+		non_quat_bones = ""
 		for pose_bone in context.object.pose.bones:
 			if(pose_bone.rotation_mode != "QUATERNION"):
-				non_quat_bones.append(pose_bone.name)
+				if(len(non_quat_bones) > 0): non_quat_bones += ", "
+				non_quat_bones += pose_bone.name
 		if(len(non_quat_bones) > 0):
-			self.layout.label(text="Please set the Rotation-Mode of all bones to 'Quaternion (WXYZ)'", icon="ERROR")
-			self.layout.label(text="The following bones are affected: %s" % non_quat_bones, icon="INFO")
-			self.layout.separator(factor=2, type="LINE")
+			row = layout.row()
+			row.alert = True
+			row_icon = row.row()
+			row_icon.alignment = "LEFT"
+			row_icon.label(icon="ERROR")
+			col = row.column()
+			col.label(text="Please set the Rotation-Mode of all bones to 'Quaternion (WXYZ)' for all PoseBones")
+			col.label(text="Doing so ensures consistency across game-engines.")
+			col.label(text="The following bones are affected: %s" % non_quat_bones)
+			col.label(text="Be aware that existing rotation animations will break!")
+			row_fix = col.row()
+			row_fix.alignment = "LEFT"
+			row_fix.operator(STFArmatureInstanceFixRotationMode.bl_idname)
+			layout.separator(factor=2, type="LINE")
 
 		# Set ID
-		draw_stf_id_ui(self.layout, context, context.object.stf_instance, context.object.stf_instance, STFSetArmatureInstanceIDOperator.bl_idname, True)
+		draw_stf_id_ui(layout, context, context.object.stf_instance, context.object.stf_instance, STFSetArmatureInstanceIDOperator.bl_idname, True)
 
-		self.layout.separator(factor=2, type="LINE")
+		layout.separator(factor=2, type="LINE")
 
 		# Components specific to this instance
-		self.layout.separator(factor=1, type="SPACE")
-		header, body = self.layout.panel("stf.instance_armature_components", default_closed = False)
+		layout.separator(factor=1, type="SPACE")
+		header, body = layout.panel("stf.instance_armature_components", default_closed = False)
 		header.label(text="Bone-Instance Components", icon="GROUP")
-		if(body): draw_components_ui(self.layout, context, context.object.stf_instance_armature, context.object, STFAddArmatureInstanceComponentOperator.bl_idname, STFRemoveArmatureInstanceComponentOperator.bl_idname, STFEditArmatureInstanceComponentIdOperator.bl_idname, _get_target_object_func, _inject_ui, is_component_instance = True)
+		if(body): draw_components_ui(layout, context, context.object.stf_instance_armature, context.object, STFAddArmatureInstanceComponentOperator.bl_idname, STFRemoveArmatureInstanceComponentOperator.bl_idname, STFEditArmatureInstanceComponentIdOperator.bl_idname, _get_target_object_func, _inject_ui, is_component_instance = True)
 
-		self.layout.separator(factor=4, type="LINE")
+		layout.separator(factor=4, type="LINE")
 
 		# Standins for components on bones, so they can be animated and changed per instance
-		self.layout.prop(context.object.stf_instance_armature_component_standins, "use_bone_component_overrides")
+		layout.prop(context.object.stf_instance_armature_component_standins, "use_bone_component_overrides")
 		if(context.object.stf_instance_armature_component_standins.use_bone_component_overrides):
-			self.layout.label(text="Override and animate values of components on bones.")
-			self.layout.operator(UpdateArmatureInstanceComponentStandins.bl_idname)
-			self.layout.separator(factor=1, type="SPACE")
+			layout.label(text="Override and animate values of components on bones.")
+			layout.operator(UpdateArmatureInstanceComponentStandins.bl_idname)
+			layout.separator(factor=1, type="SPACE")
 			
 			if(len(context.object.stf_instance_armature_component_standins.stf_components) > 0):
-				draw_instance_standin_components_ui(self.layout, context, context.object.stf_instance_armature_component_standins, context.object, STFEditArmatureInstanceComponentIdOperator.bl_idname, _get_target_object_func, _inject_standin_ui)
+				draw_instance_standin_components_ui(layout, context, context.object.stf_instance_armature_component_standins, context.object, STFEditArmatureInstanceComponentIdOperator.bl_idname, _get_target_object_func, _inject_standin_ui)
