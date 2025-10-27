@@ -36,27 +36,6 @@ class STFEditArmatureInstanceComponentIdOperator(bpy.types.Operator, STFEditComp
 	def get_components_ref_property(self, context) -> STF_Component_Ref: return context.object.stf_instance_armature.stf_components
 
 
-def _get_target_object_func(component_holder: bpy.types.Object, component_ref: InstanceModComponentRef) -> any:
-	armature: bpy.types.Armature = component_holder.data
-	for bone in armature.bones:
-		if(bone.stf_info.stf_id == component_ref.bone):
-			return bone
-	return None
-
-def _inject_ui(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: InstanceModComponentRef, context_object: any, component: any) -> bool:
-	layout.prop_search(component_ref, "bone", component_ref.id_data.data, "bones", text="Target Bone")
-	if(not component_ref.bone):
-		layout.label(text="Please select a target Bone")
-		return False
-	layout.separator(type="LINE", factor=1)
-	return True
-
-def _inject_standin_ui(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: InstanceModComponentRef, context_object: any, component: any) -> bool:
-	layout.label(text="Target Bone: " + component_ref.bone)
-	layout.prop(component_ref, "override")
-	return True
-
-
 class STFArmatureInstanceFixRotationMode(bpy.types.Operator):
 	"""Set the rotation-mode to Quaternion for all PoseBones"""
 	bl_idname = "stf.instance_armature_fix_rotation_mode"
@@ -76,6 +55,27 @@ class STFArmatureInstanceFixRotationMode(bpy.types.Operator):
 			if(pose_bone.rotation_mode != "QUATERNION"):
 				pose_bone.rotation_mode = "QUATERNION"
 		return {"FINISHED"}
+
+
+def _get_target_object_func(component_holder: bpy.types.Object, component_ref: InstanceModComponentRef) -> any:
+	armature: bpy.types.Armature = component_holder.data
+	for bone in armature.bones:
+		if(bone.stf_info.stf_id == component_ref.bone):
+			return bone
+	return None
+
+def _inject_ui(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: InstanceModComponentRef, context_object: any, component: any) -> bool:
+	layout.prop_search(component_ref, "bone", component_ref.id_data.data, "bones", text="Target Bone")
+	if(not component_ref.bone):
+		layout.label(text="Please select a target Bone")
+		return False
+	layout.separator(type="LINE", factor=1)
+	return True
+
+def _inject_standin_ui(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: InstanceModComponentRef, context_object: any, component: any) -> bool:
+	layout.label(text="Target Bone: " + component_ref.bone)
+	layout.prop(component_ref, "override")
+	return True
 
 
 class STFArmatureInstancePanel(bpy.types.Panel):
