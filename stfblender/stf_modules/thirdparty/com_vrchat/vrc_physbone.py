@@ -3,6 +3,7 @@ import json
 import re
 from typing import Callable
 
+from ....base.stf_task_steps import STF_TaskSteps
 from ....base.stf_module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
 from ....exporter.stf_export_context import STF_ExportContext
 from ....importer.stf_import_context import STF_ImportContext
@@ -76,7 +77,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 			new_collider = component.colliders.add()
 			node_path_component_selector_from_stf(context, json_resource, collider_path, new_collider)
 
-	context.add_task(_handle)
+	context.add_task(STF_TaskSteps.DEFAULT, _handle)
 
 	return component
 
@@ -101,7 +102,7 @@ def _stf_export(context: STF_ExportContext, component: VRC_Physbone, context_obj
 				if(collider_ret := node_path_component_selector_to_stf(context, collider, ret)):
 					colliders.append(collider_ret)
 			ret["colliders"] = colliders
-		context.add_task(_handle)
+		context.add_task(STF_TaskSteps.DEFAULT, _handle)
 
 		return ret, component.stf_id
 	except Exception:

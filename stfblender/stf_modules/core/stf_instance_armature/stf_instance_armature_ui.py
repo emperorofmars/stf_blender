@@ -107,7 +107,7 @@ class STFArmatureInstancePanel(bpy.types.Panel):
 			row_icon.label(icon="ERROR")
 			col = row.column()
 			col.label(text="Please set the Rotation-Mode of all bones to 'Quaternion (WXYZ)' for all PoseBones")
-			col.label(text="Doing so ensures consistency across game-engines.")
+			col.label(text="Doing so ensures consistency with game-engines.")
 			col.label(text="The following bones are affected: %s" % non_quat_bones)
 			col.label(text="Be aware that existing rotation animations will break!")
 			row_fix = col.row()
@@ -121,7 +121,6 @@ class STFArmatureInstancePanel(bpy.types.Panel):
 		layout.separator(factor=2, type="LINE")
 
 		# Components specific to this instance
-		layout.separator(factor=1, type="SPACE")
 		header, body = layout.panel("stf.instance_armature_components", default_closed = False)
 		header.label(text="Bone-Instance Components", icon="GROUP")
 		if(body): draw_components_ui(layout, context, context.object.stf_instance_armature, context.object, STFAddArmatureInstanceComponentOperator.bl_idname, STFRemoveArmatureInstanceComponentOperator.bl_idname, STFEditArmatureInstanceComponentIdOperator.bl_idname, _get_target_object_func, _inject_ui, is_component_instance = True)
@@ -129,8 +128,9 @@ class STFArmatureInstancePanel(bpy.types.Panel):
 		layout.separator(factor=4, type="LINE")
 
 		# Standins for components on bones, so they can be animated and changed per instance
-		layout.prop(context.object.stf_instance_armature_component_standins, "use_bone_component_overrides")
-		if(context.object.stf_instance_armature_component_standins.use_bone_component_overrides):
+		header, body = layout.panel("stf.instance_armature_bone_component_standins", default_closed = False)
+		header.label(text="Bone-Instance Component Standins", icon="GROUP")
+		if(body): 
 			layout.label(text="Override and animate values of components on bones.")
 			layout.operator(UpdateArmatureInstanceComponentStandins.bl_idname)
 			layout.separator(factor=1, type="SPACE")

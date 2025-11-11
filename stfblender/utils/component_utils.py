@@ -2,6 +2,7 @@ import bpy
 import json
 from typing import Callable
 
+from ..base.stf_task_steps import STF_TaskSteps
 from ..exporter.stf_export_context import STF_ExportContext
 from ..importer.stf_import_context import STF_ImportContext
 from ..base.stf_module_component import STF_BlenderComponentBase, STF_Component_Ref
@@ -225,7 +226,7 @@ def import_component_base(context: STF_ImportContext, component: STF_BlenderComp
 				else: # fallback if something went fucky
 					override.reference_type = "stf_component"
 					override.stf_component_id = override_id
-		context.add_task(_handle)
+		context.add_task(STF_TaskSteps.DEFAULT, _handle)
 	if("enabled" in json_resource):
 		component.enabled = json_resource["enabled"]
 
@@ -245,7 +246,7 @@ def export_component_base(context: STF_ExportContext, stf_type: str, component: 
 					overrides_list.append(override.stf_component_id)
 			if(len(overrides_list)):
 				ret["overrides"] = overrides_list
-		context.add_task(_handle)
+		context.add_task(STF_TaskSteps.DEFAULT, _handle)
 	if(component.enabled == False): ret["enabled"] = False
 	return ret
 

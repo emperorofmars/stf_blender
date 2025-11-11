@@ -73,7 +73,7 @@ class STFNodePanel(bpy.types.Panel):
 			row_icon.label(icon="ERROR")
 			col = row.column()
 			col.label(text="Please set the Rotation-Mode to 'Quaternion (WXYZ)'")
-			col.label(text="Doing so ensures consistency across game-engines.")
+			col.label(text="Doing so ensures consistency with game-engines.")
 			col.label(text="Be aware that existing rotation animations will break!")
 			row_fix = col.row()
 			row_fix.alignment = "LEFT"

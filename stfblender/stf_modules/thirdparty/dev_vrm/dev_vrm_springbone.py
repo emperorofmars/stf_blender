@@ -2,7 +2,7 @@ import bpy
 import re
 from typing import Callable
 
-
+from ....base.stf_task_steps import STF_TaskSteps
 from ....base.stf_module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
 from ....exporter.stf_export_context import STF_ExportContext
 from ....importer.stf_import_context import STF_ImportContext
@@ -67,7 +67,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 			node_path_component_selector_from_stf(context, json_resource, collider_path, new_collider)
 		if("center" in json_resource):
 			node_path_selector_from_stf(context, json_resource, json_resource["center"], component.center)
-	context.add_task(_handle)
+	context.add_task(STF_TaskSteps.DEFAULT, _handle)
 
 	return component
 
@@ -92,7 +92,7 @@ def _stf_export(context: STF_ExportContext, component: VRM_Springbone, context_o
 		if(component.center):
 			if(center_ret := node_path_selector_to_stf(context, component.center, ret)):
 				ret["center"] = center_ret
-	context.add_task(_handle)
+	context.add_task(STF_TaskSteps.DEFAULT, _handle)
 
 	return ret, component.stf_id
 

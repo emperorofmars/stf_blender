@@ -1,13 +1,16 @@
 from typing import Callable
+
+from .stf_task_steps import STF_TaskSteps
 from .stf_report import STFReportSeverity, STFException, STFReport
 
 
 class STF_State_Base:
 	def __init__(self, fail_on_severity = STFReportSeverity.FatalError):
-		self._tasks: list[Callable] = []
+		self._tasks: dict[int, list[Callable]] = {}
 		self._cleanup_tasks: list[Callable] = []
 		self._reports: list[STFReport] = []
 		self._fail_on_severity = fail_on_severity
+		self._current_task_step = 0
 
 	def report(self, report: STFReport):
 		self._reports.append(report)
@@ -15,22 +18,27 @@ class STF_State_Base:
 			print(report.to_string() + "\n", flush=True)
 			raise STFException(report)
 
-	def add_task(self, task: Callable):
-		self._tasks.append(task)
+	def add_task(self, step: int | STF_TaskSteps, task: Callable):
+		step = int(step)
+		if(step < self._current_task_step): step = self._current_task_step
+		if(step not in self._tasks): self._tasks[step] = []
+		self._tasks[step].append(task)
 
 	def add_cleanup_task(self, task: Callable):
 		self._cleanup_tasks.append(task)
 
 	def run_tasks(self):
-		max_iterations = 1000
-		while(len(self._tasks) > 0 and max_iterations > 0):
-			taskset = self._tasks
-			self._tasks = []
-			for task in taskset:
-				task()
-			max_iterations -= 1
-		if(len(self._tasks) > 0):
-			self.report(STFReport(message="Task Recursion", severity=STFReportSeverity.FatalError))
+		for task_step, task in self._tasks.items():
+			self._current_task_step = task_step
+			max_iterations = 1000
+			while(len(self._tasks) > 0 and max_iterations > 0):
+				taskset = self._tasks[task_step]
+				self._tasks[task_step] = []
+				for task in taskset:
+					task()
+				max_iterations -= 1
+			if(len(self._tasks[task_step]) > 0):
+				self.report(STFReport(message="Task Recursion", severity=STFReportSeverity.FatalError))
 
 		max_iterations = 1000
 		while(len(self._cleanup_tasks) > 0 and max_iterations > 0):

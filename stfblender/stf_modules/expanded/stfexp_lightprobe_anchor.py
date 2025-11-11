@@ -1,5 +1,6 @@
 import bpy
 
+from ...base.stf_task_steps import STF_TaskSteps
 from ...base.stf_module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
 from ...exporter.stf_export_context import STF_ExportContext
 from ...importer.stf_import_context import STF_ImportContext
@@ -31,13 +32,13 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, contex
 		if(len(json_resource["anchor"]) == 1):
 			def _handle_target_object():
 				component.anchor_object = import_resource(context, json_resource, json_resource["anchor"][0], "node")
-			context.add_task(_handle_target_object)
+			context.add_task(STF_TaskSteps.DEFAULT, _handle_target_object)
 		elif(len(json_resource["anchor"]) == 3):
 			def _handle_target_object():
 				component.anchor_object = import_resource(context, json_resource, json_resource["anchor"][0], "node")
 				if(bone := import_resource(context, json_resource, json_resource["anchor"][2]), "node"):
 					component.anchor_bone = bone.name
-			context.add_task(_handle_target_object)
+			context.add_task(STF_TaskSteps.DEFAULT, _handle_target_object)
 
 	return component
 
@@ -52,7 +53,7 @@ def _stf_export(context: STF_ExportContext, component: STFEXP_LightprobeAnchor, 
 			else:
 				ret["anchor"] = [register_exported_resource(ret, component.anchor_object.stf_info.stf_id)]
 
-		context.add_task(_handle)
+		context.add_task(STF_TaskSteps.DEFAULT, _handle)
 
 	return ret, component.stf_id
 

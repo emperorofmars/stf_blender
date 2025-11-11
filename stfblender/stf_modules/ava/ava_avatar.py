@@ -1,5 +1,6 @@
 import bpy
 
+from ...base.stf_task_steps import STF_TaskSteps
 from ...base.stf_module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
 from ...exporter.stf_export_context import STF_ExportContext
 from ...importer.stf_import_context import STF_ImportContext
@@ -78,17 +79,17 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, parent
 	if("viewport" in json_resource):
 		def _handle_viewport():
 			component.viewport = import_resource(context, json_resource, json_resource["viewport"], "node")
-		context.add_task(_handle_viewport)
+		context.add_task(STF_TaskSteps.DEFAULT, _handle_viewport)
 
 	if("primary_armature_instance" in json_resource):
 		def _handle_primary_armature_instance():
 			component.primary_armature_instance = import_resource(context, json_resource, json_resource["primary_armature_instance"], "node")
-		context.add_task(_handle_primary_armature_instance)
+		context.add_task(STF_TaskSteps.DEFAULT, _handle_primary_armature_instance)
 
 	if("primary_mesh_instance" in json_resource):
 		def _handle_primary_mesh_instance():
 			component.primary_mesh_instance = import_resource(context, json_resource, json_resource["primary_mesh_instance"], "node")
-		context.add_task(_handle_primary_mesh_instance)
+		context.add_task(STF_TaskSteps.DEFAULT, _handle_primary_mesh_instance)
 
 	return component
 
@@ -99,17 +100,17 @@ def _stf_export(context: STF_ExportContext, component: AVA_Avatar, parent_applic
 	if(component.viewport):
 		def _handle_viewport():
 			ret["viewport"] = register_exported_resource(ret, context.get_resource_id(component.viewport))
-		context.add_task(_handle_viewport)
+		context.add_task(STF_TaskSteps.DEFAULT, _handle_viewport)
 
 	if(component.primary_armature_instance and component.primary_armature_instance.data and type(component.primary_armature_instance.data) == bpy.types.Armature):
 		def _handle_primary_armature_instance():
 			ret["primary_armature_instance"] = register_exported_resource(ret, context.get_resource_id(component.primary_armature_instance))
-		context.add_task(_handle_primary_armature_instance)
+		context.add_task(STF_TaskSteps.DEFAULT, _handle_primary_armature_instance)
 
 	if(component.primary_mesh_instance and component.primary_mesh_instance.data and type(component.primary_mesh_instance.data) == bpy.types.Mesh):
 		def _handle_primary_mesh_instance():
 			ret["primary_mesh_instance"] = register_exported_resource(ret, context.get_resource_id(component.primary_mesh_instance))
-		context.add_task(_handle_primary_mesh_instance)
+		context.add_task(STF_TaskSteps.DEFAULT, _handle_primary_mesh_instance)
 
 	return ret, component.stf_id
 

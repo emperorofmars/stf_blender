@@ -1,6 +1,7 @@
 import uuid
 import bpy
 
+from ....base.stf_task_steps import STF_TaskSteps
 from ....base.stf_module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_ExportComponentHook
 from ....utils.component_utils import add_component, export_component_base, import_component_base
 from ....exporter.stf_export_context import STF_ExportContext
@@ -23,7 +24,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	if("rotation_mode" in json_resource):
 		def _callback():
 			context_object.rotation_mode = json_resource["rotation_mode"]
-		context.add_task(_callback)
+		context.add_task(STF_TaskSteps.DEFAULT, _callback)
 
 	return component
 

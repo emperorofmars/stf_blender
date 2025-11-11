@@ -1,5 +1,7 @@
 import bpy
 
+from ....base.stf_task_steps import STF_TaskSteps
+
 from ....importer.stf_import_context import STF_ImportContext
 from ....exporter.stf_export_context import STF_ExportContext
 from ....base.stf_report import STFReportSeverity
@@ -25,10 +27,10 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	for node_id in json_resource.get("root_nodes", []):
 		context.import_resource(node_id, context_object=collection, stf_kind="node")
 
-	context._state.run_tasks()
-
-	for animation_id in json_resource.get("animations", []):
-		context.import_resource(animation_id, context_object=collection, stf_kind="data")
+	def _handle_animations():
+		for animation_id in json_resource.get("animations", []):
+			context.import_resource(animation_id, context_object=collection, stf_kind="data")
+	context.add_task(STF_TaskSteps.ANIMATION, _handle_animations)
 
 	return collection
 
@@ -50,9 +52,11 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 		if(type(blender_object) is bpy.types.Object and blender_object.parent == None):
 			root_nodes.append(context.serialize_resource(blender_object, context_object=collection, module_kind="node", export_fail_severity=STFReportSeverity.FatalError))
 
-	for action in bpy.data.actions:
-		if(stf_animation_id := context.serialize_resource(action, context_object=collection, module_kind="data", export_fail_severity=STFReportSeverity.Debug)):
-			animations.append(stf_animation_id)
+	def _handle_animations():
+		for action in bpy.data.actions:
+			if(stf_animation_id := context.serialize_resource(action, context_object=collection, module_kind="data", export_fail_severity=STFReportSeverity.Debug)):
+				animations.append(stf_animation_id)
+	context.add_task(STF_TaskSteps.ANIMATION, _handle_animations)
 
 	return ret, collection.stf_info.stf_id
 

@@ -1,5 +1,6 @@
 import bpy
 
+from ....base.stf_task_steps import STF_TaskSteps
 from ....base.stf_module_data import STF_BlenderDataResourceBase, STF_BlenderDataModule, STF_Data_Ref
 from ....exporter.stf_export_context import STF_ExportContext
 from ....importer.stf_import_context import STF_ImportContext
@@ -132,7 +133,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 					value.blendshape_name = blendshape_name
 					value.blendshape_value = blendshape_value
 
-	context.add_task(_handle)
+	context.add_task(STF_TaskSteps.DEFAULT, _handle)
 
 	return resource
 
@@ -158,7 +159,7 @@ def _stf_export(context: STF_ExportContext, resource: VRM_Blendshape_Pose, conte
 					if(value.blendshape_name and value.blendshape_name not in value_dict):
 						value_dict[value.blendshape_name] = value.blendshape_value
 
-	context.add_task(_handle)
+	context.add_task(STF_TaskSteps.DEFAULT, _handle)
 
 	return ret, resource.stf_id
 

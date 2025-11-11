@@ -99,7 +99,11 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 			else:
 				collection = context.scene.stf_collection_selector if context.scene.stf_collection_selector else context.scene.collection
 
-			ret = export_stf_file(collection, self.filepath, self.export_settings, self.debug)
+			export_filepath = self.filepath
+			if(not export_filepath.endswith(".stf")):
+				export_filepath += ".stf"
+
+			ret = export_stf_file(collection, export_filepath, self.export_settings, self.debug)
 			if(ret.success):
 				do_report = False
 				if(len(ret.warnings) > 0):
@@ -108,11 +112,11 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 							do_report = True
 							break
 				if(do_report):
-					result_str = "STF asset \"" + self.filepath + "\" exported with reports! (%.3f sec.)" % ret.export_time
+					result_str = "STF asset \"" + export_filepath + "\" exported with reports! (%.3f sec.)" % ret.export_time
 					self.report({"WARNING"}, result_str)
 					print(result_str)
 				else:
-					result_str = "STF asset \"" + self.filepath + "\" exported successfully! (%.3f sec.)" % ret.export_time
+					result_str = "STF asset \"" + export_filepath + "\" exported successfully! (%.3f sec.)" % ret.export_time
 					self.report({"INFO"}, result_str)
 					print(result_str)
 				for report in ret.warnings:
@@ -122,7 +126,7 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 						print(report.to_string() + "\n")
 				return {"FINISHED"}
 			else:
-				self.report({"ERROR"}, self.filepath + " :: " + ret.error_message)
+				self.report({"ERROR"}, export_filepath + " :: " + ret.error_message)
 				return {"CANCELLED"}
 		finally:
 			context.window.cursor_modal_restore()

@@ -1,5 +1,6 @@
 import bpy
 
+from ...base.stf_task_steps import STF_TaskSteps
 from ...base.stf_module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
 from ...exporter.stf_export_context import STF_ExportContext
 from ...importer.stf_import_context import STF_ImportContext
@@ -101,7 +102,12 @@ class STFDrawAVAExpressionList(bpy.types.UIList):
 
 	def draw_item(self, context: bpy.types.Context, layout: bpy.types.UILayout, data, item: AVA_Expression, icon, active_data, active_propname, index):
 		layout.label(text=item.custom_expression.capitalize() if item.expression == "custom" else str(item.expression).capitalize())
-		if(item.animation): layout.label(text=item.animation.name, icon="ACTION")
+		if(item.animation):
+			layout.label(text=item.animation.name, icon="ACTION")
+		else:
+			row = layout.row()
+			row.alert = True
+			row.label(text="No Action", icon="ACTION")
 		if(item.use_blendshape_fallback and validate_stf_data_resource_reference(item.blendshape_fallback)):
 			layout.label(text="Has Fallback", icon="CHECKMARK")
 		else:
@@ -172,7 +178,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 				else:
 					context.report(STFReport("module: %s stf_id: %s, context-object: %s" % (_stf_type, stf_id, context_object), STFReportSeverity.Warn, stf_id, _stf_type, context_object))
 
-	context.add_task(_handle)
+	context.add_task(STF_TaskSteps.AFTER_ANIMATION, _handle)
 
 	return component
 
@@ -205,7 +211,7 @@ def _stf_export(context: STF_ExportContext, component: AVA_Expressions, context_
 			else:
 				context.report(STFReport("Invalid Expression", STFReportSeverity.Info, component.stf_id, _stf_type, component))
 
-	context.add_task(_handle)
+	context.add_task(STF_TaskSteps.AFTER_ANIMATION, _handle)
 
 	return ret, component.stf_id
 

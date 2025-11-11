@@ -1,6 +1,7 @@
 import bpy
 import json
 
+from ...base.stf_task_steps import STF_TaskSteps
 from ...exporter.stf_export_context import STF_ExportContext
 from ...importer.stf_import_context import STF_ImportContext
 from ...base.stf_module_data import STF_BlenderDataModule, STF_BlenderDataResourceBase, STF_Data_Ref
@@ -38,7 +39,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 			resource_grr = resource.referenced_resources.add()
 			if(referenced_resource := context.import_resource(resource_id)):
 				construct_blender_grr(referenced_resource, resource_grr, resource_id)
-	context.add_task(_handle)
+	context.add_task(STF_TaskSteps.DEFAULT, _handle)
 	
 	for buffer_id in json_resource.get("referenced_buffers", []):
 		encode_buffer(context, buffer_id, resource)
@@ -62,7 +63,7 @@ def _stf_export(context: STF_ExportContext, resource: JsonFallbackData, context_
 			if(blender_resource := resolve_blender_grr(referenced_resource)):
 				def _handle():
 					register_exported_resource(ret, context.serialize_resource(blender_resource))
-				context.add_task(_handle)
+				context.add_task(STF_TaskSteps.DEFAULT, _handle)
 		
 		for buffer in resource.buffers:
 			register_exported_buffer(ret, decode_buffer(context, buffer))

@@ -1,0 +1,8 @@
+from enum import IntEnum
+
+class STF_TaskSteps(IntEnum):
+	DEFAULT = 100
+	BEFORE_ANIMATION = 10000
+	ANIMATION = 10010
+	AFTER_ANIMATION = 10020
+	FINALE = 10000000

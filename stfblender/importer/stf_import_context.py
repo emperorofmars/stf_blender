@@ -83,12 +83,12 @@ class STF_ImportContext:
 		return None
 
 
-	def add_task(self, task: Callable):
+	def add_task(self, step: int, task: Callable):
 		"""Will be executed after all other resources have been exported"""
-		self._state._tasks.append(task)
+		self._state.add_task(step, task)
 
 	def add_cleanup_task(self, task: Callable):
-		self._state._cleanup_tasks.append(task)
+		self._state.add_cleanup_task(task)
 	
 	def register_trash_object(self, trash: bpy.types.Object):
 		self._state._trash_objects.append(trash)

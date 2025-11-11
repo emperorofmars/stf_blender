@@ -21,8 +21,6 @@ _stf_type = "stf.instance.armature"
 class STF_Instance_Armature(bpy.types.PropertyGroup):
 	stf_components: bpy.props.CollectionProperty(type=InstanceModComponentRef, options=set()) # type: ignore
 	stf_active_component_index: bpy.props.IntProperty(options=set()) # type: ignore
-	use_bone_component_overrides: bpy.props.BoolProperty(name="Enable Bone-Component Overrides", default=False, options=set()) # type: ignore
-
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
 	blender_armature = context.import_resource(json_resource["armature"], stf_kind="data")
@@ -83,7 +81,6 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	update_armature_instance_component_standins(bpy.context, blender_object)
 	if("modified_components" in json_resource):
 		for component_id, standin_component_json in json_resource["modified_components"].items():
-			blender_object.stf_instance_armature_component_standins.use_bone_component_overrides = True
 			parse_standin(context, blender_object, component_id, standin_component_json)
 
 	return blender_object
@@ -122,7 +119,7 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 		ret["pose"] = stf_pose
 
 	# components that exist on bones of this armature instance
-	if(blender_object.stf_instance_armature_component_standins.use_bone_component_overrides and len(blender_object.stf_instance_armature.stf_components) > 0):
+	if(len(blender_object.stf_instance_armature.stf_components) > 0):
 		added_components = {}
 		for component_ref in blender_object.stf_instance_armature.stf_components:
 			components = getattr(blender_object, component_ref.blender_property_name)

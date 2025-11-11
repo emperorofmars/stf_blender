@@ -2,6 +2,7 @@ import math
 import bpy
 import mathutils
 
+from ....base.stf_task_steps import STF_TaskSteps
 from ....base.stf_module import STF_Module
 from ....importer.stf_import_context import STF_ImportContext
 from ....exporter.stf_export_context import STF_ExportContext
@@ -56,7 +57,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 				blender_object.matrix_world = blender_object.parent.matrix_world @ matrix_local
 		else:
 			blender_object.matrix_world = matrix_local
-	context.add_task(_handle_parenting)
+	context.add_task(STF_TaskSteps.DEFAULT, _handle_parenting)
 
 	for child_id in json_resource.get("children", []):
 		child: bpy.types.Object = context.import_resource(child_id, context_object, stf_kind="node")
@@ -108,7 +109,7 @@ def _stf_export(context: STF_ExportContext, blender_object: bpy.types.Object, co
 					json_resource["parent_binding"] = [blender_object.parent.stf_info.stf_id, "instance", blender_object.parent.data.bones[blender_object.parent_bone].stf_info.stf_id]
 				case _:
 					context.report(STFReport("Unsupported object parent_type: " + str(blender_object.parent_type), STFReportSeverity.FatalError, blender_object.stf_info.stf_id, json_resource.get("type"), blender_object))
-	context.add_task(_handle_parent_binding)
+	context.add_task(STF_TaskSteps.DEFAULT, _handle_parent_binding)
 
 	# let t, r, s
 	if(blender_object.parent):
