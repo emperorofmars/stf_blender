@@ -75,7 +75,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 		for json_source in json_resource.get("sources", []):
 			source = component.sources.add()
 			source.weight = json_source.get("weight")
-			node_path_selector_from_stf(context, json_resource, json_resource["source"], source.source)
+			node_path_selector_from_stf(context, json_resource, json_source.get("source"), source.source)
 	context.add_task(STF_TaskSteps.DEFAULT, _handle)
 
 	return component
@@ -131,7 +131,7 @@ def _parse_component_instance_standin_func(context: STF_ImportContext, json_reso
 		for json_source in json_resource.get("sources", []):
 			source = component.sources.add()
 			source.weight = json_source.get("weight")
-			node_path_selector_from_stf(context, json_resource, json_resource["source"], source.source)
+			node_path_selector_from_stf(context, json_resource, json_source.get("source"), source.source)
 	context.add_task(STF_TaskSteps.DEFAULT, _handle)
 
 

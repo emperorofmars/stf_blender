@@ -69,7 +69,6 @@ def _inject_ui(layout: bpy.types.UILayout, context: bpy.types.Context, component
 	if(not component_ref.bone):
 		layout.label(text="Please select a target Bone")
 		return False
-	layout.separator(type="LINE", factor=1)
 	return True
 
 def _inject_standin_ui(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: InstanceModComponentRef, context_object: any, component: any) -> bool:
