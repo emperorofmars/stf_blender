@@ -20,11 +20,12 @@ def draw_node_path_selector(layout: bpy.types.UILayout, nps: NodePathSelector, t
 
 
 def resolve_node_path_selector(nps: NodePathSelector) -> bpy.types.Object | bpy.types.Bone | None:
+	if(not nps): return None
 	if(type(nps.id_data) == bpy.types.Object and nps.target_object):
 		if(type(nps.target_object.data) == bpy.types.Armature):
 			if(not nps.target_bone):
 				return nps.target_object
-			elif(nps.target_bone and nps.target_object in nps.target_object.data.bones):
+			elif(nps.target_bone and nps.target_bone in nps.target_object.data.bones):
 				return nps.target_object.data.bones[nps.target_bone]
 			else:
 				return None
@@ -38,6 +39,24 @@ def resolve_node_path_selector(nps: NodePathSelector) -> bpy.types.Object | bpy.
 
 def validate_node_path_selector(nps: NodePathSelector) -> bool:
 	return resolve_node_path_selector(nps) != None
+
+
+def node_path_selector_to_string(nps: NodePathSelector) -> str:
+	if(not nps): return "Invalid"
+	if(type(nps.id_data) == bpy.types.Object and nps.target_object):
+		if(type(nps.target_object.data) == bpy.types.Armature):
+			if(not nps.target_bone):
+				return nps.target_object.name
+			elif(nps.target_bone and nps.target_bone in nps.target_object.data.bones):
+				return nps.target_object.name + " : " + nps.target_bone
+			else:
+				return "Invalid"
+		else:
+			return nps.target_object.name
+	elif(type(nps.id_data) == bpy.types.Armature and nps.target_bone and nps.target_bone in nps.id_data.bones):
+		return nps.target_bone
+	else:
+		return "Invalid"
 
 
 def node_path_selector_to_stf(context: STF_ExportContext, nps: NodePathSelector, json_resource: dict) -> list[str]:

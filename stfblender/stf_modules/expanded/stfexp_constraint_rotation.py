@@ -8,7 +8,7 @@ from ...exporter.stf_export_context import STF_ExportContext
 from ...importer.stf_import_context import STF_ImportContext
 from ...utils.component_utils import add_component, export_component_base, import_component_base, preserve_component_reference
 from ...utils.animation_conversion_utils import get_component_stf_path
-from ...base.blender_grr.stf_node_path_selector import NodePathSelector, draw_node_path_selector, node_path_selector_from_stf, node_path_selector_to_stf, resolve_node_path_selector, validate_node_path_selector
+from ...base.blender_grr.stf_node_path_selector import NodePathSelector, draw_node_path_selector, node_path_selector_from_stf, node_path_selector_to_stf, node_path_selector_to_string, resolve_node_path_selector, validate_node_path_selector
 from ...utils.helpers import create_add_button, create_remove_button
 
 
@@ -31,7 +31,7 @@ class STFDrawAVAExpressionList(bpy.types.UIList):
 
 	def draw_item(self, context: bpy.types.Context, layout: bpy.types.UILayout, data, item: RotationConstraintSource, icon, active_data, active_propname, index):
 		if(validate_node_path_selector(item.source)):
-			layout.label(text=resolve_node_path_selector(item.source).name)
+			layout.label(text=node_path_selector_to_string(item.source), icon="RIGHTARROW")
 			layout.prop(item, "weight")
 		else:
 			layout.alert = True
@@ -49,10 +49,10 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 
 	if(component.active_source_index < len(component.sources)):
 		source = component.sources[component.active_source_index]
-		row = layout.row(align=True)
+		col = layout.column(align=True)
 		if(not validate_node_path_selector(source.source)):
-			row.alert = True
-		draw_node_path_selector(row, source.source, "Source")
+			col.alert = True
+		draw_node_path_selector(col, source.source, "Source")
 		layout.prop(source, "weight")
 
 	layout.separator(factor=1)
@@ -71,6 +71,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 
 	_get_component = preserve_component_reference(component, context_object)
 	def _handle():
+		component = _get_component()
 		for json_source in json_resource.get("sources", []):
 			source = component.sources.add()
 			source.weight = json_source.get("weight")
@@ -102,40 +103,46 @@ def _stf_export(context: STF_ExportContext, component: STFEXP_Constraint_Rotatio
 """Bone instance handling"""
 
 def _set_component_instance_standin(context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: STFEXP_Constraint_Rotation, standin_component: STFEXP_Constraint_Rotation):
-	"""standin_component.weight = component.weight
-	standin_component.source.target_object = context_object
-	standin_component.source.target_bone = component.source.target_bone"""
-	pass
+	for source_original in component.sources:
+		source = standin_component.sources.add()
+		source.weight = source_original.weight
+		source.source.target_object = source_original.source.target_object
+		source.source.target_bone = source_original.source.target_bone
 
 
 def _serialize_component_instance_standin_func(context: STF_ExportContext, component_ref: STF_Component_Ref, standin_component: STFEXP_Constraint_Rotation, context_object: any) -> dict:
-	"""ret = { "weight": standin_component.weight }
+	sources = []
+	_get_component = preserve_component_reference(standin_component, context_object)
 	def _handle():
-		if(source_ret := node_path_selector_to_stf(context, standin_component.source, ret)):
-			ret["source"] = source_ret
+		component = _get_component()
+		for source in component.sources:
+			if(source_ret := node_path_selector_to_stf(context, source.source, ret)):
+				sources.append({
+					"source": source_ret,
+					"weight": source.weight,
+				})
 	context.add_task(STF_TaskSteps.DEFAULT, _handle)
-	return ret"""
-	return {}
+	return {"sources": sources}
 
 def _parse_component_instance_standin_func(context: STF_ImportContext, json_resource: dict, component_ref: STF_Component_Ref, standin_component: STFEXP_Constraint_Rotation, context_object: any):
-	"""if("weight" in json_resource): standin_component.weight = json_resource["weight"]
-	if("source" in json_resource and len(json_resource["source"]) > 0):
-		_get_component = preserve_component_reference(standin_component, context_object)
-		def _handle():
-			standin_component = _get_component()
-			node_path_selector_from_stf(context, json_resource, json_resource["source"], standin_component.source)
-		context.add_task(STF_TaskSteps.DEFAULT, _handle)"""
-	pass
+	_get_component = preserve_component_reference(standin_component, context_object)
+	def _handle():
+		component = _get_component()
+		for json_source in json_resource.get("sources", []):
+			source = component.sources.add()
+			source.weight = json_source.get("weight")
+			node_path_selector_from_stf(context, json_resource, json_resource["source"], source.source)
+	context.add_task(STF_TaskSteps.DEFAULT, _handle)
 
 
 """Animation"""
 
 def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: any, application_object_property_index: int, data_path: str) -> tuple[list[str], Callable[[int, any], any], list[int]]:
-	if(match := re.search(r"^" + _blender_property_name + r"\[(?P<component_index>[\d]+)\].weight", data_path)):
+	"""if(match := re.search(r"^" + _blender_property_name + r"\[(?P<component_index>[\d]+)\].weight", data_path)):
 		component = getattr(application_object, _blender_property_name)[int(match.groupdict()["component_index"])]
 		component_path = get_component_stf_path(application_object, component)
 		if(component_path):
-			return component_path + ["weight"], None, None
+			return component_path + ["weight"], None, None"""
 	if(match := re.search(r"^" + _blender_property_name + r"\[(?P<component_index>[\d]+)\].enabled", data_path)):
 		component = getattr(application_object, _blender_property_name)[int(match.groupdict()["component_index"])]
 		component_path = get_component_stf_path(application_object, component)
@@ -151,8 +158,8 @@ def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: 
 		if(component.stf_id == blender_object.stf_id):
 			break
 	match(stf_path[1]):
-		case "weight":
-			return None, 0, "OBJECT", _blender_property_name + "[" + str(component_index) + "].weight", 0, None
+		#case "weight":
+		#	return None, 0, "OBJECT", _blender_property_name + "[" + str(component_index) + "].weight", 0, None
 		case "enabled":
 			return None, 0, "OBJECT", _blender_property_name + "[" + str(component_index) + "].enabled", 0, None
 	return None
