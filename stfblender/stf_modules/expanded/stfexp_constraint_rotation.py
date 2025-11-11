@@ -111,7 +111,9 @@ def _set_component_instance_standin(context: bpy.types.Context, component_ref: S
 
 
 def _serialize_component_instance_standin_func(context: STF_ExportContext, component_ref: STF_Component_Ref, standin_component: STFEXP_Constraint_Rotation, context_object: any) -> dict:
+	ret = {}
 	sources = []
+	ret["sources"] = sources
 	_get_component = preserve_component_reference(standin_component, context_object)
 	def _handle():
 		component = _get_component()
@@ -122,7 +124,7 @@ def _serialize_component_instance_standin_func(context: STF_ExportContext, compo
 					"weight": source.weight,
 				})
 	context.add_task(STF_TaskSteps.DEFAULT, _handle)
-	return {"sources": sources}
+	return ret
 
 def _parse_component_instance_standin_func(context: STF_ImportContext, json_resource: dict, component_ref: STF_Component_Ref, standin_component: STFEXP_Constraint_Rotation, context_object: any):
 	_get_component = preserve_component_reference(standin_component, context_object)
