@@ -55,24 +55,27 @@ def _stf_export(context: STF_ExportContext, component: AVA_SecondaryMotion, cont
 """Animation"""
 
 def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: any, application_object_property_index: int, data_path: str) -> tuple[list[str], Callable[[list[float]], list[float]], list[int]]:
-	if(match := re.search(r"^ava_secondary_motion\[(?P<component_index>[\d]+)\].enabled", data_path)):
-		component = application_object.ava_secondary_motion[int(match.groupdict()["component_index"])]
+	if(match := re.search(r"^" + _blender_property_name + r"\[(?P<component_index>[\d]+)\].enabled", data_path)):
+		component = getattr(application_object, _blender_property_name)[int(match.groupdict()["component_index"])]
 		component_path = get_component_stf_path(application_object, component)
 		if(component_path):
 			return component_path + ["enabled"], None, None
 	return None
 
+
 def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: any) -> tuple[any, int, any, any, list[int], Callable[[list[float]], list[float]]]:
 	blender_object = context.get_imported_resource(stf_path[0])
 	# let component_index
-	for component_index, component in enumerate(application_object.ava_secondary_motion):
+	for component_index, component in enumerate(getattr(application_object, _blender_property_name)):
 		if(component.stf_id == blender_object.stf_id):
 			break
 	match(stf_path[1]):
 		case "enabled":
-			return None, 0, "OBJECT", "ava_secondary_motion[" + str(component_index) + "].enabled", None, None
+			return None, 0, "OBJECT", _blender_property_name + "[" + str(component_index) + "].enabled", None, None
 	return None
 
+
+"""Module definition"""
 
 class STF_Module_AVA_SecondaryMotion(STF_BlenderComponentModule):
 	"""Root of a physics chain"""

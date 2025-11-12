@@ -2,6 +2,7 @@ from io import BytesIO
 from typing import Callable
 import bpy
 
+from ....base.stf_task_steps import STF_TaskSteps
 from .stf_animation_common import *
 from ....exporter.stf_export_context import STF_ExportContext
 from ....base.stf_report import STFReportSeverity, STFReport
@@ -95,6 +96,14 @@ def stf_animation_export(context: STF_ExportContext, application_object: any, co
 			"range": animation_range,
 			"tracks": stf_tracks,
 		}
+		def _handle_reset_animation():
+			if(blender_animation.slot_link.is_reset_animation):
+				ret["is_reset_animation"] = True
+			elif(blender_animation.slot_link.reset_animation):
+				if(reset_animation_id := context.serialize_resource(blender_animation.slot_link.reset_animation)):
+					ret["reset_animation"] = reset_animation_id
+		context.add_task(STF_TaskSteps.AFTER_ANIMATION, _handle_reset_animation)
+
 		return ret, blender_animation.stf_info.stf_id
 
 

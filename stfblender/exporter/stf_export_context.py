@@ -2,6 +2,7 @@ import bpy
 import logging
 from typing import Callable
 
+from ..base.stf_task_steps import STF_TaskSteps
 from .stf_export_state import STF_ExportState
 from ..base.stf_definition import STF_Meta_AssetInfo
 from ..base.stf_report import STFReportSeverity, STFReport
@@ -102,7 +103,7 @@ class STF_ExportContext:
 		return None
 
 
-	def add_task(self, step: int, task: Callable):
+	def add_task(self, step: int | STF_TaskSteps, task: Callable):
 		"""Will be executed after all other resources have been exported"""
 		self._state.add_task(step, task)
 

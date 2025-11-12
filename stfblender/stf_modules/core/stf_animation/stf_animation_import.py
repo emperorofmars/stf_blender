@@ -2,6 +2,7 @@ from typing import Callable
 import bpy
 
 from .stf_animation_common import *
+from ....base.stf_task_steps import STF_TaskSteps
 from ....importer.stf_import_context import STF_ImportContext
 from ....base.stf_report import STFReportSeverity, STFReport
 
@@ -76,6 +77,14 @@ def stf_animation_import(context: STF_ImportContext, json_resource: dict, stf_id
 
 			# Yay we can finally deal with curves
 			__parse_subtracks(track, selected_channelbag, fcurve_target, index_conversion, conversion_func)
+	
+	def _handle_reset_animation():
+		if("is_reset_animation" in json_resource and json_resource["is_reset_animation"] == True):
+			blender_animation.slot_link.is_reset_animation = True
+		elif("reset_animation" in json_resource and json_resource["reset_animation"]):
+			if(reset_animation := context.import_resource(json_resource["reset_animation"], context_object, "data")):
+				blender_animation.slot_link.reset_animation = reset_animation
+	context.add_task(STF_TaskSteps.AFTER_ANIMATION, _handle_reset_animation)
 
 	blender_animation.use_fake_user = True
 

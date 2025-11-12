@@ -2,6 +2,7 @@ import bpy
 import logging
 from typing import Callable
 
+from ..base.stf_task_steps import STF_TaskSteps
 from .stf_import_state import STF_ImportState
 from ..base.stf_report import STFReportSeverity, STFReport
 from ..base.stf_module_component import STF_Component_Editmode_Resistant_Reference
@@ -83,7 +84,7 @@ class STF_ImportContext:
 		return None
 
 
-	def add_task(self, step: int, task: Callable):
+	def add_task(self, step: int | STF_TaskSteps, task: Callable):
 		"""Will be executed after all other resources have been exported"""
 		self._state.add_task(step, task)
 
