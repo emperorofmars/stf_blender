@@ -34,10 +34,10 @@ class STF_BlenderComponentModule(STF_Module):
 
 class STF_Component_Editmode_Resistant_Reference:
 	def __init__(self, component: STF_BlenderComponentBase, context_object: any):
+		self.component_id = component.stf_id
+		self.stf_id = component.stf_id
 		if(type(context_object) == bpy.types.Bone):
 			self.armature_bone = ArmatureBone(component.id_data, context_object.name)
-			self.component_id = component.stf_id
-			self.stf_id = component.stf_id
 		else:
 			self.component = component
 	def get(self) -> STF_BlenderComponentBase:
