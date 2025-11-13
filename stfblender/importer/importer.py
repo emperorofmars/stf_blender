@@ -106,6 +106,8 @@ class ImportSTF(bpy.types.Operator, ImportHelper):
 				# Select the imported assets Collection
 				bpy.context.view_layer.active_layer_collection = context.view_layer.layer_collection.children[last_success.name]
 			return {"FINISHED"}
+		except Exception as e:
+			print(e)
 		finally:
 			context.window.cursor_modal_restore()
 

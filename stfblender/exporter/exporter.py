@@ -50,8 +50,10 @@ def export_stf_file(collection: bpy.types.Collection, filepath: str, export_sett
 			files[len(files) - 1].write(json_string)
 		return STF_Export_Result(True, warnings=stf_state._reports, export_time=time.time() - time_start)
 	except STFException as error:
+		print(error)
 		return STF_Export_Result(False, error_message=str(error))
 	except Exception as error:
+		print(error)
 		return STF_Export_Result(False, error_message=str(error))
 	finally:
 		for file in files:
