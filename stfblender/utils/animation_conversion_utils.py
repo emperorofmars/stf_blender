@@ -1,3 +1,4 @@
+from re import match
 import bpy
 
 from ..base.stf_module_component import STF_BlenderComponentBase
@@ -41,6 +42,12 @@ def convert_bone_scale_to_stf(value: list[float]): return value
 
 
 # Components
+def get_component(application_object: any, blender_property_name: str, component_index: int):
+	component_collection = getattr(application_object, blender_property_name)
+	if(component_collection and len(component_collection) > component_index):
+		return getattr(application_object, blender_property_name)[component_index]
+	return None
+
 def get_component_stf_path(application_object: any, component: STF_BlenderComponentBase):
 	for component_ref in application_object.stf_info.stf_components:
 		if(component_ref.stf_id == component.stf_id):
@@ -52,6 +59,12 @@ def get_component_stf_path(application_object: any, component: STF_BlenderCompon
 		for component_ref in application_object.stf_instance_armature_component_standins.stf_components:
 			if(component_ref.stf_id == component.stf_id):
 				return [application_object.stf_info.stf_id, "instance", application_object.data.bones[component_ref.bone].stf_info.stf_id, "component_mods", component.stf_id]
+	return None
+
+def get_component_stf_path_from_collection(application_object: any, blender_property_name: str, component_index: int):
+	component_collection = getattr(application_object, blender_property_name)
+	if(component_collection and len(component_collection) > component_index):
+		return get_component_stf_path(application_object, getattr(application_object, blender_property_name)[component_index])
 	return None
 
 

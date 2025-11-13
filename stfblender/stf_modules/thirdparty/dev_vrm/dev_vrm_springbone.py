@@ -101,9 +101,7 @@ def _stf_export(context: STF_ExportContext, component: VRM_Springbone, context_o
 
 def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: any, application_object_property_index: int, data_path: str) -> tuple[list[str], Callable[[list[float]], list[float]], list[int]]:
 	if(match := re.search(r"^" + _blender_property_name + r"\[(?P<component_index>[\d]+)\].enabled", data_path)):
-		component = getattr(application_object, _blender_property_name)[int(match.groupdict()["component_index"])]
-		component_path = get_component_stf_path(application_object, component)
-		if(component_path):
+		if(component_path := get_component_stf_path_from_collection(application_object, _blender_property_name, int(match.groupdict()["component_index"]))):
 			return component_path + ["enabled"], None, None
 	return None
 

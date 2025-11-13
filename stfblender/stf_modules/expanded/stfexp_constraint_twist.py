@@ -7,7 +7,7 @@ from ...base.stf_module_component import STF_BlenderComponentBase, STF_BlenderCo
 from ...exporter.stf_export_context import STF_ExportContext
 from ...importer.stf_import_context import STF_ImportContext
 from ...utils.component_utils import add_component, export_component_base, import_component_base, preserve_component_reference
-from ...utils.animation_conversion_utils import get_component_stf_path
+from ...utils.animation_conversion_utils import get_component_stf_path, get_component_stf_path_from_collection
 from ...base.blender_grr.stf_node_path_selector import NodePathSelector, draw_node_path_selector, node_path_selector_from_stf, node_path_selector_to_stf
 
 
@@ -90,14 +90,10 @@ def _parse_component_instance_standin_func(context: STF_ImportContext, json_reso
 
 def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: any, application_object_property_index: int, data_path: str) -> tuple[list[str], Callable[[int, any], any], list[int]]:
 	if(match := re.search(r"^" + _blender_property_name + r"\[(?P<component_index>[\d]+)\].weight", data_path)):
-		component = getattr(application_object, _blender_property_name)[int(match.groupdict()["component_index"])]
-		component_path = get_component_stf_path(application_object, component)
-		if(component_path):
+		if(component_path := get_component_stf_path_from_collection(application_object, _blender_property_name, int(match.groupdict()["component_index"]))):
 			return component_path + ["weight"], None, None
 	if(match := re.search(r"^" + _blender_property_name + r"\[(?P<component_index>[\d]+)\].enabled", data_path)):
-		component = getattr(application_object, _blender_property_name)[int(match.groupdict()["component_index"])]
-		component_path = get_component_stf_path(application_object, component)
-		if(component_path):
+		if(component_path := get_component_stf_path_from_collection(application_object, _blender_property_name, int(match.groupdict()["component_index"]))):
 			return component_path + ["enabled"], None, None
 	return None
 

@@ -8,7 +8,7 @@ from ...exporter.stf_export_context import STF_ExportContext
 from ...importer.stf_import_context import STF_ImportContext
 from ...utils.component_utils import ComponentLoadJsonOperatorBase, add_component, export_component_base, import_component_base
 from ...utils.trs_utils import blender_rotation_to_stf, blender_translation_to_stf, stf_rotation_to_blender, stf_translation_to_blender
-from ...utils.animation_conversion_utils import get_component_stf_path
+from ...utils.animation_conversion_utils import get_component_stf_path, get_component_stf_path_from_collection
 
 
 _stf_type = "stfexp.collider.plane"
@@ -99,9 +99,7 @@ def _stf_export(context: STF_ExportContext, component: STFEXP_Collider_Plane, co
 
 def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: any, application_object_property_index: int, data_path: str) -> tuple[list[str], Callable[[list[float]], list[float]], list[int]]:
 	if(match := re.search(r"^" + _blender_property_name + r"\[(?P<component_index>[\d]+)\].enabled", data_path)):
-		component = getattr(application_object, _blender_property_name)[int(match.groupdict()["component_index"])]
-		component_path = get_component_stf_path(application_object, component)
-		if(component_path):
+		if(component_path := get_component_stf_path_from_collection(application_object, _blender_property_name, int(match.groupdict()["component_index"]))):
 			return component_path + ["enabled"], None, None
 	return None
 
