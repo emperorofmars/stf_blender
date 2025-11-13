@@ -7,7 +7,7 @@ from ...base.stf_module_component import STF_BlenderComponentBase, STF_BlenderCo
 from ...exporter.stf_export_context import STF_ExportContext
 from ...importer.stf_import_context import STF_ImportContext
 from ...utils.component_utils import add_component, export_component_base, import_component_base, preserve_component_reference
-from ...utils.animation_conversion_utils import get_component_stf_path, get_component_stf_path_from_collection
+from ...utils.animation_conversion_utils import get_component_index, get_component_stf_path, get_component_stf_path_from_collection
 from ...base.blender_grr.stf_node_path_selector import NodePathSelector, draw_node_path_selector, node_path_selector_from_stf, node_path_selector_to_stf, node_path_selector_to_string, validate_node_path_selector
 from ...utils.helpers import create_add_button, create_remove_button
 
@@ -151,17 +151,12 @@ def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_o
 
 def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: any) -> tuple[any, int, any, any, list[int], Callable[[list[float]], list[float]]]:
 	blender_object = context.get_imported_resource(stf_path[0])
-	# let component_index
-	for component_index, component in enumerate(getattr(application_object, _blender_property_name)):
-		if(component.stf_id == blender_object.stf_id):
-			break
-	else:
-		return None
-	match(stf_path[1]):
-		case "sources":
-			return None, 0, "OBJECT", _blender_property_name + "[" + str(component_index) + "].sources[" + str(stf_path[2]) + "].weight", 0, None
-		case "enabled":
-			return None, 0, "OBJECT", _blender_property_name + "[" + str(component_index) + "].enabled", 0, None
+	if(component_index := get_component_index(application_object, _blender_property_name, blender_object.stf_id)):
+		match(stf_path[1]):
+			case "sources":
+				return None, 0, "OBJECT", _blender_property_name + "[" + str(component_index) + "].sources[" + str(stf_path[2]) + "].weight", 0, None
+			case "enabled":
+				return None, 0, "OBJECT", _blender_property_name + "[" + str(component_index) + "].enabled", 0, None
 	return None
 
 

@@ -8,7 +8,7 @@ from ...exporter.stf_export_context import STF_ExportContext
 from ...importer.stf_import_context import STF_ImportContext
 from ...utils.component_utils import ComponentLoadJsonOperatorBase, add_component, export_component_base, import_component_base
 from ...utils.trs_utils import blender_translation_to_stf, stf_translation_to_blender
-from ...utils.animation_conversion_utils import get_component_stf_path
+from ...utils.animation_conversion_utils import get_component_index, get_component_stf_path, get_component_stf_path_from_collection
 
 
 _stf_type = "stfexp.collider.sphere"
@@ -100,13 +100,10 @@ def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_o
 
 def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: any) -> tuple[any, int, any, any, list[int], Callable[[list[float]], list[float]]]:
 	blender_object = context.get_imported_resource(stf_path[0])
-	# let component_index
-	for component_index, component in enumerate(getattr(application_object, _blender_property_name)):
-		if(component.stf_id == blender_object.stf_id):
-			break
-	match(stf_path[1]):
-		case "enabled":
-			return None, 0, "OBJECT", _blender_property_name + "[" + str(component_index) + "].enabled", None, None
+	if(component_index := get_component_index(application_object, _blender_property_name, blender_object.stf_id)):
+		match(stf_path[1]):
+			case "enabled":
+				return None, 0, "OBJECT", _blender_property_name + "[" + str(component_index) + "].enabled", None, None
 	return None
 
 

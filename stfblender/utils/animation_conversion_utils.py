@@ -102,3 +102,13 @@ convert_scale_to_blender = trs_utils.stf_scale_to_blender
 
 scale_bone_index_conversion_to_blender = [0, 1, 2]
 def convert_bone_scale_to_blender(value: list[float]): return value
+
+
+# Components
+
+def get_component_index(application_object, blender_property_name: str, component_id: str) -> int:
+	for component_index, component in enumerate(getattr(application_object, blender_property_name)):
+		if(component.stf_id == component_id):
+			return component_index
+	else:
+		return None
