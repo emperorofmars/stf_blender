@@ -22,6 +22,8 @@ class RotationConstraintSource(STF_BlenderComponentBase):
 
 
 class STFEXP_Constraint_Rotation(STF_BlenderComponentBase):
+	weight: bpy.props.FloatProperty(name="Constraint Weight", default=1.0, subtype="FACTOR", min=0, max=1) # type: ignore
+	axes: bpy.props.BoolVectorProperty(name="Axes", default=(True, True, True), options=set(), size=3) # type: ignore
 	sources: bpy.props.CollectionProperty(type=RotationConstraintSource, name="Sources") # type: ignore
 	active_source_index: bpy.props.IntProperty() # type: ignore
 
@@ -41,6 +43,14 @@ class STFDrawAVAExpressionList(bpy.types.UIList):
 def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: STFEXP_Constraint_Rotation):
 	layout.use_property_split = True
 
+	layout.prop(component, "weight")
+	row = layout.row(align=True, heading="Axes")
+	row.prop(component, "axes", toggle=True, index=0, text="X")
+	row.prop(component, "axes", toggle=True, index=1, text="Y")
+	row.prop(component, "axes", toggle=True, index=2, text="Z")
+
+	layout.separator(factor=1)
+
 	create_add_button(layout, "bone" if type(context_object) == bpy.types.Bone else "object", _blender_property_name, component.stf_id, "sources", text="Add Constraint Source")
 
 	row = layout.row(align=True)
@@ -55,12 +65,6 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 		draw_node_path_selector(col, source.source, "Source")
 		layout.prop(source, "weight")
 
-	layout.separator(factor=1)
-	total_weight = 0
-	for s in component.sources:
-		total_weight += s.weight
-	layout.label(text="Total Weight: {:10.2f}".format(total_weight))
-
 
 """Import export"""
 
@@ -68,6 +72,9 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	component_ref, component = add_component(context_object, _blender_property_name, stf_id, _stf_type)
 	import_component_base(context, component, json_resource, context_object)
 	component: STFEXP_Constraint_Rotation = component
+
+	component.weight = json_resource.get("weight", 1)
+	component.axes = json_resource.get("axes", [True, True, True])
 
 	_get_component = preserve_component_reference(component, context_object)
 	def _handle():
@@ -83,6 +90,10 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 
 def _stf_export(context: STF_ExportContext, component: STFEXP_Constraint_Rotation, context_object: any) -> tuple[dict, str]:
 	ret = export_component_base(context, _stf_type, component)
+
+	ret["weight"] = component.weight
+	ret["axes"] = component.axes[:]
+
 	sources = []
 	ret["sources"] = sources
 
@@ -112,8 +123,13 @@ def _set_component_instance_standin(context: bpy.types.Context, component_ref: S
 
 def _serialize_component_instance_standin_func(context: STF_ExportContext, component_ref: STF_Component_Ref, standin_component: STFEXP_Constraint_Rotation, context_object: any) -> dict:
 	ret = {}
+
+	ret["weight"] = standin_component.weight
+	ret["axes"] = standin_component.axes[:]
+
 	sources = []
 	ret["sources"] = sources
+
 	_get_component = preserve_component_reference(standin_component, context_object)
 	def _handle():
 		component = _get_component()
@@ -128,6 +144,10 @@ def _serialize_component_instance_standin_func(context: STF_ExportContext, compo
 
 def _parse_component_instance_standin_func(context: STF_ImportContext, json_resource: dict, component_ref: STF_Component_Ref, standin_component: STFEXP_Constraint_Rotation, context_object: any):
 	_get_component = preserve_component_reference(standin_component, context_object)
+
+	standin_component.weight = json_resource.get("weight", 1)
+	standin_component.axes = json_resource.get("axes", [True, True, True])
+
 	def _handle():
 		component = _get_component()
 		for json_source in json_resource.get("sources", []):
@@ -140,12 +160,15 @@ def _parse_component_instance_standin_func(context: STF_ImportContext, json_reso
 """Animation"""
 
 def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: any, application_object_property_index: int, data_path: str) -> tuple[list[str], Callable[[int, any], any], list[int]]:
-	if(match := re.search(r"^" + _blender_property_name + r"\[(?P<component_index>[\d]+)\].sources\[(?P<source_index>[\d]+)\].weight", data_path)):
-		if(component_path := get_component_stf_path_from_collection(application_object, _blender_property_name, int(match.groupdict()["component_index"]))):
-			return component_path + ["sources", int(match.groupdict()["source_index"]), "weight"], None, None
 	if(match := re.search(r"^" + _blender_property_name + r"\[(?P<component_index>[\d]+)\].enabled", data_path)):
 		if(component_path := get_component_stf_path_from_collection(application_object, _blender_property_name, int(match.groupdict()["component_index"]))):
 			return component_path + ["enabled"], None, None
+	if(match := re.search(r"^" + _blender_property_name + r"\[(?P<component_index>[\d]+)\].weight", data_path)):
+		if(component_path := get_component_stf_path_from_collection(application_object, _blender_property_name, int(match.groupdict()["component_index"]))):
+			return component_path + ["weight"], None, None
+	if(match := re.search(r"^" + _blender_property_name + r"\[(?P<component_index>[\d]+)\].sources\[(?P<source_index>[\d]+)\].weight", data_path)):
+		if(component_path := get_component_stf_path_from_collection(application_object, _blender_property_name, int(match.groupdict()["component_index"]))):
+			return component_path + ["sources", int(match.groupdict()["source_index"]), "weight"], None, None
 	return None
 
 
@@ -153,10 +176,12 @@ def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: 
 	blender_object = context.get_imported_resource(stf_path[0])
 	if(component_index := get_component_index(application_object, _blender_property_name, blender_object.stf_id)):
 		match(stf_path[1]):
-			case "sources":
-				return None, 0, "OBJECT", _blender_property_name + "[" + str(component_index) + "].sources[" + str(stf_path[2]) + "].weight", 0, None
 			case "enabled":
 				return None, 0, "OBJECT", _blender_property_name + "[" + str(component_index) + "].enabled", 0, None
+			case "weight":
+				return None, 0, "OBJECT", _blender_property_name + "[" + str(component_index) + "].weight", 0, None
+			case "sources":
+				return None, 0, "OBJECT", _blender_property_name + "[" + str(component_index) + "].sources[" + str(stf_path[2]) + "].weight", 0, None
 	return None
 
 
