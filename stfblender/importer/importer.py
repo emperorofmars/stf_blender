@@ -1,3 +1,4 @@
+import traceback
 import bpy
 import os
 from bpy_extras.io_utils import ImportHelper
@@ -106,8 +107,9 @@ class ImportSTF(bpy.types.Operator, ImportHelper):
 				# Select the imported assets Collection
 				bpy.context.view_layer.active_layer_collection = context.view_layer.layer_collection.children[last_success.name]
 			return {"FINISHED"}
-		except Exception as e:
-			print(e)
+		except Exception as error:
+			print(error)
+			print(traceback.format_exc())
 		finally:
 			context.window.cursor_modal_restore()
 
