@@ -1,0 +1,9 @@
+{
+	"recommendations": [
+		"ms-python.python",
+		"jacqueslucke.blender-development",
+		"editorconfig.editorconfig",
+		"tamasfe.even-better-toml",
+		"ms-vscode.hexeditor"
+	]
+}
