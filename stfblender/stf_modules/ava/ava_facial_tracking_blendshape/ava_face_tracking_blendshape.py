@@ -8,8 +8,8 @@ from ....utils.component_utils import add_component, export_component_base, impo
 from ....utils.misc import OpenWebpage
 
 
-_stf_type = "ava.facial_tracking.blendshape"
-_blender_property_name = "ava_facial_tracking_blendshape"
+_stf_type = "ava.face_tracking.blendshape"
+_blender_property_name = "ava_face_tracking_blendshape"
 
 
 def _match_ft_blendshapes(mesh: bpy.types.Mesh, shapes: list[str]) -> tuple[int, int]:
@@ -21,12 +21,12 @@ def _match_ft_blendshapes(mesh: bpy.types.Mesh, shapes: list[str]) -> tuple[int,
 	return (shapes_matched, len(shapes))
 
 
-class AVA_FacialTracking_Blendshapes(STF_BlenderComponentBase):
+class AVA_FaceTracking_Blendshapes(STF_BlenderComponentBase):
 	ft_type: bpy.props.EnumProperty(items=[("unified_expressions", "Unified Expressions (Preferred)", ""),("arkit", "ARkit", ""),("sranipal", "SRanipal", ""),("facs_reduced", "FACS Reduced (Quest Pro)", ""),("other", "Unknown Tracking Type", "")], name="Type", default="unified_expressions", options=set()) # type: ignore
 	ft_type_custom: bpy.props.StringProperty(name="Unknown Tracking Type", options=set()) # type: ignore
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: bpy.types.Mesh, component: AVA_FacialTracking_Blendshapes):
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: bpy.types.Mesh, component: AVA_FaceTracking_Blendshapes):
 	row = layout.row()
 	row.operator(OpenWebpage.bl_idname, text="VRCFT Documentation", icon="HELP").url = "https://docs.vrcft.io/docs/tutorial-avatars/tutorial-avatars-extras/compatibility/overview"
 	row.operator(OpenWebpage.bl_idname, text="Mappings Definition", icon="DOCUMENTS").url = "https://docs.google.com/spreadsheets/d/118jo960co3Mgw8eREFVBsaJ7z0GtKNr52IB4Bz99VTA"
@@ -54,7 +54,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, contex
 	return component
 
 
-def _stf_export(context: STF_ExportContext, component: AVA_FacialTracking_Blendshapes, context_object: bpy.types.Mesh) -> tuple[dict, str]:
+def _stf_export(context: STF_ExportContext, component: AVA_FaceTracking_Blendshapes, context_object: bpy.types.Mesh) -> tuple[dict, str]:
 	ret = export_component_base(context, _stf_type, component)
 	if(component.ft_type != "other"):
 		ret["ft_type"] = component.ft_type
@@ -63,11 +63,11 @@ def _stf_export(context: STF_ExportContext, component: AVA_FacialTracking_Blends
 	return ret, component.stf_id
 
 
-class STF_Module_AVA_FacialTracking_Blendshapes(STF_BlenderComponentModule):
-	"""Define facial-tracking blendshapes"""
+class STF_Module_AVA_FaceTracking_Blendshapes(STF_BlenderComponentModule):
+	"""Define face-tracking blendshapes"""
 	stf_type = _stf_type
 	stf_kind = "component"
-	understood_application_types = [AVA_FacialTracking_Blendshapes]
+	understood_application_types = [AVA_FaceTracking_Blendshapes]
 	import_func = _stf_import
 	export_func = _stf_export
 
@@ -80,12 +80,12 @@ class STF_Module_AVA_FacialTracking_Blendshapes(STF_BlenderComponentModule):
 
 
 register_stf_modules = [
-	STF_Module_AVA_FacialTracking_Blendshapes
+	STF_Module_AVA_FaceTracking_Blendshapes
 ]
 
 
 def register():
-	setattr(bpy.types.Mesh, _blender_property_name, bpy.props.CollectionProperty(type=AVA_FacialTracking_Blendshapes, options=set()))
+	setattr(bpy.types.Mesh, _blender_property_name, bpy.props.CollectionProperty(type=AVA_FaceTracking_Blendshapes, options=set()))
 
 def unregister():
 	if hasattr(bpy.types.Mesh, _blender_property_name):
