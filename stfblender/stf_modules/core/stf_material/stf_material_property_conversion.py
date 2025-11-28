@@ -2,13 +2,15 @@ import bpy
 import re
 from typing import Callable
 
+from ....base.property_path_part import STFPropertyPathPart
+
 from ....exporter.stf_export_context import STF_ExportContext
 from ....importer.stf_import_context import STF_ImportContext
 from .stf_material_definition import STF_Material_Value_Base
 from .material_value_modules import blender_material_value_modules
 
 
-def _stf_material_resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: bpy.types.Object, application_object_property_index: int, data_path: str) -> tuple[list[str], Callable[[int, any], any], list[int]]:
+def stf_material_resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: bpy.types.Object, application_object_property_index: int, data_path: str) -> STFPropertyPathPart:
 	if(len(application_object.material_slots) <= application_object_property_index or not application_object.material_slots[application_object_property_index].material):
 		return None
 	blender_material: bpy.types.Material = application_object.material_slots[application_object_property_index].material
@@ -39,14 +41,16 @@ def _stf_material_resolve_property_path_to_stf_func(context: STF_ExportContext, 
 
 		for mat_module in blender_material_value_modules:
 			if(mat_module.property_name == material_property.value_property_name):
+				return STFPropertyPathPart([application_object.stf_info.stf_id, "instance", "material", application_object_property_index, material_property.property_type, value_index]) + mat_module.resolve_property_path_to_stf_func(context, data_path, property_value)
+
 				module_ret = mat_module.resolve_property_path_to_stf_func(context, data_path, property_value)
 				if(module_ret):
 					value_path, conversion_func, index_table = module_ret # Ignore Target Object for now
-					return [application_object.stf_info.stf_id, "instance", "material", application_object_property_index, material_property.property_type, value_index] + value_path, conversion_func, index_table
+					return STFPropertyPathPart([application_object.stf_info.stf_id, "instance", "material", application_object_property_index, material_property.property_type, value_index] + value_path, conversion_func, index_table)
 	return None
 
 
-def _stf_material_resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: bpy.types.Object) -> tuple[any, int, any, any, list[int], Callable[[list[float]], list[float]]]:
+def stf_material_resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: bpy.types.Object) -> tuple[any, int, any, any, list[int], Callable[[list[float]], list[float]]]:
 	material_index = int(stf_path[1])
 	material_property_type = stf_path[2]
 	material_property_value_index = int(stf_path[3])

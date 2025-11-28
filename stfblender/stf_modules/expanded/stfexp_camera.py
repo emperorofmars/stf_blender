@@ -3,6 +3,8 @@ import math
 import re
 from typing import Callable
 
+from ...base.property_path_part import STFPropertyPathPart
+
 from ...exporter.stf_export_context import STF_ExportContext
 from ...importer.stf_import_context import STF_ImportContext
 from ...base.stf_module import STF_Module
@@ -131,13 +133,13 @@ def _get__convert_lens_to_fov_func(camera: bpy.types.Camera) -> Callable:
 			return [_h_fov_to_v_fov(camera, 2 * math.atan((camera.sensor_width if _is_sensor_fit_horizontal(camera) else camera.sensor_height) / (2 * value[0])), 0)] # convert lens to fov
 	return _ret
 
-def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: any, application_object_property_index: int, data_path: str) -> tuple[list[str], Callable[[int, any], any], list[int]]:
+def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart:
 	if(application_object.data.type == "ORTHO"):
 		if(match := re.search(r"^ortho_scale", data_path)):
-			return [application_object.stf_info.stf_id, "instance", "fov"], _get__convert_lens_to_fov_func(application_object.data), None
+			return STFPropertyPathPart([application_object.stf_info.stf_id, "instance", "fov"], _get__convert_lens_to_fov_func(application_object.data))
 	elif(application_object.data.type == "PERSP"):
 		if(match := re.search(r"^lens", data_path)):
-			return [application_object.stf_info.stf_id, "instance", "fov"], _get__convert_lens_to_fov_func(application_object.data), None
+			return STFPropertyPathPart([application_object.stf_info.stf_id, "instance", "fov"], _get__convert_lens_to_fov_func(application_object.data))
 	# todo enabled maybe?
 	return None
 

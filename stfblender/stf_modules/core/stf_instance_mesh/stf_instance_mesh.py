@@ -1,6 +1,8 @@
 from typing import Callable
 import bpy
 
+from ....base.property_path_part import STFPropertyPathPart
+
 from ....exporter.stf_export_context import STF_ExportContext
 from ....importer.stf_import_context import STF_ImportContext
 from ....base.stf_module import STF_Module
@@ -118,12 +120,11 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 	return ret, blender_object.stf_instance.stf_id
 
 
-def _resolve_property_path_to_stf_func(context: STF_ExportContext, blender_object: any, application_object_property_index: int, data_path: str) -> tuple[list[str], Callable[[list[float]], list[float]], list[int]]:
+def _resolve_property_path_to_stf_func(context: STF_ExportContext, blender_object: any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart:
 	import re
 	match = re.search(r"^key_blocks\[\"(?P<blendshape_name>[\w. -:,]+)\"\].value", data_path)
 	if(match and "blendshape_name" in match.groupdict()):
-		return [blender_object.stf_info.stf_id, "instance", "blendshape", match.groupdict()["blendshape_name"], "value"], None, None
-
+		return STFPropertyPathPart([blender_object.stf_info.stf_id, "instance", "blendshape", match.groupdict()["blendshape_name"], "value"])
 	return None
 
 def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], blender_object: bpy.types.Object) -> tuple[any, int, any, any, list[int], Callable[[list[float]], list[float]]]:

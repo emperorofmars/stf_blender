@@ -3,6 +3,8 @@ import bpy
 import mathutils
 import math
 
+from ....base.property_path_part import STFPropertyPathPart
+
 from ....importer.stf_import_context import STF_ImportContext
 from ....exporter.stf_export_context import STF_ExportContext
 from ....utils.armature_bone import ArmatureBone
@@ -68,19 +70,19 @@ def _create_scale_to_stf_func(blender_object: ArmatureBone) -> Callable:
 	return _ret
 
 
-def resolve_property_path_to_stf_func(context: STF_ExportContext, blender_object: ArmatureBone, application_object_property_index: int, data_path: str) -> tuple[list[str], Callable[[list[float]], list[float]], list[int]]:
+def resolve_property_path_to_stf_func(context: STF_ExportContext, blender_object: ArmatureBone, application_object_property_index: int, data_path: str) -> STFPropertyPathPart:
 	import re
 	if(match := re.search(r"^location", data_path)):
-		return [blender_object.get_bone().stf_info.stf_id, "t"], _create_translation_to_stf_func(blender_object), translation_bone_index_conversion_to_stf
+		return STFPropertyPathPart([blender_object.get_bone().stf_info.stf_id, "t"], _create_translation_to_stf_func(blender_object), translation_bone_index_conversion_to_stf)
 
 	if(match := re.search(r"^rotation_quaternion", data_path)):
-		return [blender_object.get_bone().stf_info.stf_id, "r"], _create_rotation_to_stf_func(blender_object), rotation_bone_index_conversion_to_stf
+		return STFPropertyPathPart([blender_object.get_bone().stf_info.stf_id, "r"], _create_rotation_to_stf_func(blender_object), rotation_bone_index_conversion_to_stf)
 
 	if(match := re.search(r"^rotation_euler", data_path)):
-		return [blender_object.get_bone().stf_info.stf_id, "r_euler"], _create_rotation_euler_to_stf_func(blender_object), rotation_euler_bone_index_conversion_to_stf
+		return STFPropertyPathPart([blender_object.get_bone().stf_info.stf_id, "r_euler"], _create_rotation_euler_to_stf_func(blender_object), rotation_euler_bone_index_conversion_to_stf)
 
 	if(match := re.search(r"^scale", data_path)):
-		return [blender_object.get_bone().stf_info.stf_id, "s"], _create_scale_to_stf_func(blender_object), scale_bone_index_conversion_to_stf
+		return STFPropertyPathPart([blender_object.get_bone().stf_info.stf_id, "s"], _create_scale_to_stf_func(blender_object), scale_bone_index_conversion_to_stf)
 
 	return None
 

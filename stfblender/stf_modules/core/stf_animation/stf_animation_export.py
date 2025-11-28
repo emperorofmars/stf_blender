@@ -62,24 +62,25 @@ def stf_animation_export(context: STF_ExportContext, application_object: any, co
 
 							# See if this data_path can be exported
 							property_translation = context.resolve_application_property_path(selected_slot_link.target, selected_slot_link.datablock_index, data_path)
-							if(property_translation):
-								target, conversion_func, index_conversion = property_translation
-								if(not index_conversion):
-									index_conversion = []
-									for _, fcurve in fcurves.items():
-										if(fcurve):
-											index_conversion.append(fcurve.array_index)
+							if(not property_translation):
+								context.report(STFReport("Could not convert animated property", STFReportSeverity.Debug, blender_animation.stf_info.stf_id, _stf_type, blender_animation))
+								continue
 
-								interpolation, timepoints, sub_tracks = __serialize_subtracks(context, blender_animation, fcurves, animation_range, index_conversion, conversion_func)
+							index_conversion = property_translation.index_conversion
+							if(not index_conversion):
+								index_conversion = []
+								for _, fcurve in fcurves.items():
+									if(fcurve):
+										index_conversion.append(fcurve.array_index)
 
-								stf_tracks.append({
-									"target": target,
-									"timepoints": timepoints,
-									"subtracks": sub_tracks,
-									"interpolation": interpolation,
-								})
-							else:
-								context.report(STFReport("Invalid FCurve data_path: " + fcurve.data_path, STFReportSeverity.Debug, None, _stf_type, blender_animation))
+							interpolation, timepoints, sub_tracks = __serialize_subtracks(context, blender_animation, fcurves, animation_range, index_conversion, property_translation.convert_func)
+
+							stf_tracks.append({
+								"target": property_translation.stf_path_part,
+								"timepoints": timepoints,
+								"subtracks": sub_tracks,
+								"interpolation": interpolation,
+							})
 					else:
 						context.report(STFReport("Invalid Animation Target", STFReportSeverity.Debug, None, _stf_type, blender_animation))
 
@@ -109,7 +110,7 @@ def stf_animation_export(context: STF_ExportContext, application_object: any, co
 
 def __serialize_subtracks(context: STF_ExportContext, blender_animation: bpy.types.Action, fcurves: dict[int, bpy.types.FCurve], animation_range: list[float], index_conversion: list[int], conversion_func: Callable[[list[float]], list[float]] = None) -> tuple[str, list, list]:
 	real_timepoints_set: set[float] = set()
-	# for each subtrack (i.e. the x,y,z components of a location), determine at wich times have a keyframe at any of these subtracks
+	# for each subtrack (i.e. the x,y,z components of a location), determine at which times have a keyframe at any of these subtracks
 	for _, fcurve in fcurves.items():
 		for keyframe in fcurve.keyframe_points:
 			real_timepoints_set.add(keyframe.co.x)

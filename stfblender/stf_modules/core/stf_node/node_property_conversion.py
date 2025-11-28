@@ -3,6 +3,8 @@ import re
 import mathutils
 from typing import Callable
 
+from ....base.property_path_part import STFPropertyPathPart
+
 from ....exporter.stf_export_context import STF_ExportContext
 from ....importer.stf_import_context import STF_ImportContext
 from ....utils.animation_conversion_utils import *
@@ -92,21 +94,21 @@ def _create_scale_to_stf_func(blender_object: bpy.types.Object) -> Callable:
 	return _ret
 
 
-def stf_node_resolve_property_path_to_stf_func(context: STF_ExportContext, blender_object: bpy.types.Object, application_object_property_index: int, data_path: str) -> tuple[list[str], Callable[[list[float]], list[float]], list[int]]:
+def stf_node_resolve_property_path_to_stf_func(context: STF_ExportContext, blender_object: bpy.types.Object, application_object_property_index: int, data_path: str) -> STFPropertyPathPart:
 	if(match := re.search(r"^location", data_path)):
-		return [blender_object.stf_info.stf_id, "t"], _create_translation_to_stf_func(blender_object), translation_index_conversion_to_stf
+		return STFPropertyPathPart([blender_object.stf_info.stf_id, "t"], _create_translation_to_stf_func(blender_object), translation_index_conversion_to_stf)
 
 	if(match := re.search(r"^rotation_quaternion", data_path)):
-		return [blender_object.stf_info.stf_id, "r"], _create_rotation_to_stf_func(blender_object), rotation_index_conversion_to_stf
+		return STFPropertyPathPart([blender_object.stf_info.stf_id, "r"], _create_rotation_to_stf_func(blender_object), rotation_index_conversion_to_stf)
 
 	if(match := re.search(r"^rotation_euler", data_path)):
-		return [blender_object.stf_info.stf_id, "r_euler"], _create_rotation_euler_to_stf_func(blender_object), rotation_euler_index_conversion_to_stf
+		return STFPropertyPathPart([blender_object.stf_info.stf_id, "r_euler"], _create_rotation_euler_to_stf_func(blender_object), rotation_euler_index_conversion_to_stf)
 
 	if(match := re.search(r"^scale", data_path)):
-		return [blender_object.stf_info.stf_id, "s"], _create_scale_to_stf_func(blender_object), scale_index_conversion_to_stf
+		return STFPropertyPathPart([blender_object.stf_info.stf_id, "s"], _create_scale_to_stf_func(blender_object), scale_index_conversion_to_stf)
 
 	if(match := re.search(r"^hide_render", data_path)):
-		return [blender_object.stf_info.stf_id, "enabled"], lambda v: [0 if v[0] else 1], None
+		return STFPropertyPathPart([blender_object.stf_info.stf_id, "enabled"], lambda v: [0 if v[0] else 1], None)
 
 	return None
 
@@ -132,7 +134,7 @@ def _create_translation_to_blender_func(blender_object: bpy.types.Object) -> Cal
 			value = convert_translation_to_blender(value)
 			return (parent_mat @ mathutils.Matrix.Translation(value)).translation
 		return _ret
-	
+
 	else:
 		return convert_translation_to_blender
 
@@ -156,7 +158,7 @@ def _create_rotation_to_blender_func(blender_object: bpy.types.Object) -> Callab
 			value = convert_rotation_to_blender(value).to_matrix().to_4x4()
 			return (parent_mat @ value).to_quaternion()
 		return _ret
-	
+
 	else:
 		return convert_rotation_to_blender
 
@@ -176,7 +178,7 @@ def _create_rotation_euler_to_blender_func(blender_object: bpy.types.Object) -> 
 			value = mathutils.Euler(convert_rotation_euler_to_blender(value)).to_matrix().to_4x4()
 			return (parent_mat @ value).to_euler()
 		return _ret
-	
+
 	else:
 		return convert_rotation_euler_to_blender
 

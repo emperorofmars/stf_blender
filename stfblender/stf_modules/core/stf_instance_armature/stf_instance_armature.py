@@ -3,6 +3,8 @@ import mathutils
 import math
 from typing import Callable
 
+from ....base.property_path_part import STFPropertyPathPart
+
 from .stf_instance_armature_utils import parse_standin, serialize_standin, update_armature_instance_component_standins
 from ....base.stf_module import STF_Module
 from ....base.stf_module_component import InstanceModComponentRef
@@ -148,14 +150,10 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 	return ret, blender_object.stf_instance.stf_id
 
 
-def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: any, application_object_property_index: int, data_path: str) -> tuple[list[str], Callable[[list[float]], list[float]], list[int]]:
+def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart:
 	import re
 	if(match := re.search(r"^pose.bones\[\"(?P<bone_name>[\w. -:,]+)\"\]", data_path)):
-		module_ret = context.resolve_application_property_path(ArmatureBone(application_object.data, match.groupdict()["bone_name"]), application_object_property_index, data_path[match.span()[1] :])
-		if(module_ret):
-			stf_path, translate_func, index_table = module_ret
-			return [application_object.stf_info.stf_id, "instance"] + stf_path, translate_func, index_table
-
+		return STFPropertyPathPart([application_object.stf_info.stf_id, "instance"]) + context.resolve_application_property_path(ArmatureBone(application_object.data, match.groupdict()["bone_name"]), application_object_property_index, data_path[match.span()[1] :])
 	return None
 
 def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: any) -> tuple[any, int, any, any, list[int], Callable[[list[float]], list[float]]]:

@@ -11,7 +11,7 @@ from ....utils.id_utils import ensure_stf_id
 from ....utils.boilerplate import boilerplate_register, boilerplate_unregister
 from .convert_blender_material_to_stf import blender_material_to_stf
 from .convert_stf_material_to_blender import stf_material_to_blender
-from .stf_material_property_conversion import _stf_material_resolve_property_path_to_stf_func, _stf_material_resolve_stf_property_to_blender_func
+from .stf_material_property_conversion import stf_material_resolve_property_path_to_stf_func, stf_material_resolve_stf_property_to_blender_func
 
 
 _stf_type = "stf.material"
@@ -115,8 +115,8 @@ class STF_Module_STF_Material(STF_Module):
 
 	understood_application_property_path_types = [bpy.types.Object]
 	understood_application_property_path_parts = ["stf_material_value_"]
-	resolve_property_path_to_stf_func = _stf_material_resolve_property_path_to_stf_func
-	resolve_stf_property_to_blender_func = _stf_material_resolve_stf_property_to_blender_func
+	resolve_property_path_to_stf_func = stf_material_resolve_property_path_to_stf_func
+	resolve_stf_property_to_blender_func = stf_material_resolve_stf_property_to_blender_func
 
 
 register_stf_modules = [

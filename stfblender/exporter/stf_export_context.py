@@ -2,6 +2,8 @@ import bpy
 import logging
 from typing import Callable
 
+from ..base.property_path_part import STFPropertyPathPart
+
 from ..base.stf_task_steps import STF_TaskSteps
 from .stf_export_state import STF_ExportState
 from ..base.stf_definition import STF_Meta_AssetInfo
@@ -90,7 +92,7 @@ class STF_ExportContext:
 		return self._state.serialize_buffer(data, buffer_id)
 
 
-	def resolve_application_property_path(self, application_object: any, application_object_property_index: int, data_path: str) -> tuple[list[str], Callable[[list[float]], list[float]], list[int]]:
+	def resolve_application_property_path(self, application_object: any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart:
 		if(application_object == None): return None
 		if(type(application_object) == bpy.types.Object and not self.get_resource_id(application_object)):
 			return None

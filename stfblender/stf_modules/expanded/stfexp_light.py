@@ -2,6 +2,8 @@ import bpy
 import re
 from typing import Callable
 
+from ...base.property_path_part import STFPropertyPathPart
+
 from ...exporter.stf_export_context import STF_ExportContext
 from ...importer.stf_import_context import STF_ImportContext
 from ...base.stf_module import STF_Module
@@ -124,17 +126,17 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 Animation
 """
 
-def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: any, application_object_property_index: int, data_path: str) -> tuple[list[str], Callable[[int, any], any], list[int]]:
+def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart:
 	if(match := re.search(r"^temperature", data_path)):
-		return [application_object.stf_info.stf_id, "instance", "temperature"], None, None
+		return STFPropertyPathPart([application_object.stf_info.stf_id, "instance", "temperature"])
 	elif(match := re.search(r"^color", data_path)):
-		return [application_object.stf_info.stf_id, "instance", "color"], None, None
+		return STFPropertyPathPart([application_object.stf_info.stf_id, "instance", "color"])
 	elif(match := re.search(r"^energy", data_path)):
-		return [application_object.stf_info.stf_id, "instance", "brightness"], None, None # todo converter
+		return STFPropertyPathPart([application_object.stf_info.stf_id, "instance", "brightness"]) # todo converter
 	elif(match := re.search(r"^shadow_soft_size", data_path)):
-		return [application_object.stf_info.stf_id, "instance", "range"], None, None
+		return STFPropertyPathPart([application_object.stf_info.stf_id, "instance", "range"])
 	elif(match := re.search(r"^spot_size", data_path)):
-		return [application_object.stf_info.stf_id, "instance", "spot_angle"], None, None
+		return STFPropertyPathPart([application_object.stf_info.stf_id, "instance", "spot_angle"])
 	# todo enabled maybe?
 	return None
 

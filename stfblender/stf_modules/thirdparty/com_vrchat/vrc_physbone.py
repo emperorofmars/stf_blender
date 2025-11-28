@@ -3,6 +3,8 @@ import json
 import re
 from typing import Callable
 
+from ....base.property_path_part import STFPropertyPathPart
+
 from ....base.stf_task_steps import STF_TaskSteps
 from ....base.stf_module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
 from ....exporter.stf_export_context import STF_ExportContext
@@ -111,10 +113,10 @@ def _stf_export(context: STF_ExportContext, component: VRC_Physbone, context_obj
 
 """Animation"""
 
-def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: any, application_object_property_index: int, data_path: str) -> tuple[list[str], Callable[[list[float]], list[float]], list[int]]:
+def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart:
 	if(match := re.search(r"^" + _blender_property_name + r"\[(?P<component_index>[\d]+)\].enabled", data_path)):
 		if(component_path := get_component_stf_path_from_collection(application_object, _blender_property_name, int(match.groupdict()["component_index"]))):
-			return component_path + ["enabled"], None, None
+			return STFPropertyPathPart(component_path + ["enabled"])
 	return None
 
 
