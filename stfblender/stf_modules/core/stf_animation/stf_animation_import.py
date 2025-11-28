@@ -40,43 +40,46 @@ def stf_animation_import(context: STF_ImportContext, json_resource: dict, stf_id
 
 	for track in json_resource.get("tracks", []):
 		target_ret = context.resolve_stf_property_path(track.get("target", []))
-		if(target_ret):
-			target_object, application_object_property_index, slot_type, fcurve_target, index_conversion, conversion_func = target_ret
-			if(not index_conversion):
-				index_conversion = []
-				for track_index in range(len(track.get("subtracks", []))):
-					index_conversion.append(track_index)
+		if(not target_ret):
+			continue
 
-			selected_slot_link = None
-			for slot_link in blender_animation.slot_link.links:
-				if(slot_link.target == target_object and slot_link.datablock_index == application_object_property_index):
-					for slot in blender_animation.slots:
-						if(slot.handle == slot_link.slot_handle and slot.target_id_type == slot_type):
-							selected_slot_link = slot_link
-							break
-				if(selected_slot_link):
-					break
+		index_conversion = target_ret.index_conversion
 
-			selected_channelbag = None
-			if(not selected_slot_link):
-				blender_slot = blender_animation.slots.new(slot_type, target_object.name + " - " + slot_type)
-				selected_slot_link = blender_animation.slot_link.links.add()
-				selected_slot_link.slot_handle = blender_slot.handle
-				selected_slot_link.target = target_object
-				selected_slot_link.datablock_index = application_object_property_index
-				selected_channelbag = strip.channelbags.new(blender_slot)
+		if(not index_conversion):
+			index_conversion = []
+			for track_index in range(len(track.get("subtracks", []))):
+				index_conversion.append(track_index)
 
-			for slot in blender_animation.slots:
-				if(slot.handle == selected_slot_link.slot_handle):
-					blender_slot = slot
-					break
-			for channelbag in strip.channelbags:
-				if(channelbag.slot_handle == blender_slot.handle):
-					selected_channelbag = channelbag
-					break
+		selected_slot_link = None
+		for slot_link in blender_animation.slot_link.links:
+			if(slot_link.target == target_ret.slot_link_target and slot_link.datablock_index == target_ret.slot_link_property_index):
+				for slot in blender_animation.slots:
+					if(slot.handle == slot_link.slot_handle and slot.target_id_type == target_ret.slot_type):
+						selected_slot_link = slot_link
+						break
+			if(selected_slot_link):
+				break
 
-			# Yay we can finally deal with curves
-			__parse_subtracks(track, selected_channelbag, fcurve_target, index_conversion, conversion_func)
+		selected_channelbag = None
+		if(not selected_slot_link):
+			blender_slot = blender_animation.slots.new(target_ret.slot_type, target_ret.slot_link_target.name + " - " + target_ret.slot_type)
+			selected_slot_link = blender_animation.slot_link.links.add()
+			selected_slot_link.slot_handle = blender_slot.handle
+			selected_slot_link.target = target_ret.slot_link_target
+			selected_slot_link.datablock_index = target_ret.slot_link_property_index
+			selected_channelbag = strip.channelbags.new(blender_slot)
+
+		for slot in blender_animation.slots:
+			if(slot.handle == selected_slot_link.slot_handle):
+				blender_slot = slot
+				break
+		for channelbag in strip.channelbags:
+			if(channelbag.slot_handle == blender_slot.handle):
+				selected_channelbag = channelbag
+				break
+
+		# Yay we can finally deal with curves
+		__parse_subtracks(track, selected_channelbag, target_ret.blender_path, index_conversion, target_ret.convert_func)
 	
 	def _handle_reset_animation():
 		if("is_reset_animation" in json_resource and json_resource["is_reset_animation"] == True):

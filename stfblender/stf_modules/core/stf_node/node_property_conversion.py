@@ -3,11 +3,10 @@ import re
 import mathutils
 from typing import Callable
 
-from ....base.property_path_part import STFPropertyPathPart
-
 from ....exporter.stf_export_context import STF_ExportContext
 from ....importer.stf_import_context import STF_ImportContext
 from ....utils.animation_conversion_utils import *
+from ....base.property_path_part import BlenderPropertyPathPart, STFPropertyPathPart
 
 # The values that get animated in Blender, like 'location' or 'rotation_quaternion', are likely to be nonsense when the object has a parent.
 # These properties likely won't be relative to the parent or world.
@@ -196,29 +195,23 @@ def _create_scale_to_blender_func(blender_object: bpy.types.Object) -> Callable:
 	return _ret
 
 
-def stf_node_resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], blender_object: any) -> tuple[any, int, any, any, list[int], Callable[[list[float]], list[float]]]:
+def stf_node_resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], blender_object: any) -> BlenderPropertyPathPart:
 	blender_object = context.get_imported_resource(stf_path[0])
 	match(stf_path[1]):
 		case "t":
 			# todo handle parenting everywhere
-			return blender_object, 0, "OBJECT", "location", translation_index_conversion_to_blender, _create_translation_to_blender_func(blender_object)
+			return BlenderPropertyPathPart("OBJECT", "location", _create_translation_to_blender_func(blender_object), translation_index_conversion_to_blender, blender_object)
 		case "r":
-			return blender_object, 0, "OBJECT", "rotation_quaternion", rotation_index_conversion_to_blender, _create_rotation_to_blender_func(blender_object)
+			return BlenderPropertyPathPart("OBJECT", "rotation_quaternion", _create_rotation_to_blender_func(blender_object), rotation_index_conversion_to_blender, blender_object)
 		case "r_euler":
-			return blender_object, 0, "OBJECT", "rotation_euler", rotation_euler_index_conversion_to_blender, _create_rotation_euler_to_blender_func(blender_object)
+			return BlenderPropertyPathPart("OBJECT", "rotation_euler", _create_rotation_euler_to_blender_func(blender_object), rotation_euler_index_conversion_to_blender, blender_object)
 		case "s":
-			return blender_object, 0, "OBJECT", "scale", scale_index_conversion_to_blender, _create_scale_to_blender_func(blender_object)
+			return BlenderPropertyPathPart("OBJECT", "scale", _create_scale_to_blender_func(blender_object), scale_index_conversion_to_blender, blender_object)
 		case "instance":
-			module_ret =  context.resolve_stf_property_path([blender_object.stf_instance.stf_id] + stf_path[2:], blender_object)
-			if(module_ret):
-				target_object, application_object_property_index, slot_type, fcurve_target, index_table, conversion_func = module_ret # Ignore Target Object for now
-				return blender_object, application_object_property_index, slot_type, fcurve_target, index_table, conversion_func
+			return BlenderPropertyPathPart(slot_link_target = blender_object) + context.resolve_stf_property_path([blender_object.stf_instance.stf_id] + stf_path[2:], blender_object)
 		case "components":
-			module_ret =  context.resolve_stf_property_path(stf_path[2:], blender_object)
-			if(module_ret):
-				target_object, application_object_property_index, slot_type, fcurve_target, index_table, conversion_func = module_ret # Ignore Target Object for now
-				return blender_object, application_object_property_index, slot_type, fcurve_target, index_table, conversion_func
+			return BlenderPropertyPathPart(slot_link_target = blender_object) + context.resolve_stf_property_path(stf_path[2:], blender_object)
 		case "enabled":
-			return blender_object, 0, "OBJECT", "hide_render", None, lambda v: [not v[0]]
+			return BlenderPropertyPathPart("OBJECT", "hide_render", lambda v: [not v[0]], slot_link_target = blender_object)
 
 	return None

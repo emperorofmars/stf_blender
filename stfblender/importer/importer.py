@@ -41,8 +41,12 @@ def import_stf_file(filepath: str) -> STF_Import_Result:
 
 		return STF_Import_Result(True, collection = root, import_time=time.time() - time_start, warnings=stf_state._reports)
 	except STFException as error:
+		print(error)
+		print(traceback.format_exc())
 		return STF_Import_Result(False, error_message=str(error))
 	except Exception as error:
+		print(error)
+		print(traceback.format_exc())
 		return STF_Import_Result(False, error_message=str(error))
 	finally:
 		if(file is not None and not file.closed): file.close()

@@ -1,7 +1,7 @@
 from typing import Callable
 import bpy
 
-from ....base.property_path_part import STFPropertyPathPart
+from ....base.property_path_part import BlenderPropertyPathPart, STFPropertyPathPart
 
 from ....exporter.stf_export_context import STF_ExportContext
 from ....importer.stf_import_context import STF_ImportContext
@@ -127,17 +127,15 @@ def _resolve_property_path_to_stf_func(context: STF_ExportContext, blender_objec
 		return STFPropertyPathPart([blender_object.stf_info.stf_id, "instance", "blendshape", match.groupdict()["blendshape_name"], "value"])
 	return None
 
-def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], blender_object: bpy.types.Object) -> tuple[any, int, any, any, list[int], Callable[[list[float]], list[float]]]:
+def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], blender_object: bpy.types.Object) -> BlenderPropertyPathPart:
 	if(len(stf_path) == 4 and stf_path[1] == "blendshape" and stf_path[3] == "value"):
-		return None, 0, "KEY", "key_blocks[\"" + stf_path[2] + "\"].value", None, None
+		return BlenderPropertyPathPart("KEY", "key_blocks[\"" + stf_path[2] + "\"].value")
 	elif(len(stf_path) >= 5 and stf_path[1] == "material"):
 		material_index = int(stf_path[2])
 		if(len(blender_object.material_slots) <= material_index or not blender_object.material_slots[material_index].material):
 			return None
-		module_ret = context.resolve_stf_property_path([blender_object.material_slots[material_index].material.stf_info.stf_id] + stf_path[2:], blender_object)
-		if(module_ret):
-			target_object, _application_object_property_index, slot_type, fcurve_target, index_table, conversion_func = module_ret # Ignore Target Object for now
-			return blender_object, material_index, slot_type, fcurve_target, index_table, conversion_func
+		
+		return BlenderPropertyPathPart(slot_link_target = blender_object, slot_link_property_index = material_index) + context.resolve_stf_property_path([blender_object.material_slots[material_index].material.stf_info.stf_id] + stf_path[2:], blender_object)
 	return None
 
 

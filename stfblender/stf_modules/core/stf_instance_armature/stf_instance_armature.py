@@ -1,9 +1,6 @@
 import bpy
 import mathutils
 import math
-from typing import Callable
-
-from ....base.property_path_part import STFPropertyPathPart
 
 from .stf_instance_armature_utils import parse_standin, serialize_standin, update_armature_instance_component_standins
 from ....base.stf_module import STF_Module
@@ -15,6 +12,7 @@ from ....utils.id_utils import ensure_stf_id
 from ....utils.animation_conversion_utils import *
 from ....utils.armature_bone import ArmatureBone
 from ....utils.trs_utils import close_enough
+from ....base.property_path_part import BlenderPropertyPathPart, STFPropertyPathPart
 
 
 _stf_type = "stf.instance.armature"
@@ -156,7 +154,7 @@ def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_o
 		return STFPropertyPathPart([application_object.stf_info.stf_id, "instance"]) + context.resolve_application_property_path(ArmatureBone(application_object.data, match.groupdict()["bone_name"]), application_object_property_index, data_path[match.span()[1] :])
 	return None
 
-def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: any) -> tuple[any, int, any, any, list[int], Callable[[list[float]], list[float]]]:
+def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: any) -> BlenderPropertyPathPart:
 	return context.resolve_stf_property_path(stf_path[1:], application_object)
 
 

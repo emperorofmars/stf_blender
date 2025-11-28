@@ -3,7 +3,7 @@ import bpy
 
 from ....exporter.stf_export_context import STF_ExportContext
 from ....importer.stf_import_context import STF_ImportContext
-from ....base.property_path_part import STFPropertyPathPart
+from ....base.property_path_part import BlenderPropertyPathPart, STFPropertyPathPart
 
 
 class STF_Material_Value_Base(bpy.types.PropertyGroup):
@@ -22,7 +22,7 @@ class STF_Material_Value_Module_Base:
 
 	# Animation import export
 	resolve_property_path_to_stf_func: Callable[[STF_ExportContext, str, STF_Material_Value_Base], STFPropertyPathPart]
-	resolve_stf_property_to_blender_func: Callable[[STF_ImportContext, list[str]], tuple[str, list[int], Callable[[list[float]], list[float]]]]
+	resolve_stf_property_to_blender_func: Callable[[STF_ImportContext, list[str]], BlenderPropertyPathPart]
 
 	draw_func: Callable[[bpy.types.UILayout, bpy.types.Context, bpy.types.Material, STF_Material_Value_Base], None]
 

@@ -1,14 +1,12 @@
 from typing import Callable
-import bpy
 import mathutils
 import math
-
-from ....base.property_path_part import STFPropertyPathPart
 
 from ....importer.stf_import_context import STF_ImportContext
 from ....exporter.stf_export_context import STF_ExportContext
 from ....utils.armature_bone import ArmatureBone
 from ....utils.animation_conversion_utils import *
+from ....base.property_path_part import BlenderPropertyPathPart, STFPropertyPathPart
 
 
 # In Blender, bones get animated relative to their own rest pose.
@@ -141,17 +139,17 @@ def _create_scale_to_blender_func(blender_object: ArmatureBone) -> Callable:
 	return _ret
 
 
-def resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: any) -> tuple[any, int, any, any, list[int], Callable[[list[float]], list[float]]]:
+def resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: any) -> BlenderPropertyPathPart:
 	blender_object = context.get_imported_resource(stf_path[0])
 	match(stf_path[1]):
 		case "t":
-			return None, 0, "OBJECT", "pose.bones[\"" + blender_object.name + "\"].location", translation_bone_index_conversion_to_blender, _create_translation_to_blender_func(blender_object)
+			return BlenderPropertyPathPart("OBJECT", "pose.bones[\"" + blender_object.name + "\"].location", _create_translation_to_blender_func(blender_object), translation_bone_index_conversion_to_blender)
 		case "r":
-			return None, 0, "OBJECT", "pose.bones[\"" + blender_object.name + "\"].rotation_quaternion", rotation_index_bone_conversion_to_blender, _create_rotation_to_blender_func(blender_object)
+			return BlenderPropertyPathPart("OBJECT", "pose.bones[\"" + blender_object.name + "\"].rotation_quaternion", _create_rotation_to_blender_func(blender_object), rotation_index_bone_conversion_to_blender)
 		case "r_euler":
-			return None, 0, "OBJECT", "pose.bones[\"" + blender_object.name + "\"].rotation_euler", rotation_euler_bone_index_conversion_to_blender, _create_rotation_euler_to_blender_func(blender_object)
+			return BlenderPropertyPathPart("OBJECT", "pose.bones[\"" + blender_object.name + "\"].rotation_euler", _create_rotation_euler_to_blender_func(blender_object), rotation_euler_bone_index_conversion_to_blender)
 		case "s":
-			return None, 0, "OBJECT", "pose.bones[\"" + blender_object.name + "\"].scale", scale_bone_index_conversion_to_blender, _create_scale_to_blender_func(blender_object)
+			return BlenderPropertyPathPart("OBJECT", "pose.bones[\"" + blender_object.name + "\"].scale", _create_scale_to_blender_func(blender_object), scale_bone_index_conversion_to_blender)
 		case "components":
 			return context.resolve_stf_property_path(stf_path[2:], application_object)
 		case "component_mods":

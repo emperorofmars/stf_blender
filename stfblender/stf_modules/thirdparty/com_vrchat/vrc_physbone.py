@@ -1,9 +1,6 @@
 import bpy
 import json
 import re
-from typing import Callable
-
-from ....base.property_path_part import STFPropertyPathPart
 
 from ....base.stf_task_steps import STF_TaskSteps
 from ....base.stf_module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
@@ -14,6 +11,7 @@ from ....utils.animation_conversion_utils import get_component_index, get_compon
 from ....base.blender_grr.stf_node_path_selector import NodePathSelector, draw_node_path_selector, node_path_selector_from_stf, node_path_selector_to_stf
 from ....base.blender_grr.stf_node_path_component_selector import NodePathComponentSelector, draw_node_path_component_selector, node_path_component_selector_from_stf, node_path_component_selector_to_stf
 from ....utils.helpers import create_add_button, create_remove_button
+from ....base.property_path_part import BlenderPropertyPathPart, STFPropertyPathPart
 
 
 _stf_type = "com.vrchat.physbone"
@@ -120,12 +118,12 @@ def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_o
 	return None
 
 
-def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: any) -> tuple[any, int, any, any, list[int], Callable[[list[float]], list[float]]]:
+def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: any) -> BlenderPropertyPathPart:
 	blender_object = context.get_imported_resource(stf_path[0])
 	if(component_index := get_component_index(application_object, _blender_property_name, blender_object.stf_id)):
 		match(stf_path[1]):
 			case "enabled":
-				return None, 0, "OBJECT", _blender_property_name + "[" + str(component_index) + "].enabled", None, None
+				return BlenderPropertyPathPart("OBJECT", _blender_property_name + "[" + str(component_index) + "].enabled")
 	return None
 
 

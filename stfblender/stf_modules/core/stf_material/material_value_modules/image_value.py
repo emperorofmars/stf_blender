@@ -4,7 +4,7 @@ from typing import Callable
 from .....exporter.stf_export_context import STF_ExportContext
 from .....importer.stf_import_context import STF_ImportContext
 from ..stf_material_definition import STF_Material_Value_Base, STF_Material_Value_Module_Base
-from .....base.property_path_part import STFPropertyPathPart
+from .....base.property_path_part import BlenderPropertyPathPart, STFPropertyPathPart
 
 
 class STF_Material_Value_Image(STF_Material_Value_Base):
@@ -31,7 +31,7 @@ def _draw_func(layout: bpy.types.UILayout, context: bpy.types.Context, blender_m
 def _resolve_property_path_to_stf_func(context: STF_ExportContext, blender_property_path: str, value: STF_Material_Value_Image) -> STFPropertyPathPart:
 	return None
 
-def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str]) -> tuple[str, list[int], Callable[[list[float]], list[float]]]:
+def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str]) -> BlenderPropertyPathPart:
 	return None
 
 

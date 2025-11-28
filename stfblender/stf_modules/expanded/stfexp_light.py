@@ -1,14 +1,12 @@
 import bpy
 import re
-from typing import Callable
-
-from ...base.property_path_part import STFPropertyPathPart
 
 from ...exporter.stf_export_context import STF_ExportContext
 from ...importer.stf_import_context import STF_ImportContext
 from ...base.stf_module import STF_Module
 from ...utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui, ensure_stf_id
 from ...base.stf_report import STFReportSeverity, STFReport
+from ...base.property_path_part import BlenderPropertyPathPart, STFPropertyPathPart
 
 
 _stf_type = "stfexp.light"
@@ -141,18 +139,18 @@ def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_o
 	return None
 
 
-def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: any) -> tuple[any, int, any, any, list[int], Callable[[list[float]], list[float]]]:
+def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: any) -> BlenderPropertyPathPart:
 	match(stf_path[1]):
 		case "temperature":
-			return None, 0, "LIGHT", "temperature", 0, None
+			return BlenderPropertyPathPart("LIGHT", "temperature")
 		case "color":
-			return None, 0, "LIGHT", "color", 0, None
+			return BlenderPropertyPathPart("LIGHT", "color")
 		case "brightness":
-			return None, 0, "LIGHT", "energy", 0, None # todo converter
+			return BlenderPropertyPathPart("LIGHT", "energy") # todo converter
 		case "range":
-			return None, 0, "LIGHT", "shadow_soft_size", 0, None
+			return BlenderPropertyPathPart("LIGHT", "shadow_soft_size")
 		case "spot_angle":
-			return None, 0, "LIGHT", "spot_size", 0, None
+			return BlenderPropertyPathPart("LIGHT", "spot_size")
 	return None
 
 

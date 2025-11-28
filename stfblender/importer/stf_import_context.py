@@ -6,6 +6,7 @@ from ..base.stf_task_steps import STF_TaskSteps
 from .stf_import_state import STF_ImportState
 from ..base.stf_report import STFReportSeverity, STFReport
 from ..base.stf_module_component import STF_Component_Editmode_Resistant_Reference
+from ..base.property_path_part import BlenderPropertyPathPart
 
 
 _logger = logging.getLogger(__name__)
@@ -75,7 +76,7 @@ class STF_ImportContext:
 		return self._state.import_buffer(stf_id)
 
 
-	def resolve_stf_property_path(self, stf_path: list[str], application_object: any = None) -> tuple[any, int, any, any, list[int], Callable[[list[float]], list[float]]]:
+	def resolve_stf_property_path(self, stf_path: list[str], application_object: any = None) -> BlenderPropertyPathPart:
 		if(stf_path == None or len(stf_path) == 0): return None
 
 		if(selected_module := self._state.determine_property_resolution_module(stf_path[0])):

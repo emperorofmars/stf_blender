@@ -3,13 +3,12 @@ import math
 import re
 from typing import Callable
 
-from ...base.property_path_part import STFPropertyPathPart
-
 from ...exporter.stf_export_context import STF_ExportContext
 from ...importer.stf_import_context import STF_ImportContext
 from ...base.stf_module import STF_Module
 from ...utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui, ensure_stf_id
 from ...base.stf_report import STFReportSeverity, STFReport
+from ...base.property_path_part import BlenderPropertyPathPart, STFPropertyPathPart
 
 
 _stf_type = "stfexp.camera"
@@ -149,13 +148,13 @@ def _get__convert_fov_to_blender_func(camera: bpy.types.Camera) -> Callable:
 		return [(camera.sensor_width if _is_sensor_fit_horizontal(camera) else camera.sensor_height) / (2 * math.tan(value[0] / 2))] # convert fov to lens
 	return _ret
 
-def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: any) -> tuple[any, int, any, any, list[int], Callable[[list[float]], list[float]]]:
+def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: any) -> BlenderPropertyPathPart:
 	match(stf_path[1]):
 		case "fov":
 			if(application_object.data.type == "ORTHO"):
-				return None, 0, "CAMERA", "ortho_scale", 0, None
+				return BlenderPropertyPathPart("CAMERA", "ortho_scale")
 			elif(application_object.data.type == "PERSP"):
-				return None, 0, "CAMERA", "lens", 0, _get__convert_fov_to_blender_func(application_object.data)
+				return BlenderPropertyPathPart("CAMERA", "lens", _get__convert_fov_to_blender_func(application_object.data))
 	return None
 
 
