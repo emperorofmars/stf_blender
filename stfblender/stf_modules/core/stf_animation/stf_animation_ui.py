@@ -4,6 +4,7 @@ from ....utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
 from ....utils.component_utils import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
 from ....utils.component_ui import draw_components_ui, set_stf_component_filter
 from ....utils.misc import draw_slot_link_warning
+from .stf_animation_bake import STFBakeAnimationByNameOperator, STFBakeAnimationOperator
 
 
 class STFSetAnimationIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
@@ -44,23 +45,39 @@ class STFAnimationSpatialPanel(bpy.types.Panel):
 		return (context.active_action is not None)
 
 	def draw(self, context):
+		layout = self.layout
+		layout.use_property_split = True
 		set_stf_component_filter(bpy.types.Action)
 
 		if(not hasattr(bpy.types.Action, "slot_link")):
-			draw_slot_link_warning(self.layout)
+			draw_slot_link_warning(layout)
 			return
 
-		self.layout.prop(context.active_action.stf_animation, "exclude")
-		if(context.active_action.stf_animation.exclude):
-			return
+		if(context.active_action.stf_animation.is_baked_from):
+			row_readonly =  layout.row()
+			row_readonly.enabled = False
+			row_readonly.prop(context.active_action.stf_animation, "is_baked_from")
+		else:
+			layout.prop(context.active_action.stf_animation, "exclude")
+			if(context.active_action.stf_animation.exclude):
+				return
 
-		# Set ID
-		draw_stf_id_ui(self.layout, context, context.active_action, context.active_action.stf_info, STFSetAnimationIDOperator.bl_idname)
+			# Set ID
+			draw_stf_id_ui(layout, context, context.active_action, context.active_action.stf_info, STFSetAnimationIDOperator.bl_idname)
 
-		self.layout.separator(factor=2, type="LINE")
+			layout.separator(factor=2, type="SPACE")
 
-		# Components
-		self.layout.separator(factor=1, type="SPACE")
-		header, body = self.layout.panel("stf.animation_components", default_closed = False)
-		header.label(text="STF Components", icon="GROUP")
-		if(body): draw_components_ui(self.layout, context, context.active_action.stf_info, context.active_action, STFAddAnimationComponentOperator.bl_idname, STFRemoveAnimationComponentOperator.bl_idname, STFEditAnimationComponentIdOperator.bl_idname)
+			layout.prop(context.active_action.stf_animation, "constraint_bake")
+			if(context.active_action.stf_animation.constraint_bake != "nobake"):
+				layout.operator(STFBakeAnimationOperator.bl_idname)
+				bake_button = layout.operator(STFBakeAnimationByNameOperator.bl_idname)
+				bake_button.action = context.active_action.name
+				# todo list baked actions
+
+			layout.separator(factor=2, type="LINE")
+
+			# Components
+			layout.separator(factor=1, type="SPACE")
+			header, body = layout.panel("stf.animation_components", default_closed = False)
+			header.label(text="STF Components", icon="GROUP")
+			if(body): draw_components_ui(layout, context, context.active_action.stf_info, context.active_action, STFAddAnimationComponentOperator.bl_idname, STFRemoveAnimationComponentOperator.bl_idname, STFEditAnimationComponentIdOperator.bl_idname)
