@@ -10,6 +10,8 @@ def bake_constraints(action: bpy.types.Action) -> bpy.types.Action:
 
 	for slotlink in action.slot_link.links:
 		if(slotlink.target and type(slotlink.target) == bpy.types.Object):
+			if(not slotlink.target.animation_data):
+				slotlink.target.animation_data_create()
 			original_action = slotlink.target.animation_data.action
 			original_slot = slotlink.target.animation_data.action_slot_handle
 

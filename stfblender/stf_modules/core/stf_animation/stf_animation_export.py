@@ -2,10 +2,11 @@ from io import BytesIO
 from typing import Callable
 import bpy
 
-from ....base.stf_task_steps import STF_TaskSteps
 from .stf_animation_common import *
+from .stf_animation_bake import bake_constraints
 from ....exporter.stf_export_context import STF_ExportContext
 from ....base.stf_report import STFReportSeverity, STFReport
+from ....base.stf_task_steps import STF_TaskSteps
 from ....utils.id_utils import ensure_stf_id
 from ....utils.buffer_utils import serialize_float
 
@@ -35,9 +36,13 @@ def stf_animation_export(context: STF_ExportContext, application_object: any, co
 	animation_range = [blender_animation.frame_start, blender_animation.frame_end] if blender_animation.use_frame_range else [blender_animation.frame_range[0], blender_animation.frame_range[1]]
 
 	stf_tracks, requires_constraint_bake = __convert(context, blender_animation, animation_range)
-
+	stf_tracks_baked = None
 	if(requires_constraint_bake and blender_animation.stf_animation.constraint_bake != "nobake" or blender_animation.stf_animation.constraint_bake == "bake"):
-		print("BAKE " + str(blender_animation))
+		baked = bake_constraints(blender_animation)
+		stf_tracks_baked, _ = __convert(context, baked, animation_range)
+		def _clean_baked():
+			bpy.data.actions.remove(baked)
+		context.add_cleanup_task(_clean_baked)
 
 	if(len(stf_tracks) == 0):
 		context.report(STFReport("Empty Animation", STFReportSeverity.Debug, None, _stf_type, blender_animation))
@@ -52,6 +57,9 @@ def stf_animation_export(context: STF_ExportContext, application_object: any, co
 			"range": animation_range,
 			"tracks": stf_tracks,
 		}
+		if(stf_tracks_baked):
+			ret["tracks_baked"] = stf_tracks_baked
+
 		def _handle_reset_animation():
 			if(blender_animation.slot_link.is_reset_animation):
 				ret["is_reset_animation"] = True
