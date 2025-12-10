@@ -22,6 +22,8 @@ def stf_animation_export(context: STF_ExportContext, application_object: any, co
 	if(not hasattr(blender_animation, "slot_link")):
 		context.report(STFReport("Slot-Link is required to export animations!", STFReportSeverity.Debug, blender_animation.stf_info.stf_id, _stf_type, application_object))
 		return None
+	if(blender_animation.stf_animation.is_baked_from):
+		return None # Ignore baked animations, always rebake
 
 	for slot_link in blender_animation.slot_link.links:
 		if(slot_link.target):
@@ -31,10 +33,40 @@ def stf_animation_export(context: STF_ExportContext, application_object: any, co
 		return None
 
 	animation_range = [blender_animation.frame_start, blender_animation.frame_end] if blender_animation.use_frame_range else [blender_animation.frame_range[0], blender_animation.frame_range[1]]
-	stf_tracks = []
 
+	stf_tracks, requires_constraint_bake = __convert(context, blender_animation, animation_range)
+
+	if(requires_constraint_bake and blender_animation.stf_animation.constraint_bake != "nobake" or blender_animation.stf_animation.constraint_bake == "bake"):
+		print("BAKE " + str(blender_animation))
+
+	if(len(stf_tracks) == 0):
+		context.report(STFReport("Empty Animation", STFReportSeverity.Debug, None, _stf_type, blender_animation))
+		return None
+	else:
+		ensure_stf_id(context, blender_animation)
+		ret = {
+			"type": _stf_type,
+			"name": blender_animation.stf_info.stf_name if blender_animation.stf_info.stf_name_source_of_truth else blender_animation.name,
+			"loop": "cycle" if blender_animation.use_cyclic else "none", # todo create ui for this setting
+			"fps": bpy.context.scene.render.fps if not blender_animation.stf_animation.fps_override else blender_animation.animation.stf_fps,
+			"range": animation_range,
+			"tracks": stf_tracks,
+		}
+		def _handle_reset_animation():
+			if(blender_animation.slot_link.is_reset_animation):
+				ret["is_reset_animation"] = True
+			elif(blender_animation.slot_link.reset_animation):
+				if(reset_animation_id := context.serialize_resource(blender_animation.slot_link.reset_animation)):
+					ret["reset_animation"] = reset_animation_id
+		context.add_task(STF_TaskSteps.AFTER_ANIMATION, _handle_reset_animation)
+
+		return ret, blender_animation.stf_info.stf_id
+
+
+def __convert(context: STF_ExportContext, blender_animation: bpy.types.Action, animation_range: list[float]) -> tuple[list, bool]:
 	# All of this is a mess
-
+	stf_tracks = []
+	requires_constraint_bake = False
 	for layer in blender_animation.layers:
 		for strip in layer.strips:
 			if(strip.type == "KEYFRAME"):
@@ -66,6 +98,8 @@ def stf_animation_export(context: STF_ExportContext, application_object: any, co
 								context.report(STFReport("Could not convert animated property", STFReportSeverity.Debug, blender_animation.stf_info.stf_id, _stf_type, blender_animation))
 								continue
 
+							if(property_translation.constraints): requires_constraint_bake = True
+
 							index_conversion = property_translation.index_conversion
 							if(not index_conversion):
 								index_conversion = []
@@ -83,29 +117,7 @@ def stf_animation_export(context: STF_ExportContext, application_object: any, co
 							})
 					else:
 						context.report(STFReport("Invalid Animation Target", STFReportSeverity.Debug, None, _stf_type, blender_animation))
-
-	if(len(stf_tracks) == 0):
-		context.report(STFReport("Empty Animation", STFReportSeverity.Debug, None, _stf_type, blender_animation))
-		return None
-	else:
-		ensure_stf_id(context, blender_animation)
-		ret = {
-			"type": _stf_type,
-			"name": blender_animation.stf_info.stf_name if blender_animation.stf_info.stf_name_source_of_truth else blender_animation.name,
-			"loop": "cycle" if blender_animation.use_cyclic else "none", # todo create ui for this setting
-			"fps": bpy.context.scene.render.fps if not blender_animation.stf_animation.fps_override else blender_animation.animation.stf_fps,
-			"range": animation_range,
-			"tracks": stf_tracks,
-		}
-		def _handle_reset_animation():
-			if(blender_animation.slot_link.is_reset_animation):
-				ret["is_reset_animation"] = True
-			elif(blender_animation.slot_link.reset_animation):
-				if(reset_animation_id := context.serialize_resource(blender_animation.slot_link.reset_animation)):
-					ret["reset_animation"] = reset_animation_id
-		context.add_task(STF_TaskSteps.AFTER_ANIMATION, _handle_reset_animation)
-
-		return ret, blender_animation.stf_info.stf_id
+	return stf_tracks, requires_constraint_bake
 
 
 def __serialize_subtracks(context: STF_ExportContext, blender_animation: bpy.types.Action, fcurves: dict[int, bpy.types.FCurve], animation_range: list[float], index_conversion: list[int], conversion_func: Callable[[list[float]], list[float]] = None) -> tuple[str, list, list]:
@@ -163,7 +175,7 @@ def __serialize_subtracks(context: STF_ExportContext, blender_animation: bpy.typ
 			else:
 				# If one of the curves for this data_path doesn't contain a keyframe when the others do, bake it, regardles of the `bake` setting
 				value_convert[fcurve.array_index] = fcurve.evaluate(real_timepoint)
-		
+
 		# Convert values
 		value_convert = conversion_func(value_convert) if conversion_func else value_convert
 		left_tangent_convert = conversion_func(left_tangent_convert) if conversion_func else left_tangent_convert
