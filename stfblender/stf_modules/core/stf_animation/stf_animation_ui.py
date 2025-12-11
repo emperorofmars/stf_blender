@@ -4,7 +4,7 @@ from ....utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
 from ....utils.component_utils import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
 from ....utils.component_ui import draw_components_ui, set_stf_component_filter
 from ....utils.misc import draw_slot_link_warning
-from .stf_animation_bake import STFBakeAnimationByNameOperator, STFBakeAnimationOperator
+from .stf_animation_bake import STFBakeAnimationOperator
 
 
 class STFSetAnimationIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
@@ -70,8 +70,6 @@ class STFAnimationSpatialPanel(bpy.types.Panel):
 			layout.prop(context.active_action.stf_animation, "constraint_bake")
 			if(context.active_action.stf_animation.constraint_bake != "nobake"):
 				layout.operator(STFBakeAnimationOperator.bl_idname)
-				bake_button = layout.operator(STFBakeAnimationByNameOperator.bl_idname)
-				bake_button.action = context.active_action.name
 				# todo list baked actions
 
 			layout.separator(factor=2, type="LINE")

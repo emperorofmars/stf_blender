@@ -25,13 +25,11 @@ def export_stf_file(collection: bpy.types.Collection, filepath: str, export_sett
 	trash_objects: list[bpy.types.Object] = []
 	try:
 		stf_state = STF_ExportState(collection.stf_meta.to_stf_meta_assetInfo(), get_export_modules(), trash_objects, settings = export_settings)
-		stf_context = STF_ExportContext(stf_state)
-		root_id = stf_context.serialize_resource(collection)
-		stf_state.set_root_id(root_id)
-		stf_state.run_tasks()
+		stf_context = STF_ExportContext(stf_state, collection)
+		root_id = stf_context.run()
 
-		if(not stf_state.get_root_id() and type(stf_state.get_root_id()) is not str):
-			print("\nExport Failed, invalid root ID:\n\n" + str(stf_state.get_root_id()))
+		if(not root_id and type(root_id) is not str):
+			print("\nExport Failed, invalid root ID:\n\n" + str(root_id))
 			raise Exception("Export Failed, invalid root ID")
 
 		export_filepath: str = filepath
@@ -165,7 +163,7 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 			draw_meta_editor(box, context.scene.stf_collection_selector if context.scene.stf_collection_selector else context.scene.collection, context.scene.stf_collection_selector != context.scene.collection)
 
 		self.layout.separator(factor=2, type="LINE")
-		
+
 		self.layout.prop(self.export_settings, property="stf_mesh_vertex_colors")
 		self.layout.prop(self.export_settings, property="stf_mesh_blendshape_normals")
 

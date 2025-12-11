@@ -16,8 +16,15 @@ _logger = logging.getLogger(__name__)
 class STF_ExportContext:
 	"""Context for top level resource export. It will be passed to each STF_Module's export func."""
 
-	def __init__(self, state: STF_ExportState):
+	def __init__(self, state: STF_ExportState, prefab: bpy.types.Collection):
 		self._state = state
+		self._prefab = prefab
+
+	def run(self) -> str:
+		root_id = self.serialize_resource(self._prefab)
+		self._state.set_root_id(root_id)
+		self._state.run_tasks()
+		return root_id
 
 
 	def get_resource_id(self, application_object: any) -> str | None:
@@ -111,9 +118,13 @@ class STF_ExportContext:
 
 	def add_cleanup_task(self, task: Callable):
 		self._state.add_cleanup_task(task)
-	
+
 	def register_trash_object(self, trash: bpy.types.Object):
 		self._state._trash_objects.append(trash)
+
+
+	def get_root(self) -> bpy.types.Collection:
+		return self._prefab
 
 
 	def report(self, report: STFReport):

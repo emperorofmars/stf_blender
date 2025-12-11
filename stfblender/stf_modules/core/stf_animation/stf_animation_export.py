@@ -39,7 +39,7 @@ def stf_animation_export(context: STF_ExportContext, application_object: any, co
 	stf_tracks_baked = None
 	if(requires_constraint_bake and blender_animation.stf_animation.constraint_bake != "nobake" or blender_animation.stf_animation.constraint_bake == "bake"):
 		baked = bake_constraints(blender_animation)
-		stf_tracks_baked, _ = __convert(context, baked, animation_range)
+		stf_tracks_baked, _ = __convert(context, baked, animation_range, True)
 		def _clean_baked():
 			bpy.data.actions.remove(baked)
 		context.add_cleanup_task(_clean_baked)
@@ -71,7 +71,7 @@ def stf_animation_export(context: STF_ExportContext, application_object: any, co
 		return ret, blender_animation.stf_info.stf_id
 
 
-def __convert(context: STF_ExportContext, blender_animation: bpy.types.Action, animation_range: list[float]) -> tuple[list, bool]:
+def __convert(context: STF_ExportContext, blender_animation: bpy.types.Action, animation_range: list[float], bake_only: bool = False) -> tuple[list, bool]:
 	# All of this is a mess
 	stf_tracks = []
 	requires_constraint_bake = False
@@ -106,7 +106,7 @@ def __convert(context: STF_ExportContext, blender_animation: bpy.types.Action, a
 								context.report(STFReport("Could not convert animated property", STFReportSeverity.Debug, blender_animation.stf_info.stf_id, _stf_type, blender_animation))
 								continue
 
-							if(property_translation.constraints): requires_constraint_bake = True
+							if(property_translation.bake_constraints): requires_constraint_bake = True
 
 							index_conversion = property_translation.index_conversion
 							if(not index_conversion):
@@ -115,20 +115,27 @@ def __convert(context: STF_ExportContext, blender_animation: bpy.types.Action, a
 									if(fcurve):
 										index_conversion.append(fcurve.array_index)
 
-							interpolation, timepoints, sub_tracks = __serialize_subtracks(context, blender_animation, fcurves, animation_range, index_conversion, property_translation.convert_func)
+							sub_tracks_serialized = __serialize_subtracks(context, blender_animation, fcurves, animation_range, index_conversion, property_translation.convert_func, bake_only)
 
-							stf_tracks.append({
-								"target": property_translation.stf_path_part,
-								"timepoints": timepoints,
-								"subtracks": sub_tracks,
-								"interpolation": interpolation,
-							})
+							if(not bake_only):
+								interpolation, timepoints, sub_tracks = sub_tracks_serialized
+								stf_tracks.append({
+									"target": property_translation.stf_path_part,
+									"timepoints": timepoints,
+									"subtracks": sub_tracks,
+									"interpolation": interpolation,
+								})
+							else:
+								stf_tracks.append({
+									"target": property_translation.stf_path_part,
+									"subtracks": sub_tracks_serialized,
+								})
 					else:
 						context.report(STFReport("Invalid Animation Target", STFReportSeverity.Debug, None, _stf_type, blender_animation))
 	return stf_tracks, requires_constraint_bake
 
 
-def __serialize_subtracks(context: STF_ExportContext, blender_animation: bpy.types.Action, fcurves: dict[int, bpy.types.FCurve], animation_range: list[float], index_conversion: list[int], conversion_func: Callable[[list[float]], list[float]] = None) -> tuple[str, list, list]:
+def __serialize_subtracks(context: STF_ExportContext, blender_animation: bpy.types.Action, fcurves: dict[int, bpy.types.FCurve], animation_range: list[float], index_conversion: list[int], conversion_func: Callable[[list[float]], list[float]] = None, bake_only: bool = False) -> tuple[str, list, list] | list[str]:
 	real_timepoints_set: set[float] = set()
 	# for each subtrack (i.e. the x,y,z components of a location), determine at which times have a keyframe at any of these subtracks
 	for _, fcurve in fcurves.items():
@@ -164,6 +171,10 @@ def __serialize_subtracks(context: STF_ExportContext, blender_animation: bpy.typ
 	for _, fcurve in fcurves.items():
 		if(ret[index_conversion[fcurve.array_index]]):
 			ret[index_conversion[fcurve.array_index]]["baked"] = context.serialize_buffer(baked_values[index_conversion[fcurve.array_index]].getbuffer())
+
+	if(bake_only):
+		return [subtrack["baked"] for subtrack in ret]
+
 
 	# Convert keyframes
 	keyframe_indices: list[int] = [0] * len(index_conversion)

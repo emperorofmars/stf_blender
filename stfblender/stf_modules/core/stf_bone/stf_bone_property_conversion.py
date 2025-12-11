@@ -70,17 +70,25 @@ def _create_scale_to_stf_func(blender_object: ArmatureBone) -> Callable:
 
 def resolve_property_path_to_stf_func(context: STF_ExportContext, blender_object: ArmatureBone, application_object_property_index: int, data_path: str) -> STFPropertyPathPart:
 	import re
+
+	has_constraints = False
+	for obj in context.get_root().all_objects[:]:
+		if(obj.data and obj.data == blender_object.armature):
+			if(len(obj.pose.bones[blender_object.name].constraints) > 0):
+				has_constraints = True
+				break
+
 	if(match := re.search(r"^location", data_path)):
-		return STFPropertyPathPart([blender_object.get_bone().stf_info.stf_id, "t"], _create_translation_to_stf_func(blender_object), translation_bone_index_conversion_to_stf)
+		return STFPropertyPathPart([blender_object.get_bone().stf_info.stf_id, "t"], _create_translation_to_stf_func(blender_object), translation_bone_index_conversion_to_stf, has_constraints)
 
 	if(match := re.search(r"^rotation_quaternion", data_path)):
-		return STFPropertyPathPart([blender_object.get_bone().stf_info.stf_id, "r"], _create_rotation_to_stf_func(blender_object), rotation_bone_index_conversion_to_stf)
+		return STFPropertyPathPart([blender_object.get_bone().stf_info.stf_id, "r"], _create_rotation_to_stf_func(blender_object), rotation_bone_index_conversion_to_stf, has_constraints)
 
 	if(match := re.search(r"^rotation_euler", data_path)):
-		return STFPropertyPathPart([blender_object.get_bone().stf_info.stf_id, "r_euler"], _create_rotation_euler_to_stf_func(blender_object), rotation_euler_bone_index_conversion_to_stf)
+		return STFPropertyPathPart([blender_object.get_bone().stf_info.stf_id, "r_euler"], _create_rotation_euler_to_stf_func(blender_object), rotation_euler_bone_index_conversion_to_stf, has_constraints)
 
 	if(match := re.search(r"^scale", data_path)):
-		return STFPropertyPathPart([blender_object.get_bone().stf_info.stf_id, "s"], _create_scale_to_stf_func(blender_object), scale_bone_index_conversion_to_stf)
+		return STFPropertyPathPart([blender_object.get_bone().stf_info.stf_id, "s"], _create_scale_to_stf_func(blender_object), scale_bone_index_conversion_to_stf, has_constraints)
 
 	return None
 

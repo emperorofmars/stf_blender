@@ -94,20 +94,23 @@ def _create_scale_to_stf_func(blender_object: bpy.types.Object) -> Callable:
 
 
 def stf_node_resolve_property_path_to_stf_func(context: STF_ExportContext, blender_object: bpy.types.Object, application_object_property_index: int, data_path: str) -> STFPropertyPathPart:
+
+	has_constraints = len(blender_object.constraints) > 0
+
 	if(match := re.search(r"^location", data_path)):
-		return STFPropertyPathPart([blender_object.stf_info.stf_id, "t"], _create_translation_to_stf_func(blender_object), translation_index_conversion_to_stf)
+		return STFPropertyPathPart([blender_object.stf_info.stf_id, "t"], _create_translation_to_stf_func(blender_object), translation_index_conversion_to_stf, has_constraints)
 
 	if(match := re.search(r"^rotation_quaternion", data_path)):
-		return STFPropertyPathPart([blender_object.stf_info.stf_id, "r"], _create_rotation_to_stf_func(blender_object), rotation_index_conversion_to_stf)
+		return STFPropertyPathPart([blender_object.stf_info.stf_id, "r"], _create_rotation_to_stf_func(blender_object), rotation_index_conversion_to_stf, has_constraints)
 
 	if(match := re.search(r"^rotation_euler", data_path)):
-		return STFPropertyPathPart([blender_object.stf_info.stf_id, "r_euler"], _create_rotation_euler_to_stf_func(blender_object), rotation_euler_index_conversion_to_stf)
+		return STFPropertyPathPart([blender_object.stf_info.stf_id, "r_euler"], _create_rotation_euler_to_stf_func(blender_object), rotation_euler_index_conversion_to_stf, has_constraints)
 
 	if(match := re.search(r"^scale", data_path)):
-		return STFPropertyPathPart([blender_object.stf_info.stf_id, "s"], _create_scale_to_stf_func(blender_object), scale_index_conversion_to_stf)
+		return STFPropertyPathPart([blender_object.stf_info.stf_id, "s"], _create_scale_to_stf_func(blender_object), scale_index_conversion_to_stf, has_constraints)
 
 	if(match := re.search(r"^hide_render", data_path)):
-		return STFPropertyPathPart([blender_object.stf_info.stf_id, "enabled"], lambda v: [0 if v[0] else 1], None)
+		return STFPropertyPathPart([blender_object.stf_info.stf_id, "enabled"], lambda v: [0 if v[0] else 1], None, has_constraints)
 
 	return None
 

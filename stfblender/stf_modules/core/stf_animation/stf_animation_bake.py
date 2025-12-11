@@ -65,18 +65,3 @@ class STFBakeAnimationOperator(bpy.types.Operator):
 		bake_constraints(context.active_action)
 		return {"FINISHED"}
 
-
-class STFBakeAnimationByNameOperator(bpy.types.Operator):
-	bl_idname = "stf.bake_animation_by_name"
-	bl_label = "Bake Animation"
-	bl_options = {"REGISTER", "UNDO", "INTERNAL"}
-
-	action: bpy.props.StringProperty(default="") # type: ignore
-
-	def execute(self, context: bpy.types.Context):
-		if(self.action not in bpy.data.actions):
-			self.report({"ERROR"}, "No Action named \"" + self.action + "\" exists!")
-			return {"CANCELLED"}
-
-		bake_constraints(bpy.data.actions[self.action])
-		return {"FINISHED"}

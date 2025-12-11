@@ -10,16 +10,16 @@ class STFPropertyPathPart:
 			stf_path_part: list[str] = [],
 			convert_func: Callable[[list[float]], list[float]] = None,
 			index_conversion: list[int] = None,
-			constraints: bool = False
+			bake_constraints: bool = False
 			):
 		self.stf_path_part = stf_path_part
 		self.convert_func = convert_func
 		self.index_conversion = index_conversion
-		self.constraints = constraints
+		self.bake_constraints = bake_constraints
 
 	def __add__(self, other):
 		if(other):
-			return STFPropertyPathPart(self.stf_path_part + other.stf_path_part, other.convert_func, other.index_conversion, self.constraints | other.constraints)
+			return STFPropertyPathPart(self.stf_path_part + other.stf_path_part, other.convert_func, other.index_conversion, self.bake_constraints | other.bake_constraints)
 		else:
 			return None
 
