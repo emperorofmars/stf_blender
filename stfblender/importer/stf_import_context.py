@@ -13,12 +13,18 @@ _logger = logging.getLogger(__name__)
 
 
 class STF_ImportContext:
-	"""Context for top level resource import"""
+	"""Context for resource import. It will be passed to each STF_Module's import func."""
 
 	def __init__(self, state: STF_ImportState):
 		self._state: STF_ImportState = state
 		self._root_collection = None
-		#self._tasks: list[Callable] = []
+
+	def run(self) -> bpy.types.Collection:
+		ret = self.import_resource(self.get_root_id(), "data")
+		self._state.run_tasks()
+		ret.stf_meta.from_stf_meta_assetInfo(self._state._file.definition.stf.asset_info)
+		return ret
+
 
 	def get_json_resource(self, stf_id: str) -> dict:
 		return self._state.get_json_resource(stf_id)
@@ -91,7 +97,7 @@ class STF_ImportContext:
 
 	def add_cleanup_task(self, task: Callable):
 		self._state.add_cleanup_task(task)
-	
+
 	def register_trash_object(self, trash: bpy.types.Object):
 		self._state._trash_objects.append(trash)
 
@@ -100,9 +106,14 @@ class STF_ImportContext:
 
 	def set_root_collection(self, root_collection: bpy.types.Collection):
 		self._root_collection = root_collection
-	
+
 	def get_root_collection(self) -> bpy.types.Collection:
 		return self._root_collection
+
+
+	def get_setting(self, key: str, default: any = None) -> any:
+		return getattr(self._state._settings, key) if hasattr(self._state._settings, key) else default
+
 
 	def get_filename(self) -> str:
 		return self._state._file.filename

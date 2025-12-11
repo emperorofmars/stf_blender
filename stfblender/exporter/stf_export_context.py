@@ -14,7 +14,7 @@ _logger = logging.getLogger(__name__)
 
 
 class STF_ExportContext:
-	"""Context for top level resource export. It will be passed to each STF_Module's export func."""
+	"""Context for resource export. It will be passed to each STF_Module's export func."""
 
 	def __init__(self, state: STF_ExportState, prefab: bpy.types.Collection):
 		self._state = state

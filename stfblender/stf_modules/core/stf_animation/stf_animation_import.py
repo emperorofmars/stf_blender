@@ -80,7 +80,24 @@ def stf_animation_import(context: STF_ImportContext, json_resource: dict, stf_id
 
 		# Yay we can finally deal with curves
 		__parse_subtracks(track, selected_channelbag, target_ret.blender_path, index_conversion, target_ret.convert_func)
-	
+
+
+	if("tracks_baked" in json_resource and context.get_setting("import_baked_animations") == True):
+		print("BAKED: " + blender_animation.name)
+
+		baked_blender_animation = bpy.data.actions.new(blender_animation.name + "_baked")
+		baked_blender_animation.stf_animation.is_baked_from = blender_animation
+
+		baked_blender_animation.use_fake_user = True
+
+		baked_blender_animation.use_cyclic = blender_animation.use_cyclic
+		baked_blender_animation.use_frame_range = blender_animation.use_frame_range
+		baked_blender_animation.frame_start = blender_animation.frame_start
+		baked_blender_animation.frame_end = blender_animation.frame_end
+
+		# todo import baked
+
+
 	def _handle_reset_animation():
 		if("is_reset_animation" in json_resource and json_resource["is_reset_animation"] == True):
 			blender_animation.slot_link.is_reset_animation = True
@@ -106,7 +123,7 @@ def __parse_subtracks(track: dict, selected_channelbag: bpy.types.ActionChannelb
 		if(subtrack):
 			fcurves[subtrack_index] = selected_channelbag.fcurves.new(fcurve_target, index=index_conversion[subtrack_index])
 			num_frames = len(subtrack["keyframes"]) if len(subtrack["keyframes"]) > num_frames else num_frames
-	
+
 	if(num_frames <= 0): return
 
 	for keyframe_index in range(num_frames):
@@ -148,10 +165,10 @@ def __parse_subtracks(track: dict, selected_channelbag: bpy.types.ActionChannelb
 
 		for subtrack_index, subtrack in enumerate(subtracks):
 			if(not subtrack): continue
-			
+
 			stf_keyframe = subtrack["keyframes"][keyframe_index]
 			if(not stf_keyframe[0]): continue # Not source of truth, ignore
-			
+
 			keyframe = fcurves[subtrack_index].keyframe_points.insert(timepoint, value_convert[index_conversion[subtrack_index]])
 
 			interpolation_type = stf_keyframe[2]

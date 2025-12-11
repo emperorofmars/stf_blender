@@ -1,6 +1,8 @@
 import bpy
 import logging
 
+from .import_settings import STF_ImportSettings
+
 from ..base.stf_report import STFReportSeverity, STFReport
 from ..base.stf_file import STF_File
 from ..base.stf_module import STF_Module
@@ -14,10 +16,10 @@ _logger = logging.getLogger(__name__)
 class STF_ImportState(STF_State_Base):
 	"""
 	Hold all the data from a file for an import run.
-	Each context must have access to the same STF_ImportState instance.
+	Gets passed to the STF_ImportContext.
 	"""
 
-	def __init__(self, file: STF_File, modules: dict[str, STF_Module], fallback_modules: dict[str, STF_Module] = {}, trash_objects: list[bpy.types.Object] = [], fail_on_severity: STFReportSeverity = STFReportSeverity.FatalError):
+	def __init__(self, file: STF_File, modules: dict[str, STF_Module], fallback_modules: dict[str, STF_Module] = {}, trash_objects: list[bpy.types.Object] = [], fail_on_severity: STFReportSeverity = STFReportSeverity.FatalError, settings: STF_ImportSettings = {}):
 		super().__init__(fail_on_severity)
 
 		self._file = file
@@ -29,6 +31,8 @@ class STF_ImportState(STF_State_Base):
 		self._asset_info: STF_Meta_AssetInfo
 
 		self._trash_objects: list[bpy.types.Object] = trash_objects
+
+		self._settings = settings
 
 
 	def determine_module(self, json_resource: dict, stf_kind: str = None) -> STF_Module:

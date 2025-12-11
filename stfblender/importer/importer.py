@@ -5,10 +5,11 @@ from bpy_extras.io_utils import ImportHelper
 
 from ..base.stf_registry import get_import_modules, get_import_modules_fallback
 from .stf_import_state import STF_ImportState
-from ..base.stf_report import STFException, STFReport
+from ..base.stf_report import STFException, STFReport, STFReportSeverity
 from .stf_import_context import STF_ImportContext
 from ..base.stf_file import STF_File
 from ..utils.misc import OpenWebpage, draw_slot_link_warning, get_stf_version
+from .import_settings import STF_ImportSettings
 
 
 class STF_Import_Result:
@@ -19,7 +20,7 @@ class STF_Import_Result:
 		self.import_time = import_time
 		self.warnings = warnings
 
-def import_stf_file(filepath: str) -> STF_Import_Result:
+def import_stf_file(filepath: str, import_settings: STF_ImportSettings) -> STF_Import_Result:
 	import time
 	time_start = time.time()
 	file = None
@@ -29,15 +30,12 @@ def import_stf_file(filepath: str) -> STF_Import_Result:
 		file = open(filepath, "rb")
 		stf_file = STF_File.parse(file)
 
-		stf_state = STF_ImportState(stf_file, get_import_modules(), get_import_modules_fallback(), trash_objects)
+		stf_state = STF_ImportState(stf_file, get_import_modules(), get_import_modules_fallback(), trash_objects, STFReportSeverity.FatalError, import_settings)
 		stf_context = STF_ImportContext(stf_state)
-		root: bpy.types.Collection = stf_context.import_resource(stf_context.get_root_id(), "data")
-		stf_state.run_tasks()
+		root = stf_context.run()
 
 		if(not root or type(root) != bpy.types.Collection):
 			raise Exception("Import Failed, invalid root!")
-
-		root.stf_meta.from_stf_meta_assetInfo(stf_file.definition.stf.asset_info)
 
 		return STF_Import_Result(True, collection = root, import_time=time.time() - time_start, warnings=stf_state._reports)
 	except STFException as error:
@@ -66,6 +64,8 @@ class ImportSTF(bpy.types.Operator, ImportHelper):
 	directory: bpy.props.StringProperty(subtype="DIR_PATH") # type: ignore
 	files: bpy.props.CollectionProperty(name="File Paths", type=bpy.types.OperatorFileListElement) # type: ignore
 
+	import_settings: bpy.props.PointerProperty(type=STF_ImportSettings) # type: ignore
+
 
 	def invoke(self, context: bpy.types.Context, event: bpy.types.Event):
 		self.invoking_from_ui = True
@@ -81,7 +81,7 @@ class ImportSTF(bpy.types.Operator, ImportHelper):
 			last_success = None
 			for file in self.files:
 				filepath = os.path.join(self.directory, file.name)
-				result = import_stf_file(filepath)
+				result = import_stf_file(filepath, self.import_settings)
 				if(result.success):
 					total_successes += 1
 					total_time += result.import_time
@@ -124,6 +124,8 @@ class ImportSTF(bpy.types.Operator, ImportHelper):
 		self.layout.separator(factor=1, type="SPACE")
 
 		draw_slot_link_warning(self.layout)
+
+		self.layout.prop(self.import_settings, "import_baked_animations")
 
 
 def import_button(self, context: bpy.types.Context):
