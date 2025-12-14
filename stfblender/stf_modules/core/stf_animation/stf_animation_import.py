@@ -1,5 +1,7 @@
 from typing import Callable
 import bpy
+import numpy as np
+from ....utils.buffer_utils import determine_pack_format_float
 
 from .stf_animation_common import *
 from ....base.stf_task_steps import STF_TaskSteps
@@ -33,12 +35,46 @@ def stf_animation_import(context: STF_ImportContext, json_resource: dict, stf_id
 		blender_animation.frame_start = json_resource["range"][0]
 		blender_animation.frame_end = json_resource["range"][1]
 
-	# All of this is a mess
-
 	layer = blender_animation.layers.new("stf_layer")
 	strip: bpy.types.ActionKeyframeStrip = layer.strips.new(type="KEYFRAME")
+	__parse_tracks(context, json_resource.get("tracks", []), blender_animation, strip, False)
 
-	for track in json_resource.get("tracks", []):
+
+	if("tracks_baked" in json_resource and context.get_setting("import_baked_animations") == True):
+		print("BAKED: " + blender_animation.name)
+
+		baked_blender_animation = bpy.data.actions.new(blender_animation.name + "_baked")
+		baked_blender_animation.stf_animation.is_baked_from = blender_animation
+
+		baked_blender_animation.use_fake_user = True
+
+		baked_blender_animation.use_cyclic = blender_animation.use_cyclic
+		baked_blender_animation.use_frame_range = blender_animation.use_frame_range
+		baked_blender_animation.frame_start = blender_animation.frame_start
+		baked_blender_animation.frame_end = blender_animation.frame_end
+
+		baked_layer = baked_blender_animation.layers.new("stf_layer")
+		baked_strip: bpy.types.ActionKeyframeStrip = baked_layer.strips.new(type="KEYFRAME")
+
+		__parse_tracks(context, json_resource.get("tracks_baked", []), baked_blender_animation, baked_strip, True)
+
+
+	def _handle_reset_animation():
+		if("is_reset_animation" in json_resource and json_resource["is_reset_animation"] == True):
+			blender_animation.slot_link.is_reset_animation = True
+		elif("reset_animation" in json_resource and json_resource["reset_animation"]):
+			if(reset_animation := context.import_resource(json_resource["reset_animation"], context_object, "data")):
+				blender_animation.slot_link.reset_animation = reset_animation
+	context.add_task(STF_TaskSteps.AFTER_ANIMATION, _handle_reset_animation)
+
+	blender_animation.use_fake_user = True
+
+	return blender_animation
+
+
+def __parse_tracks(context: STF_ImportContext, tracks: list, blender_animation: bpy.types.Action, strip: bpy.types.ActionKeyframeStrip, is_baked_only: bool):
+	# All of this is a mess
+	for track in tracks:
 		target_ret = context.resolve_stf_property_path(track.get("target", []))
 		if(not target_ret):
 			continue
@@ -79,39 +115,13 @@ def stf_animation_import(context: STF_ImportContext, json_resource: dict, stf_id
 				break
 
 		# Yay we can finally deal with curves
-		__parse_subtracks(track, selected_channelbag, target_ret.blender_path, index_conversion, target_ret.convert_func)
+		if(not is_baked_only):
+			__parse_subtracks(track, selected_channelbag, target_ret.blender_path, index_conversion, target_ret.convert_func)
+		else:
+			__parse_subtracks_baked(context, track, selected_channelbag, target_ret.blender_path, index_conversion, target_ret.convert_func, blender_animation.frame_range[0])
 
 
-	if("tracks_baked" in json_resource and context.get_setting("import_baked_animations") == True):
-		print("BAKED: " + blender_animation.name)
-
-		baked_blender_animation = bpy.data.actions.new(blender_animation.name + "_baked")
-		baked_blender_animation.stf_animation.is_baked_from = blender_animation
-
-		baked_blender_animation.use_fake_user = True
-
-		baked_blender_animation.use_cyclic = blender_animation.use_cyclic
-		baked_blender_animation.use_frame_range = blender_animation.use_frame_range
-		baked_blender_animation.frame_start = blender_animation.frame_start
-		baked_blender_animation.frame_end = blender_animation.frame_end
-
-		# todo import baked
-
-
-	def _handle_reset_animation():
-		if("is_reset_animation" in json_resource and json_resource["is_reset_animation"] == True):
-			blender_animation.slot_link.is_reset_animation = True
-		elif("reset_animation" in json_resource and json_resource["reset_animation"]):
-			if(reset_animation := context.import_resource(json_resource["reset_animation"], context_object, "data")):
-				blender_animation.slot_link.reset_animation = reset_animation
-	context.add_task(STF_TaskSteps.AFTER_ANIMATION, _handle_reset_animation)
-
-	blender_animation.use_fake_user = True
-
-	return blender_animation
-
-
-def __parse_subtracks(track: dict, selected_channelbag: bpy.types.ActionChannelbag, fcurve_target: any, index_conversion: list[int], conversion_func: Callable[[list[float]], list[float]] = None):
+def __parse_subtracks(track: dict, selected_channelbag: bpy.types.ActionChannelbag, fcurve_target: any, index_conversion: list[int], conversion_func: Callable[[list[float]], list[float]]):
 	subtracks = track.get("subtracks", [])
 	timepoints = track.get("timepoints", [])
 	if(len(subtracks) == 0 or len(timepoints) == 0): return
@@ -127,6 +137,7 @@ def __parse_subtracks(track: dict, selected_channelbag: bpy.types.ActionChannelb
 	if(num_frames <= 0): return
 
 	for keyframe_index in range(num_frames):
+		timepoint = timepoints[keyframe_index]
 		value_convert: list[float] = [None] * len(index_conversion)
 		left_tangent_convert: list[float] = [0] * len(index_conversion)
 		right_tangent_convert: list[float] = [0] * len(index_conversion)
@@ -135,7 +146,6 @@ def __parse_subtracks(track: dict, selected_channelbag: bpy.types.ActionChannelb
 			if(not subtrack): continue
 
 			stf_keyframe = subtrack["keyframes"][keyframe_index]
-			timepoint = timepoints[keyframe_index]
 
 			has_left_tangent = False
 			left_tangent_index = 0
@@ -191,6 +201,42 @@ def __parse_subtracks(track: dict, selected_channelbag: bpy.types.ActionChannelb
 				#keyframe.handle_left_type = "FREE"
 				keyframe.handle_left.x = keyframe.co.x + stf_keyframe[left_tangent_index][0]
 				keyframe.handle_left.y =  left_tangent_convert[index_conversion[subtrack_index]]
+
+	for fcurve in fcurves:
+		if(fcurve):
+			fcurve.keyframe_points.handles_recalc()
+
+
+def __parse_subtracks_baked(context: STF_ImportContext, track: dict, selected_channelbag: bpy.types.ActionChannelbag, fcurve_target: any, index_conversion: list[int], conversion_func: Callable[[list[float]], list[float]], frame_start = 1):
+	subtracks = track.get("subtracks", [])
+	if(len(subtracks) == 0): return
+
+	num_frames = -1
+	buffers = [[]] * len(subtracks)
+
+	fcurves: list[bpy.types.FCurve] = [None] * len(subtracks)
+	for subtrack_index, subtrack in enumerate(subtracks):
+		if(subtrack):
+			fcurves[subtrack_index] = selected_channelbag.fcurves.new(fcurve_target, index=index_conversion[subtrack_index])
+			buffers[subtrack_index] = np.frombuffer(context.import_buffer(subtrack), dtype=determine_pack_format_float(4))
+			num_frames = len(buffers[subtrack_index]) if len(buffers[subtrack_index]) > num_frames else num_frames
+
+	if(num_frames <= 0): return
+
+	for keyframe_index in range(num_frames):
+		timepoint = frame_start + keyframe_index
+		value_convert: list[float] = [None] * len(index_conversion)
+
+		for subtrack_index, _ in enumerate(subtracks):
+			if(len(buffers[subtrack_index]) == 0): continue
+			value_convert[subtrack_index] = buffers[subtrack_index][keyframe_index]
+
+		if(conversion_func):
+			value_convert = conversion_func(value_convert)
+
+		for subtrack_index, _ in enumerate(subtracks):
+			if(len(buffers[subtrack_index]) == 0): continue
+			_ = fcurves[subtrack_index].keyframe_points.insert(timepoint, value_convert[index_conversion[subtrack_index]])
 
 	for fcurve in fcurves:
 		if(fcurve):
