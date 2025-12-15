@@ -39,10 +39,7 @@ def stf_animation_import(context: STF_ImportContext, json_resource: dict, stf_id
 	strip: bpy.types.ActionKeyframeStrip = layer.strips.new(type="KEYFRAME")
 	__parse_tracks(context, json_resource.get("tracks", []), blender_animation, strip, False)
 
-
 	if("tracks_baked" in json_resource and context.get_setting("import_baked_animations") == True):
-		print("BAKED: " + blender_animation.name)
-
 		baked_blender_animation = bpy.data.actions.new(blender_animation.name + "_baked")
 		baked_blender_animation.stf_animation.is_baked_from = blender_animation
 

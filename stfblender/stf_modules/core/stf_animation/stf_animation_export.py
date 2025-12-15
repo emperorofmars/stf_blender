@@ -172,6 +172,7 @@ def __serialize_subtracks(context: STF_ExportContext, blender_animation: bpy.typ
 		if(ret[index_conversion[fcurve.array_index]]):
 			ret[index_conversion[fcurve.array_index]]["baked"] = context.serialize_buffer(baked_values[index_conversion[fcurve.array_index]].getbuffer())
 
+
 	if(bake_only):
 		return [subtrack["baked"] for subtrack in ret]
 
