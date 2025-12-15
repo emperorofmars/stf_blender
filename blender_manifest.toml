@@ -82,6 +82,7 @@ paths_exclude_pattern = [
 	"/.git/",
 	"/*.zip",
 	"/.vscode/",
+	".venv",
 	"/testsuite",
 	"/stf_blender_module_template",
 	"/examples",
