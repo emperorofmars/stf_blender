@@ -77,6 +77,16 @@ def resolve_property_path_to_stf_func(context: STF_ExportContext, blender_object
 			if(len(obj.pose.bones[blender_object.name].constraints) > 0):
 				has_constraints = True
 				break
+			for bone in obj.pose.bones:
+				if(len(bone.constraints) > 0):
+					for constraint in bone.constraints:
+						if(constraint.type == "IK"):
+							if(constraint.target == obj and constraint.subtarget == blender_object.name):
+								has_constraints = True
+								break
+				if(has_constraints): break
+		if(has_constraints): break
+
 
 	if(match := re.search(r"^location", data_path)):
 		return STFPropertyPathPart([blender_object.get_bone().stf_info.stf_id, "t"], _create_translation_to_stf_func(blender_object), translation_bone_index_conversion_to_stf, has_constraints)

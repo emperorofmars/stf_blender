@@ -1,3 +1,4 @@
+import sys
 from typing import Callable
 
 from .stf_task_steps import STF_TaskSteps
@@ -28,8 +29,22 @@ class STF_State_Base:
 		self._cleanup_tasks.append(task)
 
 	def run_tasks(self):
-		for task_step, task in self._tasks.items():
+		last_taskstep = -1
+
+		def get_next_step() -> int | None:
+			candidate = sys.maxsize
+			for step in self._tasks.keys():
+				if(step < candidate and step > last_taskstep):
+					candidate = step
+			if(candidate == sys.maxsize):
+				return None
+			else:
+				return candidate
+
+		while(get_next_step()):
+			task_step = get_next_step()
 			self._current_task_step = task_step
+			task = self._tasks[task_step]
 			max_iterations = 1000
 			while(len(self._tasks) > 0 and max_iterations > 0):
 				taskset = self._tasks[task_step]
@@ -39,6 +54,8 @@ class STF_State_Base:
 				max_iterations -= 1
 			if(len(self._tasks[task_step]) > 0):
 				self.report(STFReport(message="Task Recursion", severity=STFReportSeverity.FatalError))
+
+			last_taskstep = task_step
 
 		max_iterations = 1000
 		while(len(self._cleanup_tasks) > 0 and max_iterations > 0):
