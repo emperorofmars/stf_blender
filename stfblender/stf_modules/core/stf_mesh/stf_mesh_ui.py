@@ -39,24 +39,34 @@ class STFMeshSpatialPanel(bpy.types.Panel):
 	bl_context = "data"
 
 	@classmethod
-	def poll(cls, context):
+	def poll(cls, context: bpy.types.Context):
 		return (context.mesh is not None)
 
-	def draw(self, context):
+	def draw(self, context: bpy.types.Context):
+		layout = self.layout
 		set_stf_component_filter(bpy.types.Mesh)
 
 		if(context.object.find_armature()):
 			t, r, s = context.object.matrix_local.decompose()
 			if(t.length > 0.0001 or abs(r.x) > 0.0001 or abs(r.y) > 0.0001 or abs(r.z) > 0.0001 or abs((r.w - 1)) > 0.0001 or abs(s.x - 1) > 0.0001 or abs(s.y - 1) > 0.0001 or abs(s.z - 1) > 0.0001):
-				self.layout.label(text="Warning, this mesh is not aligned with its Armature! This will lead to differing output.", icon="ERROR")
+				row = layout.row()
+				row.alert = True
+				row_icon = row.row()
+				row_icon.alignment = "LEFT"
+				row_icon.label(icon="ERROR")
+				col = row.column()
+				col.label(text="Warning, this mesh is not aligned with its Armature!")
+				col.label(text="This will lead to differing behavior outside of Blender.")
+				col.label(text="Applying all Transforms for the Mesh and Armature will likely fix this.")
+				layout.separator(factor=2, type="LINE")
 
 		# Set ID
-		draw_stf_id_ui(self.layout, context, context.mesh, context.mesh.stf_info, STFSetMeshIDOperator.bl_idname)
+		draw_stf_id_ui(layout, context, context.mesh, context.mesh.stf_info, STFSetMeshIDOperator.bl_idname)
 
-		self.layout.separator(factor=2, type="LINE")
+		layout.separator(factor=2, type="LINE")
 
 		# Components
-		self.layout.separator(factor=1, type="SPACE")
-		header, body = self.layout.panel("stf.mesh_components", default_closed = False)
+		layout.separator(factor=1, type="SPACE")
+		header, body = layout.panel("stf.mesh_components", default_closed = False)
 		header.label(text="STF Components", icon="GROUP")
-		if(body): draw_components_ui(self.layout, context, context.mesh.stf_info, context.mesh, STFAddMeshComponentOperator.bl_idname, STFRemoveMeshComponentOperator.bl_idname, STFEditMeshComponentIdOperator.bl_idname)
+		if(body): draw_components_ui(layout, context, context.mesh.stf_info, context.mesh, STFAddMeshComponentOperator.bl_idname, STFRemoveMeshComponentOperator.bl_idname, STFEditMeshComponentIdOperator.bl_idname)

@@ -32,7 +32,7 @@ class STFDrawMeshInstanceBlendshapeList(bpy.types.UIList):
 	"""Override blendshapes on this meshinstance"""
 	bl_idname = "COLLECTION_UL_stf_instance_mesh_blendshapes"
 
-	def draw_item(self, context, layout: bpy.types.UILayout, data, item: STF_Instance_Mesh_Blendshape_Value, icon, active_data, active_propname, index):
+	def draw_item(self, context: bpy.types.Context, layout: bpy.types.UILayout, data, item: STF_Instance_Mesh_Blendshape_Value, icon, active_data, active_propname, index):
 		if(item.name == "Basis"):
 			layout.label(text="Basis")
 			return
@@ -57,24 +57,34 @@ class STFMeshInstancePanel(bpy.types.Panel):
 	bl_context = "object"
 
 	@classmethod
-	def poll(cls, context):
+	def poll(cls, context: bpy.types.Context):
 		return (context.object.stf_instance is not None and context.object.data and type(context.object.data) is bpy.types.Mesh)
 
-	def draw(self, context):
+	def draw(self, context: bpy.types.Context):
+		layout = self.layout
 		if(context.object.find_armature()):
 			t, r, s = context.object.matrix_local.decompose()
 			if(t.length > 0.0001 or abs(r.x) > 0.0001 or abs(r.y) > 0.0001 or abs(r.z) > 0.0001 or abs((r.w - 1)) > 0.0001 or abs(s.x - 1) > 0.0001 or abs(s.y - 1) > 0.0001 or abs(s.z - 1) > 0.0001):
-				self.layout.label(text="Warning, this mesh-instance is not aligned with its Armature! This will lead to differing output.", icon="ERROR")
+				row = layout.row()
+				row.alert = True
+				row_icon = row.row()
+				row_icon.alignment = "LEFT"
+				row_icon.label(icon="ERROR")
+				col = row.column()
+				col.label(text="Warning, this mesh is not aligned with its Armature!")
+				col.label(text="This will lead to differing behavior outside of Blender.")
+				col.label(text="Applying all Transforms for the Mesh and Armature will likely fix this.")
+				layout.separator(factor=2, type="LINE")
 
 		# Set ID
-		draw_stf_id_ui(self.layout, context, context.object.stf_instance, context.object.stf_instance, STFSetMeshInstanceIDOperator.bl_idname, True)
+		draw_stf_id_ui(layout, context, context.object.stf_instance, context.object.stf_instance, STFSetMeshInstanceIDOperator.bl_idname, True)
 
-		self.layout.separator(factor=2, type="LINE")
+		layout.separator(factor=2, type="LINE")
 
 		# Blendshape Values per Instance
-		self.layout.prop(context.object.stf_instance_mesh, "override_blendshape_values", text="Use Instance Shape Keys")
+		layout.prop(context.object.stf_instance_mesh, "override_blendshape_values", text="Use Instance Shape Keys")
 		if(context.object.stf_instance_mesh.override_blendshape_values):
-			self.layout.operator(SetInstanceBlendshapes.bl_idname, text="Update Shape Keys", icon="LOOP_FORWARDS")
+			layout.operator(SetInstanceBlendshapes.bl_idname, text="Update Shape Keys", icon="LOOP_FORWARDS")
 
-			self.layout.template_list(STFDrawMeshInstanceBlendshapeList.bl_idname, "", context.object.stf_instance_mesh, "blendshape_values", context.object.stf_instance_mesh, "active_blendshape")
+			layout.template_list(STFDrawMeshInstanceBlendshapeList.bl_idname, "", context.object.stf_instance_mesh, "blendshape_values", context.object.stf_instance_mesh, "active_blendshape")
 
