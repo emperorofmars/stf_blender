@@ -20,13 +20,13 @@ Export
 def _create_translation_to_stf_func(blender_object: ArmatureBone) -> Callable:
 	offset = mathutils.Vector()
 	if(blender_object.get_bone().parent):
-		offset = (blender_object.get_bone().parent.matrix_local.inverted_safe() @ blender_object.get_bone().matrix_local).translation
+		offset = (blender_object.get_bone().parent.matrix_local.inverted_safe() @ blender_object.get_bone().matrix_local)
 	else:
-		offset = (mathutils.Matrix.Rotation(math.radians(-90), 4, "X") @ blender_object.get_bone().matrix_local).translation
+		offset = (mathutils.Matrix.Rotation(math.radians(-90), 4, "X") @ blender_object.get_bone().matrix_local)
 
 	def _ret(value: list[float]) -> float:
-		value = [value[i] + offset[i] for i in range(len(value))]
-		return convert_bone_translation_to_stf(value)
+		value = mathutils.Matrix.Translation(mathutils.Vector(value))
+		return convert_bone_translation_to_stf((offset @ value).translation[:])
 	return _ret
 
 def _create_rotation_to_stf_func(blender_object: ArmatureBone) -> Callable:
