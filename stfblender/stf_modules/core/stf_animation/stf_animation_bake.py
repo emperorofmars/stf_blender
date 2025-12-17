@@ -10,6 +10,7 @@ def bake_constraints(action: bpy.types.Action) -> bpy.types.Action:
 	ret.use_cyclic = action.use_cyclic
 
 	animation_range = [int(action.frame_start), int(action.frame_end)] if action.use_frame_range else [int(action.frame_range[0]), int(action.frame_range[1])]
+	if(animation_range[1] <= animation_range[0]): animation_range[1] = animation_range[0] + 1
 
 	for slotlink in action.slot_link.links:
 		if(slotlink.target and type(slotlink.target) == bpy.types.Object):
