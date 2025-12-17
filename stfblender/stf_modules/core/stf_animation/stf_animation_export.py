@@ -52,7 +52,7 @@ def stf_animation_export(context: STF_ExportContext, application_object: any, co
 		ret = {
 			"type": _stf_type,
 			"name": blender_animation.stf_info.stf_name if blender_animation.stf_info.stf_name_source_of_truth else blender_animation.name,
-			"loop": "cycle" if blender_animation.use_cyclic else "none", # create an explicit setting for other loop types
+			"loop": "loop" if blender_animation.use_cyclic else "none", # create an explicit setting for other loop types
 			"fps": bpy.context.scene.render.fps if not blender_animation.stf_animation.fps_override else blender_animation.animation.stf_fps,
 			"range": animation_range,
 			"tracks": stf_tracks,

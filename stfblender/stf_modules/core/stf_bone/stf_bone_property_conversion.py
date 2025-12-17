@@ -34,11 +34,11 @@ def _create_rotation_to_stf_func(blender_object: ArmatureBone) -> Callable:
 	if(blender_object.get_bone().parent):
 		_, offset, _ = (blender_object.get_bone().parent.matrix_local.inverted_safe() @ blender_object.get_bone().matrix_local).decompose()
 	else:
-		_, offset, _ = (blender_object.get_bone().matrix_local @ mathutils.Matrix.Rotation(math.radians(-90), 4, "X")).decompose()
+		_, offset, _ = (mathutils.Matrix.Rotation(math.radians(-90), 4, "X") @ blender_object.get_bone().matrix_local).decompose()
 
 	def _ret(value: list[float]) -> float:
 		value = mathutils.Quaternion(value)
-		return convert_bone_rotation_to_stf((value @ offset)[:])
+		return convert_bone_rotation_to_stf((offset @ value)[:])
 	return _ret
 
 def _create_rotation_euler_to_stf_func(blender_object: ArmatureBone) -> Callable:
@@ -46,11 +46,11 @@ def _create_rotation_euler_to_stf_func(blender_object: ArmatureBone) -> Callable
 	if(blender_object.get_bone().parent):
 		_, offset, _ = (blender_object.get_bone().parent.matrix_local.inverted_safe() @ blender_object.get_bone().matrix_local).decompose()
 	else:
-		_, offset, _ = (blender_object.get_bone().matrix_local @ mathutils.Matrix.Rotation(math.radians(-90), 4, "X")).decompose()
+		_, offset, _ = (mathutils.Matrix.Rotation(math.radians(-90), 4, "X") @ blender_object.get_bone().matrix_local).decompose()
 
 	def _ret(value: list[float]) -> float:
 		value = mathutils.Euler(value).to_quaternion()
-		value = (value @ offset).to_euler()
+		value = (offset @ value).to_euler()
 		return convert_bone_rotation_euler_to_stf(value[:])
 	return _ret
 
@@ -110,13 +110,13 @@ Import
 def _create_translation_to_blender_func(blender_object: ArmatureBone) -> Callable:
 	# let offset
 	if(blender_object.get_bone().parent):
-		offset = (blender_object.get_bone().parent.matrix_local.inverted_safe() @ blender_object.get_bone().matrix_local)
+		offset = (blender_object.get_bone().parent.matrix_local.inverted_safe() @ blender_object.get_bone().matrix_local).inverted_safe()
 	else:
-		offset = (mathutils.Matrix.Rotation(math.radians(-90), 4, "X") @ blender_object.get_bone().matrix_local)
+		offset = (mathutils.Matrix.Rotation(math.radians(-90), 4, "X") @ blender_object.get_bone().matrix_local).inverted_safe()
 
 	def _ret(value: list[float]) -> float:
 		value = mathutils.Matrix.Translation(mathutils.Vector(value))
-		return convert_bone_translation_to_blender((offset.inverted_safe() @ value).translation[:])
+		return convert_bone_translation_to_blender((offset @ value).translation[:])
 	return _ret
 
 def _create_rotation_to_blender_func(blender_object: ArmatureBone) -> Callable:
@@ -124,11 +124,11 @@ def _create_rotation_to_blender_func(blender_object: ArmatureBone) -> Callable:
 	if(blender_object.get_bone().parent):
 		_, offset, _ = (blender_object.get_bone().parent.matrix_local.inverted_safe() @ blender_object.get_bone().matrix_local).inverted_safe().decompose()
 	else:
-		_, offset, _ = (blender_object.get_bone().matrix_local @ mathutils.Matrix.Rotation(math.radians(-90), 4, "X")).inverted_safe().decompose()
+		_, offset, _ = (mathutils.Matrix.Rotation(math.radians(-90), 4, "X") @ blender_object.get_bone().matrix_local).inverted_safe().decompose()
 
 	def _ret(value: list[float]) -> float:
 		value = mathutils.Quaternion(convert_bone_rotation_to_blender(value))
-		return (value @ offset)[:]
+		return (offset @ value)[:]
 	return _ret
 
 def _create_rotation_euler_to_blender_func(blender_object: ArmatureBone) -> Callable:
@@ -136,11 +136,11 @@ def _create_rotation_euler_to_blender_func(blender_object: ArmatureBone) -> Call
 	if(blender_object.get_bone().parent):
 		_, offset, _ = (blender_object.get_bone().parent.matrix_local.inverted_safe() @ blender_object.get_bone().matrix_local).inverted_safe().decompose()
 	else:
-		_, offset, _ = (blender_object.get_bone().matrix_local @ mathutils.Matrix.Rotation(math.radians(-90), 4, "X")).inverted_safe().decompose()
+		_, offset, _ = (mathutils.Matrix.Rotation(math.radians(-90), 4, "X") @ blender_object.get_bone().matrix_local).inverted_safe().decompose()
 
 	def _ret(value: list[float]) -> float:
 		value = mathutils.Euler(convert_bone_rotation_euler_to_blender(value)).to_quaternion()
-		return (value @ offset).to_euler()[:]
+		return (offset @ value).to_euler()[:]
 	return _ret
 
 def _create_scale_to_blender_func(blender_object: ArmatureBone) -> Callable:
