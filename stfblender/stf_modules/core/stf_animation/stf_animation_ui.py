@@ -57,14 +57,15 @@ class STFAnimationSpatialPanel(bpy.types.Panel):
 			row_readonly =  layout.row()
 			row_readonly.enabled = False
 			row_readonly.prop(context.active_action.stf_animation, "is_baked_from")
-		else:
-			layout.prop(context.active_action.stf_animation, "exclude")
-			if(context.active_action.stf_animation.exclude):
-				return
 
-			# Set ID
-			draw_stf_id_ui(layout, context, context.active_action, context.active_action.stf_info, STFSetAnimationIDOperator.bl_idname)
+		layout.prop(context.active_action.stf_animation, "exclude")
+		if(context.active_action.stf_animation.exclude):
+			return
 
+		# Set ID
+		draw_stf_id_ui(layout, context, context.active_action, context.active_action.stf_info, STFSetAnimationIDOperator.bl_idname)
+
+		if(not context.active_action.stf_animation.is_baked_from):
 			layout.separator(factor=2, type="SPACE")
 
 			layout.prop(context.active_action.stf_animation, "constraint_bake")
@@ -72,10 +73,10 @@ class STFAnimationSpatialPanel(bpy.types.Panel):
 				layout.operator(STFBakeAnimationOperator.bl_idname)
 				# todo list baked actions
 
-			layout.separator(factor=2, type="LINE")
+		layout.separator(factor=2, type="LINE")
 
-			# Components
-			layout.separator(factor=1, type="SPACE")
-			header, body = layout.panel("stf.animation_components", default_closed = False)
-			header.label(text="STF Components", icon="GROUP")
-			if(body): draw_components_ui(layout, context, context.active_action.stf_info, context.active_action, STFAddAnimationComponentOperator.bl_idname, STFRemoveAnimationComponentOperator.bl_idname, STFEditAnimationComponentIdOperator.bl_idname)
+		# Components
+		layout.separator(factor=1, type="SPACE")
+		header, body = layout.panel("stf.animation_components", default_closed = False)
+		header.label(text="STF Components", icon="GROUP")
+		if(body): draw_components_ui(layout, context, context.active_action.stf_info, context.active_action, STFAddAnimationComponentOperator.bl_idname, STFRemoveAnimationComponentOperator.bl_idname, STFEditAnimationComponentIdOperator.bl_idname)

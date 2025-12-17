@@ -42,6 +42,8 @@ def stf_animation_import(context: STF_ImportContext, json_resource: dict, stf_id
 	if("tracks_baked" in json_resource and context.get_setting("import_baked_animations") == True):
 		baked_blender_animation = bpy.data.actions.new(blender_animation.name + "_baked")
 		baked_blender_animation.stf_animation.is_baked_from = blender_animation
+		baked_blender_animation.stf_animation.exclude = True
+		baked_blender_animation.stf_animation.constraint_bake = "nobake"
 
 		baked_blender_animation.use_fake_user = True
 
@@ -112,13 +114,10 @@ def __parse_tracks(context: STF_ImportContext, tracks: list, blender_animation: 
 				break
 
 		# Yay we can finally deal with curves
-		if(not is_baked_only):
-			__parse_subtracks(track, selected_channelbag, target_ret.blender_path, index_conversion, target_ret.convert_func)
-		else:
-			__parse_subtracks_baked(context, track, selected_channelbag, target_ret.blender_path, index_conversion, target_ret.convert_func, blender_animation.frame_range[0])
+		__parse_subtracks(track, selected_channelbag, target_ret.blender_path, index_conversion, target_ret.convert_func, is_baked_only)
 
 
-def __parse_subtracks(track: dict, selected_channelbag: bpy.types.ActionChannelbag, fcurve_target: any, index_conversion: list[int], conversion_func: Callable[[list[float]], list[float]]):
+def __parse_subtracks(track: dict, selected_channelbag: bpy.types.ActionChannelbag, fcurve_target: any, index_conversion: list[int], conversion_func: Callable[[list[float]], list[float]], is_baked_only: bool):
 	subtracks = track.get("subtracks", [])
 	timepoints = track.get("timepoints", [])
 	if(len(subtracks) == 0 or len(timepoints) == 0): return
@@ -198,42 +197,6 @@ def __parse_subtracks(track: dict, selected_channelbag: bpy.types.ActionChannelb
 				#keyframe.handle_left_type = "FREE"
 				keyframe.handle_left.x = keyframe.co.x + stf_keyframe[left_tangent_index][0]
 				keyframe.handle_left.y =  left_tangent_convert[index_conversion[subtrack_index]]
-
-	for fcurve in fcurves:
-		if(fcurve):
-			fcurve.keyframe_points.handles_recalc()
-
-
-def __parse_subtracks_baked(context: STF_ImportContext, track: dict, selected_channelbag: bpy.types.ActionChannelbag, fcurve_target: any, index_conversion: list[int], conversion_func: Callable[[list[float]], list[float]], frame_start = 1):
-	subtracks = track.get("subtracks", [])
-	if(len(subtracks) == 0): return
-
-	num_frames = -1
-	buffers = [[]] * len(subtracks)
-
-	fcurves: list[bpy.types.FCurve] = [None] * len(subtracks)
-	for subtrack_index, subtrack in enumerate(subtracks):
-		if(subtrack):
-			fcurves[subtrack_index] = selected_channelbag.fcurves.new(fcurve_target, index=index_conversion[subtrack_index])
-			buffers[subtrack_index] = np.frombuffer(context.import_buffer(subtrack), dtype=determine_pack_format_float(4))
-			num_frames = len(buffers[subtrack_index]) if len(buffers[subtrack_index]) > num_frames else num_frames
-
-	if(num_frames <= 0): return
-
-	for keyframe_index in range(num_frames):
-		timepoint = frame_start + keyframe_index
-		value_convert: list[float] = [None] * len(index_conversion)
-
-		for subtrack_index, _ in enumerate(subtracks):
-			if(len(buffers[subtrack_index]) == 0): continue
-			value_convert[subtrack_index] = buffers[subtrack_index][keyframe_index]
-
-		if(conversion_func):
-			value_convert = conversion_func(value_convert)
-
-		for subtrack_index, _ in enumerate(subtracks):
-			if(len(buffers[subtrack_index]) == 0): continue
-			_ = fcurves[subtrack_index].keyframe_points.insert(timepoint, value_convert[index_conversion[subtrack_index]])
 
 	for fcurve in fcurves:
 		if(fcurve):

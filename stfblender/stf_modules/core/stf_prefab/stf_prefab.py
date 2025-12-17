@@ -54,9 +54,8 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 
 	def _handle_animations():
 		for action in bpy.data.actions:
-			if(not action.stf_animation.is_baked_from):
-				if(stf_animation_id := context.serialize_resource(action, context_object=collection, module_kind="data", export_fail_severity=STFReportSeverity.Debug)):
-					animations.append(stf_animation_id)
+			if(stf_animation_id := context.serialize_resource(action, context_object=collection, module_kind="data", export_fail_severity=STFReportSeverity.Debug)):
+				animations.append(stf_animation_id)
 	context.add_task(STF_TaskSteps.ANIMATION, _handle_animations)
 
 	return ret, collection.stf_info.stf_id

@@ -5,6 +5,9 @@ from bpy_extras import anim_utils
 def bake_constraints(action: bpy.types.Action) -> bpy.types.Action:
 	ret = bpy.data.actions.new(action.name + "_baked")
 	ret.stf_animation.is_baked_from = action
+	ret.stf_animation.exclude = True
+	ret.stf_animation.constraint_bake = "nobake"
+	ret.use_cyclic = action.use_cyclic
 
 	animation_range = [int(action.frame_start), int(action.frame_end)] if action.use_frame_range else [int(action.frame_range[0]), int(action.frame_range[1])]
 
