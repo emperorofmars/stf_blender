@@ -48,7 +48,7 @@ def bake_constraints(action: bpy.types.Action) -> bpy.types.Action:
 			slotlink.target.animation_data.action = original_action
 			slotlink.target.animation_data.action_slot_handle = original_slot
 
-			# todo reset
+	bpy.context.scene.frame_set(bpy.context.scene.frame_current)
 
 	return ret
 

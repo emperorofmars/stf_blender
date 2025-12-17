@@ -28,13 +28,21 @@ All source-code in this repository, except when noted in individual files and/or
 **Commands to build the extension.**\
 *Change the Blender version in the path accordingly.*
 
-* Windows Git Bash
-	* Build Extension
-		```sh
-		"C:\Program Files\Blender Foundation\Blender 4.5\blender.exe" --command extension build --output-dir=./packages
+* Set Blender Path Variable
+	* Windows (Git Bash)
+		``` sh
+		BLENDER_PATH="C:\Program Files\Blender Foundation\Blender 4.5\blender.exe"
 		```
-	* Generate Repository Json
-		```sh
-		"C:\Program Files\Blender Foundation\Blender 4.5\blender.exe" --command extension server-generate --repo-dir=./packages
+	* Linux Bash
+		``` sh
+		BLENDER_PATH=~/Software/blender/blender-5.0.1-linux-x64/blender
 		```
+* Build Extension
+	```sh
+	$BLENDER_PATH --command extension build --output-dir=./packages
+	```
+* Generate Repository Json
+	```sh
+	$BLENDER_PATH --command extension server-generate --repo-dir=./packages
+	```
 -->
