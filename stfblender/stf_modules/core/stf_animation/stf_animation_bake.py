@@ -13,13 +13,22 @@ def bake_constraints(action: bpy.types.Action) -> bpy.types.Action:
 	if(animation_range[1] <= animation_range[0]): animation_range[1] = animation_range[0] + 1
 
 	for slotlink in action.slot_link.links:
-		if(slotlink.target and type(slotlink.target) == bpy.types.Object):
+		if(slotlink.target):
+			for slot in action.slots:
+				if(slot.handle == slotlink.slot_handle):
+					break
+			else:
+				continue
+			if(slot.target_id_type != "OBJECT"):
+				continue
+
 			if(not slotlink.target.animation_data):
 				slotlink.target.animation_data_create()
 			original_action = slotlink.target.animation_data.action
 			original_slot = slotlink.target.animation_data.action_slot_handle
 
 			slotlink.target.animation_data.action = action
+			slotlink.target.animation_data.action_slot_handle = slotlink.slot_handle
 
 			anim_utils.bake_action(slotlink.target, action=ret, frames=range(animation_range[0], animation_range[1]), bake_options=anim_utils.BakeOptions(
 				only_selected=False,
@@ -36,14 +45,15 @@ def bake_constraints(action: bpy.types.Action) -> bpy.types.Action:
 				do_custom_props=True
 			))
 
-			for slot in ret.slots:
+			for ret_slot in ret.slots:
 				for ret_slotlink in ret.slot_link.links:
-					if(slot.handle == ret_slotlink.slot_handle):
+					if(ret_slot.handle == ret_slotlink.slot_handle):
 						break
 				else:
 					new_slotlink = ret.slot_link.links.add()
-					new_slotlink.slot_handle = slot.handle
+					new_slotlink.slot_handle = ret_slot.handle
 					new_slotlink.target = slotlink.target
+					new_slotlink.datablock_index = slotlink.datablock_index
 
 			slotlink.target.animation_data.action = original_action
 			slotlink.target.animation_data.action_slot_handle = original_slot
