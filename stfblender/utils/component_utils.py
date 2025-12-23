@@ -183,19 +183,26 @@ class RemoveOverrideFromComponent(bpy.types.Operator):
 		return {"CANCELLED"}
 
 
-def preserve_component_reference(component: STF_BlenderComponentBase, context_object: any) -> Callable:
+def preserve_component_reference(component: STF_BlenderComponentBase, blender_property_name: str, context_object: any) -> Callable[[], STF_BlenderComponentBase]:
+	component_id = component.stf_id
 	if(type(context_object) == bpy.types.Bone and type(component.id_data) == bpy.types.Armature):
 		armature_bone = ArmatureBone(component.id_data, context_object.name)
-		component_id = component.stf_id
 		def _get_component() -> STF_BlenderComponentBase:
-			for component_ref in armature_bone.get_bone().stf_info.stf_components:
-				if(component_ref.stf_id == component_id):
-					for component in getattr(armature_bone.get_bone(), component_ref.blender_property_name):
-						if(component.stf_id == component_id):
-							return component
+			for candidate in getattr(armature_bone.get_bone(), blender_property_name):
+				if(candidate.stf_id == component_id):
+					return candidate
+	elif(type(context_object) == ArmatureBone):
+		def _get_component() -> STF_BlenderComponentBase:
+			for candidate in getattr(context_object.get_bone(), blender_property_name):
+				if(candidate.stf_id == component_id):
+					return candidate
+			return None
 	else:
 		def _get_component() -> STF_BlenderComponentBase:
-			return component
+			for candidate in getattr(context_object, blender_property_name):
+				if(candidate.stf_id == component_id):
+					return candidate
+			return None
 	return _get_component
 
 
@@ -211,17 +218,16 @@ def get_components_from_object(application_object: any) -> list:
 	return ret
 
 
-def import_component_base(context: STF_ImportContext, component: STF_BlenderComponentBase, json_resource: dict, context_object: any = None):
+def import_component_base(context: STF_ImportContext, component: STF_BlenderComponentBase, json_resource: dict, blender_property_name: str, context_object: any):
 	if("name" in json_resource): component.stf_name = json_resource["name"]
 	if("overrides" in json_resource):
-		_get_component = preserve_component_reference(component, context_object)
+		_get_component = preserve_component_reference(component, blender_property_name, context_object)
 
 		def _handle():
 			component = _get_component()
 			for override_id in json_resource["overrides"]:
-				#print(override_id)
 				override: BlenderGRR = component.overrides.add()
-				if(override_resource := context.import_resource(override_id, stf_kind="component")):
+				if(override_resource := context.get_imported_resource(override_id)):
 					construct_blender_grr(override_resource, override, override_id)
 				else: # fallback if something went fucky
 					override.reference_type = "stf_component"
@@ -230,12 +236,14 @@ def import_component_base(context: STF_ImportContext, component: STF_BlenderComp
 	if("enabled" in json_resource):
 		component.enabled = json_resource["enabled"]
 
-def export_component_base(context: STF_ExportContext, stf_type: str, component: STF_BlenderComponentBase) -> dict:
+def export_component_base(context: STF_ExportContext, stf_type: str, component: STF_BlenderComponentBase, blender_property_name: str, context_object: any) -> dict:
 	ensure_stf_id(context, component, component)
 	ret = { "type": stf_type }
 	if(component.stf_name): ret["name"] = component.stf_name
 	if(component.overrides and len(component.overrides) > 0):
+		_get_component = preserve_component_reference(component, blender_property_name, context_object)
 		def _handle():
+			component = _get_component()
 			overrides_list = []
 			for override in component.overrides:
 				if(resolved := resolve_blender_grr(override)):

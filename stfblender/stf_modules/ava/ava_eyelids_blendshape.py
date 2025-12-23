@@ -101,7 +101,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 	col.prop_search(component, "look_down_left", context_object.shape_keys, "key_blocks")
 	col.prop_search(component, "look_left_left", context_object.shape_keys, "key_blocks")
 	col.prop_search(component, "look_right_left", context_object.shape_keys, "key_blocks")
-	
+
 	layout.separator(factor=1)
 
 	col = layout.column(align=True)
@@ -112,9 +112,9 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 	col.prop_search(component, "look_right_right", context_object.shape_keys, "key_blocks")
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, parent_application_object: any) -> any:
-	component_ref, component = add_component(parent_application_object, _blender_property_name, id, _stf_type)
-	import_component_base(context, component, json_resource)
+def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, context_object: any) -> any:
+	component_ref, component = add_component(context_object, _blender_property_name, id, _stf_type)
+	import_component_base(context, component, json_resource, _blender_property_name, context_object)
 
 	for shape_name, _ in _eyelid_shapes.items():
 		if(shape_name in json_resource):
@@ -131,8 +131,8 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, parent
 	return component
 
 
-def _stf_export(context: STF_ExportContext, component: AVA_Eyelids_Blendshape, parent_application_object: any) -> tuple[dict, str]:
-	ret = export_component_base(context, _stf_type, component)
+def _stf_export(context: STF_ExportContext, component: AVA_Eyelids_Blendshape, context_object: any) -> tuple[dict, str]:
+	ret = export_component_base(context, _stf_type, component, _blender_property_name, context_object)
 
 	for shape_name, _ in _eyelid_shapes.items():
 		ret[shape_name] = getattr(component, "eyes_closed" if shape_name == "closed" else "look_" + shape_name)

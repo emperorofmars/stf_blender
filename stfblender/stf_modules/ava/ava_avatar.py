@@ -50,7 +50,7 @@ class CreateViewportObjectOperator(bpy.types.Operator):
 		return {"FINISHED"}
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, parent_application_object: any, component: AVA_Avatar):
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: AVA_Avatar):
 	layout.use_property_split = True
 	if(component.viewport):
 		layout.prop(component, "viewport")
@@ -59,7 +59,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 		row.operator(SetActiveObjectOperator.bl_idname, text="Select Viewport Object", icon="EYEDROPPER").target_name = "$ViewportFirstPerson"
 	else:
 		create_viewport_button = layout.operator(CreateViewportObjectOperator.bl_idname, text="Create Viewport Object", icon="ADD")
-		create_viewport_button.blender_collection = parent_application_object.name
+		create_viewport_button.blender_collection = context_object.name
 		create_viewport_button.component_id = component.stf_id
 
 	layout.prop(component, "primary_armature_instance", icon="ARMATURE_DATA")
@@ -72,9 +72,9 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, parent_application_object: any) -> any:
-	component_ref, component = add_component(parent_application_object, _blender_property_name, id, _stf_type)
-	import_component_base(context, component, json_resource)
+def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, context_object: any) -> any:
+	component_ref, component = add_component(context_object, _blender_property_name, id, _stf_type)
+	import_component_base(context, component, json_resource, _blender_property_name, context_object)
 
 	if("viewport" in json_resource):
 		def _handle_viewport():
@@ -94,8 +94,8 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, parent
 	return component
 
 
-def _stf_export(context: STF_ExportContext, component: AVA_Avatar, parent_application_object: any) -> tuple[dict, str]:
-	ret = export_component_base(context, _stf_type, component)
+def _stf_export(context: STF_ExportContext, component: AVA_Avatar, context_object: any) -> tuple[dict, str]:
+	ret = export_component_base(context, _stf_type, component, _blender_property_name, context_object)
 
 	if(component.viewport):
 		def _handle_viewport():

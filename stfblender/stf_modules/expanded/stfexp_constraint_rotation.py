@@ -70,13 +70,13 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
 	component_ref, component = add_component(context_object, _blender_property_name, stf_id, _stf_type)
-	import_component_base(context, component, json_resource, context_object)
+	import_component_base(context, component, json_resource, _blender_property_name, context_object)
 	component: STFEXP_Constraint_Rotation = component
 
 	component.weight = json_resource.get("weight", 1)
 	component.axes = json_resource.get("axes", [True, True, True])
 
-	_get_component = preserve_component_reference(component, context_object)
+	_get_component = preserve_component_reference(component, _blender_property_name, context_object)
 	def _handle():
 		component = _get_component()
 		for json_source in json_resource.get("sources", []):
@@ -89,7 +89,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 
 
 def _stf_export(context: STF_ExportContext, component: STFEXP_Constraint_Rotation, context_object: any) -> tuple[dict, str]:
-	ret = export_component_base(context, _stf_type, component)
+	ret = export_component_base(context, _stf_type, component, _blender_property_name, context_object)
 
 	ret["weight"] = component.weight
 	ret["axes"] = component.axes[:]
@@ -97,7 +97,7 @@ def _stf_export(context: STF_ExportContext, component: STFEXP_Constraint_Rotatio
 	sources = []
 	ret["sources"] = sources
 
-	_get_component = preserve_component_reference(component, context_object)
+	_get_component = preserve_component_reference(component, _blender_property_name, context_object)
 	def _handle():
 		component = _get_component()
 		for source in component.sources:
@@ -130,7 +130,7 @@ def _serialize_component_instance_standin_func(context: STF_ExportContext, compo
 	sources = []
 	ret["sources"] = sources
 
-	_get_component = preserve_component_reference(standin_component, context_object)
+	_get_component = preserve_component_reference(standin_component, _blender_property_name, context_object)
 	def _handle():
 		component = _get_component()
 		for source in component.sources:
@@ -143,7 +143,7 @@ def _serialize_component_instance_standin_func(context: STF_ExportContext, compo
 	return ret
 
 def _parse_component_instance_standin_func(context: STF_ImportContext, json_resource: dict, component_ref: STF_Component_Ref, standin_component: STFEXP_Constraint_Rotation, context_object: any):
-	_get_component = preserve_component_reference(standin_component, context_object)
+	_get_component = preserve_component_reference(standin_component, _blender_property_name, context_object)
 
 	standin_component.weight = json_resource.get("weight", 1)
 	standin_component.axes = json_resource.get("axes", [True, True, True])

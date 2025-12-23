@@ -40,16 +40,19 @@ class STF_ImportContext:
 		if("components" in json_resource):
 			for component_id in json_resource["components"]:
 				json_component = self.get_json_resource(component_id)
-				if(component_module := self._state.determine_module(json_component, "component")):
-					component_result = component_module.import_func(self, json_component, component_id, application_object)
-					if(component_result):
-						application_component_object = component_result
-						self.register_imported_resource(component_id, STF_Component_Editmode_Resistant_Reference(application_component_object, application_object))
+				if(json_component):
+					if(component_module := self._state.determine_module(json_component, "component")):
+						component_result = component_module.import_func(self, json_component, component_id, application_object)
+						if(component_result):
+							application_component_object = component_result
+							self.register_imported_resource(component_id, STF_Component_Editmode_Resistant_Reference(application_component_object, application_object))
+						else:
+							_logger.error("Component import error", stack_info=True)
+							self.report(STFReport("Component import error", STFReportSeverity.Error, component_id, json_component.get("type"), application_object))
 					else:
-						_logger.error("Component import error", stack_info=True)
-						self.report(STFReport("Component import error", STFReportSeverity.Error, component_id, json_component.get("type"), application_object))
+						self.report(STFReport("No STF_Module registered for component", STFReportSeverity.Warn, component_id, json_component.get("type")))
 				else:
-					self.report(STFReport("No STF_Module registered for component", STFReportSeverity.Warn, component_id, json_component.get("type")))
+					self.report(STFReport("Invalid JSON resource", STFReportSeverity.FatalError, component_id))
 
 
 	def import_resource(self, stf_id: str, context_object: any = None, stf_kind: str = "data") -> any:

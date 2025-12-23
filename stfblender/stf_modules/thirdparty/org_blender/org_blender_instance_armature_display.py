@@ -17,7 +17,7 @@ class Blender_Instance_Armature_Display(STF_BlenderComponentBase):
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: bpy.types.Object) -> any:
 	component_ref, component = add_component(context_object, _blender_property_name, stf_id, _stf_type)
-	import_component_base(context, component, json_resource)
+	import_component_base(context, component, json_resource, _blender_property_name, context_object)
 
 	if("display_in_front" in json_resource):
 		context_object.show_in_front = json_resource["display_in_front"]
@@ -26,7 +26,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 
 
 def _stf_export(context: STF_ExportContext, component: Blender_Instance_Armature_Display, context_object: bpy.types.Object) -> tuple[dict, str]:
-	ret = export_component_base(context, _stf_type, component)
+	ret = export_component_base(context, _stf_type, component, _blender_property_name, context_object)
 	ret["display_in_front"] = context_object.show_in_front
 	return ret, component.stf_id
 

@@ -57,6 +57,7 @@ class InstanceModComponentRef(STF_Component_Ref):
 	bone: bpy.props.StringProperty(name="Bone") # type: ignore
 	override: bpy.props.BoolProperty(name="Enable Instance Override", default=False) # type: ignore
 
+
 class STF_BlenderBoneComponentModule(STF_BlenderComponentModule):
 	"""Use for components that are allowed on bones and are animatable or can have different values per instance of the armature"""
 	# (layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: STF_BlenderComponentBase) -> None

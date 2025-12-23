@@ -18,7 +18,7 @@ class AVA_EyeRotation_Bone(STF_BlenderComponentBase):
 	limit_out: bpy.props.FloatProperty(name="Out", subtype="ANGLE", default=math.radians(16), options=set(), soft_min=0, soft_max=math.radians(60)) # type: ignore
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, parent_application_object: any, component: AVA_EyeRotation_Bone):
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: AVA_EyeRotation_Bone):
 	layout.use_property_split = True
 	col = layout.column(align=True)
 	col.prop(component, "limit_up")
@@ -28,9 +28,9 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, parent_application_object: any) -> any:
-	component_ref, component = add_component(parent_application_object, _blender_property_name, id, _stf_type)
-	import_component_base(context, component, json_resource)
+def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, context_object: any) -> any:
+	component_ref, component = add_component(context_object, _blender_property_name, id, _stf_type)
+	import_component_base(context, component, json_resource, _blender_property_name, context_object)
 
 	component.limit_up = json_resource.get("up", math.radians(15))
 	component.limit_down = json_resource.get("down", math.radians(12))
@@ -40,8 +40,8 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, parent
 	return component
 
 
-def _stf_export(context: STF_ExportContext, component: AVA_EyeRotation_Bone, parent_application_object: any) -> tuple[dict, str]:
-	ret = export_component_base(context, _stf_type, component)
+def _stf_export(context: STF_ExportContext, component: AVA_EyeRotation_Bone, context_object: any) -> tuple[dict, str]:
+	ret = export_component_base(context, _stf_type, component, _blender_property_name, context_object)
 	ret["up"] = component.limit_up
 	ret["down"] = component.limit_down
 	ret["in"] = component.limit_in

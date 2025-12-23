@@ -33,11 +33,11 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
 	component_ref, component = add_component(context_object, _blender_property_name, stf_id, _stf_type)
-	import_component_base(context, component, json_resource, context_object)
+	import_component_base(context, component, json_resource, _blender_property_name, context_object)
 	component.weight = json_resource.get("weight")
 
 	if("source" in json_resource):
-		_get_component = preserve_component_reference(component, context_object)
+		_get_component = preserve_component_reference(component, _blender_property_name, context_object)
 		def _handle():
 			component = _get_component()
 			node_path_selector_from_stf(context, json_resource, json_resource["source"], component.source)
@@ -47,10 +47,10 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 
 
 def _stf_export(context: STF_ExportContext, component: STFEXP_Constraint_Twist, context_object: any) -> tuple[dict, str]:
-	ret = export_component_base(context, _stf_type, component)
+	ret = export_component_base(context, _stf_type, component, _blender_property_name, context_object)
 	ret["weight"] = component.weight
 
-	_get_component = preserve_component_reference(component, context_object)
+	_get_component = preserve_component_reference(component, _blender_property_name, context_object)
 	def _handle():
 		component = _get_component()
 		if(source_ret := node_path_selector_to_stf(context, component.source, ret)):
@@ -79,7 +79,7 @@ def _serialize_component_instance_standin_func(context: STF_ExportContext, compo
 def _parse_component_instance_standin_func(context: STF_ImportContext, json_resource: dict, component_ref: STF_Component_Ref, standin_component: STFEXP_Constraint_Twist, context_object: any):
 	if("weight" in json_resource): standin_component.weight = json_resource["weight"]
 	if("source" in json_resource and len(json_resource["source"]) > 0):
-		_get_component = preserve_component_reference(standin_component, context_object)
+		_get_component = preserve_component_reference(standin_component, _blender_property_name, context_object)
 		def _handle():
 			standin_component = _get_component()
 			node_path_selector_from_stf(context, json_resource, json_resource["source"], standin_component.source)

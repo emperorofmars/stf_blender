@@ -61,7 +61,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 	layout.use_property_split = True
 	layout.prop(component, "offset_position")
 	layout.prop(component, "offset_rotation")
-	
+
 	load_json_button = layout.operator(STFEXP_Collider_Plane_LoadJsonOperator.bl_idname)
 	load_json_button.blender_bone = type(component.id_data) == bpy.types.Armature
 	load_json_button.component_id = component.stf_id
@@ -85,12 +85,12 @@ def _parse_component_instance_standin_func(context: STF_ImportContext, json_reso
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
 	component_ref, component = add_component(context_object, _blender_property_name, stf_id, _stf_type)
-	import_component_base(context, component, json_resource, context_object)
+	import_component_base(context, component, json_resource, _blender_property_name, context_object)
 	_parse_json(component, json_resource)
 	return component
 
 def _stf_export(context: STF_ExportContext, component: STFEXP_Collider_Plane, context_object: any) -> tuple[dict, str]:
-	ret = export_component_base(context, _stf_type, component)
+	ret = export_component_base(context, _stf_type, component, _blender_property_name, context_object)
 	ret = _serialize_json(component, ret)
 	return ret, component.stf_id
 

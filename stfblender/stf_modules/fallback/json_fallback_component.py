@@ -30,11 +30,11 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, context_object: any) -> any:
 	component_ref, component = add_component(context_object, _blender_property_name, id, json_resource["type"])
 	component: JsonFallbackComponent = component
-	import_component_base(context, component, json_resource, context_object)
+	import_component_base(context, component, json_resource, _blender_property_name, context_object)
 
 	component.json = json.dumps(json_resource)
 
-	_get_component = preserve_component_reference(component, context_object)
+	_get_component = preserve_component_reference(component, _blender_property_name, context_object)
 
 	def _handle():
 		component = _get_component()
@@ -55,7 +55,7 @@ def _stf_export(context: STF_ExportContext, component: JsonFallbackComponent, co
 		json_component = json.loads(component.json)
 		if("type" not in json_component or not json_component["type"]):
 			return None
-		ret = export_component_base(context, json_component["type"], component)
+		ret = export_component_base(context, json_component["type"], component, _blender_property_name, context_object)
 		ret = ret | json_component
 
 		ret["referenced_resources"] = []
@@ -66,7 +66,7 @@ def _stf_export(context: STF_ExportContext, component: JsonFallbackComponent, co
 				if(blender_resource := resolve_blender_grr(referenced_resource)):
 					register_exported_resource(ret, context.serialize_resource(blender_resource))
 		context.add_task(STF_TaskSteps.DEFAULT, _handle)
-		
+
 		for buffer in component.buffers:
 			register_exported_buffer(ret, decode_buffer(context, buffer))
 

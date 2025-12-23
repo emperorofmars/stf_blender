@@ -38,9 +38,12 @@ def update_armature_instance_component_standins(context: bpy.types.Context, blen
 						set_func(context, component_ref, blender_object, component, standin_component)
 					handled_ids.append(component_ref.stf_id)
 
-	for standin_ref_index, standin_ref in enumerate(blender_object.stf_instance_armature_component_standins.stf_components):
+	standin_ref_index = 0
+	while(standin_ref_index < len(blender_object.stf_instance_armature_component_standins.stf_components)):
+		#for standin_ref_index in range(len(blender_object.stf_instance_armature_component_standins.stf_components)):
+		standin_ref = blender_object.stf_instance_armature_component_standins.stf_components[standin_ref_index]
 		if(standin_ref.stf_id not in handled_ids):
-			if(hasattr(bone, component_ref.blender_property_name)):
+			if(hasattr(bone, component_ref.blender_property_name) and hasattr(blender_object, standin_ref.blender_property_name)):
 				for standin_component_index, standin_component in enumerate(getattr(blender_object, standin_ref.blender_property_name)):
 					if(standin_component.stf_id == standin_ref.stf_id):
 						getattr(blender_object, standin_ref.blender_property_name).remove(standin_component_index)
@@ -48,6 +51,7 @@ def update_armature_instance_component_standins(context: bpy.types.Context, blen
 						blender_object.stf_instance_armature_component_standins.stf_components.remove(standin_ref_index)
 						standin_ref_index -= 1
 						break
+		standin_ref_index += 1
 
 
 def serialize_standin(context: STF_ExportContext, blender_object: bpy.types.Object, component_standin_ref: InstanceModComponentRef) -> dict:

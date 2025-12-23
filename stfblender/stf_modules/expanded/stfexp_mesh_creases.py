@@ -50,13 +50,13 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 			edge_creases_attribute.data[edge_dict[v0_index][v1_index]].value = buffer_edge_creases[edge_index]
 
 	component_ref, component = add_component(context_object, _blender_property_name, stf_id, _stf_type)
-	import_component_base(context, component, json_resource)
+	import_component_base(context, component, json_resource, _blender_property_name, context_object)
 
 	return component
 
 
 def _stf_export(context: STF_ExportContext, component: STFEXP_Mesh_Creases, context_object: bpy.types.Mesh) -> tuple[dict, str]:
-	ret = export_component_base(context, _stf_type, component)
+	ret = export_component_base(context, _stf_type, component, _blender_property_name, context_object)
 
 	indices_width = determine_indices_width(len(context_object.loops))
 

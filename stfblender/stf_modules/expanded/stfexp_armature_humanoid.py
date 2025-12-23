@@ -120,7 +120,7 @@ class STFEXP_Armature_Humanoid(STF_BlenderComponentBase):
 
 	bone_mappings: bpy.props.CollectionProperty(type=HumanoidBone, name="Humanoid Mappings", options=set()) # type: ignore
 	active_bone_mapping: bpy.props.IntProperty() # type: ignore
-	
+
 	settings: bpy.props.PointerProperty(type=HumanoidSettings, name="Humanoid Settings", options=set()) # type: ignore
 
 
@@ -143,7 +143,7 @@ def _setup_humanoid_collection(component: STFEXP_Armature_Humanoid):
 def _map_humanoid_bones(component: STFEXP_Armature_Humanoid, armature: bpy.types.Armature):
 	if(len(component.bone_mappings) != len(_humanoid_bones)):
 		_setup_humanoid_collection(component)
-	
+
 	for bone_mapping in _humanoid_bones:
 		and_conditions = bone_mapping[2]
 		candidate = None
@@ -174,7 +174,7 @@ class ResetHumanoidCollectionOperator(bpy.types.Operator):
 	@classmethod
 	def poll(cls, context):
 		return context.armature is not None
-	
+
 	def invoke(self, context, event):
 		return context.window_manager.invoke_confirm(self, event)
 
@@ -200,7 +200,7 @@ class MapHumanoidCollectionOperator(bpy.types.Operator):
 	@classmethod
 	def poll(cls, context):
 		return context.armature is not None
-	
+
 	def invoke(self, context, event):
 		return context.window_manager.invoke_confirm(self, event)
 
@@ -295,7 +295,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, context_object: any) -> any:
 	component_ref, component = add_component(context_object, _blender_property_name, id, _stf_type)
 	component: STFEXP_Armature_Humanoid = component
-	import_component_base(context, component, json_resource)
+	import_component_base(context, component, json_resource, _blender_property_name, context_object)
 
 	component.locomotion_type = json_resource.get("locomotion_type", "planti")
 	component.no_jaw = json_resource.get("no_jaw", False)
@@ -340,7 +340,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, contex
 
 
 def _stf_export(context: STF_ExportContext, component: STFEXP_Armature_Humanoid, context_object: any) -> tuple[dict, str]:
-	ret = export_component_base(context, _stf_type, component)
+	ret = export_component_base(context, _stf_type, component, _blender_property_name, context_object)
 	ret["locomotion_type"] = component.locomotion_type
 	ret["no_jaw"] = component.no_jaw
 

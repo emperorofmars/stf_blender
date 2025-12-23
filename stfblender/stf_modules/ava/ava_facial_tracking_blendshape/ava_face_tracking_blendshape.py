@@ -44,7 +44,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, context_object: bpy.types.Mesh) -> any:
 	component_ref, component = add_component(context_object, _blender_property_name, id, _stf_type)
-	import_component_base(context, component, json_resource)
+	import_component_base(context, component, json_resource, _blender_property_name, context_object)
 	if("ft_type" in json_resource):
 		if(json_resource["ft_type"] in ft_definitions):
 			component.ft_type = json_resource["ft_type"]
@@ -55,7 +55,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, contex
 
 
 def _stf_export(context: STF_ExportContext, component: AVA_FaceTracking_Blendshapes, context_object: bpy.types.Mesh) -> tuple[dict, str]:
-	ret = export_component_base(context, _stf_type, component)
+	ret = export_component_base(context, _stf_type, component, _blender_property_name, context_object)
 	if(component.ft_type != "other"):
 		ret["ft_type"] = component.ft_type
 	else:

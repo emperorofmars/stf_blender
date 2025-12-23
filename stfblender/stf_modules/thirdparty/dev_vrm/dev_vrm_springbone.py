@@ -57,9 +57,9 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
 	component_ref, component = add_component(context_object, _blender_property_name, stf_id, _stf_type)
-	import_component_base(context, component, json_resource, context_object)
+	import_component_base(context, component, json_resource, _blender_property_name, context_object)
 
-	_get_component = preserve_component_reference(component, context_object)
+	_get_component = preserve_component_reference(component, _blender_property_name, context_object)
 	def _handle():
 		component = _get_component()
 		for collider_path in json_resource.get("colliders", []):
@@ -73,14 +73,14 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 
 
 def _stf_export(context: STF_ExportContext, component: VRM_Springbone, context_object: any) -> tuple[dict, str]:
-	ret = export_component_base(context, _stf_type, component)
+	ret = export_component_base(context, _stf_type, component, _blender_property_name, context_object)
 	ret["stiffness"] = component.stiffness
 	ret["gravityPower"] = component.gravityPower
 	ret["gravityDir"] = trs_utils.blender_translation_to_stf(component.gravityDir)
 	ret["dragForce"] = component.dragForce
 	ret["hitRadius"] = component.hitRadius
 
-	_get_component = preserve_component_reference(component, context_object)
+	_get_component = preserve_component_reference(component, _blender_property_name, context_object)
 	def _handle():
 		component = _get_component()
 		colliders = []
