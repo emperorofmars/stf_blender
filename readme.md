@@ -4,15 +4,15 @@
 
 **WIP implementation for Blender 4.5+. Do not use productively!**
 
-**[Read the User Guide!](https://docs.stfform.at/guide/blender.html)** ⭐ **[STF Website](https://docs.stfform.at/)**
+🌰 **[Read the User Guide!](https://docs.stfform.at/guide/blender.html)** 🌰 **[STF Website](https://docs.stfform.at/)**
 
 ## Installation
 ### From Repository (preferred)
 Follow the steps on [docs.stfform.at](https://docs.stfform.at/installation/blender.html)!
 
 ### Manual
-Download the [latest release](https://github.com/emperorofmars/stf_blender/releases/latest)\
-Add it under: `Edit` -> `Preferences` -> `Get Extensions` -> **Click on the top right most dropdown** -> `Install from Disk...`
+Download the [latest release](https://codeberg.org/emperorofmars/stf_blender/releases/latest)\
+Add it under: `Edit` → `Preferences` → `Get Extensions` → **Click on the top right most dropdown** → `Install from Disk...`
 
 ---
 
