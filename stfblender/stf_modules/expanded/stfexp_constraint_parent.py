@@ -13,19 +13,20 @@ from ...base.property_path_part import BlenderPropertyPathPart, STFPropertyPathP
 from .util.constraint_source import ConstraintSource
 
 
-_stf_type = "stfexp.constraint.rotation"
-_blender_property_name = "stfexp_constraint_rotation"
+_stf_type = "stfexp.constraint.parent"
+_blender_property_name = "stfexp_constraint_parent"
 
 
-class STFEXP_Constraint_Rotation(STF_BlenderComponentBase):
+class STFEXP_Constraint_Parent(STF_BlenderComponentBase):
 	weight: bpy.props.FloatProperty(name="Constraint Weight", default=1.0, subtype="FACTOR", min=0, max=1) # type: ignore
-	axes: bpy.props.BoolVectorProperty(name="Axes", default=(True, True, True), options=set(), size=3) # type: ignore
+	translation_axes: bpy.props.BoolVectorProperty(name="Translation Axes", default=(True, True, True), options=set(), size=3) # type: ignore
+	rotation_axes: bpy.props.BoolVectorProperty(name="Rotation Axes", default=(True, True, True), options=set(), size=3) # type: ignore
 	sources: bpy.props.CollectionProperty(type=ConstraintSource, name="Sources") # type: ignore
 	active_source_index: bpy.props.IntProperty() # type: ignore
 
 
 class STFDrawAVAExpressionList(bpy.types.UIList):
-	bl_idname = "COLLECTION_UL_stfexp_constraint_rotation_sources_list"
+	bl_idname = "COLLECTION_UL_stfexp_constraint_parent_sources_list"
 
 	def draw_item(self, context: bpy.types.Context, layout: bpy.types.UILayout, data, item: ConstraintSource, icon, active_data, active_propname, index):
 		if(validate_node_path_selector(item.source)):
@@ -36,14 +37,18 @@ class STFDrawAVAExpressionList(bpy.types.UIList):
 			layout.label(text="No source selected!")
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: STFEXP_Constraint_Rotation):
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: STFEXP_Constraint_Parent):
 	layout.use_property_split = True
 
 	layout.prop(component, "weight")
-	row = layout.row(align=True, heading="Axes")
-	row.prop(component, "axes", toggle=True, index=0, text="X")
-	row.prop(component, "axes", toggle=True, index=1, text="Y")
-	row.prop(component, "axes", toggle=True, index=2, text="Z")
+	row = layout.row(align=True, heading="Translation Axes")
+	row.prop(component, "translation_axes", toggle=True, index=0, text="X")
+	row.prop(component, "translation_axes", toggle=True, index=1, text="Y")
+	row.prop(component, "translation_axes", toggle=True, index=2, text="Z")
+	row = layout.row(align=True, heading="Rotation Axes")
+	row.prop(component, "rotation_axes", toggle=True, index=0, text="X")
+	row.prop(component, "rotation_axes", toggle=True, index=1, text="Y")
+	row.prop(component, "rotation_axes", toggle=True, index=2, text="Z")
 
 	layout.separator(factor=1)
 
@@ -67,10 +72,11 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
 	component_ref, component = add_component(context_object, _blender_property_name, stf_id, _stf_type)
 	import_component_base(context, component, json_resource, _blender_property_name, context_object)
-	component: STFEXP_Constraint_Rotation = component
+	component: STFEXP_Constraint_Parent = component
 
 	component.weight = json_resource.get("weight", 1)
-	component.axes = json_resource.get("axes", [True, True, True])
+	component.translation_axes = json_resource.get("translation_axes", [True, True, True])
+	component.rotation_axes = json_resource.get("rotation_axes", [True, True, True])
 
 	_get_component = preserve_component_reference(component, _blender_property_name, context_object)
 	def _handle():
@@ -84,11 +90,12 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	return component
 
 
-def _stf_export(context: STF_ExportContext, component: STFEXP_Constraint_Rotation, context_object: any) -> tuple[dict, str]:
+def _stf_export(context: STF_ExportContext, component: STFEXP_Constraint_Parent, context_object: any) -> tuple[dict, str]:
 	ret = export_component_base(context, _stf_type, component, _blender_property_name, context_object)
 
 	ret["weight"] = component.weight
-	ret["axes"] = component.axes[:]
+	ret["translation_axes"] = component.translation_axes[:]
+	ret["rotation_axes"] = component.rotation_axes[:]
 
 	sources = []
 	ret["sources"] = sources
@@ -109,7 +116,7 @@ def _stf_export(context: STF_ExportContext, component: STFEXP_Constraint_Rotatio
 
 """Bone instance handling"""
 
-def _set_component_instance_standin(context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: STFEXP_Constraint_Rotation, standin_component: STFEXP_Constraint_Rotation):
+def _set_component_instance_standin(context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: STFEXP_Constraint_Parent, standin_component: STFEXP_Constraint_Parent):
 	for source_original in component.sources:
 		source = standin_component.sources.add()
 		source.weight = source_original.weight
@@ -117,11 +124,12 @@ def _set_component_instance_standin(context: bpy.types.Context, component_ref: S
 		source.source.target_bone = source_original.source.target_bone
 
 
-def _serialize_component_instance_standin_func(context: STF_ExportContext, component_ref: STF_Component_Ref, standin_component: STFEXP_Constraint_Rotation, context_object: any) -> dict:
+def _serialize_component_instance_standin_func(context: STF_ExportContext, component_ref: STF_Component_Ref, standin_component: STFEXP_Constraint_Parent, context_object: any) -> dict:
 	ret = {}
 
 	ret["weight"] = standin_component.weight
-	ret["axes"] = standin_component.axes[:]
+	ret["translation_axes"] = standin_component.translation_axes[:]
+	ret["rotation_axes"] = standin_component.rotation_axes[:]
 
 	sources = []
 	ret["sources"] = sources
@@ -138,11 +146,12 @@ def _serialize_component_instance_standin_func(context: STF_ExportContext, compo
 	context.add_task(STF_TaskSteps.DEFAULT, _handle)
 	return ret
 
-def _parse_component_instance_standin_func(context: STF_ImportContext, json_resource: dict, component_ref: STF_Component_Ref, standin_component: STFEXP_Constraint_Rotation, context_object: any):
+def _parse_component_instance_standin_func(context: STF_ImportContext, json_resource: dict, component_ref: STF_Component_Ref, standin_component: STFEXP_Constraint_Parent, context_object: any):
 	_get_component = preserve_component_reference(standin_component, _blender_property_name, context_object)
 
 	standin_component.weight = json_resource.get("weight", 1)
-	standin_component.axes = json_resource.get("axes", [True, True, True])
+	standin_component.translation_axes = json_resource.get("translation_axes", [True, True, True])
+	standin_component.rotation_axes = json_resource.get("rotation_axes", [True, True, True])
 
 	def _handle():
 		component = _get_component()
@@ -183,12 +192,12 @@ def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: 
 
 """Module definition"""
 
-class STF_Module_STFEXP_Constraint_Rotation(STF_BlenderComponentModule):
-	"""A rigging behaviour that applies rotation from its sources onto itself"""
+class STF_Module_STFEXP_Constraint_Parent(STF_BlenderComponentModule):
+	"""A rigging behaviour that parents itself to its sources"""
 	stf_type = _stf_type
 	stf_kind = "component"
-	like_types = ["constraint.rotation", "constraint"]
-	understood_application_types = [STFEXP_Constraint_Rotation]
+	like_types = ["constraint.parent", "constraint"]
+	understood_application_types = [STFEXP_Constraint_Parent]
 	import_func = _stf_import
 	export_func = _stf_export
 
@@ -210,13 +219,13 @@ class STF_Module_STFEXP_Constraint_Rotation(STF_BlenderComponentModule):
 
 
 register_stf_modules = [
-	STF_Module_STFEXP_Constraint_Rotation
+	STF_Module_STFEXP_Constraint_Parent
 ]
 
 
 def register():
-	setattr(bpy.types.Object, _blender_property_name, bpy.props.CollectionProperty(type=STFEXP_Constraint_Rotation, options=set()))
-	setattr(bpy.types.Bone, _blender_property_name, bpy.props.CollectionProperty(type=STFEXP_Constraint_Rotation, options=set()))
+	setattr(bpy.types.Object, _blender_property_name, bpy.props.CollectionProperty(type=STFEXP_Constraint_Parent, options=set()))
+	setattr(bpy.types.Bone, _blender_property_name, bpy.props.CollectionProperty(type=STFEXP_Constraint_Parent, options=set()))
 
 def unregister():
 	if hasattr(bpy.types.Object, _blender_property_name):

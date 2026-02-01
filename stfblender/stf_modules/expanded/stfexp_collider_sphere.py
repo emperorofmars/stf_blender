@@ -8,7 +8,7 @@ from ...exporter.stf_export_context import STF_ExportContext
 from ...importer.stf_import_context import STF_ImportContext
 from ...utils.component_utils import ComponentLoadJsonOperatorBase, add_component, export_component_base, import_component_base
 from ...utils.trs_utils import blender_translation_to_stf, stf_translation_to_blender
-from ...utils.animation_conversion_utils import get_component_index, get_component_stf_path, get_component_stf_path_from_collection
+from ...utils.animation_conversion_utils import get_component_index, get_component_stf_path_from_collection
 
 
 _stf_type = "stfexp.collider.sphere"
@@ -53,6 +53,7 @@ class STFEXP_Collider_Sphere_LoadJsonOperator(ComponentLoadJsonOperatorBase, bpy
 
 def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: STFEXP_Collider_Sphere):
 	layout.use_property_split = True
+
 	layout.prop(component, "radius")
 	layout.prop(component, "offset_position")
 

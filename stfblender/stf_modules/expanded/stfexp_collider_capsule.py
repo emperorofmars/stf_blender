@@ -7,7 +7,7 @@ from ...exporter.stf_export_context import STF_ExportContext
 from ...importer.stf_import_context import STF_ImportContext
 from ...utils.component_utils import ComponentLoadJsonOperatorBase, add_component, export_component_base, import_component_base
 from ...utils.trs_utils import blender_rotation_to_stf, blender_translation_to_stf, stf_rotation_to_blender, stf_translation_to_blender
-from ...utils.animation_conversion_utils import get_component_index, get_component_stf_path, get_component_stf_path_from_collection
+from ...utils.animation_conversion_utils import get_component_index, get_component_stf_path_from_collection
 from ...base.property_path_part import BlenderPropertyPathPart, STFPropertyPathPart
 
 
@@ -30,7 +30,6 @@ def _parse_json(component: STFEXP_Collider_Capsule, json_resource: dict):
 		for index in range(3):
 			offset_position[index] = json_resource["offset_position"][index]
 		component.offset_position = stf_translation_to_blender(offset_position)
-
 	if("offset_rotation" in json_resource):
 		offset_rotation = mathutils.Vector((0, 0, 0, 0))
 		for index in range(4):
@@ -65,6 +64,7 @@ class STFEXP_Collider_Capsule_LoadJsonOperator(ComponentLoadJsonOperatorBase, bp
 
 def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: STFEXP_Collider_Capsule):
 	layout.use_property_split = True
+
 	layout.prop(component, "radius")
 	layout.prop(component, "height")
 	layout.prop(component, "offset_position")
