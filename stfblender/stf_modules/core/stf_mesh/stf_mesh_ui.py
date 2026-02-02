@@ -63,10 +63,13 @@ class STFMeshSpatialPanel(bpy.types.Panel):
 		# Set ID
 		draw_stf_id_ui(layout, context, context.mesh, context.mesh.stf_info, STFSetMeshIDOperator.bl_idname)
 
-		layout.separator(factor=2, type="LINE")
+		layout.separator(factor=1, type="SPACE")
+
+		layout.prop(context.mesh.stf_mesh, "export_blendshape_normals")
+		layout.prop(context.mesh.stf_mesh, "export_vertex_colors")
 
 		# Components
-		layout.separator(factor=1, type="SPACE")
+		layout.separator(factor=2, type="LINE")
 		header, body = layout.panel("stf.mesh_components", default_closed = False)
 		header.label(text="STF Components", icon="GROUP")
 		if(body): draw_components_ui(layout, context, context.mesh.stf_info, context.mesh, STFAddMeshComponentOperator.bl_idname, STFRemoveMeshComponentOperator.bl_idname, STFEditMeshComponentIdOperator.bl_idname)

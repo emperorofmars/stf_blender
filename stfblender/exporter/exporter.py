@@ -164,8 +164,6 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 
 		self.layout.separator(factor=2, type="LINE")
 
-		self.layout.prop(self.export_settings, property="stf_mesh_vertex_colors")
-		self.layout.prop(self.export_settings, property="stf_mesh_blendshape_normals")
 		self.layout.prop(self.export_settings, property="stf_animation_bake_constraints")
 		self.layout.prop(self.export_settings, property="stf_animation_preserve_baked")
 

@@ -70,7 +70,7 @@ def resolve_blender_grr(grr: BlenderGRR) -> any:
 			match(grr.component_reference_type):
 				case "blender":
 					component_holder = resolve_blender_resource_reference(grr.blender_resource_reference)
-					if(grr.stf_component_id and grr.stf_component_id in component_holder.stf_info.stf_components):
+					if(component_holder and grr.stf_component_id and grr.stf_component_id in component_holder.stf_info.stf_components):
 						component_ref: STF_Component_Ref = component_holder.stf_info.stf_components[grr.stf_component_id]
 						for component in getattr(component_holder, component_ref.blender_property_name):
 							if(component.stf_id == grr.stf_component_id):
