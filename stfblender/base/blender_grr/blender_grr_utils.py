@@ -4,7 +4,7 @@ from .blender_grr import BlenderGRR
 from .stf_data_resource_reference_utils import draw_stf_data_resource_reference, resolve_stf_data_resource_reference, validate_stf_data_resource_reference
 from .blender_resource_reference import draw_blender_resource_reference, pretty_print_blender_resource_reference, resolve_blender_resource_reference, validate_blender_resource_reference
 from ...base.stf_module_data import STF_BlenderDataResourceBase, STF_Data_Ref
-from ...base.stf_module_component import STF_BlenderComponentBase, STF_Component_Ref
+from ...base.stf_module_component import STF_BlenderComponentBase, STF_Component_Editmode_Resistant_Reference, STF_Component_Ref
 from ...utils.armature_bone import ArmatureBone
 from .utils import draw_component_info
 
@@ -101,7 +101,9 @@ def construct_blender_grr(generic_resource: any, grr: BlenderGRR, force_resource
 		grr.reference_type = "stf_data_resource"
 		grr.stf_data_resource_reference.collection = generic_resource.id_data
 		grr.stf_data_resource_reference.stf_data_resource_id = generic_resource.stf_id
-	elif(isinstance(generic_resource, STF_BlenderComponentBase)):
+	elif(isinstance(generic_resource, STF_BlenderComponentBase) or isinstance(generic_resource, STF_Component_Editmode_Resistant_Reference)):
+		if(isinstance(generic_resource, STF_Component_Editmode_Resistant_Reference)):
+			generic_resource = generic_resource.get()
 		grr.reference_type = "stf_component"
 		target_id = force_resource_id if force_resource_id else generic_resource.stf_id
 		# try if component sits on a stf-data-resource
