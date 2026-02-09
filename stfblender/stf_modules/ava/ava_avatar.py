@@ -16,7 +16,7 @@ _blender_property_name = "stf_ava_avatar"
 def _poll_armature_instance(self, blender_object: bpy.types.Object) -> bool:
 	return blender_object.data and type(blender_object.data) == bpy.types.Armature
 def _poll_mesh_instance(self, blender_object: bpy.types.Object) -> bool:
-	return blender_object.data and type(blender_object.data) == bpy.types.Armature
+	return blender_object.data and type(blender_object.data) == bpy.types.Mesh
 
 class AVA_Avatar(STF_BlenderComponentBase):
 	viewport: bpy.props.PointerProperty(type=bpy.types.Object, name="Viewport", description="This Object's location will be used to determine the viewport location", options=set()) # type: ignore
