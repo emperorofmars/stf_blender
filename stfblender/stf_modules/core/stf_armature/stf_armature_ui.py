@@ -25,7 +25,7 @@ class STFRemoveArmatureComponentOperator(bpy.types.Operator, STFRemoveComponentO
 	def get_property(self, context): return context.armature
 
 class STFEditArmatureComponentIdOperator(bpy.types.Operator, STFEditComponentOperatorBase):
-	"""Edit the ID and overrides of this Component"""
+	"""Edit the ID of this Component"""
 	bl_idname = "stf.edit_armature_component_id"
 	def get_property(self, context): return context.armature
 

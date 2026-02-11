@@ -44,7 +44,7 @@ class STFRemoveSceneCollectionComponentOperator(bpy.types.Operator, STFRemoveCom
 	def get_property(self, context): return context.scene.collection
 
 class STFEditSceneCollectionComponentIdOperator(bpy.types.Operator, STFEditComponentOperatorBase):
-	"""Edit the ID and overrides of this Component"""
+	"""Edit the ID of this Component"""
 	bl_idname = "stf.edit_scene_collection_component_id"
 	def get_property(self, context): return context.scene.collection
 

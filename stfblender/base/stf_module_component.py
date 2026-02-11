@@ -20,7 +20,7 @@ class STF_BlenderComponentBase(bpy.types.PropertyGroup):
 	"""Base class for stf component property-groups"""
 	stf_id: bpy.props.StringProperty(name="ID", description="Universally unique ID", options=set()) # type: ignore
 	stf_name: bpy.props.StringProperty(name="STF Name", description="Optional component name", options=set()) # type: ignore
-	overrides: bpy.props.CollectionProperty(type=BlenderGRR, name="Overrides", description="If this component is parsed by a game-engine, these components should be ignored", options=set()) # type: ignore
+	exclusion_group: bpy.props.StringProperty(name="Exclusion Group", description="Game engines will import only one 'type' in this group.", options=set()) # type: ignore
 	enabled: bpy.props.BoolProperty(name="Enabled", default=True, options={"ANIMATABLE"}) # type: ignore
 
 
@@ -33,6 +33,7 @@ class STF_BlenderComponentModule(STF_Module):
 
 
 class STF_Component_Editmode_Resistant_Reference:
+	"""Because Blender"""
 	def __init__(self, component: STF_BlenderComponentBase, context_object: any):
 		self.component_id = component.stf_id
 		self.stf_id = component.stf_id

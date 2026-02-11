@@ -25,7 +25,7 @@ class STFRemoveBoneComponentOperator(bpy.types.Operator, STFRemoveComponentOpera
 	def get_property(self, context): return context.bone
 
 class STFEditBoneComponentIdOperator(bpy.types.Operator, STFEditComponentOperatorBase):
-	"""Edit the ID and overrides of this Component"""
+	"""Edit the ID of this Component"""
 	bl_idname = "stf.edit_bone_component_id"
 	def get_property(self, context): return context.bone
 

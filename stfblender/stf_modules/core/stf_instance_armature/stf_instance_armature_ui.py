@@ -30,7 +30,7 @@ class STFRemoveArmatureInstanceComponentOperator(bpy.types.Operator, STFRemoveCo
 	def get_components_ref_property(self, context) -> STF_Component_Ref: return context.object.stf_instance_armature.stf_components
 
 class STFEditArmatureInstanceComponentIdOperator(bpy.types.Operator, STFEditComponentOperatorBase):
-	"""Edit the ID and overrides of this Component"""
+	"""Edit the ID of this Component"""
 	bl_idname = "stf.edit_armature_instance_component_id"
 	def get_property(self, context): return context.object
 	def get_components_ref_property(self, context) -> STF_Component_Ref: return context.object.stf_instance_armature.stf_components
@@ -129,10 +129,10 @@ class STFArmatureInstancePanel(bpy.types.Panel):
 		# Standins for components on bones, so they can be animated and changed per instance
 		header, body = layout.panel("stf.instance_armature_bone_component_standins", default_closed = False)
 		header.label(text="Bone-Instance Component Standins", icon="GROUP")
-		if(body): 
+		if(body):
 			layout.label(text="Override and animate values of components on bones.")
 			layout.operator(UpdateArmatureInstanceComponentStandins.bl_idname)
 			layout.separator(factor=1, type="SPACE")
-			
+
 			if(len(context.object.stf_instance_armature_component_standins.stf_components) > 0):
 				draw_instance_standin_components_ui(layout, context, context.object.stf_instance_armature_component_standins, context.object, STFEditArmatureInstanceComponentIdOperator.bl_idname, _get_target_object_func, _inject_standin_ui)

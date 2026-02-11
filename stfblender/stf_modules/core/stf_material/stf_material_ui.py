@@ -30,7 +30,7 @@ class STFRemoveMaterialComponentOperator(bpy.types.Operator, STFRemoveComponentO
 	def get_property(self, context): return context.material
 
 class STFEditMaterialComponentIdOperator(bpy.types.Operator, STFEditComponentOperatorBase):
-	"""Edit the ID and overrides of this Component"""
+	"""Edit the ID of this Component"""
 	bl_idname = "stf.edit_material_component_id"
 	def get_property(self, context): return context.material
 
@@ -234,7 +234,7 @@ class STFMaterialSpatialPanel(bpy.types.Panel):
 		self.layout.separator(factor=2, type="LINE")
 		header, body = self.layout.panel("stf.material_hints", default_closed = False)
 		header.label(text="Shader Hints", icon="GROUP")
-		if(body): 
+		if(body):
 			box = body.box()
 			header_row = box.row()
 			header_row_l = header_row.row()

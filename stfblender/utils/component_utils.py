@@ -2,7 +2,6 @@ import bpy
 import json
 from typing import Callable
 
-from ..base.stf_task_steps import STF_TaskSteps
 from ..exporter.stf_export_context import STF_ExportContext
 from ..importer.stf_import_context import STF_ImportContext
 from ..base.stf_module_component import STF_BlenderComponentBase, STF_Component_Ref
@@ -132,57 +131,6 @@ class STFEditComponentOperatorBase:
 		return self.get_property(context).stf_info.stf_components
 
 
-class AddOverrideToComponent(bpy.types.Operator):
-	"""Add override to component"""
-	bl_idname = "stf.add_override_to_component"
-	bl_label = "Add"
-	bl_options = {"REGISTER", "UNDO", "INTERNAL"}
-
-	blender_id_type: bpy.props.StringProperty() # type: ignore
-	blender_property_name: bpy.props.StringProperty() # type: ignore
-	bone_name: bpy.props.StringProperty() # type: ignore
-	component_id: bpy.props.StringProperty() # type: ignore
-
-	def execute(self, context: bpy.types.Context):
-		blender_id = getattr(context, self.blender_id_type.lower())
-		if(self.bone_name):
-			for bone in blender_id.bones:
-				if(bone.name == self.bone_name):
-					blender_id = bone
-					break
-		for component in getattr(blender_id, self.blender_property_name):
-			if(component.stf_id == self.component_id):
-				override: BlenderGRR = component.overrides.add()
-				override.reference_type = "stf_component"
-				return {"FINISHED"}
-		return {"CANCELLED"}
-
-class RemoveOverrideFromComponent(bpy.types.Operator):
-	"""Add override to component"""
-	bl_idname = "stf.remove_override_from_component"
-	bl_label = "Remove"
-	bl_options = {"REGISTER", "UNDO", "INTERNAL"}
-
-	blender_id_type: bpy.props.StringProperty() # type: ignore
-	blender_property_name: bpy.props.StringProperty() # type: ignore
-	bone_name: bpy.props.StringProperty() # type: ignore
-	component_id: bpy.props.StringProperty() # type: ignore
-	index: bpy.props.IntProperty(default=-1) # type: ignore
-
-	def execute(self, context: bpy.types.Context):
-		blender_id = getattr(context, self.blender_id_type.lower())
-		if(self.bone_name):
-			for bone in blender_id.bones:
-				if(bone.name == self.bone_name):
-					blender_id = bone
-					break
-		for component in getattr(blender_id, self.blender_property_name):
-			if(component.stf_id == self.component_id):
-				component.overrides.remove(self.index)
-				return {"FINISHED"}
-		return {"CANCELLED"}
-
-
 def preserve_component_reference(component: STF_BlenderComponentBase, blender_property_name: str, context_object: any) -> Callable[[], STF_BlenderComponentBase]:
 	component_id = component.stf_id
 	if(type(context_object) == bpy.types.Bone and type(component.id_data) == bpy.types.Armature):
@@ -220,19 +168,7 @@ def get_components_from_object(application_object: any) -> list:
 
 def import_component_base(context: STF_ImportContext, component: STF_BlenderComponentBase, json_resource: dict, blender_property_name: str, context_object: any):
 	if("name" in json_resource): component.stf_name = json_resource["name"]
-	if("overrides" in json_resource):
-		_get_component = preserve_component_reference(component, blender_property_name, context_object)
-
-		def _handle():
-			component = _get_component()
-			for override_id in json_resource["overrides"]:
-				override: BlenderGRR = component.overrides.add()
-				if(override_resource := context.get_imported_resource(override_id)):
-					construct_blender_grr(override_resource, override, override_id)
-				else: # fallback if something went fucky
-					override.reference_type = "stf_component"
-					override.stf_component_id = override_id
-		context.add_task(STF_TaskSteps.DEFAULT, _handle)
+	if("exclusion_group" in json_resource): component.exclusion_group = json_resource["exclusion_group"]
 	if("enabled" in json_resource):
 		component.enabled = json_resource["enabled"]
 
@@ -240,21 +176,7 @@ def export_component_base(context: STF_ExportContext, stf_type: str, component: 
 	ensure_stf_id(context, component, component)
 	ret = { "type": stf_type }
 	if(component.stf_name): ret["name"] = component.stf_name
-	if(component.overrides and len(component.overrides) > 0):
-		_get_component = preserve_component_reference(component, blender_property_name, context_object)
-		def _handle():
-			component = _get_component()
-			overrides_list = []
-			for override in component.overrides:
-				if(resolved := resolve_blender_grr(override)):
-					if(resolved_id := context.serialize_resource(resolved)):
-						overrides_list.append(resolved_id)
-						continue
-				if(override.stf_component_id): # fallback if something went fucky
-					overrides_list.append(override.stf_component_id)
-			if(len(overrides_list)):
-				ret["overrides"] = overrides_list
-		context.add_task(STF_TaskSteps.DEFAULT, _handle)
+	if(component.exclusion_group): ret["exclusion_group"] = component.exclusion_group
 	if(component.enabled == False): ret["enabled"] = False
 	return ret
 

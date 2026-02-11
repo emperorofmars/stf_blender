@@ -114,7 +114,7 @@ class STFRemoveDataResourceComponentOperator(bpy.types.Operator, STFRemoveCompon
 	def get_components_ref_property(self, context) -> any: return _get_data_resource_component_ref_property_collection(context)
 
 class STFEditDataResourceComponentIdOperator(bpy.types.Operator, STFEditComponentOperatorBase):
-	"""Edit the ID and overrides of this component"""
+	"""Edit the ID of this component"""
 	bl_idname = "stf.edit_data_resource_component_id"
 	@classmethod
 	def poll(cls, context): return context.scene is not None if stf_data_resource_use_scene_collection else context.collection is not None
@@ -123,10 +123,6 @@ class STFEditDataResourceComponentIdOperator(bpy.types.Operator, STFEditComponen
 
 
 def draw_resource(layout: bpy.types.UILayout, context: bpy.types.Context, resource_ref: STF_Data_Ref, collection: bpy.types.Collection, resource: STF_BlenderDataResourceBase):
-	box = layout.box()
-	row = box.row()
-	row.label(text=resource_ref.stf_type + "  -  ID: " + resource_ref.stf_id + " ")
-	
 	box = layout.box()
 	# Component header info
 	row = box.row()

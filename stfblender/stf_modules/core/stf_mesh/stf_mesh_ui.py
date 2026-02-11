@@ -25,7 +25,7 @@ class STFRemoveMeshComponentOperator(bpy.types.Operator, STFRemoveComponentOpera
 	def get_property(self, context): return context.mesh
 
 class STFEditMeshComponentIdOperator(bpy.types.Operator, STFEditComponentOperatorBase):
-	"""Edit the ID and overrides of this Component"""
+	"""Edit the ID of this Component"""
 	bl_idname = "stf.edit_mesh_component_id"
 	def get_property(self, context): return context.mesh
 

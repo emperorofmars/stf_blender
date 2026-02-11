@@ -1,7 +1,6 @@
 import bpy
 from typing import Callable
 
-from .component_utils import AddOverrideToComponent, RemoveOverrideFromComponent
 from ..base.stf_module_component import InstanceModComponentRef, STF_BlenderComponentBase, STF_Component_Ref
 from ..base.stf_registry import find_component_module, get_all_component_modules, get_component_modules, get_data_component_modules
 from ..base.blender_grr import *
@@ -173,32 +172,10 @@ def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, compo
 	row.separator(factor=5)
 	row.prop(component, "stf_name")
 
-	# overrides
-	header, body = box.panel("stf.component_overrides_" + str(component_ref.stf_type) + str(component_ref.stf_id) + str(is_instance), default_closed = True)
-	header.label(text="Component Overrides (" + str(len(component.overrides)) + ")", icon="COPY_ID")
-	if(body):
-		overrides_box = body.box()
-		row = overrides_box.row()
-		row_l = row.row(); row_l.alignment = "LEFT"; row_l.label(text="Overrides:")
-		row_r = row.row(); row_r.alignment = "RIGHT"; add_button = row_r.operator(AddOverrideToComponent.bl_idname, icon="PLUS")
-		add_button.blender_id_type = component.id_data.id_type
-		add_button.blender_property_name = component_ref.blender_property_name
-		if(type(stf_application_object) == bpy.types.Bone):
-			add_button.bone_name = stf_application_object.name
-		add_button.component_id = component_ref.stf_id
-
-		overrides_box.use_property_split = True
-		for index, override in enumerate(component.overrides):
-			if(index > 0): overrides_box.separator(factor=1, type="LINE")
-			row = overrides_box.row()
-			draw_blender_grr(row.column(align=True), override, "stf_component")
-			remove_button = row.operator(RemoveOverrideFromComponent.bl_idname, text="", icon="X")
-			remove_button.blender_id_type = component.id_data.id_type
-			remove_button.blender_property_name = component_ref.blender_property_name
-			if(type(stf_application_object) == bpy.types.Bone):
-				remove_button.bone_name = stf_application_object.name
-			remove_button.component_id = component_ref.stf_id
-			remove_button.index = index
+	exclusion_row = box.row()
+	if(is_instance):
+		exclusion_row.enabled = False
+	exclusion_row.prop(component, "exclusion_group")
 
 	# relevant for component instances & standins
 	if(inject_ui):
