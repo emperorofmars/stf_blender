@@ -65,15 +65,19 @@ def _get_target_object_func(component_holder: bpy.types.Object, component_ref: I
 	return None
 
 def _inject_ui(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: InstanceModComponentRef, context_object: any, component: any) -> bool:
+	layout = layout.box()
+	if(not component_ref.bone):
+		layout.alert = True
+		layout.label(text="Please select a target Bone")
 	layout.prop_search(component_ref, "bone", component_ref.id_data.data, "bones", text="Target Bone")
 	if(not component_ref.bone):
-		layout.label(text="Please select a target Bone")
 		return False
 	return True
 
 def _inject_standin_ui(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: InstanceModComponentRef, context_object: any, component: any) -> bool:
-	layout.label(text="Target Bone: " + component_ref.bone)
+	layout = layout.box().row()
 	layout.prop(component_ref, "override")
+	layout.label(text="Target Bone: " + component_ref.bone)
 	return True
 
 

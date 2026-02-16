@@ -27,6 +27,7 @@ def add_component(context_object: any, blender_property_name: str, stf_id: str, 
 	new_component = getattr(context_object, blender_property_name).add()
 	new_component.name = stf_id
 	new_component.stf_id = component_ref.stf_id
+	new_component.stf_name = context_object.name + " - " + stf_type
 
 	if(blender_property_name == "stf_json_fallback_component"):
 		new_component.json = "{\"type\": \"" + stf_type + "\"}"
@@ -168,7 +169,12 @@ def get_components_from_object(application_object: any) -> list:
 
 def import_component_base(context: STF_ImportContext, component: STF_BlenderComponentBase, json_resource: dict, blender_property_name: str, context_object: any):
 	if("name" in json_resource): component.stf_name = json_resource["name"]
-	if("exclusion_group" in json_resource): component.exclusion_group = json_resource["exclusion_group"]
+	if("exclusion_group" in json_resource and json_resource["exclusion_group"]):
+		component.exclusion_group = json_resource["exclusion_group"]
+		if(component.exclusion_group not in context._root_collection.stf_exclusion_groups):
+			new_g = context._root_collection.stf_exclusion_groups.add()
+			new_g.name = component.exclusion_group
+			new_g.group_name = component.exclusion_group
 	if("enabled" in json_resource):
 		component.enabled = json_resource["enabled"]
 
@@ -224,3 +230,93 @@ class ComponentLoadJsonOperatorBase():
 			json_error = True
 		layout.alert = json_error
 		layout.prop(self, "json_string", text="", icon="ERROR" if json_error else "NONE")
+
+
+
+class STF_ExclusionGroups(bpy.types.PropertyGroup):
+	group_name: bpy.props.StringProperty(name="Group Name", options=set()) # type: ignore
+
+class STF_RegisterExclusionGroup(bpy.types.Operator):
+	"""Register new Exclusion Group to make it selectable globally"""
+	bl_idname = "stf.register_exclusion_group_operator"
+	bl_label = "Register new Exclusion Group"
+	bl_options = {"REGISTER", "UNDO"}
+
+	group_name: bpy.props.StringProperty(name="Group Name") # type: ignore
+
+	@classmethod
+	def poll(cls, context): return context.collection is not None
+
+	def invoke(self, context, event):
+		if(self.group_name):
+			return self.execute(context)
+		else:
+			return context.window_manager.invoke_props_dialog(self)
+
+	def execute(self, context: bpy.types.Context):
+		if(self.group_name and self.group_name not in context.collection.stf_exclusion_groups):
+			group = context.collection.stf_exclusion_groups.add()
+			group.name = self.group_name
+			group.group_name = self.group_name
+		return {"FINISHED"}
+
+class STF_RemoveExclusionGroup(bpy.types.Operator):
+	"""Remove Exclusion-Group"""
+	bl_idname = "stf.remove_exclusion_group_operator"
+	bl_label = "Remove"
+	bl_options = {"REGISTER", "UNDO"}
+
+	group_name: bpy.props.StringProperty(name="Group Name") # type: ignore
+
+	@classmethod
+	def poll(cls, context): return context.collection is not None
+
+	def execute(self, context: bpy.types.Context):
+		for index, g in enumerate(context.collection.stf_exclusion_groups):
+			if(g.name == self.group_name):
+				context.collection.stf_exclusion_groups.remove(index)
+		return {"FINISHED"}
+
+class STF_ManageExclusionGroups(bpy.types.Operator):
+	"""Manage Registered Exclusion-Groups"""
+	bl_idname = "stf.manage_exclusion_groups_operator"
+	bl_label = "Manage Exclusion-Groups"
+	bl_options = {"REGISTER", "UNDO", "INTERNAL"}
+
+	initial_groups: bpy.props.CollectionProperty(type=STF_ExclusionGroups, name="Exclusion Groups", options=set()) # type: ignore
+
+	@classmethod
+	def poll(cls, context): return context.collection is not None
+
+	def invoke(self, context: bpy.types.Context, event):
+		for g in context.collection.stf_exclusion_groups:
+			new_g = self.initial_groups.add()
+			new_g.name = g.name
+		return context.window_manager.invoke_props_dialog(self, confirm_text="Done")
+
+	def execute(self, context: bpy.types.Context):
+		return {"FINISHED"}
+
+	def cancel(self, context: bpy.types.Context):
+		context.collection.stf_exclusion_groups.clear()
+		for g in self.initial_groups:
+			new_g = context.collection.stf_exclusion_groups.add()
+			new_g.name = g.name
+			new_g.group_name = g.name
+
+	def draw(self, context: bpy.types.Context):
+		layout = self.layout
+		for g in context.collection.stf_exclusion_groups:
+			row = layout.row(align=True)
+			row.label(text=g.name)
+			row.operator(STF_RemoveExclusionGroup.bl_idname, icon="X", text="").group_name = g.name
+		layout.separator(factor=2, type="LINE")
+		layout.operator(STF_RegisterExclusionGroup.bl_idname, text="Add New Group", icon="PLUS")
+
+
+def register():
+	bpy.types.Collection.stf_exclusion_groups = bpy.props.CollectionProperty(type=STF_ExclusionGroups, name="Exclusion Groups", options=set())
+
+def unregister():
+	if(hasattr(bpy.types.Collection, "stf_exclusion_groups")):
+		del bpy.types.Collection.stf_exclusion_groups

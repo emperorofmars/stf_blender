@@ -7,7 +7,7 @@ from ...utils.reference_helper import import_resource, register_exported_resourc
 
 class NodePathSelector(bpy.types.PropertyGroup):
 	target_object: bpy.props.PointerProperty(type=bpy.types.Object, name="Object") # type: ignore
-	target_bone: bpy.props.StringProperty(name="Bone (Optional)") # type: ignore
+	target_bone: bpy.props.StringProperty(name="Bone") # type: ignore
 
 
 def draw_node_path_selector(layout: bpy.types.UILayout, nps: NodePathSelector, text: str = "Target"):

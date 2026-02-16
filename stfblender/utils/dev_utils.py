@@ -86,6 +86,8 @@ def cleanup_unreferenced_components():
 		clean_id_thingy(blender_thingy)
 	for blender_thingy in bpy.data.meshes:
 		clean_id_thingy(blender_thingy)
+	for blender_thingy in bpy.data.curves:
+		clean_id_thingy(blender_thingy)
 
 
 class CleanupOp(bpy.types.Operator):

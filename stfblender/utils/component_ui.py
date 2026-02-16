@@ -1,6 +1,8 @@
 import bpy
 from typing import Callable
 
+from .component_utils import STF_ManageExclusionGroups, STF_RegisterExclusionGroup
+
 from ..base.stf_module_component import InstanceModComponentRef, STF_BlenderComponentBase, STF_Component_Ref
 from ..base.stf_registry import find_component_module, get_all_component_modules, get_component_modules, get_data_component_modules
 from ..base.blender_grr import *
@@ -72,8 +74,18 @@ class STFDrawComponentList(bpy.types.UIList):
 	def draw_item(self, context: bpy.types.Context, layout: bpy.types.UILayout, data, item: STF_Component_Ref, icon, active_data, active_propname):
 		global stf_component_filter
 		component = None
-		if(hasattr(item.id_data, item.blender_property_name) and stf_component_filter != bpy.types.Bone):
-			for component in getattr(item.id_data, item.blender_property_name):
+
+		# Because Blender is weird with bones :/
+		parent = None
+		if(stf_component_filter == bpy.types.Bone):
+			anc = item.rna_ancestors()
+			if(anc and len(anc) > 1 and type(anc[len(anc) - 2]) == bpy.types.Bone):
+				parent = anc[len(anc) - 2]
+		else:
+			parent = item.id_data
+
+		if(hasattr(parent, item.blender_property_name)):
+			for component in getattr(parent, item.blender_property_name):
 				if(component.stf_id == item.stf_id):
 					break
 		split = layout.split(factor=0.4)
@@ -86,7 +98,7 @@ class STFDrawComponentList(bpy.types.UIList):
 			else:
 				row_l.alert = True
 				row_l.label(text="Unnamed", icon="FILE_TEXT")
-		elif(stf_component_filter != bpy.types.Bone):
+		else:
 			layout.alert = True
 			row_l.label(text="Invalid Component!", icon="ERROR")
 
@@ -164,6 +176,12 @@ def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, compo
 	row_r.operator(CopyToClipboard.bl_idname, text="", icon="DUPLICATE").text = component_ref.stf_id
 	row_r.operator(edit_op, text="", icon="MODIFIER").component_id = component_ref.stf_id
 
+	# relevant for component instances & standins
+	if(inject_ui):
+		box.separator(factor=1, type="LINE")
+		if(not inject_ui(box, context, component_ref, stf_application_object, component)):
+			return
+
 	# enabled & name
 	row = box.row()
 	row_l = row.row()
@@ -172,16 +190,23 @@ def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, compo
 	row.separator(factor=5)
 	row.prop(component, "stf_name")
 
-	exclusion_row = box.row()
+	# exclusion group
+	exclusion_row = box.row(align=True)
 	if(is_instance):
 		exclusion_row.enabled = False
-	exclusion_row.prop(component, "exclusion_group")
-
-	# relevant for component instances & standins
-	if(inject_ui):
-		box.separator(factor=1, type="LINE")
-		if(not inject_ui(box, context, component_ref, stf_application_object, component)):
-			return
+		exclusion_row.prop(component, "exclusion_group", placeholder="e.g. physics-hair")
+	else:
+		exclusion_row_text = exclusion_row.row(align=True)
+		exclusion_row_text.prop_search(component, "exclusion_group", context.collection, "stf_exclusion_groups", results_are_suggestions=True)
+		exclusion_row_buttons = exclusion_row.row(align=True)
+		exclusion_row_buttons.alignment = "RIGHT"
+		if(component.exclusion_group):
+			exclusion_row_buttons.operator(CopyToClipboard.bl_idname, icon="DUPLICATE", text="")
+		exclusion_row_buttons.separator(factor=2)
+		if(component.exclusion_group and component.exclusion_group not in context.collection.stf_exclusion_groups):
+			exclusion_row_buttons.operator(STF_RegisterExclusionGroup.bl_idname, text="Make Group Selectable").group_name = component.exclusion_group
+		else:
+			exclusion_row_buttons.operator(STF_ManageExclusionGroups.bl_idname, text="Manage")
 
 	# determine the components module and call its appropriate draw function
 	stf_modules = get_all_component_modules()

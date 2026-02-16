@@ -2,7 +2,6 @@ import bpy
 from typing import Callable
 
 from .stf_module import STF_Module
-from ..base.blender_grr.blender_grr import BlenderGRR
 from ..utils.armature_bone import ArmatureBone
 
 """
@@ -20,7 +19,7 @@ class STF_BlenderComponentBase(bpy.types.PropertyGroup):
 	"""Base class for stf component property-groups"""
 	stf_id: bpy.props.StringProperty(name="ID", description="Universally unique ID", options=set()) # type: ignore
 	stf_name: bpy.props.StringProperty(name="STF Name", description="Optional component name", options=set()) # type: ignore
-	exclusion_group: bpy.props.StringProperty(name="Exclusion Group", description="Game engines will import only one 'type' in this group.", options=set()) # type: ignore
+	exclusion_group: bpy.props.StringProperty(name="Exclusion Group", description="Game engines will import components of only one 'type' in this group.", options=set()) # type: ignore
 	enabled: bpy.props.BoolProperty(name="Enabled", default=True, options={"ANIMATABLE"}) # type: ignore
 
 
@@ -72,7 +71,6 @@ class STF_BlenderBoneComponentModule(STF_BlenderComponentModule):
 	parse_component_instance_standin_func: Callable[[bpy.types.Context, dict, STF_Component_Ref, STF_BlenderComponentBase, any], None]
 
 
-
 class STF_ExportComponentHook:
 	"""Provides a way to export an application-native 'thing' into STF, after a target module has run.
 
@@ -92,4 +90,3 @@ class STF_ExportComponentHook:
 
 	# (Export Context, Application Object, Optional Parent Application Object)
 	hook_apply_func: Callable[[any, any, any], None]
-

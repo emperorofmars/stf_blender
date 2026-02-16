@@ -3,12 +3,13 @@ import bpy
 from bpy_extras.io_utils import ExportHelper
 
 from ..base.stf_meta import draw_meta_editor
-from ..base.stf_report import STFException, STFReport, STFReportSeverity
+from ..base.stf_report import STFReport, STFReportSeverity
 from ..base.stf_registry import get_export_modules
 from .stf_export_state import STF_ExportState
 from .stf_export_context import STF_ExportContext
 from ..utils.misc import OpenWebpage, draw_slot_link_warning, get_stf_version
 from .export_settings import STF_ExportSettings
+from ..package_key import package_key
 
 
 class STF_Export_Result:
@@ -74,7 +75,7 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 
 	export_settings: bpy.props.PointerProperty(type=STF_ExportSettings) # type: ignore
 
-	debug: bpy.props.BoolProperty(name="Export Debug Json File", default=True, description="Useful for inspection the exported file in a text-editor") # type: ignore
+	debug: bpy.props.BoolProperty(name="Export Debug Json File", default="bl_ext.vscode_development" in package_key, description="Useful for inspection the exported file in a text-editor") # type: ignore
 
 
 	def invoke(self, context: bpy.types.Context, event: bpy.types.Event):

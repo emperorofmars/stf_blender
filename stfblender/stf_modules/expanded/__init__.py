@@ -11,6 +11,8 @@ from . import stfexp_collider_capsule
 from . import stfexp_collider_plane
 from . import stfexp_camera
 from . import stfexp_light
+from .stfexp_text import stfexp_text
+from . import stfexp_instance_text
 
 register_stf_modules = \
 	stfexp_mesh_seams.register_stf_modules + \
@@ -24,4 +26,6 @@ register_stf_modules = \
 	stfexp_collider_capsule.register_stf_modules + \
 	stfexp_collider_plane.register_stf_modules + \
 	stfexp_camera.register_stf_modules + \
-	stfexp_light.register_stf_modules
+	stfexp_light.register_stf_modules + \
+	stfexp_text.register_stf_modules + \
+	stfexp_instance_text.register_stf_modules
