@@ -1,6 +1,6 @@
 import bpy
 
-from .ava_autosetup import ava_autosetup
+from .ava_autosetup import ava_autosetup, detect_mesh_and_armature
 
 
 class AVA_Autosetup_Data(bpy.types.PropertyGroup):
@@ -32,8 +32,6 @@ class AVA_Autosetup_Operator(bpy.types.Operator):
 			return {"CANCELLED"}
 
 
-# Hide in release until its more complete.
-
 class AVA_Autosetup_Panel(bpy.types.Panel):
 	bl_idname = "OBJECT_PT_ava_autosetup"
 	bl_label = "STF-AVA Autosetup"
@@ -46,18 +44,41 @@ class AVA_Autosetup_Panel(bpy.types.Panel):
 		return (context.scene is not None)
 
 	def draw(self, context: bpy.types.Context):
-		self.layout.use_property_split = True
-		self.layout.label(text="Automatically set-up a VR & V-Tubing avatar!")
+		layout = self.layout
+		layout.label(text="Automatically set-up a VR & V-Tubing avatar!")
+		layout.separator(factor=1)
 
-		self.layout.prop(context.scene.ava_autosetup, "use_scene_collection")
 		if(not context.scene.ava_autosetup.use_scene_collection):
-			self.layout.prop(context.scene.ava_autosetup, "target_collection", text="Target", icon="OUTLINER_COLLECTION")
-		
-		self.layout.separator(factor=1)
+			layout.prop(context.scene.ava_autosetup, "target_collection", text="Target", icon="OUTLINER_COLLECTION")
+		if(not context.scene.ava_autosetup.target_collection):
+			layout.prop(context.scene.ava_autosetup, "use_scene_collection")
 
-		if(context.scene.ava_autosetup.use_scene_collection or context.scene.ava_autosetup.target_collection):
-			self.layout.label(text="Pre-existing STF components will be removed!", icon="WARNING_LARGE")
-			self.layout.operator(AVA_Autosetup_Operator.bl_idname, icon="KEY_RETURN")
+		layout.separator(factor=1)
+
+		selected_col = None
+		main_mesh = None
+		main_armature = None
+		if(context.scene.ava_autosetup.use_scene_collection):
+			selected_col = context.scene.collection
+		elif(context.scene.ava_autosetup.target_collection):
+			selected_col = context.scene.ava_autosetup.target_collection
+		if(selected_col):
+			detect_ret = detect_mesh_and_armature(selected_col)
+			if(detect_ret):
+				main_mesh, main_armature = detect_ret
+				layout.label(text="Detected Body Mesh: " + main_mesh.name, icon="CHECKMARK")
+				layout.label(text="Detected Armature: " + main_armature.name, icon="CHECKMARK")
+			else:
+				layout.label(text="Couldn't find Body Mesh!", icon="ERROR")
+				layout.label(text="Couldn't find Armature!", icon="ERROR")
+
+		layout.separator(factor=1)
+
+		if(main_mesh and main_armature and context.scene.ava_autosetup.use_scene_collection or context.scene.ava_autosetup.target_collection):
+			layout.label(text="Pre-existing STF components will be removed!", icon="WARNING_LARGE")
+			layout.separator(factor=1)
+			layout.operator(AVA_Autosetup_Operator.bl_idname, icon="KEY_RETURN")
+		layout.separator(factor=1)
 
 
 def register():
