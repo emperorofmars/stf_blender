@@ -68,7 +68,7 @@ def import_stf_mesh(context: STF_ImportContext, json_resource: dict, stf_id: str
 	py_lines = []
 	if("lines" in json_resource):
 		buffer_lines = BytesIO(context.import_buffer(json_resource["lines"]))
-		for _line_index in range(int(buffer_lines.getbuffer().nbytes / indices_width)):
+		for _line_index in range(int(buffer_lines.getbuffer().nbytes / (indices_width * 2))):
 			py_lines.append([parse_uint(buffer_lines, indices_width), parse_uint(buffer_lines, indices_width)])
 
 
@@ -172,7 +172,7 @@ def import_stf_mesh(context: STF_ImportContext, json_resource: dict, stf_id: str
 						break
 			if(len(vertex_groups) < len(json_resource["bones"])):
 				context.report(STFReport("Invalid Bone Mapping", STFReportSeverity.Error, stf_id, _stf_type, blender_mesh))
-			
+
 			buffer_weight_lens = BytesIO(context.import_buffer(json_resource["weight_lens"]))
 			buffer_bone_indices = BytesIO(context.import_buffer(json_resource["bone_indices"]))
 			buffer_weights = BytesIO(context.import_buffer(json_resource["weights"]))
