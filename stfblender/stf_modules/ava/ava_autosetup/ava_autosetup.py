@@ -37,9 +37,9 @@ def ava_autosetup(target: bpy.types.Collection):
 		return
 	main_mesh, main_armature = detect_ret
 
-	# Clear
 	target.stf_use_collection_as_prefab = True
 
+	# Clear existing components
 	clear_components(target, STF_Module_AVA_Avatar.blender_property_name)
 
 	# Apply
@@ -49,5 +49,5 @@ def ava_autosetup(target: bpy.types.Collection):
 	avatar.primary_mesh_instance = main_mesh
 	avatar.primary_armature_instance = main_armature
 
-	# todo
+	# todo detect visemes, humanoid armature mappings, eye rotation, ...
 
