@@ -159,7 +159,7 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart:
 	import re
 	if(match := re.search(r"^pose.bones\[\"(?P<bone_name>[\w. -:,]+)\"\]", data_path)):
-		if(type(application_object.data) != bpy.types.Armature):
+		if(type(application_object.data) != bpy.types.Armature or match.groupdict()["bone_name"] not in application_object.data.bones):
 			return None # todo warn
 		return STFPropertyPathPart([application_object.stf_info.stf_id, "instance"]) + context.resolve_application_property_path(ArmatureBone(application_object.data, match.groupdict()["bone_name"]), application_object_property_index, data_path[match.span()[1] :])
 	return None
