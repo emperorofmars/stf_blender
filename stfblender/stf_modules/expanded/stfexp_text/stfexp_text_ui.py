@@ -54,5 +54,5 @@ class STFTextSpatialPanel(bpy.types.Panel):
 		# Components
 		layout.separator(factor=2, type="LINE")
 		header, body = layout.panel("stf.text_components", default_closed = False)
-		header.label(text="STF Components", icon="GROUP")
+		header.label(text="STF Components (" + str(len(context.curve.stf_info.stf_components)) + ")", icon="GROUP")
 		if(body): draw_components_ui(layout, context, context.curve.stf_info, context.curve, STFAddTextComponentOperator.bl_idname, STFRemoveTextComponentOperator.bl_idname, STFEditTextComponentIdOperator.bl_idname)

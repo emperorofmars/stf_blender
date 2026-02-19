@@ -31,6 +31,18 @@ class AVA_Visemes_Blendshape(STF_BlenderComponentBase):
 	vis_ou: bpy.props.StringProperty(name="OU", options=set()) # type: ignore
 
 
+def automap(component: AVA_Visemes_Blendshape, mesh: bpy.types.Mesh):
+	for viseme in _voice_visemes_15:
+		component["vis_" + viseme] = ""
+
+	if(mesh.shape_keys):
+		for shape_key in mesh.shape_keys.key_blocks:
+			for viseme in _voice_visemes_15:
+				for prefix in _voice_visemes_15_prefixes:
+					if(shape_key.name.lower().find(prefix + viseme) > 0 and (len(getattr(component, "vis_" + viseme)) > len(shape_key.name) or len(getattr(component, "vis_" + viseme)) == 0)):
+						component["vis_" + viseme] = shape_key.name
+
+
 class AutomapVisemes(bpy.types.Operator):
 	"""Map from Names"""
 	bl_idname = "ava.ava_map_blendshape_visemes"
@@ -44,15 +56,7 @@ class AutomapVisemes(bpy.types.Operator):
 			if(component.stf_id == self.component_id):
 				break
 
-		for viseme in _voice_visemes_15:
-			component["vis_" + viseme] = ""
-
-		if(context.mesh.shape_keys):
-			for shape_key in context.mesh.shape_keys.key_blocks:
-				for viseme in _voice_visemes_15:
-					for prefix in _voice_visemes_15_prefixes:
-						if(shape_key.name.lower().find(prefix + viseme) > 0 and (len(getattr(component, "vis_" + viseme)) > len(shape_key.name) or len(getattr(component, "vis_" + viseme)) == 0)):
-							component["vis_" + viseme] = shape_key.name
+		automap(component, context.mesh)
 
 		return {"FINISHED"}
 

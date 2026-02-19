@@ -77,6 +77,6 @@ class STFAnimationSpatialPanel(bpy.types.Panel):
 
 		# Components
 		layout.separator(factor=1, type="SPACE")
-		header, body = layout.panel("stf.animation_components", default_closed = False)
-		header.label(text="STF Components", icon="GROUP")
+		header, body = layout.panel("stf.animation_components", default_closed = True)
+		header.label(text="STF Components (" + str(len(context.active_action.stf_info.stf_components)) + ")", icon="GROUP")
 		if(body): draw_components_ui(layout, context, context.active_action.stf_info, context.active_action, STFAddAnimationComponentOperator.bl_idname, STFRemoveAnimationComponentOperator.bl_idname, STFEditAnimationComponentIdOperator.bl_idname)

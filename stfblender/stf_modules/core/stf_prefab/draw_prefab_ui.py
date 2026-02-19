@@ -36,6 +36,6 @@ def draw_prefab_ui(layout: bpy.types.UILayout, context: bpy.types.Context, colle
 		# Components
 		layout.separator(factor=3, type="LINE")
 		header, body = layout.panel("stf.prefab_components", default_closed = False)
-		header.label(text="STF Components", icon="GROUP")
+		header.label(text="STF Components (" + str(len(collection.stf_info.stf_components)) + ")", icon="GROUP")
 		if(body): draw_components_ui(layout, context, collection.stf_info, collection, operator_add_component, operator_remove_component, operator_edit_component_id)
 

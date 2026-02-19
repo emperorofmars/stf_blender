@@ -71,5 +71,5 @@ class STFMeshSpatialPanel(bpy.types.Panel):
 		# Components
 		layout.separator(factor=2, type="LINE")
 		header, body = layout.panel("stf.mesh_components", default_closed = False)
-		header.label(text="STF Components", icon="GROUP")
+		header.label(text="STF Components (" + str(len(context.mesh.stf_info.stf_components)) + ")", icon="GROUP")
 		if(body): draw_components_ui(layout, context, context.mesh.stf_info, context.mesh, STFAddMeshComponentOperator.bl_idname, STFRemoveMeshComponentOperator.bl_idname, STFEditMeshComponentIdOperator.bl_idname)

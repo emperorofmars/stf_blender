@@ -63,13 +63,14 @@ class AVA_Autosetup_Panel(bpy.types.Panel):
 		elif(context.scene.ava_autosetup.target_collection):
 			selected_col = context.scene.ava_autosetup.target_collection
 		if(selected_col):
-			detect_ret = detect_mesh_and_armature(selected_col)
-			if(detect_ret):
-				main_mesh, main_armature = detect_ret
+			main_mesh, main_armature = detect_mesh_and_armature(selected_col)
+			if(main_mesh):
 				layout.label(text="Detected Body Mesh: " + main_mesh.name, icon="CHECKMARK")
-				layout.label(text="Detected Armature: " + main_armature.name, icon="CHECKMARK")
 			else:
 				layout.label(text="Couldn't find Body Mesh!", icon="ERROR")
+			if(main_armature):
+				layout.label(text="Detected Armature: " + main_armature.name, icon="CHECKMARK")
+			else:
 				layout.label(text="Couldn't find Armature!", icon="ERROR")
 
 		layout.separator(factor=1)

@@ -53,5 +53,5 @@ class STFArmatureSpatialPanel(bpy.types.Panel):
 		# Components
 		self.layout.separator(factor=1, type="SPACE")
 		header, body = self.layout.panel("stf.armature_components", default_closed = False)
-		header.label(text="STF Components", icon="GROUP")
+		header.label(text="STF Components (" + str(len(context.armature.stf_info.stf_components)) + ")", icon="GROUP")
 		if(body): draw_components_ui(self.layout, context, context.armature.stf_info, context.armature, STFAddArmatureComponentOperator.bl_idname, STFRemoveArmatureComponentOperator.bl_idname, STFEditArmatureComponentIdOperator.bl_idname)

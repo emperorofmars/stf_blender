@@ -37,28 +37,6 @@ def _map_blendshape(blendshape_name: str) -> str:
 							return "eye_closed_right" if shape_name == "closed" else "look_" + shape_name + "_right"
 
 
-class AutomapEyelids(bpy.types.Operator):
-	"""Map from Names"""
-	bl_idname = "ava.ava_map_blendshape_eyelids"
-	bl_label = "Map from Names"
-	bl_options = {"REGISTER", "UNDO"}
-
-	component_id: bpy.props.StringProperty() # type: ignore
-
-	def execute(self, context):
-		for component in context.mesh.ava_eyelids_blendshape:
-			if(component.stf_id == self.component_id):
-				break
-
-		if(context.mesh.shape_keys):
-			for blendshape_name in context.mesh.shape_keys.key_blocks:
-				mapping = _map_blendshape(blendshape_name.name)
-				if(mapping and (not getattr(component, mapping) or len(getattr(component, mapping)) > len(blendshape_name.name))):
-					setattr(component, mapping, blendshape_name.name)
-
-		return {"FINISHED"}
-
-
 class AVA_Eyelids_Blendshape(STF_BlenderComponentBase):
 	eyes_closed: bpy.props.StringProperty(name="Both Closed", options=set()) # type: ignore
 	look_up: bpy.props.StringProperty(name="Both Up", options=set()) # type: ignore
@@ -77,6 +55,32 @@ class AVA_Eyelids_Blendshape(STF_BlenderComponentBase):
 	look_down_right: bpy.props.StringProperty(name="Right Down", options=set()) # type: ignore
 	look_left_right: bpy.props.StringProperty(name="Right Left", options=set()) # type: ignore
 	look_right_right: bpy.props.StringProperty(name="Right Right", options=set()) # type: ignore
+
+
+def automap(component: AVA_Eyelids_Blendshape, mesh: bpy.types.Mesh):
+	if(mesh.shape_keys):
+		for blendshape_name in mesh.shape_keys.key_blocks:
+			mapping = _map_blendshape(blendshape_name.name)
+			if(mapping and (not getattr(component, mapping) or len(getattr(component, mapping)) > len(blendshape_name.name))):
+				setattr(component, mapping, blendshape_name.name)
+
+
+class AutomapEyelids(bpy.types.Operator):
+	"""Map from Names"""
+	bl_idname = "ava.ava_map_blendshape_eyelids"
+	bl_label = "Map from Names"
+	bl_options = {"REGISTER", "UNDO"}
+
+	component_id: bpy.props.StringProperty() # type: ignore
+
+	def execute(self, context):
+		for component in context.mesh.ava_eyelids_blendshape:
+			if(component.stf_id == self.component_id):
+				break
+
+		automap(component, context.mesh)
+
+		return {"FINISHED"}
 
 
 def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: AVA_Eyelids_Blendshape):

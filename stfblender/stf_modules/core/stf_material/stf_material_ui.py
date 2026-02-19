@@ -294,7 +294,7 @@ class STFMaterialSpatialPanel(bpy.types.Panel):
 		# Components
 		self.layout.separator(factor=2, type="LINE")
 		header, body = self.layout.panel("stf.material_components", default_closed = True)
-		header.label(text="STF Components", icon="GROUP")
+		header.label(text="STF Components (" + str(len(context.material.stf_info.stf_components)) + ")", icon="GROUP")
 		if(body): draw_components_ui(self.layout, context, context.material.stf_info, context.material, STFAddMaterialComponentOperator.bl_idname, STFRemoveMaterialComponentOperator.bl_idname, STFEditMaterialComponentIdOperator.bl_idname)
 
 

@@ -78,6 +78,6 @@ class STFImageSpatialPanel(bpy.types.Panel):
 		# Components
 		self.layout.separator(factor=1, type="SPACE")
 		header, body = self.layout.panel("stf.image_components", default_closed = False)
-		header.label(text="STF Components", icon="GROUP")
+		header.label(text="STF Components (" + str(len(context.edit_image.stf_info.stf_components)) + ")", icon="GROUP")
 		if(body): draw_components_ui(self.layout, context, context.edit_image.stf_info, context.edit_image, STFAddImageComponentOperator.bl_idname, STFRemoveImageComponentOperator.bl_idname, STFEditImageComponentIdOperator.bl_idname)
 

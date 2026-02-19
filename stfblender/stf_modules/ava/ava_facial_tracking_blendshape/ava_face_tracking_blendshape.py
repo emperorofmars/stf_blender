@@ -21,6 +21,18 @@ def _match_ft_blendshapes(mesh: bpy.types.Mesh, shapes: list[str]) -> tuple[int,
 	return (shapes_matched, len(shapes))
 
 
+def automap(mesh: bpy.types.Mesh) -> str:
+	best = None
+	best_percent = 0
+	for ft_type in ft_definitions:
+		matched, total = _match_ft_blendshapes(mesh, ft_definitions[ft_type])
+		percent = matched / total
+		if(matched > 0 and best_percent < percent):
+			best = ft_type
+			best_percent = percent
+	return best
+
+
 class AVA_FaceTracking_Blendshapes(STF_BlenderComponentBase):
 	ft_type: bpy.props.EnumProperty(items=[("unified_expressions", "Unified Expressions (Preferred)", ""),("arkit", "ARkit", ""),("sranipal", "SRanipal", ""),("facs_reduced", "FACS Reduced (Quest Pro)", ""),("other", "Unknown Tracking Type", "")], name="Type", default="unified_expressions", options=set()) # type: ignore
 	ft_type_custom: bpy.props.StringProperty(name="Unknown Tracking Type", options=set()) # type: ignore
