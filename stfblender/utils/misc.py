@@ -37,7 +37,7 @@ class SetActiveObjectOperator(bpy.types.Operator):
 
 
 class OpenWebpage(bpy.types.Operator):
-	"""Open URL in Webbrowser"""
+	"""Open in Webbrowser"""
 	bl_idname = "stf.open_webpage"
 	bl_label = "Open Webpage"
 
