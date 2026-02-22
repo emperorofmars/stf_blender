@@ -14,7 +14,8 @@ __pycache__
 *$py.class
 
 
-packages
+packages/*
+!packages/.gitkeep
 
 testsuite/output/*
 !testsuite/output/.gitkeep

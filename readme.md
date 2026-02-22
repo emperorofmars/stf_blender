@@ -16,7 +16,13 @@ Add it under: `Edit` → `Preferences` → `Get Extensions` → **Click on the t
 
 ---
 
-**Also install the [Slot Link](https://extensions.blender.org/add-ons/slot-link/) extension if you want to import/export animations.**
+> [!TIP]
+> **Also install the [Slot Link](https://extensions.blender.org/add-ons/slot-link/) extension if you want to import/export animations.**
+
+## Development
+* Use VSCode with the [recommended extensions](./.vscode/extensions.json).\
+	The most important one is [Blender VS Code](https://github.com/JacquesLucke/blender_vscode).
+* Create a Python 3.11 venv in the repo directory. Inside use pip to install [fake-bpy-module](https://pypi.org/project/fake-bpy-module-latest/).
 
 ## License
 All source-code in this repository, except when noted in individual files and/or directories, is licensed under either:
@@ -26,7 +32,7 @@ All source-code in this repository, except when noted in individual files and/or
 
 <!--
 **Commands to build the extension.**\
-*Change the Blender version in the path accordingly.*
+*Change the Blender version and path accordingly.*
 
 * Set Blender Path Variable
 	* Windows (Git Bash)
