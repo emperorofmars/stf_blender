@@ -11,7 +11,7 @@ from .id_utils import ensure_stf_id
 from .armature_bone import ArmatureBone
 
 
-def add_component(context_object: any, blender_property_name: str, stf_id: str, stf_type: str, components_ref_property: any = None) -> tuple[STF_Component_Ref, STF_BlenderComponentBase]:
+def add_component(context_object: any, blender_property_name: str, stf_id: str, stf_type: str, components_ref_property: any = None, name = None) -> tuple[STF_Component_Ref, STF_BlenderComponentBase]:
 	if(components_ref_property is None):
 		if(isinstance(context_object, STF_BlenderDataResourceBase)): # jank, but works
 			components_ref_property = context_object.stf_components
@@ -27,7 +27,8 @@ def add_component(context_object: any, blender_property_name: str, stf_id: str, 
 	new_component = getattr(context_object, blender_property_name).add()
 	new_component.name = stf_id
 	new_component.stf_id = component_ref.stf_id
-	new_component.stf_name = context_object.name + " - " + stf_type
+	if(name):
+		new_component.stf_name = name.replace("$parent", context_object.name)
 
 	if(blender_property_name == "stf_json_fallback_component"):
 		new_component.json = "{\"type\": \"" + stf_type + "\"}"
@@ -41,10 +42,11 @@ class STFAddComponentOperatorBase:
 
 	stf_type: bpy.props.StringProperty(name="Type") # type: ignore
 	property_name: bpy.props.StringProperty() # type: ignore
+	default_name: bpy.props.StringProperty() # type: ignore
 
 	def execute(self, context):
 		import uuid
-		add_component(self.get_property(context), self.property_name, str(uuid.uuid4()), self.stf_type, self.get_components_ref_property(context))
+		add_component(self.get_property(context), self.property_name, str(uuid.uuid4()), self.stf_type, self.get_components_ref_property(context), self.default_name)
 		return {"FINISHED"}
 
 	def get_property(self, context) -> any:

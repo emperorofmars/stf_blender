@@ -30,6 +30,10 @@ class STF_BlenderComponentModule(STF_Module):
 	# (layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: STF_BlenderComponentBase) -> None
 	draw_component_func: Callable[[bpy.types.UILayout, bpy.types.Context, STF_Component_Ref, any, any], None]
 
+	# Default stf_name newly added components will get.
+	# Substitutes $parent with the name of the object the component is added to.
+	pretty_name_template: str
+
 
 class STF_Component_Editmode_Resistant_Reference:
 	"""Because Blender"""

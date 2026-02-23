@@ -164,6 +164,7 @@ class STF_Module_AVA_Eyelids_Blendshape(STF_BlenderComponentModule):
 	draw_component_func = _draw_component
 
 	like_types = []
+	pretty_name_template = "Eyelid Blendshapes"
 
 
 register_stf_modules = [

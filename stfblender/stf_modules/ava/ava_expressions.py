@@ -230,6 +230,8 @@ class STF_Module_AVA_Expressions(STF_BlenderComponentModule):
 	filter = [bpy.types.Collection]
 	draw_component_func = _draw_component
 
+	pretty_name_template = "Avatar Expressions"
+
 
 register_stf_modules = [
 	STF_Module_AVA_Expressions

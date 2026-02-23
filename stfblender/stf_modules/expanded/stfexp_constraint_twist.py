@@ -136,6 +136,8 @@ class STF_Module_STFEXP_Constraint_Twist(STF_BlenderComponentModule):
 	serialize_component_instance_standin_func = _serialize_component_instance_standin_func
 	parse_component_instance_standin_func = _parse_component_instance_standin_func
 
+	pretty_name_template = "Twist Constraint"
+
 
 register_stf_modules = [
 	STF_Module_STFEXP_Constraint_Twist

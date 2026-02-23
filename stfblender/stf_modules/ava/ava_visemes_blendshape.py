@@ -122,6 +122,8 @@ class STF_Module_AVA_Visemes_Blendshape(STF_BlenderComponentModule):
 
 	like_types = []
 
+	pretty_name_template = "Viseme Blendshapes"
+
 
 register_stf_modules = [
 	STF_Module_AVA_Visemes_Blendshape

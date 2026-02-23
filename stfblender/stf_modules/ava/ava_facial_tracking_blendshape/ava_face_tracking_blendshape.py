@@ -89,6 +89,7 @@ class STF_Module_AVA_FaceTracking_Blendshapes(STF_BlenderComponentModule):
 	draw_component_func = _draw_component
 
 	like_types = []
+	pretty_name_template = "Face Tracking Blendshapes"
 
 
 register_stf_modules = [

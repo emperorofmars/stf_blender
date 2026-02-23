@@ -135,6 +135,8 @@ class STF_Module_STFEXP_Collider_Sphere(STF_BlenderBoneComponentModule):
 	serialize_component_instance_standin_func = _serialize_component_instance_standin_func
 	parse_component_instance_standin_func = _parse_component_instance_standin_func
 
+	pretty_name_template = "Sphere Collider"
+
 
 register_stf_modules = [
 	STF_Module_STFEXP_Collider_Sphere

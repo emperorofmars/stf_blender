@@ -149,6 +149,8 @@ class STF_Module_VRC_Physbone(STF_BlenderComponentModule):
 	resolve_property_path_to_stf_func = _resolve_property_path_to_stf_func
 	resolve_stf_property_to_blender_func = _resolve_stf_property_to_blender_func
 
+	pretty_name_template = "VRChat Physbone"
+
 
 register_stf_modules = [
 	STF_Module_VRC_Physbone

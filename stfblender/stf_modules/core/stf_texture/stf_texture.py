@@ -67,7 +67,8 @@ class STF_Module_STF_Texture(STF_BlenderComponentModule):
 	filter = [bpy.types.Image]
 	draw_component_func = _draw_component
 
-	like_types = []
+	like_types = ["texture"]
+	pretty_name_template = "Texture Settings"
 
 
 register_stf_modules = [

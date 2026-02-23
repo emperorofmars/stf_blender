@@ -63,6 +63,7 @@ class STF_Module_AVA_EyeRotation_Bone(STF_BlenderComponentModule):
 	draw_component_func = _draw_component
 
 	like_types = []
+	pretty_name_template = "Eye-Rotation Limits"
 
 
 register_stf_modules = [

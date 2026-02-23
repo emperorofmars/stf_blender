@@ -384,7 +384,7 @@ class STF_Module_STFEXP_Armature_Humanoid(STF_BlenderComponentModule):
 	"""Declares that this Armature is humanoid. Must satisfy the requirements for the Unity/VRM humanoid rig"""
 	stf_type = _stf_type
 	stf_kind = "component"
-	like_types = []
+	like_types = ["armature_humanoid"]
 	understood_application_types = [STFEXP_Armature_Humanoid]
 	import_func = _stf_import
 	export_func = _stf_export
@@ -393,6 +393,8 @@ class STF_Module_STFEXP_Armature_Humanoid(STF_BlenderComponentModule):
 	single = True
 	filter = [bpy.types.Armature]
 	draw_component_func = _draw_component
+
+	pretty_name_template = "Humanoid Bone Mappings"
 
 
 register_stf_modules = [

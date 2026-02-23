@@ -136,6 +136,8 @@ class STF_Module_VRM_Springbone(STF_BlenderComponentModule):
 	resolve_property_path_to_stf_func = _resolve_property_path_to_stf_func
 	resolve_stf_property_to_blender_func = _resolve_stf_property_to_blender_func
 
+	pretty_name_template = "VRM Springbone"
+
 
 register_stf_modules = [
 	STF_Module_VRM_Springbone

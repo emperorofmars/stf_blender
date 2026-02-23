@@ -61,6 +61,8 @@ class STF_Module_VRC_AvatarColliders(STF_BlenderComponentModule):
 
 	like_types = []
 
+	pretty_name_template = "VRChat Avatar Colliders"
+
 
 register_stf_modules = [
 	STF_Module_VRC_AvatarColliders

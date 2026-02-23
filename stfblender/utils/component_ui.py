@@ -279,12 +279,14 @@ def draw_components_ui(
 		add_button = row2_r.operator(add_component_op, icon="PLUS", text="Add Fallback Component")
 		add_button.stf_type = bpy.context.scene.stf_fallback_component_type
 		add_button.property_name = selected_add_module.blender_property_name
+		add_button.default_name = bpy.context.scene.stf_fallback_component_type
 	elif(selected_add_module):
 		row_l = row.row(align=True)
 		row_l.alignment = "RIGHT"
 		add_button = row_l.operator(add_component_op, icon="PLUS", text="Add Component")
 		add_button.stf_type = available_component_modules
 		add_button.property_name = selected_add_module.blender_property_name
+		add_button.default_name = selected_add_module.pretty_name_template if hasattr(selected_add_module, "pretty_name_template") and selected_add_module.pretty_name_template else selected_add_module.stf_type
 	else:
 		row.separator(factor=1)
 		row.label(text="Please select a component type")

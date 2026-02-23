@@ -73,6 +73,8 @@ class STF_Module_STFEXP_LightprobeAnchor(STF_BlenderComponentModule):
 
 	like_types = []
 
+	pretty_name_template = "Lightprobe Anchor"
+
 
 register_stf_modules = [
 	STF_Module_STFEXP_LightprobeAnchor

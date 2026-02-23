@@ -42,7 +42,7 @@ class CreateViewportObjectOperator(bpy.types.Operator):
 			viewport_object.empty_display_size = 0.1
 			viewport_object.empty_display_type = "SINGLE_ARROW"
 			target_object.objects.link(viewport_object)
-		for avatar_component in target_object.stf_ava_avatar:
+		for avatar_component in getattr(target_object, _blender_property_name):
 			if(avatar_component.stf_id == self.component_id):
 				avatar_component.viewport = viewport_object
 				break
@@ -56,7 +56,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 		layout.prop(component, "viewport")
 		row = layout.row()
 		row.alignment = "RIGHT"
-		row.operator(SetActiveObjectOperator.bl_idname, text="Select Viewport Object", icon="EYEDROPPER").target_name = "$ViewportFirstPerson"
+		row.operator(SetActiveObjectOperator.bl_idname, text="Select Viewport Object", icon="EYEDROPPER").target_name = component.viewport.name
 	else:
 		create_viewport_button = layout.operator(CreateViewportObjectOperator.bl_idname, text="Create Viewport Object", icon="ADD")
 		create_viewport_button.blender_collection = context_object.name
@@ -128,7 +128,8 @@ class STF_Module_AVA_Avatar(STF_BlenderComponentModule):
 	filter = [bpy.types.Collection]
 	draw_component_func = _draw_component
 
-	like_types = []
+	like_types = ["avatar"]
+	pretty_name_template = "Avatar"
 
 
 register_stf_modules = [
