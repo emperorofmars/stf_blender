@@ -5,6 +5,7 @@ from . import stfexp_armature_humanoid
 from . import stfexp_constraint_twist
 from . import stfexp_constraint_rotation
 from . import stfexp_constraint_parent
+from . import stfexp_constraint_ik
 from . import stfexp_lightprobe_anchor
 from . import stfexp_collider_sphere
 from . import stfexp_collider_capsule
@@ -21,6 +22,7 @@ register_stf_modules = \
 	stfexp_constraint_twist.register_stf_modules + \
 	stfexp_constraint_rotation.register_stf_modules + \
 	stfexp_constraint_parent.register_stf_modules + \
+	stfexp_constraint_ik.register_stf_modules + \
 	stfexp_lightprobe_anchor.register_stf_modules + \
 	stfexp_collider_sphere.register_stf_modules + \
 	stfexp_collider_capsule.register_stf_modules + \

@@ -25,10 +25,22 @@ class STF_BlenderComponentBase(bpy.types.PropertyGroup):
 
 class STF_BlenderComponentModule(STF_Module):
 	"""Extension to STF_Module which also associates a function to draw the component in Blender's UI"""
+
+	# getattr(blender_ID_thingy, blender_property_name) has to return a list of components of this modules type on the respective blender_ID_thingy
 	blender_property_name: str
+
+	# Filter of types this component can be placed on.
 	filter: list
+
 	# (layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: STF_BlenderComponentBase) -> None
 	draw_component_func: Callable[[bpy.types.UILayout, bpy.types.Context, STF_Component_Ref, any, any], None]
+
+	# If the component can setup Blender native constructs, e.g. IK constraints on a PoseBone, implement this func.
+	# The apply_object should be the final instance where the component functionality should be applied to.
+	# In the case of an IK constraint on a bone, the context_object will be bpy.types.Bone, and the apply object will be the bpy.types.Object that instantiates the Armature with the Bone.
+	# This way the IK constraint will be applied to every Armature instance.
+	# (component: STF_BlenderComponentBase, context_object: any, apply_object: any)
+	process_func: Callable[[STF_BlenderComponentBase, any, any], None]
 
 	# Default stf_name newly added components will get.
 	# Substitutes $parent with the name of the object the component is added to.

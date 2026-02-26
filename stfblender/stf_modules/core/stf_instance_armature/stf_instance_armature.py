@@ -2,7 +2,9 @@ import bpy
 import mathutils
 import math
 
-from .stf_instance_armature_utils import parse_standin, serialize_standin, update_armature_instance_component_standins
+from ....base.stf_task_steps import STF_TaskSteps
+
+from .stf_instance_armature_utils import parse_standin, process_components, serialize_standin, update_armature_instance_component_standins
 from ....base.stf_module import STF_Module
 from ....base.stf_module_component import InstanceModComponentRef
 from ....base.stf_report import STFReportSeverity, STFReport
@@ -83,6 +85,10 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 		for bone_id, component_ids in json_resource["modified_components"].items():
 			for component_id, standin_component_json in component_ids.items():
 				parse_standin(context, blender_object, component_id, standin_component_json)
+
+	def _run_component_process():
+		process_components(blender_object, [stf_module for _, stf_module in context._state._modules.items()])
+	context.add_task(STF_TaskSteps.BEFORE_ANIMATION, _run_component_process)
 
 	return blender_object
 

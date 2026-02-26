@@ -39,8 +39,8 @@ class STFBoneSpatialPanel(bpy.types.Panel):
 	bl_context = "bone"
 
 	@classmethod
-	def poll(cls, context):
-		return (context.bone is not None)
+	def poll(cls, context: bpy.types.Context):
+		return context.bone is not None
 
 	def draw(self, context):
 		set_stf_component_filter(bpy.types.Bone)

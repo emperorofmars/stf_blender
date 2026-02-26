@@ -1,7 +1,7 @@
 import bpy
 
 from ....base.stf_registry import find_component_module, get_component_modules
-from ....base.stf_module_component import InstanceModComponentRef, STF_BlenderComponentModule
+from ....base.stf_module_component import InstanceModComponentRef, STF_BlenderComponentModule, STF_Component_Ref
 from ....exporter.stf_export_context import STF_ExportContext
 from ....importer.stf_import_context import STF_ImportContext
 from ....utils.animation_conversion_utils import *
@@ -92,6 +92,64 @@ class UpdateArmatureInstanceComponentStandins(bpy.types.Operator):
 	bl_label = "Update Standins"
 	bl_options = {"REGISTER", "UNDO"}
 
-	def execute(self, context):
+	def execute(self, context: bpy.types.Context):
 		update_armature_instance_component_standins(context, context.object, get_component_modules())
 		return {"FINISHED"}
+
+
+
+def process_components(armature_instance: bpy.types.Object, stf_modules: list[STF_BlenderComponentModule] = None):
+	if(not stf_modules):
+		stf_modules = get_component_modules()
+
+	components_to_process = {}
+
+	for bone in armature_instance.data.bones:
+		for component_ref in bone.stf_info.stf_components:
+			component_ref: STF_Component_Ref = component_ref
+			for stf_module in stf_modules:
+				if(stf_module.stf_type == component_ref.stf_type and hasattr(stf_module, "process_func") and getattr(stf_module, "process_func")):
+					for component in getattr(bone, component_ref.blender_property_name):
+						if(component.stf_id == component_ref.stf_id):
+							components_to_process[component.stf_id] = ([component, bone, stf_module])
+							break
+
+	for component_ref in armature_instance.stf_instance_armature_component_standins.stf_components:
+		if(component_ref.override and component_ref.stf_id in components_to_process):
+			for component in getattr(armature_instance, components_to_process[component_ref.stf_id][2].blender_property_name):
+				if(component.stf_id == component_ref.stf_id):
+					components_to_process[component.stf_id][0] = component
+					break
+
+	for component_ref in armature_instance.stf_instance_armature.stf_components:
+		bone = component_ref.bone
+		for component_ref in bone.stf_info.stf_components:
+			component_ref: STF_Component_Ref = component_ref
+			for stf_module in stf_modules:
+				if(stf_module.stf_type == component_ref.stf_type and hasattr(stf_module, "process_func") and getattr(stf_module, "process_func")):
+					for component in getattr(bone, component_ref.blender_property_name):
+						if(component.stf_id == component_ref.stf_id):
+							components_to_process[component.stf_id] = ([component, bone, stf_module])
+							break
+
+	for component_id in components_to_process:
+		component, bone, stf_module = components_to_process[component_id]
+		component: STF_BlenderComponentBase = component
+		stf_module.process_func(component, bone, armature_instance)
+
+
+class ProcessComponentsOntoArmatureInstance(bpy.types.Operator):
+	bl_idname = "stf.armature_instance_process_components"
+	bl_label = "Process Components"
+	bl_options = {"REGISTER", "UNDO"}
+
+	@classmethod
+	def poll(cls, context: bpy.types.Context): return context.object is not None and type(context.object.data) == bpy.types.Armature
+
+	def invoke(self, context, event):
+		return context.window_manager.invoke_confirm(self, event, message="This will overwrite constraints and other values!")
+
+	def execute(self, context: bpy.types.Context):
+		process_components(context.object, get_component_modules())
+		return {"FINISHED"}
+

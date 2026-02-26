@@ -2,7 +2,7 @@ import bpy
 
 from ....base.stf_module_component import STF_Component_Ref
 from .stf_instance_armature import InstanceModComponentRef
-from .stf_instance_armature_utils import UpdateArmatureInstanceComponentStandins
+from .stf_instance_armature_utils import ProcessComponentsOntoArmatureInstance, UpdateArmatureInstanceComponentStandins
 from ....utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
 from ....utils.component_utils import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
 from ....utils.component_ui import draw_components_ui, draw_instance_standin_components_ui, set_stf_component_filter, set_stf_component_instance_filter
@@ -140,3 +140,6 @@ class STFArmatureInstancePanel(bpy.types.Panel):
 
 			if(len(context.object.stf_instance_armature_component_standins.stf_components) > 0):
 				draw_instance_standin_components_ui(layout, context, context.object.stf_instance_armature_component_standins, context.object, STFEditArmatureInstanceComponentIdOperator.bl_idname, _get_target_object_func, _inject_standin_ui)
+
+		layout.separator(factor=4, type="LINE")
+		layout.operator(ProcessComponentsOntoArmatureInstance.bl_idname)
