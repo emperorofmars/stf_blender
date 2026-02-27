@@ -7,6 +7,7 @@ from ...utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui, ensure_stf_i
 from ...base.stf_report import STFReportSeverity, STFReport
 from ...utils.reference_helper import import_resource, register_exported_resource
 
+# TODO this module is at a bare minimum level, improve it
 
 _stf_type = "stfexp.instance.text"
 

@@ -104,6 +104,8 @@ def process_components(armature_instance: bpy.types.Object, stf_modules: list[ST
 
 	components_to_process = {}
 
+	# todo handle exclusion groups
+
 	for bone in armature_instance.data.bones:
 		for component_ref in bone.stf_info.stf_components:
 			component_ref: STF_Component_Ref = component_ref
