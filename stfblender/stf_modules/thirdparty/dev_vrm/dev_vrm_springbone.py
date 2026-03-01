@@ -5,7 +5,7 @@ from ....base.stf_task_steps import STF_TaskSteps
 from ....base.stf_module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
 from ....exporter.stf_export_context import STF_ExportContext
 from ....importer.stf_import_context import STF_ImportContext
-from ....utils.component_utils import add_component, export_component_base, import_component_base, preserve_component_reference
+from ....utils.component_utils import ComponentLoadJsonOperatorBase, add_component, export_component_base, import_component_base, preserve_component_reference
 from ....utils.animation_conversion_utils import get_component_index, get_component_stf_path, get_component_stf_path_from_collection
 from ....base.blender_grr.stf_node_path_selector import NodePathSelector, draw_node_path_selector, node_path_selector_from_stf, node_path_selector_to_stf
 from ....base.blender_grr.stf_node_path_component_selector import NodePathComponentSelector, draw_node_path_component_selector, node_path_component_selector_from_stf, node_path_component_selector_to_stf
@@ -26,6 +26,27 @@ class VRM_Springbone(STF_BlenderComponentBase):
 	center: bpy.props.PointerProperty(type=NodePathSelector, name="Center", description="The reference point of a swaying object can be set at any location except the origin. When implementing UI moving with warp, the parent node to move with warp can be specified if you don't want to make the object swaying with warp movement") # type: ignore
 	hitRadius: bpy.props.FloatProperty(default=0.02, min=0, soft_max=10, precision=2, unit="LENGTH", name="Hit Radius", description="The radius of the sphere used for the collision detection with colliders") # type: ignore
 	colliders: bpy.props.CollectionProperty(type=NodePathComponentSelector, name="Colliders", description="Specify the of the collider components for collisions with swaying objects", options=set()) # type: ignore
+
+
+class VRM_Springbone_LoadJsonOperator(ComponentLoadJsonOperatorBase, bpy.types.Operator):
+	bl_idname = "stf.dev_vrm_springbone_loadjson"
+	blender_bone: bpy.props.BoolProperty() # type: ignore
+
+	def get_property(self, context) -> any:
+		if(not self.blender_bone):
+			return context.object.dev_vrm_springbone
+		else:
+			return context.bone.dev_vrm_springbone
+
+	def parse_json(self, context, component: any, json_resource: dict):
+		if(json_resource.get("type") != _stf_type): raise Exception("Invalid Type")
+
+		if("stiffness" in json_resource): component.stiffness = json_resource["stiffness"]
+		if("gravityPower" in json_resource): component.gravityPower = json_resource["gravityPower"]
+		if("gravityDir" in json_resource): component.gravityDir = trs_utils.stf_translation_to_blender(json_resource["gravityDir"])
+		if("dragForce" in json_resource): component.dragForce = json_resource["dragForce"]
+		if("hitRadius" in json_resource): component.hitRadius = json_resource["hitRadius"]
+		return {"FINISHED"}
 
 
 def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: VRM_Springbone):
@@ -54,10 +75,20 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 		draw_node_path_component_selector(col, collider)
 		create_remove_button(row, "bone" if type(component.id_data) == bpy.types.Armature else "object", _blender_property_name, component.stf_id, "colliders", index)
 
+	load_json_button = layout.operator(VRM_Springbone_LoadJsonOperator.bl_idname)
+	load_json_button.blender_bone = type(component.id_data) == bpy.types.Armature
+	load_json_button.component_id = component.stf_id
+
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
 	component_ref, component = add_component(context_object, _blender_property_name, stf_id, _stf_type)
 	import_component_base(context, component, json_resource, _blender_property_name, context_object)
+
+	if("stiffness" in json_resource): component.stiffness = json_resource["stiffness"]
+	if("gravityPower" in json_resource): component.gravityPower = json_resource["gravityPower"]
+	if("gravityDir" in json_resource): component.gravityDir = trs_utils.stf_translation_to_blender(json_resource["gravityDir"])
+	if("dragForce" in json_resource): component.dragForce = json_resource["dragForce"]
+	if("hitRadius" in json_resource): component.hitRadius = json_resource["hitRadius"]
 
 	_get_component = preserve_component_reference(component, _blender_property_name, context_object)
 	def _handle():
