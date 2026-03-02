@@ -3,6 +3,7 @@ import bpy
 from ....utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
 from ....utils.component_utils import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
 from ....utils.component_ui import draw_components_ui, set_stf_component_filter
+from ....utils.draw_multiline_text import draw_multiline_text
 
 
 class STFSetMeshIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
@@ -49,15 +50,7 @@ class STFMeshSpatialPanel(bpy.types.Panel):
 		if(context.object.find_armature()):
 			t, r, s = context.object.matrix_local.decompose()
 			if(t.length > 0.0001 or abs(r.x) > 0.0001 or abs(r.y) > 0.0001 or abs(r.z) > 0.0001 or abs((r.w - 1)) > 0.0001 or abs(s.x - 1) > 0.0001 or abs(s.y - 1) > 0.0001 or abs(s.z - 1) > 0.0001):
-				row = layout.row()
-				row.alert = True
-				row_icon = row.row()
-				row_icon.alignment = "LEFT"
-				row_icon.label(icon="ERROR")
-				col = row.column()
-				col.label(text="Warning, this mesh is not aligned with its Armature!")
-				col.label(text="This will lead to differing behavior outside of Blender.")
-				col.label(text="Applying all Transforms for the Mesh and Armature will likely fix this.")
+				text_row = draw_multiline_text(layout, "Warning, this mesh is not aligned with its Armature!\nThis will lead to differing behavior outside of Blender.\nApplying all Transforms for the Mesh and Armature will likely fix this.", width=80, icon="ERROR", alert=True)
 				layout.separator(factor=2, type="LINE")
 
 		# Set ID

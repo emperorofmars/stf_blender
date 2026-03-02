@@ -6,6 +6,7 @@ from .stf_instance_armature_utils import ProcessComponentsOntoArmatureInstance, 
 from ....utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
 from ....utils.component_utils import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
 from ....utils.component_ui import draw_components_ui, draw_instance_standin_components_ui, set_stf_component_filter, set_stf_component_instance_filter
+from ....utils.draw_multiline_text import draw_multiline_text
 
 
 class STFSetArmatureInstanceIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
@@ -103,17 +104,8 @@ class STFArmatureInstancePanel(bpy.types.Panel):
 				if(len(non_quat_bones) > 0): non_quat_bones += ", "
 				non_quat_bones += pose_bone.name
 		if(len(non_quat_bones) > 0):
-			row = layout.row()
-			row.alert = True
-			row_icon = row.row()
-			row_icon.alignment = "LEFT"
-			row_icon.label(icon="ERROR")
-			col = row.column()
-			col.label(text="Please set the Rotation-Mode of all bones to 'Quaternion (WXYZ)' for all PoseBones")
-			col.label(text="Doing so ensures consistency with game-engines.")
-			col.label(text="The following bones are affected: %s" % non_quat_bones)
-			col.label(text="Be aware that existing rotation animations will break!")
-			row_fix = col.row()
+			text_row = draw_multiline_text(layout, "Please set the Rotation-Mode of all bones to 'Quaternion (WXYZ)' for all PoseBones\nDoing so ensures consistency with game-engines.\nThe following bones are affected: %s\nBe aware that existing rotation animations will break!" % non_quat_bones, width=80, icon="ERROR", alert=True)
+			row_fix = text_row.row()
 			row_fix.alignment = "LEFT"
 			row_fix.operator(STFArmatureInstanceFixRotationMode.bl_idname)
 			layout.separator(factor=2, type="LINE")

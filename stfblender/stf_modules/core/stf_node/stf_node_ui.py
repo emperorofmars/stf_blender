@@ -3,6 +3,7 @@ import bpy
 from ....utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
 from ....utils.component_utils import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
 from ....utils.component_ui import draw_components_ui, set_stf_component_filter
+from ....utils.draw_multiline_text import draw_multiline_text
 
 
 class STFSetObjectIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
@@ -66,18 +67,10 @@ class STFNodePanel(bpy.types.Panel):
 		set_stf_component_filter(bpy.types.Object)
 
 		if(context.object.rotation_mode != "QUATERNION"):
-			row = layout.row()
-			row.alert = True
-			row_icon = row.row()
-			row_icon.alignment = "LEFT"
-			row_icon.label(icon="ERROR")
-			col = row.column()
-			col.label(text="Please set the Rotation-Mode to 'Quaternion (WXYZ)'")
-			col.label(text="Doing so ensures consistency with game-engines.")
-			col.label(text="Be aware that existing rotation animations will break!")
-			row_fix = col.row()
+			text_row = draw_multiline_text(layout, "Please set the Rotation-Mode to 'Quaternion (WXYZ)'\nDoing so ensures consistency with game-engines.\nBe aware that existing rotation animations will break!", width=80, icon="ERROR", alert=True)
+			row_fix = text_row.row()
 			row_fix.alignment = "LEFT"
-			row_fix.operator(STFNodeFixRotationMode.bl_idname)
+			text_row.operator(STFNodeFixRotationMode.bl_idname)
 			layout.separator(factor=2, type="LINE")
 
 		# Set ID

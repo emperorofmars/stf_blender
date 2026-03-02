@@ -1,5 +1,7 @@
 import bpy
 import re
+import math
+import mathutils
 
 from ...base.stf_module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
 from ...base.property_path_part import BlenderPropertyPathPart, STFPropertyPathPart
@@ -16,9 +18,9 @@ _blender_property_name = "stfexp_constraint_ik"
 
 
 class STFEXP_Constraint_IK(STF_BlenderComponentBase):
-	chain_length: bpy.props.IntProperty(name="Chain Length", default=1, min=1) # type: ignore
-	target: bpy.props.PointerProperty(name="Target", type=NodePathSelector) # type: ignore
-	pole: bpy.props.PointerProperty(name="Pole", type=NodePathSelector) # type: ignore
+	chain_length: bpy.props.IntProperty(name="Chain Length", default=2, min=1, options=set()) # type: ignore
+	target: bpy.props.PointerProperty(name="Target", type=NodePathSelector, options=set()) # type: ignore
+	pole: bpy.props.PointerProperty(name="Pole", type=NodePathSelector, options=set()) # type: ignore
 
 
 def _process_func(component: STFEXP_Constraint_IK, context_object: bpy.types.Bone, target_object: bpy.types.Object):
@@ -42,11 +44,36 @@ def _process_func(component: STFEXP_Constraint_IK, context_object: bpy.types.Bon
 			constraint.target = target_object
 
 	if(component.pole.target_object):
+		constraint.pole_angle = math.pi
 		constraint.pole_target = component.pole.target_object
 	if(component.pole.target_bone):
+		constraint.pole_angle = math.pi
 		constraint.pole_subtarget = component.pole.target_bone
 		if(not component.pole.target_object):
 			constraint.pole_target = target_object
+
+	if(constraint.pole_target and constraint.pole_subtarget):
+		# https://blender.stackexchange.com/a/19755
+		# todo deal with poles from other armatures or just objects
+
+		def signed_angle(vector_u, vector_v, normal):
+			# Normal specifies orientation
+			angle = vector_u.angle(vector_v)
+			if vector_u.cross(vector_v).angle(normal) < 1:
+				angle = -angle
+			return angle
+
+		def get_pole_angle(base_bone, ik_bone, pole_location):
+			pole_normal = (ik_bone.tail - base_bone.head).cross(pole_location - base_bone.head)
+			projected_pole_axis = pole_normal.cross(base_bone.tail - base_bone.head)
+			return signed_angle(base_bone.x_axis, projected_pole_axis, base_bone.tail - base_bone.head)
+
+		root_bone = pose_bone
+		for _ in range(component.chain_length):
+			if(root_bone and root_bone.parent):
+				root_bone = root_bone.parent
+		if(root_bone):
+			constraint.pole_angle = get_pole_angle(root_bone, pose_bone, constraint.pole_target.pose.bones[constraint.pole_subtarget].matrix.translation)
 
 
 class ParseFromCurrentArmatureInstance(bpy.types.Operator):
