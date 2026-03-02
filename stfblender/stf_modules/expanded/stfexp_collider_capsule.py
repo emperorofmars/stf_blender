@@ -52,9 +52,9 @@ class STFEXP_Collider_Capsule_LoadJsonOperator(ComponentLoadJsonOperatorBase, bp
 
 	def get_property(self, context) -> any:
 		if(not self.blender_bone):
-			return context.object.stfexp_collider_capsule
+			return getattr(context.object, _blender_property_name)
 		else:
-			return context.bone.stfexp_collider_capsule
+			return getattr(context.bone, _blender_property_name)
 
 	def parse_json(self, context, component: any, json_resource: dict):
 		if(json_resource.get("type") != _stf_type): raise Exception("Invalid Type")

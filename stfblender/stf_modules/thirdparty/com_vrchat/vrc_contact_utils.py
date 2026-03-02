@@ -1,11 +1,15 @@
 import bpy
 import mathutils
+import re
+from typing import Callable
 
 from ....exporter.stf_export_context import STF_ExportContext
 from ....importer.stf_import_context import STF_ImportContext
 from ....utils.helpers import create_add_button, create_remove_button
 from ....base.stf_module_component import STF_BlenderComponentBase, STF_Component_Ref
 from ....utils.trs_utils import blender_rotation_to_stf, blender_translation_to_stf, stf_rotation_to_blender, stf_translation_to_blender
+from ....utils.animation_conversion_utils import get_component_index, get_component_stf_path_from_collection
+from ....base.property_path_part import BlenderPropertyPathPart, STFPropertyPathPart
 
 
 class CollisionTag(bpy.types.PropertyGroup):
@@ -50,7 +54,7 @@ def vrc_contact_draw_base(layout: bpy.types.UILayout, context: bpy.types.Context
 	create_add_button(box, "object" if type(component.id_data) == bpy.types.Object else "bone", blender_property_name, component.stf_id, "collision_tags")
 
 
-def vrc_contact_import_base(context: STF_ImportContext, component: VRC_ContactBase, json_resource: dict):
+def vrc_contact_import_base(component: VRC_ContactBase, json_resource: dict):
 	component.shape = json_resource.get("shape", "sphere")
 	component.radius = json_resource.get("radius", 1)
 	component.height = json_resource.get("height", 1)
@@ -75,7 +79,7 @@ def vrc_contact_import_base(context: STF_ImportContext, component: VRC_ContactBa
 		new_tag.tag_name = coltag
 
 
-def vrc_contact_export_base(context: STF_ExportContext, component: VRC_ContactBase, context_object: any, json_resource: dict):
+def vrc_contact_export_base(component: VRC_ContactBase, context_object: any, json_resource: dict):
 	json_resource["shape"] = component.shape
 	json_resource["radius"] = component.radius
 	if(component.shape == "capsule"):
@@ -95,3 +99,24 @@ def vrc_contact_export_base(context: STF_ExportContext, component: VRC_ContactBa
 		if(coltag.tag_name and coltag not in collision_tags):
 			collision_tags.append(coltag.tag_name)
 	json_resource["collision_tags"] = collision_tags
+
+
+def vrc_contact_create_resolve_property_path_to_stf_func(blender_property_name: str) -> Callable:
+	def handle(context: STF_ExportContext, application_object: any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart:
+		if(match := re.search(r"^" + blender_property_name + r"\[(?P<component_index>[\d]+)\].enabled", data_path)):
+			if(component_path := get_component_stf_path_from_collection(application_object, blender_property_name, int(match.groupdict()["component_index"]))):
+				return STFPropertyPathPart(component_path + ["enabled"])
+		return None
+	return handle
+
+
+def vrc_contact_create_resolve_stf_property_to_blender_func(blender_property_name: str) -> Callable:
+	def handle(context: STF_ImportContext, stf_path: list[str], application_object: any) -> BlenderPropertyPathPart:
+		blender_object = context.get_imported_resource(stf_path[0])
+		if(component_index := get_component_index(application_object, blender_property_name, blender_object.stf_id)):
+			match(stf_path[1]):
+				case "enabled":
+					return BlenderPropertyPathPart("OBJECT", blender_property_name + "[" + str(component_index) + "].enabled")
+		return None
+	return handle
+
