@@ -1,5 +1,5 @@
 import bpy
-from typing import Callable
+from typing import Any
 
 from .....exporter.stf_export_context import STF_ExportContext
 from .....importer.stf_import_context import STF_ImportContext
@@ -11,11 +11,11 @@ class STF_Material_Value_Float(STF_Material_Value_Base):
 	number: bpy.props.FloatProperty(name="Float") # type: ignore
 
 
-def _value_import_func(context: STF_ImportContext, blender_material: bpy.types.Material, json_resource: any, value: STF_Material_Value_Float):
+def _value_import_func(context: STF_ImportContext, blender_material: bpy.types.Material, json_resource: Any, value: STF_Material_Value_Float):
 	value.number = json_resource
 
 
-def _value_export_func(context: STF_ExportContext, blender_material: bpy.types.Material, value: STF_Material_Value_Float) -> any:
+def _value_export_func(context: STF_ExportContext, blender_material: bpy.types.Material, value: STF_Material_Value_Float) -> Any:
 	return value.number
 
 

@@ -1,4 +1,5 @@
 import bpy
+from typing import Any
 
 from ....base.stf_task_steps import STF_TaskSteps
 from ....base.stf_module_data import STF_BlenderDataResourceBase, STF_BlenderDataModule, STF_Data_Ref
@@ -118,7 +119,7 @@ def _draw_resource(layout: bpy.types.UILayout, context: bpy.types.Context, compo
 				remove_button.index = value_index
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: bpy.types.Collection) -> any:
+def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: bpy.types.Collection) -> Any:
 	resource_ref, resource = add_resource(context.get_root_collection(), _blender_property_name, stf_id, _stf_type)
 	import_data_resource_base(resource, json_resource)
 

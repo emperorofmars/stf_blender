@@ -1,4 +1,5 @@
 import bpy
+from typing import Any
 
 from ....base.stf_task_steps import STF_TaskSteps
 
@@ -14,7 +15,7 @@ from ....utils.id_utils import ensure_stf_id
 _stf_type = "stf.prefab"
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
+def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
 	collection = bpy.data.collections.new(json_resource.get("name", context.get_filename()))
 	collection.stf_info.stf_id = stf_id
 	if(json_resource.get("name")):
@@ -35,7 +36,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	return collection
 
 
-def _stf_export(context: STF_ExportContext, application_object: any, context_object: any) -> tuple[dict, str]:
+def _stf_export(context: STF_ExportContext, application_object: Any, context_object: Any) -> tuple[dict, str]:
 	collection: bpy.types.Collection = application_object
 	ensure_stf_id(context, collection)
 

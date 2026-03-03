@@ -1,5 +1,6 @@
 import bpy
 import re
+from typing import Any
 
 from ...base.stf_module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
 from ...exporter.stf_export_context import STF_ExportContext
@@ -17,7 +18,7 @@ class AVA_SecondaryMotion(STF_BlenderComponentBase):
 	intensity: bpy.props.FloatProperty(name="Intensity", default=0.3) # type: ignore
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: AVA_SecondaryMotion):
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: AVA_SecondaryMotion):
 	layout.label(text="This component is mostly a stub for now.")
 	layout.label(text="Use application specific bone-physics")
 	layout.label(text="components if possible and override this one.")
@@ -26,27 +27,27 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 
 """Bone instance handling"""
 
-def _set_component_instance_standin(context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: AVA_SecondaryMotion, standin_component: AVA_SecondaryMotion):
+def _set_component_instance_standin(context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: AVA_SecondaryMotion, standin_component: AVA_SecondaryMotion):
 	standin_component.intensity = component.intensity
 
 
-def _serialize_component_instance_standin_func(context: STF_ExportContext, component_ref: STF_Component_Ref, standin_component: AVA_SecondaryMotion, context_object: any) -> dict:
+def _serialize_component_instance_standin_func(context: STF_ExportContext, component_ref: STF_Component_Ref, standin_component: AVA_SecondaryMotion, context_object: Any) -> dict:
 	return {"intensity": standin_component.intensity}
 
-def _parse_component_instance_standin_func(context: STF_ImportContext, json_resource: dict, component_ref: STF_Component_Ref, standin_component: AVA_SecondaryMotion, context_object: any):
+def _parse_component_instance_standin_func(context: STF_ImportContext, json_resource: dict, component_ref: STF_Component_Ref, standin_component: AVA_SecondaryMotion, context_object: Any):
 	standin_component.intensity = json_resource.get("intensity", 0.3)
 
 
 """Import & export"""
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
+def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
 	component_ref, component = add_component(context_object, _blender_property_name, stf_id, _stf_type)
 	import_component_base(context, component, json_resource, _blender_property_name, context_object)
 	component.intensity = json_resource.get("intensity")
 	return component
 
 
-def _stf_export(context: STF_ExportContext, component: AVA_SecondaryMotion, context_object: any) -> tuple[dict, str]:
+def _stf_export(context: STF_ExportContext, component: AVA_SecondaryMotion, context_object: Any) -> tuple[dict, str]:
 	ret = export_component_base(context, _stf_type, component, _blender_property_name, context_object)
 	ret["intensity"] = component.intensity
 	return ret, component.stf_id
@@ -54,14 +55,14 @@ def _stf_export(context: STF_ExportContext, component: AVA_SecondaryMotion, cont
 
 """Animation"""
 
-def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart:
+def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: Any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart:
 	if(match := re.search(r"^" + _blender_property_name + r"\[(?P<component_index>[\d]+)\].enabled", data_path)):
 		if(component_path := get_component_stf_path_from_collection(application_object, _blender_property_name, int(match.groupdict()["component_index"]))):
 			return STFPropertyPathPart(component_path + ["enabled"])
 	return None
 
 
-def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: any) -> BlenderPropertyPathPart:
+def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: Any) -> BlenderPropertyPathPart:
 	blender_object = context.get_imported_resource(stf_path[0])
 	if(component_index := get_component_index(application_object, _blender_property_name, blender_object.stf_id)):
 		match(stf_path[1]):

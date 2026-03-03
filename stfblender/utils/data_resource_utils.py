@@ -1,10 +1,11 @@
 import bpy
+from typing import Any
 
 from ..base.stf_module_data import STF_BlenderDataResourceBase, STF_Data_Ref
 from .id_utils import ensure_stf_id
 
 
-def add_resource(collection: bpy.types.Collection, blender_property_name: str, stf_id: str, stf_type: str) -> tuple[STF_Data_Ref, any]:
+def add_resource(collection: bpy.types.Collection, blender_property_name: str, stf_id: str, stf_type: str) -> tuple[STF_Data_Ref, Any]:
 	resource_ref: STF_Data_Ref = collection.stf_data_refs.add()
 	resource_ref.stf_id = stf_id
 	resource_ref.stf_type = stf_type
@@ -131,10 +132,10 @@ def get_components_from_data_resource(resource: STF_BlenderDataResourceBase) -> 
 	return ret
 
 
-def import_data_resource_base(resource: STF_BlenderDataResourceBase, json_resource: any):
+def import_data_resource_base(resource: STF_BlenderDataResourceBase, json_resource: Any):
 	if("name" in json_resource): resource.stf_name = json_resource["name"]
 
-def export_data_resource_base(stf_context: any, stf_type: str, resource: STF_BlenderDataResourceBase) -> dict:
+def export_data_resource_base(stf_context: Any, stf_type: str, resource: STF_BlenderDataResourceBase) -> dict:
 	ensure_stf_id(stf_context, resource, resource)
 	ret = { "type": stf_type }
 	if(resource.stf_name): ret["name"] = resource.stf_name

@@ -1,4 +1,5 @@
 import bpy
+from typing import Any
 
 from ...exporter.stf_export_context import STF_ExportContext
 from ...importer.stf_import_context import STF_ImportContext
@@ -40,7 +41,7 @@ class STFEXP_Instance_Text_Panel(bpy.types.Panel):
 Import
 """
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
+def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
 	blender_text = import_resource(context, json_resource, json_resource["text"], "data")
 
 	blender_object = bpy.data.objects.new(json_resource.get("name", "STFEXP Instance Text"), blender_text)
@@ -61,14 +62,14 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 Export
 """
 
-def _can_handle_application_object_func(application_object: any) -> int:
+def _can_handle_application_object_func(application_object: Any) -> int:
 	if(type(application_object) == tuple and type(application_object[0]) == bpy.types.Object and isinstance(application_object[1], bpy.types.TextCurve)):
 		return 1000
 	else:
 		return -1
 
 
-def _stf_export(context: STF_ExportContext, application_object: any, context_object: any) -> tuple[dict, str]:
+def _stf_export(context: STF_ExportContext, application_object: Any, context_object: Any) -> tuple[dict, str]:
 	blender_object: bpy.types.Object = application_object[0]
 	blender_text: bpy.types.Text = application_object[1]
 	ensure_stf_id(context, blender_object.stf_instance)

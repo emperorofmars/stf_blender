@@ -1,7 +1,7 @@
 import math
 import re
 import mathutils
-from typing import Callable
+from typing import Any, Callable
 
 from ....exporter.stf_export_context import STF_ExportContext
 from ....importer.stf_import_context import STF_ImportContext
@@ -198,7 +198,7 @@ def _create_scale_to_blender_func(blender_object: bpy.types.Object) -> Callable:
 	return _ret
 
 
-def stf_node_resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], blender_object: any) -> BlenderPropertyPathPart:
+def stf_node_resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], blender_object: Any) -> BlenderPropertyPathPart:
 	blender_object = context.get_imported_resource(stf_path[0])
 	match(stf_path[1]):
 		case "t":

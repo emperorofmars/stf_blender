@@ -1,5 +1,6 @@
 import bpy
 import json
+from typing import Any
 
 from ...base.stf_task_steps import STF_TaskSteps
 from ...base.stf_module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
@@ -23,11 +24,11 @@ class JsonFallbackComponent(STF_BlenderComponentBase):
 	active_buffer: bpy.props.IntProperty() # type: ignore
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: JsonFallbackComponent):
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: JsonFallbackComponent):
 	draw_fallback(layout, component_ref, component)
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, context_object: any) -> any:
+def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, context_object: Any) -> Any:
 	component_ref, component = add_component(context_object, _blender_property_name, id, json_resource["type"])
 	component: JsonFallbackComponent = component
 	import_component_base(context, component, json_resource, _blender_property_name, context_object)
@@ -50,7 +51,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, contex
 	return component
 
 
-def _stf_export(context: STF_ExportContext, component: JsonFallbackComponent, context_object: any) -> tuple[dict, str]:
+def _stf_export(context: STF_ExportContext, component: JsonFallbackComponent, context_object: Any) -> tuple[dict, str]:
 	try:
 		json_component = json.loads(component.json)
 		if("type" not in json_component or not json_component["type"]):

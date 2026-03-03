@@ -1,5 +1,6 @@
-from io import BytesIO
 import bpy
+from io import BytesIO
+from typing import Any
 import numpy as np
 
 from ....importer.stf_import_context import STF_ImportContext
@@ -13,7 +14,7 @@ _stf_type = "stf.mesh"
 
 # Mesh import and export are the lowest hanging fruits for performance improvements.
 
-def import_stf_mesh(context: STF_ImportContext, json_resource: dict, stf_id: str, parent_application_object: any) -> tuple[any, any]:
+def import_stf_mesh(context: STF_ImportContext, json_resource: dict, stf_id: str, parent_application_object: Any) -> Any:
 	blender_mesh = bpy.data.meshes.new(json_resource.get("name", "STF Mesh"))
 	blender_mesh.stf_info.stf_id = stf_id
 	if(json_resource.get("name")):

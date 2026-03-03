@@ -1,5 +1,6 @@
 import bpy
 import json
+from typing import Any
 
 from ...base.stf_task_steps import STF_TaskSteps
 from ...exporter.stf_export_context import STF_ExportContext
@@ -27,7 +28,7 @@ def _draw_resource(layout: bpy.types.UILayout, context: bpy.types.Context, resou
 	draw_fallback(layout, resource_ref, resource)
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: bpy.types.Collection) -> any:
+def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: bpy.types.Collection) -> Any:
 	resource_ref, resource = add_resource(context_object, _blender_property_name, stf_id, json_resource["type"])
 	resource: JsonFallbackData = resource
 	import_data_resource_base(resource, json_resource)
@@ -40,14 +41,14 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 			if(referenced_resource := context.import_resource(resource_id)):
 				construct_blender_grr(referenced_resource, resource_grr, resource_id)
 	context.add_task(STF_TaskSteps.DEFAULT, _handle)
-	
+
 	for buffer_id in json_resource.get("referenced_buffers", []):
 		encode_buffer(context, buffer_id, resource)
 
 	return resource
 
 
-def _stf_export(context: STF_ExportContext, resource: JsonFallbackData, context_object: any) -> tuple[dict, str]:
+def _stf_export(context: STF_ExportContext, resource: JsonFallbackData, context_object: Any) -> tuple[dict, str]:
 	try:
 		json_resource = json.loads(resource.json)
 		if("type" not in json_resource or not json_resource["type"]):
@@ -64,7 +65,7 @@ def _stf_export(context: STF_ExportContext, resource: JsonFallbackData, context_
 				def _handle():
 					register_exported_resource(ret, context.serialize_resource(blender_resource))
 				context.add_task(STF_TaskSteps.DEFAULT, _handle)
-		
+
 		for buffer in resource.buffers:
 			register_exported_buffer(ret, decode_buffer(context, buffer))
 

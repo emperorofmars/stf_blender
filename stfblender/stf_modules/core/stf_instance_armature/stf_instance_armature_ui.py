@@ -1,4 +1,5 @@
 import bpy
+from typing import Any
 
 from ....base.stf_module_component import STF_Component_Ref
 from .stf_instance_armature import InstanceModComponentRef
@@ -58,14 +59,14 @@ class STFArmatureInstanceFixRotationMode(bpy.types.Operator):
 		return {"FINISHED"}
 
 
-def _get_target_object_func(component_holder: bpy.types.Object, component_ref: InstanceModComponentRef) -> any:
+def _get_target_object_func(component_holder: bpy.types.Object, component_ref: InstanceModComponentRef) -> Any:
 	armature: bpy.types.Armature = component_holder.data
 	for bone in armature.bones:
 		if(bone.stf_info.stf_id == component_ref.bone):
 			return bone
 	return None
 
-def _inject_ui(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: InstanceModComponentRef, context_object: any, component: any) -> bool:
+def _inject_ui(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: InstanceModComponentRef, context_object: Any, component: Any) -> bool:
 	layout = layout.box()
 	if(not component_ref.bone):
 		layout.alert = True
@@ -75,7 +76,7 @@ def _inject_ui(layout: bpy.types.UILayout, context: bpy.types.Context, component
 		return False
 	return True
 
-def _inject_standin_ui(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: InstanceModComponentRef, context_object: any, component: any) -> bool:
+def _inject_standin_ui(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: InstanceModComponentRef, context_object: Any, component: Any) -> bool:
 	layout = layout.box().row()
 	layout.prop(component_ref, "override")
 	layout.label(text="Target Bone: " + component_ref.bone)

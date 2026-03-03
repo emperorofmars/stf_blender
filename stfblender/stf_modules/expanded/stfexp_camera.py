@@ -1,7 +1,7 @@
 import bpy
 import math
 import re
-from typing import Callable
+from typing import Any, Callable
 
 from ...exporter.stf_export_context import STF_ExportContext
 from ...importer.stf_import_context import STF_ImportContext
@@ -42,7 +42,7 @@ class STFEXP_Camera_Panel(bpy.types.Panel):
 Import
 """
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
+def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
 	blender_camera = bpy.data.cameras.new(json_resource.get("name", "STFEXP Camera"))
 	blender_object = bpy.data.objects.new(json_resource.get("name", "STF Node"), blender_camera)
 	blender_object.stf_instance.stf_id = stf_id
@@ -72,7 +72,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 Export
 """
 
-def _can_handle_application_object_func(application_object: any) -> int:
+def _can_handle_application_object_func(application_object: Any) -> int:
 	if(type(application_object) == tuple and type(application_object[0]) == bpy.types.Object and type(application_object[1]) == bpy.types.Camera):
 		return 1000
 	else:
@@ -98,7 +98,7 @@ def _h_fov_to_v_fov(camera: bpy.types.Camera, cur_angle: float, cur_ortho_scale:
 		else:
 			return cur_angle
 
-def _stf_export(context: STF_ExportContext, application_object: any, context_object: any) -> tuple[dict, str]:
+def _stf_export(context: STF_ExportContext, application_object: Any, context_object: Any) -> tuple[dict, str]:
 	blender_object: bpy.types.Object = application_object[0]
 	blender_camera: bpy.types.Camera = application_object[1]
 	ensure_stf_id(context, blender_object.stf_instance)
@@ -132,7 +132,7 @@ def _get__convert_lens_to_fov_func(camera: bpy.types.Camera) -> Callable:
 			return [_h_fov_to_v_fov(camera, 2 * math.atan((camera.sensor_width if _is_sensor_fit_horizontal(camera) else camera.sensor_height) / (2 * value[0])), 0)] # convert lens to fov
 	return _ret
 
-def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart:
+def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: Any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart:
 	if(application_object.data.type == "ORTHO"):
 		if(match := re.search(r"^ortho_scale", data_path)):
 			return STFPropertyPathPart([application_object.stf_info.stf_id, "instance", "fov"], _get__convert_lens_to_fov_func(application_object.data))
@@ -148,7 +148,7 @@ def _get__convert_fov_to_blender_func(camera: bpy.types.Camera) -> Callable:
 		return [(camera.sensor_width if _is_sensor_fit_horizontal(camera) else camera.sensor_height) / (2 * math.tan(value[0] / 2))] # convert fov to lens
 	return _ret
 
-def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: any) -> BlenderPropertyPathPart:
+def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: Any) -> BlenderPropertyPathPart:
 	match(stf_path[1]):
 		case "fov":
 			if(application_object.data.type == "ORTHO"):

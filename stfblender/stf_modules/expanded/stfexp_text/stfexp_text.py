@@ -1,4 +1,5 @@
 import bpy
+from typing import Any
 
 from ....base.stf_module import STF_Module
 from ....exporter.stf_export_context import STF_ExportContext
@@ -16,7 +17,7 @@ class STFEXP_Text(bpy.types.PropertyGroup):
 	pass
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
+def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
 	blender_text: bpy.types.TextCurve = bpy.data.curves.new(json_resource.get("name", "STF Text"), "FONT")
 	blender_text.stf_info.stf_id = stf_id
 	if(json_resource.get("name")):
@@ -28,7 +29,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	return blender_text
 
 
-def _stf_export(context: STF_ExportContext, application_object: any, context_object: any) -> tuple[dict, str]:
+def _stf_export(context: STF_ExportContext, application_object: Any, context_object: Any) -> tuple[dict, str]:
 	blender_text: bpy.types.TextCurve = application_object
 	ensure_stf_id(context, blender_text)
 

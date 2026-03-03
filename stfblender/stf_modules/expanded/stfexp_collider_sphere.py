@@ -1,6 +1,7 @@
-import re
 import bpy
 import mathutils
+import re
+from typing import Any
 
 from ...base.property_path_part import BlenderPropertyPathPart, STFPropertyPathPart
 from ...base.stf_module_component import STF_BlenderBoneComponentModule, STF_BlenderComponentBase, STF_Component_Ref
@@ -16,8 +17,8 @@ _blender_property_name = "stfexp_collider_sphere"
 
 
 class STFEXP_Collider_Sphere(STF_BlenderComponentBase):
-	radius: bpy.props.FloatProperty(name="Radius", default=1) # type: ignore
-	offset_position: bpy.props.FloatVectorProperty(name="Position Offset", size=3, default=(0, 0, 0), subtype="XYZ") # type: ignore
+	radius: bpy.props.FloatProperty(name="Radius", default=1, min=0, precision=3) # type: ignore
+	offset_position: bpy.props.FloatVectorProperty(name="Position Offset", size=3, default=(0, 0, 0), subtype="XYZ", precision=3) # type: ignore
 
 
 def _parse_json(component: STFEXP_Collider_Sphere, json_resource: dict):
@@ -39,19 +40,19 @@ class STFEXP_Collider_Sphere_LoadJsonOperator(ComponentLoadJsonOperatorBase, bpy
 	bl_idname = "stf.stfexp_collider_sphere_loadjson"
 	blender_bone: bpy.props.BoolProperty() # type: ignore
 
-	def get_property(self, context) -> any:
+	def get_property(self, context) -> Any:
 		if(not self.blender_bone):
 			return getattr(context.object, _blender_property_name)
 		else:
 			return getattr(context.bone, _blender_property_name)
 
-	def parse_json(self, context, component: any, json_resource: dict):
+	def parse_json(self, context, component: Any, json_resource: dict):
 		if(json_resource.get("type") != _stf_type): raise Exception("Invalid Type")
 		_parse_json(component, json_resource)
 		return {"FINISHED"}
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: STFEXP_Collider_Sphere):
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: STFEXP_Collider_Sphere):
 	layout.use_property_split = True
 
 	layout.prop(component, "radius")
@@ -64,27 +65,27 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 
 """Bone instance handling"""
 
-def _set_component_instance_standin(context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: STFEXP_Collider_Sphere, standin_component: STFEXP_Collider_Sphere):
+def _set_component_instance_standin(context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: STFEXP_Collider_Sphere, standin_component: STFEXP_Collider_Sphere):
 	standin_component.radius = component.radius
 	standin_component.offset_position = component.offset_position
 
 
-def _serialize_component_instance_standin_func(context: STF_ExportContext, component_ref: STF_Component_Ref, standin_component: STFEXP_Collider_Sphere, context_object: any) -> dict:
+def _serialize_component_instance_standin_func(context: STF_ExportContext, component_ref: STF_Component_Ref, standin_component: STFEXP_Collider_Sphere, context_object: Any) -> dict:
 	return _serialize_json(standin_component)
 
-def _parse_component_instance_standin_func(context: STF_ImportContext, json_resource: dict, component_ref: STF_Component_Ref, standin_component: STFEXP_Collider_Sphere, context_object: any):
+def _parse_component_instance_standin_func(context: STF_ImportContext, json_resource: dict, component_ref: STF_Component_Ref, standin_component: STFEXP_Collider_Sphere, context_object: Any):
 	_parse_json(standin_component, json_resource)
 
 
 """Import & export"""
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
+def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
 	component_ref, component = add_component(context_object, _blender_property_name, stf_id, _stf_type)
 	import_component_base(context, component, json_resource, _blender_property_name, context_object)
 	_parse_json(component, json_resource)
 	return component
 
-def _stf_export(context: STF_ExportContext, component: STFEXP_Collider_Sphere, context_object: any) -> tuple[dict, str]:
+def _stf_export(context: STF_ExportContext, component: STFEXP_Collider_Sphere, context_object: Any) -> tuple[dict, str]:
 	ret = export_component_base(context, _stf_type, component, _blender_property_name, context_object)
 	ret = _serialize_json(component, ret)
 	return ret, component.stf_id
@@ -92,14 +93,14 @@ def _stf_export(context: STF_ExportContext, component: STFEXP_Collider_Sphere, c
 
 """Animation"""
 
-def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart:
+def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: Any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart:
 	if(match := re.search(r"^" + _blender_property_name + r"\[(?P<component_index>[\d]+)\].enabled", data_path)):
 		if(component_path := get_component_stf_path_from_collection(application_object, _blender_property_name, int(match.groupdict()["component_index"]))):
 			return STFPropertyPathPart(component_path + ["enabled"])
 	return None
 
 
-def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: any) -> BlenderPropertyPathPart:
+def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: Any) -> BlenderPropertyPathPart:
 	blender_object = context.get_imported_resource(stf_path[0])
 	if(component_index := get_component_index(application_object, _blender_property_name, blender_object.stf_id)):
 		match(stf_path[1]):

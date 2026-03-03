@@ -1,5 +1,5 @@
 import bpy
-from typing import Callable
+from typing import Any
 
 from .....exporter.stf_export_context import STF_ExportContext
 from .....importer.stf_import_context import STF_ImportContext
@@ -13,12 +13,12 @@ class STF_Material_Value_Image(STF_Material_Value_Base):
 	# uv_offset:
 
 
-def _value_import_func(context: STF_ImportContext, blender_material: bpy.types.Material, json_resource: any, value: STF_Material_Value_Image):
+def _value_import_func(context: STF_ImportContext, blender_material: bpy.types.Material, json_resource: Any, value: STF_Material_Value_Image):
 	if("image" in json_resource and json_resource["image"]):
 		value.image = context.import_resource(json_resource["image"], stf_kind="data")
 
 
-def _value_export_func(context: STF_ExportContext, blender_material: bpy.types.Material, value: STF_Material_Value_Image) -> any:
+def _value_export_func(context: STF_ExportContext, blender_material: bpy.types.Material, value: STF_Material_Value_Image) -> Any:
 	ret = {}
 	if(value.image): ret["image"] = context.serialize_resource(value.image)
 	return ret

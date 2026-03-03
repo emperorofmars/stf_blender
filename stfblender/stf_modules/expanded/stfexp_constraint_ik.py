@@ -1,7 +1,7 @@
 import bpy
 import re
 import math
-import mathutils
+from typing import Any
 
 from ...base.stf_module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
 from ...base.property_path_part import BlenderPropertyPathPart, STFPropertyPathPart
@@ -145,7 +145,7 @@ class ApplyToCurrentArmatureInstance(bpy.types.Operator):
 		return {"FINISHED"}
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: STFEXP_Constraint_IK):
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: STFEXP_Constraint_IK):
 	layout.use_property_split = True
 	layout.prop(component, "chain_length")
 
@@ -161,7 +161,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 
 """Import export"""
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
+def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
 	component_ref, component = add_component(context_object, _blender_property_name, stf_id, _stf_type)
 	import_component_base(context, component, json_resource, _blender_property_name, context_object)
 	component.chain_length = json_resource.get("chain_length")
@@ -179,7 +179,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	return component
 
 
-def _stf_export(context: STF_ExportContext, component: STFEXP_Constraint_IK, context_object: any) -> tuple[dict, str]:
+def _stf_export(context: STF_ExportContext, component: STFEXP_Constraint_IK, context_object: Any) -> tuple[dict, str]:
 	ret = export_component_base(context, _stf_type, component, _blender_property_name, context_object)
 	ret["chain_length"] = component.chain_length
 
@@ -197,7 +197,7 @@ def _stf_export(context: STF_ExportContext, component: STFEXP_Constraint_IK, con
 
 """Bone instance handling"""
 
-def _set_component_instance_standin(context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: STFEXP_Constraint_IK, standin_component: STFEXP_Constraint_IK):
+def _set_component_instance_standin(context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: STFEXP_Constraint_IK, standin_component: STFEXP_Constraint_IK):
 	standin_component.chain_length = component.chain_length
 	standin_component.target.target_object = context_object
 	standin_component.target.target_bone = component.target.target_bone
@@ -205,7 +205,7 @@ def _set_component_instance_standin(context: bpy.types.Context, component_ref: S
 	standin_component.pole.target_bone = component.pole.target_bone
 
 
-def _serialize_component_instance_standin_func(context: STF_ExportContext, component_ref: STF_Component_Ref, standin_component: STFEXP_Constraint_IK, context_object: any) -> dict:
+def _serialize_component_instance_standin_func(context: STF_ExportContext, component_ref: STF_Component_Ref, standin_component: STFEXP_Constraint_IK, context_object: Any) -> dict:
 	ret = { "chain_length": standin_component.chain_length }
 	_get_component = preserve_component_reference(standin_component, _blender_property_name, context_object)
 	def _handle():
@@ -217,7 +217,7 @@ def _serialize_component_instance_standin_func(context: STF_ExportContext, compo
 	context.add_task(STF_TaskSteps.DEFAULT, _handle)
 	return ret
 
-def _parse_component_instance_standin_func(context: STF_ImportContext, json_resource: dict, component_ref: STF_Component_Ref, standin_component: STFEXP_Constraint_IK, context_object: any):
+def _parse_component_instance_standin_func(context: STF_ImportContext, json_resource: dict, component_ref: STF_Component_Ref, standin_component: STFEXP_Constraint_IK, context_object: Any):
 	if("chain_length" in json_resource): standin_component.chain_length = json_resource["chain_length"]
 
 	if("target" in json_resource or "pole" in json_resource):
@@ -233,13 +233,13 @@ def _parse_component_instance_standin_func(context: STF_ImportContext, json_reso
 
 """Animation"""
 
-def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart:
+def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: Any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart:
 	if(match := re.search(r"^" + _blender_property_name + r"\[(?P<component_index>[\d]+)\].enabled", data_path)):
 		if(component_path := get_component_stf_path_from_collection(application_object, _blender_property_name, int(match.groupdict()["component_index"]))):
 			return STFPropertyPathPart(component_path + ["enabled"])
 	return None
 
-def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: any) -> BlenderPropertyPathPart:
+def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: Any) -> BlenderPropertyPathPart:
 	blender_object = context.get_imported_resource(stf_path[0])
 	if(component_index := get_component_index(application_object, _blender_property_name, blender_object.stf_id)):
 		match(stf_path[1]):

@@ -1,5 +1,6 @@
 import bpy
 import re
+from typing import Any
 
 from ...exporter.stf_export_context import STF_ExportContext
 from ...importer.stf_import_context import STF_ImportContext
@@ -40,7 +41,7 @@ class STFEXP_Light_Panel(bpy.types.Panel):
 Import
 """
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
+def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
 	blender_light_type = "POINT"
 	match(json_resource.get("light_type")):
 		case "point":
@@ -83,13 +84,13 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 Export
 """
 
-def _can_handle_application_object_func(application_object: any) -> int:
+def _can_handle_application_object_func(application_object: Any) -> int:
 	if(type(application_object) == tuple and type(application_object[0]) == bpy.types.Object and isinstance(application_object[1], bpy.types.Light) and application_object[1].type in ["POINT", "SUN", "SPOT"]):
 		return 1000
 	else:
 		return -1
 
-def _stf_export(context: STF_ExportContext, application_object: any, context_object: any) -> tuple[dict, str]:
+def _stf_export(context: STF_ExportContext, application_object: Any, context_object: Any) -> tuple[dict, str]:
 	blender_object: bpy.types.Object = application_object[0]
 	blender_light: bpy.types.Light = application_object[1]
 	ensure_stf_id(context, blender_object.stf_instance)
@@ -124,7 +125,7 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 Animation
 """
 
-def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart:
+def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: Any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart:
 	if(match := re.search(r"^temperature", data_path)):
 		return STFPropertyPathPart([application_object.stf_info.stf_id, "instance", "temperature"])
 	elif(match := re.search(r"^color", data_path)):
@@ -139,7 +140,7 @@ def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_o
 	return None
 
 
-def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: any) -> BlenderPropertyPathPart:
+def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: Any) -> BlenderPropertyPathPart:
 	match(stf_path[1]):
 		case "temperature":
 			return BlenderPropertyPathPart("LIGHT", "temperature")

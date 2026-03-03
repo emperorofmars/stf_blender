@@ -1,4 +1,5 @@
 import bpy
+from typing import Any
 
 from ....importer.stf_import_context import STF_ImportContext
 from ....exporter.stf_export_context import STF_ExportContext
@@ -12,7 +13,7 @@ from ....utils.armature_bone import ArmatureBone
 _stf_type = "stf.armature"
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
+def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
 	blender_armature = bpy.data.armatures.new(json_resource.get("name", "STF Armature"))
 	blender_armature.stf_info.stf_id = stf_id
 	if(json_resource.get("name")):
@@ -28,7 +29,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	return blender_armature
 
 
-def _stf_export(context: STF_ExportContext, application_object: any, context_object: any) -> tuple[dict, str]:
+def _stf_export(context: STF_ExportContext, application_object: Any, context_object: Any) -> tuple[dict, str]:
 	blender_armature: bpy.types.Armature = application_object
 	ensure_stf_id(context, blender_armature)
 

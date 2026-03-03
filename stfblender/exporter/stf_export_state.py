@@ -2,6 +2,7 @@ import bpy
 import io
 import logging
 from enum import Enum
+from typing import Any
 
 from ..base.stf_definition import STF_Buffer_Included, STF_JsonDefinition, STF_Meta_AssetInfo
 from ..base.stf_report import STFReportSeverity, STFReport
@@ -27,14 +28,24 @@ class STF_ExportState(STF_State_Base):
 	Gets passed to the STF_ExportContext.
 	"""
 
-	def __init__(self, asset_info: STF_Meta_AssetInfo, modules: tuple[dict[any, list[STF_Module]], dict[any, list[STF_ExportComponentHook]]], trash_objects: list[bpy.types.Object] = [], fail_on_severity: STFReportSeverity = STFReportSeverity.FatalError, permit_id_reassignment: bool = True, metric_multiplier: float = 1, settings: any = None):
+	def __init__(
+			self,
+			asset_info: STF_Meta_AssetInfo,
+			modules: tuple[dict[Any, list[STF_Module]],
+			dict[Any, list[STF_ExportComponentHook]]],
+			trash_objects: list[bpy.types.Object] = [],
+			fail_on_severity: STFReportSeverity = STFReportSeverity.FatalError,
+			permit_id_reassignment: bool = True,
+			metric_multiplier: float = 1,
+			settings: Any = None
+	):
 		super().__init__(fail_on_severity)
 
-		self._modules: dict[any, list[STF_Module]] = modules[0]
-		self._hooks: dict[any, list[STF_ExportComponentHook]] = modules[1]
+		self._modules: dict[Any, list[STF_Module]] = modules[0]
+		self._hooks: dict[Any, list[STF_ExportComponentHook]] = modules[1]
 
-		self._resources: dict[any, str] = {} # original application object -> ID of exported STF Json resource
-		self._resources_inverse: dict[str, any] = {} # original application object -> ID of exported STF Json resource
+		self._resources: dict[Any, str] = {} # original application object -> ID of exported STF Json resource
+		self._resources_inverse: dict[str, Any] = {} # original application object -> ID of exported STF Json resource
 		self._exported_resources: dict[str, dict] = {} # ID -> exported STF Json resource
 		self._exported_buffers: dict[str, io.BytesIO] = {} # ID -> exported STF Json buffer
 
@@ -48,7 +59,7 @@ class STF_ExportState(STF_State_Base):
 		self._settings = settings
 
 
-	def determine_module(self, application_object: any, module_kind: str = None) -> STF_Module:
+	def determine_module(self, application_object: Any, module_kind: str = None) -> STF_Module:
 		"""Find the best suited registered STF_Module for the type of this object"""
 		selected_module = None
 		selected_priority = -1
@@ -72,11 +83,11 @@ class STF_ExportState(STF_State_Base):
 		return selected_module
 
 
-	def determine_hooks(self, application_object: any) -> list[STF_ExportComponentHook]:
+	def determine_hooks(self, application_object: Any) -> list[STF_ExportComponentHook]:
 		return self._hooks.get(type(application_object), [])
 
 
-	def determine_property_resolution_module(self, application_object: any, data_path: str) -> STF_Module:
+	def determine_property_resolution_module(self, application_object: Any, data_path: str) -> STF_Module:
 		# TODO handle priority for animation path handling maybe at some point?
 
 		for _, module_list in self._modules.items():
@@ -91,7 +102,7 @@ class STF_ExportState(STF_State_Base):
 		return None
 
 
-	def get_resource_id(self, application_object: any) -> str:
+	def get_resource_id(self, application_object: Any) -> str:
 		"""Get the ID this object will be referenced by. The object may not be fully serialized yet."""
 		if(application_object in self._resources):
 			return self._resources[application_object]
@@ -99,13 +110,13 @@ class STF_ExportState(STF_State_Base):
 			return None
 
 
-	def register_id(self, application_object: any, id: str):
+	def register_id(self, application_object: Any, id: str):
 		"""Register the ID for this object. The object has not been serialized yet."""
 		self._resources[application_object] = id
 		self._resources_inverse[id] = application_object
 
 
-	def register_serialized_resource(self, application_object: any, json_resource: dict, id: str):
+	def register_serialized_resource(self, application_object: Any, json_resource: dict, id: str):
 		"""Now register the fully serialized object."""
 		if(type(id) is not str):
 			_logger.error("Invalid Resource ID", stack_info=True)

@@ -1,4 +1,5 @@
 import bpy
+from typing import Any
 
 from .stf_material_definition import STF_Material_Property, STF_Material_Value_Module_Base
 from .material_value_modules import blender_material_value_modules
@@ -17,7 +18,7 @@ from .stf_material_property_conversion import stf_material_resolve_property_path
 _stf_type = "stf.material"
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
+def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
 	blender_material = bpy.data.materials.new(json_resource.get("name", "STF Material"))
 	blender_material.stf_info.stf_id = stf_id
 	if(json_resource.get("name")):
@@ -59,7 +60,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	return blender_material
 
 
-def _stf_export(context: STF_ExportContext, application_object: any, context_object: any) -> tuple[dict, str]:
+def _stf_export(context: STF_ExportContext, application_object: Any, context_object: Any) -> tuple[dict, str]:
 	blender_material: bpy.types.Material = application_object
 	ensure_stf_id(context, blender_material)
 

@@ -1,6 +1,6 @@
 import bpy
 from enum import Enum
-from typing import Callable
+from typing import Any, Callable
 
 from .property_path_part import BlenderPropertyPathPart, STFPropertyPathPart
 
@@ -29,36 +29,36 @@ class STF_Module:
 	understood_application_types: list = []
 
 	# Return a priority for handling this application type. If the priority is negative, don't use this module even if no other is found.
-	can_handle_application_object_func: Callable[[any], int]
+	can_handle_application_object_func: Callable[[Any], int]
 
 
 	# (Import Context, Json Dict, ID, Optional Parent Application Object) -> The Application Object
-	import_func: Callable[[any, dict, str, any], any]
+	import_func: Callable[[Any, dict, str, Any], Any]
 
 	# (Export Context, Application Object, Optional Parent Application Object) -> (Json Dict, ID)
-	export_func: Callable[[any, any, any], tuple[dict, str]]
+	export_func: Callable[[Any, Any, Any], tuple[dict, str]]
 
 	"""
 	Properties for animation handling
 	"""
 	# List of application types from which this module can convert paths.
-	understood_application_property_path_types: list[any] = []
+	understood_application_property_path_types: list[Any] = []
 
 	# List of paths which this component can convert into stf paths.
 	understood_application_property_path_parts: list[str] = []
 
 	# (Export Context, Application Object, Application Object Property Index,, Application Path) -> BlenderPropertyPathPart
-	resolve_property_path_to_stf_func: Callable[[any, any, int, str], STFPropertyPathPart]
+	resolve_property_path_to_stf_func: Callable[[Any, Any, int, str], STFPropertyPathPart]
 
 	# (Import Context, Target Application Node, List of STF Path Elements, Base Target Application Object) -> BlenderPropertyPathPart
-	resolve_stf_property_to_blender_func: Callable[[any, list[str], any], BlenderPropertyPathPart]
+	resolve_stf_property_to_blender_func: Callable[[Any, list[str], Any], BlenderPropertyPathPart]
 
 	"""
 	Handling components if applicable. `get_components_func` must be assigned if the resource supports components
 	"""
 	# Get a list of application-components on the application object.
 	# (Application Object) -> List[Application Component Object]
-	get_components_func: Callable[[any], list[any]]
+	get_components_func: Callable[[Any], list[Any]]
 
 	# Get the object which has the `stf_components` property. Mostly a workaround for Bone references getting invalidated by Blender on mode-switch.
-	get_components_holder_func: Callable[[any], any]
+	get_components_holder_func: Callable[[Any], Any]

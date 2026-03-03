@@ -1,6 +1,6 @@
-from typing import Callable
 import mathutils
 import math
+from typing import Any, Callable
 
 from ....importer.stf_import_context import STF_ImportContext
 from ....exporter.stf_export_context import STF_ExportContext
@@ -156,7 +156,7 @@ def _create_scale_to_blender_func(blender_object: ArmatureBone) -> Callable:
 	return _ret
 
 
-def resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: any) -> BlenderPropertyPathPart:
+def resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: Any) -> BlenderPropertyPathPart:
 	blender_object = context.get_imported_resource(stf_path[0])
 	match(stf_path[1]):
 		case "t":

@@ -1,3 +1,5 @@
+from typing import Any
+
 
 class STF_Meta_AssetInfo:
 	def __init__(self):
@@ -118,7 +120,7 @@ class STF_Buffer_File:
 class STF_Buffer_JsonArray:
 	def __init__(self):
 		self.type: str = "stf.buffer.json_array"
-		self.data: list[any]
+		self.data: list[Any]
 
 	@staticmethod
 	def from_dict(dict: dict):

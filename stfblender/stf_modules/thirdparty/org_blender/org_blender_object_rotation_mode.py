@@ -1,5 +1,6 @@
-import uuid
 import bpy
+import uuid
+from typing import Any
 
 from ....base.stf_task_steps import STF_TaskSteps
 from ....base.stf_module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_ExportComponentHook
@@ -17,7 +18,7 @@ class Blender_Object_Rotation_Mode(STF_BlenderComponentBase):
 	pass
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: bpy.types.Object) -> any:
+def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: bpy.types.Object) -> Any:
 	component_ref, component = add_component(context_object, _blender_property_name, stf_id, _stf_type)
 	import_component_base(context, component, json_resource, _blender_property_name, context_object)
 
@@ -52,7 +53,7 @@ def _hook_can_handle_func(application_object: bpy.types.Object) -> bool:
 	if(hasattr(application_object, "org_blender_object_rotation_mode") and len(application_object.org_blender_object_rotation_mode) > 0): return False
 	return True
 
-def _hook_apply_func(context: STF_ExportContext, application_object: bpy.types.Object, context_object: any):
+def _hook_apply_func(context: STF_ExportContext, application_object: bpy.types.Object, context_object: Any):
 	add_component(application_object, _blender_property_name, str(uuid.uuid4()), _stf_type)
 
 

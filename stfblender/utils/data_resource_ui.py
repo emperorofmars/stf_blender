@@ -1,4 +1,5 @@
 import bpy
+from typing import Any
 
 from ..base.stf_module_data import STF_BlenderDataResourceBase, STF_Data_Ref
 from ..base.stf_registry import find_data_module, get_blender_non_native_data_modules
@@ -92,7 +93,7 @@ class STFDrawDataResourceList(bpy.types.UIList):
 		row_r.operator(CopyToClipboard.bl_idname, text="", icon="DUPLICATE", emboss=False).text = item.stf_id
 
 
-def _get_data_resource_component_ref_property_collection(context: bpy.types.Context) -> any:
+def _get_data_resource_component_ref_property_collection(context: bpy.types.Context) -> Any:
 	for resource in getattr(context.scene.collection if stf_data_resource_use_scene_collection else context.collection, stf_data_resource_property):
 		if(resource.stf_id == stf_data_resource_id):
 			return resource.stf_components
@@ -103,7 +104,7 @@ class STFAddDataResourceComponentOperator(bpy.types.Operator, STFAddComponentOpe
 	@classmethod
 	def poll(cls, context): return context.scene is not None if stf_data_resource_use_scene_collection else context.collection is not None
 	def get_property(self, context): return context.scene.collection if stf_data_resource_use_scene_collection else context.collection
-	def get_components_ref_property(self, context) -> any: return _get_data_resource_component_ref_property_collection(context)
+	def get_components_ref_property(self, context) -> Any: return _get_data_resource_component_ref_property_collection(context)
 
 class STFRemoveDataResourceComponentOperator(bpy.types.Operator, STFRemoveComponentOperatorBase):
 	"""Remove selected component from Data-Resource"""
@@ -111,7 +112,7 @@ class STFRemoveDataResourceComponentOperator(bpy.types.Operator, STFRemoveCompon
 	@classmethod
 	def poll(cls, context): return context.scene is not None if stf_data_resource_use_scene_collection else context.collection is not None
 	def get_property(self, context): return context.scene.collection if stf_data_resource_use_scene_collection else context.collection
-	def get_components_ref_property(self, context) -> any: return _get_data_resource_component_ref_property_collection(context)
+	def get_components_ref_property(self, context) -> Any: return _get_data_resource_component_ref_property_collection(context)
 
 class STFEditDataResourceComponentIdOperator(bpy.types.Operator, STFEditComponentOperatorBase):
 	"""Edit the ID of this component"""
@@ -119,7 +120,7 @@ class STFEditDataResourceComponentIdOperator(bpy.types.Operator, STFEditComponen
 	@classmethod
 	def poll(cls, context): return context.scene is not None if stf_data_resource_use_scene_collection else context.collection is not None
 	def get_property(self, context): return context.scene.collection if stf_data_resource_use_scene_collection else context.collection
-	def get_components_ref_property(self, context) -> any: return _get_data_resource_component_ref_property_collection(context)
+	def get_components_ref_property(self, context) -> Any: return _get_data_resource_component_ref_property_collection(context)
 
 
 def draw_resource(layout: bpy.types.UILayout, context: bpy.types.Context, resource_ref: STF_Data_Ref, collection: bpy.types.Collection, resource: STF_BlenderDataResourceBase):

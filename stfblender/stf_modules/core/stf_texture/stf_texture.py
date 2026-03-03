@@ -1,4 +1,5 @@
 import bpy
+from typing import Any
 
 from ....base.stf_module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
 from ....exporter.stf_export_context import STF_ExportContext
@@ -21,7 +22,7 @@ class STF_Texture(STF_BlenderComponentBase):
 	# TODO much more
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: STF_Texture):
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: STF_Texture):
 	col = layout.column(align=True)
 	col.use_property_split = True
 	col.prop(component, "width")
@@ -31,7 +32,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 	col.prop(component, "mipmaps")
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
+def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
 	component_ref, component = add_component(context_object, _blender_property_name, stf_id, _stf_type)
 	import_component_base(context, component, json_resource, _blender_property_name, context_object)
 
@@ -44,7 +45,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	return component
 
 
-def _stf_export(context: STF_ExportContext, component: STF_Texture, context_object: any) -> tuple[dict, str]:
+def _stf_export(context: STF_ExportContext, component: STF_Texture, context_object: Any) -> tuple[dict, str]:
 	ret = export_component_base(context, _stf_type, component, _blender_property_name, context_object)
 	ret["width"] = component.width
 	ret["height"] = component.height

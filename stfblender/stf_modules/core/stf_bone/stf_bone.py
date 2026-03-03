@@ -1,6 +1,7 @@
 import bpy
 import mathutils
 import math
+from typing import Any
 
 from ....base.stf_report import STFReportSeverity, STFReport
 from ....base.stf_module import STF_Module
@@ -18,7 +19,18 @@ from .stf_bone_property_conversion import resolve_property_path_to_stf_func, res
 _stf_type = "stf.bone"
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
+def search_uses(self, context: bpy.types.Context, edit_text: str):
+	return (
+		("position", "Position"),
+		("ik_target", "IK Target"),
+		("ik_pole", "IK Pole"),
+	)
+
+class STF_Bone(bpy.types.PropertyGroup):
+	non_deform_use: bpy.props.StringProperty(name="Use non-deform Bone as", options=set(), search=search_uses) # type: ignore
+
+
+def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
 	blender_armature: bpy.types.Armature = context_object.data
 	blender_object: bpy.types.Object = context_object
 
@@ -46,6 +58,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	blender_edit_bone.length = json_resource["length"]
 
 	if("connected" in json_resource): blender_edit_bone.use_connect = json_resource["connected"]
+	if("deform" in json_resource): blender_edit_bone.use_deform = json_resource["deform"]
 
 	for child_name in children:
 		child = blender_armature.edit_bones[child_name]
@@ -61,11 +74,15 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	if(json_resource.get("name")):
 		blender_armature.bones[blender_bone_name].stf_info.stf_name = json_resource["name"]
 		blender_armature.bones[blender_bone_name].stf_info.stf_name_source_of_truth = True
+	if("non_deform_use" in json_resource):
+		blender_armature.bones[blender_bone_name].stf_bone.non_deform_use = json_resource["non_deform_use"]
+		if(json_resource["non_deform_use"] in ["ik_target", "ik_pole"]):
+			blender_armature.bones[blender_bone_name].color.palette = "THEME03"
 
 	return blender_bone
 
 
-def _stf_export(context: STF_ExportContext, application_object: any, context_object: any) -> tuple[dict, str]:
+def _stf_export(context: STF_ExportContext, application_object: Any, context_object: Any) -> tuple[dict, str]:
 	blender_bone_def: ArmatureBone = application_object
 	ensure_stf_id(context, blender_bone_def.get_bone(), blender_bone_def.get_bone().stf_info)
 
@@ -95,6 +112,9 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 	ret["translation"] = trs_utils.blender_translation_to_stf(t)
 	ret["rotation"] = trs_utils.blender_rotation_to_stf(r)
 	ret["length"] = blender_bone.length
+	if(not blender_bone.use_deform):
+		ret["deform"] = False
+		ret["non_deform_use"] = blender_bone.stf_bone.non_deform_use if blender_bone.stf_bone.non_deform_use else "position"
 
 	return ret, stf_id
 
@@ -102,7 +122,7 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 def _get_components_from_object(application_object: ArmatureBone) -> list:
 	return get_components_from_object(application_object.get_bone())
 
-def _get_components_holder_func(application_object: ArmatureBone) -> any:
+def _get_components_holder_func(application_object: ArmatureBone) -> Any:
 	return application_object.get_bone()
 
 
@@ -129,6 +149,11 @@ register_stf_modules = [
 
 def register():
 	boilerplate_register(bpy.types.Bone, "node")
+	bpy.types.Bone.stf_bone = bpy.props.PointerProperty(type=STF_Bone, name="STF Bone", options=set())
+	#bpy.types.Bone.stf_bone_non_deform_use_select = bpy.props.PointerProperty(type=STF_Bone, name="STF Bone", options=set())
+
 
 def unregister():
 	boilerplate_unregister(bpy.types.Bone, "node")
+	if hasattr(bpy.types.Bone, "stf_bone"):
+		del bpy.types.Bone.stf_bone

@@ -1,6 +1,6 @@
 import bpy
 import logging
-from typing import Callable
+from typing import Any, Callable
 
 from ..base.stf_task_steps import STF_TaskSteps
 from .stf_import_state import STF_ImportState
@@ -32,11 +32,11 @@ class STF_ImportContext:
 	def get_imported_resource(self, stf_id: str):
 		return self._state.get_imported_resource(stf_id)
 
-	def register_imported_resource(self, stf_id: str, application_object: any):
+	def register_imported_resource(self, stf_id: str, application_object: Any):
 		self._state.register_imported_resource(stf_id, application_object)
 
 
-	def __run_components(self, json_resource: dict, application_object: any):
+	def __run_components(self, json_resource: dict, application_object: Any):
 		if("components" in json_resource):
 			for component_id in json_resource["components"]:
 				json_component = self.get_json_resource(component_id)
@@ -55,7 +55,7 @@ class STF_ImportContext:
 					self.report(STFReport("Invalid JSON resource", STFReportSeverity.FatalError, component_id))
 
 
-	def import_resource(self, stf_id: str, context_object: any = None, stf_kind: str = "data") -> any:
+	def import_resource(self, stf_id: str, context_object: Any = None, stf_kind: str = "data") -> Any:
 		if(stf_id in self._state._imported_resources):
 			if(type(self._state._imported_resources[stf_id]) == STF_Component_Editmode_Resistant_Reference):
 				return self._state._imported_resources[stf_id].get()
@@ -85,7 +85,7 @@ class STF_ImportContext:
 		return self._state.import_buffer(stf_id)
 
 
-	def resolve_stf_property_path(self, stf_path: list[str], application_object: any = None) -> BlenderPropertyPathPart:
+	def resolve_stf_property_path(self, stf_path: list[str], application_object: Any = None) -> BlenderPropertyPathPart:
 		if(stf_path == None or len(stf_path) == 0): return None
 
 		if(selected_module := self._state.determine_property_resolution_module(stf_path[0])):
@@ -114,7 +114,7 @@ class STF_ImportContext:
 		return self._root_collection
 
 
-	def get_setting(self, key: str, default: any = None) -> any:
+	def get_setting(self, key: str, default: Any = None) -> Any:
 		return getattr(self._state._settings, key) if hasattr(self._state._settings, key) else default
 
 

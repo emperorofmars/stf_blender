@@ -1,4 +1,5 @@
 import bpy
+from typing import Any
 
 from .stf_dependency_import import stfblender
 
@@ -11,11 +12,11 @@ class SqueakComponent(stfblender.base.stf_module_component.STF_BlenderComponentB
 	squeak: bpy.props.BoolProperty(name="Squeak", default=True) # type: ignore
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: stfblender.base.stf_module_component.STF_Component_Ref, context_object: any, component: SqueakComponent):
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: stfblender.base.stf_module_component.STF_Component_Ref, context_object: Any, component: SqueakComponent):
 	layout.prop(component, "squeak")
 
 
-def _stf_import(context: stfblender.importer.stf_import_context.STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
+def _stf_import(context: stfblender.importer.stf_import_context.STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
 	component_ref, component = stfblender.utils.component_utils.add_component(context_object, _blender_property_name, stf_id, _stf_type)
 	ret = stfblender.utils.component_utils.import_component_base(context, component, json_resource, _blender_property_name, context_object)
 
@@ -24,7 +25,7 @@ def _stf_import(context: stfblender.importer.stf_import_context.STF_ImportContex
 	return component
 
 
-def _stf_export(context: stfblender.exporter.stf_export_context.STF_ExportContext, component: SqueakComponent, context_object: any) -> tuple[dict, str]:
+def _stf_export(context: stfblender.exporter.stf_export_context.STF_ExportContext, component: SqueakComponent, context_object: Any) -> tuple[dict, str]:
 	ret = stfblender.utils.component_utils.export_component_base(context, _stf_type, component, _blender_property_name, context_object)
 	ret["squeak"] = component.squeak
 	return ret, component.stf_id

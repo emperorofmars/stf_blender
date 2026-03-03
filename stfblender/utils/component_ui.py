@@ -1,5 +1,5 @@
 import bpy
-from typing import Callable
+from typing import Any, Callable
 
 from .component_utils import STF_ManageExclusionGroups, STF_RegisterExclusionGroup
 
@@ -163,7 +163,7 @@ class STFDrawInstanceComponentList(bpy.types.UIList):
 		row_r.operator(CopyToClipboard.bl_idname, text="", icon="DUPLICATE", emboss=False).text = item.stf_id
 
 
-def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, stf_application_object: any, component: STF_BlenderComponentBase, edit_op: str, is_instance: bool, inject_ui: Callable = None):
+def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, stf_application_object: Any, component: STF_BlenderComponentBase, edit_op: str, is_instance: bool, inject_ui: Callable = None):
 	box = layout.box()
 	# Component header info
 	row = box.row()
@@ -241,13 +241,13 @@ def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, compo
 def draw_components_ui(
 		layout: bpy.types.UILayout,
 		context: bpy.types.Context,
-		ref_holder: any,
-		component_holder: any,
+		ref_holder: Any,
+		component_holder: Any,
 		add_component_op: str,
 		remove_component_op: str,
 		edit_component_id_op: str,
 		get_target_object_func: Callable = None,
-		inject_ui: any = None,
+		inject_ui: Any = None,
 		is_data_resource_component: bool = False,
 		is_component_instance: bool = False
 		):
@@ -315,8 +315,8 @@ def draw_components_ui(
 def draw_instance_standin_components_ui(
 		layout: bpy.types.UILayout,
 		context: bpy.types.Context,
-		ref_holder: any,
-		component_holder: any,
+		ref_holder: Any,
+		component_holder: Any,
 		edit_component_id_op: str,
 		get_target_object_func: Callable = None,
 		inject_ui: Callable = None

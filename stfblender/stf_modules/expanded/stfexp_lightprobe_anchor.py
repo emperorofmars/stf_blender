@@ -1,4 +1,5 @@
 import bpy
+from typing import Any
 
 from ...base.stf_task_steps import STF_TaskSteps
 from ...base.stf_module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
@@ -17,14 +18,14 @@ class STFEXP_LightprobeAnchor(STF_BlenderComponentBase):
 	anchor_bone: bpy.props.StringProperty(name="Anchor Bone", options=set()) # type: ignore
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: STFEXP_LightprobeAnchor):
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: STFEXP_LightprobeAnchor):
 	layout.use_property_split = True
 	layout.prop(component, "anchor_object")
 	if(component.anchor_object and type(component.anchor_object.data) == bpy.types.Armature):
 		layout.prop_search(component, "anchor_bone", component.anchor_object.data, "bones")
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, context_object: any) -> any:
+def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, context_object: Any) -> Any:
 	component_ref, component = add_component(context_object, _blender_property_name, id, _stf_type)
 	import_component_base(context, component, json_resource, _blender_property_name, context_object)
 
@@ -43,7 +44,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, contex
 	return component
 
 
-def _stf_export(context: STF_ExportContext, component: STFEXP_LightprobeAnchor, context_object: any) -> tuple[dict, str]:
+def _stf_export(context: STF_ExportContext, component: STFEXP_LightprobeAnchor, context_object: Any) -> tuple[dict, str]:
 	ret = export_component_base(context, _stf_type, component, _blender_property_name, context_object)
 
 	if(component.anchor_object):

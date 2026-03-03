@@ -1,9 +1,10 @@
 import bpy
+from typing import Any
 
 from ..base.stf_registry import get_stf_modules
 
 
-def clean_id_thingy(id_thingy: any):
+def clean_id_thingy(id_thingy: Any):
 	valid_component_ids = []
 	cleaned_component_refs = 0
 	if(hasattr(id_thingy, "stf_info")):

@@ -1,5 +1,6 @@
 import bpy
 import logging
+from typing import Any
 
 from .import_settings import STF_ImportSettings
 
@@ -27,7 +28,7 @@ class STF_ImportState(STF_State_Base):
 		self._modules: dict[str, STF_Module] = modules
 		self._fallback_modules: dict[str, STF_Module] = fallback_modules
 
-		self._imported_resources: dict[str, any] = {} # ID | list of IDs -> imported object
+		self._imported_resources: dict[str, Any] = {} # ID | list of IDs -> imported object
 		self._asset_info: STF_Meta_AssetInfo
 
 		self._trash_objects: list[bpy.types.Object] = trash_objects
@@ -38,7 +39,7 @@ class STF_ImportState(STF_State_Base):
 	def determine_module(self, json_resource: dict, stf_kind: str = None) -> STF_Module:
 		return self._modules.get(json_resource["type"], self._fallback_modules.get(stf_kind))
 
-	def register_imported_resource(self, stf_id: str, application_object: any):
+	def register_imported_resource(self, stf_id: str, application_object: Any):
 		self._imported_resources[stf_id] = application_object
 
 	def get_imported_resource(self, stf_id: str):

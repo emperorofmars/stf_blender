@@ -1,4 +1,5 @@
 import bpy
+from typing import Any
 
 from .stf_dependency_import import stfblender
 
@@ -6,7 +7,7 @@ from .stf_dependency_import import stfblender
 _stf_type = "my_custom.namespaced.brush"
 
 
-def _stf_import(context: stfblender.importer.stf_import_context.STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
+def _stf_import(context: stfblender.importer.stf_import_context.STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
 	application_object = bpy.data.brushes.new(json_resource.get("name", "My Custom Brush"))
 	application_object.stf_info.stf_id = stf_id
 	if(json_resource.get("name")):
@@ -18,7 +19,7 @@ def _stf_import(context: stfblender.importer.stf_import_context.STF_ImportContex
 	return application_object
 
 
-def _stf_export(context: stfblender.exporter.stf_export_context.STF_ExportContext, application_object: any, context_object: any) -> tuple[dict, str]:
+def _stf_export(context: stfblender.exporter.stf_export_context.STF_ExportContext, application_object: Any, context_object: Any) -> tuple[dict, str]:
 	application_object: bpy.types.Brush = application_object
 	stfblender.utils.id_utils.ensure_stf_id(context, application_object)
 

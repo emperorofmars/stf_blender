@@ -1,5 +1,6 @@
 import bpy
 import uuid
+from typing import Any
 
 from .misc import CopyToClipboard
 from ..base.stf_report import STFReportSeverity, STFReport
@@ -14,11 +15,11 @@ class STFSetIDOperatorBase:
 		self.get_property(context).stf_id = str(uuid.uuid4())
 		return {"FINISHED"}
 
-	def get_property(self, context) -> any:
+	def get_property(self, context) -> Any:
 		pass
 
 
-def draw_stf_id_ui(layout: bpy.types.UILayout, context: bpy.types.Context, blender_object: any, stf_prop_holder: any, set_id_op: str, is_instance: bool = False):
+def draw_stf_id_ui(layout: bpy.types.UILayout, context: bpy.types.Context, blender_object: Any, stf_prop_holder: Any, set_id_op: str, is_instance: bool = False):
 	layout = layout.box()
 	flow = layout.split(factor=0.15)
 	flow.label(text="ID:", icon="TAG")
@@ -51,7 +52,7 @@ def draw_stf_id_ui(layout: bpy.types.UILayout, context: bpy.types.Context, blend
 		row_r.prop(stf_prop_holder, "stf_name_source_of_truth", text="Override Name")
 
 
-def ensure_stf_id(stf_context: any, blender_object: any, stf_prop_holder: any = None):
+def ensure_stf_id(stf_context: Any, blender_object: Any, stf_prop_holder: Any = None):
 	if(not stf_prop_holder and hasattr(blender_object, "stf_info")):
 		stf_prop_holder = blender_object.stf_info
 	elif(not stf_prop_holder):

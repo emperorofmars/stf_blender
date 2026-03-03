@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Any, Callable
 import bpy
 import numpy as np
 from ....utils.buffer_utils import determine_pack_format_float
@@ -12,7 +12,7 @@ from ....base.stf_report import STFReportSeverity, STFReport
 _stf_type = stf_animation_type
 
 
-def stf_animation_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
+def stf_animation_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
 	if(not hasattr(bpy.types.Action, "slot_link")):
 		context.report(STFReport("Slot-Link is required to import animations!", STFReportSeverity.Warn, stf_id, _stf_type))
 		return
@@ -117,7 +117,7 @@ def __parse_tracks(context: STF_ImportContext, tracks: list, blender_animation: 
 		__parse_subtracks(track, selected_channelbag, target_ret.blender_path, index_conversion, target_ret.convert_func, is_baked_only)
 
 
-def __parse_subtracks(track: dict, selected_channelbag: bpy.types.ActionChannelbag, fcurve_target: any, index_conversion: list[int], conversion_func: Callable[[list[float]], list[float]], is_baked_only: bool):
+def __parse_subtracks(track: dict, selected_channelbag: bpy.types.ActionChannelbag, fcurve_target: Any, index_conversion: list[int], conversion_func: Callable[[list[float]], list[float]], is_baked_only: bool):
 	subtracks = track.get("subtracks", [])
 	timepoints = track.get("timepoints", [])
 	if(len(subtracks) == 0 or len(timepoints) == 0): return

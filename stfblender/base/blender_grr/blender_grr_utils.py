@@ -1,4 +1,5 @@
 import bpy
+from typing import Any
 
 from .blender_grr import BlenderGRR
 from .stf_data_resource_reference_utils import draw_stf_data_resource_reference, resolve_stf_data_resource_reference, validate_stf_data_resource_reference
@@ -59,7 +60,7 @@ def draw_blender_grr(layout: bpy.types.UILayout, grr: BlenderGRR, reference_type
 								draw_component_info(layout, component_holder, component_holder.stf_info, grr.stf_component_id)
 
 
-def resolve_blender_grr(grr: BlenderGRR) -> any:
+def resolve_blender_grr(grr: BlenderGRR) -> Any:
 	match(grr.reference_type):
 		case "blender": return resolve_blender_resource_reference(grr.blender_resource_reference)
 		case "stf_data_resource":
@@ -87,7 +88,7 @@ def resolve_blender_grr(grr: BlenderGRR) -> any:
 	return None
 
 
-def construct_blender_grr(generic_resource: any, grr: BlenderGRR, force_resource_id: str = None):
+def construct_blender_grr(generic_resource: Any, grr: BlenderGRR, force_resource_id: str = None):
 	if(isinstance(generic_resource, bpy.types.ID)):
 		grr.reference_type = "blender"
 		grr.blender_resource_reference.blender_type = generic_resource.id_type

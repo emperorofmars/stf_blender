@@ -1,7 +1,8 @@
 import bpy
+from typing import Any
 
 
-def draw_component_info(layout: bpy.types.UILayout, component_holder: any, component_ref_holder: any, component_id: str):
+def draw_component_info(layout: bpy.types.UILayout, component_holder: Any, component_ref_holder: Any, component_id: str):
 	# let component_ref
 	for component_ref in component_ref_holder.stf_components:
 		if(component_ref.stf_id == component_id):

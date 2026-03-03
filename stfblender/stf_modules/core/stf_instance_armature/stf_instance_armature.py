@@ -1,6 +1,7 @@
 import bpy
 import mathutils
 import math
+from typing import Any
 
 from ....base.stf_task_steps import STF_TaskSteps
 
@@ -24,7 +25,7 @@ class STF_Instance_Armature(bpy.types.PropertyGroup):
 	stf_components: bpy.props.CollectionProperty(type=InstanceModComponentRef, options=set()) # type: ignore
 	stf_active_component_index: bpy.props.IntProperty(options=set()) # type: ignore
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
+def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
 	blender_armature = context.import_resource(json_resource["armature"], stf_kind="data")
 	if(not blender_armature or type(blender_armature) is not bpy.types.Armature):
 		context.report(STFReport("Failed to import armature: " + str(json_resource.get("instance", {}).get("armature")), STFReportSeverity.Error, stf_id, _stf_type, context_object))
@@ -60,6 +61,9 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 						pose.matrix = pose.parent.matrix @ blender_matrix
 					else:
 						pose.matrix = mathutils.Matrix.Rotation(math.radians(90), 4, "X") @ blender_matrix
+					if(not blender_armature.bones[pose.name].use_deform):
+						if(blender_armature.bones[pose.name].stf_bone.non_deform_use in ["ik_target", "ik_pole"]):
+							pose.color.palette = "THEME03"
 					next_poses += pose.children
 		else:
 			context.report(STFReport("Failed to import pose for armature: " + str(json_resource.get("armature")), STFReportSeverity.Error, stf_id, _stf_type, blender_armature))
@@ -93,13 +97,13 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	return blender_object
 
 
-def _can_handle_application_object_func(application_object: any) -> int:
+def _can_handle_application_object_func(application_object: Any) -> int:
 	if(type(application_object) == tuple and type(application_object[0]) == bpy.types.Object and type(application_object[1]) == bpy.types.Armature):
 		return 1000
 	else:
 		return -1
 
-def _stf_export(context: STF_ExportContext, application_object: any, context_object: any) -> tuple[dict, str]:
+def _stf_export(context: STF_ExportContext, application_object: Any, context_object: Any) -> tuple[dict, str]:
 	blender_object: bpy.types.Object = application_object[0]
 	blender_armature: bpy.types.Armature = application_object[1]
 
@@ -162,7 +166,7 @@ def _stf_export(context: STF_ExportContext, application_object: any, context_obj
 	return ret, blender_object.stf_instance.stf_id
 
 
-def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart:
+def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: Any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart:
 	import re
 	if(match := re.search(r"^pose.bones\[\"(?P<bone_name>[\w. -:,]+)\"\]", data_path)):
 		if(type(application_object.data) != bpy.types.Armature or match.groupdict()["bone_name"] not in application_object.data.bones):
@@ -170,7 +174,7 @@ def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_o
 		return STFPropertyPathPart([application_object.stf_info.stf_id, "instance"]) + context.resolve_application_property_path(ArmatureBone(application_object.data, match.groupdict()["bone_name"]), application_object_property_index, data_path[match.span()[1] :])
 	return None
 
-def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: any) -> BlenderPropertyPathPart:
+def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: Any) -> BlenderPropertyPathPart:
 	return context.resolve_stf_property_path(stf_path[1:], application_object)
 
 

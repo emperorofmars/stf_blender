@@ -1,4 +1,5 @@
 import bpy
+from typing import Any
 
 from ...base.stf_task_steps import STF_TaskSteps
 from ...base.stf_module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
@@ -43,7 +44,7 @@ class CreateVoicePositionObjectOperator(bpy.types.Operator):
 		return {"FINISHED"}
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: AVA_VoicePosition):
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: AVA_VoicePosition):
 	layout.use_property_split = True
 	if(component.voice_position):
 		layout.prop(component, "voice_position")
@@ -56,7 +57,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 		create_button.component_id = component.stf_id
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, context_object: any) -> any:
+def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, context_object: Any) -> Any:
 	component_ref, component = add_component(context_object, _blender_property_name, id, _stf_type)
 	import_component_base(context, component, json_resource, _blender_property_name, context_object)
 
@@ -68,7 +69,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, contex
 	return component
 
 
-def _stf_export(context: STF_ExportContext, component: AVA_VoicePosition, context_object: any) -> tuple[dict, str]:
+def _stf_export(context: STF_ExportContext, component: AVA_VoicePosition, context_object: Any) -> tuple[dict, str]:
 	ret = export_component_base(context, _stf_type, component, _blender_property_name, context_object)
 
 	if(component.voice_position):

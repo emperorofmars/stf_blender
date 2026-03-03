@@ -1,4 +1,5 @@
 import bpy
+from typing import Any
 
 from ...base.stf_module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
 from ...exporter.stf_export_context import STF_ExportContext
@@ -83,7 +84,7 @@ class AutomapEyelids(bpy.types.Operator):
 		return {"FINISHED"}
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: AVA_Eyelids_Blendshape):
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: AVA_Eyelids_Blendshape):
 	if(not context_object or type(context_object) is not bpy.types.Mesh):
 		return
 
@@ -116,7 +117,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 	col.prop_search(component, "look_right_right", context_object.shape_keys, "key_blocks")
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, context_object: any) -> any:
+def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, context_object: Any) -> Any:
 	component_ref, component = add_component(context_object, _blender_property_name, id, _stf_type)
 	import_component_base(context, component, json_resource, _blender_property_name, context_object)
 
@@ -135,7 +136,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, contex
 	return component
 
 
-def _stf_export(context: STF_ExportContext, component: AVA_Eyelids_Blendshape, context_object: any) -> tuple[dict, str]:
+def _stf_export(context: STF_ExportContext, component: AVA_Eyelids_Blendshape, context_object: Any) -> tuple[dict, str]:
 	ret = export_component_base(context, _stf_type, component, _blender_property_name, context_object)
 
 	for shape_name, _ in _eyelid_shapes.items():

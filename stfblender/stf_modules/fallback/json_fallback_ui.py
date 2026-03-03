@@ -1,5 +1,6 @@
 import bpy
 import json
+from typing import Any
 
 from ...base.stf_module_component import STF_Component_Ref
 from ...base.stf_module_data import STF_Data_Ref
@@ -104,7 +105,7 @@ class FallbackBuffersList(bpy.types.UIList):
 
 
 
-def draw_fallback(layout: bpy.types.UILayout, resource_ref: STF_Component_Ref | STF_Data_Ref, resource: any):
+def draw_fallback(layout: bpy.types.UILayout, resource_ref: STF_Component_Ref | STF_Data_Ref, resource: Any):
 	col = layout.column(align=True)
 	col.label(text="Json Data:", icon="PASTEDOWN")
 	json_error = False

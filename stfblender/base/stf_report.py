@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Any
 
 
 class STFReportSeverity(Enum):
@@ -10,7 +11,7 @@ class STFReportSeverity(Enum):
 
 
 class STFReport:
-	def __init__(self, message: str, severity: STFReportSeverity = STFReportSeverity.Error, stf_id: str = None, stf_type: str = None, application_object: any = None):
+	def __init__(self, message: str, severity: STFReportSeverity = STFReportSeverity.Error, stf_id: str = None, stf_type: str = None, application_object: Any = None):
 		self.message = message
 		self.severity = severity
 		self.stf_id = stf_id

@@ -1,6 +1,6 @@
 import bpy
 import json
-from typing import Callable
+from typing import Any, Callable
 
 from ..exporter.stf_export_context import STF_ExportContext
 from ..importer.stf_import_context import STF_ImportContext
@@ -11,7 +11,7 @@ from .id_utils import ensure_stf_id
 from .armature_bone import ArmatureBone
 
 
-def add_component(context_object: any, blender_property_name: str, stf_id: str, stf_type: str, components_ref_property: any = None, name = None) -> tuple[STF_Component_Ref, STF_BlenderComponentBase]:
+def add_component(context_object: Any, blender_property_name: str, stf_id: str, stf_type: str, components_ref_property: Any = None, name = None) -> tuple[STF_Component_Ref, STF_BlenderComponentBase]:
 	if(components_ref_property is None):
 		if(isinstance(context_object, STF_BlenderDataResourceBase)): # jank, but works
 			components_ref_property = context_object.stf_components
@@ -49,10 +49,10 @@ class STFAddComponentOperatorBase:
 		add_component(self.get_property(context), self.property_name, str(uuid.uuid4()), self.stf_type, self.get_components_ref_property(context), self.default_name)
 		return {"FINISHED"}
 
-	def get_property(self, context) -> any:
+	def get_property(self, context) -> Any:
 		pass
 
-	def get_components_ref_property(self, context) -> any:
+	def get_components_ref_property(self, context) -> Any:
 		return self.get_property(context).stf_info.stf_components
 
 
@@ -83,7 +83,7 @@ class STFRemoveComponentOperatorBase:
 		self.get_components_ref_property(context).remove(self.index)
 		return {"FINISHED"}
 
-	def get_property(self, context) -> any:
+	def get_property(self, context) -> Any:
 		pass
 
 	def get_components_ref_property(self, context) -> STF_Component_Ref:
@@ -127,14 +127,14 @@ class STFEditComponentOperatorBase:
 		layout: bpy.types.UILayout = self.layout
 		layout.prop(self, "edit_component_id")
 
-	def get_property(self, context) -> any:
+	def get_property(self, context) -> Any:
 		pass
 
 	def get_components_ref_property(self, context) -> STF_Component_Ref:
 		return self.get_property(context).stf_info.stf_components
 
 
-def preserve_component_reference(component: STF_BlenderComponentBase, blender_property_name: str, context_object: any) -> Callable[[], STF_BlenderComponentBase]:
+def preserve_component_reference(component: STF_BlenderComponentBase, blender_property_name: str, context_object: Any) -> Callable[[], STF_BlenderComponentBase]:
 	component_id = component.stf_id
 	if(type(context_object) == bpy.types.Bone and type(component.id_data) == bpy.types.Armature):
 		armature_bone = ArmatureBone(component.id_data, context_object.name)
@@ -157,7 +157,7 @@ def preserve_component_reference(component: STF_BlenderComponentBase, blender_pr
 	return _get_component
 
 
-def get_components_from_object(application_object: any) -> list:
+def get_components_from_object(application_object: Any) -> list:
 	ret = []
 	if(hasattr(application_object, "stf_info")):
 		for component_ref in application_object.stf_info.stf_components:
@@ -169,7 +169,7 @@ def get_components_from_object(application_object: any) -> list:
 	return ret
 
 
-def import_component_base(context: STF_ImportContext, component: STF_BlenderComponentBase, json_resource: dict, blender_property_name: str, context_object: any):
+def import_component_base(context: STF_ImportContext, component: STF_BlenderComponentBase, json_resource: dict, blender_property_name: str, context_object: Any):
 	if("name" in json_resource): component.stf_name = json_resource["name"]
 	if("exclusion_group" in json_resource and json_resource["exclusion_group"]):
 		component.exclusion_group = json_resource["exclusion_group"]
@@ -180,7 +180,7 @@ def import_component_base(context: STF_ImportContext, component: STF_BlenderComp
 	if("enabled" in json_resource):
 		component.enabled = json_resource["enabled"]
 
-def export_component_base(context: STF_ExportContext, stf_type: str, component: STF_BlenderComponentBase, blender_property_name: str, context_object: any) -> dict:
+def export_component_base(context: STF_ExportContext, stf_type: str, component: STF_BlenderComponentBase, blender_property_name: str, context_object: Any) -> dict:
 	ensure_stf_id(context, component, component)
 	ret = { "type": stf_type }
 	if(component.stf_name): ret["name"] = component.stf_name
@@ -214,10 +214,10 @@ class ComponentLoadJsonOperatorBase():
 		self.report({"ERROR"}, "Failed applying Json values.")
 		return {"CANCELLED"}
 
-	def get_property(self, context) -> any:
+	def get_property(self, context) -> Any:
 		pass
 
-	def parse_json(self, context, component: any, json_resource: dict):
+	def parse_json(self, context, component: Any, json_resource: dict):
 		pass
 
 	def draw(self, context):

@@ -1,6 +1,7 @@
-import math
 import bpy
+import math
 import mathutils
+from typing import Any
 
 from ....base.stf_task_steps import STF_TaskSteps
 from ....base.stf_module import STF_Module
@@ -23,7 +24,7 @@ class STF_Instance(bpy.types.PropertyGroup):
 	enabled: bpy.props.BoolProperty(name="Enabled", default=True, options=set()) # type: ignore
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
+def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
 	if("instance" in json_resource):
 		blender_object: bpy.types.Object = context.import_resource(json_resource["instance"], stf_kind="instance")
 	else:
@@ -72,7 +73,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	return blender_object
 
 
-def _can_handle_application_object_func(application_object: any) -> int:
+def _can_handle_application_object_func(application_object: Any) -> int:
 	if(type(application_object) == bpy.types.Object):
 		if(not application_object.instance_collection and not application_object.data):
 			return 1000

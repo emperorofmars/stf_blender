@@ -1,5 +1,6 @@
 import bpy
 import re
+from typing import Any
 
 from ....base.stf_task_steps import STF_TaskSteps
 from ....base.stf_module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
@@ -32,13 +33,13 @@ class VRM_Springbone_LoadJsonOperator(ComponentLoadJsonOperatorBase, bpy.types.O
 	bl_idname = "stf.dev_vrm_springbone_loadjson"
 	blender_bone: bpy.props.BoolProperty() # type: ignore
 
-	def get_property(self, context) -> any:
+	def get_property(self, context) -> Any:
 		if(not self.blender_bone):
 			return context.object.dev_vrm_springbone
 		else:
 			return context.bone.dev_vrm_springbone
 
-	def parse_json(self, context, component: any, json_resource: dict):
+	def parse_json(self, context, component: Any, json_resource: dict):
 		if(json_resource.get("type") != _stf_type): raise Exception("Invalid Type")
 
 		if("stiffness" in json_resource): component.stiffness = json_resource["stiffness"]
@@ -49,7 +50,7 @@ class VRM_Springbone_LoadJsonOperator(ComponentLoadJsonOperatorBase, bpy.types.O
 		return {"FINISHED"}
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: VRM_Springbone):
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: VRM_Springbone):
 	layout.use_property_split = True
 	col = layout.column()
 	col.prop(component, "stiffness", slider=True)
@@ -80,7 +81,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 	load_json_button.component_id = component.stf_id
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
+def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
 	component_ref, component = add_component(context_object, _blender_property_name, stf_id, _stf_type)
 	import_component_base(context, component, json_resource, _blender_property_name, context_object)
 
@@ -103,7 +104,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	return component
 
 
-def _stf_export(context: STF_ExportContext, component: VRM_Springbone, context_object: any) -> tuple[dict, str]:
+def _stf_export(context: STF_ExportContext, component: VRM_Springbone, context_object: Any) -> tuple[dict, str]:
 	ret = export_component_base(context, _stf_type, component, _blender_property_name, context_object)
 	ret["stiffness"] = component.stiffness
 	ret["gravityPower"] = component.gravityPower
@@ -130,14 +131,14 @@ def _stf_export(context: STF_ExportContext, component: VRM_Springbone, context_o
 
 """Animation"""
 
-def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart:
+def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: Any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart:
 	if(match := re.search(r"^" + _blender_property_name + r"\[(?P<component_index>[\d]+)\].enabled", data_path)):
 		if(component_path := get_component_stf_path_from_collection(application_object, _blender_property_name, int(match.groupdict()["component_index"]))):
 			return STFPropertyPathPart(component_path + ["enabled"])
 	return None
 
 
-def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: any) -> BlenderPropertyPathPart:
+def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: Any) -> BlenderPropertyPathPart:
 	blender_object = context.get_imported_resource(stf_path[0])
 	if(component_index := get_component_index(application_object, _blender_property_name, blender_object.stf_id)):
 		match(stf_path[1]):

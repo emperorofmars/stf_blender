@@ -1,3 +1,5 @@
+from typing import Any
+
 import bpy
 
 from .stf_module import STF_Module
@@ -53,7 +55,7 @@ def get_import_modules_fallback() -> dict[str, STF_Module]:
 	return ret_modules
 
 
-def get_export_modules() -> tuple[dict[any, list[STF_Module]], dict[any, list[STF_ExportComponentHook]]]:
+def get_export_modules() -> tuple[dict[Any, list[STF_Module]], dict[Any, list[STF_ExportComponentHook]]]:
 	stf_modules = get_stf_modules()
 
 	ret_modules = {}

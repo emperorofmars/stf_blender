@@ -1,6 +1,6 @@
 import bpy
 import logging
-from typing import Callable
+from typing import Any, Callable
 
 from ..base.property_path_part import STFPropertyPathPart
 
@@ -27,14 +27,14 @@ class STF_ExportContext:
 		return root_id
 
 
-	def get_resource_id(self, application_object: any) -> str | None:
+	def get_resource_id(self, application_object: Any) -> str | None:
 		return self._state.get_resource_id(application_object)
 
-	def register_id(self, application_object: any, stf_id: str):
+	def register_id(self, application_object: Any, stf_id: str):
 		self._state.register_id(application_object, stf_id)
 
 
-	def __run_hooks(self, application_object: any, context_object: any, json_resource: dict, stf_id: str):
+	def __run_hooks(self, application_object: Any, context_object: Any, json_resource: dict, stf_id: str):
 		"""Run hooks on application object"""
 		if(hooks := self._state.determine_hooks(application_object)):
 			for hook in hooks:
@@ -43,7 +43,7 @@ class STF_ExportContext:
 					hook.hook_apply_func(self, application_object, context_object)
 
 
-	def __run_components(self, application_object: any, json_resource: dict, stf_id: str, components: list):
+	def __run_components(self, application_object: Any, json_resource: dict, stf_id: str, components: list):
 		"""Export components explicitely defined by this application"""
 		if(len(components) > 0):
 			if("components" not in json_resource): json_resource["components"] = []
@@ -61,7 +61,7 @@ class STF_ExportContext:
 					self.report(STFReport("Unsupported Component", STFReportSeverity.Warn, None, None, application_object))
 
 
-	def serialize_resource(self, application_object: any, context_object: any = None, module_kind = None, export_fail_severity: STFReportSeverity = STFReportSeverity.Error) -> str | None:
+	def serialize_resource(self, application_object: Any, context_object: Any = None, module_kind = None, export_fail_severity: STFReportSeverity = STFReportSeverity.Error) -> str | None:
 		"""Run all logic to serialize an application resource. If it already has been serialized, return the existing ID."""
 
 		if(application_object == None): return None
@@ -99,7 +99,7 @@ class STF_ExportContext:
 		return self._state.serialize_buffer(data, buffer_id)
 
 
-	def resolve_application_property_path(self, application_object: any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart:
+	def resolve_application_property_path(self, application_object: Any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart:
 		if(application_object == None): return None
 		if(type(application_object) == bpy.types.Object and not self.get_resource_id(application_object)):
 			return None
@@ -134,7 +134,7 @@ class STF_ExportContext:
 	def id_exists(self, stf_id: str) -> bool:
 		return self._state.id_exists(stf_id)
 
-	def get_setting(self, key: str, default: any = None) -> any:
+	def get_setting(self, key: str, default: Any = None) -> Any:
 		return getattr(self._state._settings, key) if hasattr(self._state._settings, key) else default
 
 	def get_root_id(self) -> str | None:

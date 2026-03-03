@@ -1,5 +1,5 @@
 from io import BytesIO
-from typing import Callable
+from typing import Any, Callable
 import bpy
 
 from .stf_animation_common import *
@@ -14,7 +14,7 @@ from ....utils.buffer_utils import serialize_float
 _stf_type = stf_animation_type
 
 
-def stf_animation_export(context: STF_ExportContext, application_object: any, context_object: any) -> tuple[dict, str]:
+def stf_animation_export(context: STF_ExportContext, application_object: Any, context_object: Any) -> tuple[dict, str]:
 	blender_animation: bpy.types.Action = application_object
 	if(blender_animation.stf_animation.exclude): return None
 	if(blender_animation.is_action_legacy):

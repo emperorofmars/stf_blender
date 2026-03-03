@@ -1,5 +1,5 @@
-from typing import Callable
 import bpy
+from typing import Any, Callable
 
 from ....exporter.stf_export_context import STF_ExportContext
 from ....importer.stf_import_context import STF_ImportContext
@@ -15,10 +15,10 @@ class STF_Material_Value_Module_Base:
 	property_name: str
 
 	# (STF Context, Blender Material, STF Value Json, Blender STF Material Value)
-	value_import_func: Callable[[any, bpy.types.Material, any, STF_Material_Value_Base], None]
+	value_import_func: Callable[[Any, bpy.types.Material, Any, STF_Material_Value_Base], None]
 
 	# (STF Context, Blender Material, Blender STF Material Value) -> Json Value
-	value_export_func: Callable[[any, bpy.types.Material, STF_Material_Value_Base], any]
+	value_export_func: Callable[[Any, bpy.types.Material, STF_Material_Value_Base], Any]
 
 	# Animation import export
 	resolve_property_path_to_stf_func: Callable[[STF_ExportContext, str, STF_Material_Value_Base], STFPropertyPathPart]

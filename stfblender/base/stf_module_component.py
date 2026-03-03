@@ -1,5 +1,5 @@
 import bpy
-from typing import Callable
+from typing import Any, Callable
 
 from .stf_module import STF_Module
 from ..utils.armature_bone import ArmatureBone
@@ -32,15 +32,15 @@ class STF_BlenderComponentModule(STF_Module):
 	# Filter of types this component can be placed on.
 	filter: list
 
-	# (layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: STF_BlenderComponentBase) -> None
-	draw_component_func: Callable[[bpy.types.UILayout, bpy.types.Context, STF_Component_Ref, any, any], None]
+	# (layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: STF_BlenderComponentBase) -> None
+	draw_component_func: Callable[[bpy.types.UILayout, bpy.types.Context, STF_Component_Ref, Any, Any], None]
 
 	# If the component can setup Blender native constructs, e.g. IK constraints on a PoseBone, implement this func.
 	# The apply_object should be the final instance where the component functionality should be applied to.
 	# In the case of an IK constraint on a bone, the context_object will be bpy.types.Bone, and the apply object will be the bpy.types.Object that instantiates the Armature with the Bone.
 	# This way the IK constraint will be applied to every Armature instance.
-	# (component: STF_BlenderComponentBase, context_object: any, apply_object: any)
-	process_func: Callable[[STF_BlenderComponentBase, any, any], None]
+	# (component: STF_BlenderComponentBase, context_object: Any, apply_object: Any)
+	process_func: Callable[[STF_BlenderComponentBase, Any, Any], None]
 
 	# Default stf_name newly added components will get.
 	# Substitutes $parent with the name of the object the component is added to.
@@ -49,7 +49,7 @@ class STF_BlenderComponentModule(STF_Module):
 
 class STF_Component_Editmode_Resistant_Reference:
 	"""Because Blender"""
-	def __init__(self, component: STF_BlenderComponentBase, context_object: any):
+	def __init__(self, component: STF_BlenderComponentBase, context_object: Any):
 		self.component_id = component.stf_id
 		self.stf_id = component.stf_id
 		if(type(context_object) == bpy.types.Bone):
@@ -76,15 +76,15 @@ class InstanceModComponentRef(STF_Component_Ref):
 
 class STF_BlenderBoneComponentModule(STF_BlenderComponentModule):
 	"""Use for components that are allowed on bones and are animatable or can have different values per instance of the armature"""
-	# (layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: STF_BlenderComponentBase) -> None
-	draw_component_instance_func: Callable[[bpy.types.UILayout, bpy.types.Context, STF_Component_Ref, any, any], None]
-	# (context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: STF_BlenderComponentBase, standin_component: STF_BlenderComponentBase) -> None
-	set_component_instance_standin_func: Callable[[bpy.types.Context, STF_Component_Ref, any, any, any], None]
+	# (layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: STF_BlenderComponentBase) -> None
+	draw_component_instance_func: Callable[[bpy.types.UILayout, bpy.types.Context, STF_Component_Ref, Any, Any], None]
+	# (context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: STF_BlenderComponentBase, standin_component: STF_BlenderComponentBase) -> None
+	set_component_instance_standin_func: Callable[[bpy.types.Context, STF_Component_Ref, Any, Any, Any], None]
 
-	# (context: bpy.types.Context, component_ref: STF_Component_Ref, standin_component: STF_BlenderComponentBase, context_object: any) -> json_resource: dict
-	serialize_component_instance_standin_func: Callable[[bpy.types.Context, STF_Component_Ref, STF_BlenderComponentBase, any], dict]
-	# (context: bpy.types.Context, json_resource: dict, component_ref: STF_Component_Ref, standin_component: STF_BlenderComponentBase, context_object: any) -> None
-	parse_component_instance_standin_func: Callable[[bpy.types.Context, dict, STF_Component_Ref, STF_BlenderComponentBase, any], None]
+	# (context: bpy.types.Context, component_ref: STF_Component_Ref, standin_component: STF_BlenderComponentBase, context_object: Any) -> json_resource: dict
+	serialize_component_instance_standin_func: Callable[[bpy.types.Context, STF_Component_Ref, STF_BlenderComponentBase, Any], dict]
+	# (context: bpy.types.Context, json_resource: dict, component_ref: STF_Component_Ref, standin_component: STF_BlenderComponentBase, context_object: Any) -> None
+	parse_component_instance_standin_func: Callable[[bpy.types.Context, dict, STF_Component_Ref, STF_BlenderComponentBase, Any], None]
 
 
 class STF_ExportComponentHook:
@@ -102,7 +102,7 @@ class STF_ExportComponentHook:
 	# List of application types this module can hook into
 	hook_target_application_types: list = []
 
-	hook_can_handle_application_object_func: Callable[[any], bool]
+	hook_can_handle_application_object_func: Callable[[Any], bool]
 
 	# (Export Context, Application Object, Optional Parent Application Object)
-	hook_apply_func: Callable[[any, any, any], None]
+	hook_apply_func: Callable[[Any, Any, Any], None]

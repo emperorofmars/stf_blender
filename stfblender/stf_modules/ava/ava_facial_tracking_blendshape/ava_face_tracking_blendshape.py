@@ -1,4 +1,5 @@
 import bpy
+from typing import Any
 
 from .ft_csv import ft_definitions
 from ....base.stf_module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
@@ -54,7 +55,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 		layout.prop(component, "ft_type_custom")
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, context_object: bpy.types.Mesh) -> any:
+def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, context_object: bpy.types.Mesh) -> Any:
 	component_ref, component = add_component(context_object, _blender_property_name, id, _stf_type)
 	import_component_base(context, component, json_resource, _blender_property_name, context_object)
 	if("ft_type" in json_resource):

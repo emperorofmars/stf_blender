@@ -1,6 +1,7 @@
 import bpy
+from typing import Any
 
-from .vrc_contact_utils import VRC_ContactBase, vrc_contact_create_resolve_property_path_to_stf_func, vrc_contact_create_resolve_stf_property_to_blender_func, vrc_contact_draw_base, vrc_contact_export_base, vrc_contact_import_base
+from .vrc_contact_base import VRC_ContactBase, vrc_contact_create_resolve_property_path_to_stf_func, vrc_contact_create_resolve_stf_property_to_blender_func, vrc_contact_draw_base, vrc_contact_export_base, vrc_contact_import_base
 from ....base.stf_module_component import STF_BlenderComponentModule, STF_Component_Ref
 from ....exporter.stf_export_context import STF_ExportContext
 from ....importer.stf_import_context import STF_ImportContext
@@ -19,19 +20,19 @@ class VRC_ContactSender_LoadJsonOperator(ComponentLoadJsonOperatorBase, bpy.type
 	bl_idname = "stf.vrc_contact_sender_loadjson"
 	blender_bone: bpy.props.BoolProperty() # type: ignore
 
-	def get_property(self, context) -> any:
+	def get_property(self, context) -> Any:
 		if(not self.blender_bone):
 			return getattr(context.object, _blender_property_name)
 		else:
 			return getattr(context.bone, _blender_property_name)
 
-	def parse_json(self, context, component: any, json_resource: dict):
+	def parse_json(self, context, component: Any, json_resource: dict):
 		if(json_resource.get("type") != _stf_type): raise Exception("Invalid Type")
 		vrc_contact_import_base(component, json_resource)
 		return {"FINISHED"}
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: VRC_ContactSender):
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: VRC_ContactSender):
 	layout.use_property_split = True
 	vrc_contact_draw_base(layout, context, component_ref, context_object, component, _blender_property_name)
 
@@ -40,14 +41,14 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 	load_json_button.component_id = component.stf_id
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
+def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
 	component_ref, component = add_component(context_object, _blender_property_name, stf_id, _stf_type)
 	import_component_base(context, component, json_resource, _blender_property_name, context_object)
 	vrc_contact_import_base(component, json_resource)
 	return component
 
 
-def _stf_export(context: STF_ExportContext, component: VRC_ContactSender, context_object: any) -> tuple[dict, str]:
+def _stf_export(context: STF_ExportContext, component: VRC_ContactSender, context_object: Any) -> tuple[dict, str]:
 	ret = export_component_base(context, _stf_type, component, _blender_property_name, context_object)
 	vrc_contact_export_base(component, context_object, ret)
 	return ret, component.stf_id

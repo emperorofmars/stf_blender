@@ -1,5 +1,5 @@
 import bpy
-from typing import Callable
+from typing import Any, Callable
 
 from .stf_module import STF_Module
 from .stf_module_component import STF_Component_Ref
@@ -26,8 +26,8 @@ class STF_BlenderDataResourceBase(bpy.types.PropertyGroup):
 class STF_BlenderDataModule(STF_Module):
 	"""Extension to STF_Module which also associates a function to draw the data-resources in Blender's UI"""
 	blender_property_name: str
-	# (layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: any, component: STF_BlenderDataResourceBase) -> None
-	draw_resource_func: Callable[[bpy.types.UILayout, bpy.types.Context, STF_Data_Ref, any, any], None]
+	# (layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: STF_BlenderDataResourceBase) -> None
+	draw_resource_func: Callable[[bpy.types.UILayout, bpy.types.Context, STF_Data_Ref, Any, Any], None]
 
 
 def register():

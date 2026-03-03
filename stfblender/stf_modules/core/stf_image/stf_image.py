@@ -1,4 +1,5 @@
 import bpy
+from typing import Any
 
 from ....exporter.stf_export_context import STF_ExportContext
 from ....importer.stf_import_context import STF_ImportContext
@@ -16,7 +17,7 @@ class STF_Image(bpy.types.PropertyGroup):
 	is_normal_map: bpy.props.BoolProperty(name="Use as Normal-Map", default=False, options=set()) # type: ignore
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: any) -> any:
+def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
 	blender_image = bpy.data.images.new(json_resource.get("name", "STF Image"), 8, 8)
 	blender_image.stf_info.stf_id = stf_id
 	if(json_resource.get("name")):
@@ -43,7 +44,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	return blender_image
 
 
-def _stf_export(context: STF_ExportContext, application_object: any, context_object: any) -> tuple[dict, str]:
+def _stf_export(context: STF_ExportContext, application_object: Any, context_object: Any) -> tuple[dict, str]:
 	blender_image: bpy.types.Image = application_object
 	ensure_stf_id(context, blender_image)
 
