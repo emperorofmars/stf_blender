@@ -1,12 +1,10 @@
 import bpy
 from typing import Any
 
-from ...exporter.stf_export_context import STF_ExportContext
-from ...importer.stf_import_context import STF_ImportContext
-from ...base.stf_module import STF_Module
+from ...lib_stfblender import STF_ExportContext, STF_ImportContext, STF_Module, STFReportSeverity, STFReport
+from ...lib_stfblender.helpers import import_resource, register_exported_resource
+
 from ...utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui, ensure_stf_id
-from ...base.stf_report import STFReportSeverity, STFReport
-from ...utils.reference_helper import import_resource, register_exported_resource
 
 # TODO this module is at a bare minimum level, improve it
 

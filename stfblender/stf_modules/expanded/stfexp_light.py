@@ -2,12 +2,9 @@ import bpy
 import re
 from typing import Any
 
-from ...exporter.stf_export_context import STF_ExportContext
-from ...importer.stf_import_context import STF_ImportContext
-from ...base.stf_module import STF_Module
+from ...lib_stfblender import STF_ExportContext, STF_ImportContext, STF_Module, STFReportSeverity, STFReport, BlenderPropertyPathPart, STFPropertyPathPart
+
 from ...utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui, ensure_stf_id
-from ...base.stf_report import STFReportSeverity, STFReport
-from ...base.property_path_part import BlenderPropertyPathPart, STFPropertyPathPart
 
 
 _stf_type = "stfexp.light"

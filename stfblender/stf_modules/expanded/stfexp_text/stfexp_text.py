@@ -1,9 +1,8 @@
 import bpy
 from typing import Any
 
-from ....base.stf_module import STF_Module
-from ....exporter.stf_export_context import STF_ExportContext
-from ....importer.stf_import_context import STF_ImportContext
+from ....lib_stfblender import STF_Module, STF_ExportContext, STF_ExportContext, STF_ImportContext
+
 from ....utils.component_utils import get_components_from_object
 from ....utils.boilerplate import boilerplate_register, boilerplate_unregister
 from ....utils.id_utils import ensure_stf_id

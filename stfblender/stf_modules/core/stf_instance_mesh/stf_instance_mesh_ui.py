@@ -1,11 +1,9 @@
 import bpy
 
-
-
+from ....lib_stfblender.helpers import draw_multiline_text
 from ....utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
 from .stf_instance_mesh import STF_Instance_Mesh_Blendshape_Value
 from .stf_instance_mesh_util import set_instance_blendshapes
-from ....utils.draw_multiline_text import draw_multiline_text
 
 
 class SetInstanceBlendshapes(bpy.types.Operator):

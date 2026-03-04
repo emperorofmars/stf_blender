@@ -1,9 +1,7 @@
 import bpy
 from typing import Any
 
-from .....exporter.stf_export_context import STF_ExportContext
-from .....importer.stf_import_context import STF_ImportContext
-from .....base.property_path_part import BlenderPropertyPathPart, STFPropertyPathPart
+from .....lib_stfblender import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart
 from ..stf_material_definition import STF_Material_Value_Base, STF_Material_Value_Module_Base
 
 

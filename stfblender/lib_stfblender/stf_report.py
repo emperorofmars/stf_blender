@@ -1,8 +1,8 @@
-from enum import Enum
+from enum import IntEnum
 from typing import Any
 
 
-class STFReportSeverity(Enum):
+class STFReportSeverity(IntEnum):
 	Debug = 0
 	Info = 1
 	Warn = 2

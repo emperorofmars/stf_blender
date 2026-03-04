@@ -4,9 +4,9 @@ from io import BytesIO
 from typing import Any
 import numpy as np
 
-from ....exporter.stf_export_context import STF_ExportContext
+from ....lib_stfblender import STF_ExportContext
 from ....utils.id_utils import ensure_stf_id
-from ....utils.buffer_utils import determine_indices_width, determine_pack_format_float, determine_pack_format_uint, serialize_float, serialize_uint
+from ....lib_stfblender.utils.buffer_utils import determine_indices_width, determine_pack_format_float, determine_pack_format_uint, serialize_float, serialize_uint
 
 
 _stf_type = "stf.mesh"

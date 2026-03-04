@@ -1,12 +1,9 @@
 from typing import Any, Callable
 import bpy
 import numpy as np
-from ....utils.buffer_utils import determine_pack_format_float
 
+from ....lib_stfblender import STF_ImportContext, STF_TaskSteps, STFReportSeverity, STFReport
 from .stf_animation_common import *
-from ....base.stf_task_steps import STF_TaskSteps
-from ....importer.stf_import_context import STF_ImportContext
-from ....base.stf_report import STFReportSeverity, STFReport
 
 
 _stf_type = stf_animation_type

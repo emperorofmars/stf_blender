@@ -4,8 +4,8 @@ from .utils import draw_component_info
 from .stf_node_path_selector import *
 from ...importer.stf_import_context import STF_ImportContext
 from ...exporter.stf_export_context import STF_ExportContext
-from ...utils.reference_helper import get_resource_id, register_exported_resource
-from ..stf_module_component import STF_Component_Ref
+from ...lib_stfblender.helpers.reference_helper import get_resource_id, register_exported_resource
+from ...lib_stfblender.module_component.stf_module_component import STF_Component_Ref
 
 
 class NodePathComponentSelector(bpy.types.PropertyGroup):

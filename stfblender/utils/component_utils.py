@@ -4,11 +4,11 @@ from typing import Any, Callable
 
 from ..exporter.stf_export_context import STF_ExportContext
 from ..importer.stf_import_context import STF_ImportContext
-from ..base.stf_module_component import STF_BlenderComponentBase, STF_Component_Ref
-from ..base.stf_module_data import STF_BlenderDataResourceBase
+from ..lib_stfblender.module_component.stf_module_component import STF_BlenderComponentBase, STF_Component_Ref
+from ..lib_stfblender.module_data.stf_module_data import STF_BlenderDataResourceBase
 from ..base.blender_grr import *
 from .id_utils import ensure_stf_id
-from .armature_bone import ArmatureBone
+from ..lib_stfblender.utils.armature_bone import ArmatureBone
 
 
 def add_component(context_object: Any, blender_property_name: str, stf_id: str, stf_type: str, components_ref_property: Any = None, name = None) -> tuple[STF_Component_Ref, STF_BlenderComponentBase]:

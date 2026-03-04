@@ -1,13 +1,12 @@
 import bpy
 from typing import Any
 
-from ....importer.stf_import_context import STF_ImportContext
-from ....exporter.stf_export_context import STF_ExportContext
-from ....base.stf_module import STF_Module
+from ....lib_stfblender import STF_Module, STF_ImportContext, STF_ExportContext
+from ....lib_stfblender.utils.armature_bone import ArmatureBone
+
 from ....utils.component_utils import get_components_from_object
 from ....utils.boilerplate import boilerplate_register, boilerplate_unregister
 from ....utils.id_utils import ensure_stf_id
-from ....utils.armature_bone import ArmatureBone
 
 
 _stf_type = "stf.armature"

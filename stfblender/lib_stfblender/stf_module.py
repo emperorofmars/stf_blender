@@ -1,15 +1,14 @@
-import bpy
-from enum import Enum
+from enum import StrEnum
 from typing import Any, Callable
 
 from .property_path_part import BlenderPropertyPathPart, STFPropertyPathPart
 
 
-class STF_Kind(Enum):
-	DATA = 0
-	NODE = 1
-	INSTANCE = 2
-	COMPONENT = 3
+class STF_Kind(StrEnum):
+	DATA = "data"
+	NODE = "node"
+	INSTANCE = "instance"
+	COMPONENT = "component"
 
 
 class STF_Module:

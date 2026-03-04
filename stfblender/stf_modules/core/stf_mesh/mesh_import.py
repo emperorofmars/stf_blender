@@ -3,10 +3,9 @@ from io import BytesIO
 from typing import Any
 import numpy as np
 
-from ....importer.stf_import_context import STF_ImportContext
-from ....base.stf_report import STFReportSeverity, STFReport
-from ....utils.trs_utils import stf_translation_to_blender, stf_uv_to_blender
-from ....utils.buffer_utils import determine_pack_format_float, determine_pack_format_uint, parse_float, parse_int, parse_uint
+from ....lib_stfblender import STF_ImportContext, STFReportSeverity, STFReport
+from ....lib_stfblender.utils.trs_utils import stf_translation_to_blender, stf_uv_to_blender
+from ....lib_stfblender.utils.buffer_utils import determine_pack_format_float, determine_pack_format_uint, parse_float, parse_int, parse_uint
 
 
 _stf_type = "stf.mesh"

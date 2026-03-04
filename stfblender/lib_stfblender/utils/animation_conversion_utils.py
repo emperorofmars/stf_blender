@@ -1,8 +1,8 @@
 import bpy
 from typing import Any
 
-from ..base.stf_module_component import STF_BlenderComponentBase
-from ..utils import trs_utils
+from ..module_component.stf_module_component import STF_BlenderComponentBase
+from . import trs_utils
 
 
 """

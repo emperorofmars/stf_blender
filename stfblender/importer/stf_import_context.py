@@ -2,17 +2,18 @@ import bpy
 import logging
 from typing import Any, Callable
 
-from ..base.stf_task_steps import STF_TaskSteps
+from ..lib_stfblender import STF_ImportContext as ISTF_ImportContext
+from ..lib_stfblender.stf_task_steps import STF_TaskSteps
 from .stf_import_state import STF_ImportState
-from ..base.stf_report import STFReportSeverity, STFReport
-from ..base.stf_module_component import STF_Component_Editmode_Resistant_Reference
-from ..base.property_path_part import BlenderPropertyPathPart
+from ..lib_stfblender.stf_report import STFReportSeverity, STFReport
+from ..lib_stfblender.module_component.stf_module_component import STF_Component_Editmode_Resistant_Reference
+from ..lib_stfblender.property_path_part import BlenderPropertyPathPart
 
 
 _logger = logging.getLogger(__name__)
 
 
-class STF_ImportContext:
+class STF_ImportContext(ISTF_ImportContext):
 	"""Context for resource import. It will be passed to each STF_Module's import func."""
 
 	def __init__(self, state: STF_ImportState):

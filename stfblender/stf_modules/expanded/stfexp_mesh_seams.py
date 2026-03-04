@@ -3,12 +3,12 @@ import uuid
 from io import BytesIO
 from typing import Any
 
-from ...base.stf_module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_ExportComponentHook
+from ...lib_stfblender import STF_ExportContext, STF_ImportContext
+from ...lib_stfblender.module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_ExportComponentHook
+from ...lib_stfblender.helpers import register_exported_buffer, import_buffer
+from ...lib_stfblender.utils.buffer_utils import determine_indices_width, parse_uint, serialize_uint
+
 from ...utils.component_utils import add_component, export_component_base, import_component_base
-from ...exporter.stf_export_context import STF_ExportContext
-from ...importer.stf_import_context import STF_ImportContext
-from ...utils.buffer_utils import determine_indices_width, parse_uint, serialize_uint
-from ...utils.reference_helper import register_exported_buffer, import_buffer
 
 
 _stf_type = "stfexp.mesh.seams"

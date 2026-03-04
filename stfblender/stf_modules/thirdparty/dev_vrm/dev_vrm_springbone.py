@@ -2,17 +2,15 @@ import bpy
 import re
 from typing import Any
 
-from ....base.stf_task_steps import STF_TaskSteps
-from ....base.stf_module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
-from ....exporter.stf_export_context import STF_ExportContext
-from ....importer.stf_import_context import STF_ImportContext
+from ....lib_stfblender import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STF_TaskSteps
+from ....lib_stfblender.module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
+from ....lib_stfblender.utils.animation_conversion_utils import get_component_index, get_component_stf_path_from_collection
+from ....lib_stfblender.helpers import create_add_button, create_remove_button
+from ....lib_stfblender.utils import trs_utils
+
 from ....utils.component_utils import ComponentLoadJsonOperatorBase, add_component, export_component_base, import_component_base, preserve_component_reference
-from ....utils.animation_conversion_utils import get_component_index, get_component_stf_path, get_component_stf_path_from_collection
 from ....base.blender_grr.stf_node_path_selector import NodePathSelector, draw_node_path_selector, node_path_selector_from_stf, node_path_selector_to_stf
 from ....base.blender_grr.stf_node_path_component_selector import NodePathComponentSelector, draw_node_path_component_selector, node_path_component_selector_from_stf, node_path_component_selector_to_stf
-from ....utils.collection_helpers import create_add_button, create_remove_button
-from ....utils import trs_utils
-from ....base.property_path_part import BlenderPropertyPathPart, STFPropertyPathPart
 
 
 _stf_type = "dev.vrm.springbone"

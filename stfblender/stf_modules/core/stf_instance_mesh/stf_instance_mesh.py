@@ -1,15 +1,11 @@
 import bpy
 from typing import Any
 
-from ....base.property_path_part import BlenderPropertyPathPart, STFPropertyPathPart
-
-from ....exporter.stf_export_context import STF_ExportContext
-from ....importer.stf_import_context import STF_ImportContext
-from ....base.stf_module import STF_Module
-from ....utils.id_utils import ensure_stf_id
-from ....base.stf_report import STFReportSeverity, STFReport
-from ....utils.component_utils import get_components_from_object
+from ....lib_stfblender import STF_Module, STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STFReportSeverity, STFReport
 from .stf_instance_mesh_util import set_instance_blendshapes
+
+from ....utils.id_utils import ensure_stf_id
+from ....utils.component_utils import get_components_from_object
 
 
 _stf_type = "stf.instance.mesh"

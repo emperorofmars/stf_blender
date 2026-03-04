@@ -3,7 +3,7 @@ import bpy
 from bpy_extras.io_utils import ExportHelper
 
 from ..base.stf_meta import draw_meta_editor
-from ..base.stf_report import STFReport, STFReportSeverity
+from ..lib_stfblender.stf_report import STFReport, STFReportSeverity
 from ..base.stf_registry import get_export_modules
 from .stf_export_state import STF_ExportState
 from .stf_export_context import STF_ExportContext

@@ -1,9 +1,9 @@
 import bpy
 
+from ....lib_stfblender import STF_Module
 from .stf_animation_common import *
 from .stf_animation_export import stf_animation_export
 from .stf_animation_import import stf_animation_import
-from ....base.stf_module import STF_Module
 from ....utils.component_utils import get_components_from_object
 from ....utils.boilerplate import boilerplate_register, boilerplate_unregister
 

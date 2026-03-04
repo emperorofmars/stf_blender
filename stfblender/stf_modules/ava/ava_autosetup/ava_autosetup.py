@@ -7,7 +7,7 @@ from ..ava_visemes_blendshape import STF_Module_AVA_Visemes_Blendshape, automap 
 from ..ava_eyelids_blendshape import STF_Module_AVA_Eyelids_Blendshape, automap as automap_eyelids
 from ..ava_facial_tracking_blendshape.ava_face_tracking_blendshape import STF_Module_AVA_FaceTracking_Blendshapes, automap as automap_ft
 from ..ava_eyerotation_bone import STF_Module_AVA_EyeRotation_Bone
-from ...expanded.stfexp_armature_humanoid import HumanoidBone, STF_Module_STFEXP_Armature_Humanoid, STFEXP_Armature_Humanoid, _map_humanoid_bones as automap_humanoid
+from ...expanded.stfexp_armature_humanoid import STF_Module_STFEXP_Armature_Humanoid, STFEXP_Armature_Humanoid, _map_humanoid_bones as automap_humanoid
 
 
 def detect_mesh_and_armature(collection: bpy.types.Collection) -> tuple[bpy.types.Object, bpy.types.Object]:

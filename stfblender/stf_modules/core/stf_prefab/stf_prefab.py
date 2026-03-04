@@ -1,12 +1,8 @@
 import bpy
 from typing import Any
 
-from ....base.stf_task_steps import STF_TaskSteps
+from ....lib_stfblender import STF_Module, STF_ImportContext, STF_ExportContext, STF_TaskSteps, STFReportSeverity
 
-from ....importer.stf_import_context import STF_ImportContext
-from ....exporter.stf_export_context import STF_ExportContext
-from ....base.stf_report import STFReportSeverity
-from ....base.stf_module import STF_Module
 from ....utils.boilerplate import boilerplate_register, boilerplate_unregister
 from ....utils.component_utils import get_components_from_object
 from ....utils.id_utils import ensure_stf_id

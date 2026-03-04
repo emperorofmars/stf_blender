@@ -1,8 +1,8 @@
 import bpy
 from typing import Any, Callable
 
-from .stf_module import STF_Module
-from .stf_module_component import STF_Component_Ref
+from ..stf_module import STF_Module
+from ..module_component.stf_module_component import STF_Component_Ref
 
 """
 STF data-resources that aren't natively supported by Blender, similar to components, are stored by the Collection that represents the STF-Prefab.
@@ -22,22 +22,9 @@ class STF_BlenderDataResourceBase(bpy.types.PropertyGroup):
 	stf_components: bpy.props.CollectionProperty(type=STF_Component_Ref, name="Components", options=set()) # type: ignore
 	stf_active_component_index: bpy.props.IntProperty(name="Selected Component", options=set()) # type: ignore
 
-	name: bpy.props.StringProperty(name="Name", get=lambda self: self.stf_name) # type: ignore
-
 
 class STF_BlenderDataModule(STF_Module):
 	"""Extension to STF_Module which also associates a function to draw the data-resources in Blender's UI"""
 	blender_property_name: str
 	# (layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: STF_BlenderDataResourceBase) -> None
 	draw_resource_func: Callable[[bpy.types.UILayout, bpy.types.Context, STF_Data_Ref, Any, Any], None]
-
-
-def register():
-	bpy.types.Collection.stf_data_refs = bpy.props.CollectionProperty(type=STF_Data_Ref, name="STF Data Refs", options=set()) # type: ignore
-	bpy.types.Collection.stf_data_ref_selected = bpy.props.IntProperty(options=set()) # type: ignore
-
-def unregister():
-	if hasattr(bpy.types.Collection, "stf_data_ref_selected"):
-		del bpy.types.Collection.stf_data_ref_selected
-	if hasattr(bpy.types.Collection, "stf_data_refs"):
-		del bpy.types.Collection.stf_data_refs

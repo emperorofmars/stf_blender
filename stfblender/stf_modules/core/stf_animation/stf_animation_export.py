@@ -2,13 +2,11 @@ from io import BytesIO
 from typing import Any, Callable
 import bpy
 
+from ....lib_stfblender import STF_ExportContext, STFReportSeverity, STFReport, STF_TaskSteps
+from ....lib_stfblender.utils.buffer_utils import serialize_float
 from .stf_animation_common import *
 from .stf_animation_bake import bake_constraints
-from ....exporter.stf_export_context import STF_ExportContext
-from ....base.stf_report import STFReportSeverity, STFReport
-from ....base.stf_task_steps import STF_TaskSteps
 from ....utils.id_utils import ensure_stf_id
-from ....utils.buffer_utils import serialize_float
 
 
 _stf_type = stf_animation_type

@@ -4,10 +4,10 @@ import logging
 from enum import Enum
 from typing import Any
 
-from ..base.stf_definition import STF_Buffer_Included, STF_JsonDefinition, STF_Meta_AssetInfo
-from ..base.stf_report import STFReportSeverity, STFReport
-from ..base.stf_module import STF_Module
-from ..base.stf_module_component import STF_ExportComponentHook
+from ..lib_stfblender.stf_json_definition import STF_Buffer, STF_JsonDefinition, STF_Meta_AssetInfo
+from ..lib_stfblender.stf_report import STFReportSeverity, STFReport
+from ..lib_stfblender.stf_module import STF_Module
+from ..lib_stfblender.module_component.stf_module_component import STF_ExportComponentHook
 from ..base.stf_file import STF_File
 from ..base.stf_state_base import STF_State_Base
 from ..utils.misc import get_stf_version
@@ -169,7 +169,7 @@ class STF_ExportState(STF_State_Base):
 		if(buffer_mode == STF_Buffer_Mode.included_binary):
 			buffer_index = 0
 			for id, buffer in self._exported_buffers.items():
-				json_buffer_def = STF_Buffer_Included()
+				json_buffer_def = STF_Buffer()
 				json_buffer_def.index = buffer_index
 				ret.buffers[id] = json_buffer_def
 				buffer_index += 1

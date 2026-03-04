@@ -3,19 +3,14 @@ import mathutils
 import math
 from typing import Any
 
-from ....base.stf_task_steps import STF_TaskSteps
+from ....lib_stfblender import STF_Module, STF_ExportContext, STF_ImportContext, STF_TaskSteps, STFReportSeverity, STFReport, BlenderPropertyPathPart, STFPropertyPathPart
+from ....lib_stfblender.module_component import InstanceModComponentRef
+from ....lib_stfblender.utils.animation_conversion_utils import *
+from ....lib_stfblender.utils.armature_bone import ArmatureBone
+from ....lib_stfblender.utils.trs_utils import close_enough
 
 from .stf_instance_armature_utils import parse_standin, process_components, serialize_standin, update_armature_instance_component_standins
-from ....base.stf_module import STF_Module
-from ....base.stf_module_component import InstanceModComponentRef
-from ....base.stf_report import STFReportSeverity, STFReport
-from ....exporter.stf_export_context import STF_ExportContext
-from ....importer.stf_import_context import STF_ImportContext
 from ....utils.id_utils import ensure_stf_id
-from ....utils.animation_conversion_utils import *
-from ....utils.armature_bone import ArmatureBone
-from ....utils.trs_utils import close_enough
-from ....base.property_path_part import BlenderPropertyPathPart, STFPropertyPathPart
 
 
 _stf_type = "stf.instance.armature"

@@ -3,7 +3,7 @@ import bpy
 from ....utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
 from ....utils.component_utils import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
 from ....utils.component_ui import draw_components_ui, set_stf_component_filter
-from ....utils.draw_multiline_text import draw_multiline_text
+from ....lib_stfblender.helpers import draw_multiline_text
 
 
 class STFSetMeshIDOperator(bpy.types.Operator, STFSetIDOperatorBase):

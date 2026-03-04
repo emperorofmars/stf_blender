@@ -1,5 +1,3 @@
-from typing import Any
-
 
 class STF_Meta_AssetInfo:
 	def __init__(self):
@@ -81,14 +79,14 @@ class STF_Meta:
 		}
 
 
-class STF_Buffer_Included:
+class STF_Buffer:
 	def __init__(self):
 		self.type: str = "stf.buffer.included"
 		self.index: int
 
 	@staticmethod
 	def from_dict(dict: dict):
-		ret = STF_Buffer_Included()
+		ret = STF_Buffer()
 		ret.index = dict["index"]
 		return ret
 
@@ -99,49 +97,13 @@ class STF_Buffer_Included:
 		}
 
 
-class STF_Buffer_File:
-	def __init__(self):
-		self.type: str = "stf.buffer.file"
-		self.path: str
-
-	@staticmethod
-	def from_dict(dict: dict):
-		ret = STF_Buffer_File()
-		ret.path = dict["path"]
-		return ret
-
-	def to_dict(self):
-		return {
-			"type": self.type,
-			"path": self.path,
-		}
-
-
-class STF_Buffer_JsonArray:
-	def __init__(self):
-		self.type: str = "stf.buffer.json_array"
-		self.data: list[Any]
-
-	@staticmethod
-	def from_dict(dict: dict):
-		ret = STF_Buffer_JsonArray()
-		ret.data = dict["data"]
-		return ret
-
-	def to_dict(self):
-		return {
-			"type": self.type,
-			"data": self.data,
-		}
-
-
 class STF_JsonDefinition:
 	"""Represents the STF Json definition's top level object"""
 
 	def __init__(self):
 		self.stf: STF_Meta = STF_Meta()
 		self.resources: dict[str, dict] = dict()
-		self.buffers: dict[str, STF_Buffer_Included | STF_Buffer_File | STF_Buffer_JsonArray] = dict()
+		self.buffers: dict[str, STF_Buffer] = dict()
 
 	@staticmethod
 	def from_dict(dict):
@@ -150,9 +112,8 @@ class STF_JsonDefinition:
 		ret.resources = dict["resources"]
 		for key, value in dict["buffers"].items():
 			match value["type"]:
-				case "stf.buffer.included": ret.buffers[key] = STF_Buffer_Included.from_dict(value)
-				case "stf.buffer.file": ret.buffers[key] = STF_Buffer_File.from_dict(value)
-				case "stf.buffer.json_array": ret.buffers[key] = STF_Buffer_JsonArray.from_dict(value)
+				case "stf.buffer.included": ret.buffers[key] = STF_Buffer.from_dict(value)
+				case _: raise RuntimeError("Invalid buffer type: " + value["type"])
 		return ret
 
 	def to_dict(self):

@@ -1,12 +1,10 @@
-from typing import Any
-
 import bpy
 
-from .stf_module import STF_Module
-from .stf_module_component import STF_BlenderComponentModule, STF_ExportComponentHook
-from .stf_module_data import STF_BlenderDataModule
-#from ..stf_modules.fallback.json_fallback_component import STF_Module_JsonFallbackComponent
-#from ..stf_modules.fallback.json_fallback_data import STF_Module_JsonFallbackData
+from typing import Any
+
+from ..lib_stfblender.stf_module import STF_Module
+from ..lib_stfblender.module_component.stf_module_component import STF_BlenderComponentModule, STF_ExportComponentHook
+from ..lib_stfblender.module_data.stf_module_data import STF_BlenderDataModule
 
 """
 Util to retrieve all existing STF-modules

@@ -1,9 +1,9 @@
 import bpy
 from typing import Any
 
-from ...base.stf_module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
-from ...exporter.stf_export_context import STF_ExportContext
-from ...importer.stf_import_context import STF_ImportContext
+from ...lib_stfblender import STF_ExportContext, STF_ImportContext
+from ...lib_stfblender.module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
+
 from ...utils.component_utils import add_component, export_component_base, import_component_base
 from ...base.blender_grr import *
 

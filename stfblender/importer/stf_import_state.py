@@ -4,10 +4,10 @@ from typing import Any
 
 from .import_settings import STF_ImportSettings
 
-from ..base.stf_report import STFReportSeverity, STFReport
+from ..lib_stfblender.stf_report import STFReportSeverity, STFReport
 from ..base.stf_file import STF_File
-from ..base.stf_module import STF_Module
-from ..base.stf_definition import STF_Meta_AssetInfo
+from ..lib_stfblender.stf_module import STF_Module
+from ..lib_stfblender.stf_json_definition import STF_Meta_AssetInfo
 from ..base.stf_state_base import STF_State_Base
 
 

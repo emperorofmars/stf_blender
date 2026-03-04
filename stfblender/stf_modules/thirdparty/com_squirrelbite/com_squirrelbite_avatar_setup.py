@@ -1,15 +1,12 @@
 import bpy
 from typing import Any
 
-from ....base.stf_module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
-from ....exporter.stf_export_context import STF_ExportContext
-from ....importer.stf_import_context import STF_ImportContext
-from ....utils.component_utils import add_component, export_component_base, import_component_base
-from ....base.stf_report import STFReport, STFReportSeverity
-from ....utils.reference_helper import import_resource, register_exported_resource
+from ....lib_stfblender import STF_ExportContext, STF_ImportContext, STFReportSeverity, STFReport
+from ....lib_stfblender.module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
+from ....lib_stfblender.helpers import import_resource, register_exported_resource, draw_list, poll_valid_animations
 from ....base.blender_grr import *
-from ....utils.collection_helpers import draw_list
-from ....utils.poll_helpers import poll_valid_animations
+
+from ....utils.component_utils import add_component, export_component_base, import_component_base
 
 
 _stf_type = "com.squirrelbite.avatar_setup"

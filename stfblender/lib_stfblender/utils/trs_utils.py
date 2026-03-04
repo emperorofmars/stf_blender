@@ -1,7 +1,5 @@
 import mathutils
 
-# Graciously referenced from: https://github.com/KhronosGroup/glTF-Blender-IO/blob/main/addons/io_scene_gltf2/blender/exp/nodes.py#L537
-
 
 def close_enough(value: float, target: float = 0, threshold: float = 0.000001) -> float:
 	if(abs(value - target) < threshold):

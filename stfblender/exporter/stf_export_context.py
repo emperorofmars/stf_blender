@@ -2,18 +2,17 @@ import bpy
 import logging
 from typing import Any, Callable
 
-from ..base.property_path_part import STFPropertyPathPart
-
-from ..base.stf_task_steps import STF_TaskSteps
+from ..lib_stfblender import STF_ExportContext as ISTF_ExportContext, STF_TaskSteps
 from .stf_export_state import STF_ExportState
-from ..base.stf_definition import STF_Meta_AssetInfo
-from ..base.stf_report import STFReportSeverity, STFReport
+from ..lib_stfblender.stf_json_definition import STF_Meta_AssetInfo
+from ..lib_stfblender.stf_report import STFReportSeverity, STFReport
+from ..lib_stfblender.property_path_part import STFPropertyPathPart
 
 
 _logger = logging.getLogger(__name__)
 
 
-class STF_ExportContext:
+class STF_ExportContext(ISTF_ExportContext):
 	"""Context for resource export. It will be passed to each STF_Module's export func."""
 
 	def __init__(self, state: STF_ExportState, prefab: bpy.types.Collection):

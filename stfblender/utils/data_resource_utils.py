@@ -1,7 +1,7 @@
 import bpy
 from typing import Any
 
-from ..base.stf_module_data import STF_BlenderDataResourceBase, STF_Data_Ref
+from ..lib_stfblender.module_data.stf_module_data import STF_BlenderDataResourceBase, STF_Data_Ref
 from .id_utils import ensure_stf_id
 
 
@@ -13,7 +13,7 @@ def add_resource(collection: bpy.types.Collection, blender_property_name: str, s
 	resource_ref.name = stf_id
 
 	new_resource = getattr(collection, blender_property_name).add()
-	new_resource.stf_id = resource_ref.stf_id
+	new_resource.stf_id = stf_id
 	new_resource.name = stf_id
 
 	if(blender_property_name == "stf_json_fallback_data"):

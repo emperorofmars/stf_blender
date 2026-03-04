@@ -1,7 +1,7 @@
 import bpy
 from typing import Any, Callable
 
-from .stf_module import STF_Module
+from ..stf_module import STF_Module
 from ..utils.armature_bone import ArmatureBone
 
 """

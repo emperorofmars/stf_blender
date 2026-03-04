@@ -1,14 +1,15 @@
 import bpy
 from typing import Any
 
-from ..base.stf_module_data import STF_BlenderDataResourceBase, STF_Data_Ref
+from ..lib_stfblender.module_data import STF_BlenderDataResourceBase, STF_Data_Ref
+from ..lib_stfblender.helpers import draw_multiline_text
+
 from ..base.stf_registry import find_data_module, get_blender_non_native_data_modules
 from .misc import CopyToClipboard
 from .data_resource_utils import STFCreateDataResourceOperator, STFEditDataResourceOperator, STFRemoveDataResourceOperator
 from .component_ui import draw_components_ui, set_stf_data_resource_component_filter
 from .component_utils import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
 from ..stf_modules.fallback.json_fallback_data import STF_Module_JsonFallbackData
-from .draw_multiline_text import draw_multiline_text
 
 
 class STFDrawDataResourceList(bpy.types.UIList):

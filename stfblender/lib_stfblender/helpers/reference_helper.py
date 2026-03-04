@@ -1,6 +1,6 @@
 from typing import Any
 
-from ..importer.stf_import_context import STF_ImportContext
+from ..interface_stf_import_context import STF_ImportContext
 
 
 def register_exported_resource(json_resource: dict, resource_id: str) -> int:

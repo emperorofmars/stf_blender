@@ -3,10 +3,8 @@ import re
 import mathutils
 from typing import Any, Callable
 
-from ....exporter.stf_export_context import STF_ExportContext
-from ....importer.stf_import_context import STF_ImportContext
-from ....utils.animation_conversion_utils import *
-from ....base.property_path_part import BlenderPropertyPathPart, STFPropertyPathPart
+from ....lib_stfblender import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart
+from ....lib_stfblender.utils.animation_conversion_utils import *
 
 # The values that get animated in Blender, like 'location' or 'rotation_quaternion', are likely to be nonsense when the object has a parent.
 # These properties likely won't be relative to the parent or world.

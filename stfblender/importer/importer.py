@@ -5,7 +5,7 @@ from bpy_extras.io_utils import ImportHelper
 
 from ..base.stf_registry import get_import_modules, get_import_modules_fallback
 from .stf_import_state import STF_ImportState
-from ..base.stf_report import STFException, STFReport, STFReportSeverity
+from ..lib_stfblender.stf_report import STFException, STFReport, STFReportSeverity
 from .stf_import_context import STF_ImportContext
 from ..base.stf_file import STF_File
 from ..utils.misc import OpenWebpage, draw_slot_link_warning, get_stf_version

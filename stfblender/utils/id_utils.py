@@ -3,7 +3,7 @@ import uuid
 from typing import Any
 
 from .misc import CopyToClipboard
-from ..base.stf_report import STFReportSeverity, STFReport
+from ..lib_stfblender.stf_report import STFReportSeverity, STFReport
 
 
 class STFSetIDOperatorBase:

@@ -1,10 +1,10 @@
 import bpy
 
+from ....lib_stfblender import STF_ExportContext, STF_ImportContext
+from ....lib_stfblender.module_component import InstanceModComponentRef, STF_BlenderComponentModule, STF_Component_Ref
+from ....lib_stfblender.utils.animation_conversion_utils import *
+
 from ....base.stf_registry import find_component_module, get_component_modules
-from ....base.stf_module_component import InstanceModComponentRef, STF_BlenderComponentModule, STF_Component_Ref
-from ....exporter.stf_export_context import STF_ExportContext
-from ....importer.stf_import_context import STF_ImportContext
-from ....utils.animation_conversion_utils import *
 from ....utils.component_utils import add_component
 
 
