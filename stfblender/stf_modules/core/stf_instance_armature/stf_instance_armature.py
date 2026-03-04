@@ -3,7 +3,7 @@ import mathutils
 import math
 from typing import Any
 
-from ....lib_stfblender import STF_Module, STF_ExportContext, STF_ImportContext, STF_TaskSteps, STFReportSeverity, STFReport, BlenderPropertyPathPart, STFPropertyPathPart
+from ....lib_stfblender import STF_Module, STF_ExportContext, STF_ImportContext, STF_TaskSteps, STFReportSeverity, STFReport, BlenderPropertyPathPart, STFPropertyPathPart, STF_Kind
 from ....lib_stfblender.module_component import InstanceModComponentRef
 from ....lib_stfblender.utils.animation_conversion_utils import *
 from ....lib_stfblender.utils.armature_bone import ArmatureBone
@@ -175,7 +175,7 @@ def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: 
 
 class STF_Module_STF_Instance_Armature(STF_Module):
 	stf_type = _stf_type
-	stf_kind = "instance"
+	stf_kind = STF_Kind.INSTANCE
 	like_types = ["instance.armature", "instance"]
 	understood_application_types = [tuple]
 	import_func = _stf_import

@@ -1,7 +1,7 @@
 import bpy
 from typing import Any
 
-from ....lib_stfblender import STF_Module, STF_ImportContext, STF_ExportContext
+from ....lib_stfblender import STF_Module, STF_ImportContext, STF_ExportContext, STF_Kind
 from ....lib_stfblender.utils.armature_bone import ArmatureBone
 
 from ....utils.component_utils import get_components_from_object
@@ -56,7 +56,7 @@ def _stf_export(context: STF_ExportContext, application_object: Any, context_obj
 
 class STF_Module_STF_Armature(STF_Module):
 	stf_type = _stf_type
-	stf_kind = "data"
+	stf_kind = STF_Kind.DATA
 	like_types = ["armature", "prefab"]
 	understood_application_types = [bpy.types.Armature]
 	import_func = _stf_import
@@ -70,7 +70,7 @@ register_stf_modules = [
 
 
 def register():
-	boilerplate_register(bpy.types.Armature, "data")
+	boilerplate_register(bpy.types.Armature, STF_Kind.DATA)
 
 def unregister():
-	boilerplate_unregister(bpy.types.Armature, "data")
+	boilerplate_unregister(bpy.types.Armature, STF_Kind.DATA)

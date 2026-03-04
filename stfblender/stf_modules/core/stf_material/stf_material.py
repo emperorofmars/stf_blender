@@ -1,7 +1,7 @@
 import bpy
 from typing import Any
 
-from ....lib_stfblender import STF_Module, STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STFReportSeverity, STFReport
+from ....lib_stfblender import STF_Module, STF_ExportContext, STF_ImportContext, STF_Kind
 
 from .stf_material_definition import STF_Material_Property, STF_Material_Value_Module_Base
 from .material_value_modules import blender_material_value_modules
@@ -106,7 +106,7 @@ def _stf_export(context: STF_ExportContext, application_object: Any, context_obj
 
 class STF_Module_STF_Material(STF_Module):
 	stf_type = _stf_type
-	stf_kind = "data"
+	stf_kind = STF_Kind.DATA
 	like_types = ["material"]
 	understood_application_types = [bpy.types.Material]
 	import_func = _stf_import
@@ -125,7 +125,7 @@ register_stf_modules = [
 
 
 def register():
-	boilerplate_register(bpy.types.Material, "data")
+	boilerplate_register(bpy.types.Material, STF_Kind.DATA)
 
 def unregister():
-	boilerplate_unregister(bpy.types.Material, "data")
+	boilerplate_unregister(bpy.types.Material, STF_Kind.DATA)

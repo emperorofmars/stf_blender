@@ -3,7 +3,7 @@ import math
 import mathutils
 from typing import Any
 
-from ....lib_stfblender import STF_Module, STF_ExportContext, STF_ImportContext, STF_TaskSteps, STFReportSeverity, STFReport
+from ....lib_stfblender import STF_Module, STF_ExportContext, STF_ImportContext, STF_TaskSteps, STFReportSeverity, STFReport, STF_Kind
 from ....lib_stfblender.utils import trs_utils
 
 from ....utils.boilerplate import boilerplate_register, boilerplate_unregister
@@ -132,7 +132,7 @@ def _stf_export(context: STF_ExportContext, blender_object: bpy.types.Object, co
 
 class STF_Module_STF_Node(STF_Module):
 	stf_type = _stf_type
-	stf_kind = "node"
+	stf_kind = STF_Kind.NODE
 	like_types = ["node", "node.spatial"]
 	understood_application_types = [bpy.types.Object]
 	import_func = _stf_import
@@ -152,10 +152,10 @@ register_stf_modules = [
 
 
 def register():
-	boilerplate_register(bpy.types.Object, "node")
+	boilerplate_register(bpy.types.Object, STF_Kind.NODE)
 	bpy.types.Object.stf_instance = bpy.props.PointerProperty(type=STF_Instance, options=set()) # type: ignore
 
 def unregister():
 	if hasattr(bpy.types.Object, "stf_instance"):
 		del bpy.types.Object.stf_instance
-	boilerplate_unregister(bpy.types.Object, "node")
+	boilerplate_unregister(bpy.types.Object, STF_Kind.NODE)

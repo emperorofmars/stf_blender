@@ -1,6 +1,6 @@
 import bpy
 
-from ....lib_stfblender import STF_Module
+from ....lib_stfblender import STF_Module, STF_Kind
 from ....utils.component_utils import get_components_from_object
 from ....utils.boilerplate import boilerplate_register, boilerplate_unregister
 
@@ -18,7 +18,7 @@ class STF_Mesh(bpy.types.PropertyGroup):
 
 class STF_Module_STF_Mesh(STF_Module):
 	stf_type = _stf_type
-	stf_kind = "data"
+	stf_kind = STF_Kind.DATA
 	like_types = ["mesh"]
 	understood_application_types = [bpy.types.Mesh]
 	import_func = import_stf_mesh
@@ -33,9 +33,9 @@ register_stf_modules = [
 
 def register():
 	bpy.types.Mesh.stf_mesh = bpy.props.PointerProperty(type=STF_Mesh)
-	boilerplate_register(bpy.types.Mesh, "data")
+	boilerplate_register(bpy.types.Mesh, STF_Kind.DATA)
 
 def unregister():
-	boilerplate_unregister(bpy.types.Mesh, "data")
+	boilerplate_unregister(bpy.types.Mesh, STF_Kind.DATA)
 	if hasattr(bpy.types.Mesh, "stf_mesh"):
 		del bpy.types.Mesh.stf_mesh

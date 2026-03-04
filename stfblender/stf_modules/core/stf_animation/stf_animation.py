@@ -1,6 +1,6 @@
 import bpy
 
-from ....lib_stfblender import STF_Module
+from ....lib_stfblender import STF_Module, STF_Kind
 from .stf_animation_common import *
 from .stf_animation_export import stf_animation_export
 from .stf_animation_import import stf_animation_import
@@ -21,7 +21,7 @@ class STF_Animation(bpy.types.PropertyGroup):
 
 class STF_Module_STF_Animation(STF_Module):
 	stf_type = _stf_type
-	stf_kind = "data"
+	stf_kind = STF_Kind.DATA
 	like_types = ["animation"]
 	understood_application_types = [bpy.types.Action]
 	import_func = stf_animation_import
@@ -35,10 +35,10 @@ register_stf_modules = [
 
 
 def register():
-	boilerplate_register(bpy.types.Action, "data")
+	boilerplate_register(bpy.types.Action, STF_Kind.DATA)
 	bpy.types.Action.stf_animation = bpy.props.PointerProperty(type=STF_Animation, options=set())
 
 def unregister():
 	if hasattr(bpy.types.Action, "stf_animation"):
 		del bpy.types.Action.stf_animation
-	boilerplate_unregister(bpy.types.Action, "data")
+	boilerplate_unregister(bpy.types.Action, STF_Kind.DATA)

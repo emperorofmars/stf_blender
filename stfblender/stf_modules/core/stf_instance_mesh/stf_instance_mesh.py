@@ -1,7 +1,7 @@
 import bpy
 from typing import Any
 
-from ....lib_stfblender import STF_Module, STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STFReportSeverity, STFReport
+from ....lib_stfblender import STF_Module, STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STFReportSeverity, STFReport, STF_Kind
 from .stf_instance_mesh_util import set_instance_blendshapes
 
 from ....utils.id_utils import ensure_stf_id
@@ -137,7 +137,7 @@ def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: 
 
 class STF_Module_STF_Instance_Mesh(STF_Module):
 	stf_type = _stf_type
-	stf_kind = "instance"
+	stf_kind = STF_Kind.INSTANCE
 	like_types = ["instance.mesh", "instance"]
 	understood_application_types = [tuple]
 	import_func = _stf_import

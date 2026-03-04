@@ -1,7 +1,7 @@
 import bpy
 from typing import Any
 
-from ....lib_stfblender import STF_Module, STF_ImportContext, STF_ExportContext, STF_TaskSteps, STFReportSeverity
+from ....lib_stfblender import STF_Module, STF_ImportContext, STF_ExportContext, STF_TaskSteps, STFReportSeverity, STF_Kind
 
 from ....utils.boilerplate import boilerplate_register, boilerplate_unregister
 from ....utils.component_utils import get_components_from_object
@@ -60,7 +60,7 @@ def _stf_export(context: STF_ExportContext, application_object: Any, context_obj
 
 class STF_Module_STF_Prefab(STF_Module):
 	stf_type = _stf_type
-	stf_kind = "data"
+	stf_kind = STF_Kind.DATA
 	like_types = ["prefab"]
 	understood_application_types = [bpy.types.Collection]
 	import_func = _stf_import
@@ -73,10 +73,10 @@ register_stf_modules = [
 ]
 
 def register():
-	boilerplate_register(bpy.types.Collection, "data")
+	boilerplate_register(bpy.types.Collection, STF_Kind.DATA)
 	bpy.types.Collection.stf_use_collection_as_prefab = bpy.props.BoolProperty(name="Use As STF Prefab", default=False, options=set())
 
 def unregister():
-	boilerplate_unregister(bpy.types.Collection, "data")
+	boilerplate_unregister(bpy.types.Collection, STF_Kind.DATA)
 	if hasattr(bpy.types.Collection, "stf_use_collection_as_prefab"):
 		del bpy.types.Collection.stf_use_collection_as_prefab
