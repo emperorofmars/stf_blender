@@ -2,11 +2,13 @@ from io import BytesIO
 from typing import Any, Callable
 import bpy
 
+
 from ....lib_stfblender import STF_ExportContext, STFReportSeverity, STFReport, STF_TaskSteps
 from ....lib_stfblender.utils.buffer_utils import serialize_float
+from ....lib_stfblender.utils.id_utils import ensure_stf_id
+from ....lib_stfblender.slot_link import ActionSlotLink
 from .stf_animation_common import *
 from .stf_animation_bake import bake_constraints
-from ....utils.id_utils import ensure_stf_id
 
 
 _stf_type = stf_animation_type
@@ -22,7 +24,8 @@ def stf_animation_export(context: STF_ExportContext, application_object: Any, co
 		context.report(STFReport("Slot-Link is required to export animations!", STFReportSeverity.Debug, blender_animation.stf_info.stf_id, _stf_type, application_object))
 		return None
 
-	for slot_link in blender_animation.slot_link.links:
+	action_slot_link: ActionSlotLink = blender_animation.slot_link
+	for slot_link in action_slot_link.links:
 		if(slot_link.target):
 			break
 	else:
@@ -59,10 +62,10 @@ def stf_animation_export(context: STF_ExportContext, application_object: Any, co
 			ret["tracks_baked"] = stf_tracks_baked
 
 		def _handle_reset_animation():
-			if(blender_animation.slot_link.is_reset_animation):
+			if(action_slot_link.is_reset_animation):
 				ret["is_reset_animation"] = True
-			elif(blender_animation.slot_link.reset_animation):
-				if(reset_animation_id := context.serialize_resource(blender_animation.slot_link.reset_animation)):
+			elif(action_slot_link.reset_animation):
+				if(reset_animation_id := context.serialize_resource(action_slot_link.reset_animation)):
 					ret["reset_animation"] = reset_animation_id
 		context.add_task(STF_TaskSteps.AFTER_ANIMATION, _handle_reset_animation)
 
@@ -73,6 +76,7 @@ def __convert(context: STF_ExportContext, blender_animation: bpy.types.Action, a
 	# All of this is a mess
 	stf_tracks = []
 	requires_constraint_bake = False
+	action_slot_link: ActionSlotLink = blender_animation.slot_link
 	for layer in blender_animation.layers:
 		for strip in layer.strips:
 			if(strip.type == "KEYFRAME"):
@@ -80,7 +84,7 @@ def __convert(context: STF_ExportContext, blender_animation: bpy.types.Action, a
 				for channelbag in strip.channelbags:
 					# Get the target for this set of animation tracks from the Slot Link extension. (Why can't you be normal Blender?)
 					selected_slot_link = None
-					for slot_link in blender_animation.slot_link.links:
+					for slot_link in action_slot_link.links:
 						if(slot_link.slot_handle == channelbag.slot_handle):
 							selected_slot_link = slot_link
 							break

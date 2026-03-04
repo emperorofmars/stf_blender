@@ -6,7 +6,7 @@ from typing import Any, Callable
 from ...lib_stfblender import STF_ExportContext, STF_ImportContext, STF_Module, BlenderPropertyPathPart, STFPropertyPathPart
 from ...lib_stfblender.stf_report import STFReportSeverity, STFReport
 
-from ...utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui, ensure_stf_id
+from ...lib_stfblender.utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui, ensure_stf_id
 
 
 _stf_type = "stfexp.camera"

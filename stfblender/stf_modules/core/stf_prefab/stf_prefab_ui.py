@@ -1,6 +1,6 @@
 import bpy
 
-from ....utils.id_utils import STFSetIDOperatorBase
+from ....lib_stfblender.utils.id_utils import STFSetIDOperatorBase
 from ....utils.component_utils import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
 from ....utils.component_ui import set_stf_component_filter
 from .draw_prefab_ui import draw_prefab_ui

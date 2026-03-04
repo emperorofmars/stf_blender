@@ -5,7 +5,7 @@ from ....lib_stfblender import STF_Module, STF_ImportContext, STF_ExportContext,
 
 from ....utils.boilerplate import boilerplate_register, boilerplate_unregister
 from ....utils.component_utils import get_components_from_object
-from ....utils.id_utils import ensure_stf_id
+from ....lib_stfblender.utils.id_utils import ensure_stf_id
 
 
 _stf_type = "stf.prefab"

@@ -2,8 +2,8 @@ import bpy
 import uuid
 from typing import Any
 
-from .misc import CopyToClipboard
-from ..lib_stfblender.stf_report import STFReportSeverity, STFReport
+from .. import STF_ExportContext, STFReportSeverity, STFReport
+from ..helpers.misc import CopyToClipboard
 
 
 class STFSetIDOperatorBase:
@@ -52,7 +52,7 @@ def draw_stf_id_ui(layout: bpy.types.UILayout, context: bpy.types.Context, blend
 		row_r.prop(stf_prop_holder, "stf_name_source_of_truth", text="Override Name")
 
 
-def ensure_stf_id(stf_context: Any, blender_object: Any, stf_prop_holder: Any = None):
+def ensure_stf_id(stf_context: STF_ExportContext, blender_object: Any, stf_prop_holder: Any = None):
 	if(not stf_prop_holder and hasattr(blender_object, "stf_info")):
 		stf_prop_holder = blender_object.stf_info
 	elif(not stf_prop_holder):
@@ -67,12 +67,4 @@ def ensure_stf_id(stf_context: Any, blender_object: Any, stf_prop_holder: Any = 
 	elif(stf_context.id_exists(stf_prop_holder.stf_id) and not stf_context._state._permit_id_reassignment):
 		stf_context.report(STFReport("Duplicate ID", STFReportSeverity.FatalError, stf_prop_holder.stf_id, None, blender_object))
 	stf_context.register_id(blender_object, stf_prop_holder.stf_id)
-
-
-def register():
-	bpy.types.Scene.stf_edit_resource_id = bpy.props.BoolProperty(name="Edit ID", description="Toggle the editing of the ID", default=False)
-
-def unregister():
-	if hasattr(bpy.types.Scene, "stf_edit_resource_id"):
-		del bpy.types.Scene.stf_edit_resource_id
 

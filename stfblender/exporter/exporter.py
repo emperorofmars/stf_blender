@@ -7,7 +7,7 @@ from ..lib_stfblender.stf_report import STFReport, STFReportSeverity
 from ..base.stf_registry import get_export_modules
 from .stf_export_state import STF_ExportState
 from .stf_export_context import STF_ExportContext
-from ..utils.misc import OpenWebpage, draw_slot_link_warning, get_stf_version
+from ..lib_stfblender.helpers.misc import OpenWebpage, draw_slot_link_warning, get_stf_version
 from .export_settings import STF_ExportSettings
 from ..package_key import package_key
 

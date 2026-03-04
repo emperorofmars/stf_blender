@@ -7,7 +7,7 @@ from .stf_material_definition import STF_Material_Property, STF_Material_Value_M
 from .material_value_modules import blender_material_value_modules
 from .stf_material_operators import add_property, add_value_to_property
 from ....utils.component_utils import get_components_from_object
-from ....utils.id_utils import ensure_stf_id
+from ....lib_stfblender.utils.id_utils import ensure_stf_id
 from ....utils.boilerplate import boilerplate_register, boilerplate_unregister
 from .convert_blender_material_to_stf import blender_material_to_stf
 from .convert_stf_material_to_blender import stf_material_to_blender

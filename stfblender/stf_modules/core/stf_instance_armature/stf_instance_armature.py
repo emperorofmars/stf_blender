@@ -10,7 +10,7 @@ from ....lib_stfblender.utils.armature_bone import ArmatureBone
 from ....lib_stfblender.utils.trs_utils import close_enough
 
 from .stf_instance_armature_utils import parse_standin, process_components, serialize_standin, update_armature_instance_component_standins
-from ....utils.id_utils import ensure_stf_id
+from ....lib_stfblender.utils.id_utils import ensure_stf_id
 
 
 _stf_type = "stf.instance.armature"

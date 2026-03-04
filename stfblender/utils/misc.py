@@ -1,27 +1,11 @@
 import bpy
 
-
-def draw_slot_link_warning(layout: bpy.types.UILayout):
-	if(not hasattr(bpy.types.Action, "slot_link")):
-		layout.separator(factor=1, type="SPACE")
-		box = layout.box()
-		box.label(text="Note: The 'Slot Link' extension is required to import & export animations!")
-		box.operator(OpenWebpage.bl_idname).url = "https://extensions.blender.org/add-ons/slot-link/"
-		layout.separator(factor=1, type="SPACE")
-
-
-def get_stf_version() -> str:
-	import addon_utils
-	for module in addon_utils.modules():
-		if module.__name__.endswith("stf_blender"):
-			version = module.bl_info.get("version", (0, 0, 0))
-			return str(version[0]) + "." + str(version[1]) + "." + str(version[2])
-	return "0.0.0"
+from ..lib_stfblender.helpers.misc import CopyToClipboard as ICopyToClipboard, SetActiveObjectOperator as ISetActiveObjectOperator, OpenWebpage as IOpenWebpage
 
 
 class SetActiveObjectOperator(bpy.types.Operator):
 	"""Select the specified Object in the Scene"""
-	bl_idname = "stf.util_set_object_active"
+	bl_idname = ISetActiveObjectOperator.bl_idname
 	bl_label = "Select"
 	bl_options = {"REGISTER", "UNDO"}
 
@@ -38,7 +22,7 @@ class SetActiveObjectOperator(bpy.types.Operator):
 
 class OpenWebpage(bpy.types.Operator):
 	"""Open in Webbrowser"""
-	bl_idname = "stf.open_webpage"
+	bl_idname = IOpenWebpage.bl_idname
 	bl_label = "Open Webpage"
 
 	url: bpy.props.StringProperty(name = "URL") # type: ignore
@@ -51,7 +35,7 @@ class OpenWebpage(bpy.types.Operator):
 
 class CopyToClipboard(bpy.types.Operator):
 	"""Copy to Clipboard"""
-	bl_idname = "stf.copy_to_clipboard"
+	bl_idname = ICopyToClipboard.bl_idname
 	bl_label = "Copy to Clipboard"
 	bl_options = {"REGISTER", "UNDO"}
 

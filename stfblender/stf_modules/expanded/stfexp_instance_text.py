@@ -4,7 +4,7 @@ from typing import Any
 from ...lib_stfblender import STF_ExportContext, STF_ImportContext, STF_Module, STFReportSeverity, STFReport
 from ...lib_stfblender.helpers import import_resource, register_exported_resource
 
-from ...utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui, ensure_stf_id
+from ...lib_stfblender.utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui, ensure_stf_id
 
 # TODO this module is at a bare minimum level, improve it
 

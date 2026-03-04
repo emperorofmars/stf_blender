@@ -6,7 +6,7 @@ from ...lib_stfblender.module_component import STF_BlenderComponentBase, STF_Ble
 from ...lib_stfblender.helpers import register_exported_resource, import_resource, create_add_button, create_remove_button, poll_valid_animations
 
 from ...utils.component_utils import add_component, export_component_base, import_component_base
-from ...utils.misc import draw_slot_link_warning
+from ...lib_stfblender.helpers.misc import draw_slot_link_warning
 from ...base.blender_grr import *
 
 

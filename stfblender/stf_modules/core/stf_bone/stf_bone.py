@@ -10,7 +10,7 @@ from ....lib_stfblender.utils.animation_conversion_utils import *
 
 from ....utils.component_utils import get_components_from_object
 from ....utils.boilerplate import boilerplate_register, boilerplate_unregister
-from ....utils.id_utils import ensure_stf_id
+from ....lib_stfblender.utils.id_utils import ensure_stf_id
 from .stf_bone_property_conversion import resolve_property_path_to_stf_func, resolve_stf_property_to_blender_func
 
 

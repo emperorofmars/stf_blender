@@ -6,7 +6,7 @@ from ...lib_stfblender.module_component import STF_BlenderComponentBase, STF_Ble
 from ...lib_stfblender.helpers import register_exported_resource, import_resource
 
 from ...utils.component_utils import add_component, export_component_base, import_component_base
-from ...utils.misc import SetActiveObjectOperator
+from ...lib_stfblender.helpers.misc import SetActiveObjectOperator
 
 
 _stf_type = "ava.voice_position"

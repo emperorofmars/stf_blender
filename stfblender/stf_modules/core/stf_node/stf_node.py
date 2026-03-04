@@ -8,7 +8,7 @@ from ....lib_stfblender.utils import trs_utils
 
 from ....utils.boilerplate import boilerplate_register, boilerplate_unregister
 from ....utils.component_utils import get_components_from_object
-from ....utils.id_utils import ensure_stf_id
+from ....lib_stfblender.utils.id_utils import ensure_stf_id
 from .node_property_conversion import stf_node_resolve_property_path_to_stf_func, stf_node_resolve_stf_property_to_blender_func
 
 

@@ -10,7 +10,7 @@ from ..lib_stfblender.stf_module import STF_Module
 from ..lib_stfblender.module_component.stf_module_component import STF_ExportComponentHook
 from ..base.stf_file import STF_File
 from ..base.stf_state_base import STF_State_Base
-from ..utils.misc import get_stf_version
+from ..lib_stfblender.helpers.misc import get_stf_version
 
 
 _logger = logging.getLogger(__name__)

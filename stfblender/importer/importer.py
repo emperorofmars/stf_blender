@@ -8,7 +8,7 @@ from .stf_import_state import STF_ImportState
 from ..lib_stfblender.stf_report import STFException, STFReport, STFReportSeverity
 from .stf_import_context import STF_ImportContext
 from ..base.stf_file import STF_File
-from ..utils.misc import OpenWebpage, draw_slot_link_warning, get_stf_version
+from ..lib_stfblender.helpers.misc import OpenWebpage, draw_slot_link_warning, get_stf_version
 from .import_settings import STF_ImportSettings
 
 
