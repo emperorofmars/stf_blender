@@ -1,8 +1,8 @@
 import io
 import json
 
-from ..lib_stfblender.stf_json_definition import STF_JsonDefinition
-from ..lib_stfblender.utils import buffer_utils
+from ..stf_json_definition import STF_JsonDefinition
+from ..utils import buffer_utils
 
 
 class STF_File:

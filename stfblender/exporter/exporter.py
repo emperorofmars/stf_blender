@@ -2,12 +2,12 @@ import traceback
 import bpy
 from bpy_extras.io_utils import ExportHelper
 
-from ..base.stf_meta import draw_meta_editor
-from ..lib_stfblender.stf_report import STFReport, STFReportSeverity
-from ..base.stf_registry import get_export_modules
+from ..common.base.stf_meta import draw_meta_editor
+from ..common.stf_report import STFReport, STFReportSeverity
+from ..common.base.stf_registry import get_export_modules
 from .stf_export_state import STF_ExportState
 from .stf_export_context import STF_ExportContext
-from ..lib_stfblender.helpers.misc import OpenWebpage, draw_slot_link_warning, get_stf_version
+from ..common.helpers.misc import OpenWebpage, draw_slot_link_warning, get_stf_version
 from .export_settings import STF_ExportSettings
 from ..package_key import package_key
 

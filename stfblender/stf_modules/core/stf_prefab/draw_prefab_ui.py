@@ -1,9 +1,9 @@
 import bpy
 
-from ....lib_stfblender.utils.id_utils import draw_stf_id_ui
-from ....utils.component_ui import draw_components_ui, set_stf_component_filter
-from ....base.stf_meta import draw_meta_editor
-from ....lib_stfblender.helpers.misc import draw_slot_link_warning
+from ....common.utils.id_utils import draw_stf_id_ui
+from ....common.module_component.component_ui import draw_components_ui, set_stf_component_filter
+from ....common.base.stf_meta import draw_meta_editor
+from ....common.helpers.misc import draw_slot_link_warning
 
 
 def draw_prefab_ui(layout: bpy.types.UILayout, context: bpy.types.Context, collection: bpy.types.Collection, operator_set_as_root: str, operator_set_id: str, operator_add_component: str, operator_remove_component: str, operator_edit_component_id: str):

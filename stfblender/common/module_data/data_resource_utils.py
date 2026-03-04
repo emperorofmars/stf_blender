@@ -1,8 +1,8 @@
 import bpy
 from typing import Any
 
-from ..lib_stfblender.module_data.stf_module_data import STF_BlenderDataResourceBase, STF_Data_Ref
-from ..lib_stfblender.utils.id_utils import ensure_stf_id
+from .stf_module_data import STF_BlenderDataResourceBase, STF_Data_Ref
+from ..utils.id_utils import ensure_stf_id
 
 
 def add_resource(collection: bpy.types.Collection, blender_property_name: str, stf_id: str, stf_type: str) -> tuple[STF_Data_Ref, Any]:

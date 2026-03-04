@@ -1,8 +1,8 @@
 import sys
 from typing import Callable
 
-from ..lib_stfblender.stf_task_steps import STF_TaskSteps
-from ..lib_stfblender.stf_report import STFReportSeverity, STFException, STFReport
+from ..stf_task_steps import STF_TaskSteps
+from ..stf_report import STFReportSeverity, STFException, STFReport
 
 
 class STF_State_Base:

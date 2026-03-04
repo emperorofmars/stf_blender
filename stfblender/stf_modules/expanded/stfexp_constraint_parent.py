@@ -2,14 +2,14 @@ import bpy
 import re
 from typing import Any
 
-from ...lib_stfblender import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STF_TaskSteps
-from ...lib_stfblender.module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
-from ...lib_stfblender.utils.animation_conversion_utils import get_component_index, get_component_stf_path_from_collection
-from ...lib_stfblender.helpers import create_add_button, create_remove_button
+from ...common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STF_TaskSteps
+from ...common.module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
+from ...common.utils.animation_conversion_utils import get_component_index, get_component_stf_path_from_collection
+from ...common.helpers import create_add_button, create_remove_button
 from .util.constraint_source import ConstraintSource
 
-from ...utils.component_utils import add_component, export_component_base, import_component_base, preserve_component_reference
-from ...lib_stfblender.blender_grr.stf_node_path_selector import draw_node_path_selector, node_path_selector_from_stf, node_path_selector_to_stf, node_path_selector_to_string, validate_node_path_selector
+from ...common.module_component.component_utils import add_component, export_component_base, import_component_base, preserve_component_reference
+from ...common.blender_grr.stf_node_path_selector import draw_node_path_selector, node_path_selector_from_stf, node_path_selector_to_stf, node_path_selector_to_string, validate_node_path_selector
 
 
 _stf_type = "stfexp.constraint.parent"

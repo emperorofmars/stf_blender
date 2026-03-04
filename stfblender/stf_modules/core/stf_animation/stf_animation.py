@@ -1,11 +1,11 @@
 import bpy
 
-from ....lib_stfblender import STF_Module, STF_Kind
+from ....common import STF_Module, STF_Kind
 from .stf_animation_common import *
 from .stf_animation_export import stf_animation_export
 from .stf_animation_import import stf_animation_import
-from ....utils.component_utils import get_components_from_object
-from ....utils.boilerplate import boilerplate_register, boilerplate_unregister
+from ....common.module_component.component_utils import get_components_from_object
+from ....common.utils.boilerplate import boilerplate_register, boilerplate_unregister
 
 
 _stf_type = stf_animation_type

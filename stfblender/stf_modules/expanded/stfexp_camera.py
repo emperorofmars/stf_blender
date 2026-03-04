@@ -3,10 +3,10 @@ import math
 import re
 from typing import Any, Callable
 
-from ...lib_stfblender import STF_ExportContext, STF_ImportContext, STF_Module, BlenderPropertyPathPart, STFPropertyPathPart
-from ...lib_stfblender.stf_report import STFReportSeverity, STFReport
+from ...common import STF_ExportContext, STF_ImportContext, STF_Module, BlenderPropertyPathPart, STFPropertyPathPart
+from ...common.stf_report import STFReportSeverity, STFReport
 
-from ...lib_stfblender.utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui, ensure_stf_id
+from ...common.utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui, ensure_stf_id
 
 
 _stf_type = "stfexp.camera"

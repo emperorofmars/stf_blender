@@ -2,10 +2,10 @@ import bpy
 import re
 from typing import Any
 
-from ...lib_stfblender import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart
-from ...lib_stfblender.module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
-from ...lib_stfblender.utils.animation_conversion_utils import get_component_index, get_component_stf_path_from_collection
-from ...utils.component_utils import add_component, export_component_base, import_component_base
+from ...common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart
+from ...common.module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
+from ...common.utils.animation_conversion_utils import get_component_index, get_component_stf_path_from_collection
+from ...common.module_component.component_utils import add_component, export_component_base, import_component_base
 
 
 _stf_type = "ava.secondary_motion"

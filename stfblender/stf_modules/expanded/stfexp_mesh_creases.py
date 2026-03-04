@@ -4,12 +4,12 @@ from io import BytesIO
 from typing import Any
 import numpy as np
 
-from ...lib_stfblender import STF_ExportContext, STF_ImportContext
-from ...lib_stfblender.module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_ExportComponentHook
-from ...lib_stfblender.utils.buffer_utils import determine_indices_width, determine_pack_format_float
-from ...lib_stfblender.helpers import register_exported_buffer, import_buffer
+from ...common import STF_ExportContext, STF_ImportContext
+from ...common.module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_ExportComponentHook
+from ...common.utils.buffer_utils import determine_indices_width, determine_pack_format_float
+from ...common.helpers import register_exported_buffer, import_buffer
 
-from ...utils.component_utils import add_component, export_component_base, import_component_base
+from ...common.module_component.component_utils import add_component, export_component_base, import_component_base
 
 
 _stf_type = "stfexp.mesh.creases"

@@ -1,7 +1,7 @@
 import bpy
 from typing import Any, Callable
 
-from ....lib_stfblender import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart
+from ....common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart
 
 
 class STF_Material_Value_Base(bpy.types.PropertyGroup):

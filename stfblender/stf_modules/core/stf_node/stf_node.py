@@ -3,12 +3,12 @@ import math
 import mathutils
 from typing import Any
 
-from ....lib_stfblender import STF_Module, STF_ExportContext, STF_ImportContext, STF_TaskSteps, STFReportSeverity, STFReport, STF_Kind
-from ....lib_stfblender.utils import trs_utils
+from ....common import STF_Module, STF_ExportContext, STF_ImportContext, STF_TaskSteps, STFReportSeverity, STFReport, STF_Kind
+from ....common.utils import trs_utils
 
-from ....utils.boilerplate import boilerplate_register, boilerplate_unregister
-from ....utils.component_utils import get_components_from_object
-from ....lib_stfblender.utils.id_utils import ensure_stf_id
+from ....common.utils.boilerplate import boilerplate_register, boilerplate_unregister
+from ....common.module_component.component_utils import get_components_from_object
+from ....common.utils.id_utils import ensure_stf_id
 from .node_property_conversion import stf_node_resolve_property_path_to_stf_func, stf_node_resolve_stf_property_to_blender_func
 
 

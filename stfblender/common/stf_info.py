@@ -1,6 +1,6 @@
 import bpy
 
-from ..lib_stfblender.module_component.stf_module_component import STF_Component_Ref
+from .module_component.stf_module_component import STF_Component_Ref
 
 
 class STF_Info(bpy.types.PropertyGroup):

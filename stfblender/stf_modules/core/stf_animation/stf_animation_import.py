@@ -2,7 +2,7 @@ from typing import Any, Callable
 import bpy
 import numpy as np
 
-from ....lib_stfblender import STF_ImportContext, STF_TaskSteps, STFReportSeverity, STFReport
+from ....common import STF_ImportContext, STF_TaskSteps, STFReportSeverity, STFReport
 from .stf_animation_common import *
 
 

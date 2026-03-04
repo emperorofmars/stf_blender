@@ -68,3 +68,10 @@ def ensure_stf_id(stf_context: STF_ExportContext, blender_object: Any, stf_prop_
 		stf_context.report(STFReport("Duplicate ID", STFReportSeverity.FatalError, stf_prop_holder.stf_id, None, blender_object))
 	stf_context.register_id(blender_object, stf_prop_holder.stf_id)
 
+
+def register():
+	bpy.types.Scene.stf_edit_resource_id = bpy.props.BoolProperty(name="Edit ID", description="Toggle the editing of the ID", default=False)
+
+def unregister():
+	if hasattr(bpy.types.Scene, "stf_edit_resource_id"):
+		del bpy.types.Scene.stf_edit_resource_id

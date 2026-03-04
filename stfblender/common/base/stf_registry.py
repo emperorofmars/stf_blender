@@ -2,9 +2,9 @@ import bpy
 
 from typing import Any
 
-from ..lib_stfblender.stf_module import STF_Module
-from ..lib_stfblender.module_component.stf_module_component import STF_BlenderComponentModule, STF_ExportComponentHook
-from ..lib_stfblender.module_data.stf_module_data import STF_BlenderDataModule
+from ..stf_module import STF_Module
+from ..module_component.stf_module_component import STF_BlenderComponentModule, STF_ExportComponentHook
+from ..module_data.stf_module_data import STF_BlenderDataModule
 
 """
 Util to retrieve all existing STF-modules

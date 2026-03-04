@@ -2,17 +2,16 @@ import bpy
 import json
 from typing import Any, Callable
 
-from ..lib_stfblender import STF_ExportContext, STF_ImportContext
-from ..lib_stfblender.module_component.stf_module_component import STF_BlenderComponentBase, STF_Component_Ref
-from ..lib_stfblender.module_data.stf_module_data import STF_BlenderDataResourceBase
-from ..lib_stfblender.blender_grr import *
-from ..lib_stfblender.utils.id_utils import ensure_stf_id
-from ..lib_stfblender.utils.armature_bone import ArmatureBone
+from .. import STF_ExportContext, STF_ImportContext
+from .stf_module_component import STF_BlenderComponentBase, STF_Component_Ref
+from ..blender_grr import *
+from ..utils.id_utils import ensure_stf_id
+from ..utils.armature_bone import ArmatureBone
 
 
 def add_component(context_object: Any, blender_property_name: str, stf_id: str, stf_type: str, components_ref_property: Any = None, name = None) -> tuple[STF_Component_Ref, STF_BlenderComponentBase]:
 	if(components_ref_property is None):
-		if(isinstance(context_object, STF_BlenderDataResourceBase)): # jank, but works
+		if(hasattr(context_object, "stf_components")):
 			components_ref_property = context_object.stf_components
 			context_object = context_object.id_data
 		else:

@@ -1,7 +1,7 @@
 import bpy
 import re
 
-from ....lib_stfblender import STF_Module, STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart
+from ....common import STF_Module, STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart
 
 from .stf_material_definition import STF_Material_Value_Base
 from .material_value_modules import blender_material_value_modules

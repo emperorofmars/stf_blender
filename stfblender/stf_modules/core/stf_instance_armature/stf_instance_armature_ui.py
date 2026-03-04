@@ -1,14 +1,14 @@
 import bpy
 from typing import Any
 
-from ....lib_stfblender.module_component import STF_Component_Ref
-from ....lib_stfblender.helpers import draw_multiline_text
+from ....common.module_component import STF_Component_Ref
+from ....common.helpers import draw_multiline_text
 from .stf_instance_armature import InstanceModComponentRef
 from .stf_instance_armature_utils import ProcessComponentsOntoArmatureInstance, UpdateArmatureInstanceComponentStandins
 
-from ....lib_stfblender.utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
-from ....utils.component_utils import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
-from ....utils.component_ui import draw_components_ui, draw_instance_standin_components_ui, set_stf_component_filter, set_stf_component_instance_filter
+from ....common.utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
+from ....common.module_component.component_utils import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
+from ....common.module_component.component_ui import draw_components_ui, draw_instance_standin_components_ui, set_stf_component_filter, set_stf_component_instance_filter
 
 
 class STFSetArmatureInstanceIDOperator(bpy.types.Operator, STFSetIDOperatorBase):

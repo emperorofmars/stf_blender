@@ -1,11 +1,11 @@
 import bpy
 
-from ....lib_stfblender import STF_ExportContext, STF_ImportContext
-from ....lib_stfblender.module_component import InstanceModComponentRef, STF_BlenderComponentModule, STF_Component_Ref
-from ....lib_stfblender.utils.animation_conversion_utils import *
+from ....common import STF_ExportContext, STF_ImportContext
+from ....common.module_component import InstanceModComponentRef, STF_BlenderComponentModule, STF_Component_Ref
+from ....common.utils.animation_conversion_utils import *
 
-from ....base.stf_registry import find_component_module, get_component_modules
-from ....utils.component_utils import add_component
+from ....common.base.stf_registry import find_component_module, get_component_modules
+from ....common.module_component.component_utils import add_component
 
 
 def update_armature_instance_component_standins(context: bpy.types.Context, blender_object: bpy.types.Object, stf_modules: list[STF_BlenderComponentModule] = None):

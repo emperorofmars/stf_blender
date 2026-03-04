@@ -1,8 +1,8 @@
 import bpy
 
-from ....lib_stfblender import STF_Module, STF_Kind
-from ....utils.component_utils import get_components_from_object
-from ....utils.boilerplate import boilerplate_register, boilerplate_unregister
+from ....common import STF_Module, STF_Kind
+from ....common.module_component.component_utils import get_components_from_object
+from ....common.utils.boilerplate import boilerplate_register, boilerplate_unregister
 
 from .mesh_import import import_stf_mesh
 from .mesh_export import export_stf_mesh

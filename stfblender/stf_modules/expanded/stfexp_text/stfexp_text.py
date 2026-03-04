@@ -1,11 +1,10 @@
 import bpy
 from typing import Any
 
-from ....lib_stfblender import STF_Module, STF_ExportContext, STF_ExportContext, STF_ImportContext
-
-from ....utils.component_utils import get_components_from_object
-from ....utils.boilerplate import boilerplate_register, boilerplate_unregister
-from ....lib_stfblender.utils.id_utils import ensure_stf_id
+from ....common import STF_Module, STF_ExportContext, STF_ExportContext, STF_ImportContext
+from ....common.utils.boilerplate import boilerplate_register, boilerplate_unregister
+from ....common.utils.id_utils import ensure_stf_id
+from ....common.module_component.component_utils import get_components_from_object
 
 # TODO this module is at a bare minimum level, improve it
 

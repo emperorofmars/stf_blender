@@ -4,13 +4,13 @@ import logging
 from enum import Enum
 from typing import Any
 
-from ..lib_stfblender.stf_json_definition import STF_Buffer, STF_JsonDefinition, STF_Meta_AssetInfo
-from ..lib_stfblender.stf_report import STFReportSeverity, STFReport
-from ..lib_stfblender.stf_module import STF_Module
-from ..lib_stfblender.module_component.stf_module_component import STF_ExportComponentHook
-from ..base.stf_file import STF_File
-from ..base.stf_state_base import STF_State_Base
-from ..lib_stfblender.helpers.misc import get_stf_version
+from ..common.stf_json_definition import STF_Buffer, STF_JsonDefinition, STF_Meta_AssetInfo
+from ..common.stf_report import STFReportSeverity, STFReport
+from ..common.stf_module import STF_Module
+from ..common.module_component.stf_module_component import STF_ExportComponentHook
+from ..common.base.stf_file import STF_File
+from ..common.base.stf_state_base import STF_State_Base
+from ..common.helpers.misc import get_stf_version
 
 
 _logger = logging.getLogger(__name__)

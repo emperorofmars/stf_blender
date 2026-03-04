@@ -3,14 +3,14 @@ import mathutils
 import math
 from typing import Any
 
-from ....lib_stfblender import STF_Module, STF_ImportContext, STF_ExportContext, STFReportSeverity, STFReport, STF_Kind
-from ....lib_stfblender.utils import trs_utils
-from ....lib_stfblender.utils.armature_bone import ArmatureBone
-from ....lib_stfblender.utils.animation_conversion_utils import *
+from ....common import STF_Module, STF_ImportContext, STF_ExportContext, STFReportSeverity, STFReport, STF_Kind
+from ....common.utils import trs_utils
+from ....common.utils.armature_bone import ArmatureBone
+from ....common.utils.animation_conversion_utils import *
 
-from ....utils.component_utils import get_components_from_object
-from ....utils.boilerplate import boilerplate_register, boilerplate_unregister
-from ....lib_stfblender.utils.id_utils import ensure_stf_id
+from ....common.module_component.component_utils import get_components_from_object
+from ....common.utils.boilerplate import boilerplate_register, boilerplate_unregister
+from ....common.utils.id_utils import ensure_stf_id
 from .stf_bone_property_conversion import resolve_property_path_to_stf_func, resolve_stf_property_to_blender_func
 
 

@@ -2,12 +2,12 @@ import bpy
 import logging
 from typing import Any, Callable
 
-from ..lib_stfblender import STF_ImportContext as ISTF_ImportContext
-from ..lib_stfblender.stf_task_steps import STF_TaskSteps
+from ..common import STF_ImportContext as ISTF_ImportContext
+from ..common.stf_task_steps import STF_TaskSteps
 from .stf_import_state import STF_ImportState
-from ..lib_stfblender.stf_report import STFReportSeverity, STFReport
-from ..lib_stfblender.module_component.stf_module_component import STF_Component_Editmode_Resistant_Reference
-from ..lib_stfblender.property_path_part import BlenderPropertyPathPart
+from ..common.stf_report import STFReportSeverity, STFReport
+from ..common.module_component.stf_module_component import STF_Component_Editmode_Resistant_Reference
+from ..common.property_path_part import BlenderPropertyPathPart
 
 
 _logger = logging.getLogger(__name__)

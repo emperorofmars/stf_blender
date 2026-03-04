@@ -1,11 +1,11 @@
 import bpy
 from typing import Any
 
-from ...lib_stfblender import STF_ImportContext, STF_ExportContext, STF_TaskSteps
-from ...lib_stfblender.module_data import STF_BlenderDataResourceBase, STF_BlenderDataModule, STF_Data_Ref
-from ...lib_stfblender.helpers import draw_list, poll_valid_animations, import_resource, register_exported_resource
+from ...common import STF_ImportContext, STF_ExportContext, STF_TaskSteps
+from ...common.module_data import STF_BlenderDataResourceBase, STF_BlenderDataModule, STF_Data_Ref
+from ...common.helpers import draw_list, poll_valid_animations, import_resource, register_exported_resource
 
-from ...utils.data_resource_utils import add_resource, export_data_resource_base, get_components_from_data_resource, import_data_resource_base
+from ...common.module_data.data_resource_utils import add_resource, export_data_resource_base, get_components_from_data_resource, import_data_resource_base
 
 
 _stf_type = "stfexp.animation_blendtree"

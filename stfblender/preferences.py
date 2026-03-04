@@ -1,7 +1,7 @@
 import bpy
 
 from .package_key import package_key
-from .lib_stfblender.helpers.misc import draw_slot_link_warning
+from .common.helpers.misc import draw_slot_link_warning
 
 
 class STF_Extension_Preferences(bpy.types.AddonPreferences):

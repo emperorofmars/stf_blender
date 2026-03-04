@@ -1,12 +1,12 @@
 import bpy
 from typing import Any
 
-from ...lib_stfblender import STF_ExportContext, STF_ImportContext, STF_TaskSteps
-from ...lib_stfblender.module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
-from ...lib_stfblender.helpers import register_exported_resource, import_resource
+from ...common import STF_ExportContext, STF_ImportContext, STF_TaskSteps
+from ...common.module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
+from ...common.helpers import register_exported_resource, import_resource
 
-from ...utils.component_utils import add_component, export_component_base, import_component_base
-from ...lib_stfblender.helpers.misc import SetActiveObjectOperator
+from ...common.module_component.component_utils import add_component, export_component_base, import_component_base
+from ...common.helpers.misc import SetActiveObjectOperator
 
 
 _stf_type = "ava.voice_position"

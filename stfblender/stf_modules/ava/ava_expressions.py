@@ -1,12 +1,12 @@
 import bpy
 from typing import Any
 
-from ...lib_stfblender import STF_ExportContext, STF_ImportContext, STFReportSeverity, STFReport, STF_TaskSteps
-from ...lib_stfblender.module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
-from ...lib_stfblender.helpers import register_exported_resource, import_resource, create_add_button, create_remove_button, poll_valid_animations, draw_slot_link_warning
+from ...common import STF_ExportContext, STF_ImportContext, STFReportSeverity, STFReport, STF_TaskSteps
+from ...common.module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
+from ...common.helpers import register_exported_resource, import_resource, create_add_button, create_remove_button, poll_valid_animations, draw_slot_link_warning
 
-from ...utils.component_utils import add_component, export_component_base, import_component_base
-from ...lib_stfblender.blender_grr import *
+from ...common.module_component.component_utils import add_component, export_component_base, import_component_base
+from ...common.blender_grr import *
 
 
 _stf_type = "ava.expressions"

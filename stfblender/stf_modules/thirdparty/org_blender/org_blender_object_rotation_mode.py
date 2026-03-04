@@ -2,9 +2,9 @@ import bpy
 import uuid
 from typing import Any
 
-from ....lib_stfblender import STF_Module, STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STFReportSeverity, STFReport, STF_TaskSteps
-from ....lib_stfblender.module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_ExportComponentHook
-from ....utils.component_utils import add_component, export_component_base, import_component_base
+from ....common import STF_Module, STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STFReportSeverity, STFReport, STF_TaskSteps
+from ....common.module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_ExportComponentHook
+from ....common.module_component.component_utils import add_component, export_component_base, import_component_base
 
 
 _stf_type = "org.blender.object.rotation_mode"

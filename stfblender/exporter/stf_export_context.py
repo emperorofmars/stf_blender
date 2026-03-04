@@ -2,11 +2,11 @@ import bpy
 import logging
 from typing import Any, Callable
 
-from ..lib_stfblender import STF_ExportContext as ISTF_ExportContext, STF_TaskSteps
+from ..common import STF_ExportContext as ISTF_ExportContext, STF_TaskSteps
 from .stf_export_state import STF_ExportState
-from ..lib_stfblender.stf_json_definition import STF_Meta_AssetInfo
-from ..lib_stfblender.stf_report import STFReportSeverity, STFReport
-from ..lib_stfblender.property_path_part import STFPropertyPathPart
+from ..common.stf_json_definition import STF_Meta_AssetInfo
+from ..common.stf_report import STFReportSeverity, STFReport
+from ..common.property_path_part import STFPropertyPathPart
 
 
 _logger = logging.getLogger(__name__)

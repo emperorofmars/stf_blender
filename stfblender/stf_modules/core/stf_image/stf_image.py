@@ -1,11 +1,11 @@
 import bpy
 from typing import Any
 
-from ....lib_stfblender import STF_Module, STF_ExportContext, STF_ImportContext, STFReport, STFReportSeverity, STF_Kind
+from ....common import STF_Module, STF_ExportContext, STF_ImportContext, STFReport, STFReportSeverity, STF_Kind
 
-from ....utils.component_utils import get_components_from_object
-from ....lib_stfblender.utils.id_utils import ensure_stf_id
-from ....utils.boilerplate import boilerplate_register, boilerplate_unregister
+from ....common.module_component.component_utils import get_components_from_object
+from ....common.utils.id_utils import ensure_stf_id
+from ....common.utils.boilerplate import boilerplate_register, boilerplate_unregister
 
 
 _stf_type = "stf.image"
