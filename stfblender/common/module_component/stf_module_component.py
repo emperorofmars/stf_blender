@@ -1,8 +1,10 @@
 import bpy
 from typing import Any, Callable
 
+
 from ..stf_module import STF_Module
 from ..utils.armature_bone import ArmatureBone
+from .. import STF_ExportContext
 
 """
 Components aren't natively supported by Blender, they are stored by the Blender-ID-thingy they belong to.
@@ -105,4 +107,4 @@ class STF_ExportComponentHook:
 	hook_can_handle_application_object_func: Callable[[Any], bool]
 
 	# (Export Context, Application Object, Optional Parent Application Object)
-	hook_apply_func: Callable[[Any, Any, Any], None]
+	hook_apply_func: Callable[[STF_ExportContext, Any, Any], None]

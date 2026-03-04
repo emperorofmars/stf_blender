@@ -1,7 +1,7 @@
 from enum import StrEnum
 from typing import Any, Callable
 
-from .property_path_part import BlenderPropertyPathPart, STFPropertyPathPart
+from . import STF_ImportContext, STF_ExportContext, BlenderPropertyPathPart, STFPropertyPathPart
 
 
 class STF_Kind(StrEnum):
@@ -32,10 +32,10 @@ class STF_Module:
 
 
 	# (Import Context, Json Dict, ID, Optional Parent Application Object) -> The Application Object
-	import_func: Callable[[Any, dict, str, Any], Any]
+	import_func: Callable[[STF_ImportContext, dict, str, Any], Any]
 
 	# (Export Context, Application Object, Optional Parent Application Object) -> (Json Dict, ID)
-	export_func: Callable[[Any, Any, Any], tuple[dict, str]]
+	export_func: Callable[[STF_ExportContext, Any, Any], tuple[dict, str]]
 
 	"""
 	Properties for animation handling
@@ -47,10 +47,10 @@ class STF_Module:
 	understood_application_property_path_parts: list[str] = []
 
 	# (Export Context, Application Object, Application Object Property Index,, Application Path) -> BlenderPropertyPathPart
-	resolve_property_path_to_stf_func: Callable[[Any, Any, int, str], STFPropertyPathPart]
+	resolve_property_path_to_stf_func: Callable[[STF_ExportContext, Any, int, str], STFPropertyPathPart]
 
 	# (Import Context, Target Application Node, List of STF Path Elements, Base Target Application Object) -> BlenderPropertyPathPart
-	resolve_stf_property_to_blender_func: Callable[[Any, list[str], Any], BlenderPropertyPathPart]
+	resolve_stf_property_to_blender_func: Callable[[STF_ImportContext, list[str], Any], BlenderPropertyPathPart]
 
 	"""
 	Handling components if applicable. `get_components_func` must be assigned if the resource supports components
