@@ -4,9 +4,9 @@ from typing import Any
 from .blender_grr import BlenderGRR
 from .stf_data_resource_reference_utils import draw_stf_data_resource_reference, resolve_stf_data_resource_reference, validate_stf_data_resource_reference
 from .blender_resource_reference import draw_blender_resource_reference, pretty_print_blender_resource_reference, resolve_blender_resource_reference, validate_blender_resource_reference
-from ...lib_stfblender.module_data.stf_module_data import STF_BlenderDataResourceBase, STF_Data_Ref
-from ...lib_stfblender.module_component.stf_module_component import STF_BlenderComponentBase, STF_Component_Editmode_Resistant_Reference, STF_Component_Ref
-from ...lib_stfblender.utils.armature_bone import ArmatureBone
+from ..module_data.stf_module_data import STF_BlenderDataResourceBase, STF_Data_Ref
+from ..module_component.stf_module_component import STF_BlenderComponentBase, STF_Component_Editmode_Resistant_Reference, STF_Component_Ref
+from ..utils.armature_bone import ArmatureBone
 from .utils import draw_component_info
 
 """

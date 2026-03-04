@@ -4,7 +4,7 @@ from typing import Any
 
 from ...lib_stfblender.module_component import STF_Component_Ref
 from ...lib_stfblender.module_data import STF_Data_Ref
-from ...base.blender_grr import BlenderGRR, draw_blender_grr
+from ...lib_stfblender.blender_grr import BlenderGRR, draw_blender_grr
 
 
 class FallbackResourcesAdd(bpy.types.Operator):

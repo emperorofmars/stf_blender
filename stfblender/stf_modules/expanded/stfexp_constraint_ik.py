@@ -8,7 +8,7 @@ from ...lib_stfblender.module_component import STF_BlenderComponentBase, STF_Ble
 from ...lib_stfblender.utils.animation_conversion_utils import get_component_index, get_component_stf_path_from_collection
 
 from ...utils.component_utils import add_component, export_component_base, import_component_base, preserve_component_reference
-from ...base.blender_grr.stf_node_path_selector import NodePathSelector, draw_node_path_selector, node_path_selector_from_stf, node_path_selector_to_stf
+from ...lib_stfblender.blender_grr.stf_node_path_selector import NodePathSelector, draw_node_path_selector, node_path_selector_from_stf, node_path_selector_to_stf
 
 
 _stf_type = "stfexp.constraint.ik"

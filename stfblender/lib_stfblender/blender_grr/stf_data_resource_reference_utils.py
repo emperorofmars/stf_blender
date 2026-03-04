@@ -2,7 +2,7 @@ import bpy
 from typing import Any
 
 from .stf_data_resource_reference import STFDataResourceReference
-from ...lib_stfblender.module_data.stf_module_data import STF_BlenderDataResourceBase, STF_Data_Ref
+from ..module_data.stf_module_data import STF_BlenderDataResourceBase, STF_Data_Ref
 
 """
 STF Data-Resource Reference

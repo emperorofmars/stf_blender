@@ -9,7 +9,7 @@ from ...lib_stfblender.helpers import create_add_button, create_remove_button
 from .util.constraint_source import ConstraintSource
 
 from ...utils.component_utils import add_component, export_component_base, import_component_base, preserve_component_reference
-from ...base.blender_grr.stf_node_path_selector import draw_node_path_selector, node_path_selector_from_stf, node_path_selector_to_stf, node_path_selector_to_string, validate_node_path_selector
+from ...lib_stfblender.blender_grr.stf_node_path_selector import draw_node_path_selector, node_path_selector_from_stf, node_path_selector_to_stf, node_path_selector_to_string, validate_node_path_selector
 
 
 _stf_type = "stfexp.constraint.parent"

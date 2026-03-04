@@ -1,8 +1,7 @@
 import bpy
 
-from ...importer.stf_import_context import STF_ImportContext
-from ...exporter.stf_export_context import STF_ExportContext
-from ...lib_stfblender.helpers.reference_helper import import_resource, register_exported_resource
+from .. import STF_ImportContext, STF_ExportContext
+from ..helpers import import_resource, register_exported_resource
 
 
 class NodePathSelector(bpy.types.PropertyGroup):

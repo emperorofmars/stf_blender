@@ -7,7 +7,7 @@ from ...lib_stfblender.module_component import STF_BlenderComponentBase, STF_Ble
 from ...lib_stfblender.helpers import register_exported_buffer, register_exported_resource
 
 from ...utils.component_utils import add_component, export_component_base, import_component_base, preserve_component_reference
-from ...base.blender_grr import BlenderGRR, construct_blender_grr, resolve_blender_grr
+from ...lib_stfblender.blender_grr import BlenderGRR, construct_blender_grr, resolve_blender_grr
 from .json_fallback_buffer import STF_FallbackBuffer, decode_buffer, encode_buffer
 from .json_fallback_ui import draw_fallback
 

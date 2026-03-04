@@ -2,11 +2,10 @@ import bpy
 import json
 from typing import Any, Callable
 
-from ..exporter.stf_export_context import STF_ExportContext
-from ..importer.stf_import_context import STF_ImportContext
+from ..lib_stfblender import STF_ExportContext, STF_ImportContext
 from ..lib_stfblender.module_component.stf_module_component import STF_BlenderComponentBase, STF_Component_Ref
 from ..lib_stfblender.module_data.stf_module_data import STF_BlenderDataResourceBase
-from ..base.blender_grr import *
+from ..lib_stfblender.blender_grr import *
 from ..lib_stfblender.utils.id_utils import ensure_stf_id
 from ..lib_stfblender.utils.armature_bone import ArmatureBone
 

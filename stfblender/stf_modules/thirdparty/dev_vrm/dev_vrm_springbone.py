@@ -9,8 +9,8 @@ from ....lib_stfblender.helpers import create_add_button, create_remove_button
 from ....lib_stfblender.utils import trs_utils
 
 from ....utils.component_utils import ComponentLoadJsonOperatorBase, add_component, export_component_base, import_component_base, preserve_component_reference
-from ....base.blender_grr.stf_node_path_selector import NodePathSelector, draw_node_path_selector, node_path_selector_from_stf, node_path_selector_to_stf
-from ....base.blender_grr.stf_node_path_component_selector import NodePathComponentSelector, draw_node_path_component_selector, node_path_component_selector_from_stf, node_path_component_selector_to_stf
+from ....lib_stfblender.blender_grr.stf_node_path_selector import NodePathSelector, draw_node_path_selector, node_path_selector_from_stf, node_path_selector_to_stf
+from ....lib_stfblender.blender_grr.stf_node_path_component_selector import NodePathComponentSelector, draw_node_path_component_selector, node_path_component_selector_from_stf, node_path_component_selector_to_stf
 
 
 _stf_type = "dev.vrm.springbone"
