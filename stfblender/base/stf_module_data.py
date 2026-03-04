@@ -22,6 +22,8 @@ class STF_BlenderDataResourceBase(bpy.types.PropertyGroup):
 	stf_components: bpy.props.CollectionProperty(type=STF_Component_Ref, name="Components", options=set()) # type: ignore
 	stf_active_component_index: bpy.props.IntProperty(name="Selected Component", options=set()) # type: ignore
 
+	name: bpy.props.StringProperty(name="Name", get=lambda self: self.stf_name) # type: ignore
+
 
 class STF_BlenderDataModule(STF_Module):
 	"""Extension to STF_Module which also associates a function to draw the data-resources in Blender's UI"""

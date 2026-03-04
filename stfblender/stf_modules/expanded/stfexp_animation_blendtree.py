@@ -7,7 +7,8 @@ from ...importer.stf_import_context import STF_ImportContext
 from ...utils.data_resource_utils import add_resource, export_data_resource_base, get_components_from_data_resource, import_data_resource_base
 from ...base.stf_task_steps import STF_TaskSteps
 from ...utils.reference_helper import import_resource, register_exported_resource
-from ...utils.helpers import draw_list
+from ...utils.collection_helpers import draw_list
+from ...utils.poll_helpers import poll_valid_animations
 
 
 _stf_type = "stfexp.animation_blendtree"
@@ -16,7 +17,7 @@ _blender_property_name = "stfexp.animation_blendtree"
 
 class BlendtreeAnimationMapping(bpy.types.PropertyGroup):
 	position: bpy.props.FloatVectorProperty(name="Position", size=2, default=(0, 0), soft_min=-1, soft_max=1, options=set(), subtype="XYZ") # type: ignore
-	animation: bpy.props.PointerProperty(name="Animation", type=bpy.types.Action, options=set()) # type: ignore
+	animation: bpy.props.PointerProperty(name="Animation", type=bpy.types.Action, options=set(), poll=poll_valid_animations) # type: ignore
 
 class STFEXP_Animation_Blendtree(STF_BlenderDataResourceBase):
 	type: bpy.props.EnumProperty(name="Type", items=(("1d", "1D", ""), ("2d", "2D", ""))) # type: ignore

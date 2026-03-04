@@ -11,7 +11,7 @@ from ....utils.component_utils import add_component, export_component_base, impo
 from ....utils.animation_conversion_utils import get_component_index, get_component_stf_path, get_component_stf_path_from_collection
 from ....base.blender_grr.stf_node_path_selector import NodePathSelector, draw_node_path_selector, node_path_selector_from_stf, node_path_selector_to_stf
 from ....base.blender_grr.stf_node_path_component_selector import NodePathComponentSelector, draw_node_path_component_selector, node_path_component_selector_from_stf, node_path_component_selector_to_stf
-from ....utils.helpers import create_add_button, create_remove_button
+from ....utils.collection_helpers import create_add_button, create_remove_button
 from ....base.property_path_part import BlenderPropertyPathPart, STFPropertyPathPart
 
 

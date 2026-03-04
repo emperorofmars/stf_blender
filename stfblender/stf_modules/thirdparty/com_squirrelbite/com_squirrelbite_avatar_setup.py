@@ -8,7 +8,8 @@ from ....utils.component_utils import add_component, export_component_base, impo
 from ....base.stf_report import STFReport, STFReportSeverity
 from ....utils.reference_helper import import_resource, register_exported_resource
 from ....base.blender_grr import *
-from ....utils.helpers import draw_list
+from ....utils.collection_helpers import draw_list
+from ....utils.poll_helpers import poll_valid_animations
 
 
 _stf_type = "com.squirrelbite.avatar_setup"
@@ -16,8 +17,8 @@ _blender_property_name = "com_squirrelbite_avatar_setup"
 
 
 class Toggle(bpy.types.PropertyGroup):
-	animation_on: bpy.props.PointerProperty(name="On", type=bpy.types.Action, options=set()) # type: ignore
-	animation_off: bpy.props.PointerProperty(name="Off", type=bpy.types.Action, options=set()) # type: ignore
+	animation_on: bpy.props.PointerProperty(name="On", type=bpy.types.Action, options=set(), poll=poll_valid_animations) # type: ignore
+	animation_off: bpy.props.PointerProperty(name="Off", type=bpy.types.Action, options=set(), poll=poll_valid_animations) # type: ignore
 
 class PersistentPuppet(bpy.types.PropertyGroup):
 	type: bpy.props.EnumProperty(name="Type", items=(("1d", "1D", ""), ("2d", "2D", ""))) # type: ignore
@@ -34,11 +35,11 @@ class Squirrelbite_Avatar_Setup(STF_BlenderComponentBase):
 	puppets: bpy.props.CollectionProperty(name="Puppets", type=STFDataResourceReference, options=set()) # type: ignore
 	toggles: bpy.props.CollectionProperty(name="Toggles", type=Toggle, options=set()) # type: ignore
 
-	breathing_normal: bpy.props.PointerProperty(name="Breathing Normal Animation", type=bpy.types.Action, options=set()) # type: ignore
-	breathing_intense: bpy.props.PointerProperty(name="Breathing Intense Animation", type=bpy.types.Action, options=set()) # type: ignore
+	breathing_normal: bpy.props.PointerProperty(name="Breathing Normal Animation", type=bpy.types.Action, options=set(), poll=poll_valid_animations) # type: ignore
+	breathing_intense: bpy.props.PointerProperty(name="Breathing Intense Animation", type=bpy.types.Action, options=set(), poll=poll_valid_animations) # type: ignore
 
-	additive_excited: bpy.props.PointerProperty(name="Additive Excited Animation", type=bpy.types.Action, options=set()) # type: ignore
-	additive_idle: bpy.props.PointerProperty(name="Additive Idle Animation", type=bpy.types.Action, options=set()) # type: ignore
+	additive_excited: bpy.props.PointerProperty(name="Additive Excited Animation", type=bpy.types.Action, options=set(), poll=poll_valid_animations) # type: ignore
+	additive_idle: bpy.props.PointerProperty(name="Additive Idle Animation", type=bpy.types.Action, options=set(), poll=poll_valid_animations) # type: ignore
 
 
 def _draw_func_toggle(layout: bpy.types.UILayout, element: Any) -> bpy.types.UILayout:
