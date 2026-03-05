@@ -46,7 +46,7 @@ class MyCustomSTFSqueakComponentModule(stfblender.common.module_component.STF_Bl
 	like_types = ["squeak"]
 
 
-register_stf_modules = [MyCustomSTFSqueakComponentModule]
+register_stf_handlers = [MyCustomSTFSqueakComponentModule]
 
 
 def register():

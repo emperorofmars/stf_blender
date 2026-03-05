@@ -1,25 +1,18 @@
 import bpy
 import io
 import logging
-from enum import Enum
 from typing import Any
 
 from ..common.base.stf_json_definition import STF_Buffer, STF_JsonDefinition, STF_Meta_AssetInfo
 from ..common.stf_report import STFReportSeverity, STFReport
-from ..common.stf_module import STF_Module
-from ..common.module_component.stf_module_component import STF_ExportComponentHook
+from ..common.resource.blender_native.stf_handler_blender_native import STF_Handler_BlenderNative
+from ..common.resource.component.stf_handler_component import STF_ExportComponentHook
 from ..common.base.stf_file import STF_File
 from ..common.base.stf_state_base import STF_State_Base
 from ..common.helpers.misc import get_stf_version
 
 
 _logger = logging.getLogger(__name__)
-
-
-class STF_Buffer_Mode(Enum):
-	included_binary = 0
-	included_json = 1
-	external = 2
 
 
 class STF_ExportState(STF_State_Base):
@@ -31,7 +24,7 @@ class STF_ExportState(STF_State_Base):
 	def __init__(
 			self,
 			asset_info: STF_Meta_AssetInfo,
-			modules: tuple[dict[Any, list[STF_Module]],
+			handlers: tuple[dict[Any, list[STF_Handler_BlenderNative]],
 			dict[Any, list[STF_ExportComponentHook]]],
 			trash_objects: list[bpy.types.Object] = [],
 			fail_on_severity: STFReportSeverity = STFReportSeverity.FatalError,
@@ -41,8 +34,8 @@ class STF_ExportState(STF_State_Base):
 	):
 		super().__init__(fail_on_severity)
 
-		self._modules: dict[Any, list[STF_Module]] = modules[0]
-		self._hooks: dict[Any, list[STF_ExportComponentHook]] = modules[1]
+		self._handlers: dict[Any, list[STF_Handler_BlenderNative]] = handlers[0]
+		self._hooks: dict[Any, list[STF_ExportComponentHook]] = handlers[1]
 
 		self._resources: dict[Any, str] = {} # original application object -> ID of exported STF Json resource
 		self._resources_inverse: dict[str, Any] = {} # original application object -> ID of exported STF Json resource
@@ -59,12 +52,12 @@ class STF_ExportState(STF_State_Base):
 		self._settings = settings
 
 
-	def determine_module(self, application_object: Any, module_kind: str = None) -> STF_Module:
-		"""Find the best suited registered STF_Module for the type of this object"""
+	def determine_handler(self, application_object: Any, module_kind: str = None) -> STF_Handler_BlenderNative:
+		"""Find the best suited registered STF_Handler for the type of this object"""
 		selected_module = None
 		selected_priority = -1
 
-		for module in self._modules.get(type(application_object), []):
+		for module in self._handlers.get(type(application_object), []):
 			if(hasattr(module, "can_handle_application_object_func")):
 				priority = module.can_handle_application_object_func(application_object)
 				if(priority > selected_priority and (module_kind == None or module.stf_category == module_kind)):
@@ -74,12 +67,6 @@ class STF_ExportState(STF_State_Base):
 				selected_module = module
 				selected_priority = 1
 
-		"""if(not selected_module):
-			if(module_kind == "data"):
-				return STF_Module_JsonFallbackData
-			elif(module_kind == "component"):
-				return STF_Module_JsonFallbackComponent"""
-
 		return selected_module
 
 
@@ -87,10 +74,10 @@ class STF_ExportState(STF_State_Base):
 		return self._hooks.get(type(application_object), [])
 
 
-	def determine_property_resolution_module(self, application_object: Any, data_path: str) -> STF_Module:
+	def determine_property_resolution_handler(self, application_object: Any, data_path: str) -> STF_Handler_BlenderNative:
 		# TODO handle priority for animation path handling maybe at some point?
 
-		for _, module_list in self._modules.items():
+		for _, module_list in self._handlers.items():
 			for module in module_list:
 				if(hasattr(module, "understood_application_property_path_types") and type(application_object) in module.understood_application_property_path_types
 						and hasattr(module, "understood_application_property_path_parts")
@@ -152,7 +139,7 @@ class STF_ExportState(STF_State_Base):
 		return self._root_id
 
 
-	def create_stf_definition(self, buffer_mode: STF_Buffer_Mode = STF_Buffer_Mode.included_binary) -> STF_JsonDefinition:
+	def create_stf_definition(self) -> STF_JsonDefinition:
 		import datetime
 
 		ret = STF_JsonDefinition()
@@ -166,20 +153,19 @@ class STF_ExportState(STF_State_Base):
 		ret.stf.metric_multiplier = self._metric_multiplier
 		ret.resources = self._exported_resources
 		ret.buffers = {}
-		if(buffer_mode == STF_Buffer_Mode.included_binary):
-			buffer_index = 0
-			for id, buffer in self._exported_buffers.items():
-				json_buffer_def = STF_Buffer()
-				json_buffer_def.index = buffer_index
-				ret.buffers[id] = json_buffer_def
-				buffer_index += 1
+		buffer_index = 0
+		for id, buffer in self._exported_buffers.items():
+			json_buffer_def = STF_Buffer()
+			json_buffer_def.index = buffer_index
+			ret.buffers[id] = json_buffer_def
+			buffer_index += 1
 		return ret
 
 	def create_stf_binary_file(self) -> STF_File:
 		ret = STF_File()
 		ret.binary_version_major = 0
 		ret.binary_version_minor = 0
-		ret.definition = self.create_stf_definition(STF_Buffer_Mode.included_binary)
+		ret.definition = self.create_stf_definition()
 		for _, buffer in self._exported_buffers.items():
 			ret.buffers_included.append(buffer)
 		return ret

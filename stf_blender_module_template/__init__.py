@@ -19,5 +19,5 @@ def unregister():
 if(stf_dependency_import.selected_stf_extension):
 	from . import template_stf_data_module
 	from . import template_stf_component_module
-	register_stf_modules = template_stf_data_module.register_stf_modules + template_stf_component_module.register_stf_modules # + any other array of STF_Module
+	register_stf_handlers = template_stf_data_module.register_stf_handlers + template_stf_component_module.register_stf_handlers # + any other array of STF_Module
 

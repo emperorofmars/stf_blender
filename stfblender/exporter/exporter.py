@@ -4,7 +4,7 @@ from bpy_extras.io_utils import ExportHelper
 
 from ..common.base.stf_meta import draw_meta_editor
 from ..common.stf_report import STFReport, STFReportSeverity
-from ..common.base.stf_registry import get_export_modules
+from ..common.base.stf_registry import get_export_handlers
 from .stf_export_state import STF_ExportState
 from .stf_export_context import STF_ExportContext
 from ..common.helpers.misc import OpenWebpage, draw_slot_link_warning, get_stf_version
@@ -25,7 +25,7 @@ def export_stf_file(collection: bpy.types.Collection, filepath: str, export_sett
 	files = []
 	trash_objects: list[bpy.types.Object] = []
 	try:
-		stf_state = STF_ExportState(collection.stf_meta.to_stf_meta_assetInfo(), get_export_modules(), trash_objects, settings = export_settings)
+		stf_state = STF_ExportState(collection.stf_meta.to_stf_meta_assetInfo(), get_export_handlers(), trash_objects, settings = export_settings)
 		stf_context = STF_ExportContext(stf_state, collection)
 		root_id = stf_context.run()
 

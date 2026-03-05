@@ -1,7 +1,7 @@
 import bpy
 from typing import Any
 
-from ..base.stf_registry import get_stf_modules
+from ..base.stf_registry import get_stf_handlers
 
 
 def clean_id_thingy(id_thingy: Any):
@@ -52,7 +52,7 @@ def clean_id_thingy(id_thingy: Any):
 			i += 1
 
 	check_properties = []
-	for stf_module in get_stf_modules():
+	for stf_module in get_stf_handlers():
 		if(hasattr(stf_module, "blender_property_name")):
 			check_properties.append(getattr(stf_module, "blender_property_name"))
 

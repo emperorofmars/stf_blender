@@ -1,7 +1,7 @@
 import bpy
 from typing import Any
 
-from ..base.stf_info import STF_Info
+from ..resource.blender_native.stf_info import STF_Info
 
 
 def boilerplate_register(blender_type: Any, stf_category: str):

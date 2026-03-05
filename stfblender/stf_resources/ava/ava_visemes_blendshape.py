@@ -1,0 +1,138 @@
+import bpy
+from typing import Any
+
+from ...common import STF_ExportContext, STF_ImportContext, STF_Category
+from ...common.resource.component import STF_ComponentResourceBase, STF_Handler_Component, STF_Component_Ref
+from ...common.resource.component.component_utils import add_component, export_component_base, import_component_base
+
+
+_stf_type = "ava.visemes.blendshape"
+_blender_property_name = "stf_ava_visemes_blendshape"
+
+
+_voice_visemes_15 = ["sil", "aa", "ch", "dd", "e", "ff", "ih", "kk", "nn", "oh", "ou", "pp", "rr", "ss", "th"]
+_voice_visemes_15_prefixes = ["", "vis.", "vis_", "vis ", "vrc.", "vrc_", "vrc "]
+
+class AVA_Visemes_Blendshape(STF_ComponentResourceBase):
+	vis_sil: bpy.props.StringProperty(name="Sil", options=set()) # type: ignore
+	vis_pp: bpy.props.StringProperty(name="PP", options=set()) # type: ignore
+	vis_ff: bpy.props.StringProperty(name="FF", options=set()) # type: ignore
+	vis_th: bpy.props.StringProperty(name="TH", options=set()) # type: ignore
+	vis_dd: bpy.props.StringProperty(name="DD", options=set()) # type: ignore
+	vis_kk: bpy.props.StringProperty(name="KK", options=set()) # type: ignore
+	vis_ch: bpy.props.StringProperty(name="CH", options=set()) # type: ignore
+	vis_ss: bpy.props.StringProperty(name="SS", options=set()) # type: ignore
+	vis_nn: bpy.props.StringProperty(name="NN", options=set()) # type: ignore
+	vis_rr: bpy.props.StringProperty(name="RR", options=set()) # type: ignore
+	vis_aa: bpy.props.StringProperty(name="AA", options=set()) # type: ignore
+	vis_e: bpy.props.StringProperty(name="E", options=set()) # type: ignore
+	vis_ih: bpy.props.StringProperty(name="IH", options=set()) # type: ignore
+	vis_oh: bpy.props.StringProperty(name="OH", options=set()) # type: ignore
+	vis_ou: bpy.props.StringProperty(name="OU", options=set()) # type: ignore
+
+
+def automap(component: AVA_Visemes_Blendshape, mesh: bpy.types.Mesh):
+	for viseme in _voice_visemes_15:
+		component["vis_" + viseme] = ""
+
+	if(mesh.shape_keys):
+		for shape_key in mesh.shape_keys.key_blocks:
+			for viseme in _voice_visemes_15:
+				for prefix in _voice_visemes_15_prefixes:
+					if(shape_key.name.lower().find(prefix + viseme) > 0 and (len(getattr(component, "vis_" + viseme)) > len(shape_key.name) or len(getattr(component, "vis_" + viseme)) == 0)):
+						component["vis_" + viseme] = shape_key.name
+
+
+class AutomapVisemes(bpy.types.Operator):
+	"""Map from Names"""
+	bl_idname = "ava.ava_map_blendshape_visemes"
+	bl_label = "Map from Names"
+	bl_options = {"REGISTER", "UNDO"}
+
+	component_id: bpy.props.StringProperty() # type: ignore
+
+	def execute(self, context):
+		for component in context.mesh.stf_ava_visemes_blendshape:
+			if(component.stf_id == self.component_id):
+				break
+
+		automap(component, context.mesh)
+
+		return {"FINISHED"}
+
+
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: AVA_Visemes_Blendshape):
+	if(not context_object or type(context_object) is not bpy.types.Mesh):
+		return
+
+	layout.use_property_split = True
+	layout.operator(AutomapVisemes.bl_idname, icon="LOOP_FORWARDS").component_id = component.stf_id
+
+	col = layout.column(align=True)
+	col.prop_search(component, "vis_sil", context_object.shape_keys, "key_blocks")
+	col.prop_search(component, "vis_pp", context_object.shape_keys, "key_blocks")
+	col.prop_search(component, "vis_ff", context_object.shape_keys, "key_blocks")
+	col.prop_search(component, "vis_th", context_object.shape_keys, "key_blocks")
+	col.prop_search(component, "vis_dd", context_object.shape_keys, "key_blocks")
+	col.prop_search(component, "vis_kk", context_object.shape_keys, "key_blocks")
+	col.prop_search(component, "vis_ch", context_object.shape_keys, "key_blocks")
+	col.prop_search(component, "vis_ss", context_object.shape_keys, "key_blocks")
+	col.prop_search(component, "vis_nn", context_object.shape_keys, "key_blocks")
+	col.prop_search(component, "vis_rr", context_object.shape_keys, "key_blocks")
+	col.prop_search(component, "vis_aa", context_object.shape_keys, "key_blocks")
+	col.prop_search(component, "vis_e", context_object.shape_keys, "key_blocks")
+	col.prop_search(component, "vis_ih", context_object.shape_keys, "key_blocks")
+	col.prop_search(component, "vis_oh", context_object.shape_keys, "key_blocks")
+	col.prop_search(component, "vis_ou", context_object.shape_keys, "key_blocks")
+
+
+
+def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, context_object: Any) -> Any:
+	component_ref, component = add_component(context_object, _blender_property_name, id, _stf_type)
+	import_component_base(context, component, json_resource, _blender_property_name, context_object)
+
+	for viseme in _voice_visemes_15:
+		if(viseme in json_resource):
+			component["vis_" + viseme] = json_resource[viseme]
+
+	return component
+
+
+def _stf_export(context: STF_ExportContext, component: AVA_Visemes_Blendshape, context_object: Any) -> tuple[dict, str]:
+	ret = export_component_base(context, _stf_type, component, _blender_property_name, context_object)
+
+	for viseme in _voice_visemes_15:
+		ret[viseme] = component["vis_" + viseme]
+
+	return ret, component.stf_id
+
+
+class Handler_AVA_Visemes_Blendshape(STF_Handler_Component):
+	"""Define which shape-keys/blendshapes represent visemes"""
+	stf_type = _stf_type
+	stf_category = STF_Category.COMPONENT
+	understood_application_types = [AVA_Visemes_Blendshape]
+	import_func = _stf_import
+	export_func = _stf_export
+
+	blender_property_name = _blender_property_name
+	single = True
+	filter = [bpy.types.Mesh]
+	draw_component_func = _draw_component
+
+	like_types = []
+
+	pretty_name_template = "Viseme Blendshapes"
+
+
+register_stf_handlers = [
+	Handler_AVA_Visemes_Blendshape
+]
+
+
+def register():
+	setattr(bpy.types.Mesh, _blender_property_name, bpy.props.CollectionProperty(type=AVA_Visemes_Blendshape, options=set()))
+
+def unregister():
+	if hasattr(bpy.types.Mesh, _blender_property_name):
+		delattr(bpy.types.Mesh, _blender_property_name)

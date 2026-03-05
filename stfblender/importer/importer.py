@@ -3,7 +3,7 @@ import bpy
 import os
 from bpy_extras.io_utils import ImportHelper
 
-from ..common.base.stf_registry import get_import_modules, get_import_modules_fallback
+from ..common.base.stf_registry import get_import_handlers, get_import_handlers_fallback
 from .stf_import_state import STF_ImportState
 from ..common.stf_report import STFException, STFReport, STFReportSeverity
 from .stf_import_context import STF_ImportContext
@@ -30,7 +30,7 @@ def import_stf_file(filepath: str, import_settings: STF_ImportSettings) -> STF_I
 		file = open(filepath, "rb")
 		stf_file = STF_File.parse(file)
 
-		stf_state = STF_ImportState(stf_file, get_import_modules(), get_import_modules_fallback(), trash_objects, STFReportSeverity.FatalError, import_settings)
+		stf_state = STF_ImportState(stf_file, get_import_handlers(), get_import_handlers_fallback(), trash_objects, STFReportSeverity.FatalError, import_settings)
 		stf_context = STF_ImportContext(stf_state)
 		root = stf_context.run()
 

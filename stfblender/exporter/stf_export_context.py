@@ -47,15 +47,15 @@ class STF_ExportContext(ISTF_ExportContext):
 		if(len(components) > 0):
 			if("components" not in json_resource): json_resource["components"] = []
 			for component in components:
-				if(selected_module := self._state.determine_module(component, "component")):
-					component_ret = selected_module.export_func(self, component, application_object)
+				if(selected_handler := self._state.determine_handler(component, "component")):
+					component_ret = selected_handler.export_func(self, component, application_object)
 					if(component_ret):
 						component_json_resource, component_id = component_ret
 						self._state.register_serialized_resource(component, component_json_resource, component_id)
 						json_resource["components"].append(component_id)
 					else:
 						_logger.error("Export Component Failed", stack_info=True)
-						self.report(STFReport("Export Component Failed", STFReportSeverity.Error, stf_id, selected_module.stf_type, application_object))
+						self.report(STFReport("Export Component Failed", STFReportSeverity.Error, stf_id, selected_handler.stf_type, application_object))
 				else:
 					self.report(STFReport("Unsupported Component", STFReportSeverity.Warn, None, None, application_object))
 
@@ -66,27 +66,27 @@ class STF_ExportContext(ISTF_ExportContext):
 		if(application_object == None): return None
 		if(existing_id := self.get_resource_id(application_object)): return existing_id
 
-		if(selected_module := self._state.determine_module(application_object, stf_category)):
-			module_ret = selected_module.export_func(self, application_object, context_object)
+		if(selected_handler := self._state.determine_handler(application_object, stf_category)):
+			handler_ret = selected_handler.export_func(self, application_object, context_object)
 
-			if(module_ret):
-				json_resource, resource_id = module_ret
+			if(handler_ret):
+				json_resource, resource_id = handler_ret
 				self._state.register_serialized_resource(application_object, json_resource, resource_id)
 
-				if(selected_module.stf_category not in ["component", "instance"]):
+				if(selected_handler.stf_category not in ["component", "instance"]):
 					# Export components from application native constructs
 					self.__run_hooks(application_object, context_object, json_resource, resource_id)
 
-					if(hasattr(selected_module, "get_components_func")):
+					if(hasattr(selected_handler, "get_components_func")):
 						# Export components explicitely defined
-						components = selected_module.get_components_func(application_object)
+						components = selected_handler.get_components_func(application_object)
 						self.__run_components(application_object, json_resource, resource_id, components)
 
 				return resource_id
 			else:
 				if(export_fail_severity.value >= STFReportSeverity.Error.value):
 					_logger.error("Resource Export Failed", stack_info=True)
-				self.report(STFReport("Resource Export Failed", export_fail_severity, None, selected_module.stf_type, application_object))
+				self.report(STFReport("Resource Export Failed", export_fail_severity, None, selected_handler.stf_type, application_object))
 		else:
 			if(export_fail_severity.value >= STFReportSeverity.Error.value):
 				_logger.error("No Module Found", stack_info=True)
@@ -105,8 +105,8 @@ class STF_ExportContext(ISTF_ExportContext):
 
 		if(data_path.startswith(".")): data_path = data_path[1:]
 
-		if(selected_module := self._state.determine_property_resolution_module(application_object, data_path)):
-			return selected_module.resolve_property_path_to_stf_func(self, application_object, application_object_property_index, data_path)
+		if(selected_handler := self._state.determine_property_resolution_handler(application_object, data_path)):
+			return selected_handler.resolve_property_path_to_stf_func(self, application_object, application_object_property_index, data_path)
 
 		return None
 

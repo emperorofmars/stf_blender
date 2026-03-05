@@ -1,8 +1,8 @@
 import bpy
 from typing import Callable
 
-from ..module_component import STF_BlenderComponentBase
-from ..module_data import STF_BlenderDataResourceBase
+from ..resource.component import STF_ComponentResourceBase
+from ..resource.data import STF_DataResourceBase
 
 
 class Edit_Component_Collection(bpy.types.Operator):
@@ -71,7 +71,7 @@ def create_remove_button(layout: bpy.types.UILayout, blender_id_type: str | bool
 	return
 
 
-def draw_list(layout: bpy.types.UILayout, blender_id_type: str | bool, resource: STF_BlenderComponentBase | STF_BlenderDataResourceBase, attr: str, blender_property_name: str, draw_func: Callable):
+def draw_list(layout: bpy.types.UILayout, blender_id_type: str | bool, resource: STF_ComponentResourceBase | STF_DataResourceBase, attr: str, blender_property_name: str, draw_func: Callable):
 	col = layout.column(align=True)
 	for index_element, element in enumerate(getattr(resource, attr)):
 		layout_remove_btn = draw_func(col, element)

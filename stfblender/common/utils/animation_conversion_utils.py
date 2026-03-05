@@ -1,7 +1,7 @@
 import bpy
 from typing import Any
 
-from ..module_component.stf_module_component import STF_BlenderComponentBase
+from ..resource.component.stf_handler_component import STF_ComponentResourceBase
 from . import trs_utils
 
 
@@ -48,7 +48,7 @@ def get_component(application_object: Any, blender_property_name: str, component
 		return getattr(application_object, blender_property_name)[component_index]
 	return None
 
-def get_component_stf_path(application_object: Any, component: STF_BlenderComponentBase):
+def get_component_stf_path(application_object: Any, component: STF_ComponentResourceBase):
 	for component_ref in application_object.stf_info.stf_components:
 		if(component_ref.stf_id == component.stf_id):
 			return [application_object.stf_info.stf_id, "components", component.stf_id]

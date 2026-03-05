@@ -4,8 +4,8 @@ from typing import Any
 from .blender_grr import BlenderGRR
 from .stf_data_resource_reference_utils import draw_stf_data_resource_reference, resolve_stf_data_resource_reference, validate_stf_data_resource_reference
 from .blender_resource_reference import draw_blender_resource_reference, pretty_print_blender_resource_reference, resolve_blender_resource_reference, validate_blender_resource_reference
-from ..module_data.stf_module_data import STF_BlenderDataResourceBase, STF_Data_Ref
-from ..module_component.stf_module_component import STF_BlenderComponentBase, STF_Component_Editmode_Resistant_Reference, STF_Component_Ref
+from ..resource.data.stf_handler_data import STF_DataResourceBase, STF_Data_Ref
+from ..resource.component.stf_handler_component import STF_ComponentResourceBase, STF_Component_Editmode_Resistant_Reference, STF_Component_Ref
 from ..utils.armature_bone import ArmatureBone
 from .utils import draw_component_info
 
@@ -98,11 +98,11 @@ def construct_blender_grr(generic_resource: Any, grr: BlenderGRR, force_resource
 		grr.blender_resource_reference.blender_type = "ARMATURE"
 		grr.blender_resource_reference.armature = generic_resource.armature
 		grr.blender_resource_reference.bone_name = generic_resource.get_bone().name
-	elif(isinstance(generic_resource, STF_BlenderDataResourceBase)):
+	elif(isinstance(generic_resource, STF_DataResourceBase)):
 		grr.reference_type = "stf_data_resource"
 		grr.stf_data_resource_reference.collection = generic_resource.id_data
 		grr.stf_data_resource_reference.stf_data_resource_id = generic_resource.stf_id
-	elif(isinstance(generic_resource, STF_BlenderComponentBase) or isinstance(generic_resource, STF_Component_Editmode_Resistant_Reference)):
+	elif(isinstance(generic_resource, STF_ComponentResourceBase) or isinstance(generic_resource, STF_Component_Editmode_Resistant_Reference)):
 		if(isinstance(generic_resource, STF_Component_Editmode_Resistant_Reference)):
 			generic_resource = generic_resource.get()
 		grr.reference_type = "stf_component"

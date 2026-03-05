@@ -2,7 +2,7 @@ import bpy
 from typing import Any
 
 from .stf_data_resource_reference import STFDataResourceReference
-from ..module_data.stf_module_data import STF_BlenderDataResourceBase, STF_Data_Ref
+from ..resource.data.stf_handler_data import STF_DataResourceBase, STF_Data_Ref
 
 """
 STF Data-Resource Reference
@@ -53,7 +53,7 @@ def draw_stf_data_resource_reference(layout: bpy.types.UILayout, drr: STFDataRes
 			info_layout.label(text=resource_ref.stf_type + " - " + (resource.stf_name if resource.stf_name and len(resource.stf_name) > 0 else "Unnamed"))
 
 
-def __get_blender_property(ref_holder: Any, property_holder: Any, target_id: str) -> tuple[STF_Data_Ref, STF_BlenderDataResourceBase]:
+def __get_blender_property(ref_holder: Any, property_holder: Any, target_id: str) -> tuple[STF_Data_Ref, STF_DataResourceBase]:
 	for resource_ref in ref_holder:
 		if(resource_ref.stf_id == target_id):
 			for resource in getattr(property_holder, resource_ref.blender_property_name):
@@ -61,7 +61,7 @@ def __get_blender_property(ref_holder: Any, property_holder: Any, target_id: str
 					return resource_ref, resource
 	return None
 
-def resolve_stf_data_resource_reference(drr: STFDataResourceReference) -> tuple[STF_Data_Ref, STF_BlenderDataResourceBase]:
+def resolve_stf_data_resource_reference(drr: STFDataResourceReference) -> tuple[STF_Data_Ref, STF_DataResourceBase]:
 	if(drr.use_scene_collection and drr.scene):
 		return __get_blender_property(drr.scene.collection.stf_data_refs, drr.scene.collection, drr.stf_data_resource_id)
 	elif(not drr.use_scene_collection and drr.collection):

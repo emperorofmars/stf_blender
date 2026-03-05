@@ -1,0 +1,82 @@
+import bpy
+from typing import Any
+
+from ....common import STF_ImportContext, STF_ExportContext, STF_TaskSteps, STFReportSeverity, STF_Category
+from ....common.resource.blender_native import STF_Handler_BlenderNative
+from ....common.utils.boilerplate import boilerplate_register, boilerplate_unregister
+from ....common.resource.component.component_utils import get_components_from_object
+from ....common.utils.id_utils import ensure_stf_id
+
+
+_stf_type = "stf.prefab"
+
+
+def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
+	collection = bpy.data.collections.new(json_resource.get("name", context.get_filename()))
+	collection.stf_info.stf_id = stf_id
+	if(json_resource.get("name")):
+		collection.stf_info.stf_name = json_resource["name"]
+		collection.stf_info.stf_name_source_of_truth = True
+	bpy.context.scene.collection.children.link(collection)
+	collection.stf_use_collection_as_prefab = True
+	context.set_root_collection(collection)
+
+	for node_id in json_resource.get("root_nodes", []):
+		context.import_resource(node_id, context_object=collection, stf_category=STF_Category.NODE)
+
+	def _handle_animations():
+		for animation_id in json_resource.get("animations", []):
+			context.import_resource(animation_id, context_object=collection, stf_category=STF_Category.DATA)
+	context.add_task(STF_TaskSteps.ANIMATION, _handle_animations)
+
+	return collection
+
+
+def _stf_export(context: STF_ExportContext, application_object: Any, context_object: Any) -> tuple[dict, str]:
+	collection: bpy.types.Collection = application_object
+	ensure_stf_id(context, collection)
+
+	root_nodes = []
+	animations = []
+	ret = {
+		"type": _stf_type,
+		"name": collection.stf_info.stf_name if collection.stf_info.stf_name_source_of_truth else collection.name,
+		"root_nodes": root_nodes,
+		"animations": animations,
+	}
+
+	for blender_object in collection.all_objects[:]:
+		if(type(blender_object) is bpy.types.Object and blender_object.parent == None):
+			root_nodes.append(context.serialize_resource(blender_object, context_object=collection, stf_category="node", export_fail_severity=STFReportSeverity.FatalError))
+
+	def _handle_animations():
+		for action in bpy.data.actions:
+			if(stf_animation_id := context.serialize_resource(action, context_object=collection, stf_category="data", export_fail_severity=STFReportSeverity.Debug)):
+				animations.append(stf_animation_id)
+	context.add_task(STF_TaskSteps.ANIMATION, _handle_animations)
+
+	return ret, collection.stf_info.stf_id
+
+
+class Handler_STF_Prefab(STF_Handler_BlenderNative):
+	stf_type = _stf_type
+	stf_category = STF_Category.DATA
+	like_types = ["prefab"]
+	understood_application_types = [bpy.types.Collection]
+	import_func = _stf_import
+	export_func = _stf_export
+	get_components_func = get_components_from_object
+
+
+register_stf_handlers = [
+	Handler_STF_Prefab
+]
+
+def register():
+	boilerplate_register(bpy.types.Collection, STF_Category.DATA)
+	bpy.types.Collection.stf_use_collection_as_prefab = bpy.props.BoolProperty(name="Use As STF Prefab", default=False, options=set())
+
+def unregister():
+	boilerplate_unregister(bpy.types.Collection, STF_Category.DATA)
+	if hasattr(bpy.types.Collection, "stf_use_collection_as_prefab"):
+		del bpy.types.Collection.stf_use_collection_as_prefab

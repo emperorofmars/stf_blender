@@ -44,7 +44,7 @@ class CustomSTFBrushModule(stfblender.common.STF_Module):
 	get_components_func = stfblender.common.module_component.component_utils.get_components_from_object
 
 
-register_stf_modules = [CustomSTFBrushModule]
+register_stf_handlers = [CustomSTFBrushModule]
 
 
 def register():

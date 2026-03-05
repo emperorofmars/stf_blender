@@ -2,30 +2,30 @@ import bpy
 
 from typing import Any
 
-from ..stf_module import STF_Module
-from ..module_component.stf_module_component import STF_BlenderComponentModule, STF_ExportComponentHook
-from ..module_data.stf_module_data import STF_BlenderDataModule
+from ..resource.stf_handler_base import STF_HandlerBase
+from ..resource.component.stf_handler_component import STF_Handler_Component, STF_ExportComponentHook
+from ..resource.data.stf_handler_data import STF_Handler_Data
 
 """
-Util to retrieve all existing STF-modules
+Util to retrieve all existing STF-handlers
 """
 
-def get_stf_modules() -> list[STF_Module]:
-	stf_modules = []
+def get_stf_handlers() -> list[STF_HandlerBase]:
+	stf_handlers = []
 	import sys
 	for blender_addon in bpy.context.preferences.addons.keys():
 		try:
 			python_module = sys.modules[blender_addon]
-			if(stf_module_list := getattr(python_module, "register_stf_modules", None)):
-				if(isinstance(stf_module_list, list)):
-					for stf_module in stf_module_list:
-						stf_modules.append(stf_module)
+			if(stf_handler_list := getattr(python_module, "register_stf_handlers", None)):
+				if(isinstance(stf_handler_list, list)):
+					for stf_handler in stf_handler_list:
+						stf_handlers.append(stf_handler)
 		except Exception:
 			continue
-	return stf_modules
+	return stf_handlers
 
 
-def is_priority_higher(a: STF_Module, b: STF_Module) -> bool:
+def is_priority_higher(a: STF_HandlerBase, b: STF_HandlerBase) -> bool:
 	if(not hasattr(a, "priority")):
 		return True
 	if(not hasattr(b, "priority")):
@@ -33,117 +33,117 @@ def is_priority_higher(a: STF_Module, b: STF_Module) -> bool:
 	return a.priority <= b.priority
 
 
-def get_import_modules() -> dict[str, STF_Module]:
-	stf_modules = get_stf_modules()
-	ret_modules = {}
-	for stf_module in stf_modules:
-		if(hasattr(stf_module, "stf_type") and hasattr(stf_module, "import_func")):
-			if(not ret_modules.get(stf_module.stf_type) or is_priority_higher(ret_modules[stf_module.stf_type], stf_module)):
-				ret_modules[stf_module.stf_type] = stf_module
-	return ret_modules
+def get_import_handlers() -> dict[str, STF_HandlerBase]:
+	stf_handlers = get_stf_handlers()
+	ret_handlers = {}
+	for stf_handler in stf_handlers:
+		if(hasattr(stf_handler, "stf_type") and hasattr(stf_handler, "import_func")):
+			if(not ret_handlers.get(stf_handler.stf_type) or is_priority_higher(ret_handlers[stf_handler.stf_type], stf_handler)):
+				ret_handlers[stf_handler.stf_type] = stf_handler
+	return ret_handlers
 
 
-def get_import_modules_fallback() -> dict[str, STF_Module]:
-	stf_modules = get_stf_modules()
-	ret_modules = {}
-	for stf_module in stf_modules:
-		if(hasattr(stf_module, "stf_type") and not getattr(stf_module, "stf_type") and hasattr(stf_module, "import_func")):
-			if(not ret_modules.get(stf_module.stf_category) or is_priority_higher(ret_modules[stf_module.stf_category], stf_module)):
-				ret_modules[stf_module.stf_category] = stf_module
-	return ret_modules
+def get_import_handlers_fallback() -> dict[str, STF_HandlerBase]:
+	stf_handlers = get_stf_handlers()
+	ret_handlers = {}
+	for stf_handler in stf_handlers:
+		if(hasattr(stf_handler, "stf_type") and not getattr(stf_handler, "stf_type") and hasattr(stf_handler, "import_func")):
+			if(not ret_handlers.get(stf_handler.stf_category) or is_priority_higher(ret_handlers[stf_handler.stf_category], stf_handler)):
+				ret_handlers[stf_handler.stf_category] = stf_handler
+	return ret_handlers
 
 
-def get_export_modules() -> tuple[dict[Any, list[STF_Module]], dict[Any, list[STF_ExportComponentHook]]]:
-	stf_modules = get_stf_modules()
+def get_export_handlers() -> tuple[dict[Any, list[STF_HandlerBase]], dict[Any, list[STF_ExportComponentHook]]]:
+	stf_handlers = get_stf_handlers()
 
-	ret_modules = {}
+	ret_handlers = {}
 	ret_hooks = {}
 
-	for stf_module in stf_modules:
-		if(hasattr(stf_module, "understood_application_types") and hasattr(stf_module, "export_func")):
-			for understood_type in stf_module.understood_application_types:
-				if(not ret_modules.get(understood_type)):
-					ret_modules[understood_type] = [stf_module]
+	for stf_handler in stf_handlers:
+		if(hasattr(stf_handler, "understood_application_types") and hasattr(stf_handler, "export_func")):
+			for understood_type in stf_handler.understood_application_types:
+				if(not ret_handlers.get(understood_type)):
+					ret_handlers[understood_type] = [stf_handler]
 				else:
-					ret_modules[understood_type].append(stf_module)
+					ret_handlers[understood_type].append(stf_handler)
 
-		if(hasattr(stf_module, "hook_target_application_types") and hasattr(stf_module, "hook_apply_func") and hasattr(stf_module, "hook_can_handle_application_object_func")):
-			for understood_type in stf_module.hook_target_application_types:
+		if(hasattr(stf_handler, "hook_target_application_types") and hasattr(stf_handler, "hook_apply_func") and hasattr(stf_handler, "hook_can_handle_application_object_func")):
+			for understood_type in stf_handler.hook_target_application_types:
 				if(not ret_hooks.get(understood_type)):
-					ret_hooks[understood_type] = [stf_module]
+					ret_hooks[understood_type] = [stf_handler]
 				else:
-					ret_hooks[understood_type].append(stf_module)
+					ret_hooks[understood_type].append(stf_handler)
 
-	return (ret_modules, ret_hooks)
+	return (ret_handlers, ret_hooks)
 
 
-def get_all_component_modules() -> list[STF_BlenderComponentModule]:
+def get_all_component_handlers() -> list[STF_Handler_Component]:
 	ret = []
-	for stf_module in get_stf_modules():
-		if(hasattr(stf_module, "blender_property_name") and getattr(stf_module, "stf_category") == "component"):
-			ret.append(stf_module)
+	for stf_handler in get_stf_handlers():
+		if(hasattr(stf_handler, "blender_property_name") and getattr(stf_handler, "stf_category") == "component"):
+			ret.append(stf_handler)
 	return ret
 
 
-def get_component_modules(filter = None) -> list[STF_BlenderComponentModule]:
+def get_component_handlers(filter = None) -> list[STF_Handler_Component]:
 	ret = []
-	for stf_module in get_stf_modules():
-		if(hasattr(stf_module, "stf_type") and getattr(stf_module, "stf_type") and hasattr(stf_module, "blender_property_name") and getattr(stf_module, "stf_category") == "component"):
-			if(hasattr(stf_module, "filter_all_data_modules") and getattr(stf_module, "filter_all_data_modules")):
+	for stf_handler in get_stf_handlers():
+		if(hasattr(stf_handler, "stf_type") and getattr(stf_handler, "stf_type") and hasattr(stf_handler, "blender_property_name") and getattr(stf_handler, "stf_category") == "component"):
+			if(hasattr(stf_handler, "filter_all_data_modules") and getattr(stf_handler, "filter_all_data_modules")):
 				continue
-			elif(hasattr(stf_module, "filter") and getattr(stf_module, "filter") and filter):
-				if(filter in getattr(stf_module, "filter")):
-					ret.append(stf_module)
+			elif(hasattr(stf_handler, "filter") and getattr(stf_handler, "filter") and filter):
+				if(filter in getattr(stf_handler, "filter")):
+					ret.append(stf_handler)
 				else:
 					continue
 			else:
-				ret.append(stf_module)
+				ret.append(stf_handler)
 	return ret
 
 
-def get_data_component_modules(filter = None) -> list[STF_BlenderComponentModule]:
+def get_data_component_handlers(filter = None) -> list[STF_Handler_Component]:
 	ret = []
-	for stf_module in get_stf_modules():
-		if(hasattr(stf_module, "stf_type") and getattr(stf_module, "stf_type") and hasattr(stf_module, "blender_property_name") and getattr(stf_module, "stf_category") == "component"):
-			if(hasattr(stf_module, "filter") and getattr(stf_module, "filter") and filter):
-				if(filter in getattr(stf_module, "filter")):
-					ret.append(stf_module)
+	for stf_handler in get_stf_handlers():
+		if(hasattr(stf_handler, "stf_type") and getattr(stf_handler, "stf_type") and hasattr(stf_handler, "blender_property_name") and getattr(stf_handler, "stf_category") == "component"):
+			if(hasattr(stf_handler, "filter") and getattr(stf_handler, "filter") and filter):
+				if(filter in getattr(stf_handler, "filter")):
+					ret.append(stf_handler)
 				else:
 					continue
-			elif(hasattr(stf_module, "filter_all_data_modules")):
-				if(getattr(stf_module, "filter_all_data_modules")):
-					ret.append(stf_module)
+			elif(hasattr(stf_handler, "filter_all_data_modules")):
+				if(getattr(stf_handler, "filter_all_data_modules")):
+					ret.append(stf_handler)
 				else:
 					continue
 			else:
-				ret.append(stf_module)
+				ret.append(stf_handler)
 	return ret
 
-def get_blender_non_native_data_modules() -> list[STF_BlenderDataModule]:
+def get_blender_non_native_data_handlers() -> list[STF_Handler_Data]:
 	ret = []
-	for stf_module in get_stf_modules():
-		if(hasattr(stf_module, "stf_type") and getattr(stf_module, "stf_type") and hasattr(stf_module, "blender_property_name") and getattr(stf_module, "stf_category") == "data"):
-			ret.append(stf_module)
+	for stf_handler in get_stf_handlers():
+		if(hasattr(stf_handler, "stf_type") and getattr(stf_handler, "stf_type") and hasattr(stf_handler, "blender_property_name") and getattr(stf_handler, "stf_category") == "data"):
+			ret.append(stf_handler)
 	return ret
 
 
-def get_fallback_module(stf_category: str) -> STF_Module:
-	for stf_module in get_stf_modules():
-		if(hasattr(stf_module, "stf_type") and stf_module.stf_type == None and stf_module.stf_category == stf_category):
-			return stf_module
+def get_fallback_handler(stf_category: str) -> STF_HandlerBase:
+	for stf_handler in get_stf_handlers():
+		if(hasattr(stf_handler, "stf_type") and stf_handler.stf_type == None and stf_handler.stf_category == stf_category):
+			return stf_handler
 
 
-def find_component_module(stf_modules: list[STF_BlenderComponentModule], stf_type: str) -> STF_BlenderComponentModule:
-	for stf_module in stf_modules:
-		if(stf_module.stf_type == stf_type):
-			return stf_module
+def find_component_handler(stf_handlers: list[STF_Handler_Component], stf_type: str) -> STF_Handler_Component:
+	for stf_handler in stf_handlers:
+		if(stf_handler.stf_type == stf_type):
+			return stf_handler
 	if(stf_type == "fallback"):
-		return get_fallback_module("component")
+		return get_fallback_handler("component")
 
-def find_data_module(stf_modules: list[STF_BlenderDataModule], stf_type: str) -> STF_BlenderDataModule:
-	for stf_module in stf_modules:
-		if(stf_module.stf_type == stf_type):
-			return stf_module
+def find_data_handler(stf_handlers: list[STF_Handler_Data], stf_type: str) -> STF_Handler_Data:
+	for stf_handler in stf_handlers:
+		if(stf_handler.stf_type == stf_type):
+			return stf_handler
 	if(stf_type == "fallback"):
-		return get_fallback_module("data")
+		return get_fallback_handler("data")
 

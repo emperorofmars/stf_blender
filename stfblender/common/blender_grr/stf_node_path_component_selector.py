@@ -3,7 +3,7 @@ import bpy
 from .utils import draw_component_info
 from .stf_node_path_selector import *
 from .. import STF_ImportContext, STF_ExportContext
-from ..module_component import STF_Component_Ref
+from ..resource.component import STF_Component_Ref
 from ..helpers import get_resource_id, register_exported_resource
 
 

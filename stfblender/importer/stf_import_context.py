@@ -6,7 +6,7 @@ from ..common import STF_ImportContext as ISTF_ImportContext, STF_Category
 from ..common.stf_task_steps import STF_TaskSteps
 from .stf_import_state import STF_ImportState
 from ..common.stf_report import STFReportSeverity, STFReport
-from ..common.module_component.stf_module_component import STF_Component_Editmode_Resistant_Reference
+from ..common.resource.component.stf_handler_component import STF_Component_Editmode_Resistant_Reference
 from ..common.property_path_part import BlenderPropertyPathPart
 
 
@@ -42,8 +42,8 @@ class STF_ImportContext(ISTF_ImportContext):
 			for component_id in json_resource["components"]:
 				json_component = self.get_json_resource(component_id)
 				if(json_component):
-					if(component_module := self._state.determine_module(json_component, STF_Category.COMPONENT)):
-						component_result = component_module.import_func(self, json_component, component_id, application_object)
+					if(component_handler := self._state.determine_handler(json_component, STF_Category.COMPONENT)):
+						component_result = component_handler.import_func(self, json_component, component_id, application_object)
 						if(component_result):
 							application_component_object = component_result
 							self.register_imported_resource(component_id, STF_Component_Editmode_Resistant_Reference(application_component_object, application_object))
@@ -68,15 +68,15 @@ class STF_ImportContext(ISTF_ImportContext):
 			_logger.fatal("Invalid JSON resource", stack_info=True)
 			self.report(STFReport("Invalid JSON resource", STFReportSeverity.FatalError, stf_id, application_object=context_object))
 
-		if(module := self._state.determine_module(json_resource, stf_category)):
-			application_object = module.import_func(self, json_resource, stf_id, context_object)
+		if(handler := self._state.determine_handler(json_resource, stf_category)):
+			application_object = handler.import_func(self, json_resource, stf_id, context_object)
 			if(application_object):
 				self.register_imported_resource(stf_id, application_object)
-				self.__run_components(json_resource, module.get_components_holder_func(application_object) if hasattr(module, "get_components_holder_func") else application_object)
+				self.__run_components(json_resource, handler.get_components_holder_func(application_object) if hasattr(handler, "get_components_holder_func") else application_object)
 				return application_object
 			else:
 				_logger.error("Resource import error", stack_info=True)
-				self.report(STFReport("Resource import error", STFReportSeverity.Error, stf_id, module.stf_type, None))
+				self.report(STFReport("Resource import error", STFReportSeverity.Error, stf_id, handler.stf_type, None))
 		else:
 			self.report(STFReport("Could not process resource: " + stf_id, STFReportSeverity.FatalError, stf_id, json_resource.get("type")))
 		return None
@@ -89,8 +89,8 @@ class STF_ImportContext(ISTF_ImportContext):
 	def resolve_stf_property_path(self, stf_path: list[str], application_object: Any = None) -> BlenderPropertyPathPart:
 		if(stf_path == None or len(stf_path) == 0): return None
 
-		if(selected_module := self._state.determine_property_resolution_module(stf_path[0])):
-			return selected_module.resolve_stf_property_to_blender_func(self, stf_path, application_object)
+		if(selected_handler := self._state.determine_property_resolution_module(stf_path[0])):
+			return selected_handler.resolve_stf_property_to_blender_func(self, stf_path, application_object)
 
 		return None
 

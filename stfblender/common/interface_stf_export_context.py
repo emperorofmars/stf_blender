@@ -8,7 +8,7 @@ from .property_path_part import STFPropertyPathPart
 
 
 class STF_ExportContext:
-	"""Interface Context for resource export. It will be passed to each STF_Module's export func."""
+	"""Interface Context for resource export. It will be passed to each STF_Handler's export func."""
 
 	def get_resource_id(self, application_object: Any) -> str | None:
 		pass

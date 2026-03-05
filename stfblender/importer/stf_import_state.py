@@ -6,7 +6,7 @@ from .import_settings import STF_ImportSettings
 
 from ..common.stf_report import STFReportSeverity, STFReport
 from ..common.base.stf_file import STF_File
-from ..common.stf_module import STF_Module
+from ..common.resource.blender_native.stf_handler_blender_native import STF_Handler_BlenderNative
 from ..common.base.stf_json_definition import STF_Meta_AssetInfo
 from ..common.base.stf_state_base import STF_State_Base
 
@@ -20,13 +20,13 @@ class STF_ImportState(STF_State_Base):
 	Gets passed to the STF_ImportContext.
 	"""
 
-	def __init__(self, file: STF_File, modules: dict[str, STF_Module], fallback_modules: dict[str, STF_Module] = {}, trash_objects: list[bpy.types.Object] = [], fail_on_severity: STFReportSeverity = STFReportSeverity.FatalError, settings: STF_ImportSettings = {}):
+	def __init__(self, file: STF_File, modules: dict[str, STF_Handler_BlenderNative], fallback_modules: dict[str, STF_Handler_BlenderNative] = {}, trash_objects: list[bpy.types.Object] = [], fail_on_severity: STFReportSeverity = STFReportSeverity.FatalError, settings: STF_ImportSettings = {}):
 		super().__init__(fail_on_severity)
 
 		self._file = file
 
-		self._modules: dict[str, STF_Module] = modules
-		self._fallback_modules: dict[str, STF_Module] = fallback_modules
+		self._modules: dict[str, STF_Handler_BlenderNative] = modules
+		self._fallback_modules: dict[str, STF_Handler_BlenderNative] = fallback_modules
 
 		self._imported_resources: dict[str, Any] = {} # ID | list of IDs -> imported object
 		self._asset_info: STF_Meta_AssetInfo
@@ -36,7 +36,7 @@ class STF_ImportState(STF_State_Base):
 		self._settings = settings
 
 
-	def determine_module(self, json_resource: dict, stf_category: str | None = None) -> STF_Module:
+	def determine_handler(self, json_resource: dict, stf_category: str | None = None) -> STF_Handler_BlenderNative:
 		return self._modules.get(json_resource["type"], self._fallback_modules.get(stf_category))
 
 	def register_imported_resource(self, stf_id: str, application_object: Any):
@@ -56,9 +56,9 @@ class STF_ImportState(STF_State_Base):
 		return None
 
 
-	def determine_property_resolution_module(self, stf_id: str) -> STF_Module:
+	def determine_property_resolution_module(self, stf_id: str) -> STF_Handler_BlenderNative:
 		if(json_resource := self.get_json_resource(stf_id)):
-			module = self.determine_module(json_resource)
+			module = self.determine_handler(json_resource)
 			if(hasattr(module, "resolve_stf_property_to_blender_func")):
 				return module
 		return None
