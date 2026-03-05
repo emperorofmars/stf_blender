@@ -1,10 +1,8 @@
 import bpy
 from typing import Any, Callable
 
-
-from ..stf_module import STF_Module
+from .. import STF_Category, STF_Module, STF_ExportContext
 from ..utils.armature_bone import ArmatureBone
-from .. import STF_ExportContext
 
 """
 Components aren't natively supported by Blender, they are stored by the Blender-ID-thingy they belong to.
@@ -27,6 +25,8 @@ class STF_BlenderComponentBase(bpy.types.PropertyGroup):
 
 class STF_BlenderComponentModule(STF_Module):
 	"""Extension to STF_Module which also associates a function to draw the component in Blender's UI"""
+
+	stf_category = STF_Category.COMPONENT
 
 	# getattr(blender_ID_thingy, blender_property_name) has to return a list of components of this modules type on the respective blender_ID_thingy
 	blender_property_name: str

@@ -1,9 +1,8 @@
 import bpy
 from typing import Any
 
-from ...common import STF_ExportContext, STF_ImportContext
+from ...common import STF_ExportContext, STF_ImportContext, STF_Category
 from ...common.module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
-
 from ...common.module_component.component_utils import add_component, export_component_base, import_component_base
 from ...common.blender_grr import *
 
@@ -42,7 +41,7 @@ def _stf_export(context: STF_ExportContext, component: STF_Data_Resource_Compone
 class STF_Module_STF_Data_Resource_Component_Test(STF_BlenderComponentModule):
 	"""Placeholder Test"""
 	stf_type = _stf_type
-	stf_kind = "component"
+	stf_category = STF_Category.COMPONENT
 	like_types = []
 	understood_application_types = [STF_Data_Resource_Component_Test]
 	import_func = _stf_import

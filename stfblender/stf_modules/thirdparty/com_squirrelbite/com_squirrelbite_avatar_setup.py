@@ -1,12 +1,11 @@
 import bpy
 from typing import Any
 
-from ....common import STF_ExportContext, STF_ImportContext, STFReportSeverity, STFReport
+from ....common import STF_ExportContext, STF_ImportContext, STFReportSeverity, STFReport, STF_Category
 from ....common.module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
+from ....common.module_component.component_utils import add_component, export_component_base, import_component_base
 from ....common.helpers import import_resource, register_exported_resource, draw_list, poll_valid_animations
 from ....common.blender_grr import *
-
-from ....common.module_component.component_utils import add_component, export_component_base, import_component_base
 
 
 _stf_type = "com.squirrelbite.avatar_setup"
@@ -134,7 +133,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 		if(puppet.type == "2d"):
 			puppet.property_y = puppet_json.get("property_x")
 
-		if(blendtree_resource := import_resource(context, json_resource, puppet_json["blendtree"], "data")):
+		if(blendtree_resource := import_resource(context, json_resource, puppet_json["blendtree"], STF_Category.DATA)):
 			puppet.blendtree.collection = context.get_root_collection()
 			puppet.blendtree.stf_data_resource_id = blendtree_resource.stf_id
 		else:
@@ -144,7 +143,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 
 	# puppets
 	for puppet_json in json_resource.get("puppets", []):
-		if(blendtree_resource := import_resource(context, json_resource, puppet_json["blendtree"], "data")):
+		if(blendtree_resource := import_resource(context, json_resource, puppet_json["blendtree"], STF_Category.DATA)):
 			puppet: STFDataResourceReference = component.puppets.add()
 			puppet.name = puppet_json.get("name", "")
 			puppet.collection = context.get_root_collection()
@@ -216,7 +215,7 @@ def _stf_export(context: STF_ExportContext, component: Squirrelbite_Avatar_Setup
 class STF_Module_Squirrelbite_Avatar_Setup(STF_BlenderComponentModule):
 	"""Opinionated setup of animation logic and behaviors for VR & V-Tubing avatars"""
 	stf_type = _stf_type
-	stf_kind = "component"
+	stf_category = STF_Category.COMPONENT
 	understood_application_types = [Squirrelbite_Avatar_Setup]
 	import_func = _stf_import
 	export_func = _stf_export

@@ -2,7 +2,7 @@ import bpy
 import logging
 from typing import Any, Callable
 
-from ..common import STF_ImportContext as ISTF_ImportContext
+from ..common import STF_ImportContext as ISTF_ImportContext, STF_Category
 from ..common.stf_task_steps import STF_TaskSteps
 from .stf_import_state import STF_ImportState
 from ..common.stf_report import STFReportSeverity, STFReport
@@ -21,7 +21,7 @@ class STF_ImportContext(ISTF_ImportContext):
 		self._root_collection = None
 
 	def run(self) -> bpy.types.Collection:
-		ret = self.import_resource(self.get_root_id(), "data")
+		ret = self.import_resource(self.get_root_id(), STF_Category.DATA)
 		self._state.run_tasks()
 		ret.stf_meta.from_stf_meta_assetInfo(self._state._file.definition.stf.asset_info)
 		return ret
@@ -42,7 +42,7 @@ class STF_ImportContext(ISTF_ImportContext):
 			for component_id in json_resource["components"]:
 				json_component = self.get_json_resource(component_id)
 				if(json_component):
-					if(component_module := self._state.determine_module(json_component, "component")):
+					if(component_module := self._state.determine_module(json_component, STF_Category.COMPONENT)):
 						component_result = component_module.import_func(self, json_component, component_id, application_object)
 						if(component_result):
 							application_component_object = component_result
@@ -56,7 +56,7 @@ class STF_ImportContext(ISTF_ImportContext):
 					self.report(STFReport("Invalid JSON resource", STFReportSeverity.FatalError, component_id))
 
 
-	def import_resource(self, stf_id: str, context_object: Any = None, stf_kind: str = "data") -> Any:
+	def import_resource(self, stf_id: str, context_object: Any = None, stf_category: str | None = STF_Category.DATA) -> Any:
 		if(stf_id in self._state._imported_resources):
 			if(type(self._state._imported_resources[stf_id]) == STF_Component_Editmode_Resistant_Reference):
 				return self._state._imported_resources[stf_id].get()
@@ -68,7 +68,7 @@ class STF_ImportContext(ISTF_ImportContext):
 			_logger.fatal("Invalid JSON resource", stack_info=True)
 			self.report(STFReport("Invalid JSON resource", STFReportSeverity.FatalError, stf_id, application_object=context_object))
 
-		if(module := self._state.determine_module(json_resource, stf_kind)):
+		if(module := self._state.determine_module(json_resource, stf_category)):
 			application_object = module.import_func(self, json_resource, stf_id, context_object)
 			if(application_object):
 				self.register_imported_resource(stf_id, application_object)

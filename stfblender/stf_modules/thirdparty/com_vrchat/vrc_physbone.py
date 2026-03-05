@@ -3,13 +3,11 @@ import json
 import re
 from typing import Any
 
-from ....common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STF_TaskSteps
-from ....common.module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
-from ....common.property_path_part import BlenderPropertyPathPart, STFPropertyPathPart
+from ....common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STF_TaskSteps, STF_Category
+from ....common.module_component import STF_BlenderComponentBase, STF_BlenderBoneComponentModule, STF_Component_Ref
+from ....common.module_component.component_utils import add_component, export_component_base, import_component_base, preserve_component_reference
 from ....common.utils.animation_conversion_utils import get_component_index, get_component_stf_path_from_collection
 from ....common.helpers import create_add_button, create_remove_button
-
-from ....common.module_component.component_utils import add_component, export_component_base, import_component_base, preserve_component_reference
 from ....common.blender_grr.stf_node_path_selector import NodePathSelector, draw_node_path_selector, node_path_selector_from_stf, node_path_selector_to_stf
 from ....common.blender_grr.stf_node_path_component_selector import NodePathComponentSelector, draw_node_path_component_selector, node_path_component_selector_from_stf, node_path_component_selector_to_stf
 
@@ -129,11 +127,11 @@ def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: 
 
 """Module definition"""
 
-class STF_Module_VRC_Physbone(STF_BlenderComponentModule):
+class STF_Module_VRC_Physbone(STF_BlenderBoneComponentModule):
 	"""Represents a `VRCPhysbone`. Serialize the component in Unity and paste the Json-definition into the `Json Values` field.
 	You must manually set the ID's of referenced Collider components and the Objects/Bones that should be ignored by the Physbone"""
 	stf_type = _stf_type
-	stf_kind = "component"
+	stf_category = STF_Category.COMPONENT
 	like_types = ["secondary_motion"]
 	understood_application_types = [VRC_Physbone]
 	import_func = _stf_import

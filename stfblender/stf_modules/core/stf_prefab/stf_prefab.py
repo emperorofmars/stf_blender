@@ -1,7 +1,7 @@
 import bpy
 from typing import Any
 
-from ....common import STF_Module, STF_ImportContext, STF_ExportContext, STF_TaskSteps, STFReportSeverity, STF_Kind
+from ....common import STF_Module, STF_ImportContext, STF_ExportContext, STF_TaskSteps, STFReportSeverity, STF_Category
 
 from ....common.utils.boilerplate import boilerplate_register, boilerplate_unregister
 from ....common.module_component.component_utils import get_components_from_object
@@ -22,11 +22,11 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	context.set_root_collection(collection)
 
 	for node_id in json_resource.get("root_nodes", []):
-		context.import_resource(node_id, context_object=collection, stf_kind="node")
+		context.import_resource(node_id, context_object=collection, stf_category=STF_Category.NODE)
 
 	def _handle_animations():
 		for animation_id in json_resource.get("animations", []):
-			context.import_resource(animation_id, context_object=collection, stf_kind="data")
+			context.import_resource(animation_id, context_object=collection, stf_category=STF_Category.DATA)
 	context.add_task(STF_TaskSteps.ANIMATION, _handle_animations)
 
 	return collection
@@ -47,11 +47,11 @@ def _stf_export(context: STF_ExportContext, application_object: Any, context_obj
 
 	for blender_object in collection.all_objects[:]:
 		if(type(blender_object) is bpy.types.Object and blender_object.parent == None):
-			root_nodes.append(context.serialize_resource(blender_object, context_object=collection, module_kind="node", export_fail_severity=STFReportSeverity.FatalError))
+			root_nodes.append(context.serialize_resource(blender_object, context_object=collection, stf_category="node", export_fail_severity=STFReportSeverity.FatalError))
 
 	def _handle_animations():
 		for action in bpy.data.actions:
-			if(stf_animation_id := context.serialize_resource(action, context_object=collection, module_kind="data", export_fail_severity=STFReportSeverity.Debug)):
+			if(stf_animation_id := context.serialize_resource(action, context_object=collection, stf_category="data", export_fail_severity=STFReportSeverity.Debug)):
 				animations.append(stf_animation_id)
 	context.add_task(STF_TaskSteps.ANIMATION, _handle_animations)
 
@@ -60,7 +60,7 @@ def _stf_export(context: STF_ExportContext, application_object: Any, context_obj
 
 class STF_Module_STF_Prefab(STF_Module):
 	stf_type = _stf_type
-	stf_kind = STF_Kind.DATA
+	stf_category = STF_Category.DATA
 	like_types = ["prefab"]
 	understood_application_types = [bpy.types.Collection]
 	import_func = _stf_import
@@ -73,10 +73,10 @@ register_stf_modules = [
 ]
 
 def register():
-	boilerplate_register(bpy.types.Collection, STF_Kind.DATA)
+	boilerplate_register(bpy.types.Collection, STF_Category.DATA)
 	bpy.types.Collection.stf_use_collection_as_prefab = bpy.props.BoolProperty(name="Use As STF Prefab", default=False, options=set())
 
 def unregister():
-	boilerplate_unregister(bpy.types.Collection, STF_Kind.DATA)
+	boilerplate_unregister(bpy.types.Collection, STF_Category.DATA)
 	if hasattr(bpy.types.Collection, "stf_use_collection_as_prefab"):
 		del bpy.types.Collection.stf_use_collection_as_prefab

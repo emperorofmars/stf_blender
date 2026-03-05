@@ -3,7 +3,7 @@ import math
 import mathutils
 from typing import Any
 
-from ....common import STF_Module, STF_ExportContext, STF_ImportContext, STF_TaskSteps, STFReportSeverity, STFReport, STF_Kind
+from ....common import STF_Module, STF_ExportContext, STF_ImportContext, STF_TaskSteps, STFReportSeverity, STFReport, STF_Category
 from ....common.utils import trs_utils
 
 from ....common.utils.boilerplate import boilerplate_register, boilerplate_unregister
@@ -23,7 +23,7 @@ class STF_Instance(bpy.types.PropertyGroup):
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
 	if("instance" in json_resource):
-		blender_object: bpy.types.Object = context.import_resource(json_resource["instance"], stf_kind="instance")
+		blender_object: bpy.types.Object = context.import_resource(json_resource["instance"], stf_category=STF_Category.INSTANCE)
 	else:
 		blender_object: bpy.types.Object = bpy.data.objects.new(json_resource.get("name", "STF Node"), None)
 	context.register_imported_resource(stf_id, blender_object)
@@ -58,7 +58,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	context.add_task(STF_TaskSteps.DEFAULT, _handle_parenting)
 
 	for child_id in json_resource.get("children", []):
-		child: bpy.types.Object = context.import_resource(child_id, context_object, stf_kind="node")
+		child: bpy.types.Object = context.import_resource(child_id, context_object, stf_category=STF_Category.NODE)
 		if(child):
 			child.parent = blender_object
 		else:
@@ -92,7 +92,7 @@ def _stf_export(context: STF_ExportContext, blender_object: bpy.types.Object, co
 	for child in blender_object.children:
 		for collection in child.users_collection:
 			if(context_object.is_embedded_data or collection == context_object):
-				children.append(context.serialize_resource(child, context_object, module_kind="node"))
+				children.append(context.serialize_resource(child, context_object, stf_category="node"))
 				break # break inner loop
 
 	json_resource["children"] = children
@@ -123,7 +123,7 @@ def _stf_export(context: STF_ExportContext, blender_object: bpy.types.Object, co
 		json_resource["enabled"] = False
 
 	if(blender_object.data):
-		instance_id = context.serialize_resource((blender_object, blender_object.data), context_object, module_kind="instance")
+		instance_id = context.serialize_resource((blender_object, blender_object.data), context_object, stf_category="instance")
 		if(instance_id):
 			json_resource["instance"] = instance_id
 
@@ -132,7 +132,7 @@ def _stf_export(context: STF_ExportContext, blender_object: bpy.types.Object, co
 
 class STF_Module_STF_Node(STF_Module):
 	stf_type = _stf_type
-	stf_kind = STF_Kind.NODE
+	stf_category = STF_Category.NODE
 	like_types = ["node", "node.spatial"]
 	understood_application_types = [bpy.types.Object]
 	import_func = _stf_import
@@ -152,10 +152,10 @@ register_stf_modules = [
 
 
 def register():
-	boilerplate_register(bpy.types.Object, STF_Kind.NODE)
+	boilerplate_register(bpy.types.Object, STF_Category.NODE)
 	bpy.types.Object.stf_instance = bpy.props.PointerProperty(type=STF_Instance, options=set()) # type: ignore
 
 def unregister():
 	if hasattr(bpy.types.Object, "stf_instance"):
 		del bpy.types.Object.stf_instance
-	boilerplate_unregister(bpy.types.Object, STF_Kind.NODE)
+	boilerplate_unregister(bpy.types.Object, STF_Category.NODE)

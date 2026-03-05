@@ -3,13 +3,12 @@ import mathutils
 import math
 from typing import Any
 
-from ....common import STF_Module, STF_ExportContext, STF_ImportContext, STF_TaskSteps, STFReportSeverity, STFReport, BlenderPropertyPathPart, STFPropertyPathPart, STF_Kind
+from .stf_instance_armature_utils import parse_standin, process_components, serialize_standin, update_armature_instance_component_standins
+from ....common import STF_Module, STF_ExportContext, STF_ImportContext, STF_TaskSteps, STFReportSeverity, STFReport, BlenderPropertyPathPart, STFPropertyPathPart, STF_Category
 from ....common.module_component import InstanceModComponentRef
 from ....common.utils.animation_conversion_utils import *
 from ....common.utils.armature_bone import ArmatureBone
 from ....common.utils.trs_utils import close_enough
-
-from .stf_instance_armature_utils import parse_standin, process_components, serialize_standin, update_armature_instance_component_standins
 from ....common.utils.id_utils import ensure_stf_id
 
 
@@ -21,7 +20,7 @@ class STF_Instance_Armature(bpy.types.PropertyGroup):
 	stf_active_component_index: bpy.props.IntProperty(options=set()) # type: ignore
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
-	blender_armature = context.import_resource(json_resource["armature"], stf_kind="data")
+	blender_armature = context.import_resource(json_resource["armature"], stf_category=STF_Category.DATA)
 	if(not blender_armature or type(blender_armature) is not bpy.types.Armature):
 		context.report(STFReport("Failed to import armature: " + str(json_resource.get("instance", {}).get("armature")), STFReportSeverity.Error, stf_id, _stf_type, context_object))
 
@@ -67,7 +66,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	if("added_components" in json_resource):
 		for bone_id, component_ids in json_resource["added_components"].items():
 			for component_id in component_ids:
-				if(component := context.import_resource(component_id, blender_object, stf_kind="component")):
+				if(component := context.import_resource(component_id, blender_object, stf_category=STF_Category.COMPONENT)):
 					for component_ref_index, component_ref in enumerate(blender_object.stf_info.stf_components):
 						if(component_ref.stf_id == component_id):
 							instance_component_ref = blender_object.stf_instance_armature.stf_components.add()
@@ -105,7 +104,7 @@ def _stf_export(context: STF_ExportContext, application_object: Any, context_obj
 	ensure_stf_id(context, blender_object.stf_instance)
 	ret = {"type": _stf_type, "name": blender_object.stf_instance.stf_name}
 
-	ret["armature"] = context.serialize_resource(blender_armature, module_kind="data")
+	ret["armature"] = context.serialize_resource(blender_armature, stf_category="data")
 
 	if(blender_object.pose):
 		stf_pose: dict[str, list[list[float]]] = {}
@@ -175,7 +174,7 @@ def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: 
 
 class STF_Module_STF_Instance_Armature(STF_Module):
 	stf_type = _stf_type
-	stf_kind = STF_Kind.INSTANCE
+	stf_category = STF_Category.INSTANCE
 	like_types = ["instance.armature", "instance"]
 	understood_application_types = [tuple]
 	import_func = _stf_import

@@ -3,7 +3,7 @@ import mathutils
 import re
 from typing import Any
 
-from ...common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart
+from ...common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STF_Category
 from ...common.module_component import STF_BlenderComponentBase, STF_BlenderBoneComponentModule, STF_Component_Ref
 from ...common.utils.trs_utils import blender_translation_to_stf, stf_translation_to_blender
 from ...common.utils.animation_conversion_utils import get_component_index, get_component_stf_path_from_collection
@@ -112,7 +112,7 @@ def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: 
 class STF_Module_STFEXP_Collider_Sphere(STF_BlenderBoneComponentModule):
 	"""Sphere collider"""
 	stf_type = _stf_type
-	stf_kind = "component"
+	stf_category = STF_Category.COMPONENT
 	like_types = ["collider.sphere", "collider"]
 	understood_application_types = [STFEXP_Collider_Sphere]
 	import_func = _stf_import

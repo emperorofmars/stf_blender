@@ -1,10 +1,9 @@
 import bpy
 from typing import Any
 
-from ...common import STF_ExportContext, STF_ImportContext, STF_Module, STFReportSeverity, STFReport
-from ...common.helpers import import_resource, register_exported_resource
-
+from ...common import STF_ExportContext, STF_ImportContext, STF_Module, STFReportSeverity, STFReport, STF_Category
 from ...common.utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui, ensure_stf_id
+from ...common.helpers import import_resource, register_exported_resource
 
 # TODO this module is at a bare minimum level, improve it
 
@@ -40,7 +39,7 @@ Import
 """
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
-	blender_text = import_resource(context, json_resource, json_resource["text"], "data")
+	blender_text = import_resource(context, json_resource, json_resource["text"], STF_Category.DATA)
 
 	blender_object = bpy.data.objects.new(json_resource.get("name", "STFEXP Instance Text"), blender_text)
 	blender_object.stf_instance.stf_id = stf_id
@@ -90,7 +89,7 @@ Definition
 
 class STF_Module_STFEXP_Instance_Text(STF_Module):
 	stf_type = _stf_type
-	stf_kind = "instance"
+	stf_category = STF_Category.INSTANCE
 	like_types = ["instance.text"]
 	understood_application_types = [tuple]
 	import_func = _stf_import

@@ -2,8 +2,8 @@ import bpy
 import re
 from typing import Any
 
-from ...common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STF_TaskSteps
-from ...common.module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
+from ...common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STF_TaskSteps, STF_Category
+from ...common.module_component import STF_BlenderComponentBase, STF_BlenderBoneComponentModule, STF_Component_Ref
 from ...common.utils.animation_conversion_utils import get_component_index, get_component_stf_path_from_collection
 from ...common.helpers import create_add_button, create_remove_button
 from .util.constraint_source import ConstraintSource
@@ -191,10 +191,10 @@ def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: 
 
 """Module definition"""
 
-class STF_Module_STFEXP_Constraint_Parent(STF_BlenderComponentModule):
+class STF_Module_STFEXP_Constraint_Parent(STF_BlenderBoneComponentModule):
 	"""A rigging behaviour that parents itself to its sources"""
 	stf_type = _stf_type
-	stf_kind = "component"
+	stf_category = STF_Category.COMPONENT
 	like_types = ["constraint.parent", "constraint"]
 	understood_application_types = [STFEXP_Constraint_Parent]
 	import_func = _stf_import

@@ -2,10 +2,10 @@ import bpy
 from typing import Any
 
 from .ft_csv import ft_definitions
-from ....common import STF_ExportContext, STF_ImportContext
+from ....common import STF_ExportContext, STF_ImportContext, STF_Category
 from ....common.module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
 from ....common.module_component.component_utils import add_component, export_component_base, import_component_base
-from ....common.helpers.misc import OpenWebpage
+from ....common.helpers import OpenWebpage
 
 
 _stf_type = "ava.face_tracking.blendshape"
@@ -78,7 +78,7 @@ def _stf_export(context: STF_ExportContext, component: AVA_FaceTracking_Blendsha
 class STF_Module_AVA_FaceTracking_Blendshapes(STF_BlenderComponentModule):
 	"""Define face-tracking blendshapes"""
 	stf_type = _stf_type
-	stf_kind = "component"
+	stf_category = STF_Category.COMPONENT
 	understood_application_types = [AVA_FaceTracking_Blendshapes]
 	import_func = _stf_import
 	export_func = _stf_export

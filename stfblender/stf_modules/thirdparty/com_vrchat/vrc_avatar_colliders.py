@@ -2,7 +2,7 @@ import bpy
 import json
 from typing import Any
 
-from ....common import STF_ExportContext, STF_ImportContext
+from ....common import STF_ExportContext, STF_ImportContext, STF_Category
 from ....common.module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
 from ....common.module_component.component_utils import add_component, export_component_base, import_component_base
 
@@ -48,7 +48,7 @@ class STF_Module_VRC_AvatarColliders(STF_BlenderComponentModule):
 	"""Represents the `Colliders` of an `VRCAvatarDescriptor`.
 	Serialize the component in Unity and paste the Json-definition into the `Data` field"""
 	stf_type = _stf_type
-	stf_kind = "component"
+	stf_category = STF_Category.COMPONENT
 	understood_application_types = [VRC_AvatarColliders]
 	import_func = _stf_import
 	export_func = _stf_export

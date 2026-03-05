@@ -2,9 +2,8 @@ import bpy
 from typing import Any
 
 from .vrc_contact_base import VRC_ContactBase, vrc_contact_create_resolve_property_path_to_stf_func, vrc_contact_create_resolve_stf_property_to_blender_func, vrc_contact_draw_base, vrc_contact_export_base, vrc_contact_import_base
-from ....common import STF_ExportContext, STF_ImportContext
-from ....common.module_component import STF_BlenderComponentModule, STF_Component_Ref
-
+from ....common import STF_ExportContext, STF_ImportContext, STF_Category
+from ....common.module_component import STF_BlenderBoneComponentModule, STF_Component_Ref
 from ....common.module_component.component_utils import ComponentLoadJsonOperatorBase, add_component, export_component_base, import_component_base
 
 
@@ -65,11 +64,11 @@ def _stf_export(context: STF_ExportContext, component: VRC_ContactReceiver, cont
 	return ret, component.stf_id
 
 
-class STF_Module_VRC_ContactReceiver(STF_BlenderComponentModule):
+class STF_Module_VRC_ContactReceiver(STF_BlenderBoneComponentModule):
 	"""Represents a `VRCContactSender`.
 	Serialize the component in Unity and paste the Json-definition into the `Set from JSON` operator"""
 	stf_type = _stf_type
-	stf_kind = "component"
+	stf_category = STF_Category.COMPONENT
 	understood_application_types = [VRC_ContactReceiver]
 	import_func = _stf_import
 	export_func = _stf_export

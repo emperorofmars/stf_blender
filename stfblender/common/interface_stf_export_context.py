@@ -2,7 +2,7 @@ import bpy
 from typing import Any, Callable
 
 from .stf_task_steps import STF_TaskSteps
-from .stf_json_definition import STF_Meta_AssetInfo
+from .base.stf_json_definition import STF_Meta_AssetInfo
 from .stf_report import STFReportSeverity, STFReport
 from .property_path_part import STFPropertyPathPart
 
@@ -16,7 +16,7 @@ class STF_ExportContext:
 	def register_id(self, application_object: Any, stf_id: str):
 		pass
 
-	def serialize_resource(self, application_object: Any, context_object: Any = None, module_kind = None, export_fail_severity: STFReportSeverity = STFReportSeverity.Error) -> str | None:
+	def serialize_resource(self, application_object: Any, context_object: Any = None, stf_category: str | None = None, export_fail_severity: STFReportSeverity = STFReportSeverity.Error) -> str | None:
 		pass
 
 	def serialize_buffer(self, data: bytes, buffer_id: str = None) -> str:

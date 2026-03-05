@@ -48,8 +48,8 @@ def get_import_modules_fallback() -> dict[str, STF_Module]:
 	ret_modules = {}
 	for stf_module in stf_modules:
 		if(hasattr(stf_module, "stf_type") and not getattr(stf_module, "stf_type") and hasattr(stf_module, "import_func")):
-			if(not ret_modules.get(stf_module.stf_kind) or is_priority_higher(ret_modules[stf_module.stf_kind], stf_module)):
-				ret_modules[stf_module.stf_kind] = stf_module
+			if(not ret_modules.get(stf_module.stf_category) or is_priority_higher(ret_modules[stf_module.stf_category], stf_module)):
+				ret_modules[stf_module.stf_category] = stf_module
 	return ret_modules
 
 
@@ -80,7 +80,7 @@ def get_export_modules() -> tuple[dict[Any, list[STF_Module]], dict[Any, list[ST
 def get_all_component_modules() -> list[STF_BlenderComponentModule]:
 	ret = []
 	for stf_module in get_stf_modules():
-		if(hasattr(stf_module, "blender_property_name") and getattr(stf_module, "stf_kind") == "component"):
+		if(hasattr(stf_module, "blender_property_name") and getattr(stf_module, "stf_category") == "component"):
 			ret.append(stf_module)
 	return ret
 
@@ -88,7 +88,7 @@ def get_all_component_modules() -> list[STF_BlenderComponentModule]:
 def get_component_modules(filter = None) -> list[STF_BlenderComponentModule]:
 	ret = []
 	for stf_module in get_stf_modules():
-		if(hasattr(stf_module, "stf_type") and getattr(stf_module, "stf_type") and hasattr(stf_module, "blender_property_name") and getattr(stf_module, "stf_kind") == "component"):
+		if(hasattr(stf_module, "stf_type") and getattr(stf_module, "stf_type") and hasattr(stf_module, "blender_property_name") and getattr(stf_module, "stf_category") == "component"):
 			if(hasattr(stf_module, "filter_all_data_modules") and getattr(stf_module, "filter_all_data_modules")):
 				continue
 			elif(hasattr(stf_module, "filter") and getattr(stf_module, "filter") and filter):
@@ -104,7 +104,7 @@ def get_component_modules(filter = None) -> list[STF_BlenderComponentModule]:
 def get_data_component_modules(filter = None) -> list[STF_BlenderComponentModule]:
 	ret = []
 	for stf_module in get_stf_modules():
-		if(hasattr(stf_module, "stf_type") and getattr(stf_module, "stf_type") and hasattr(stf_module, "blender_property_name") and getattr(stf_module, "stf_kind") == "component"):
+		if(hasattr(stf_module, "stf_type") and getattr(stf_module, "stf_type") and hasattr(stf_module, "blender_property_name") and getattr(stf_module, "stf_category") == "component"):
 			if(hasattr(stf_module, "filter") and getattr(stf_module, "filter") and filter):
 				if(filter in getattr(stf_module, "filter")):
 					ret.append(stf_module)
@@ -122,14 +122,14 @@ def get_data_component_modules(filter = None) -> list[STF_BlenderComponentModule
 def get_blender_non_native_data_modules() -> list[STF_BlenderDataModule]:
 	ret = []
 	for stf_module in get_stf_modules():
-		if(hasattr(stf_module, "stf_type") and getattr(stf_module, "stf_type") and hasattr(stf_module, "blender_property_name") and getattr(stf_module, "stf_kind") == "data"):
+		if(hasattr(stf_module, "stf_type") and getattr(stf_module, "stf_type") and hasattr(stf_module, "blender_property_name") and getattr(stf_module, "stf_category") == "data"):
 			ret.append(stf_module)
 	return ret
 
 
-def get_fallback_module(stf_kind: str) -> STF_Module:
+def get_fallback_module(stf_category: str) -> STF_Module:
 	for stf_module in get_stf_modules():
-		if(hasattr(stf_module, "stf_type") and stf_module.stf_type == None and stf_module.stf_kind == stf_kind):
+		if(hasattr(stf_module, "stf_type") and stf_module.stf_type == None and stf_module.stf_category == stf_category):
 			return stf_module
 
 

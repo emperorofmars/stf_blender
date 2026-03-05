@@ -1,11 +1,10 @@
 import bpy
 from typing import Any
 
-from ...common import STF_ImportContext, STF_ExportContext, STF_TaskSteps
+from ...common import STF_ImportContext, STF_ExportContext, STF_TaskSteps, STF_Category
 from ...common.module_data import STF_BlenderDataResourceBase, STF_BlenderDataModule, STF_Data_Ref
-from ...common.helpers import draw_list, poll_valid_animations, import_resource, register_exported_resource
-
 from ...common.module_data.data_resource_utils import add_resource, export_data_resource_base, get_components_from_data_resource, import_data_resource_base
+from ...common.helpers import draw_list, poll_valid_animations, import_resource, register_exported_resource
 
 
 _stf_type = "stfexp.animation_blendtree"
@@ -58,7 +57,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 			mapping.position[0] = animation_mapping["position"][0]
 			if(resource.type == "2d"):
 				mapping.position[1] = animation_mapping["position"][1]
-			mapping.animation = import_resource(context, json_resource, animation_mapping.get("animation"), "data")
+			mapping.animation = import_resource(context, json_resource, animation_mapping.get("animation"), STF_Category.DATA)
 	context.add_task(STF_TaskSteps.AFTER_ANIMATION, _handle)
 
 	return resource
@@ -72,7 +71,7 @@ def _stf_export(context: STF_ExportContext, resource: STFEXP_Animation_Blendtree
 		animations = []
 		for mapping in resource.animations:
 			if(mapping.animation):
-				anim_id = context.serialize_resource(mapping.animation, module_kind="data")
+				anim_id = context.serialize_resource(mapping.animation, stf_category=STF_Category.DATA)
 				if(anim_id):
 					animations.append({
 						"position": mapping.position[:] if resource.type == "2d" else mapping.position[0],
@@ -87,7 +86,7 @@ def _stf_export(context: STF_ExportContext, resource: STFEXP_Animation_Blendtree
 class STF_Module_STFEXP_Animation_Blendtree(STF_BlenderDataModule):
 	"""Define a blendtree for animations"""
 	stf_type = _stf_type
-	stf_kind = "data"
+	stf_category = STF_Category.DATA
 	understood_application_types = [STFEXP_Animation_Blendtree]
 	import_func = _stf_import
 	export_func = _stf_export

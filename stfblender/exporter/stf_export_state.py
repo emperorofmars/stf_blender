@@ -4,7 +4,7 @@ import logging
 from enum import Enum
 from typing import Any
 
-from ..common.stf_json_definition import STF_Buffer, STF_JsonDefinition, STF_Meta_AssetInfo
+from ..common.base.stf_json_definition import STF_Buffer, STF_JsonDefinition, STF_Meta_AssetInfo
 from ..common.stf_report import STFReportSeverity, STFReport
 from ..common.stf_module import STF_Module
 from ..common.module_component.stf_module_component import STF_ExportComponentHook
@@ -67,7 +67,7 @@ class STF_ExportState(STF_State_Base):
 		for module in self._modules.get(type(application_object), []):
 			if(hasattr(module, "can_handle_application_object_func")):
 				priority = module.can_handle_application_object_func(application_object)
-				if(priority > selected_priority and (module_kind == None or module.stf_kind == module_kind)):
+				if(priority > selected_priority and (module_kind == None or module.stf_category == module_kind)):
 					selected_module = module
 					selected_priority = priority
 			elif(1 > selected_priority):

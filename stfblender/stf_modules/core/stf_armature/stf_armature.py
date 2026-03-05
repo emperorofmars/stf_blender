@@ -1,7 +1,7 @@
 import bpy
 from typing import Any
 
-from ....common import STF_Module, STF_ImportContext, STF_ExportContext, STF_Kind
+from ....common import STF_Module, STF_ImportContext, STF_ExportContext, STF_Category
 from ....common.utils.armature_bone import ArmatureBone
 
 from ....common.module_component.component_utils import get_components_from_object
@@ -23,7 +23,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	bpy.context.scene.collection.objects.link(tmp_hook_object)
 
 	for bone_id in json_resource.get("root_bones", []):
-		context.import_resource(bone_id, tmp_hook_object, "node")
+		context.import_resource(bone_id, tmp_hook_object, STF_Category.NODE)
 
 	return blender_armature
 
@@ -56,7 +56,7 @@ def _stf_export(context: STF_ExportContext, application_object: Any, context_obj
 
 class STF_Module_STF_Armature(STF_Module):
 	stf_type = _stf_type
-	stf_kind = STF_Kind.DATA
+	stf_category = STF_Category.DATA
 	like_types = ["armature", "prefab"]
 	understood_application_types = [bpy.types.Armature]
 	import_func = _stf_import
@@ -70,7 +70,7 @@ register_stf_modules = [
 
 
 def register():
-	boilerplate_register(bpy.types.Armature, STF_Kind.DATA)
+	boilerplate_register(bpy.types.Armature, STF_Category.DATA)
 
 def unregister():
-	boilerplate_unregister(bpy.types.Armature, STF_Kind.DATA)
+	boilerplate_unregister(bpy.types.Armature, STF_Category.DATA)

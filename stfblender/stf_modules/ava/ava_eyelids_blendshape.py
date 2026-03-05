@@ -1,9 +1,8 @@
 import bpy
 from typing import Any
 
-from ...common import STF_ExportContext, STF_ImportContext
+from ...common import STF_ExportContext, STF_ImportContext, STF_Category
 from ...common.module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
-
 from ...common.module_component.component_utils import add_component, export_component_base, import_component_base
 
 
@@ -154,7 +153,7 @@ def _stf_export(context: STF_ExportContext, component: AVA_Eyelids_Blendshape, c
 class STF_Module_AVA_Eyelids_Blendshape(STF_BlenderComponentModule):
 	"""Define which shape-keys/blendshapes move eyelids"""
 	stf_type = _stf_type
-	stf_kind = "component"
+	stf_category = STF_Category.COMPONENT
 	understood_application_types = [AVA_Eyelids_Blendshape]
 	import_func = _stf_import
 	export_func = _stf_export

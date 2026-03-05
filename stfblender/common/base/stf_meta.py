@@ -1,6 +1,6 @@
 import bpy
 
-from ..stf_json_definition import STF_Meta_AssetInfo
+from .stf_json_definition import STF_Meta_AssetInfo
 
 
 class STF_KV(bpy.types.PropertyGroup):

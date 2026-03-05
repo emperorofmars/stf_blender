@@ -35,7 +35,7 @@ def _stf_export(context: stfblender.common.STF_ExportContext, application_object
 
 class CustomSTFBrushModule(stfblender.common.STF_Module):
 	stf_type = _stf_type
-	stf_kind = "data"
+	stf_category = "data"
 	like_types = ["brush", "or", "whatever"]
 	priority = 0
 	understood_application_types = [bpy.types.Brush]

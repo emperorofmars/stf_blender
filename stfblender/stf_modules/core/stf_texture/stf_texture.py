@@ -1,7 +1,7 @@
 import bpy
 from typing import Any
 
-from ....common import STF_ExportContext, STF_ImportContext, STF_Kind
+from ....common import STF_ExportContext, STF_ImportContext, STF_Category
 from ....common.module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
 
 from ....common.module_component.component_utils import add_component, export_component_base, import_component_base
@@ -57,7 +57,7 @@ def _stf_export(context: STF_ExportContext, component: STF_Texture, context_obje
 class STF_Module_STF_Texture(STF_BlenderComponentModule):
 	"""Information how an Image is to be processed into a GPU texture"""
 	stf_type = _stf_type
-	stf_kind = STF_Kind.COMPONENT
+	stf_category = STF_Category.COMPONENT
 	understood_application_types = [STF_Texture]
 	import_func = _stf_import
 	export_func = _stf_export

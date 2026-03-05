@@ -4,7 +4,7 @@ from typing import Any, Callable
 
 from ..common import STF_ExportContext as ISTF_ExportContext, STF_TaskSteps
 from .stf_export_state import STF_ExportState
-from ..common.stf_json_definition import STF_Meta_AssetInfo
+from ..common.base.stf_json_definition import STF_Meta_AssetInfo
 from ..common.stf_report import STFReportSeverity, STFReport
 from ..common.property_path_part import STFPropertyPathPart
 
@@ -60,20 +60,20 @@ class STF_ExportContext(ISTF_ExportContext):
 					self.report(STFReport("Unsupported Component", STFReportSeverity.Warn, None, None, application_object))
 
 
-	def serialize_resource(self, application_object: Any, context_object: Any = None, module_kind = None, export_fail_severity: STFReportSeverity = STFReportSeverity.Error) -> str | None:
+	def serialize_resource(self, application_object: Any, context_object: Any = None, stf_category: str | None = None, export_fail_severity: STFReportSeverity = STFReportSeverity.Error) -> str | None:
 		"""Run all logic to serialize an application resource. If it already has been serialized, return the existing ID."""
 
 		if(application_object == None): return None
 		if(existing_id := self.get_resource_id(application_object)): return existing_id
 
-		if(selected_module := self._state.determine_module(application_object, module_kind)):
+		if(selected_module := self._state.determine_module(application_object, stf_category)):
 			module_ret = selected_module.export_func(self, application_object, context_object)
 
 			if(module_ret):
 				json_resource, resource_id = module_ret
 				self._state.register_serialized_resource(application_object, json_resource, resource_id)
 
-				if(selected_module.stf_kind not in ["component", "instance"]):
+				if(selected_module.stf_category not in ["component", "instance"]):
 					# Export components from application native constructs
 					self.__run_hooks(application_object, context_object, json_resource, resource_id)
 

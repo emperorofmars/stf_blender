@@ -1,11 +1,10 @@
 import bpy
 from typing import Any
 
-from ...common import STF_ExportContext, STF_ImportContext, STF_TaskSteps
+from ...common import STF_ExportContext, STF_ImportContext, STF_TaskSteps, STF_Category
 from ...common.module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
-from ...common.helpers import register_exported_resource, import_resource
-
 from ...common.module_component.component_utils import add_component, export_component_base, import_component_base
+from ...common.helpers import register_exported_resource, import_resource
 
 
 _stf_type = "stfexp.lightprobe_anchor"
@@ -31,12 +30,12 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, contex
 	if("anchor" in json_resource):
 		if(len(json_resource["anchor"]) == 1):
 			def _handle_target_object():
-				component.anchor_object = import_resource(context, json_resource, json_resource["anchor"][0], "node")
+				component.anchor_object = import_resource(context, json_resource, json_resource["anchor"][0], STF_Category.NODE)
 			context.add_task(STF_TaskSteps.DEFAULT, _handle_target_object)
 		elif(len(json_resource["anchor"]) == 3):
 			def _handle_target_object():
-				component.anchor_object = import_resource(context, json_resource, json_resource["anchor"][0], "node")
-				if(bone := import_resource(context, json_resource, json_resource["anchor"][2]), "node"):
+				component.anchor_object = import_resource(context, json_resource, json_resource["anchor"][0], STF_Category.NODE)
+				if(bone := import_resource(context, json_resource, json_resource["anchor"][2]), STF_Category.NODE):
 					component.anchor_bone = bone.name
 			context.add_task(STF_TaskSteps.DEFAULT, _handle_target_object)
 
@@ -61,7 +60,7 @@ def _stf_export(context: STF_ExportContext, component: STFEXP_LightprobeAnchor, 
 class STF_Module_STFEXP_LightprobeAnchor(STF_BlenderComponentModule):
 	"""Define a object/bone from which a game-engine will sample lightprobe values"""
 	stf_type = _stf_type
-	stf_kind = "component"
+	stf_category = STF_Category.COMPONENT
 	understood_application_types = [STFEXP_LightprobeAnchor]
 	import_func = _stf_import
 	export_func = _stf_export

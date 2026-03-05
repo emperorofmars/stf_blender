@@ -7,7 +7,7 @@ from .import_settings import STF_ImportSettings
 from ..common.stf_report import STFReportSeverity, STFReport
 from ..common.base.stf_file import STF_File
 from ..common.stf_module import STF_Module
-from ..common.stf_json_definition import STF_Meta_AssetInfo
+from ..common.base.stf_json_definition import STF_Meta_AssetInfo
 from ..common.base.stf_state_base import STF_State_Base
 
 
@@ -36,8 +36,8 @@ class STF_ImportState(STF_State_Base):
 		self._settings = settings
 
 
-	def determine_module(self, json_resource: dict, stf_kind: str = None) -> STF_Module:
-		return self._modules.get(json_resource["type"], self._fallback_modules.get(stf_kind))
+	def determine_module(self, json_resource: dict, stf_category: str | None = None) -> STF_Module:
+		return self._modules.get(json_resource["type"], self._fallback_modules.get(stf_category))
 
 	def register_imported_resource(self, stf_id: str, application_object: Any):
 		self._imported_resources[stf_id] = application_object

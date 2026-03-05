@@ -1,8 +1,7 @@
 import bpy
 from typing import Any
 
-from ....common import STF_Module, STF_ExportContext, STF_ImportContext, STFReport, STFReportSeverity, STF_Kind
-
+from ....common import STF_Module, STF_ExportContext, STF_ImportContext, STFReport, STFReportSeverity, STF_Category
 from ....common.module_component.component_utils import get_components_from_object
 from ....common.utils.id_utils import ensure_stf_id
 from ....common.utils.boilerplate import boilerplate_register, boilerplate_unregister
@@ -79,7 +78,7 @@ def _stf_export(context: STF_ExportContext, application_object: Any, context_obj
 
 class STF_Module_STF_Image(STF_Module):
 	stf_type = _stf_type
-	stf_kind = STF_Kind.DATA
+	stf_category = STF_Category.DATA
 	like_types = ["image"]
 	understood_application_types = [bpy.types.Image]
 	import_func = _stf_import
@@ -93,11 +92,11 @@ register_stf_modules = [
 
 
 def register():
-	boilerplate_register(bpy.types.Image, STF_Kind.DATA)
+	boilerplate_register(bpy.types.Image, STF_Category.DATA)
 	bpy.types.Image.stf_image = bpy.props.PointerProperty(type=STF_Image, options=set())
 
 
 def unregister():
 	if hasattr(bpy.types.Image, "stf_image"):
 		del bpy.types.Image.stf_image
-	boilerplate_unregister(bpy.types.Image, STF_Kind.DATA)
+	boilerplate_unregister(bpy.types.Image, STF_Category.DATA)

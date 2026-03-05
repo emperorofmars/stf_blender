@@ -1,6 +1,7 @@
 import bpy
 from typing import Any, Callable
 
+#from .stf_module import STF_Category
 from .stf_task_steps import STF_TaskSteps
 from .stf_report import STFReport
 from .property_path_part import BlenderPropertyPathPart
@@ -18,7 +19,7 @@ class STF_ImportContext:
 	def register_imported_resource(self, stf_id: str, application_object: Any):
 		pass
 
-	def import_resource(self, stf_id: str, context_object: Any = None, stf_kind: str = "data") -> Any:
+	def import_resource(self, stf_id: str, context_object: Any = None, stf_category: str = "data") -> Any:
 		pass
 
 	def import_buffer(self, stf_id: str) -> bytes:

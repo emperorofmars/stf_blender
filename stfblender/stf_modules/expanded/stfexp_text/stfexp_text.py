@@ -1,10 +1,10 @@
 import bpy
 from typing import Any
 
-from ....common import STF_Module, STF_ExportContext, STF_ExportContext, STF_ImportContext
+from ....common import STF_Module, STF_ExportContext, STF_ExportContext, STF_ImportContext, STF_Category
+from ....common.module_component.component_utils import get_components_from_object
 from ....common.utils.boilerplate import boilerplate_register, boilerplate_unregister
 from ....common.utils.id_utils import ensure_stf_id
-from ....common.module_component.component_utils import get_components_from_object
 
 # TODO this module is at a bare minimum level, improve it
 
@@ -42,7 +42,7 @@ def _stf_export(context: STF_ExportContext, application_object: Any, context_obj
 
 class STF_Module_STFEXP_Text(STF_Module):
 	stf_type = _stf_type
-	stf_kind = "data"
+	stf_category = STF_Category.DATA
 	like_types = ["text"]
 	understood_application_types = [bpy.types.TextCurve]
 	import_func = _stf_import

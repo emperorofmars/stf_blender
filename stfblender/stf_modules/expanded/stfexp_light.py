@@ -2,8 +2,7 @@ import bpy
 import re
 from typing import Any
 
-from ...common import STF_ExportContext, STF_ImportContext, STF_Module, STFReportSeverity, STFReport, BlenderPropertyPathPart, STFPropertyPathPart
-
+from ...common import STF_ExportContext, STF_ImportContext, STF_Module, STFReportSeverity, STFReport, BlenderPropertyPathPart, STFPropertyPathPart, STF_Category
 from ...common.utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui, ensure_stf_id
 
 
@@ -158,7 +157,7 @@ Definition
 
 class STF_Module_STFEXP_Light(STF_Module):
 	stf_type = _stf_type
-	stf_kind = "instance"
+	stf_category = STF_Category.INSTANCE
 	like_types = ["light"]
 	understood_application_types = [tuple]
 	import_func = _stf_import

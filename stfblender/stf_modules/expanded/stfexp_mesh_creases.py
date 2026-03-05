@@ -4,12 +4,11 @@ from io import BytesIO
 from typing import Any
 import numpy as np
 
-from ...common import STF_ExportContext, STF_ImportContext
+from ...common import STF_ExportContext, STF_ImportContext, STF_Category
 from ...common.module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_ExportComponentHook
+from ...common.module_component.component_utils import add_component, export_component_base, import_component_base
 from ...common.utils.buffer_utils import determine_indices_width, determine_pack_format_float
 from ...common.helpers import register_exported_buffer, import_buffer
-
-from ...common.module_component.component_utils import add_component, export_component_base, import_component_base
 
 
 _stf_type = "stfexp.mesh.creases"
@@ -81,7 +80,7 @@ def _stf_export(context: STF_ExportContext, component: STFEXP_Mesh_Creases, cont
 class STF_Module_STF_Mesh_Creases(STF_BlenderComponentModule):
 	"""Represents the existence of mesh-creases. If they are present, Blender will automatically create this component on export, no need to add it manually"""
 	stf_type = _stf_type
-	stf_kind = "component"
+	stf_category = STF_Category.COMPONENT
 	understood_application_types = [STFEXP_Mesh_Creases]
 	import_func = _stf_import
 	export_func = _stf_export
@@ -91,13 +90,11 @@ class STF_Module_STF_Mesh_Creases(STF_BlenderComponentModule):
 	filter = [bpy.types.Mesh]
 
 
-
 def _hook_can_handle_func(application_object: Any) -> bool:
 	mesh: bpy.types.Mesh = application_object
 	if(not mesh.vertex_creases and not mesh.edge_creases): return False
 	if(mesh.stfexp_mesh_creases and len(mesh.stfexp_mesh_creases) > 0): return False
 	return True
-
 
 def _hook_apply_func(context: STF_ExportContext, application_object: bpy.types.Mesh, context_object: Any):
 	add_component(application_object, _blender_property_name, str(uuid.uuid4()), _stf_type)
@@ -107,7 +104,6 @@ class HOOK_STFEXP_Mesh_Creases(STF_ExportComponentHook):
 	hook_target_application_types = [bpy.types.Mesh]
 	hook_can_handle_application_object_func = _hook_can_handle_func
 	hook_apply_func = _hook_apply_func
-
 
 
 register_stf_modules = [

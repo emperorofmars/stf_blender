@@ -2,11 +2,10 @@ import bpy
 import re
 from typing import Any
 
-from ...common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STF_TaskSteps
-from ...common.module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
-from ...common.utils.animation_conversion_utils import get_component_index, get_component_stf_path_from_collection
-
+from ...common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STF_TaskSteps, STF_Category
+from ...common.module_component import STF_BlenderComponentBase, STF_BlenderBoneComponentModule, STF_Component_Ref
 from ...common.module_component.component_utils import add_component, export_component_base, import_component_base, preserve_component_reference
+from ...common.utils.animation_conversion_utils import get_component_index, get_component_stf_path_from_collection
 from ...common.blender_grr.stf_node_path_selector import NodePathSelector, draw_node_path_selector, node_path_selector_from_stf, node_path_selector_to_stf
 
 
@@ -110,10 +109,10 @@ def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: 
 
 """Module definition"""
 
-class STF_Module_STFEXP_Constraint_Twist(STF_BlenderComponentModule):
+class STF_Module_STFEXP_Constraint_Twist(STF_BlenderBoneComponentModule):
 	"""A rigging behaviour which copies an amount of the Y-axis rotation from the source object/bone. If no source is selected, the parent of the parent will be assumed"""
 	stf_type = _stf_type
-	stf_kind = "component"
+	stf_category = STF_Category.COMPONENT
 	like_types = ["constraint.rotation", "constraint"]
 	understood_application_types = [STFEXP_Constraint_Twist]
 	import_func = _stf_import

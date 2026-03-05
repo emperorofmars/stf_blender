@@ -1,7 +1,7 @@
 import bpy
 from typing import Any
 
-from ...common import STF_ExportContext, STF_ImportContext, STF_TaskSteps
+from ...common import STF_ExportContext, STF_ImportContext, STF_TaskSteps, STF_Category
 from ...common.module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
 from ...common.helpers import register_exported_resource, import_resource
 
@@ -78,17 +78,17 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, contex
 
 	if("viewport" in json_resource):
 		def _handle_viewport():
-			component.viewport = import_resource(context, json_resource, json_resource["viewport"], "node")
+			component.viewport = import_resource(context, json_resource, json_resource["viewport"], STF_Category.NODE)
 		context.add_task(STF_TaskSteps.DEFAULT, _handle_viewport)
 
 	if("primary_armature_instance" in json_resource):
 		def _handle_primary_armature_instance():
-			component.primary_armature_instance = import_resource(context, json_resource, json_resource["primary_armature_instance"], "node")
+			component.primary_armature_instance = import_resource(context, json_resource, json_resource["primary_armature_instance"], STF_Category.NODE)
 		context.add_task(STF_TaskSteps.DEFAULT, _handle_primary_armature_instance)
 
 	if("primary_mesh_instance" in json_resource):
 		def _handle_primary_mesh_instance():
-			component.primary_mesh_instance = import_resource(context, json_resource, json_resource["primary_mesh_instance"], "node")
+			component.primary_mesh_instance = import_resource(context, json_resource, json_resource["primary_mesh_instance"], STF_Category.NODE)
 		context.add_task(STF_TaskSteps.DEFAULT, _handle_primary_mesh_instance)
 
 	return component
@@ -118,7 +118,7 @@ def _stf_export(context: STF_ExportContext, component: AVA_Avatar, context_objec
 class STF_Module_AVA_Avatar(STF_BlenderComponentModule):
 	"""Represents a VR & V-tubing avatar model"""
 	stf_type = _stf_type
-	stf_kind = "component"
+	stf_category = STF_Category.COMPONENT
 	understood_application_types = [AVA_Avatar]
 	import_func = _stf_import
 	export_func = _stf_export

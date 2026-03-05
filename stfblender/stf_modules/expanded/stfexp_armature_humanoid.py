@@ -2,9 +2,8 @@ import bpy
 import math
 from typing import Any
 
-from ...common import STF_ExportContext, STF_ImportContext
+from ...common import STF_ExportContext, STF_ImportContext, STF_Category
 from ...common.module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
-
 from ...common.module_component.component_utils import add_component, export_component_base, import_component_base
 
 
@@ -384,7 +383,7 @@ def _stf_export(context: STF_ExportContext, component: STFEXP_Armature_Humanoid,
 class STF_Module_STFEXP_Armature_Humanoid(STF_BlenderComponentModule):
 	"""Declares that this Armature is humanoid. Must satisfy the requirements for the Unity/VRM humanoid rig"""
 	stf_type = _stf_type
-	stf_kind = "component"
+	stf_category = STF_Category.COMPONENT
 	like_types = ["armature_humanoid"]
 	understood_application_types = [STFEXP_Armature_Humanoid]
 	import_func = _stf_import

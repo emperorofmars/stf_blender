@@ -1,12 +1,10 @@
 import bpy
 from typing import Any
 
-from ...common import STF_ExportContext, STF_ImportContext, STF_TaskSteps
+from ...common import STF_ExportContext, STF_ImportContext, STF_TaskSteps, STF_Category
 from ...common.module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
-from ...common.helpers import register_exported_resource, import_resource
-
 from ...common.module_component.component_utils import add_component, export_component_base, import_component_base
-from ...common.helpers.misc import SetActiveObjectOperator
+from ...common.helpers import register_exported_resource, import_resource, SetActiveObjectOperator
 
 
 _stf_type = "ava.voice_position"
@@ -62,7 +60,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, contex
 
 	if("voice_position" in json_resource):
 		def _handle():
-			component.voice_position = import_resource(context, json_resource, json_resource["voice_position"], "node")
+			component.voice_position = import_resource(context, json_resource, json_resource["voice_position"], STF_Category.NODE)
 		context.add_task(STF_TaskSteps.DEFAULT, _handle)
 
 	return component
@@ -82,7 +80,7 @@ def _stf_export(context: STF_ExportContext, component: AVA_VoicePosition, contex
 class STF_Module_AVA_VoicePosition(STF_BlenderComponentModule):
 	"""Specify the position from which a VR & V-Tubing avatars voice originates"""
 	stf_type = _stf_type
-	stf_kind = "component"
+	stf_category = STF_Category.COMPONENT
 	understood_application_types = [AVA_VoicePosition]
 	import_func = _stf_import
 	export_func = _stf_export

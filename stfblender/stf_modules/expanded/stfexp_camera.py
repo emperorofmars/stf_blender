@@ -3,9 +3,8 @@ import math
 import re
 from typing import Any, Callable
 
-from ...common import STF_ExportContext, STF_ImportContext, STF_Module, BlenderPropertyPathPart, STFPropertyPathPart
+from ...common import STF_ExportContext, STF_ImportContext, STF_Module, BlenderPropertyPathPart, STFPropertyPathPart, STF_Category
 from ...common.stf_report import STFReportSeverity, STFReport
-
 from ...common.utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui, ensure_stf_id
 
 
@@ -162,7 +161,7 @@ Definition
 
 class STF_Module_STFEXP_Camera(STF_Module):
 	stf_type = _stf_type
-	stf_kind = "instance"
+	stf_category = STF_Category.INSTANCE
 	like_types = ["camera"]
 	understood_application_types = [tuple]
 	import_func = _stf_import

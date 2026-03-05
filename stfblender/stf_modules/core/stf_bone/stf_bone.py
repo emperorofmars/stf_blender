@@ -3,11 +3,10 @@ import mathutils
 import math
 from typing import Any
 
-from ....common import STF_Module, STF_ImportContext, STF_ExportContext, STFReportSeverity, STFReport, STF_Kind
+from ....common import STF_Module, STF_ImportContext, STF_ExportContext, STFReportSeverity, STFReport, STF_Category
 from ....common.utils import trs_utils
 from ....common.utils.armature_bone import ArmatureBone
 from ....common.utils.animation_conversion_utils import *
-
 from ....common.module_component.component_utils import get_components_from_object
 from ....common.utils.boilerplate import boilerplate_register, boilerplate_unregister
 from ....common.utils.id_utils import ensure_stf_id
@@ -35,7 +34,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	# Once Blender enters into edit-mode, the Bone references will be invalidated. Store the child-names as string.
 	children = []
 	for child_id in json_resource.get("children", []):
-		child: ArmatureBone = context.import_resource(child_id, context_object, "node")
+		child: ArmatureBone = context.import_resource(child_id, context_object, STF_Category.NODE)
 		if(child):
 			children.append(child.name)
 		else:
@@ -126,7 +125,7 @@ def _get_components_holder_func(application_object: ArmatureBone) -> Any:
 
 class STF_Module_STF_Bone(STF_Module):
 	stf_type = _stf_type
-	stf_kind = STF_Kind.NODE
+	stf_category = STF_Category.NODE
 	like_types = ["bone", "node"]
 	understood_application_types = [ArmatureBone]
 	import_func = _stf_import
@@ -146,12 +145,12 @@ register_stf_modules = [
 
 
 def register():
-	boilerplate_register(bpy.types.Bone, STF_Kind.NODE)
+	boilerplate_register(bpy.types.Bone, STF_Category.NODE)
 	bpy.types.Bone.stf_bone = bpy.props.PointerProperty(type=STF_Bone, name="STF Bone", options=set())
 	#bpy.types.Bone.stf_bone_non_deform_use_select = bpy.props.PointerProperty(type=STF_Bone, name="STF Bone", options=set())
 
 
 def unregister():
-	boilerplate_unregister(bpy.types.Bone, STF_Kind.NODE)
+	boilerplate_unregister(bpy.types.Bone, STF_Category.NODE)
 	if hasattr(bpy.types.Bone, "stf_bone"):
 		del bpy.types.Bone.stf_bone

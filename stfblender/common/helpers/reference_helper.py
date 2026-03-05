@@ -1,6 +1,6 @@
 from typing import Any
 
-from ..interface_stf_import_context import STF_ImportContext
+from .. import STF_ImportContext, STF_Category
 
 
 def register_exported_resource(json_resource: dict, resource_id: str) -> int:
@@ -38,7 +38,7 @@ def get_buffer_id(json_resource: dict, buffer_index: int) -> str:
 	else:
 		return json_resource["referenced_buffers"][buffer_index]
 
-def import_resource(context: STF_ImportContext, json_resource: dict, resource_index: int, expected_kind: str = "data") -> Any:
+def import_resource(context: STF_ImportContext, json_resource: dict, resource_index: int, expected_kind: str = STF_Category.DATA) -> Any:
 	if("referenced_resources" not in json_resource or len(json_resource["referenced_resources"]) < resource_index):
 		return None
 	else:

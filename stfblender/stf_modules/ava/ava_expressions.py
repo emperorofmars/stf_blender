@@ -1,10 +1,9 @@
 import bpy
 from typing import Any
 
-from ...common import STF_ExportContext, STF_ImportContext, STFReportSeverity, STFReport, STF_TaskSteps
+from ...common import STF_ExportContext, STF_ImportContext, STFReportSeverity, STFReport, STF_TaskSteps, STF_Category
 from ...common.module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
 from ...common.helpers import register_exported_resource, import_resource, create_add_button, create_remove_button, poll_valid_animations, draw_slot_link_warning
-
 from ...common.module_component.component_utils import add_component, export_component_base, import_component_base
 from ...common.blender_grr import *
 
@@ -165,11 +164,11 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 			else:
 				blender_expression.expression = "custom"
 				blender_expression.custom_expression = meaning
-			blender_expression.animation = import_resource(context, json_resource, json_expression.get("animation"), "data")
+			blender_expression.animation = import_resource(context, json_resource, json_expression.get("animation"), STF_Category.DATA)
 
 			if("fallback" in json_expression):
 				blender_expression.use_blendshape_fallback = True
-				if(fallback_resource := import_resource(context, json_resource, json_expression["fallback"], "data")):
+				if(fallback_resource := import_resource(context, json_resource, json_expression["fallback"], STF_Category.DATA)):
 					blender_expression.blendshape_fallback.collection = context.get_root_collection() # todo maybe handle root collection import?
 					blender_expression.blendshape_fallback.stf_data_resource_id = fallback_resource.stf_id
 				else:
@@ -216,7 +215,7 @@ def _stf_export(context: STF_ExportContext, component: AVA_Expressions, context_
 class STF_Module_AVA_Expressions(STF_BlenderComponentModule):
 	"""Map facial-expressions/emotions to animations"""
 	stf_type = _stf_type
-	stf_kind = "component"
+	stf_category = STF_Category.COMPONENT
 	like_types = ["expressions"]
 	understood_application_types = [AVA_Expressions]
 	import_func = _stf_import

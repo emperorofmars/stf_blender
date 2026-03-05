@@ -2,10 +2,10 @@ import bpy
 import re
 from typing import Any
 
-from ...common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart
-from ...common.module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_Component_Ref
-from ...common.utils.animation_conversion_utils import get_component_index, get_component_stf_path_from_collection
+from ...common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STF_Category
+from ...common.module_component import STF_BlenderComponentBase, STF_BlenderBoneComponentModule, STF_Component_Ref
 from ...common.module_component.component_utils import add_component, export_component_base, import_component_base
+from ...common.utils.animation_conversion_utils import get_component_index, get_component_stf_path_from_collection
 
 
 _stf_type = "ava.secondary_motion"
@@ -71,10 +71,10 @@ def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: 
 
 """Module definition"""
 
-class STF_Module_AVA_SecondaryMotion(STF_BlenderComponentModule):
+class STF_Module_AVA_SecondaryMotion(STF_BlenderBoneComponentModule):
 	"""Root of a physics chain"""
 	stf_type = _stf_type
-	stf_kind = "component"
+	stf_category = STF_Category.COMPONENT
 	like_types = ["secondary_motion"]
 	understood_application_types = [AVA_SecondaryMotion]
 	import_func = _stf_import

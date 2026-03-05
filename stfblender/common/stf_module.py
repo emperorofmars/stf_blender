@@ -1,22 +1,14 @@
-from enum import StrEnum
 from typing import Any, Callable
 
 from . import STF_ImportContext, STF_ExportContext, BlenderPropertyPathPart, STFPropertyPathPart
-
-
-class STF_Kind(StrEnum):
-	DATA = "data"
-	NODE = "node"
-	INSTANCE = "instance"
-	COMPONENT = "component"
 
 
 class STF_Module:
 	"""Represents functionality to import and export an STF resource"""
 	stf_type: str
 
-	# The STF kind string must match the STF_Kind enum. This property is useful for validation.
-	stf_kind: str
+	# The STF category string must match the STF_Category enum. This property is useful for validation.
+	stf_category: str
 
 	# If a module for the same stf_type is registered, the priority will decide which is preferred.
 	priority: int = 0

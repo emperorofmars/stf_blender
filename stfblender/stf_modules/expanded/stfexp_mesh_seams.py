@@ -3,12 +3,11 @@ import uuid
 from io import BytesIO
 from typing import Any
 
-from ...common import STF_ExportContext, STF_ImportContext
+from ...common import STF_ExportContext, STF_ImportContext, STF_Category
 from ...common.module_component import STF_BlenderComponentBase, STF_BlenderComponentModule, STF_ExportComponentHook
-from ...common.helpers import register_exported_buffer, import_buffer
-from ...common.utils.buffer_utils import determine_indices_width, parse_uint, serialize_uint
-
 from ...common.module_component.component_utils import add_component, export_component_base, import_component_base
+from ...common.utils.buffer_utils import determine_indices_width, parse_uint, serialize_uint
+from ...common.helpers import register_exported_buffer, import_buffer
 
 
 _stf_type = "stfexp.mesh.seams"
@@ -63,7 +62,7 @@ def _stf_export(context: STF_ExportContext, component: STFEXP_Mesh_Seams, contex
 class STF_Module_STF_Mesh_Seams(STF_BlenderComponentModule):
 	"""Represents the existence of mesh-seams. If they are present, Blender will automatically create this component on export, no need to add it manually"""
 	stf_type = _stf_type
-	stf_kind = "component"
+	stf_category = STF_Category.COMPONENT
 	understood_application_types = [STFEXP_Mesh_Seams]
 	import_func = _stf_import
 	export_func = _stf_export
@@ -73,12 +72,10 @@ class STF_Module_STF_Mesh_Seams(STF_BlenderComponentModule):
 	filter = [bpy.types.Mesh]
 
 
-
 def _hook_can_handle_func(application_object: Any) -> bool:
 	mesh: bpy.types.Mesh = application_object
 	if(mesh.stfexp_mesh_seams and len(mesh.stfexp_mesh_seams) > 0): return False
 	return True
-
 
 def _hook_apply_func(context: STF_ExportContext, application_object: bpy.types.Mesh, context_object: Any):
 	add_component(application_object, _blender_property_name, str(uuid.uuid4()), _stf_type)

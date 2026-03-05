@@ -3,7 +3,7 @@ from io import BytesIO
 from typing import Any
 import numpy as np
 
-from ....common import STF_ImportContext, STFReportSeverity, STFReport
+from ....common import STF_ImportContext, STFReportSeverity, STFReport, STF_Category
 from ....common.utils.trs_utils import stf_translation_to_blender, stf_uv_to_blender
 from ....common.utils.buffer_utils import determine_pack_format_float, determine_pack_format_uint, parse_float, parse_int, parse_uint
 
@@ -13,7 +13,7 @@ _stf_type = "stf.mesh"
 
 # Mesh import and export are the lowest hanging fruits for performance improvements.
 
-def import_stf_mesh(context: STF_ImportContext, json_resource: dict, stf_id: str, parent_application_object: Any) -> Any:
+def import_stf_mesh(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
 	blender_mesh = bpy.data.meshes.new(json_resource.get("name", "STF Mesh"))
 	blender_mesh.stf_info.stf_id = stf_id
 	if(json_resource.get("name")):
@@ -144,7 +144,7 @@ def import_stf_mesh(context: STF_ImportContext, json_resource: dict, stf_id: str
 		for material_slot in json_resource["material_slots"]:
 			material = None
 			if(material_slot):
-				material = context.import_resource(material_slot, stf_kind="data")
+				material = context.import_resource(material_slot, stf_category=STF_Category.DATA)
 			blender_mesh.materials.append(material)
 
 	if("material_indices" in json_resource):
@@ -156,7 +156,7 @@ def import_stf_mesh(context: STF_ImportContext, json_resource: dict, stf_id: str
 
 	# Weight paint
 	if("armature" in json_resource and "weights" in json_resource and "bones" in json_resource):
-		armature: bpy.types.Armature = context.import_resource(json_resource["armature"], stf_kind="data")
+		armature: bpy.types.Armature = context.import_resource(json_resource["armature"], stf_category=STF_Category.DATA)
 		if(not armature):
 			context.report(STFReport("Invalid Armature (armature id: " + json_resource["armature"] + " )", STFReportSeverity.Error, stf_id, _stf_type, blender_mesh))
 		else:

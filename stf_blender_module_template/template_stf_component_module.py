@@ -33,7 +33,7 @@ def _stf_export(context: stfblender.common.STF_ExportContext, component: SqueakC
 
 class MyCustomSTFSqueakComponentModule(stfblender.common.module_component.STF_BlenderComponentModule):
 	stf_type = _stf_type
-	stf_kind = "component"
+	stf_category = "component"
 	understood_application_types = [SqueakComponent]
 	import_func = _stf_import
 	export_func = _stf_export

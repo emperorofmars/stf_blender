@@ -2,11 +2,10 @@ import bpy
 import json
 from typing import Any
 
-from ...common import STF_ExportContext, STF_ImportContext, STF_TaskSteps
+from ...common import STF_ExportContext, STF_ImportContext, STF_TaskSteps, STF_Category
 from ...common.module_data import STF_BlenderDataModule, STF_BlenderDataResourceBase, STF_Data_Ref
-from ...common.helpers import register_exported_buffer, register_exported_resource
-
 from ...common.module_data.data_resource_utils import add_resource, export_data_resource_base, get_components_from_data_resource, import_data_resource_base
+from ...common.helpers import register_exported_buffer, register_exported_resource
 from ...common.blender_grr import BlenderGRR, construct_blender_grr, resolve_blender_grr
 from .json_fallback_buffer import STF_FallbackBuffer, decode_buffer, encode_buffer
 from .json_fallback_ui import draw_fallback
@@ -77,7 +76,7 @@ class STF_Module_JsonFallbackData(STF_BlenderDataModule):
 	"""This type is not supported.
 	You have to edit the raw json string, resource references and base64 encoded binary buffers"""
 	stf_type = None
-	stf_kind = "data"
+	stf_category = STF_Category.DATA
 	understood_application_types = [JsonFallbackData]
 	import_func = _stf_import
 	export_func = _stf_export
