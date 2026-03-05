@@ -33,7 +33,7 @@ def _stf_export(context: stfblender.common.STF_ExportContext, application_object
 	return json_resource, application_object.stf_info.stf_id
 
 
-class CustomSTFBrushModule(stfblender.common.STF_Module):
+class CustomSTFBrushHandler(stfblender.common.resource.STF_Handler_Data):
 	stf_type = _stf_type
 	stf_category = "data"
 	like_types = ["brush", "or", "whatever"]
@@ -41,10 +41,10 @@ class CustomSTFBrushModule(stfblender.common.STF_Module):
 	understood_application_types = [bpy.types.Brush]
 	import_func = _stf_import
 	export_func = _stf_export
-	get_components_func = stfblender.common.module_component.component_utils.get_components_from_object
+	get_components_func = stfblender.common.resource.component.component_utils.get_components_from_object
 
 
-register_stf_handlers = [CustomSTFBrushModule]
+register_stf_handlers = [CustomSTFBrushHandler]
 
 
 def register():

@@ -8,11 +8,11 @@ _stf_type = "my_custom.namespaced.squeak_component"
 _blender_property_name = "my_custom_namespaced_squeak_component"
 
 
-class SqueakComponent(stfblender.common.module_component.STF_BlenderComponentBase):
+class SqueakComponent(stfblender.common.resource.STF_ComponentResourceBase):
 	squeak: bpy.props.BoolProperty(name="Squeak", default=True) # type: ignore
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: stfblender.common.module_component.STF_Component_Ref, context_object: Any, component: SqueakComponent):
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: stfblender.common.resource.STF_Component_Ref, context_object: Any, component: SqueakComponent):
 	layout.prop(component, "squeak")
 
 
@@ -31,7 +31,7 @@ def _stf_export(context: stfblender.common.STF_ExportContext, component: SqueakC
 	return ret, component.stf_id
 
 
-class MyCustomSTFSqueakComponentModule(stfblender.common.module_component.STF_BlenderComponentModule):
+class MyCustomSTFSqueakComponentModule(stfblender.common.resource.STF_Handler_Component):
 	stf_type = _stf_type
 	stf_category = "component"
 	understood_application_types = [SqueakComponent]
