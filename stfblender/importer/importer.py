@@ -1,7 +1,9 @@
 import traceback
 import bpy
 import os
+import io
 from bpy_extras.io_utils import ImportHelper
+from collections.abc import Sequence
 
 from ..common.base.stf_registry import get_import_handlers, get_import_handlers_fallback
 from .stf_import_state import STF_ImportState
@@ -13,17 +15,17 @@ from .import_settings import STF_ImportSettings
 
 
 class STF_Import_Result:
-	def __init__(self, success: bool, collection: bpy.types.Collection = None, error_message: str = None, warnings: list[STFReport] = [], import_time: float = -1):
-		self.success = success
-		self.collection = collection
-		self.error_message = error_message
-		self.import_time = import_time
-		self.warnings = warnings
+	def __init__(self, success: bool, collection: bpy.types.Collection | None = None, error_message: str | None = None, warnings: Sequence[STFReport] = (), import_time: float = -1):
+		self.success: bool = success
+		self.collection: bpy.types.Collection | None = collection
+		self.error_message: str | None = error_message
+		self.warnings: Sequence[STFReport] = warnings
+		self.import_time: float = import_time
 
 def import_stf_file(filepath: str, import_settings: STF_ImportSettings) -> STF_Import_Result:
 	import time
 	time_start = time.time()
-	file = None
+	file: io.BufferedReader | None = None
 	trash_objects: list[bpy.types.Object] = []
 	try:
 		# Read and parse stf_file from disk
@@ -34,7 +36,7 @@ def import_stf_file(filepath: str, import_settings: STF_ImportSettings) -> STF_I
 		stf_context = STF_ImportContext(stf_state)
 		root = stf_context.run()
 
-		if(not root or type(root) != bpy.types.Collection):
+		if(not root or type(root) is not bpy.types.Collection):
 			raise Exception("Import Failed, invalid root!")
 
 		return STF_Import_Result(True, collection = root, import_time=time.time() - time_start, warnings=stf_state._reports)

@@ -1,6 +1,8 @@
+from io import BufferedWriter
 import traceback
 import bpy
 from bpy_extras.io_utils import ExportHelper
+from collections.abc import Sequence
 
 from ..common.base.stf_meta import draw_meta_editor
 from ..common.stf_report import STFReport, STFReportSeverity
@@ -13,16 +15,16 @@ from ..package_key import package_key
 
 
 class STF_Export_Result:
-	def __init__(self, success: bool, error_message: str = None, warnings: list[STFReport] = [], export_time: float = -1):
-		self.success = success
-		self.error_message = error_message
-		self.export_time = export_time
-		self.warnings = warnings
+	def __init__(self, success: bool, error_message: str | None = None, warnings: Sequence[STFReport] = (), export_time: float = -1):
+		self.success: bool = success
+		self.error_message: str | None = error_message
+		self.warnings: Sequence[STFReport] = warnings
+		self.export_time: float = export_time
 
 def export_stf_file(collection: bpy.types.Collection, filepath: str, export_settings: STF_ExportSettings, debug: bool = False) -> STF_Export_Result:
 	import time
 	time_start = time.time()
-	files = []
+	files: Sequence[BufferedWriter] = []
 	trash_objects: list[bpy.types.Object] = []
 	try:
 		stf_state = STF_ExportState(collection.stf_meta.to_stf_meta_assetInfo(), get_export_handlers(), trash_objects, settings = export_settings)

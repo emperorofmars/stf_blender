@@ -11,7 +11,7 @@ class STFReportSeverity(IntEnum):
 
 
 class STFReport:
-	def __init__(self, message: str, severity: STFReportSeverity = STFReportSeverity.Error, stf_id: str = None, stf_type: str = None, application_object: Any = None):
+	def __init__(self, message: str, severity: STFReportSeverity = STFReportSeverity.Error, stf_id: str | None = None, stf_type: str | None = None, application_object: Any = None):
 		self.message = message
 		self.severity = severity
 		self.stf_id = stf_id

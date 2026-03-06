@@ -6,12 +6,12 @@ from ..stf_report import STFReportSeverity, STFException, STFReport
 
 
 class STF_State_Base:
-	def __init__(self, fail_on_severity = STFReportSeverity.FatalError):
+	def __init__(self, fail_on_severity: STFReportSeverity = STFReportSeverity.FatalError):
 		self._tasks: dict[int, list[Callable]] = {}
 		self._cleanup_tasks: list[Callable] = []
 		self._reports: list[STFReport] = []
-		self._fail_on_severity = fail_on_severity
-		self._current_task_step = 0
+		self._fail_on_severity: STFReportSeverity = fail_on_severity
+		self._current_task_step: int = 0
 
 	def report(self, report: STFReport):
 		self._reports.append(report)
@@ -29,7 +29,7 @@ class STF_State_Base:
 		self._cleanup_tasks.append(task)
 
 	def run_tasks(self):
-		last_taskstep = -1
+		last_taskstep: int = -1
 
 		def get_next_step() -> int | None:
 			candidate = sys.maxsize

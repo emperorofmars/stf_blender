@@ -1,15 +1,18 @@
+from collections.abc import Sequence
 import bpy
 import io
 import logging
 from typing import Any
 
+from .export_settings import STF_ExportSettings
+
+from ..common import STFReportSeverity, STFReport
+from ..common.resource.stf_handler_base import STF_HandlerBase
 from ..common.base.stf_json_definition import STF_Buffer, STF_JsonDefinition, STF_Meta_AssetInfo
-from ..common.stf_report import STFReportSeverity, STFReport
-from ..common.resource.blender_native.stf_handler_blender_native import STF_Handler_BlenderNative
-from ..common.resource.component.stf_handler_component import STF_ExportComponentHook
+from ..common.resource.component import STF_ExportComponentHook
 from ..common.base.stf_file import STF_File
 from ..common.base.stf_state_base import STF_State_Base
-from ..common.helpers.misc import get_stf_version
+from ..common.helpers import get_stf_version
 
 
 _logger = logging.getLogger(__name__)
@@ -24,17 +27,16 @@ class STF_ExportState(STF_State_Base):
 	def __init__(
 			self,
 			asset_info: STF_Meta_AssetInfo,
-			handlers: tuple[dict[Any, list[STF_Handler_BlenderNative]],
-			dict[Any, list[STF_ExportComponentHook]]],
-			trash_objects: list[bpy.types.Object] = [],
+			handlers: tuple[dict[Any, list[STF_HandlerBase]], dict[Any, list[STF_ExportComponentHook]]],
+			trash_objects: Sequence[bpy.types.Object] = (),
 			fail_on_severity: STFReportSeverity = STFReportSeverity.FatalError,
 			permit_id_reassignment: bool = True,
 			metric_multiplier: float = 1,
-			settings: Any = None
+			settings: STF_ExportSettings | None = None
 	):
 		super().__init__(fail_on_severity)
 
-		self._handlers: dict[Any, list[STF_Handler_BlenderNative]] = handlers[0]
+		self._handlers: dict[Any, list[STF_HandlerBase]] = handlers[0]
 		self._hooks: dict[Any, list[STF_ExportComponentHook]] = handlers[1]
 
 		self._resources: dict[Any, str] = {} # original application object -> ID of exported STF Json resource
@@ -42,17 +44,17 @@ class STF_ExportState(STF_State_Base):
 		self._exported_resources: dict[str, dict] = {} # ID -> exported STF Json resource
 		self._exported_buffers: dict[str, io.BytesIO] = {} # ID -> exported STF Json buffer
 
-		self._asset_info = asset_info
-		self._permit_id_reassignment = permit_id_reassignment
-		self._root_id: str = None
-		self._metric_multiplier = metric_multiplier
+		self._asset_info: STF_Meta_AssetInfo = asset_info
+		self._permit_id_reassignment: bool = permit_id_reassignment
+		self._root_id: str | None = None
+		self._metric_multiplier: float = metric_multiplier
 
-		self._trash_objects: list[bpy.types.Object] = trash_objects
+		self._trash_objects: Sequence[bpy.types.Object] = trash_objects
 
-		self._settings = settings
+		self._settings: STF_ExportSettings | None = settings
 
 
-	def determine_handler(self, application_object: Any, module_kind: str = None) -> STF_Handler_BlenderNative:
+	def determine_handler(self, application_object: Any, stf_category: str | None = None) -> STF_HandlerBase | None:
 		"""Find the best suited registered STF_Handler for the type of this object"""
 		selected_module = None
 		selected_priority = -1
@@ -60,7 +62,7 @@ class STF_ExportState(STF_State_Base):
 		for module in self._handlers.get(type(application_object), []):
 			if(hasattr(module, "can_handle_application_object_func")):
 				priority = module.can_handle_application_object_func(application_object)
-				if(priority > selected_priority and (module_kind == None or module.stf_category == module_kind)):
+				if(priority > selected_priority and (stf_category is None or module.stf_category == stf_category)):
 					selected_module = module
 					selected_priority = priority
 			elif(1 > selected_priority):
@@ -74,7 +76,7 @@ class STF_ExportState(STF_State_Base):
 		return self._hooks.get(type(application_object), [])
 
 
-	def determine_property_resolution_handler(self, application_object: Any, data_path: str) -> STF_Handler_BlenderNative:
+	def determine_property_resolution_handler(self, application_object: Any, data_path: str) -> STF_HandlerBase:
 		# TODO handle priority for animation path handling maybe at some point?
 
 		for _, module_list in self._handlers.items():
@@ -103,7 +105,7 @@ class STF_ExportState(STF_State_Base):
 		self._resources_inverse[id] = application_object
 
 
-	def register_serialized_resource(self, application_object: Any, json_resource: dict, id: str):
+	def register_serialized_resource(self, application_object: Any, json_resource: dict[str, Any], id: str):
 		"""Now register the fully serialized object."""
 		if(type(id) is not str):
 			_logger.error("Invalid Resource ID", stack_info=True)

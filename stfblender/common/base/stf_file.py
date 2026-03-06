@@ -17,7 +17,7 @@ class STF_File:
 		self.filename: str = ""
 
 	@staticmethod
-	def parse(buffer: io.BytesIO):
+	def parse(buffer: io.BufferedReader):
 		ret = STF_File()
 		ret.filename = buffer.name
 
@@ -53,7 +53,7 @@ class STF_File:
 
 		return ret
 
-	def serialize(self, buffer: io.BytesIO):
+	def serialize(self, buffer: io.BufferedWriter):
 		# Serialize Magic number
 		buffer.write("STF0".encode("ascii"))
 
