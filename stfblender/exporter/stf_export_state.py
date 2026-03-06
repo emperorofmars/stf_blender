@@ -1,11 +1,10 @@
-from collections.abc import Sequence
 import bpy
 import io
 import logging
 from typing import Any
+from collections.abc import Sequence
 
 from .export_settings import STF_ExportSettings
-
 from ..common import STFReportSeverity, STFReport
 from ..common.resource.stf_handler_base import STF_HandlerBase
 from ..common.base.stf_json_definition import STF_Buffer, STF_JsonDefinition, STF_Meta_AssetInfo
@@ -56,20 +55,20 @@ class STF_ExportState(STF_State_Base):
 
 	def determine_handler(self, application_object: Any, stf_category: str | None = None) -> STF_HandlerBase | None:
 		"""Find the best suited registered STF_Handler for the type of this object"""
-		selected_module = None
+		selected_handler = None
 		selected_priority = -1
 
-		for module in self._handlers.get(type(application_object), []):
-			if(hasattr(module, "can_handle_application_object_func")):
-				priority = module.can_handle_application_object_func(application_object)
-				if(priority > selected_priority and (stf_category is None or module.stf_category == stf_category)):
-					selected_module = module
+		for handler in self._handlers.get(type(application_object), []):
+			if(hasattr(handler, "can_handle_application_object_func")):
+				priority = handler.can_handle_application_object_func(application_object)
+				if(priority > selected_priority and (stf_category is None or handler.stf_category == stf_category)):
+					selected_handler = handler
 					selected_priority = priority
 			elif(1 > selected_priority):
-				selected_module = module
+				selected_handler = handler
 				selected_priority = 1
 
-		return selected_module
+		return selected_handler
 
 
 	def determine_hooks(self, application_object: Any) -> list[STF_ExportComponentHook]:
@@ -79,19 +78,19 @@ class STF_ExportState(STF_State_Base):
 	def determine_property_resolution_handler(self, application_object: Any, data_path: str) -> STF_HandlerBase:
 		# TODO handle priority for animation path handling maybe at some point?
 
-		for _, module_list in self._handlers.items():
-			for module in module_list:
-				if(hasattr(module, "understood_application_property_path_types") and type(application_object) in module.understood_application_property_path_types
-						and hasattr(module, "understood_application_property_path_parts")
-						and hasattr(module, "resolve_property_path_to_stf_func")):
-					for understood_property in module.understood_application_property_path_parts:
+		for _, handler_list in self._handlers.items():
+			for handler in handler_list:
+				if(hasattr(handler, "understood_application_property_path_types") and type(application_object) in handler.understood_application_property_path_types
+						and hasattr(handler, "understood_application_property_path_parts")
+						and hasattr(handler, "resolve_property_path_to_stf_func")):
+					for understood_property in handler.understood_application_property_path_parts:
 						if(data_path.startswith(understood_property)):
-							return module
+							return handler
 
 		return None
 
 
-	def get_resource_id(self, application_object: Any) -> str:
+	def get_resource_id(self, application_object: Any) -> str | None:
 		"""Get the ID this object will be referenced by. The object may not be fully serialized yet."""
 		if(application_object in self._resources):
 			return self._resources[application_object]

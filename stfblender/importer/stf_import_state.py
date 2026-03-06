@@ -65,7 +65,7 @@ class STF_ImportState(STF_State_Base):
 		return None
 
 
-	def get_json_resource(self, stf_id: str) -> dict[str, Any] | None:
+	def get_json_resource(self, stf_id: str) -> dict[str, Any]:
 		return self._file.definition.resources.get(stf_id)
 
 	def get_root_id(self) -> str:
