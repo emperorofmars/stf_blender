@@ -41,8 +41,7 @@ class STF_State_Base:
 			else:
 				return candidate
 
-		while(get_next_step()):
-			task_step = get_next_step()
+		while(task_step := get_next_step()):
 			self._current_task_step = task_step
 			task = self._tasks[task_step]
 			max_iterations = 1000

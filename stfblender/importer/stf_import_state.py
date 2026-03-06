@@ -57,15 +57,15 @@ class STF_ImportState(STF_State_Base):
 		return None
 
 
-	def determine_property_resolution_module(self, stf_id: str) -> STF_HandlerBase | None:
+	def determine_property_resolution_handler(self, stf_id: str) -> STF_HandlerBase | None:
 		if(json_resource := self.get_json_resource(stf_id)):
-			module = self.determine_handler(json_resource)
-			if(hasattr(module, "resolve_stf_property_to_blender_func")):
-				return module
+			handler = self.determine_handler(json_resource)
+			if(hasattr(handler, "resolve_stf_property_to_blender_func")):
+				return handler
 		return None
 
 
-	def get_json_resource(self, stf_id: str) -> dict[str, Any]:
+	def get_json_resource(self, stf_id: str) -> dict[str, Any] | None:
 		return self._file.definition.resources.get(stf_id)
 
 	def get_root_id(self) -> str:

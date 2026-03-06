@@ -27,7 +27,7 @@ class STF_ImportContext(ISTF_ImportContext):
 		return ret
 
 
-	def get_json_resource(self, stf_id: str) -> dict:
+	def get_json_resource(self, stf_id: str) -> dict | None:
 		return self._state.get_json_resource(stf_id)
 
 	def get_imported_resource(self, stf_id: str):
@@ -40,8 +40,7 @@ class STF_ImportContext(ISTF_ImportContext):
 	def __run_components(self, json_resource: dict, application_object: Any):
 		if("components" in json_resource):
 			for component_id in json_resource["components"]:
-				json_component = self.get_json_resource(component_id)
-				if(json_component):
+				if(json_component := self.get_json_resource(component_id)):
 					if(component_handler := self._state.determine_handler(json_component, STF_Category.COMPONENT)):
 						component_result = component_handler.import_func(self, json_component, component_id, application_object)
 						if(component_result):
@@ -58,7 +57,7 @@ class STF_ImportContext(ISTF_ImportContext):
 
 	def import_resource(self, stf_id: str, context_object: Any = None, stf_category: str | None = STF_Category.DATA) -> Any:
 		if(stf_id in self._state._imported_resources):
-			if(type(self._state._imported_resources[stf_id]) == STF_Component_Editmode_Resistant_Reference):
+			if(type(self._state._imported_resources[stf_id]) is STF_Component_Editmode_Resistant_Reference):
 				return self._state._imported_resources[stf_id].get()
 			else:
 				return self._state._imported_resources[stf_id]
@@ -82,14 +81,14 @@ class STF_ImportContext(ISTF_ImportContext):
 		return None
 
 
-	def import_buffer(self, stf_id: str) -> bytes:
+	def import_buffer(self, stf_id: str) -> bytes | None:
 		return self._state.import_buffer(stf_id)
 
 
 	def resolve_stf_property_path(self, stf_path: list[str], application_object: Any = None) -> BlenderPropertyPathPart:
-		if(stf_path == None or len(stf_path) == 0): return None
+		if(stf_path is None or len(stf_path) == 0): return None
 
-		if(selected_handler := self._state.determine_property_resolution_module(stf_path[0])):
+		if(selected_handler := self._state.determine_property_resolution_handler(stf_path[0])):
 			return selected_handler.resolve_stf_property_to_blender_func(self, stf_path, application_object)
 
 		return None

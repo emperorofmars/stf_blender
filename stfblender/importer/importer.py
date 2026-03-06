@@ -5,13 +5,13 @@ import io
 from bpy_extras.io_utils import ImportHelper
 from collections.abc import Sequence
 
-from ..common.base.stf_registry import get_import_handlers, get_import_handlers_fallback
-from .stf_import_state import STF_ImportState
-from ..common.stf_report import STFException, STFReport, STFReportSeverity
-from .stf_import_context import STF_ImportContext
-from ..common.base.stf_file import STF_File
-from ..common.helpers.misc import OpenWebpage, draw_slot_link_warning, get_stf_version
 from .import_settings import STF_ImportSettings
+from .stf_import_state import STF_ImportState
+from .stf_import_context import STF_ImportContext
+from ..common.base.stf_registry import get_import_handlers, get_import_handlers_fallback
+from ..common.stf_report import STFException, STFReport, STFReportSeverity
+from ..common.base.stf_file import STF_File
+from ..common.helpers import OpenWebpage, draw_slot_link_warning, get_stf_version
 
 
 class STF_Import_Result:
@@ -121,13 +121,14 @@ class ImportSTF(bpy.types.Operator, ImportHelper):
 
 
 	def draw(self, context: bpy.types.Context):
-		self.layout.operator(OpenWebpage.bl_idname, text="Open User Guide", icon="HELP").url = "https://docs.stfform.at/guide/blender.html"
-		self.layout.label(text="STF version: " + get_stf_version())
-		self.layout.separator(factor=1, type="SPACE")
+		layout: bpy.types.UILayout = self.layout # type: ignore
+		layout.operator(OpenWebpage.bl_idname, text="Open User Guide", icon="HELP").url = "https://docs.stfform.at/guide/blender.html"
+		layout.label(text="STF version: " + get_stf_version())
+		layout.separator(factor=1, type="SPACE")
 
-		draw_slot_link_warning(self.layout)
+		draw_slot_link_warning(layout)
 
-		self.layout.prop(self.import_settings, "import_baked_animations")
+		layout.prop(self.import_settings, "import_baked_animations")
 
 
 def import_button(self, context: bpy.types.Context):

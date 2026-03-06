@@ -10,7 +10,7 @@ from .property_path_part import BlenderPropertyPathPart
 class STF_ImportContext:
 	"""Interface Context for resource import. It will be passed to each STF_Handlers's import func."""
 
-	def get_json_resource(self, stf_id: str) -> dict:
+	def get_json_resource(self, stf_id: str) -> dict | None:
 		pass
 
 	def get_imported_resource(self, stf_id: str):
@@ -22,7 +22,7 @@ class STF_ImportContext:
 	def import_resource(self, stf_id: str, context_object: Any = None, stf_category: str = STF_Category.DATA) -> Any:
 		pass
 
-	def import_buffer(self, stf_id: str) -> bytes:
+	def import_buffer(self, stf_id: str) -> bytes | None:
 		pass
 
 	def resolve_stf_property_path(self, stf_path: list[str], application_object: Any = None) -> BlenderPropertyPathPart:

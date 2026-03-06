@@ -2,6 +2,7 @@ import bpy
 
 from typing import Any
 
+from ...common.stf_category import STF_Category
 from ..resource.stf_handler_base import STF_HandlerBase
 from ..resource.component.stf_handler_component import STF_Handler_Component, STF_ExportComponentHook
 from ..resource.data.stf_handler_data import STF_Handler_Data
@@ -13,7 +14,7 @@ Util to retrieve all existing STF-handlers
 def get_stf_handlers() -> list[STF_HandlerBase]:
 	stf_handlers = []
 	import sys
-	for blender_addon in bpy.context.preferences.addons.keys():
+	for blender_addon in bpy.context.preferences.addons.keys(): # type: ignore
 		try:
 			python_module = sys.modules[blender_addon]
 			if(stf_handler_list := getattr(python_module, "register_stf_handlers", None)):
@@ -68,11 +69,12 @@ def get_export_handlers() -> tuple[dict[Any, list[STF_HandlerBase]], dict[Any, l
 					ret_handlers[understood_type].append(stf_handler)
 
 		if(hasattr(stf_handler, "hook_target_application_types") and hasattr(stf_handler, "hook_apply_func") and hasattr(stf_handler, "hook_can_handle_application_object_func")):
-			for understood_type in stf_handler.hook_target_application_types:
+			stf_hook: STF_ExportComponentHook = stf_handler # type: ignore
+			for understood_type in stf_hook.hook_target_application_types:
 				if(not ret_hooks.get(understood_type)):
-					ret_hooks[understood_type] = [stf_handler]
+					ret_hooks[understood_type] = [stf_hook]
 				else:
-					ret_hooks[understood_type].append(stf_handler)
+					ret_hooks[understood_type].append(stf_hook)
 
 	return (ret_handlers, ret_hooks)
 
@@ -127,23 +129,22 @@ def get_blender_non_native_data_handlers() -> list[STF_Handler_Data]:
 	return ret
 
 
-def get_fallback_handler(stf_category: str) -> STF_HandlerBase:
+def get_fallback_handler(stf_category: str) -> STF_HandlerBase: # type: ignore
 	for stf_handler in get_stf_handlers():
-		if(hasattr(stf_handler, "stf_type") and stf_handler.stf_type == None and stf_handler.stf_category == stf_category):
+		if(hasattr(stf_handler, "stf_type") and stf_handler.stf_type is None and stf_handler.stf_category == stf_category):
 			return stf_handler
 
 
-def find_component_handler(stf_handlers: list[STF_Handler_Component], stf_type: str) -> STF_Handler_Component:
+def find_component_handler(stf_handlers: list[STF_Handler_Component], stf_type: str) -> STF_Handler_Component:  # type: ignore
 	for stf_handler in stf_handlers:
 		if(stf_handler.stf_type == stf_type):
 			return stf_handler
 	if(stf_type == "fallback"):
-		return get_fallback_handler("component")
+		return get_fallback_handler(STF_Category.COMPONENT) # type: ignore
 
-def find_data_handler(stf_handlers: list[STF_Handler_Data], stf_type: str) -> STF_Handler_Data:
+def find_data_handler(stf_handlers: list[STF_Handler_Data], stf_type: str) -> STF_Handler_Data:  # type: ignore
 	for stf_handler in stf_handlers:
 		if(stf_handler.stf_type == stf_type):
 			return stf_handler
 	if(stf_type == "fallback"):
-		return get_fallback_handler("data")
-
+		return get_fallback_handler("data") # type: ignore
