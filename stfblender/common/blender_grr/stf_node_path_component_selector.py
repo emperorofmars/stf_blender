@@ -1,4 +1,6 @@
 import bpy
+from collections.abc import Sequence
+from typing import Any
 
 from .utils import draw_component_info
 from .stf_node_path_selector import *
@@ -34,14 +36,14 @@ def validate_node_path_component_selector(nps: NodePathComponentSelector) -> boo
 	return resolve_node_path_component_selector(nps) != None
 
 
-def node_path_component_selector_to_stf(context: STF_ExportContext, nps: NodePathComponentSelector, json_resource: dict) -> list:
+def node_path_component_selector_to_stf(context: STF_ExportContext, nps: NodePathComponentSelector, json_resource: dict[str, Any]) -> Sequence:
 	if(nps.target_component):
 		if(ret := node_path_selector_to_stf(context, nps.target, json_resource)):
 			return ret + ["components", register_exported_resource(json_resource, nps.target_component)]
 	return None
 
 
-def node_path_component_selector_from_stf(context: STF_ImportContext, json_resource: dict, node_path: list, nps: NodePathComponentSelector):
+def node_path_component_selector_from_stf(context: STF_ImportContext, json_resource: dict[str, Any], node_path: Sequence, nps: NodePathComponentSelector):
 	if("components" in node_path):
 		idx = node_path.index("components")
 		if(len(node_path) > idx + 1):

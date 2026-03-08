@@ -19,13 +19,13 @@ class Edit_Component_Collection(bpy.types.Operator):
 	component_property: bpy.props.StringProperty() # type: ignore
 	index: bpy.props.IntProperty() # type: ignore
 
-	def invoke(self, context, event):
+	def invoke(self, context: bpy.types.Context, event):
 		if(self.op == "remove"):
 			return context.window_manager.invoke_confirm(self, event)
 		else:
 			return self.execute(context)
 
-	def execute(self, context):
+	def execute(self, context: bpy.types.Context):
 		blender_id = getattr(context, self.blender_id_type) if not self.scene_collection else context.scene.collection
 		if(blender_id):
 			for component in getattr(blender_id, self.blender_property_name):

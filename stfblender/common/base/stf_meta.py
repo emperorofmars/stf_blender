@@ -57,9 +57,9 @@ class STFAddMetaPropertyCollection(bpy.types.Operator):
 	bl_options = {"REGISTER", "UNDO"}
 
 	@classmethod
-	def poll(cls, context): return context.collection is not None
+	def poll(cls, context: bpy.types.Context): return context.collection is not None
 
-	def execute(self, context):
+	def execute(self, context: bpy.types.Context):
 		context.collection.stf_meta.custom_properties.add()
 		return {"FINISHED"}
 
@@ -70,9 +70,9 @@ class STFAddMetaPropertyScene(bpy.types.Operator):
 	bl_options = {"REGISTER", "UNDO"}
 
 	@classmethod
-	def poll(cls, context): return context.scene is not None and context.scene.collection is not None
+	def poll(cls, context: bpy.types.Context): return context.scene is not None and context.scene.collection is not None
 
-	def execute(self, context):
+	def execute(self, context: bpy.types.Context):
 		context.scene.collection.stf_meta.custom_properties.add()
 		return {"FINISHED"}
 
@@ -86,9 +86,9 @@ class STFRemoveMetaPropertyCollection(bpy.types.Operator):
 	index: bpy.props.IntProperty(name="Index") # type: ignore
 
 	@classmethod
-	def poll(cls, context): return context.collection is not None
+	def poll(cls, context: bpy.types.Context): return context.collection is not None
 
-	def execute(self, context):
+	def execute(self, context: bpy.types.Context):
 		context.collection.stf_meta.custom_properties.remove(self.index)
 		return {"FINISHED"}
 
@@ -102,9 +102,9 @@ class STFRemoveMetaPropertyScene(bpy.types.Operator):
 	index: bpy.props.IntProperty(name="Index") # type: ignore
 
 	@classmethod
-	def poll(cls, context): return context.scene is not None and context.scene.collection is not None
+	def poll(cls, context: bpy.types.Context): return context.scene is not None and context.scene.collection is not None
 
-	def execute(self, context):
+	def execute(self, context: bpy.types.Context):
 		context.scene.collection.stf_meta.custom_properties.remove(self.index)
 		return {"FINISHED"}
 

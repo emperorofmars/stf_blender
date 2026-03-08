@@ -24,7 +24,7 @@ def pretty_print_blender_grr(grr: BlenderGRR) -> str:
 		case "stf_component": return "bar"
 
 
-def draw_blender_grr(layout: bpy.types.UILayout, grr: BlenderGRR, reference_type_filter: str = None):
+def draw_blender_grr(layout: bpy.types.UILayout, grr: BlenderGRR, reference_type_filter: str | None = None):
 	if(not reference_type_filter):
 		layout.prop(grr, "reference_type")
 

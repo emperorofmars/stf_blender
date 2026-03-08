@@ -1,4 +1,6 @@
 import bpy
+from collections.abc import Sequence
+from typing import Any
 
 from .. import STF_ImportContext, STF_ExportContext, STF_Category
 from ..helpers import import_resource, register_exported_resource
@@ -58,7 +60,7 @@ def node_path_selector_to_string(nps: NodePathSelector) -> str:
 		return "Invalid"
 
 
-def node_path_selector_to_stf(context: STF_ExportContext, nps: NodePathSelector, json_resource: dict) -> list[str]:
+def node_path_selector_to_stf(context: STF_ExportContext, nps: NodePathSelector, json_resource: dict[str, Any]) -> Sequence[str]:
 	if(type(nps.id_data) == bpy.types.Object and nps.target_object):
 		if(type(nps.target_object.data) == bpy.types.Armature):
 			if(not nps.target_bone):
@@ -75,7 +77,7 @@ def node_path_selector_to_stf(context: STF_ExportContext, nps: NodePathSelector,
 		return None
 
 
-def node_path_selector_from_stf(context: STF_ImportContext, json_resource: dict, node_path: list[str], nps: NodePathSelector):
+def node_path_selector_from_stf(context: STF_ImportContext, json_resource: dict[str, Any], node_path: Sequence[str], nps: NodePathSelector):
 	if(type(nps.id_data) == bpy.types.Object):
 		if(len(node_path) == 1):
 			nps.target_object = import_resource(context, json_resource, node_path[0], STF_Category.NODE)

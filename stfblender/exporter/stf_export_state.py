@@ -75,7 +75,7 @@ class STF_ExportState(STF_State_Base):
 		return self._hooks.get(type(application_object), [])
 
 
-	def determine_property_resolution_handler(self, application_object: Any, data_path: str) -> STF_HandlerBase:
+	def determine_property_resolution_handler(self, application_object: Any, data_path: str) -> STF_HandlerBase | None:
 		# TODO handle priority for animation path handling maybe at some point?
 
 		for _, handler_list in self._handlers.items():
@@ -86,7 +86,6 @@ class STF_ExportState(STF_State_Base):
 					for understood_property in handler.understood_application_property_path_parts:
 						if(data_path.startswith(understood_property)):
 							return handler
-
 		return None
 
 
@@ -117,12 +116,11 @@ class STF_ExportState(STF_State_Base):
 			_logger.fatal("Resource recursion detected!", stack_info=True)
 			self.report(STFReport("Resource recursion detected!", STFReportSeverity.FatalError, id, json_resource.get("type"), application_object))
 			return
-		# TODO check for resource loops
 
 		self._exported_resources[id] = json_resource
 
 
-	def serialize_buffer(self, data: bytes, buffer_id: str = None) -> str:
+	def serialize_buffer(self, data: bytes, buffer_id: str | None = None) -> str:
 		"""Register a serialized buffer."""
 		import uuid
 		buffer_id = buffer_id if buffer_id else str(uuid.uuid4())
@@ -136,7 +134,7 @@ class STF_ExportState(STF_State_Base):
 	def set_root_id(self, id: str):
 		self._root_id = id
 
-	def get_root_id(self):
+	def get_root_id(self) -> str | None:
 		return self._root_id
 
 

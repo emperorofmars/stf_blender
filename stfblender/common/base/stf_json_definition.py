@@ -1,3 +1,5 @@
+from typing import Any
+
 
 class STF_Meta_AssetInfo:
 	def __init__(self):
@@ -12,7 +14,7 @@ class STF_Meta_AssetInfo:
 		self.custom_properties: dict[str, str] = {}
 
 	@staticmethod
-	def from_dict(dict: dict):
+	def from_dict(dict: dict[str, str]):
 		ret = STF_Meta_AssetInfo()
 		for key, value in dict.items():
 			match key:
@@ -27,7 +29,7 @@ class STF_Meta_AssetInfo:
 
 		return ret
 
-	def to_dict(self):
+	def to_dict(self) -> dict[str, str]:
 		ret = {}
 		for key, value in vars(self).items():
 			if(value):
@@ -49,12 +51,12 @@ class STF_Meta:
 		self.generator: str = "libstf_python"
 		self.generator_version = "0.0.0"
 		self.timestamp: str = datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat()
-		self.root: str = None
+		self.root: str | None = None
 		self.asset_info: STF_Meta_AssetInfo = STF_Meta_AssetInfo()
 		self.metric_multiplier: float = 1
 
 	@staticmethod
-	def from_dict(dict: dict):
+	def from_dict(dict: dict[str, Any]):
 		ret = STF_Meta()
 		ret.version_major = dict["version_major"]
 		ret.version_minor = dict["version_minor"]
@@ -66,7 +68,7 @@ class STF_Meta:
 		ret.metric_multiplier = dict["metric_multiplier"]
 		return ret
 
-	def to_dict(self):
+	def to_dict(self) -> dict[str, Any]:
 		return {
 			"version_major": self.version_major,
 			"version_minor": self.version_minor,
@@ -85,12 +87,12 @@ class STF_Buffer:
 		self.index: int
 
 	@staticmethod
-	def from_dict(dict: dict):
+	def from_dict(dict: dict[str, Any]):
 		ret = STF_Buffer()
 		ret.index = dict["index"]
 		return ret
 
-	def to_dict(self):
+	def to_dict(self) -> dict[str, Any]:
 		return {
 			"type": self.type,
 			"index": self.index,
@@ -106,7 +108,7 @@ class STF_JsonDefinition:
 		self.buffers: dict[str, STF_Buffer] = dict()
 
 	@staticmethod
-	def from_dict(dict):
+	def from_dict(dict: dict[str, Any]):
 		ret = STF_JsonDefinition()
 		ret.stf = STF_Meta.from_dict(dict["stf"])
 		ret.resources = dict["resources"]

@@ -1,5 +1,6 @@
 import bpy
 from typing import Any
+from collections.abc import Sequence
 
 from .stf_data_resource_reference import STFDataResourceReference
 from ..resource.data.stf_handler_data import STF_DataResourceBase, STF_Data_Ref
@@ -19,7 +20,7 @@ def __draw_blender_collection_selection(layout: bpy.types.UILayout, drr: STFData
 		layout.prop(drr, "scene")
 		return drr.scene.collection if drr.scene else None
 
-def draw_stf_data_resource_reference(layout: bpy.types.UILayout, drr: STFDataResourceReference, type_filter: list[str] = []):
+def draw_stf_data_resource_reference(layout: bpy.types.UILayout, drr: STFDataResourceReference, type_filter: Sequence[str] = ()):
 	if(collection := __draw_blender_collection_selection(layout, drr)):
 		# let resource_ref
 		for resource_ref in collection.stf_data_refs:
@@ -69,7 +70,7 @@ def resolve_stf_data_resource_reference(drr: STFDataResourceReference) -> tuple[
 	else:
 		return None
 
-def validate_stf_data_resource_reference(drr: STFDataResourceReference, valid_types: list[str] = []) -> bool:
+def validate_stf_data_resource_reference(drr: STFDataResourceReference, valid_types: Sequence[str] = ()) -> bool:
 	if(drr):
 		if(res := resolve_stf_data_resource_reference(drr)):
 			resource_ref, resource = res

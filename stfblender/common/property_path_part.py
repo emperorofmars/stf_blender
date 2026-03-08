@@ -1,5 +1,6 @@
 import bpy
-from typing import Callable
+from typing import Callable, Self
+from collections.abc import Sequence
 
 
 class STFPropertyPathPart:
@@ -7,9 +8,9 @@ class STFPropertyPathPart:
 
 	def __init__(
 			self,
-			stf_path_part: list[str] = [],
-			convert_func: Callable[[list[float]], list[float]] = None,
-			index_conversion: list[int] = None,
+			stf_path_part: Sequence[str] = (),
+			convert_func: Callable[[Sequence[float]], Sequence[float]] = None,
+			index_conversion: Sequence[int] | None = None,
 			bake_constraints: bool = False
 			):
 		self.stf_path_part = stf_path_part
@@ -17,7 +18,7 @@ class STFPropertyPathPart:
 		self.index_conversion = index_conversion
 		self.bake_constraints = bake_constraints
 
-	def __add__(self, other):
+	def __add__(self, other: Self | None) -> Self:
 		if(other):
 			return STFPropertyPathPart(self.stf_path_part + other.stf_path_part, other.convert_func, other.index_conversion, self.bake_constraints | other.bake_constraints)
 		else:
@@ -31,8 +32,8 @@ class BlenderPropertyPathPart:
 			self,
 			slot_type: str = None,
 			blender_path: str = "",
-			convert_func: Callable[[list[float]], list[float]] = None,
-			index_conversion: list[int] = None,
+			convert_func: Callable[[Sequence[float]], Sequence[float]] = None,
+			index_conversion: Sequence[int] | None = None,
 			slot_link_target: bpy.types.Object = None,
 			slot_link_property_index: int = 0
 			):
@@ -43,7 +44,7 @@ class BlenderPropertyPathPart:
 		self.slot_link_target = slot_link_target
 		self.slot_link_property_index = slot_link_property_index
 
-	def __add__(self, other):
+	def __add__(self, other: Self | None) -> Self | None:
 		if(other):
 			return BlenderPropertyPathPart(
 				other.slot_type,
