@@ -1,6 +1,6 @@
 from typing import Any
 
-from .. import STF_ImportContext, STF_Category
+from .. import STF_ImportContext, STF_ExportContext, STF_Category
 
 
 def register_exported_resource(json_resource: dict, resource_id: str) -> int:
@@ -25,27 +25,33 @@ def register_exported_buffer(json_resource: dict, buffer_id: str) -> int:
 		else:
 			return json_resource["referenced_buffers"].index(buffer_id)
 
+def export_resource(context: STF_ExportContext, json_resource: dict, resource: Any) -> int | None:
+	if(resource_id := context.serialize_resource(resource)):
+		return register_exported_resource(json_resource, resource_id)
+	else:
+		return None
+
 
 def get_resource_id(json_resource: dict, resource_index: int) -> str:
-	if("referenced_resources" not in json_resource or len(json_resource["referenced_resources"]) < resource_index):
+	if(resource_index is None or "referenced_resources" not in json_resource or len(json_resource["referenced_resources"]) < resource_index):
 		return None
 	else:
 		return json_resource["referenced_resources"][resource_index]
 
 def get_buffer_id(json_resource: dict, buffer_index: int) -> str:
-	if("referenced_buffers" not in json_resource or len(json_resource["referenced_buffers"]) < buffer_index):
+	if(buffer_index is None or "referenced_buffers" not in json_resource or len(json_resource["referenced_buffers"]) < buffer_index):
 		return None
 	else:
 		return json_resource["referenced_buffers"][buffer_index]
 
 def import_resource(context: STF_ImportContext, json_resource: dict, resource_index: int, expected_kind: str = STF_Category.DATA) -> Any:
-	if("referenced_resources" not in json_resource or len(json_resource["referenced_resources"]) < resource_index):
+	if(resource_index is None or "referenced_resources" not in json_resource or len(json_resource["referenced_resources"]) < resource_index):
 		return None
 	else:
 		return context.import_resource(json_resource["referenced_resources"][resource_index], expected_kind)
 
-def import_buffer(context: STF_ImportContext, json_resource: dict, resource_index: int) -> Any:
-	if("referenced_buffers" not in json_resource or len(json_resource["referenced_buffers"]) < resource_index):
+def import_buffer(context: STF_ImportContext, json_resource: dict, buffer_index: int) -> Any:
+	if(buffer_index is None or "referenced_buffers" not in json_resource or len(json_resource["referenced_buffers"]) < buffer_index):
 		return None
 	else:
-		return context.import_buffer(json_resource["referenced_buffers"][resource_index])
+		return context.import_buffer(json_resource["referenced_buffers"][buffer_index])
