@@ -2,10 +2,9 @@ import bpy
 from typing import Any
 
 from ....common import STF_ExportContext, STF_ImportContext, STFReport, STFReportSeverity, STF_Category
-from ....common.resource.blender_native import STF_Handler_BlenderNative
+from ....common.resource.blender_native import STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister
 from ....common.resource.component.component_utils import get_components_from_object
 from ....common.utils.id_utils import ensure_stf_id
-from ....common.utils.boilerplate import boilerplate_register, boilerplate_unregister
 
 
 _stf_type = "stf.image"
@@ -93,11 +92,11 @@ register_stf_handlers = [
 
 
 def register():
-	boilerplate_register(bpy.types.Image, STF_Category.DATA)
+	boilerplate_register(bpy.types.Image)
 	bpy.types.Image.stf_image = bpy.props.PointerProperty(type=STF_Image, options=set())
 
 
 def unregister():
 	if hasattr(bpy.types.Image, "stf_image"):
 		del bpy.types.Image.stf_image
-	boilerplate_unregister(bpy.types.Image, STF_Category.DATA)
+	boilerplate_unregister(bpy.types.Image)

@@ -2,10 +2,9 @@ import bpy
 from typing import Any
 
 from ....common import STF_ExportContext, STF_ImportContext, STF_Category
-from ....common.resource.blender_native import STF_Handler_BlenderNative
+from ....common.resource.blender_native import STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister
 from ....common.resource.component.component_utils import get_components_from_object
 from ....common.utils.id_utils import ensure_stf_id
-from ....common.utils.boilerplate import boilerplate_register, boilerplate_unregister
 from .stf_material_definition import STF_Material_Property, STF_Material_Value_Module_Base
 from .material_value_modules import blender_material_value_modules
 from .stf_material_operators import add_property, add_value_to_property
@@ -125,7 +124,7 @@ register_stf_handlers = [
 
 
 def register():
-	boilerplate_register(bpy.types.Material, STF_Category.DATA)
+	boilerplate_register(bpy.types.Material)
 
 def unregister():
-	boilerplate_unregister(bpy.types.Material, STF_Category.DATA)
+	boilerplate_unregister(bpy.types.Material)

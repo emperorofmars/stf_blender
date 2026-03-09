@@ -2,9 +2,8 @@ import bpy
 from typing import Any
 
 from ....common import STF_ExportContext, STF_ExportContext, STF_ImportContext, STF_Category
-from ....common.resource.blender_native import STF_Handler_BlenderNative
+from ....common.resource.blender_native import STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister
 from ....common.resource.component.component_utils import get_components_from_object
-from ....common.utils.boilerplate import boilerplate_register, boilerplate_unregister
 from ....common.utils.id_utils import ensure_stf_id
 
 # TODO this module is at a bare minimum level, improve it
@@ -58,9 +57,9 @@ register_stf_handlers = [
 
 def register():
 	bpy.types.TextCurve.stf_text = bpy.props.PointerProperty(type=STFEXP_Text)
-	boilerplate_register(bpy.types.TextCurve, "data")
+	boilerplate_register(bpy.types.TextCurve)
 
 def unregister():
-	boilerplate_unregister(bpy.types.TextCurve, "data")
+	boilerplate_unregister(bpy.types.TextCurve)
 	if hasattr(bpy.types.TextCurve, "stf_text"):
 		del bpy.types.TextCurve.stf_text

@@ -3,7 +3,7 @@ import bpy
 from ....common.helpers import draw_multiline_text
 from ....common.utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
 from .stf_instance_mesh import STF_Instance_Mesh_Blendshape_Value
-from .stf_instance_mesh_util import set_instance_blendshapes
+from .stf_instance_mesh_util import instance_blendshapes_requires_update, set_instance_blendshapes
 
 
 class SetInstanceBlendshapes(bpy.types.Operator):
@@ -14,6 +14,9 @@ class SetInstanceBlendshapes(bpy.types.Operator):
 
 	@classmethod
 	def poll(cls, context): return context.object.stf_instance is not None and context.object.data and type(context.object.data) is bpy.types.Mesh
+
+	def invoke(self, context, event):
+		return context.window_manager.invoke_confirm(self, event)
 
 	def execute(self, context):
 		set_instance_blendshapes(context.object)
@@ -36,16 +39,33 @@ class STFDrawMeshInstanceBlendshapeList(bpy.types.UIList):
 		if(item.name == "Basis"):
 			layout.label(text="Basis")
 			return
-		layout.prop(item, "override", text=item.name)
-		row = layout.row()
-		if(not item.override):
-			row.enabled = False
-			if(item.id_data.data.shape_keys and item.id_data.data.shape_keys.key_blocks and item.name in item.id_data.data.shape_keys.key_blocks):
-				row.prop(item.id_data.data.shape_keys.key_blocks[item.name], "value", text="Value")
+		row_outer = layout.row()
+		if(item.id_data.data.shape_keys and item.id_data.data.shape_keys.key_blocks and item.name in item.id_data.data.shape_keys.key_blocks):
+			if(item.id_data.stf_instance_mesh.override_blendshape_values):
+				row_outer.prop(item, "override", text="")
+			row_outer.label(text=item.name)
+			row = row_outer.row()
+			if(not item.override or not item.id_data.stf_instance_mesh.override_blendshape_values):
+				row.enabled = False
+				if(item.id_data.data.shape_keys and item.id_data.data.shape_keys.key_blocks and item.name in item.id_data.data.shape_keys.key_blocks):
+					row.prop(item.id_data.data.shape_keys.key_blocks[item.name], "value", text="Value")
 			else:
-				row.label(text="Invalid Value")
+				row.prop(item, "value", text="Value")
 		else:
-			row.prop(item, "value", text="Value")
+			row_outer.alert = True
+			row_outer.enabled = False
+			row_outer.label(text="Invalid Value ( " + item.name + " )")
+
+
+	def filter_items(self, context: bpy.types.Context, data, propname: str):
+		items: list[STF_Instance_Mesh_Blendshape_Value] = getattr(data, propname)
+
+		_sort = [(idx, item) for idx, item in enumerate(items)]
+		def _sort_func(item: tuple[int, STF_Instance_Mesh_Blendshape_Value]):
+			return item[1].index_on_mesh
+		sortorder = bpy.types.UI_UL_list.sort_items_helper(_sort, _sort_func, False)
+
+		return [self.bitflag_filter_item] * len(items), sortorder
 
 
 class STFMeshInstancePanel(bpy.types.Panel):
@@ -74,9 +94,12 @@ class STFMeshInstancePanel(bpy.types.Panel):
 		layout.separator(factor=2, type="LINE")
 
 		# Blendshape Values per Instance
-		layout.prop(context.object.stf_instance_mesh, "override_blendshape_values", text="Use Instance Shape Keys")
-		if(context.object.stf_instance_mesh.override_blendshape_values):
-			layout.operator(SetInstanceBlendshapes.bl_idname, text="Update Shape Keys", icon="LOOP_FORWARDS")
-
+		if(context.object.data.shape_keys and len(context.object.data.shape_keys.key_blocks) > 0):
+			layout.prop(context.object.stf_instance_mesh, "override_blendshape_values", text="Use Instance Shape Keys")
+			#if(context.object.stf_instance_mesh.override_blendshape_values):
+			row = layout.row()
+			if(instance_blendshapes_requires_update(context.object)):
+				row.alert = True
+			row.operator(SetInstanceBlendshapes.bl_idname, text="Update Shape Keys", icon="LOOP_FORWARDS")
 			layout.template_list(STFDrawMeshInstanceBlendshapeList.bl_idname, "", context.object.stf_instance_mesh, "blendshape_values", context.object.stf_instance_mesh, "active_blendshape")
 

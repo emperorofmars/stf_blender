@@ -1,12 +1,11 @@
 import bpy
 
 from ....common import STF_Category
-from ....common.resource.blender_native import STF_Handler_BlenderNative
+from ....common.resource.blender_native import STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister
 from .stf_animation_common import *
 from .stf_animation_export import stf_animation_export
 from .stf_animation_import import stf_animation_import
 from ....common.resource.component.component_utils import get_components_from_object
-from ....common.utils.boilerplate import boilerplate_register, boilerplate_unregister
 
 
 _stf_type = stf_animation_type
@@ -36,10 +35,10 @@ register_stf_handlers = [
 
 
 def register():
-	boilerplate_register(bpy.types.Action, STF_Category.DATA)
+	boilerplate_register(bpy.types.Action)
 	bpy.types.Action.stf_animation = bpy.props.PointerProperty(type=STF_Animation, options=set())
 
 def unregister():
 	if hasattr(bpy.types.Action, "stf_animation"):
 		del bpy.types.Action.stf_animation
-	boilerplate_unregister(bpy.types.Action, STF_Category.DATA)
+	boilerplate_unregister(bpy.types.Action)

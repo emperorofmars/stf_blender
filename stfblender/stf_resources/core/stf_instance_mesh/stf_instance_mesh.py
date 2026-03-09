@@ -14,7 +14,8 @@ _stf_type = "stf.instance.mesh"
 class STF_Instance_Mesh_Blendshape_Value(bpy.types.PropertyGroup):
 	name: bpy.props.StringProperty(name="Name", options=set()) # type: ignore
 	override: bpy.props.BoolProperty(name="Override", default=False, options=set()) # type: ignore
-	value: bpy.props.FloatProperty(name="Value", default=0, soft_min=0, soft_max=1, subtype="FACTOR") # type: ignore
+	value: bpy.props.FloatProperty(name="Value", default=0, soft_min=0, soft_max=1, precision=3, subtype="FACTOR") # type: ignore
+	index_on_mesh: bpy.props.IntProperty(name="Index") # type: ignore
 
 class STF_Instance_Mesh(bpy.types.PropertyGroup):
 	override_blendshape_values: bpy.props.BoolProperty(name="Override Blendshape Values", default=False, options=set()) # type: ignore
@@ -50,6 +51,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 			if(blendshape_value != None):
 				instance_blendshape.value = blendshape_value
 				instance_blendshape.override = True
+				instance_blendshape.index_on_mesh = index
 
 	if("materials" in json_resource):
 		for material_index, material_id in enumerate(json_resource["materials"]):

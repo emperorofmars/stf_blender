@@ -48,7 +48,7 @@ register_stf_handlers = [CustomSTFBrushHandler]
 
 
 def register():
-	stfblender.common.utils.boilerplate.boilerplate_register(bpy.types.Brush, "data")
+	stfblender.common.resource.blender_native.boilerplate_register(bpy.types.Brush)
 
 def unregister():
-	stfblender.common.utils.boilerplate.boilerplate_unregister(bpy.types.Brush, "data")
+	stfblender.common.resource.blender_native.boilerplate_unregister(bpy.types.Brush)

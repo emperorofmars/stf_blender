@@ -4,9 +4,8 @@ import mathutils
 from typing import Any
 
 from ....common import STF_ExportContext, STF_ImportContext, STF_TaskSteps, STFReportSeverity, STFReport, STF_Category
-from ....common.resource.blender_native import STF_Handler_BlenderNative
+from ....common.resource.blender_native import STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister
 from ....common.utils import trs_utils
-from ....common.utils.boilerplate import boilerplate_register, boilerplate_unregister
 from ....common.resource.component.component_utils import get_components_from_object
 from ....common.utils.id_utils import ensure_stf_id
 from .node_property_conversion import stf_node_resolve_property_path_to_stf_func, stf_node_resolve_stf_property_to_blender_func
@@ -152,10 +151,10 @@ register_stf_handlers = [
 
 
 def register():
-	boilerplate_register(bpy.types.Object, STF_Category.NODE)
+	boilerplate_register(bpy.types.Object)
 	bpy.types.Object.stf_instance = bpy.props.PointerProperty(type=STF_Instance, options=set()) # type: ignore
 
 def unregister():
 	if hasattr(bpy.types.Object, "stf_instance"):
 		del bpy.types.Object.stf_instance
-	boilerplate_unregister(bpy.types.Object, STF_Category.NODE)
+	boilerplate_unregister(bpy.types.Object)

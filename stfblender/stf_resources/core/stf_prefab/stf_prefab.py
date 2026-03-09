@@ -2,8 +2,7 @@ import bpy
 from typing import Any
 
 from ....common import STF_ImportContext, STF_ExportContext, STF_TaskSteps, STFReportSeverity, STF_Category
-from ....common.resource.blender_native import STF_Handler_BlenderNative
-from ....common.utils.boilerplate import boilerplate_register, boilerplate_unregister
+from ....common.resource.blender_native import STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister
 from ....common.resource.component.component_utils import get_components_from_object
 from ....common.utils.id_utils import ensure_stf_id
 
@@ -73,10 +72,10 @@ register_stf_handlers = [
 ]
 
 def register():
-	boilerplate_register(bpy.types.Collection, STF_Category.DATA)
+	boilerplate_register(bpy.types.Collection)
 	bpy.types.Collection.stf_use_collection_as_prefab = bpy.props.BoolProperty(name="Use As STF Prefab", default=False, options=set())
 
 def unregister():
-	boilerplate_unregister(bpy.types.Collection, STF_Category.DATA)
+	boilerplate_unregister(bpy.types.Collection)
 	if hasattr(bpy.types.Collection, "stf_use_collection_as_prefab"):
 		del bpy.types.Collection.stf_use_collection_as_prefab

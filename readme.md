@@ -19,7 +19,17 @@ Add it under: `Edit` → `Preferences` → `Get Extensions` → **Click on the t
 > [!TIP]
 > **Also install the [Slot Link](https://extensions.blender.org/add-ons/slot-link/) extension if you want to import/export animations.**
 
-## Development
+Please open issues for any bugs or misbehavior you notice. Feel free to open issues for feature requests.
+
+## Contributing
+Human made contributions via pull-requests are welcome.
+
+### Guidelines
+* Any form of LLM contribution is prohibited, this also includes issues and PRs.
+* Please open an issue first for larger changes.
+* For changes to the format itself, please open an issue first in the [STF Documentation](https://codeberg.org/emperorofmars/stf_documentation) repository.
+
+### Development
 * Use VSCode with the [recommended extensions](./.vscode/extensions.json).\
 	The most important one is [Blender VS Code](https://github.com/JacquesLucke/blender_vscode).
 * Create a Python 3.11 venv in the repo directory. Inside use pip to install [fake-bpy-module](https://pypi.org/project/fake-bpy-module-latest/).
@@ -29,6 +39,7 @@ All source-code in this repository, except when noted in individual files and/or
 
 * MIT License (LICENSE-MIT or <https://opensource.org/license/MIT>)
 * Apache License, Version 2.0 (LICENSE-APACHE2 or http://www.apache.org/licenses/LICENSE-2.0)
+
 
 <!--
 **Commands to build the extension.**\
@@ -43,12 +54,12 @@ All source-code in this repository, except when noted in individual files and/or
 		``` sh
 		BLENDER_PATH=~/Software/blender/blender-5.0.1-linux-x64/blender
 		```
+	* Linux Fish
+		``` sh
+		set BLENDER_PATH ~/Software/blender/blender-5.0.1-linux-x64/blender
+		```
 * Build Extension
 	```sh
 	$BLENDER_PATH --command extension build --output-dir=./packages
-	```
-* Generate Repository Json
-	```sh
-	$BLENDER_PATH --command extension server-generate --repo-dir=./packages
 	```
 -->

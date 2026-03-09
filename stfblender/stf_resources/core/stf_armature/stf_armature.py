@@ -2,10 +2,9 @@ import bpy
 from typing import Any
 
 from ....common import STF_ImportContext, STF_ExportContext, STF_Category
-from ....common.resource.blender_native import STF_Handler_BlenderNative
+from ....common.resource.blender_native import STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister
 from ....common.resource.component.component_utils import get_components_from_object
 from ....common.utils.armature_bone import ArmatureBone
-from ....common.utils.boilerplate import boilerplate_register, boilerplate_unregister
 from ....common.utils.id_utils import ensure_stf_id
 
 
@@ -70,7 +69,7 @@ register_stf_handlers = [
 
 
 def register():
-	boilerplate_register(bpy.types.Armature, STF_Category.DATA)
+	boilerplate_register(bpy.types.Armature)
 
 def unregister():
-	boilerplate_unregister(bpy.types.Armature, STF_Category.DATA)
+	boilerplate_unregister(bpy.types.Armature)

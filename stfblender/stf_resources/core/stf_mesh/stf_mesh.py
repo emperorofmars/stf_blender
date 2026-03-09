@@ -1,9 +1,8 @@
 import bpy
 
 from ....common import STF_Category
-from ....common.resource.blender_native import STF_Handler_BlenderNative
+from ....common.resource.blender_native import STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister
 from ....common.resource.component.component_utils import get_components_from_object
-from ....common.utils.boilerplate import boilerplate_register, boilerplate_unregister
 from .mesh_import import import_stf_mesh
 from .mesh_export import export_stf_mesh
 
@@ -33,9 +32,9 @@ register_stf_handlers = [
 
 def register():
 	bpy.types.Mesh.stf_mesh = bpy.props.PointerProperty(type=STF_Mesh)
-	boilerplate_register(bpy.types.Mesh, STF_Category.DATA)
+	boilerplate_register(bpy.types.Mesh)
 
 def unregister():
-	boilerplate_unregister(bpy.types.Mesh, STF_Category.DATA)
+	boilerplate_unregister(bpy.types.Mesh)
 	if hasattr(bpy.types.Mesh, "stf_mesh"):
 		del bpy.types.Mesh.stf_mesh
