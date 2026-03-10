@@ -151,10 +151,10 @@ def _map_humanoid_bones(component: STFEXP_Armature_Humanoid, armature: bpy.types
 		candidate = None
 		candidate_confidence = -1
 		for bone in armature.bones:
-			for outer_or_conditions in mapping_conditions:
+			for outer_or_condition in mapping_conditions:
 				and_success = True
 				and_len = 0
-				for and_condition in outer_or_conditions:
+				for and_condition in outer_or_condition:
 					or_success = False
 					or_len = 0
 					for or_condition in and_condition:
