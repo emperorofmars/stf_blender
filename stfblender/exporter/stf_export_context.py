@@ -49,13 +49,16 @@ class STF_ExportContext(ISTF_ExportContext):
 			for component in components:
 				if(selected_handler := self._state.determine_handler(component, "component")):
 					component_ret = selected_handler.export_func(self, component, application_object)
-					if(component_ret):
+					if(component_ret and type(component_ret) is not STFReport):
 						component_json_resource, component_id = component_ret
 						self._state.register_serialized_resource(component, component_json_resource, component_id)
 						json_resource["components"].append(component_id)
 					else:
 						_logger.error("Export Component Failed", stack_info=True)
-						self.report(STFReport("Export Component Failed", STFReportSeverity.Error, stf_id, selected_handler.stf_type, application_object))
+						if(type(component_ret) is STFReport):
+							self.report(component_ret)
+						else:
+							self.report(STFReport("Export Component Failed", STFReportSeverity.Error, stf_id, selected_handler.stf_type, application_object))
 				else:
 					self.report(STFReport("Unsupported Component", STFReportSeverity.Warn, None, None, application_object))
 
@@ -69,7 +72,7 @@ class STF_ExportContext(ISTF_ExportContext):
 		if(selected_handler := self._state.determine_handler(application_object, stf_category)):
 			handler_ret = selected_handler.export_func(self, application_object, context_object)
 
-			if(handler_ret):
+			if(handler_ret and type(handler_ret) is not STFReport):
 				json_resource, resource_id = handler_ret
 				self._state.register_serialized_resource(application_object, json_resource, resource_id)
 
@@ -86,7 +89,10 @@ class STF_ExportContext(ISTF_ExportContext):
 			else:
 				if(export_fail_severity.value >= STFReportSeverity.Error.value):
 					_logger.error("Resource Export Failed", stack_info=True)
-				self.report(STFReport("Resource Export Failed", export_fail_severity, None, selected_handler.stf_type, application_object))
+				if(type(handler_ret) is STFReport):
+					self.report(handler_ret)
+				else:
+					self.report(STFReport("Resource Export Failed", export_fail_severity, None, selected_handler.stf_type, application_object))
 		else:
 			if(export_fail_severity.value >= STFReportSeverity.Error.value):
 				_logger.error("No Module Found", stack_info=True)

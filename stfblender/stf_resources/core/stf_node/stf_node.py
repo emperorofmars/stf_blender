@@ -20,7 +20,7 @@ class STF_Instance(bpy.types.PropertyGroup):
 	enabled: bpy.props.BoolProperty(name="Enabled", default=True, options=set()) # type: ignore
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
+def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any | STFReport:
 	if("instance" in json_resource):
 		blender_object: bpy.types.Object = context.import_resource(json_resource["instance"], stf_category=STF_Category.INSTANCE)
 	else:
@@ -79,7 +79,7 @@ def _can_handle_application_object_func(application_object: Any) -> int:
 		return -1
 
 
-def _stf_export(context: STF_ExportContext, blender_object: bpy.types.Object, context_object: bpy.types.Collection) -> tuple[dict, str]:
+def _stf_export(context: STF_ExportContext, blender_object: bpy.types.Object, context_object: bpy.types.Collection) -> tuple[dict, str] | STFReport:
 	ensure_stf_id(context, blender_object)
 
 	json_resource = {

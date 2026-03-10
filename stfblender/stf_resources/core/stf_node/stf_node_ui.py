@@ -10,14 +10,14 @@ class STFSetObjectIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
 	"""Set STF-ID for Object"""
 	bl_idname = "stf.set_object_stf_id"
 	@classmethod
-	def poll(cls, context): return context.object is not None
+	def poll(cls, context): return hasattr(context, "object") and context.object is not None
 	def get_property(self, context): return context.object.stf_info
 
 class STFAddObjectComponentOperator(bpy.types.Operator, STFAddComponentOperatorBase):
 	"""Add Component to Object"""
 	bl_idname = "stf.add_object_component"
 	@classmethod
-	def poll(cls, context): return context.object is not None
+	def poll(cls, context): return hasattr(context, "object") and context.object is not None
 	def get_property(self, context): return context.object
 
 class STFRemoveObjectComponentOperator(bpy.types.Operator, STFRemoveComponentOperatorBase):
@@ -40,7 +40,7 @@ class STFNodeFixRotationMode(bpy.types.Operator):
 
 	@classmethod
 	def poll(cls, context):
-		return context.object is not None and context.object.rotation_mode != "QUATERNION"
+		return hasattr(context, "object") and context.object is not None and context.object.rotation_mode != "QUATERNION"
 
 	def invoke(self, context, event):
 		return context.window_manager.invoke_confirm(self, event, title="Set the rotation-mode to Quaternion", message=self.bl_description)
@@ -60,7 +60,7 @@ class STFNodePanel(bpy.types.Panel):
 
 	@classmethod
 	def poll(cls, context):
-		return context.object is not None
+		return hasattr(context, "object") and context.object is not None
 
 	def draw(self, context):
 		layout = self.layout

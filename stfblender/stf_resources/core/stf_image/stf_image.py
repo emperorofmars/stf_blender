@@ -14,7 +14,7 @@ class STF_Image(bpy.types.PropertyGroup):
 	is_normal_map: bpy.props.BoolProperty(name="Use as Normal-Map", default=False, options=set()) # type: ignore
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
+def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any | STFReport:
 	blender_image = bpy.data.images.new(json_resource.get("name", "STF Image"), 8, 8)
 	blender_image.stf_info.stf_id = stf_id
 	if(json_resource.get("name")):
@@ -41,7 +41,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	return blender_image
 
 
-def _stf_export(context: STF_ExportContext, application_object: Any, context_object: Any) -> tuple[dict, str]:
+def _stf_export(context: STF_ExportContext, application_object: Any, context_object: Any) -> tuple[dict, str] | STFReport:
 	blender_image: bpy.types.Image = application_object
 	ensure_stf_id(context, blender_image)
 
@@ -72,8 +72,7 @@ def _stf_export(context: STF_ExportContext, application_object: Any, context_obj
 
 		return ret, blender_image.stf_info.stf_id
 	except Exception as error:
-		context.report(STFReport("Could not export image: " + str(blender_image.filepath), STFReportSeverity.Error, blender_image.stf_info.stf_id, _stf_type, blender_image))
-		return None
+		return STFReport("Could not export image: " + str(blender_image.filepath), STFReportSeverity.Error, blender_image.stf_info.stf_id, _stf_type, blender_image)
 
 
 class Handler_STF_Image(STF_Handler_BlenderNative):

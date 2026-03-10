@@ -23,7 +23,7 @@ class STF_Instance_Mesh(bpy.types.PropertyGroup):
 	active_blendshape: bpy.props.IntProperty(options=set()) # type: ignore
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
+def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any | STFReport:
 	blender_resource = context.import_resource(json_resource["mesh"], stf_category=STF_Category.DATA)
 	blender_object = bpy.data.objects.new(json_resource.get("name", "STF Node"), blender_resource)
 	blender_object.stf_instance.stf_id = stf_id
@@ -69,7 +69,7 @@ def _can_handle_application_object_func(application_object: Any) -> int:
 	else:
 		return -1
 
-def _stf_export(context: STF_ExportContext, application_object: Any, context_object: bpy.types.Collection) -> tuple[dict, str]:
+def _stf_export(context: STF_ExportContext, application_object: Any, context_object: bpy.types.Collection) -> tuple[dict, str] | STFReport:
 	blender_object: bpy.types.Object = application_object[0]
 	blender_mesh: bpy.types.Mesh = application_object[1]
 

@@ -9,7 +9,7 @@ from .stf_animation_common import *
 _stf_type = stf_animation_type
 
 
-def stf_animation_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
+def stf_animation_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any | STFReport:
 	if(not hasattr(bpy.types.Action, "slot_link")):
 		context.report(STFReport("Slot-Link is required to import animations!", STFReportSeverity.Warn, stf_id, _stf_type))
 		return

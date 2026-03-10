@@ -1,10 +1,10 @@
 import bpy
 from typing import Any
 
-from ...common import STF_ImportContext, STF_ExportContext, STF_TaskSteps, STF_Category
+from ...common import STF_ImportContext, STF_ExportContext, STF_TaskSteps, STF_Category, STFReport
 from ...common.resource.data import STF_DataResourceBase, STF_Handler_Data, STF_Data_Ref
 from ...common.resource.data.data_resource_utils import add_resource, export_data_resource_base, get_components_from_data_resource, import_data_resource_base
-from ...common.helpers import draw_list, poll_valid_animations, import_resource, register_exported_resource
+from ...common.helpers import draw_list, poll_valid_animations, import_resource, export_resource
 
 
 _stf_type = "stfexp.animation_blendtree"
@@ -46,7 +46,7 @@ def _draw_resource(layout: bpy.types.UILayout, context: bpy.types.Context, resou
 		draw_list(layout, "collection", resource, "animations", _blender_property_name, _draw_func_animation1d)
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: bpy.types.Collection) -> Any:
+def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: bpy.types.Collection) -> Any | STFReport:
 	resource_ref, resource = add_resource(context.get_root_collection(), _blender_property_name, stf_id, _stf_type)
 	import_data_resource_base(resource, json_resource)
 	resource.type = json_resource["blendtree_type"]
@@ -63,7 +63,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	return resource
 
 
-def _stf_export(context: STF_ExportContext, resource: STFEXP_Animation_Blendtree, context_object: bpy.types.Collection) -> tuple[dict, str]:
+def _stf_export(context: STF_ExportContext, resource: STFEXP_Animation_Blendtree, context_object: bpy.types.Collection) -> tuple[dict, str] | STFReport:
 	ret = export_data_resource_base(context, _stf_type, resource)
 	ret["blendtree_type"] = resource.type
 
@@ -71,11 +71,11 @@ def _stf_export(context: STF_ExportContext, resource: STFEXP_Animation_Blendtree
 		animations = []
 		for mapping in resource.animations:
 			if(mapping.animation):
-				anim_id = context.serialize_resource(mapping.animation, stf_category=STF_Category.DATA)
-				if(anim_id):
+				anim_id = export_resource(context, ret, mapping.animation)
+				if(anim_id >= 0):
 					animations.append({
 						"position": mapping.position[:] if resource.type == "2d" else mapping.position[0],
-						"animation": register_exported_resource(ret, anim_id),
+						"animation": anim_id,
 					})
 		ret["animations"] = animations
 	context.add_task(STF_TaskSteps.AFTER_ANIMATION, _handle)

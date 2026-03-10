@@ -9,14 +9,14 @@ class STFSetBoneIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
 	"""Set STF-ID for Bone"""
 	bl_idname = "stf.set_bone_stf_id"
 	@classmethod
-	def poll(cls, context): return context.bone is not None
+	def poll(cls, context): return hasattr(context, "bone") and context.bone is not None
 	def get_property(self, context): return context.bone.stf_info
 
 class STFAddBoneComponentOperator(bpy.types.Operator, STFAddComponentOperatorBase):
 	"""Add Component to Bone"""
 	bl_idname = "stf.add_bone_component"
 	@classmethod
-	def poll(cls, context): return context.bone is not None
+	def poll(cls, context): return hasattr(context, "bone") and context.bone is not None
 	def get_property(self, context): return context.bone
 
 class STFRemoveBoneComponentOperator(bpy.types.Operator, STFRemoveComponentOperatorBase):
@@ -40,7 +40,7 @@ class STFBoneSpatialPanel(bpy.types.Panel):
 
 	@classmethod
 	def poll(cls, context: bpy.types.Context):
-		return context.bone is not None
+		return hasattr(context, "bone") and context.bone is not None
 
 	def draw(self, context: bpy.types.Context):
 		set_stf_component_filter(bpy.types.Bone)

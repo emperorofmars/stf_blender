@@ -4,7 +4,7 @@ from io import BytesIO
 from typing import Any
 import numpy as np
 
-from ....common import STF_ExportContext
+from ....common import STF_ExportContext, STFReport
 from ....common.utils.id_utils import ensure_stf_id
 from ....common.utils.buffer_utils import determine_indices_width, determine_pack_format_float, determine_pack_format_uint, serialize_float, serialize_uint
 
@@ -18,7 +18,7 @@ float_threshold_blendshape = 0.0001
 
 # Mesh import and export are the lowest hanging fruits for performance improvements.
 
-def export_stf_mesh(context: STF_ExportContext, application_object: Any, parent_application_object: Any) -> tuple[dict, str]:
+def export_stf_mesh(context: STF_ExportContext, application_object: Any, parent_application_object: Any) -> tuple[dict, str] | STFReport:
 	blender_mesh: bpy.types.Mesh = application_object
 	ensure_stf_id(context, blender_mesh)
 

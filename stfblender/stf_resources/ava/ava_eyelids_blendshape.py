@@ -10,16 +10,16 @@ _stf_type = "ava.eyelids.blendshape"
 _blender_property_name = "ava_eyelids_blendshape"
 
 
-_eyelid_prefixes = ["", "vis.", "vis_", "vis ", "vrc.", "vrc_", "vrc ", "eye", "eyes", "eyelid", "eyelids"]
+_eyelid_prefixes = ["", "vis.", "vis_", "vis ", "vrc.", "vrc_", "vrc ", "eye", "eye.", "eye_", "eye ", "eyes", "eyes.", "eyes_", "eyes ", "eyelid", "eyelids"]
 _eyelid_shapes = {
 	"closed": ["close", "closed", "blink"],
-	"up": ["up", "lookup", "look up", "look_up"],
-	"down": ["down", "lookdown", "look down", "look_down"],
-	"left": ["right", "lookright", "look right", "right_right"],
-	"right": [".r", ".right", "_r", "_right", " right"]
+	"up": ["up", "lookup", "look_up", "look up", "lookingup", "looking_up", "looking up", "browsup", "brows_up", "brows up"],
+	"down": ["down", "lookdown", "look_down", "look down", "lookingdown", "looking_down", "looking down", "browsdown", "brows_down", "brows down"],
+	"left": ["left", "lookleft", "look_left", "look left", "lookingleft", "looking_left", "looking left", "browsleft", "brows_left", "brows left"],
+	"right": ["right", "lookright", "look_right", "look right", "lookingright", "looking_right", "looking right", "browsright", "brows_right", "brows right"],
 }
-_eyelid_suffixes_left = [".l", ".left", "_l", "_left", " left", "left"]
-_eyelid_suffixes_right = [".r", ".right", "_r", "_right", " right", "right"]
+_eyelid_suffixes_left = [".l", ".left", "_l", "_left", " left", "left", "left eye", " left eye"]
+_eyelid_suffixes_right = [".r", ".right", "_r", "_right", " right", "right", "right eye", " right eye"]
 
 
 def _map_blendshape(blendshape_name: str) -> str:

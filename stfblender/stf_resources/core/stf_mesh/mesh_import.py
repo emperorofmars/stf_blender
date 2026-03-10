@@ -13,7 +13,7 @@ _stf_type = "stf.mesh"
 
 # Mesh import and export are the lowest hanging fruits for performance improvements.
 
-def import_stf_mesh(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
+def import_stf_mesh(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any | STFReport:
 	blender_mesh = bpy.data.meshes.new(json_resource.get("name", "STF Mesh"))
 	blender_mesh.stf_info.stf_id = stf_id
 	if(json_resource.get("name")):

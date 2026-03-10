@@ -12,24 +12,24 @@ class STFSetAnimationIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
 	bl_idname = "stf.set_animation_stf_id"
 	@classmethod
 	def poll(cls, context): return context.active_action is not None
-	def get_property(self, context): return context.active_action.stf_info
+	def get_property(self, context): return hasattr(context, "active_action") and context.active_action.stf_info
 
 class STFAddAnimationComponentOperator(bpy.types.Operator, STFAddComponentOperatorBase):
 	"""Add Component to Animation"""
 	bl_idname = "stf.add_animation_component"
 	@classmethod
 	def poll(cls, context): return context.active_action is not None
-	def get_property(self, context): return context.active_action
+	def get_property(self, context): return hasattr(context, "active_action") and context.active_action
 
 class STFRemoveAnimationComponentOperator(bpy.types.Operator, STFRemoveComponentOperatorBase):
 	"""Remove selected component from Animation"""
 	bl_idname = "stf.remove_animation_component"
-	def get_property(self, context): return context.active_action
+	def get_property(self, context): return hasattr(context, "active_action") and context.active_action
 
 class STFEditAnimationComponentIdOperator(bpy.types.Operator, STFEditComponentOperatorBase):
 	"""Edit the ID of this Component"""
 	bl_idname = "stf.edit_animation_component_id"
-	def get_property(self, context): return context.active_action
+	def get_property(self, context): return hasattr(context, "active_action") and context.active_action
 
 
 class STFAnimationSpatialPanel(bpy.types.Panel):
@@ -42,9 +42,9 @@ class STFAnimationSpatialPanel(bpy.types.Panel):
 
 	@classmethod
 	def poll(cls, context):
-		return (context.active_action is not None)
+		return hasattr(context, "active_action") and context.active_action is not None
 
-	def draw(self, context):
+	def draw(self, context: bpy.types.Context):
 		layout = self.layout
 		layout.use_property_split = True
 		set_stf_component_filter(bpy.types.Action)

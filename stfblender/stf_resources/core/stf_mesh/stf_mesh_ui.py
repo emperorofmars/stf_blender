@@ -10,14 +10,14 @@ class STFSetMeshIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
 	"""Set STF-ID for Mesh"""
 	bl_idname = "stf.set_mesh_stf_id"
 	@classmethod
-	def poll(cls, context): return context.mesh is not None
+	def poll(cls, context): return hasattr(context, "mesh") and context.mesh is not None
 	def get_property(self, context): return context.mesh.stf_info
 
 class STFAddMeshComponentOperator(bpy.types.Operator, STFAddComponentOperatorBase):
 	"""Add Component to Mesh"""
 	bl_idname = "stf.add_mesh_component"
 	@classmethod
-	def poll(cls, context): return context.mesh is not None
+	def poll(cls, context): return hasattr(context, "mesh") and context.mesh is not None
 	def get_property(self, context): return context.mesh
 
 class STFRemoveMeshComponentOperator(bpy.types.Operator, STFRemoveComponentOperatorBase):
@@ -41,7 +41,7 @@ class STFMeshSpatialPanel(bpy.types.Panel):
 
 	@classmethod
 	def poll(cls, context: bpy.types.Context):
-		return (context.mesh is not None)
+		return hasattr(context, "mesh") and context.mesh is not None
 
 	def draw(self, context: bpy.types.Context):
 		layout = self.layout

@@ -9,7 +9,7 @@ class STFSetImageIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
 	"""Set STF-ID for Image"""
 	bl_idname = "stf.set_image_stf_id"
 	@classmethod
-	def poll(cls, context): return context.edit_image is not None
+	def poll(cls, context): return hasattr(context, "edit_image") and context.edit_image is not None
 	def get_property(self, context): return context.edit_image.stf_info
 
 
@@ -17,7 +17,7 @@ class STFAddImageComponentOperator(bpy.types.Operator, STFAddComponentOperatorBa
 	"""Add Component to Image"""
 	bl_idname = "stf.add_image_component"
 	@classmethod
-	def poll(cls, context): return context.edit_image is not None
+	def poll(cls, context): return hasattr(context, "edit_image") and context.edit_image is not None
 	def get_property(self, context): return context.edit_image
 
 class STFRemoveImageComponentOperator(bpy.types.Operator, STFRemoveComponentOperatorBase):
@@ -54,8 +54,8 @@ class STFImageSpatialPanel(bpy.types.Panel):
 	bl_category = "Image"
 
 	@classmethod
-	def poll(cls, context):
-		return (context.edit_image is not None)
+	def poll(cls, context: bpy.types.Context):
+		return hasattr(context, "edit_image") and context.edit_image is not None
 
 	def draw(self, context):
 		set_stf_component_filter(bpy.types.Image)

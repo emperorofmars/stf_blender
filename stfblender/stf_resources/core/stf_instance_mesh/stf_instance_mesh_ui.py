@@ -13,7 +13,7 @@ class SetInstanceBlendshapes(bpy.types.Operator):
 	bl_options = {"REGISTER", "UNDO"}
 
 	@classmethod
-	def poll(cls, context): return context.object.stf_instance is not None and context.object.data and type(context.object.data) is bpy.types.Mesh
+	def poll(cls, context): return hasattr(context, "object") and context.object is not None and context.object.stf_instance is not None and context.object.data and type(context.object.data) is bpy.types.Mesh
 
 	def invoke(self, context, event):
 		return context.window_manager.invoke_confirm(self, event)
@@ -27,7 +27,7 @@ class STFSetMeshInstanceIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
 	"""Set STF-ID for MeshInstance"""
 	bl_idname = "stf.set_mesh_instance_stf_id"
 	@classmethod
-	def poll(cls, context): return context.object.stf_instance is not None and context.object.data and type(context.object.data) is bpy.types.Mesh
+	def poll(cls, context): return hasattr(context, "object") and context.object is not None and context.object.stf_instance is not None and context.object.data and type(context.object.data) is bpy.types.Mesh
 	def get_property(self, context): return context.object.stf_instance
 
 
@@ -78,7 +78,7 @@ class STFMeshInstancePanel(bpy.types.Panel):
 
 	@classmethod
 	def poll(cls, context: bpy.types.Context):
-		return (context.object.stf_instance is not None and context.object.data and type(context.object.data) is bpy.types.Mesh)
+		return hasattr(context, "object") and context.object is not None and context.object.stf_instance is not None and context.object.data and type(context.object.data) is bpy.types.Mesh
 
 	def draw(self, context: bpy.types.Context):
 		layout = self.layout

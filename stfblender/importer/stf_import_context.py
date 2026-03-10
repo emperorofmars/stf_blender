@@ -43,12 +43,15 @@ class STF_ImportContext(ISTF_ImportContext):
 				if(json_component := self.get_json_resource(component_id)):
 					if(component_handler := self._state.determine_handler(json_component, STF_Category.COMPONENT)):
 						component_result = component_handler.import_func(self, json_component, component_id, application_object)
-						if(component_result):
+						if(component_result and type(component_result) is not STFReport):
 							application_component_object = component_result
 							self.register_imported_resource(component_id, STF_Component_Editmode_Resistant_Reference(application_component_object, application_object))
 						else:
 							_logger.error("Component import error", stack_info=True)
-							self.report(STFReport("Component import error", STFReportSeverity.Error, component_id, json_component.get("type"), application_object))
+							if(type(component_result) is STFReport):
+								self.report(component_result)
+							else:
+								self.report(STFReport("Component import error", STFReportSeverity.Error, component_id, json_component.get("type"), application_object))
 					else:
 						self.report(STFReport("No STF_Module registered for component", STFReportSeverity.Warn, component_id, json_component.get("type")))
 				else:
@@ -69,13 +72,16 @@ class STF_ImportContext(ISTF_ImportContext):
 
 		if(handler := self._state.determine_handler(json_resource, stf_category)):
 			application_object = handler.import_func(self, json_resource, stf_id, context_object)
-			if(application_object):
+			if(application_object and type(application_object) is not STFReport):
 				self.register_imported_resource(stf_id, application_object)
 				self.__run_components(json_resource, handler.get_components_holder_func(application_object) if hasattr(handler, "get_components_holder_func") else application_object)
 				return application_object
 			else:
 				_logger.error("Resource import error", stack_info=True)
-				self.report(STFReport("Resource import error", STFReportSeverity.Error, stf_id, handler.stf_type, None))
+				if(type(application_object) is STFReport):
+					self.report(application_object)
+				else:
+					self.report(STFReport("Resource import error", STFReportSeverity.Error, stf_id, handler.stf_type, None))
 		else:
 			self.report(STFReport("Could not process resource: " + stf_id, STFReportSeverity.FatalError, stf_id, json_resource.get("type")))
 		return None

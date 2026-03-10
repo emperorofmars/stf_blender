@@ -20,7 +20,7 @@ class STF_Instance_Armature(bpy.types.PropertyGroup):
 	stf_components: bpy.props.CollectionProperty(type=InstanceModComponentRef, options=set()) # type: ignore
 	stf_active_component_index: bpy.props.IntProperty(options=set()) # type: ignore
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
+def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any | STFReport:
 	blender_armature = context.import_resource(json_resource["armature"], stf_category=STF_Category.DATA)
 	if(not blender_armature or type(blender_armature) is not bpy.types.Armature):
 		context.report(STFReport("Failed to import armature: " + str(json_resource.get("instance", {}).get("armature")), STFReportSeverity.Error, stf_id, _stf_type, context_object))
@@ -98,7 +98,7 @@ def _can_handle_application_object_func(application_object: Any) -> int:
 	else:
 		return -1
 
-def _stf_export(context: STF_ExportContext, application_object: Any, context_object: Any) -> tuple[dict, str]:
+def _stf_export(context: STF_ExportContext, application_object: Any, context_object: Any) -> tuple[dict, str] | STFReport:
 	blender_object: bpy.types.Object = application_object[0]
 	blender_armature: bpy.types.Armature = application_object[1]
 

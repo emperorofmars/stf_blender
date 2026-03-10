@@ -9,14 +9,14 @@ class STFSetArmatureIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
 	"""Set STF-ID for Armature"""
 	bl_idname = "stf.set_armature_stf_id"
 	@classmethod
-	def poll(cls, context): return context.armature is not None
+	def poll(cls, context): return hasattr(context, "armature") and context.armature is not None
 	def get_property(self, context): return context.armature.stf_info
 
 class STFAddArmatureComponentOperator(bpy.types.Operator, STFAddComponentOperatorBase):
 	"""Add Component to Armature"""
 	bl_idname = "stf.add_armature_component"
 	@classmethod
-	def poll(cls, context): return context.armature is not None
+	def poll(cls, context): return hasattr(context, "armature") and context.armature is not None
 	def get_property(self, context): return context.armature
 
 class STFRemoveArmatureComponentOperator(bpy.types.Operator, STFRemoveComponentOperatorBase):
@@ -40,7 +40,7 @@ class STFArmatureSpatialPanel(bpy.types.Panel):
 
 	@classmethod
 	def poll(cls, context):
-		return (context.armature is not None)
+		return hasattr(context, "armature") and context.armature is not None
 
 	def draw(self, context):
 		set_stf_component_filter(bpy.types.Armature)

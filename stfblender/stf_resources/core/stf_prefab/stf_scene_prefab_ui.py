@@ -14,7 +14,7 @@ class STFSetSceneCollectionAsRootOperator(bpy.types.Operator):
 
 	@classmethod
 	def poll(cls, context: bpy.types.Context):
-		return context.scene is not None
+		return hasattr(context, "scene") and context.scene is not None
 
 	def execute(self, context: bpy.types.Context):
 		context.scene.stf_root_collection = None
@@ -28,14 +28,14 @@ class STFSetSceneCollectionIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
 	"""Set STF-ID for Scene Collection"""
 	bl_idname = "stf.set_scene_collection_stf_id"
 	@classmethod
-	def poll(cls, context): return context.scene is not None
+	def poll(cls, context): return hasattr(context, "scene") and context.scene is not None
 	def get_property(self, context): return context.scene.collection.stf_info
 
 class STFAddSceneCollectionComponentOperator(bpy.types.Operator, STFAddComponentOperatorBase):
 	"""Add Component to Scene Collection"""
 	bl_idname = "stf.add_scene_collection_component"
 	@classmethod
-	def poll(cls, context): return context.scene.collection is not None
+	def poll(cls, context): return hasattr(context, "scene") and context.scene.collection is not None
 	def get_property(self, context): return context.scene.collection
 
 class STFRemoveSceneCollectionComponentOperator(bpy.types.Operator, STFRemoveComponentOperatorBase):
@@ -60,7 +60,7 @@ class STFSceneCollectionPanel(bpy.types.Panel):
 
 	@classmethod
 	def poll(cls, context: bpy.types.Context):
-		return (context.scene is not None)
+		return hasattr(context, "scene") and context.scene is not None
 
 	def draw_header(self, context: bpy.types.Context):
 		if(context.scene.stf_root_collection == context.scene.collection):

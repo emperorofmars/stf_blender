@@ -14,7 +14,7 @@ from .stf_animation_bake import bake_constraints
 _stf_type = stf_animation_type
 
 
-def stf_animation_export(context: STF_ExportContext, application_object: Any, context_object: Any) -> tuple[dict, str]:
+def stf_animation_export(context: STF_ExportContext, application_object: Any, context_object: Any) -> tuple[dict, str] | STFReport:
 	blender_animation: bpy.types.Action = application_object
 	if(blender_animation.stf_animation.exclude): return None
 	if(blender_animation.is_action_legacy):

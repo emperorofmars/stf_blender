@@ -1,7 +1,7 @@
 import bpy
 from typing import Any
 
-from ....common import STF_ImportContext, STF_ExportContext, STF_TaskSteps, STFReportSeverity, STF_Category
+from ....common import STF_ImportContext, STF_ExportContext, STF_TaskSteps, STFReportSeverity, STF_Category, STFReport
 from ....common.resource.blender_native import STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister
 from ....common.resource.component.component_utils import get_components_from_object
 from ....common.utils.id_utils import ensure_stf_id
@@ -10,7 +10,7 @@ from ....common.utils.id_utils import ensure_stf_id
 _stf_type = "stf.prefab"
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
+def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any | STFReport:
 	collection = bpy.data.collections.new(json_resource.get("name", context.get_filename()))
 	collection.stf_info.stf_id = stf_id
 	if(json_resource.get("name")):
@@ -31,7 +31,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	return collection
 
 
-def _stf_export(context: STF_ExportContext, application_object: Any, context_object: Any) -> tuple[dict, str]:
+def _stf_export(context: STF_ExportContext, application_object: Any, context_object: Any) -> tuple[dict, str] | STFReport:
 	collection: bpy.types.Collection = application_object
 	ensure_stf_id(context, collection)
 

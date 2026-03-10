@@ -18,7 +18,8 @@ def _value_import_func(context: STF_ImportContext, blender_material: bpy.types.M
 
 def _value_export_func(context: STF_ExportContext, blender_material: bpy.types.Material, value: STF_Material_Value_Image) -> Any:
 	ret = {}
-	if(value.image): ret["image"] = context.serialize_resource(value.image)
+	if(value.image):
+		ret["image"] = context.serialize_resource(value.image)
 	return ret
 
 

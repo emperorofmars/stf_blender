@@ -15,14 +15,14 @@ class STFSetArmatureInstanceIDOperator(bpy.types.Operator, STFSetIDOperatorBase)
 	"""Set STF-ID for Armature-Instance"""
 	bl_idname = "stf.set_armature_instance_stf_id"
 	@classmethod
-	def poll(cls, context): return context.object.stf_instance is not None and context.object.data and type(context.object.data) is bpy.types.Armature
+	def poll(cls, context): return hasattr(context, "object") and context.object is not None and context.object.stf_instance is not None and context.object.data and type(context.object.data) is bpy.types.Armature
 	def get_property(self, context): return context.object.stf_instance
 
 class STFAddArmatureInstanceComponentOperator(bpy.types.Operator, STFAddComponentOperatorBase):
 	"""Add Component to Armature-Instance"""
 	bl_idname = "stf.add_armature_instance_component"
 	@classmethod
-	def poll(cls, context): return context.object.stf_instance_armature is not None and context.object.data and type(context.object.data) is bpy.types.Armature
+	def poll(cls, context): return hasattr(context, "object") and context.object is not None and context.object.stf_instance_armature is not None and context.object.data and type(context.object.data) is bpy.types.Armature
 	def get_property(self, context): return context.object
 	def get_components_ref_property(self, context) -> STF_Component_Ref: return context.object.stf_instance_armature.stf_components
 
@@ -47,10 +47,10 @@ class STFArmatureInstanceFixRotationMode(bpy.types.Operator):
 	bl_options = {"REGISTER", "UNDO"}
 
 	@classmethod
-	def poll(cls, context):
-		return context.object is not None and context.object.stf_instance_armature is not None and context.object.data and type(context.object.data) is bpy.types.Armature
+	def poll(cls, context: bpy.types.Context):
+		return hasattr(context, "object") and context.object is not None and context.object.stf_instance_armature is not None and context.object.data and type(context.object.data) is bpy.types.Armature
 
-	def invoke(self, context, event):
+	def invoke(self, context: bpy.types.Context, event):
 		return context.window_manager.invoke_confirm(self, event, title="Set the rotation-mode to Quaternion for all PoseBones", message=self.bl_description)
 
 	def execute(self, context: bpy.types.Context):
@@ -94,7 +94,7 @@ class STFArmatureInstancePanel(bpy.types.Panel):
 
 	@classmethod
 	def poll(cls, context: bpy.types.Context):
-		return context.object is not None and context.object.stf_instance_armature is not None and context.object.data and type(context.object.data) is bpy.types.Armature
+		return hasattr(context, "object") and context.object is not None and context.object.stf_instance_armature is not None and context.object.data and type(context.object.data) is bpy.types.Armature
 
 	def draw(self, context: bpy.types.Context):
 		layout = self.layout

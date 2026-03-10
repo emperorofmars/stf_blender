@@ -14,14 +14,14 @@ class STFSetMaterialIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
 	"""Set STF-ID for Material"""
 	bl_idname = "stf.set_material_stf_id"
 	@classmethod
-	def poll(cls, context): return context.material is not None
+	def poll(cls, context): return hasattr(context, "material") and context.material is not None
 	def get_property(self, context): return context.material.stf_info
 
 class STFAddMaterialComponentOperator(bpy.types.Operator, STFAddComponentOperatorBase):
 	"""Add Component to Material"""
 	bl_idname = "stf.add_material_component"
 	@classmethod
-	def poll(cls, context): return context.material is not None
+	def poll(cls, context): return hasattr(context, "material") and context.material is not None
 	def get_property(self, context): return context.material
 
 class STFRemoveMaterialComponentOperator(bpy.types.Operator, STFRemoveComponentOperatorBase):
@@ -169,9 +169,9 @@ class STFMaterialSpatialPanel(bpy.types.Panel):
 
 	@classmethod
 	def poll(cls, context):
-		return (context.material is not None)
+		return hasattr(context, "material") and context.material is not None
 
-	def draw(self, context):
+	def draw(self, context: bpy.types.Context):
 		set_stf_component_filter(bpy.types.Material)
 
 		# Set ID

@@ -9,14 +9,14 @@ class STFSetTextIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
 	"""Set STF-ID for Text"""
 	bl_idname = "stf.set_text_stf_id"
 	@classmethod
-	def poll(cls, context): return context.curve is not None and isinstance(context.curve, bpy.types.TextCurve)
+	def poll(cls, context): return hasattr(context, "curve") and context.curve is not None and isinstance(context.curve, bpy.types.TextCurve)
 	def get_property(self, context): return context.curve.stf_info
 
 class STFAddTextComponentOperator(bpy.types.Operator, STFAddComponentOperatorBase):
 	"""Add Component to Text"""
 	bl_idname = "stf.add_text_component"
 	@classmethod
-	def poll(cls, context): return context.curve is not None and isinstance(context.curve, bpy.types.TextCurve)
+	def poll(cls, context): return hasattr(context, "curve") and context.curve is not None and isinstance(context.curve, bpy.types.TextCurve)
 	def get_property(self, context): return context.curve
 
 class STFRemoveTextComponentOperator(bpy.types.Operator, STFRemoveComponentOperatorBase):
@@ -40,7 +40,7 @@ class STFTextSpatialPanel(bpy.types.Panel):
 
 	@classmethod
 	def poll(cls, context: bpy.types.Context):
-		return context.curve is not None and isinstance(context.curve, bpy.types.TextCurve)
+		return hasattr(context, "curve") and context.curve is not None and isinstance(context.curve, bpy.types.TextCurve)
 
 	def draw(self, context: bpy.types.Context):
 		layout = self.layout

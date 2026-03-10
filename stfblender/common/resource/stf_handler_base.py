@@ -1,6 +1,6 @@
 from typing import Any, Callable
 
-from .. import STF_ImportContext, STF_ExportContext, BlenderPropertyPathPart, STFPropertyPathPart
+from .. import STF_ImportContext, STF_ExportContext, BlenderPropertyPathPart, STFPropertyPathPart, STFReport
 
 
 class STF_HandlerBase:
@@ -24,10 +24,10 @@ class STF_HandlerBase:
 
 
 	# (Import Context, Json Dict, ID, Optional Parent Application Object) -> The Application Object
-	import_func: Callable[[STF_ImportContext, dict, str, Any], Any]
+	import_func: Callable[[STF_ImportContext, dict, str, Any], Any | STFReport]
 
 	# (Export Context, Application Object, Optional Parent Application Object) -> (Json Dict, ID)
-	export_func: Callable[[STF_ExportContext, Any, Any], tuple[dict, str]]
+	export_func: Callable[[STF_ExportContext, Any, Any], tuple[dict, str] | STFReport]
 
 	"""
 	Properties for animation handling

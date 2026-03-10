@@ -1,7 +1,7 @@
 import bpy
 from typing import Any
 
-from ...common import STF_ExportContext, STF_ImportContext, STF_Category
+from ...common import STF_ExportContext, STF_ImportContext, STF_Category, STFReport
 from ...common.resource.component import STF_ComponentResourceBase, STF_Handler_Component, STF_Component_Ref
 from ...common.resource.component.component_utils import add_component, export_component_base, import_component_base
 
@@ -11,7 +11,7 @@ _blender_property_name = "stf_ava_visemes_blendshape"
 
 
 _voice_visemes_15 = ["sil", "aa", "ch", "dd", "e", "ff", "ih", "kk", "nn", "oh", "ou", "pp", "rr", "ss", "th"]
-_voice_visemes_15_prefixes = ["", "vis.", "vis_", "vis ", "vrc.", "vrc_", "vrc "]
+_voice_visemes_15_prefixes = ["vis.", "vis_", "vis ", "vrc.", "vrc_", "vrc ", "vrc.v_", "viseme", "viseme.", "viseme_", "viseme ", ""]
 
 class AVA_Visemes_Blendshape(STF_ComponentResourceBase):
 	vis_sil: bpy.props.StringProperty(name="Sil", options=set()) # type: ignore
@@ -35,12 +35,21 @@ def automap(component: AVA_Visemes_Blendshape, mesh: bpy.types.Mesh):
 	for viseme in _voice_visemes_15:
 		component["vis_" + viseme] = ""
 
+	confidences: dict[str, int] = {}
+	for viseme in _voice_visemes_15:
+		confidences[viseme] = -1
+
 	if(mesh.shape_keys):
 		for shape_key in mesh.shape_keys.key_blocks:
 			for viseme in _voice_visemes_15:
 				for prefix in _voice_visemes_15_prefixes:
-					if(shape_key.name.lower().find(prefix + viseme) > 0 and (len(getattr(component, "vis_" + viseme)) > len(shape_key.name) or len(getattr(component, "vis_" + viseme)) == 0)):
+					test = prefix + viseme
+					shape: str = shape_key.name.lower()
+					shape_confidence = len(test) / max(len(shape), 1)
+
+					if(test in shape and shape_confidence > confidences[viseme]):
 						component["vis_" + viseme] = shape_key.name
+						confidences[viseme] = shape_confidence
 
 
 class AutomapVisemes(bpy.types.Operator):
@@ -87,7 +96,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, context_object: Any) -> Any:
+def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, context_object: Any) -> Any | STFReport:
 	component_ref, component = add_component(context_object, _blender_property_name, id, _stf_type)
 	import_component_base(context, component, json_resource, _blender_property_name, context_object)
 
@@ -98,7 +107,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, contex
 	return component
 
 
-def _stf_export(context: STF_ExportContext, component: AVA_Visemes_Blendshape, context_object: Any) -> tuple[dict, str]:
+def _stf_export(context: STF_ExportContext, component: AVA_Visemes_Blendshape, context_object: Any) -> tuple[dict, str] | STFReport:
 	ret = export_component_base(context, _stf_type, component, _blender_property_name, context_object)
 
 	for viseme in _voice_visemes_15:
