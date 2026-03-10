@@ -21,6 +21,8 @@ class STF_ExportContext(ISTF_ExportContext):
 
 	def run(self) -> str:
 		root_id = self.serialize_resource(self._prefab)
+		if(not root_id):
+			raise Exception("Failed to import root resource")
 		self._state.set_root_id(root_id)
 		self._state.run_tasks()
 		return root_id
@@ -66,7 +68,7 @@ class STF_ExportContext(ISTF_ExportContext):
 	def serialize_resource(self, application_object: Any, context_object: Any = None, stf_category: str | None = None, export_fail_severity: STFReportSeverity = STFReportSeverity.Error) -> str | None:
 		"""Run all logic to serialize an application resource. If it already has been serialized, return the existing ID."""
 
-		if(application_object == None): return None
+		if(application_object is None): return None
 		if(existing_id := self.get_resource_id(application_object)): return existing_id
 
 		if(selected_handler := self._state.determine_handler(application_object, stf_category)):
@@ -100,13 +102,13 @@ class STF_ExportContext(ISTF_ExportContext):
 		return None
 
 
-	def serialize_buffer(self, data: bytes, buffer_id: str = None) -> str:
+	def serialize_buffer(self, data: bytes, buffer_id: str | None = None) -> str:
 		return self._state.serialize_buffer(data, buffer_id)
 
 
-	def resolve_application_property_path(self, application_object: Any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart:
-		if(application_object == None): return None
-		if(type(application_object) == bpy.types.Object and not self.get_resource_id(application_object)):
+	def resolve_application_property_path(self, application_object: Any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart | None:
+		if(application_object is None): return None
+		if(type(application_object) is bpy.types.Object and not self.get_resource_id(application_object)):
 			return None
 
 		if(data_path.startswith(".")): data_path = data_path[1:]

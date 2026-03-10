@@ -1,5 +1,4 @@
 import bpy
-import io
 import logging
 from typing import Any
 from collections.abc import Sequence
@@ -27,7 +26,7 @@ class STF_ExportState(STF_State_Base):
 			self,
 			asset_info: STF_Meta_AssetInfo,
 			handlers: tuple[dict[Any, list[STF_HandlerBase]], dict[Any, list[STF_ExportComponentHook]]],
-			trash_objects: Sequence[bpy.types.Object] = (),
+			trash_objects: list[bpy.types.Object] = [],
 			fail_on_severity: STFReportSeverity = STFReportSeverity.FatalError,
 			permit_id_reassignment: bool = True,
 			metric_multiplier: float = 1,
@@ -41,14 +40,14 @@ class STF_ExportState(STF_State_Base):
 		self._resources: dict[Any, str] = {} # original application object -> ID of exported STF Json resource
 		self._resources_inverse: dict[str, Any] = {} # original application object -> ID of exported STF Json resource
 		self._exported_resources: dict[str, dict] = {} # ID -> exported STF Json resource
-		self._exported_buffers: dict[str, io.BytesIO] = {} # ID -> exported STF Json buffer
+		self._exported_buffers: dict[str, bytes] = {} # ID -> exported STF Json buffer
 
 		self._asset_info: STF_Meta_AssetInfo = asset_info
 		self._permit_id_reassignment: bool = permit_id_reassignment
 		self._root_id: str | None = None
 		self._metric_multiplier: float = metric_multiplier
 
-		self._trash_objects: Sequence[bpy.types.Object] = trash_objects
+		self._trash_objects: list[bpy.types.Object] = trash_objects
 
 		self._settings: STF_ExportSettings | None = settings
 
@@ -140,7 +139,8 @@ class STF_ExportState(STF_State_Base):
 
 	def create_stf_definition(self) -> STF_JsonDefinition:
 		import datetime
-
+		if(not self._root_id):
+			raise Exception("Invalid root ID")
 		ret = STF_JsonDefinition()
 		ret.stf.version_major = 0
 		ret.stf.version_minor = 0

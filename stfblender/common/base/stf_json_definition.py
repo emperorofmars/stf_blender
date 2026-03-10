@@ -3,13 +3,13 @@ from typing import Any
 
 class STF_Meta_AssetInfo:
 	def __init__(self):
-		self.asset_name: str = None
-		self.version: str = None
-		self.url: str = None
-		self.author: str = None
-		self.license: str = None
-		self.license_url: str = None
-		self.documentation_url: str = None
+		self.asset_name: str | None = None
+		self.version: str | None = None
+		self.url: str | None = None
+		self.author: str | None = None
+		self.license: str | None = None
+		self.license_url: str | None = None
+		self.documentation_url: str | None = None
 
 		self.custom_properties: dict[str, str] = {}
 
@@ -51,7 +51,7 @@ class STF_Meta:
 		self.generator: str = "libstf_python"
 		self.generator_version = "0.0.0"
 		self.timestamp: str = datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat()
-		self.root: str | None = None
+		self.root: str
 		self.asset_info: STF_Meta_AssetInfo = STF_Meta_AssetInfo()
 		self.metric_multiplier: float = 1
 
@@ -118,8 +118,8 @@ class STF_JsonDefinition:
 				case _: raise RuntimeError("Invalid buffer type: " + value["type"])
 		return ret
 
-	def to_dict(self):
-		buffers = {}
+	def to_dict(self) -> dict[str, Any]:
+		buffers: dict[str, Any] = {}
 		for key, value in self.buffers.items():
 			buffers[key] = value.to_dict()
 		return {

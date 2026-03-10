@@ -19,13 +19,13 @@ class STF_ImportContext:
 	def register_imported_resource(self, stf_id: str, application_object: Any):
 		pass
 
-	def import_resource(self, stf_id: str, context_object: Any = None, stf_category: str = STF_Category.DATA) -> Any:
+	def import_resource(self, stf_id: str, context_object: Any = None, stf_category: str = STF_Category.DATA) -> Any | None:
 		pass
 
 	def import_buffer(self, stf_id: str) -> bytes | None:
 		pass
 
-	def resolve_stf_property_path(self, stf_path: list[str], application_object: Any = None) -> BlenderPropertyPathPart:
+	def resolve_stf_property_path(self, stf_path: list[str], application_object: Any = None) -> BlenderPropertyPathPart | None:
 		pass
 
 	def add_task(self, step: int | STF_TaskSteps, task: Callable):

@@ -1,4 +1,4 @@
-from io import BytesIO
+from io import BufferedReader
 import struct
 
 
@@ -11,6 +11,7 @@ def determine_indices_width(length: int) -> int:
 		return 4
 	elif(length <= 2**64):
 		return 8
+	else: raise Exception("Invalid indices width")
 
 
 def determine_pack_format_int(width: int) -> str:
@@ -18,17 +19,20 @@ def determine_pack_format_int(width: int) -> str:
 	elif(width <= 2): return "<h"
 	elif(width <= 4): return "<i"
 	elif(width <= 8): return "<q"
+	else: raise Exception("Invalid pack format width")
 
 def determine_pack_format_uint(width: int) -> str:
 	if(width <= 1): return "<B"
 	elif(width <= 2): return "<H"
 	elif(width <= 4): return "<I"
 	elif(width <= 8): return "<Q"
+	else: raise Exception("Invalid pack format width")
 
 def determine_pack_format_float(width: int) -> str:
 	#if(width <= 2): return "<e"
 	if(width <= 4): return "<f"
 	elif(width <= 8): return "<d"
+	else: raise Exception("Invalid pack format width")
 
 
 def serialize_int(value: int, width: int = 4) -> bytes:
@@ -41,11 +45,11 @@ def serialize_float(value: float, width: int = 4) -> bytes:
 	return struct.pack(determine_pack_format_float(width), value)
 
 
-def parse_int(buffer: BytesIO, width: int = 4) -> int:
+def parse_int(buffer: BufferedReader, width: int = 4) -> int:
 	return struct.unpack(determine_pack_format_int(width), buffer.read(width))[0]
 
-def parse_uint(buffer: BytesIO, width: int = 4) -> int:
+def parse_uint(buffer: BufferedReader, width: int = 4) -> int:
 	return struct.unpack(determine_pack_format_uint(width), buffer.read(width))[0]
 
-def parse_float(buffer: BytesIO, width: int = 4) -> float:
+def parse_float(buffer: BufferedReader, width: int = 4) -> float:
 	return struct.unpack(determine_pack_format_float(width), buffer.read(width))[0]

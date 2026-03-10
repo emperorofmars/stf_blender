@@ -52,7 +52,7 @@ def get_component_stf_path(application_object: Any, component: STF_ComponentReso
 	for component_ref in application_object.stf_info.stf_components:
 		if(component_ref.stf_id == component.stf_id):
 			return [application_object.stf_info.stf_id, "components", component.stf_id]
-	if(type(application_object.data) == bpy.types.Armature):
+	if(type(application_object.data) is bpy.types.Armature):
 		for component_ref in application_object.stf_instance_armature.stf_components:
 			if(component_ref.stf_id == component.stf_id):
 				return [application_object.stf_info.stf_id, "instance", application_object.data.bones[component_ref.bone].stf_info.stf_id, "components", component.stf_id]

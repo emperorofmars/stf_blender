@@ -22,15 +22,17 @@ class STF_ImportContext(ISTF_ImportContext):
 
 	def run(self) -> bpy.types.Collection:
 		ret = self.import_resource(self.get_root_id(), STF_Category.DATA)
+		if(not ret):
+			raise Exception("Failed to export root resource")
 		self._state.run_tasks()
 		ret.stf_meta.from_stf_meta_assetInfo(self._state._file.definition.stf.asset_info)
 		return ret
 
 
-	def get_json_resource(self, stf_id: str) -> dict | None:
+	def get_json_resource(self, stf_id: str) -> dict[str, Any] | None:
 		return self._state.get_json_resource(stf_id)
 
-	def get_imported_resource(self, stf_id: str):
+	def get_imported_resource(self, stf_id: str) -> Any | None:
 		return self._state.get_imported_resource(stf_id)
 
 	def register_imported_resource(self, stf_id: str, application_object: Any):
@@ -58,7 +60,7 @@ class STF_ImportContext(ISTF_ImportContext):
 					self.report(STFReport("Invalid JSON resource", STFReportSeverity.FatalError, component_id))
 
 
-	def import_resource(self, stf_id: str, context_object: Any = None, stf_category: str | None = STF_Category.DATA) -> Any:
+	def import_resource(self, stf_id: str, context_object: Any = None, stf_category: str | None = STF_Category.DATA) -> Any | None:
 		if(stf_id in self._state._imported_resources):
 			if(type(self._state._imported_resources[stf_id]) is STF_Component_Editmode_Resistant_Reference):
 				return self._state._imported_resources[stf_id].get()
@@ -91,7 +93,7 @@ class STF_ImportContext(ISTF_ImportContext):
 		return self._state.import_buffer(stf_id)
 
 
-	def resolve_stf_property_path(self, stf_path: list[str], application_object: Any = None) -> BlenderPropertyPathPart:
+	def resolve_stf_property_path(self, stf_path: list[str], application_object: Any = None) -> BlenderPropertyPathPart | None:
 		if(stf_path is None or len(stf_path) == 0): return None
 
 		if(selected_handler := self._state.determine_property_resolution_handler(stf_path[0])):

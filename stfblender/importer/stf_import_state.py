@@ -21,7 +21,7 @@ class STF_ImportState(STF_State_Base):
 	Gets passed to the STF_ImportContext.
 	"""
 
-	def __init__(self, file: STF_File, handlers: dict[str, STF_HandlerBase], fallback_handlers: dict[str, STF_HandlerBase] = {}, trash_objects: list[bpy.types.Object] = [], fail_on_severity: STFReportSeverity = STFReportSeverity.FatalError, settings: STF_ImportSettings = {}):
+	def __init__(self, file: STF_File, handlers: dict[str, STF_HandlerBase], fallback_handlers: dict[str, STF_HandlerBase] = {}, trash_objects: list[bpy.types.Object] = [], fail_on_severity: STFReportSeverity = STFReportSeverity.FatalError, settings: STF_ImportSettings | None = None):
 		super().__init__(fail_on_severity)
 
 		self._file: STF_File = file
@@ -34,7 +34,7 @@ class STF_ImportState(STF_State_Base):
 
 		self._trash_objects: list[bpy.types.Object] = trash_objects
 
-		self._settings: STF_ImportSettings = settings
+		self._settings: STF_ImportSettings | None = settings
 
 
 	def determine_handler(self, json_resource: dict[str, Any], stf_category: str = STF_Category.DATA) -> STF_HandlerBase | None:
