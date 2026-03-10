@@ -16,67 +16,67 @@ _mappings_right_side = ["right", "_r", ".r", "-r"]
 
 # (humanoid_name, display_name, matching_conditions, muscle_rotation_limits(False | [[p_min, p_max],[s_min, s_max],[t_min, t_max]]))
 _humanoid_bones = [
-	("hip", "Hip", [["hip", "hips"]], False),
-	("spine", "Spine", [["spine"]], [[-40, 40],[-40, 40],[-40, 40]]),
-	("chest", "Chest", [["chest"]], [[-40, 40],[-40, 40],[-40, 40]]),
-	("upper_chest", "Upper Chest", [["upper"], ["chest"]], False),
-	("neck", "Neck", [["neck"]], [[-40, 40],[-40, 40],[-40, 40]]),
-	("head", "Head", [["head"]], [[-40, 40],[-40, 40],[-40, 40]]),
-	("jaw", "Jaw", [["jaw"]], False),
-	("eye.l", "Left Eye", [["eye"], _mappings_left_side], [[-10, 15],[-20, 20],False]),
-	("eye.r", "Right Eye", [["eye"], _mappings_right_side], [[-10, 15],[-20, 20],False]),
+	("hip", "Hip", [[["hip", "hips"]]], False),
+	("spine", "Spine", [[["spine"]]], [[-40, 40],[-40, 40],[-40, 40]]),
+	("chest", "Chest", [[["chest"]]], [[-40, 40],[-40, 40],[-40, 40]]),
+	("upper_chest", "Upper Chest", [[["upper"], ["chest"]]], False),
+	("neck", "Neck", [[["neck"]]], [[-40, 40],[-40, 40],[-40, 40]]),
+	("head", "Head", [[["head"]]], [[-40, 40],[-40, 40],[-40, 40]]),
+	("jaw", "Jaw", [[["jaw"]]], False),
+	("eye.l", "Left Eye", [[["eye"], _mappings_left_side]], [[-10, 15],[-20, 20],False]),
+	("eye.r", "Right Eye", [[["eye"], _mappings_right_side]], [[-10, 15],[-20, 20],False]),
 
-	("shoulder.l", "Left Shoulder", [["shoulder"], _mappings_left_side], [[-15, 30],[-15, 15],False]),
-	("upper_arm.l", "Left Upper Arm", [["upper"], ["arm"], _mappings_left_side], [[-60, 100],[-100, 100],[-90, 90]]),
-	("lower_arm.l", "Left Lower Arm", [["lower"], ["arm"], _mappings_left_side], [[-80, 80],False,[-90, 90]]),
-	("wrist.l", "Left Wrist", [["hand", "wrist"], _mappings_left_side], [[-80, 80],[-40, 40],False]),
+	("shoulder.l", "Left Shoulder", [[["shoulder"], _mappings_left_side]], [[-15, 30],[-15, 15],False]),
+	("upper_arm.l", "Left Upper Arm", [[["upper"], ["arm"], _mappings_left_side]], [[-60, 100],[-100, 100],[-90, 90]]),
+	("lower_arm.l", "Left Lower Arm", [[["lower", "fore"], ["arm"], _mappings_left_side]], [[-80, 80],False,[-90, 90]]),
+	("wrist.l", "Left Wrist", [[["hand", "wrist"], _mappings_left_side]], [[-80, 80],[-40, 40],False]),
 
-	("thumb_1.l", "Left Thumb Proximal", [["thumb"], ["1", "proximal"], _mappings_left_side], [[-20, 20],[-25, 25],False]),
-	("thumb_2.l", "Left Thumb Intermediate", [["thumb"], ["2", "intermediate"], _mappings_left_side], [[-40, 35],False,False]),
-	("thumb_3.l", "Left Thumb Distal", [["thumb"], ["3", "distal"], _mappings_left_side], [[-40, 35],False,False]),
-	("index_1.l", "Left Index Proximal", [["index"], ["1", "proximal"], _mappings_left_side], [[-50, 50],[-20,20],False]),
-	("index_2.l", "Left Index Intermediate", [["index"], ["2", "intermediate"], _mappings_left_side], [[-45, 45],False,False]),
-	("index_3.l", "Left Index Distal", [["index"], ["3", "distal"], _mappings_left_side], [[-45, 45],False,False]),
-	("middle_1.l", "Left Middle Proximal", [["middle"], ["1", "proximal"], _mappings_left_side], [[-50, 50],[-7.5,7.5],False]),
-	("middle_2.l", "Left Middle Intermediate", [["middle"], ["2", "intermediate"], _mappings_left_side], [[-45, 45],False,False]),
-	("middle_3.l", "Left Middle Distal", [["middle"], ["3", "distal"], _mappings_left_side], [[-45, 45],False,False]),
-	("ring_1.l", "Left Ring Proximal", [["ring"], ["1", "proximal"], _mappings_left_side], [[-50, 50],[-7.5,7.5],False]),
-	("ring_2.l", "Left Ring Intermediate", [["ring"], ["2", "intermediate"], _mappings_left_side], [[-45, 45],False,False]),
-	("ring_3.l", "Left Ring Distal", [["ring"], ["3", "distal"], _mappings_left_side], [[-45, 45],False,False]),
-	("little_1.l", "Left Little Proximal", [["little", "pinkie"], ["1", "proximal"], _mappings_left_side], [[-50, 50],[-20,20],False]),
-	("little_2.l", "Left Little Intermediate", [["little", "pinkie"], ["2", "intermediate"], _mappings_left_side], [[-45, 45],False,False]),
-	("little_3.l", "Left Little Distal", [["little", "pinkie"], ["3", "distal"], _mappings_left_side], [[-45, 45],False,False]),
+	("thumb_1.l", "Left Thumb Proximal", [[["thumb"], ["1", "proximal"], _mappings_left_side]], [[-20, 20],[-25, 25],False]),
+	("thumb_2.l", "Left Thumb Intermediate", [[["thumb"], ["2", "intermediate"], _mappings_left_side]], [[-40, 35],False,False]),
+	("thumb_3.l", "Left Thumb Distal", [[["thumb"], ["3", "distal"], _mappings_left_side]], [[-40, 35],False,False]),
+	("index_1.l", "Left Index Proximal", [[["index"], ["1", "proximal"], _mappings_left_side]], [[-50, 50],[-20,20],False]),
+	("index_2.l", "Left Index Intermediate", [[["index"], ["2", "intermediate"], _mappings_left_side]], [[-45, 45],False,False]),
+	("index_3.l", "Left Index Distal", [[["index"], ["3", "distal"], _mappings_left_side]], [[-45, 45],False,False]),
+	("middle_1.l", "Left Middle Proximal", [[["middle"], ["1", "proximal"], _mappings_left_side]], [[-50, 50],[-7.5,7.5],False]),
+	("middle_2.l", "Left Middle Intermediate", [[["middle"], ["2", "intermediate"], _mappings_left_side]], [[-45, 45],False,False]),
+	("middle_3.l", "Left Middle Distal", [[["middle"], ["3", "distal"], _mappings_left_side]], [[-45, 45],False,False]),
+	("ring_1.l", "Left Ring Proximal", [[["ring"], ["1", "proximal"], _mappings_left_side]], [[-50, 50],[-7.5,7.5],False]),
+	("ring_2.l", "Left Ring Intermediate", [[["ring"], ["2", "intermediate"], _mappings_left_side]], [[-45, 45],False,False]),
+	("ring_3.l", "Left Ring Distal", [[["ring"], ["3", "distal"], _mappings_left_side]], [[-45, 45],False,False]),
+	("little_1.l", "Left Little Proximal", [[["little", "pinkie", "pinky"], ["1", "proximal"], _mappings_left_side]], [[-50, 50],[-20,20],False]),
+	("little_2.l", "Left Little Intermediate", [[["little", "pinkie", "pinky"], ["2", "intermediate"], _mappings_left_side]], [[-45, 45],False,False]),
+	("little_3.l", "Left Little Distal", [[["little", "pinkie", "pinky"], ["3", "distal"], _mappings_left_side]], [[-45, 45],False,False]),
 
-	("shoulder.r", "Right Shoulder", [["shoulder"], _mappings_right_side], [[-15, 30],[-15, 15],False]),
-	("upper_arm.r", "Right Upper Arm", [["upper"], ["arm"], _mappings_right_side], [[-60, 100],[-100, 100],[-90, 90]]),
-	("lower_arm.r", "Right Lower Arm", [["lower"], ["arm"], _mappings_right_side], [[-80, 80],False,[-90, 90]]),
-	("wrist.r", "Right Wrist", [["hand", "wrist"], _mappings_right_side], [[-80, 80],[-40, 40],False]),
+	("shoulder.r", "Right Shoulder", [[["shoulder"], _mappings_right_side]], [[-15, 30],[-15, 15],False]),
+	("upper_arm.r", "Right Upper Arm", [[["upper"], ["arm"], _mappings_right_side]], [[-60, 100],[-100, 100],[-90, 90]]),
+	("lower_arm.r", "Right Lower Arm", [[["lower", "fore"], ["arm"], _mappings_right_side]], [[-80, 80],False,[-90, 90]]),
+	("wrist.r", "Right Wrist", [[["hand", "wrist"], _mappings_right_side]], [[-80, 80],[-40, 40],False]),
 
-	("thumb_1.r", "Right Thumb Proximal", [["thumb"], ["1", "proximal"], _mappings_right_side], [[-20, 20],[-25, 25],False]),
-	("thumb_2.r", "Right Thumb Intermediate", [["thumb"], ["2", "intermediate"], _mappings_right_side], [[-40, 35],False,False]),
-	("thumb_3.r", "Right Thumb Distal", [["thumb"], ["3", "distal"], _mappings_right_side], [[-40, 35],False,False]),
-	("index_1.r", "Right Index Proximal", [["index"], ["1", "proximal"], _mappings_right_side], [[-50, 50],[-20,20],False]),
-	("index_2.r", "Right Index Intermediate", [["index"], ["2", "intermediate"], _mappings_right_side], [[-45, 45],False,False]),
-	("index_3.r", "Right Index Distal", [["index"], ["3", "distal"], _mappings_right_side], [[-45, 45],False,False]),
-	("middle_1.r", "Right Middle Proximal", [["middle"], ["1", "proximal"], _mappings_right_side], [[-50, 50],[-7.5,7.5],False]),
-	("middle_2.r", "Right Middle Intermediate", [["middle"], ["2", "intermediate"], _mappings_right_side], [[-45, 45],False,False]),
-	("middle_3.r", "Right Middle Distal", [["middle"], ["3", "distal"], _mappings_right_side], [[-45, 45],False,False]),
-	("ring_1.r", "Right Ring Proximal", [["ring"], ["1", "proximal"], _mappings_right_side], [[-50, 50],[-7.5,7.5],False]),
-	("ring_2.r", "Right Ring Intermediate", [["ring"], ["2", "intermediate"], _mappings_right_side], [[-45, 45],False,False]),
-	("ring_3.r", "Right Ring Distal", [["ring"], ["3", "distal"], _mappings_right_side], [[-45, 45],False,False]),
-	("little_1.r", "Right Little Proximal", [["little", "pinkie"], ["1", "proximal"], _mappings_right_side], [[-50, 50],[-20,20],False]),
-	("little_2.r", "Right Little Intermediate", [["little", "pinkie"], ["2", "intermediate"], _mappings_right_side], [[-45, 45],False,False]),
-	("little_3.r", "Right Little Distal", [["little", "pinkie"], ["3", "distal"], _mappings_right_side], [[-45, 45],False,False]),
+	("thumb_1.r", "Right Thumb Proximal", [[["thumb"], ["1", "proximal"], _mappings_right_side]], [[-20, 20],[-25, 25],False]),
+	("thumb_2.r", "Right Thumb Intermediate", [[["thumb"], ["2", "intermediate"], _mappings_right_side]], [[-40, 35],False,False]),
+	("thumb_3.r", "Right Thumb Distal", [[["thumb"], ["3", "distal"], _mappings_right_side]], [[-40, 35],False,False]),
+	("index_1.r", "Right Index Proximal", [[["index"], ["1", "proximal"], _mappings_right_side]], [[-50, 50],[-20,20],False]),
+	("index_2.r", "Right Index Intermediate", [[["index"], ["2", "intermediate"], _mappings_right_side]], [[-45, 45],False,False]),
+	("index_3.r", "Right Index Distal", [[["index"], ["3", "distal"], _mappings_right_side]], [[-45, 45],False,False]),
+	("middle_1.r", "Right Middle Proximal", [[["middle"], ["1", "proximal"], _mappings_right_side]], [[-50, 50],[-7.5,7.5],False]),
+	("middle_2.r", "Right Middle Intermediate", [[["middle"], ["2", "intermediate"], _mappings_right_side]], [[-45, 45],False,False]),
+	("middle_3.r", "Right Middle Distal", [[["middle"], ["3", "distal"], _mappings_right_side]], [[-45, 45],False,False]),
+	("ring_1.r", "Right Ring Proximal", [[["ring"], ["1", "proximal"], _mappings_right_side]], [[-50, 50],[-7.5,7.5],False]),
+	("ring_2.r", "Right Ring Intermediate", [[["ring"], ["2", "intermediate"], _mappings_right_side]], [[-45, 45],False,False]),
+	("ring_3.r", "Right Ring Distal", [[["ring"], ["3", "distal"], _mappings_right_side]], [[-45, 45],False,False]),
+	("little_1.r", "Right Little Proximal", [[["little", "pinkie", "pinky"], ["1", "proximal"], _mappings_right_side]], [[-50, 50],[-20,20],False]),
+	("little_2.r", "Right Little Intermediate", [[["little", "pinkie", "pinky"], ["2", "intermediate"], _mappings_right_side]], [[-45, 45],False,False]),
+	("little_3.r", "Right Little Distal", [[["little", "pinkie", "pinky"], ["3", "distal"], _mappings_right_side]], [[-45, 45],False,False]),
 
-	("upper_leg.l", "Left Upper Leg", [["leg"], ["upper"], _mappings_left_side], [[-90, 90],[-60, 60],[-60, 60]]),
-	("lower_leg.l", "Left Lower Leg", [["leg"], ["lower"], _mappings_left_side], [[-80, 80],False,[-90, 90]]),
-	("foot.l", "Left Foot", [["foot"], _mappings_left_side], [[-50, 50],False,[-30, 30]]),
-	("toes.l", "Left Toes", [["toes"], _mappings_left_side], False),
+	("upper_leg.l", "Left Upper Leg", [[["leg"], ["upper"], _mappings_left_side], [["thigh"], _mappings_left_side]], [[-90, 90],[-60, 60],[-60, 60]]),
+	("lower_leg.l", "Left Lower Leg", [[["leg"], ["lower"], _mappings_left_side], [["shin"], _mappings_left_side]], [[-80, 80],False,[-90, 90]]),
+	("foot.l", "Left Foot", [[["foot"], _mappings_left_side]], [[-50, 50],False,[-30, 30]]),
+	("toes.l", "Left Toes", [[["toes"], _mappings_left_side]], False),
 
-	("upper_leg.r", "Right Upper Leg", [["leg"], ["upper"], _mappings_right_side], [[-90, 90],[-60, 60],[-60, 60]]),
-	("lower_leg.r", "Right Lower Leg", [["leg"], ["lower"], _mappings_right_side], [[-80, 80],False,[-90, 90]]),
-	("foot.r", "Right Foot", [["foot"], _mappings_right_side], [[-50, 50],False,[-30, 30]]),
-	("toes.r", "Right Toes", [["toes"], _mappings_right_side], False),
+	("upper_leg.r", "Right Upper Leg", [[["leg"], ["upper"], _mappings_right_side], [["thigh"], _mappings_left_side]], [[-90, 90],[-60, 60],[-60, 60]]),
+	("lower_leg.r", "Right Lower Leg", [[["leg"], ["lower"], _mappings_right_side], [["shin"], _mappings_left_side]], [[-80, 80],False,[-90, 90]]),
+	("foot.r", "Right Foot", [[["foot"], _mappings_right_side]], [[-50, 50],False,[-30, 30]]),
+	("toes.r", "Right Toes", [[["toes"], _mappings_right_side]], False),
 ]
 
 def _get_display_name(humanoid_name: str) -> str:
@@ -145,18 +145,19 @@ def _map_humanoid_bones(component: STFEXP_Armature_Humanoid, armature: bpy.types
 		_setup_humanoid_collection(component)
 
 	for bone_mapping in _humanoid_bones:
-		and_conditions = bone_mapping[2]
+		mapping_conditions: list = bone_mapping[2]
 		candidate = None
 		for bone in armature.bones:
-			for and_condition in and_conditions:
-				for or_condition in and_condition:
-					if(or_condition in bone.name.lower()):
+			for and_conditions in mapping_conditions:
+				for and_condition in and_conditions:
+					for or_condition in and_condition:
+						if(or_condition in bone.name.lower()):
+							break
+					else:
 						break
 				else:
-					break
-			else:
-				if(not candidate or len(candidate) > len(bone.name)):
-					candidate = bone.name
+					if(not candidate or len(candidate) > len(bone.name)):
+						candidate = bone.name
 		if(candidate):
 			component.bone_mappings[bone_mapping[0]].bone = candidate
 		else:
