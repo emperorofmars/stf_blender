@@ -1,6 +1,7 @@
 import bpy
 import math
 from typing import Any
+from collections.abc import Sequence
 
 from ...common import STF_ExportContext, STF_ImportContext, STF_Category, STFReport
 from ...common.resource.component import STF_ComponentResourceBase, STF_Handler_Component, STF_Component_Ref
@@ -16,16 +17,16 @@ _mappings_left_side = (("left", "_l", ".l", "-l"), ("left", ))
 _mappings_right_side = (("right", "_r", ".r", "-r"), ("right", ))
 
 # (humanoid_name, display_name, matching_conditions, side (None | "l" | "r"), muscle_rotation_limits(False | [[p_min, p_max],[s_min, s_max],[t_min, t_max]]))
-_humanoid_bones = (
-	("hip", "Hip", [[["hip", "hips"]]], None, False),
-	("spine", "Spine", [[["spine"]]], None, [[-40, 40],[-40, 40],[-40, 40]]),
-	("chest", "Chest", [[["chest"]]], None, [[-40, 40],[-40, 40],[-40, 40]]),
-	("upper_chest", "Upper Chest", [[["upper", "up"], ["chest"]]], None, False),
-	("neck", "Neck", [[["neck"]]], None, [[-40, 40],[-40, 40],[-40, 40]]),
-	("head", "Head", [[["head"]]], None, [[-40, 40],[-40, 40],[-40, 40]]),
-	("jaw", "Jaw", [[["jaw"]]], None, False),
-	("eye.l", "Left Eye", [[["eye"]]], "l", [[-10, 15],[-20, 20],False]),
-	("eye.r", "Right Eye", [[["eye"]]], "r", [[-10, 15],[-20, 20],False]),
+_humanoid_bones: Sequence[tuple[str, str, Sequence[Sequence[Sequence[str]]], str | None, Sequence[Sequence[float] | None] | None]] = (
+	("hip", "Hip", ((("hip", "hips"),),), None, False),
+	("spine", "Spine", ((("spine",),),), None, [[-40, 40],[-40, 40],[-40, 40]]),
+	("chest", "Chest", ((("chest",),),), None, [[-40, 40],[-40, 40],[-40, 40]]),
+	("upper_chest", "Upper Chest", ((("upper", "up"), ("chest",)),), None, False),
+	("neck", "Neck", ((("neck",),),), None, [[-40, 40],[-40, 40],[-40, 40]]),
+	("head", "Head", ((("head",),),), None, [[-40, 40],[-40, 40],[-40, 40]]),
+	("jaw", "Jaw", ((("jaw",),),), None, False),
+	("eye.l", "Left Eye", ((("eye",),),), "l", [[-10, 15],[-20, 20],False]),
+	("eye.r", "Right Eye", ((("eye",),),), "r", [[-10, 15],[-20, 20],False]),
 
 	("shoulder.l", "Left Shoulder", [[["shoulder", "collar"]]], "l", [[-15, 30],[-15, 15],False]),
 	("upper_arm.l", "Left Upper Arm", [[["arm"]], [["upper", "up"], ["arm"]]], "l", [[-60, 100],[-100, 100],[-90, 90]]),
