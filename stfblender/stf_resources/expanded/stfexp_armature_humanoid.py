@@ -209,13 +209,13 @@ class ResetHumanoidCollectionOperator(bpy.types.Operator):
 	component_id: bpy.props.StringProperty() # type: ignore
 
 	@classmethod
-	def poll(cls, context):
-		return context.armature is not None
+	def poll(cls, context: bpy.types.Context):
+		return hasattr(context, "armature") and context.armature is not None
 
-	def invoke(self, context, event):
+	def invoke(self, context: bpy.types.Context, event: bpy.types.Event):
 		return context.window_manager.invoke_confirm(self, event)
 
-	def execute(self, context):
+	def execute(self, context: bpy.types.Context):
 		# let component
 		for component in context.armature.stfexp_armature_humanoid:
 			component.stf_id == self.component_id
@@ -238,7 +238,7 @@ class MapHumanoidCollectionOperator(bpy.types.Operator):
 	def poll(cls, context: bpy.types.Context):
 		return hasattr(context, "armature") and context.armature is not None
 
-	def invoke(self, context: bpy.types.Context, event):
+	def invoke(self, context: bpy.types.Context, event: bpy.types.Event):
 		return context.window_manager.invoke_confirm(self, event)
 
 	def execute(self, context: bpy.types.Context):
