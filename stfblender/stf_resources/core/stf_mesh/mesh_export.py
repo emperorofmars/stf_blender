@@ -62,8 +62,10 @@ def export_stf_mesh(context: STF_ExportContext, application_object: Any, parent_
 	stf_mesh["vertices"] = context.serialize_buffer(buffer_vertices.tobytes())
 
 
-	# Loop deduplication
+	# Loop deduplication (Loop -> Split)
+	# One or more loops with the same attributes (normal, uvs, colors) will become one split.
 
+	# copy uv data, because accessing this normally has severely degraded performance in Blender 5.1
 	uv_layers = []
 	for uv_layer in blender_mesh.uv_layers:
 		uv_array = np.zeros(len(blender_mesh.loops) * 2, dtype=determine_pack_format_float(float_width))
@@ -71,7 +73,6 @@ def export_stf_mesh(context: STF_ExportContext, application_object: Any, parent_
 		uv_array = np.reshape(uv_array, (-1, 2))
 		uv_layers.append(uv_array)
 
-	# Prepare optimization of splits
 	def compareUVs(a: int, b: int) -> bool:
 		for uv_layer in uv_layers:
 			if (np.linalg.norm((uv_layer[a] - uv_layer[b])) > float_threshold):
