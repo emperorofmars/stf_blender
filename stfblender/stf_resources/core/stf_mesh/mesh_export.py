@@ -19,6 +19,9 @@ float_threshold_blendshape = 0.0001
 # Mesh import and export are the lowest hanging fruits for performance improvements.
 
 def export_stf_mesh(context: STF_ExportContext, application_object: Any, parent_application_object: Any) -> tuple[dict, str] | STFReport:
+	#import time
+	#time_start = time.time()
+
 	blender_mesh: bpy.types.Mesh = application_object
 	ensure_stf_id(context, blender_mesh)
 
@@ -58,10 +61,20 @@ def export_stf_mesh(context: STF_ExportContext, application_object: Any, parent_
 	buffer_vertices[:, 2] *= -1
 	stf_mesh["vertices"] = context.serialize_buffer(buffer_vertices.tobytes())
 
+
+	# Loop deduplication
+
+	uv_layers = []
+	for uv_layer in blender_mesh.uv_layers:
+		uv_array = np.zeros(len(blender_mesh.loops) * 2, dtype=determine_pack_format_float(float_width))
+		uv_layer.uv.foreach_get("vector", uv_array)
+		uv_array = np.reshape(uv_array, (-1, 2))
+		uv_layers.append(uv_array)
+
 	# Prepare optimization of splits
 	def compareUVs(a: int, b: int) -> bool:
-		for uv_layer in blender_mesh.uv_layers:
-			if ((uv_layer.uv[a].vector - uv_layer.uv[b].vector).length > float_threshold):
+		for uv_layer in uv_layers:
+			if (np.linalg.norm((uv_layer[a] - uv_layer[b])) > float_threshold):
 				return False
 		return True
 
@@ -70,8 +83,9 @@ def export_stf_mesh(context: STF_ExportContext, application_object: Any, parent_
 		return (mathutils.Vector(blender_mesh.color_attributes.active_color.data[a].color[:]) - mathutils.Vector(blender_mesh.color_attributes.active_color.data[b].color[:])).length < float_threshold
 
 	verts_to_split: dict[int, list] = {}
-	deduped_split_indices: list[int] = []
-	face_corners_to_split: list[int] = []
+	deduped_split_indices: list[int] = [] # indices of unique face corners
+	face_corners_to_split: list[int] = [] # if multiple face corners share the same attributes, point to the same split
+
 	for loop in blender_mesh.loops:
 		if (loop.vertex_index not in verts_to_split):
 			verts_to_split[loop.vertex_index] = [loop.index]
@@ -95,7 +109,6 @@ def export_stf_mesh(context: STF_ExportContext, application_object: Any, parent_
 	deduped_split_indices = np.array(deduped_split_indices, dtype=determine_pack_format_uint(indices_width))
 	face_corners_to_split = np.array(face_corners_to_split, dtype=determine_pack_format_uint(indices_width))
 
-
 	# Splits & face corners
 	buffer_splits = np.zeros(len(blender_mesh.loops), dtype=determine_pack_format_uint(indices_width))
 	blender_mesh.loops.foreach_get("vertex_index", buffer_splits)
@@ -115,10 +128,7 @@ def export_stf_mesh(context: STF_ExportContext, application_object: Any, parent_
 
 	# Uvs
 	uvs = []
-	for uv_index, uv_layer in enumerate(blender_mesh.uv_layers):
-		buffer_uv = np.zeros(len(blender_mesh.loops) * 2, dtype=determine_pack_format_float(float_width))
-		uv_layer.uv.foreach_get("vector", buffer_uv)
-		buffer_uv = np.reshape(buffer_uv, (-1, 2))
+	for buffer_uv in uv_layers:
 		buffer_uv = buffer_uv[deduped_split_indices]
 		buffer_uv[:, 1] = 1 - buffer_uv[:, 1]
 		uvs.append({"name": uv_layer.name, "uv": context.serialize_buffer(buffer_uv.tobytes())})
@@ -132,7 +142,6 @@ def export_stf_mesh(context: STF_ExportContext, application_object: Any, parent_
 			color_buffer = np.reshape(color_buffer, (-1, 4))
 			color_buffer = color_buffer[deduped_split_indices]
 			stf_mesh["split_colors"] = context.serialize_buffer(color_buffer.tobytes())
-
 
 	# Topology
 	buffer_tris = BytesIO()
@@ -185,7 +194,6 @@ def export_stf_mesh(context: STF_ExportContext, application_object: Any, parent_
 
 	# TODO explicit vertex sharpness at some point Blender plz
 
-
 	# Weightpaint
 	if(armature and tmp_blender_mesh_object):
 		stf_mesh["armature"] = context.serialize_resource(armature)
@@ -235,7 +243,6 @@ def export_stf_mesh(context: STF_ExportContext, application_object: Any, parent_
 		stf_mesh["bone_indices"] = context.serialize_buffer(buffer_bone_indices.getvalue())
 		stf_mesh["weights"] = context.serialize_buffer(buffer_weights.getvalue())
 
-
 	# Vertex groups
 	if(tmp_blender_mesh_object):
 		group_index_to_group_name: dict[int, str] = {}
@@ -275,7 +282,6 @@ def export_stf_mesh(context: STF_ExportContext, application_object: Any, parent_
 					vertex_group["indices"] = context.serialize_buffer(buffer_indices.getvalue())
 				buffers_vertex_groups.append(vertex_group)
 			stf_mesh["vertex_groups"] = buffers_vertex_groups
-
 
 	# Blendshapes / Morphtargets / Shapekeys / Blendtargets / Targetblends / Targetshapes / Morphshapes / Blendkeys / Shapetargets / Shapemorphs / Blendmorphs / Blendtargets / Morphblends / Morphkeys / Shapeblends / Blendblends / ...
 	if(blender_mesh.shape_keys):
@@ -333,5 +339,7 @@ def export_stf_mesh(context: STF_ExportContext, application_object: Any, parent_
 					blendshape["split_normals"] = context.serialize_buffer(blendshape_normals_split_buffer.tobytes())
 			blendshapes.append(blendshape)
 		stf_mesh["blendshapes"] = blendshapes
+
+	#print("Mesh " + blender_mesh.name + " export time: %.3f sec." % (time.time() - time_start))
 
 	return stf_mesh, blender_mesh.stf_info.stf_id

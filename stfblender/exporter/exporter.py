@@ -92,7 +92,7 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 
 
 	def execute(self, context: bpy.types.Context):
-		context.window.cursor_modal_set("WAIT")
+		#context.window.cursor_modal_set("WAIT")
 		called_from_collection_exporter = not context.space_data or context.space_data.type != "FILE_BROWSER"
 		try:
 			# let collection
@@ -131,7 +131,8 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 				self.report({"ERROR"}, export_filepath + " :: " + ret.error_message)
 				return {"CANCELLED"}
 		finally:
-			context.window.cursor_modal_restore()
+			#context.window.cursor_modal_restore()
+			pass
 
 
 	def draw(self, context: bpy.types.Context):
