@@ -31,7 +31,12 @@ def package_name_from_manifest(blender_manifest: str) -> str:
 
 
 if(__name__ == "__main__"):
+	import argparse, os
+	parser = argparse.ArgumentParser(description="Create a Blender extension .zip from its manifest")
+	parser.add_argument("-o", "--output-dir", help="Directory where to place the .zip", default=".")
+	args = parser.parse_args()
+
 	with open("blender_manifest.toml", "r") as blender_manifest:
 		manifest = blender_manifest.read()
-		with open(package_name_from_manifest(manifest), "wb") as package:
+		with open(os.path.join(args.output_dir, package_name_from_manifest(manifest)), "wb") as package:
 			build_blender_package(manifest, package)
