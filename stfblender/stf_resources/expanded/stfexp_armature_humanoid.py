@@ -257,7 +257,12 @@ class MapHumanoidCollectionOperator(bpy.types.Operator):
 class STFEXP_HumanoidMappingsList(bpy.types.UIList):
 	bl_idname = "COLLECTION_UL_stfexp_humanoid_mappings_list"
 
-	def draw_item(self, context: bpy.types.Context, layout: bpy.types.UILayout, data, item, icon, active_data, active_propname, index):
+	def draw_item(self, context: bpy.types.Context, layout: bpy.types.UILayout, data: STFEXP_Armature_Humanoid, item: HumanoidBone, icon, active_data, active_propname, index):
+		for candidate_mapping in data.bone_mappings:
+			if(candidate_mapping != item and candidate_mapping.bone == item.bone):
+				layout.alert = True
+				break
+
 		layout.label(text=_get_display_name(item.name), icon="NONE" if item.bone else "ERROR")
 		layout.label(text=item.bone if item.bone else "Not Mapped!", icon="BONE_DATA" if item.bone else "ERROR")
 
@@ -301,7 +306,13 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 		else:
 			return
 
-		layout.prop_search(mapping, "bone", context_object, "bones", text="Mapped Bone")
+		col = layout.column()
+		for candidate_mapping in component.bone_mappings:
+			if(candidate_mapping != mapping and candidate_mapping.bone == mapping.bone):
+				col.alert = True
+				col.label(text="Duplicate Bone Mapping! Bone '" + mapping.bone + "' is also mapped in " + _get_display_name(candidate_mapping.name), icon="ERROR")
+				break
+		col.prop_search(mapping, "bone", context_object, "bones", text="Mapped Bone")
 
 		if(mapping_definition[4] and len(mapping_definition[4]) == 3):
 			layout.prop(mapping, "set_rotation_limits")
