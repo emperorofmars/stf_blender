@@ -27,7 +27,7 @@ Human made contributions via pull-requests are welcome.
 ### Guidelines
 * Any form of LLM contribution is prohibited, this also includes issues and PRs.
 * Please open an issue first for larger changes.
-* For changes to the format itself, please open an issue first in the [STF Documentation](https://codeberg.org/emperorofmars/stf_documentation) repository.
+* For changes to the format itself, please open an issue first in the [STF Documentation](https://codeberg.org/stf_format/stf_documentation) repository.
 
 ### Development
 * Use VSCode with the [recommended extensions](./.vscode/extensions.json).\
