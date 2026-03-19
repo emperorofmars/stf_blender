@@ -3,6 +3,7 @@ from typing import Any
 
 from .....common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STF_Category
 from ..stf_material_definition import STF_Material_Value_Base, STF_Material_Value_Module_Base
+from .....common.helpers import export_resource, import_resource
 
 
 class STF_Material_Value_Image(STF_Material_Value_Base):
@@ -11,15 +12,15 @@ class STF_Material_Value_Image(STF_Material_Value_Base):
 	# uv_offset:
 
 
-def _value_import_func(context: STF_ImportContext, blender_material: bpy.types.Material, json_resource: Any, value: STF_Material_Value_Image):
-	if("image" in json_resource and json_resource["image"]):
-		value.image = context.import_resource(json_resource["image"], stf_category=STF_Category.DATA)
+def _value_import_func(context: STF_ImportContext, json_material: dict, blender_material: bpy.types.Material, json_resource: Any, value: STF_Material_Value_Image):
+	if("image" in json_resource and json_resource["image"] != None):
+		value.image = import_resource(context, json_material, json_resource["image"], stf_category=STF_Category.DATA)
 
 
-def _value_export_func(context: STF_ExportContext, blender_material: bpy.types.Material, value: STF_Material_Value_Image) -> Any:
+def _value_export_func(context: STF_ExportContext, json_material: dict, blender_material: bpy.types.Material, value: STF_Material_Value_Image) -> Any:
 	ret = {}
 	if(value.image):
-		ret["image"] = context.serialize_resource(value.image)
+		ret["image"] = export_resource(context, json_material, value.image)
 	return ret
 
 

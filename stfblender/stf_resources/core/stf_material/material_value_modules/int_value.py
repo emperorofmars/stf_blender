@@ -9,11 +9,11 @@ class STF_Material_Value_Int(STF_Material_Value_Base):
 	number: bpy.props.IntProperty(name="Int") # type: ignore
 
 
-def _value_import_func(context: STF_ImportContext, blender_material: bpy.types.Material, json_resource: Any, value: STF_Material_Value_Int):
+def _value_import_func(context: STF_ImportContext, json_material: dict, blender_material: bpy.types.Material, json_resource: Any, value: STF_Material_Value_Int):
 	value.number = json_resource
 
 
-def _value_export_func(context: STF_ExportContext, blender_material: bpy.types.Material, value: STF_Material_Value_Int) -> Any:
+def _value_export_func(context: STF_ExportContext, json_material: dict, blender_material: bpy.types.Material, value: STF_Material_Value_Int) -> Any:
 	return value.number
 
 

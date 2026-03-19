@@ -7,6 +7,7 @@ from ....common import STF_ExportContext, STFReportSeverity, STFReport, STF_Task
 from ....common.utils.buffer_utils import serialize_float
 from ....common.utils.id_utils import ensure_stf_id
 from ....common.slot_link import ActionSlotLink
+from ....common.helpers import export_resource, export_buffer
 from .stf_animation_common import *
 from .stf_animation_bake import bake_constraints
 
@@ -34,20 +35,21 @@ def stf_animation_export(context: STF_ExportContext, application_object: Any, co
 
 	animation_range = [blender_animation.frame_start, blender_animation.frame_end] if blender_animation.use_frame_range else [blender_animation.frame_range[0], blender_animation.frame_range[1]]
 
-	stf_tracks, requires_constraint_bake = __convert(context, blender_animation, animation_range)
+	reference_holder = {}
+
+	stf_tracks, requires_constraint_bake = __convert(context, blender_animation, animation_range, reference_holder)
 	stf_tracks_baked = None
 	if(requires_constraint_bake and context.get_setting("stf_animation_bake_constraints") and blender_animation.stf_animation.constraint_bake != "nobake" or blender_animation.stf_animation.constraint_bake == "bake"):
 		baked = bake_constraints(blender_animation)
 		if(baked):
-			stf_tracks_baked, _ = __convert(context, baked, animation_range, True)
+			stf_tracks_baked, _ = __convert(context, baked, animation_range, reference_holder, True)
 			if(not context.get_setting("stf_animation_preserve_baked")):
 				def _clean_baked():
 					bpy.data.actions.remove(baked)
 				context.add_cleanup_task(_clean_baked)
 
 	if(len(stf_tracks) == 0):
-		context.report(STFReport("Empty Animation", STFReportSeverity.Debug, None, _stf_type, blender_animation))
-		return None
+		return STFReport("Empty Animation", STFReportSeverity.Debug, None, _stf_type, blender_animation)
 	else:
 		ensure_stf_id(context, blender_animation)
 		ret = {
@@ -58,6 +60,9 @@ def stf_animation_export(context: STF_ExportContext, application_object: Any, co
 			"range": animation_range,
 			"tracks": stf_tracks,
 		}
+		if("referenced_buffers" in reference_holder):
+			ret["referenced_buffers"] = reference_holder["referenced_buffers"]
+
 		if(stf_tracks_baked):
 			ret["tracks_baked"] = stf_tracks_baked
 
@@ -65,14 +70,14 @@ def stf_animation_export(context: STF_ExportContext, application_object: Any, co
 			if(action_slot_link.is_reset_animation):
 				ret["is_reset_animation"] = True
 			elif(action_slot_link.reset_animation):
-				if(reset_animation_id := context.serialize_resource(action_slot_link.reset_animation)):
+				if(reset_animation_id := export_resource(context, ret, action_slot_link.reset_animation)):
 					ret["reset_animation"] = reset_animation_id
 		context.add_task(STF_TaskSteps.AFTER_ANIMATION, _handle_reset_animation)
 
 		return ret, blender_animation.stf_info.stf_id
 
 
-def __convert(context: STF_ExportContext, blender_animation: bpy.types.Action, animation_range: list[float], bake_only: bool = False) -> tuple[list, bool]:
+def __convert(context: STF_ExportContext, blender_animation: bpy.types.Action, animation_range: list[float], reference_holder: dict, bake_only: bool = False) -> tuple[list, bool]:
 	# All of this is a mess
 	stf_tracks = []
 	requires_constraint_bake = False
@@ -117,7 +122,7 @@ def __convert(context: STF_ExportContext, blender_animation: bpy.types.Action, a
 									if(fcurve):
 										index_conversion.append(fcurve.array_index)
 
-							sub_tracks_serialized = __serialize_subtracks(context, blender_animation, property_translation.stf_path_part, fcurves, animation_range, index_conversion, property_translation.convert_func, bake_only)
+							sub_tracks_serialized = __serialize_subtracks(context, blender_animation, property_translation.stf_path_part, fcurves, animation_range, index_conversion, property_translation.convert_func, bake_only, reference_holder)
 							if(sub_tracks_serialized):
 								stf_tracks.append(sub_tracks_serialized)
 					else:
@@ -125,7 +130,7 @@ def __convert(context: STF_ExportContext, blender_animation: bpy.types.Action, a
 	return stf_tracks, requires_constraint_bake
 
 
-def __serialize_subtracks(context: STF_ExportContext, blender_animation: bpy.types.Action, stf_target: list, fcurves: dict[int, bpy.types.FCurve], animation_range: list[float], index_conversion: list[int], conversion_func: Callable[[list[float]], list[float]] = None, bake_only: bool = False) -> dict:
+def __serialize_subtracks(context: STF_ExportContext, blender_animation: bpy.types.Action, stf_target: list, fcurves: dict[int, bpy.types.FCurve], animation_range: list[float], index_conversion: list[int], conversion_func: Callable[[list[float]], list[float]], bake_only: bool, reference_holder: dict) -> dict:
 	real_timepoints_set: set[float] = set()
 	# for each subtrack (i.e. the x,y,z components of a location), determine at which times have a keyframe at any of these subtracks
 	for _, fcurve in fcurves.items():
@@ -259,7 +264,7 @@ def __serialize_subtracks(context: STF_ExportContext, blender_animation: bpy.typ
 		# Serialize buffers for each subtrack
 		for _, fcurve in fcurves.items():
 			if(ret[index_conversion[fcurve.array_index]]):
-				ret[index_conversion[fcurve.array_index]]["baked"] = context.serialize_buffer(baked_values[index_conversion[fcurve.array_index]].getbuffer())
+				ret[index_conversion[fcurve.array_index]]["baked"] = export_buffer(context, reference_holder, baked_values[index_conversion[fcurve.array_index]].getbuffer())
 
 	return {
 		"target": stf_target,

@@ -44,11 +44,11 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 				stf_values = stf_property.get("values")
 				prop.multi_value = True
 				if(len(stf_values) > 0):
-					material_value_module.value_import_func(context, blender_material, stf_values[0], value)
+					material_value_module.value_import_func(context, json_resource, blender_material, stf_values[0], value)
 					if(len(stf_values) > 1):
 						for stf_value in stf_values[1:]:
 							value_ref, value = add_value_to_property(blender_material, len(blender_material.stf_material.properties) - 1)
-							material_value_module.value_import_func(context, blender_material, stf_value, value)
+							material_value_module.value_import_func(context, json_resource, blender_material, stf_value, value)
 				else:
 					pass # TODO report fail
 				break
@@ -93,7 +93,7 @@ def _stf_export(context: STF_ExportContext, application_object: Any, context_obj
 					for property_value in getattr(blender_material, property.value_property_name):
 						if(property_value.value_id == value_ref.value_id):
 							# TODO check if export succeeded and warn if not
-							values.append(mat_module.value_export_func(context, blender_material, property_value))
+							values.append(mat_module.value_export_func(context, ret, blender_material, property_value))
 							break
 
 		json_prop["values"] = values

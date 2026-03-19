@@ -26,7 +26,7 @@ class STF_ImportState(STF_State_Base):
 
 		self._file: STF_File = file
 
-		self._modules: dict[str, STF_HandlerBase] = handlers
+		self._resources: dict[str, STF_HandlerBase] = handlers
 		self._fallback_modules: dict[str, STF_HandlerBase] = fallback_handlers
 
 		self._imported_resources: dict[str, Any] = {} # ID | list of IDs -> imported object
@@ -38,7 +38,7 @@ class STF_ImportState(STF_State_Base):
 
 
 	def determine_handler(self, json_resource: dict[str, Any], stf_category: str = STF_Category.DATA) -> STF_HandlerBase | None:
-		return self._modules.get(json_resource["type"], self._fallback_modules.get(stf_category))
+		return self._resources.get(json_resource["type"], self._fallback_modules.get(stf_category))
 
 	def register_imported_resource(self, stf_id: str, application_object: Any):
 		self._imported_resources[stf_id] = application_object

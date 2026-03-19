@@ -6,6 +6,7 @@ from ....common.resource.blender_native import STF_Handler_BlenderNative, boiler
 from ....common.resource.component.component_utils import get_components_from_object
 from ....common.utils.armature_bone import ArmatureBone
 from ....common.utils.id_utils import ensure_stf_id
+from ....common.helpers import export_resource, import_resource
 
 
 _stf_type = "stf.armature"
@@ -22,7 +23,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	bpy.context.scene.collection.objects.link(tmp_hook_object)
 
 	for bone_id in json_resource.get("root_bones", []):
-		context.import_resource(bone_id, tmp_hook_object, STF_Category.NODE)
+		import_resource(context, json_resource, bone_id, tmp_hook_object, STF_Category.NODE)
 
 	return blender_armature
 
@@ -48,7 +49,7 @@ def _stf_export(context: STF_ExportContext, application_object: Any, context_obj
 			root_bone_definitions.append(ArmatureBone(blender_armature, blender_bone.name))
 
 	for root_bone_definition in root_bone_definitions:
-		root_bones.append(context.serialize_resource(root_bone_definition, blender_armature, "node"))
+		root_bones.append(export_resource(context, ret, root_bone_definition, blender_armature, "node"))
 
 	return ret, blender_armature.stf_info.stf_id
 

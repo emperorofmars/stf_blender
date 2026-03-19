@@ -11,6 +11,7 @@ from ....common.utils.animation_conversion_utils import *
 from ....common.utils.armature_bone import ArmatureBone
 from ....common.utils.trs_utils import close_enough
 from ....common.utils.id_utils import ensure_stf_id
+from ....common.helpers import export_resource, import_resource, get_resource_id
 
 
 _stf_type = "stf.instance.armature"
@@ -21,7 +22,7 @@ class STF_Instance_Armature(bpy.types.PropertyGroup):
 	stf_active_component_index: bpy.props.IntProperty(options=set()) # type: ignore
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any | STFReport:
-	blender_armature = context.import_resource(json_resource["armature"], stf_category=STF_Category.DATA)
+	blender_armature = import_resource(context, json_resource, json_resource["armature"], stf_category=STF_Category.DATA)
 	if(not blender_armature or type(blender_armature) is not bpy.types.Armature):
 		context.report(STFReport("Failed to import armature: " + str(json_resource.get("instance", {}).get("armature")), STFReportSeverity.Error, stf_id, _stf_type, context_object))
 
@@ -66,15 +67,16 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	# components that exist on bones of this armature instance
 	if("added_components" in json_resource):
 		for bone_id, component_ids in json_resource["added_components"].items():
-			for component_id in component_ids:
-				if(component := context.import_resource(component_id, blender_object, stf_category=STF_Category.COMPONENT)):
+			for component_id_index in component_ids:
+				if(component := import_resource(context, json_resource, component_id_index, blender_object, stf_category=STF_Category.COMPONENT)):
+					component_id = get_resource_id(json_resource, component_id_index)
 					for component_ref_index, component_ref in enumerate(blender_object.stf_info.stf_components):
 						if(component_ref.stf_id == component_id):
 							instance_component_ref = blender_object.stf_instance_armature.stf_components.add()
 							instance_component_ref.stf_id = component_id
 							instance_component_ref.stf_type = component_ref.stf_type
 							instance_component_ref.blender_property_name = component_ref.blender_property_name
-							instance_component_ref.bone = context.get_imported_resource(bone_id).name
+							instance_component_ref.bone = context.get_imported_resource(get_resource_id(json_resource, bone_id)).name
 							blender_object.stf_info.stf_components.remove(component_ref_index)
 							break
 
@@ -86,7 +88,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 				parse_standin(context, blender_object, component_id, standin_component_json)
 
 	def _run_component_process():
-		process_components(blender_object, [stf_module for _, stf_module in context._state._modules.items()])
+		process_components(blender_object, [stf_resource for _, stf_resource in context._state._resources.items()])
 	context.add_task(STF_TaskSteps.BEFORE_ANIMATION, _run_component_process)
 
 	return blender_object
@@ -105,7 +107,7 @@ def _stf_export(context: STF_ExportContext, application_object: Any, context_obj
 	ensure_stf_id(context, blender_object.stf_instance)
 	ret = {"type": _stf_type, "name": blender_object.stf_instance.stf_name}
 
-	ret["armature"] = context.serialize_resource(blender_armature, stf_category="data")
+	ret["armature"] = export_resource(context, ret, blender_armature, stf_category="data")
 
 	if(blender_object.pose):
 		stf_pose: dict[str, list[list[float]]] = {}
@@ -132,7 +134,7 @@ def _stf_export(context: STF_ExportContext, application_object: Any, context_obj
 			for component in components:
 				if(component.stf_id == component_ref.stf_id and component_ref.bone):
 					bone = blender_armature.bones[component_ref.bone]
-					component_id = context.serialize_resource(component, blender_object, "component")
+					component_id = export_resource(context, ret, component, blender_object, "component")
 					if(component_id):
 						if(bone.stf_info.stf_id not in added_components):
 							added_components[bone.stf_info.stf_id] = []

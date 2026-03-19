@@ -12,11 +12,11 @@ class STF_Material_Value_Module_Base:
 	value_type: str
 	property_name: str
 
-	# (STF Context, Blender Material, STF Value Json, Blender STF Material Value)
-	value_import_func: Callable[[Any, bpy.types.Material, Any, STF_Material_Value_Base], None]
+	# (STF Context, Material Json, Blender Material, STF Value Json, Blender STF Material Value)
+	value_import_func: Callable[[Any, dict, bpy.types.Material, Any, STF_Material_Value_Base], None]
 
-	# (STF Context, Blender Material, Blender STF Material Value) -> Json Value
-	value_export_func: Callable[[Any, bpy.types.Material, STF_Material_Value_Base], Any]
+	# (STF Context, Material Json, Blender Material, Blender STF Material Value) -> Json Value
+	value_export_func: Callable[[Any, dict, bpy.types.Material, STF_Material_Value_Base], Any]
 
 	# Animation import export
 	resolve_property_path_to_stf_func: Callable[[STF_ExportContext, str, STF_Material_Value_Base], STFPropertyPathPart]

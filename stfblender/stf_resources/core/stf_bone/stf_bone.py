@@ -2,6 +2,7 @@ import bpy
 import mathutils
 import math
 from typing import Any
+from collections.abc import Sequence
 
 from ....common import STF_ImportContext, STF_ExportContext, STFReportSeverity, STFReport, STF_Category
 from ....common.resource.blender_native import STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister
@@ -10,13 +11,14 @@ from ....common.utils.armature_bone import ArmatureBone
 from ....common.utils.animation_conversion_utils import *
 from ....common.resource.component.component_utils import get_components_from_object
 from ....common.utils.id_utils import ensure_stf_id
+from ....common.helpers import export_resource, import_resource
 from .stf_bone_property_conversion import resolve_property_path_to_stf_func, resolve_stf_property_to_blender_func
 
 
 _stf_type = "stf.bone"
 
 
-def search_uses(self, context: bpy.types.Context, edit_text: str):
+def search_uses(self, context: bpy.types.Context, edit_text: str) -> Sequence[tuple[str, str]]:
 	return (
 		("position", "Position"),
 		("ik_target", "IK Target"),
@@ -34,7 +36,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	# Once Blender enters into edit-mode, the Bone references will be invalidated. Store the child-names as string.
 	children = []
 	for child_id in json_resource.get("children", []):
-		child: ArmatureBone = context.import_resource(child_id, context_object, STF_Category.NODE)
+		child: ArmatureBone = import_resource(context, json_resource, child_id, context_object, STF_Category.NODE)
 		if(child):
 			children.append(child.name)
 		else:
@@ -100,7 +102,7 @@ def _stf_export(context: STF_ExportContext, application_object: Any, context_obj
 		ret["connected"] = blender_armature.bones[blender_bone_name].use_connect
 
 	for child in blender_child_bones:
-		children.append(context.serialize_resource(child, context_object, "node"))
+		children.append(export_resource(context, ret, child, context_object, "node"))
 
 	blender_bone: bpy.types.Bone = blender_armature.bones[blender_bone_name]
 

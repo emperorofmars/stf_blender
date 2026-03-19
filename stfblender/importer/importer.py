@@ -75,7 +75,7 @@ class ImportSTF(bpy.types.Operator, ImportHelper):
 
 
 	def execute(self, context: bpy.types.Context):
-		#context.window.cursor_modal_set("WAIT")
+		context.window.cursor_modal_set("WAIT")
 		try:
 			result_str = ""
 			total_time = 0
@@ -117,8 +117,7 @@ class ImportSTF(bpy.types.Operator, ImportHelper):
 			print(error)
 			print(traceback.format_exc())
 		finally:
-			#context.window.cursor_modal_restore()
-			pass
+			context.window.cursor_modal_restore()
 
 
 	def draw(self, context: bpy.types.Context):

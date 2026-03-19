@@ -3,11 +3,14 @@ import math
 import mathutils
 from typing import Any
 
+from ....common.helpers.reference_helper import register_exported_resource
+
 from ....common import STF_ExportContext, STF_ImportContext, STF_TaskSteps, STFReportSeverity, STFReport, STF_Category
 from ....common.resource.blender_native import STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister
 from ....common.utils import trs_utils
 from ....common.resource.component.component_utils import get_components_from_object
 from ....common.utils.id_utils import ensure_stf_id
+from ....common.helpers import export_resource, import_resource, get_resource_id
 from .node_property_conversion import stf_node_resolve_property_path_to_stf_func, stf_node_resolve_stf_property_to_blender_func
 
 
@@ -22,7 +25,7 @@ class STF_Instance(bpy.types.PropertyGroup):
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any | STFReport:
 	if("instance" in json_resource):
-		blender_object: bpy.types.Object = context.import_resource(json_resource["instance"], stf_category=STF_Category.INSTANCE)
+		blender_object: bpy.types.Object = import_resource(context, json_resource, json_resource["instance"], stf_category=STF_Category.INSTANCE)
 	else:
 		blender_object: bpy.types.Object = bpy.data.objects.new(json_resource.get("name", "STF Node"), None)
 	context.register_imported_resource(stf_id, blender_object)
@@ -42,7 +45,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 		matrix_local = trs_utils.stf_to_blender_matrix(json_resource["trs"])
 		if(blender_object.parent):
 			if("parent_binding" in json_resource and json_resource["parent_binding"] and len(json_resource["parent_binding"]) == 3):
-				bone: bpy.types.Bone = context.get_imported_resource(json_resource["parent_binding"][2]).get_bone()
+				bone: bpy.types.Bone = context.get_imported_resource(get_resource_id(json_resource, json_resource["parent_binding"][2])).get_bone()
 				pose_bone = blender_object.parent.pose.bones[bone.name]
 				blender_object.parent_type = "BONE"
 				blender_object.parent_bone = bone.name
@@ -57,7 +60,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	context.add_task(STF_TaskSteps.DEFAULT, _handle_parenting)
 
 	for child_id in json_resource.get("children", []):
-		child: bpy.types.Object = context.import_resource(child_id, context_object, stf_category=STF_Category.NODE)
+		child: bpy.types.Object = import_resource(context, json_resource, child_id, context_object, stf_category=STF_Category.NODE)
 		if(child):
 			child.parent = blender_object
 		else:
@@ -91,7 +94,7 @@ def _stf_export(context: STF_ExportContext, blender_object: bpy.types.Object, co
 	for child in blender_object.children:
 		for collection in child.users_collection:
 			if(context_object.is_embedded_data or collection == context_object):
-				children.append(context.serialize_resource(child, context_object, stf_category="node"))
+				children.append(export_resource(context, json_resource, child, context_object, stf_category="node"))
 				break # break inner loop
 
 	json_resource["children"] = children
@@ -103,7 +106,7 @@ def _stf_export(context: STF_ExportContext, blender_object: bpy.types.Object, co
 					pass
 				case "BONE":
 					# TODO make this more generic
-					json_resource["parent_binding"] = [blender_object.parent.stf_info.stf_id, "instance", blender_object.parent.data.bones[blender_object.parent_bone].stf_info.stf_id]
+					json_resource["parent_binding"] = [register_exported_resource(json_resource, blender_object.parent.stf_info.stf_id), "instance", register_exported_resource(json_resource, blender_object.parent.data.bones[blender_object.parent_bone].stf_info.stf_id)]
 				case _:
 					context.report(STFReport("Unsupported object parent_type: " + str(blender_object.parent_type), STFReportSeverity.FatalError, blender_object.stf_info.stf_id, json_resource.get("type"), blender_object))
 	context.add_task(STF_TaskSteps.DEFAULT, _handle_parent_binding)
@@ -122,8 +125,8 @@ def _stf_export(context: STF_ExportContext, blender_object: bpy.types.Object, co
 		json_resource["enabled"] = False
 
 	if(blender_object.data):
-		instance_id = context.serialize_resource((blender_object, blender_object.data), context_object, stf_category="instance")
-		if(instance_id):
+		instance_id = export_resource(context, json_resource, (blender_object, blender_object.data), context_object, stf_category="instance")
+		if(instance_id >= 0):
 			json_resource["instance"] = instance_id
 
 	return json_resource, blender_object.stf_info.stf_id

@@ -98,9 +98,9 @@ class UpdateArmatureInstanceComponentStandins(bpy.types.Operator):
 
 
 
-def process_components(armature_instance: bpy.types.Object, stf_modules: list[STF_Handler_Component] = None):
-	if(not stf_modules):
-		stf_modules = get_component_handlers()
+def process_components(armature_instance: bpy.types.Object, stf_resources: list[STF_Handler_Component] = None):
+	if(not stf_resources):
+		stf_resources = get_component_handlers()
 
 	components_to_process = {}
 
@@ -109,7 +109,7 @@ def process_components(armature_instance: bpy.types.Object, stf_modules: list[ST
 	for bone in armature_instance.data.bones:
 		for component_ref in bone.stf_info.stf_components:
 			component_ref: STF_Component_Ref = component_ref
-			for stf_module in stf_modules:
+			for stf_module in stf_resources:
 				if(stf_module.stf_type == component_ref.stf_type and hasattr(stf_module, "process_func") and getattr(stf_module, "process_func")):
 					for component in getattr(bone, component_ref.blender_property_name):
 						if(component.stf_id == component_ref.stf_id):
@@ -124,10 +124,10 @@ def process_components(armature_instance: bpy.types.Object, stf_modules: list[ST
 					break
 
 	for component_ref in armature_instance.stf_instance_armature.stf_components:
-		bone = component_ref.bone
+		bone: bpy.types.Bone = armature_instance.data.bones[component_ref.bone]
 		for component_ref in bone.stf_info.stf_components:
 			component_ref: STF_Component_Ref = component_ref
-			for stf_module in stf_modules:
+			for stf_module in stf_resources:
 				if(stf_module.stf_type == component_ref.stf_type and hasattr(stf_module, "process_func") and getattr(stf_module, "process_func")):
 					for component in getattr(bone, component_ref.blender_property_name):
 						if(component.stf_id == component_ref.stf_id):
