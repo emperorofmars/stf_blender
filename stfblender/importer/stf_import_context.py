@@ -25,7 +25,7 @@ class STF_ImportContext(ISTF_ImportContext):
 		if(not ret):
 			raise Exception("Failed to export root resource")
 		self._state.run_tasks()
-		ret.stf_meta.from_stf_meta_assetInfo(self._state._file.definition.stf.asset_info)
+		ret.stf_meta.from_stf_meta_assetInfo(self._state._file.definition.stf.asset_info, self._state._file.definition.stf.asset_properties)
 		return ret
 
 

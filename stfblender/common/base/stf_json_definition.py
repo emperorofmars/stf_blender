@@ -11,8 +11,6 @@ class STF_Meta_AssetInfo:
 		self.license_url: str | None = None
 		self.documentation_url: str | None = None
 
-		self.custom_properties: dict[str, str] = {}
-
 	@staticmethod
 	def from_dict(dict: dict[str, str]):
 		ret = STF_Meta_AssetInfo()
@@ -25,8 +23,6 @@ class STF_Meta_AssetInfo:
 				case "license": ret.license = value
 				case "license_url": ret.license_url = value
 				case "documentation_url": ret.documentation_url = value
-				case _: ret.custom_properties[key] = value
-
 		return ret
 
 	def to_dict(self) -> dict[str, str]:
@@ -34,11 +30,28 @@ class STF_Meta_AssetInfo:
 		for key, value in vars(self).items():
 			if(value):
 				match key:
-					case "custom_properties":
-						for key, value in self.custom_properties.items():
-							ret[key] = value
 					case _:
 						ret[key] = value
+		return ret
+
+
+class STF_Meta_AssetProperties:
+	def __init__(self):
+		self.custom_properties: dict[str, str] = {}
+
+	@staticmethod
+	def from_dict(dict: dict[str, str]):
+		ret = STF_Meta_AssetProperties()
+		for key, value in dict.items():
+			ret.custom_properties[key] = value
+		return ret
+
+	def to_dict(self) -> dict[str, str]:
+		ret = {}
+		for key, value in vars(self).items():
+			if(key and value):
+				for key, value in self.custom_properties.items():
+					ret[key] = value
 		return ret
 
 
@@ -48,11 +61,12 @@ class STF_Meta:
 
 		self.version_major: int = 0
 		self.version_minor: int = 0
-		self.generator: str = "libstf_python"
+		self.generator: str = "stf_blender"
 		self.generator_version = "0.0.0"
 		self.timestamp: str = datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat()
 		self.root: str
 		self.asset_info: STF_Meta_AssetInfo = STF_Meta_AssetInfo()
+		self.asset_properties: STF_Meta_AssetProperties = STF_Meta_AssetProperties()
 		self.metric_multiplier: float = 1
 
 	@staticmethod
@@ -61,7 +75,8 @@ class STF_Meta:
 		ret.version_major = dict["version_major"]
 		ret.version_minor = dict["version_minor"]
 		ret.root = dict["root"]
-		ret.asset_info = STF_Meta_AssetInfo.from_dict(dict["asset_info"])
+		ret.asset_info = STF_Meta_AssetInfo.from_dict(dict.get("asset_info", {}))
+		ret.asset_properties = STF_Meta_AssetProperties.from_dict(dict.get("asset_properties", {}))
 		ret.generator = dict["generator"]
 		ret.generator_version = dict["generator_version"]
 		ret.timestamp = dict["timestamp"]
@@ -74,6 +89,7 @@ class STF_Meta:
 			"version_minor": self.version_minor,
 			"root": self.root,
 			"asset_info": self.asset_info.to_dict(),
+			"asset_properties": self.asset_properties.to_dict(),
 			"generator": self.generator,
 			"generator_version": self.generator_version,
 			"timestamp": self.timestamp,

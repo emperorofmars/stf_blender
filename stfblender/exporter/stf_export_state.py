@@ -6,7 +6,7 @@ from collections.abc import Sequence
 from .export_settings import STF_ExportSettings
 from ..common import STFReportSeverity, STFReport
 from ..common.resource.stf_handler_base import STF_HandlerBase
-from ..common.base.stf_json_definition import STF_Buffer, STF_JsonDefinition, STF_Meta_AssetInfo
+from ..common.base.stf_json_definition import STF_Buffer, STF_JsonDefinition, STF_Meta_AssetInfo, STF_Meta_AssetProperties
 from ..common.resource.component import STF_ExportComponentHook
 from ..common.base.stf_file import STF_File
 from ..common.base.stf_state_base import STF_State_Base
@@ -24,7 +24,7 @@ class STF_ExportState(STF_State_Base):
 
 	def __init__(
 			self,
-			asset_info: STF_Meta_AssetInfo,
+			asset_info: tuple[STF_Meta_AssetInfo, STF_Meta_AssetProperties],
 			handlers: tuple[dict[Any, list[STF_HandlerBase]], dict[Any, list[STF_ExportComponentHook]]],
 			trash_objects: list[bpy.types.Object] = [],
 			fail_on_severity: STFReportSeverity = STFReportSeverity.FatalError,
@@ -42,7 +42,8 @@ class STF_ExportState(STF_State_Base):
 		self._exported_resources: dict[str, dict] = {} # ID -> exported STF Json resource
 		self._exported_buffers: dict[str, bytes] = {} # ID -> exported STF Json buffer
 
-		self._asset_info: STF_Meta_AssetInfo = asset_info
+		self._asset_info: STF_Meta_AssetInfo = asset_info[0]
+		self._asset_properties: STF_Meta_AssetInfo = asset_info[1]
 		self._permit_id_reassignment: bool = permit_id_reassignment
 		self._root_id: str | None = None
 		self._metric_multiplier: float = metric_multiplier
@@ -149,6 +150,7 @@ class STF_ExportState(STF_State_Base):
 		ret.stf.generator_version = get_stf_version()
 		ret.stf.timestamp = datetime.datetime.now(datetime.timezone.utc).isoformat()
 		ret.stf.asset_info = self._asset_info
+		ret.stf.asset_properties = self._asset_properties
 		ret.stf.metric_multiplier = self._metric_multiplier
 		ret.resources = self._exported_resources
 		ret.buffers = {}

@@ -1,6 +1,6 @@
 import bpy
 
-from .stf_json_definition import STF_Meta_AssetInfo
+from .stf_json_definition import STF_Meta_AssetInfo, STF_Meta_AssetProperties
 
 
 class STF_KV(bpy.types.PropertyGroup):
@@ -20,21 +20,24 @@ class STF_Meta(bpy.types.PropertyGroup):
 
 	custom_properties: bpy.props.CollectionProperty(type=STF_KV, name="Type", options=set()) # type: ignore
 
-	def to_stf_meta_assetInfo(self) -> STF_Meta_AssetInfo:
-		ret = STF_Meta_AssetInfo()
-		if(self.asset_name): ret.asset_name = self.asset_name
-		if(self.version): ret.version = self.version
-		if(self.url): ret.url = self.url
-		if(self.author): ret.author = self.author
-		if(self.license): ret.license = self.license
-		if(self.license_url): ret.license_url = self.license_url
-		if(self.documentation_url): ret.documentation_url = self.documentation_url
-		ret.custom_properties = {}
-		for custom_property in self.custom_properties:
-			ret.custom_properties[custom_property.name] = custom_property.value
-		return ret
+	def to_stf_meta_assetInfo(self) -> tuple[STF_Meta_AssetInfo, STF_Meta_AssetProperties]:
+		ret_meta = STF_Meta_AssetInfo()
+		ret_properties = STF_Meta_AssetProperties()
+		if(self.asset_name): ret_meta.asset_name = self.asset_name
+		if(self.version): ret_meta.version = self.version
+		if(self.url): ret_meta.url = self.url
+		if(self.author): ret_meta.author = self.author
+		if(self.license): ret_meta.license = self.license
+		if(self.license_url): ret_meta.license_url = self.license_url
+		if(self.documentation_url): ret_meta.documentation_url = self.documentation_url
 
-	def from_stf_meta_assetInfo(self, meta: STF_Meta_AssetInfo):
+		ret_properties.custom_properties = {}
+		for custom_property in self.custom_properties:
+			if(custom_property.name and custom_property.value):
+				ret_properties.custom_properties[custom_property.name] = custom_property.value
+		return (ret_meta, ret_properties)
+
+	def from_stf_meta_assetInfo(self, meta: STF_Meta_AssetInfo, properties: STF_Meta_AssetProperties):
 		if(meta.asset_name): self.asset_name = meta.asset_name
 		if(meta.version): self.version = meta.version
 		if(meta.url): self.url = meta.url
@@ -42,7 +45,8 @@ class STF_Meta(bpy.types.PropertyGroup):
 		if(meta.license): self.license = meta.license
 		if(meta.license_url): self.license_url = meta.license_url
 		if(meta.documentation_url): self.documentation_url = meta.documentation_url
-		for key, value in meta.custom_properties.items():
+
+		for key, value in properties.custom_properties.items():
 			if(key):
 				new_prop = self.custom_properties.add()
 				new_prop.name = key
