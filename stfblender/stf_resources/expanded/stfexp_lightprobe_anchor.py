@@ -4,7 +4,7 @@ from typing import Any
 from ...common import STF_ExportContext, STF_ImportContext, STF_TaskSteps, STF_Category
 from ...common.resource.component import STF_ComponentResourceBase, STF_Handler_Component, STF_Component_Ref
 from ...common.resource.component.component_utils import add_component, export_component_base, import_component_base
-from ...common.helpers import register_exported_resource, import_resource
+from ...common.helpers import register_exported_resource
 
 
 _stf_type = "stfexp.lightprobe_anchor"
@@ -30,12 +30,12 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, contex
 	if("anchor" in json_resource):
 		if(len(json_resource["anchor"]) == 1):
 			def _handle_target_object():
-				component.anchor_object = import_resource(context, json_resource, json_resource["anchor"][0], STF_Category.NODE)
+				component.anchor_object = context.import_resource(json_resource, json_resource["anchor"][0], STF_Category.NODE)
 			context.add_task(STF_TaskSteps.DEFAULT, _handle_target_object)
 		elif(len(json_resource["anchor"]) == 3):
 			def _handle_target_object():
-				component.anchor_object = import_resource(context, json_resource, json_resource["anchor"][0], STF_Category.NODE)
-				if(bone := import_resource(context, json_resource, json_resource["anchor"][2]), STF_Category.NODE):
+				component.anchor_object = context.import_resource(json_resource, json_resource["anchor"][0], STF_Category.NODE)
+				if(bone := context.import_resource(json_resource, json_resource["anchor"][2]), STF_Category.NODE):
 					component.anchor_bone = bone.name
 			context.add_task(STF_TaskSteps.DEFAULT, _handle_target_object)
 

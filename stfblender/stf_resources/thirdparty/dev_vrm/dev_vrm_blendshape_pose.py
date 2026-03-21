@@ -4,7 +4,7 @@ from typing import Any
 from ....common import STF_ExportContext, STF_ImportContext, STF_TaskSteps, STF_Category
 from ....common.resource.data import STF_DataResourceBase, STF_Handler_Data, STF_Data_Ref
 from ....common.resource.data.data_resource_utils import add_resource, export_data_resource_base, get_components_from_data_resource, import_data_resource_base
-from ....common.helpers import register_exported_resource, import_resource
+from ....common.helpers import register_exported_resource
 
 
 _stf_type = "dev.vrm.blendshape_pose"
@@ -125,7 +125,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	def _handle():
 		for target_id_index_as_str_because_its_a_json_key, values in json_resource.get("targets", {}).items():
 			target_id_index = int(target_id_index_as_str_because_its_a_json_key)
-			if(meshinstance := import_resource(context, json_resource, target_id_index, STF_Category.NODE)):
+			if(meshinstance := context.import_resource(json_resource, target_id_index, STF_Category.NODE)):
 				target = resource.targets.add()
 				target.mesh_instance = meshinstance
 				for blendshape_name, blendshape_value in values.items():

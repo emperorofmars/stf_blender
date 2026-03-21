@@ -4,7 +4,7 @@ from typing import Any
 from ...common import STF_ImportContext, STF_ExportContext, STF_TaskSteps, STF_Category, STFReport
 from ...common.resource.data import STF_DataResourceBase, STF_Handler_Data, STF_Data_Ref
 from ...common.resource.data.data_resource_utils import add_resource, export_data_resource_base, get_components_from_data_resource, import_data_resource_base
-from ...common.helpers import draw_list, poll_valid_animations, import_resource, export_resource
+from ...common.helpers import draw_list, poll_valid_animations
 
 
 _stf_type = "stfexp.animation_blendtree"
@@ -57,7 +57,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 			mapping.position[0] = animation_mapping["position"][0]
 			if(resource.type == "2d"):
 				mapping.position[1] = animation_mapping["position"][1]
-			mapping.animation = import_resource(context, json_resource, animation_mapping.get("animation"), STF_Category.DATA)
+			mapping.animation = context.import_resource(json_resource, animation_mapping.get("animation"), STF_Category.DATA)
 	context.add_task(STF_TaskSteps.AFTER_ANIMATION, _handle)
 
 	return resource
@@ -71,7 +71,7 @@ def _stf_export(context: STF_ExportContext, resource: STFEXP_Animation_Blendtree
 		animations = []
 		for mapping in resource.animations:
 			if(mapping.animation):
-				anim_id = export_resource(context, ret, mapping.animation)
+				anim_id = context.serialize_resource(ret, mapping.animation, stf_category=STF_Category.DATA)
 				if(anim_id >= 0):
 					animations.append({
 						"position": mapping.position[:] if resource.type == "2d" else mapping.position[0],

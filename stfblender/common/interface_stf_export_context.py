@@ -16,10 +16,16 @@ class STF_ExportContext:
 	def register_id(self, application_object: Any, stf_id: str):
 		pass
 
-	def serialize_resource(self, application_object: Any, context_object: Any = None, stf_category: str | None = None, export_fail_severity: STFReportSeverity = STFReportSeverity.Error) -> str | None:
+	def serialize_resource(self, json_parent: dict, application_object: Any, context_object: Any = None, stf_category: str | None = None, export_fail_severity: STFReportSeverity = STFReportSeverity.Error) -> int | None:
 		pass
 
-	def serialize_buffer(self, data: bytes, buffer_id: str | None = None) -> str:
+	def _serialize_resource(self, application_object: Any, context_object: Any = None, stf_category: str | None = None, export_fail_severity: STFReportSeverity = STFReportSeverity.Error) -> str | None:
+		pass
+
+	def serialize_buffer(self, json_parent: dict, data: bytes, buffer_id: str | None = None) -> str:
+		pass
+
+	def _serialize_buffer(self, data: bytes, buffer_id: str | None = None) -> str:
 		pass
 
 	def resolve_application_property_path(self, application_object: Any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart | None:

@@ -6,7 +6,6 @@ from ....common import STF_ExportContext, STF_ImportContext, BlenderPropertyPath
 from ....common.resource.blender_native import STF_Handler_BlenderNative
 from ....common.resource.component.component_utils import get_components_from_object
 from ....common.utils.id_utils import ensure_stf_id
-from ....common.helpers import export_resource, import_resource
 
 
 _stf_type = "stf.instance.mesh"
@@ -25,7 +24,7 @@ class STF_Instance_Mesh(bpy.types.PropertyGroup):
 
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any | STFReport:
-	blender_resource = import_resource(context, json_resource, json_resource["mesh"], stf_category=STF_Category.DATA)
+	blender_resource = context.import_resource(json_resource, json_resource["mesh"], stf_category=STF_Category.DATA)
 	blender_object = bpy.data.objects.new(json_resource.get("name", "STF Node"), blender_resource)
 	blender_object.stf_instance.stf_id = stf_id
 	if(json_resource.get("name")):
@@ -36,7 +35,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 		context.report(STFReport("Failed to import mesh: " + str(json_resource.get("instance", {}).get("mesh")), STFReportSeverity.Error, stf_id, _stf_type, context_object))
 
 	if("armature_instance" in json_resource):
-		armature_instance: bpy.types.Object = import_resource(context, json_resource, json_resource["armature_instance"], stf_category=STF_Category.NODE)
+		armature_instance: bpy.types.Object = context.import_resource(json_resource, json_resource["armature_instance"], stf_category=STF_Category.NODE)
 		if(not armature_instance):
 			context.report(STFReport("Invalid armature instance: " + str(json_resource["armature_instance"]), STFReportSeverity.Error, stf_id, _stf_type, context_object))
 		else:
@@ -57,7 +56,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	if("materials" in json_resource):
 		for material_index, material_id in enumerate(json_resource["materials"]):
 			if(material_id and len(blender_object.material_slots) > material_index):
-				if(material := import_resource(context, json_resource, material_id, stf_category=STF_Category.DATA)):
+				if(material := context.import_resource(json_resource, material_id, stf_category=STF_Category.DATA)):
 					blender_object.material_slots[material_index].link = "OBJECT"
 					blender_object.material_slots[material_index].material = material
 
@@ -89,18 +88,18 @@ def _stf_export(context: STF_ExportContext, application_object: Any, context_obj
 			context.report(STFReport("Armature sits outside the exported asset", severity=STFReportSeverity.FatalError, stf_id=blender_object.stf_info.stf_id, stf_type=_stf_type, application_object=blender_object))
 			return None
 		# The armature has to be passed, because in Blenders datamodel, the relationship between mesh and armature is loose.
-		ret["mesh"] = export_resource(context, ret, blender_mesh, blender_armatures[0].object.data, stf_category=STF_Category.DATA)
-		ret["armature_instance"] = export_resource(context, ret, blender_armatures[0].object, stf_category=STF_Category.NODE)
+		ret["mesh"] = context.serialize_resource(ret, blender_mesh, blender_armatures[0].object.data, stf_category=STF_Category.DATA)
+		ret["armature_instance"] = context.serialize_resource(ret, blender_armatures[0].object, stf_category=STF_Category.NODE)
 	elif(len(blender_armatures) > 1):
 		context.report(STFReport("More than one Armature per mesh is not supported!", severity=STFReportSeverity.FatalError, stf_id=blender_object.stf_info.stf_id, stf_type=_stf_type, application_object=blender_object))
 		return None
 	else:
-		ret["mesh"] = export_resource(context, ret, blender_mesh, stf_category=STF_Category.DATA)
+		ret["mesh"] = context.serialize_resource(ret, blender_mesh, stf_category=STF_Category.DATA)
 
 	material_slots = []
 	for material_slot in blender_object.material_slots:
 		if(material_slot.material and material_slot.link == "OBJECT"):
-			material_slots.append(export_resource(context, ret, material_slot.material, stf_category=STF_Category.DATA))
+			material_slots.append(context.serialize_resource(ret, material_slot.material, stf_category=STF_Category.DATA))
 		else:
 			material_slots.append(None)
 	ret["materials"] = material_slots

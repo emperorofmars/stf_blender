@@ -21,7 +21,7 @@ class STF_ImportContext(ISTF_ImportContext):
 		self._root_collection = None
 
 	def run(self) -> bpy.types.Collection:
-		ret = self.import_resource(self.get_root_id(), STF_Category.DATA)
+		ret = self._import_resource(self.get_root_id(), STF_Category.DATA)
 		if(not ret):
 			raise Exception("Failed to export root resource")
 		self._state.run_tasks()
@@ -60,7 +60,15 @@ class STF_ImportContext(ISTF_ImportContext):
 					self.report(STFReport("Invalid JSON resource", STFReportSeverity.FatalError, component_id))
 
 
-	def import_resource(self, stf_id: str, context_object: Any = None, stf_category: str | None = STF_Category.DATA) -> Any | None:
+	def import_resource(self, json_parent: dict, resource_index: int, context_object: Any = None, stf_category: str = STF_Category.DATA) -> Any:
+		if(type(resource_index) is str): # todo remove this possibility sometime after stf v0.1.x
+			return self._import_resource(resource_index, context_object, stf_category)
+		if(resource_index is None or "referenced_resources" not in json_parent or len(json_parent["referenced_resources"]) < resource_index):
+			return None
+		else:
+			return self._import_resource(json_parent["referenced_resources"][resource_index], context_object, stf_category)
+
+	def _import_resource(self, stf_id: str, context_object: Any = None, stf_category: str | None = STF_Category.DATA) -> Any | None:
 		if(stf_id in self._state._imported_resources):
 			if(type(self._state._imported_resources[stf_id]) is STF_Component_Editmode_Resistant_Reference):
 				return self._state._imported_resources[stf_id].get()
@@ -89,7 +97,15 @@ class STF_ImportContext(ISTF_ImportContext):
 		return None
 
 
-	def import_buffer(self, stf_id: str) -> bytes | None:
+	def import_buffer(self, json_parent: dict, buffer_index: int) -> bytes | None:
+		if(type(buffer_index) is str): # todo remove this possibility sometime after stf v0.1.x
+			return self._state.import_buffer(buffer_index)
+		if(buffer_index is None or "referenced_buffers" not in json_parent or len(json_parent["referenced_buffers"]) < buffer_index):
+			return None
+		else:
+			return self._state.import_buffer(json_parent["referenced_buffers"][buffer_index])
+
+	def _import_buffer(self, stf_id: str) -> bytes | None:
 		return self._state.import_buffer(stf_id)
 
 

@@ -4,7 +4,7 @@ from typing import Any
 from ...common import STF_ExportContext, STF_ImportContext, STF_TaskSteps, STF_Category
 from ...common.resource.component import STF_ComponentResourceBase, STF_Handler_Component, STF_Component_Ref
 from ...common.resource.component.component_utils import add_component, export_component_base, import_component_base
-from ...common.helpers import register_exported_resource, import_resource, SetActiveObjectOperator
+from ...common.helpers import register_exported_resource, SetActiveObjectOperator
 
 
 _stf_type = "ava.voice_position"
@@ -60,7 +60,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, contex
 
 	if("voice_position" in json_resource):
 		def _handle():
-			component.voice_position = import_resource(context, json_resource, json_resource["voice_position"], STF_Category.NODE)
+			component.voice_position = context.import_resource(json_resource, json_resource["voice_position"], STF_Category.NODE)
 		context.add_task(STF_TaskSteps.DEFAULT, _handle)
 
 	return component

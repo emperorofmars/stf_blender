@@ -4,7 +4,6 @@ from typing import Any
 from ...common import STF_ExportContext, STF_ImportContext, STFReportSeverity, STFReport, STF_Category
 from ...common.resource.blender_native import STF_Handler_BlenderNative
 from ...common.utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui, ensure_stf_id
-from ...common.helpers import import_resource, register_exported_resource
 
 # TODO this module is at a bare minimum level, improve it
 
@@ -40,7 +39,7 @@ Import
 """
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
-	blender_text = import_resource(context, json_resource, json_resource["text"], STF_Category.DATA)
+	blender_text = context.import_resource(json_resource, json_resource["text"], STF_Category.DATA)
 
 	blender_object = bpy.data.objects.new(json_resource.get("name", "STFEXP Instance Text"), blender_text)
 	blender_object.stf_instance.stf_id = stf_id
@@ -76,7 +75,7 @@ def _stf_export(context: STF_ExportContext, application_object: Any, context_obj
 		"type": _stf_type,
 		"name": blender_object.stf_instance.stf_name,
 	}
-	ret["text"] = register_exported_resource(ret, context.serialize_resource(blender_text, None, "data"))
+	ret["text"] = context.serialize_resource(ret, blender_text, None, STF_Category.DATA)
 
 	# todo handle materials
 

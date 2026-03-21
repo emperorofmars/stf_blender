@@ -3,7 +3,7 @@ from typing import Any
 
 from ...common import STF_ExportContext, STF_ImportContext, STF_TaskSteps, STF_Category
 from ...common.resource.component import STF_ComponentResourceBase, STF_Handler_Component, STF_Component_Ref
-from ...common.helpers import register_exported_resource, import_resource
+from ...common.helpers import register_exported_resource
 
 from ...common.resource.component.component_utils import add_component, export_component_base, import_component_base
 from ...common.helpers.misc import SetActiveObjectOperator
@@ -78,17 +78,17 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, contex
 
 	if("viewport" in json_resource):
 		def _handle_viewport():
-			component.viewport = import_resource(context, json_resource, json_resource["viewport"], STF_Category.NODE)
+			component.viewport = context.import_resource(json_resource, json_resource["viewport"], STF_Category.NODE)
 		context.add_task(STF_TaskSteps.DEFAULT, _handle_viewport)
 
 	if("primary_armature_instance" in json_resource):
 		def _handle_primary_armature_instance():
-			component.primary_armature_instance = import_resource(context, json_resource, json_resource["primary_armature_instance"], STF_Category.NODE)
+			component.primary_armature_instance = context.import_resource(json_resource, json_resource["primary_armature_instance"], STF_Category.NODE)
 		context.add_task(STF_TaskSteps.DEFAULT, _handle_primary_armature_instance)
 
 	if("primary_mesh_instance" in json_resource):
 		def _handle_primary_mesh_instance():
-			component.primary_mesh_instance = import_resource(context, json_resource, json_resource["primary_mesh_instance"], STF_Category.NODE)
+			component.primary_mesh_instance = context.import_resource(json_resource, json_resource["primary_mesh_instance"], STF_Category.NODE)
 		context.add_task(STF_TaskSteps.DEFAULT, _handle_primary_mesh_instance)
 
 	return component

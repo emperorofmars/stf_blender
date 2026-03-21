@@ -5,7 +5,6 @@ from ....common import STF_ImportContext, STF_ExportContext, STF_TaskSteps, STFR
 from ....common.resource.blender_native import STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister
 from ....common.resource.component.component_utils import get_components_from_object
 from ....common.utils.id_utils import ensure_stf_id
-from ....common.helpers import export_resource, import_resource
 
 
 _stf_type = "stf.prefab"
@@ -22,11 +21,11 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	context.set_root_collection(collection)
 
 	for node_id in json_resource.get("root_nodes", []):
-		import_resource(context, json_resource, node_id, context_object=collection, stf_category=STF_Category.NODE)
+		context.import_resource(json_resource, node_id, context_object=collection, stf_category=STF_Category.NODE)
 
 	def _handle_animations():
 		for animation_id in json_resource.get("animations", []):
-			import_resource(context, json_resource, animation_id, context_object=collection, stf_category=STF_Category.DATA)
+			context.import_resource(json_resource, animation_id, context_object=collection, stf_category=STF_Category.DATA)
 	context.add_task(STF_TaskSteps.ANIMATION, _handle_animations)
 
 	return collection
@@ -47,11 +46,11 @@ def _stf_export(context: STF_ExportContext, application_object: Any, context_obj
 
 	for blender_object in collection.all_objects[:]:
 		if(type(blender_object) is bpy.types.Object and blender_object.parent == None):
-			root_nodes.append(export_resource(context, ret, blender_object, context_object=collection, stf_category="node", export_fail_severity=STFReportSeverity.FatalError))
+			root_nodes.append(context.serialize_resource(ret, blender_object, context_object=collection, stf_category="node", export_fail_severity=STFReportSeverity.FatalError))
 
 	def _handle_animations():
 		for action in bpy.data.actions:
-			if(stf_animation_id := export_resource(context, ret, action, context_object=collection, stf_category="data", export_fail_severity=STFReportSeverity.Debug)):
+			if(stf_animation_id := context.serialize_resource(ret, action, context_object=collection, stf_category="data", export_fail_severity=STFReportSeverity.Debug)):
 				animations.append(stf_animation_id)
 	context.add_task(STF_TaskSteps.ANIMATION, _handle_animations)
 

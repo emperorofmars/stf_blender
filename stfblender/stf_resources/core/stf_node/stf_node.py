@@ -10,7 +10,7 @@ from ....common.resource.blender_native import STF_Handler_BlenderNative, boiler
 from ....common.utils import trs_utils
 from ....common.resource.component.component_utils import get_components_from_object
 from ....common.utils.id_utils import ensure_stf_id
-from ....common.helpers import export_resource, import_resource, get_resource_id
+from ....common.helpers import get_resource_id
 from .node_property_conversion import stf_node_resolve_property_path_to_stf_func, stf_node_resolve_stf_property_to_blender_func
 
 
@@ -25,7 +25,7 @@ class STF_Instance(bpy.types.PropertyGroup):
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any | STFReport:
 	if("instance" in json_resource):
-		blender_object: bpy.types.Object = import_resource(context, json_resource, json_resource["instance"], stf_category=STF_Category.INSTANCE)
+		blender_object: bpy.types.Object = context.import_resource(json_resource, json_resource["instance"], stf_category=STF_Category.INSTANCE)
 	else:
 		blender_object: bpy.types.Object = bpy.data.objects.new(json_resource.get("name", "STF Node"), None)
 	context.register_imported_resource(stf_id, blender_object)
@@ -60,7 +60,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	context.add_task(STF_TaskSteps.DEFAULT, _handle_parenting)
 
 	for child_id in json_resource.get("children", []):
-		child: bpy.types.Object = import_resource(context, json_resource, child_id, context_object, stf_category=STF_Category.NODE)
+		child: bpy.types.Object = context.import_resource(json_resource, child_id, context_object, stf_category=STF_Category.NODE)
 		if(child):
 			child.parent = blender_object
 		else:
@@ -94,7 +94,7 @@ def _stf_export(context: STF_ExportContext, blender_object: bpy.types.Object, co
 	for child in blender_object.children:
 		for collection in child.users_collection:
 			if(context_object.is_embedded_data or collection == context_object):
-				children.append(export_resource(context, json_resource, child, context_object, stf_category="node"))
+				children.append(context.serialize_resource(json_resource, child, context_object, stf_category="node"))
 				break # break inner loop
 
 	json_resource["children"] = children
@@ -125,7 +125,7 @@ def _stf_export(context: STF_ExportContext, blender_object: bpy.types.Object, co
 		json_resource["enabled"] = False
 
 	if(blender_object.data):
-		instance_id = export_resource(context, json_resource, (blender_object, blender_object.data), context_object, stf_category="instance")
+		instance_id = context.serialize_resource(json_resource, (blender_object, blender_object.data), context_object, stf_category="instance")
 		if(instance_id >= 0):
 			json_resource["instance"] = instance_id
 

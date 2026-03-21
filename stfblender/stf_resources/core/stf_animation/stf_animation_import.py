@@ -3,7 +3,6 @@ import bpy
 import numpy as np
 
 from ....common import STF_ImportContext, STF_TaskSteps, STFReportSeverity, STFReport, STF_Category
-from ....common.helpers import import_resource
 from .stf_animation_common import *
 
 
@@ -60,7 +59,7 @@ def stf_animation_import(context: STF_ImportContext, json_resource: dict, stf_id
 		if("is_reset_animation" in json_resource and json_resource["is_reset_animation"] == True):
 			blender_animation.slot_link.is_reset_animation = True
 		elif("reset_animation" in json_resource and json_resource["reset_animation"]):
-			if(reset_animation := import_resource(context, json_resource, json_resource["reset_animation"], context_object, STF_Category.DATA)):
+			if(reset_animation := context.import_resource(json_resource, json_resource["reset_animation"], context_object, STF_Category.DATA)):
 				blender_animation.slot_link.reset_animation = reset_animation
 	context.add_task(STF_TaskSteps.AFTER_ANIMATION, _handle_reset_animation)
 

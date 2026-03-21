@@ -3,7 +3,7 @@ from collections.abc import Sequence
 from typing import Any
 
 from .. import STF_ImportContext, STF_ExportContext, STF_Category
-from ..helpers import import_resource, register_exported_resource
+from ..helpers import register_exported_resource
 
 
 class NodePathSelector(bpy.types.PropertyGroup):
@@ -64,15 +64,15 @@ def node_path_selector_to_stf(context: STF_ExportContext, nps: NodePathSelector,
 	if(type(nps.id_data) == bpy.types.Object and nps.target_object):
 		if(type(nps.target_object.data) == bpy.types.Armature):
 			if(not nps.target_bone):
-				return [register_exported_resource(json_resource, context.serialize_resource(nps.target_object, stf_category=STF_Category.NODE))]
+				return [context.serialize_resource(json_resource, nps.target_object, stf_category=STF_Category.NODE)]
 			elif(nps.target_bone and nps.target_bone in nps.target_object.data.bones):
-				return [register_exported_resource(json_resource, context.serialize_resource(nps.target_object, stf_category=STF_Category.NODE)),STF_Category.INSTANCE, register_exported_resource(json_resource, context.serialize_resource(nps.target_object.data.bones[nps.target_bone], stf_category=STF_Category.NODE))]
+				return [context.serialize_resource(json_resource, nps.target_object, stf_category=STF_Category.NODE), STF_Category.INSTANCE, context.serialize_resource(json_resource, nps.target_object.data.bones[nps.target_bone], stf_category=STF_Category.NODE)]
 			else:
 				return None
 		else:
-			return [register_exported_resource(json_resource, context.serialize_resource(nps.target_object, stf_category=STF_Category.NODE))]
+			return [context.serialize_resource(json_resource, nps.target_object, stf_category=STF_Category.NODE)]
 	elif(type(nps.id_data) == bpy.types.Armature and nps.target_bone and nps.target_bone in nps.id_data.bones):
-		return [register_exported_resource(json_resource, context.serialize_resource(nps.id_data.bones[nps.target_bone], stf_category=STF_Category.NODE))]
+		return [context.serialize_resource(json_resource, nps.id_data.bones[nps.target_bone], stf_category=STF_Category.NODE)]
 	else:
 		return None
 
@@ -80,10 +80,10 @@ def node_path_selector_to_stf(context: STF_ExportContext, nps: NodePathSelector,
 def node_path_selector_from_stf(context: STF_ImportContext, json_resource: dict[str, Any], node_path: Sequence[str], nps: NodePathSelector):
 	if(type(nps.id_data) == bpy.types.Object):
 		if(len(node_path) == 1):
-			nps.target_object = import_resource(context, json_resource, node_path[0], STF_Category.NODE)
+			nps.target_object = context.import_resource(json_resource, node_path[0], STF_Category.NODE)
 		if(len(node_path) == 3 and node_path[1] == "instance"):
-			nps.target_object = import_resource(context, json_resource, node_path[0], STF_Category.NODE)
-			nps.target_bone = import_resource(context, json_resource, node_path[2], STF_Category.NODE).name
+			nps.target_object = context.import_resource(json_resource, node_path[0], STF_Category.NODE)
+			nps.target_bone = context.import_resource(json_resource, node_path[2], STF_Category.NODE).name
 	if(type(nps.id_data) == bpy.types.Armature):
-		nps.target_bone = import_resource(context, json_resource, node_path[0], STF_Category.NODE).name
+		nps.target_bone = context.import_resource(json_resource, node_path[0], STF_Category.NODE).name
 

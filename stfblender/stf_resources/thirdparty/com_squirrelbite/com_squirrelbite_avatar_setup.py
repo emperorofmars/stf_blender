@@ -4,7 +4,7 @@ from typing import Any
 from ....common import STF_ExportContext, STF_ImportContext, STFReportSeverity, STFReport, STF_Category
 from ....common.resource.component import STF_ComponentResourceBase, STF_Handler_Component, STF_Component_Ref
 from ....common.resource.component.component_utils import add_component, export_component_base, import_component_base
-from ....common.helpers import export_resource, import_resource, draw_list, poll_valid_animations
+from ....common.helpers import draw_list, poll_valid_animations
 from ....common.blender_grr import *
 
 
@@ -125,8 +125,8 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	for toggle_json in json_resource.get("toggles_pre", []):
 		toggle: Toggle = component.toggles_pre.add()
 		toggle.name = toggle_json.get("name", "")
-		toggle.animation_on = import_resource(context, json_resource, toggle_json.get("on"))
-		toggle.animation_off = import_resource(context, json_resource, toggle_json.get("off"))
+		toggle.animation_on = context.import_resource(json_resource, toggle_json.get("on"))
+		toggle.animation_off = context.import_resource(json_resource, toggle_json.get("off"))
 
 	# puppets pre
 	for puppet_json in json_resource.get("puppets_pre", []):
@@ -138,7 +138,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 		if(puppet.type == "2d"):
 			puppet.property_y = puppet_json.get("property_x")
 
-		if(blendtree_resource := import_resource(context, json_resource, puppet_json["blendtree"], STF_Category.DATA)):
+		if(blendtree_resource := context.import_resource(json_resource, puppet_json["blendtree"], STF_Category.DATA)):
 			puppet.blendtree.collection = context.get_root_collection()
 			puppet.blendtree.stf_data_resource_id = blendtree_resource.stf_id
 		else:
@@ -148,12 +148,12 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	for toggle_json in json_resource.get("toggles", []):
 		toggle: Toggle = component.toggles.add()
 		toggle.name = toggle_json.get("name", "")
-		toggle.animation_on = import_resource(context, json_resource, toggle_json.get("on"))
-		toggle.animation_off = import_resource(context, json_resource, toggle_json.get("off"))
+		toggle.animation_on = context.import_resource(json_resource, toggle_json.get("on"))
+		toggle.animation_off = context.import_resource(json_resource, toggle_json.get("off"))
 
 	# puppets
 	for puppet_json in json_resource.get("puppets", []):
-		if(blendtree_resource := import_resource(context, json_resource, puppet_json["blendtree"], STF_Category.DATA)):
+		if(blendtree_resource := context.import_resource(json_resource, puppet_json["blendtree"], STF_Category.DATA)):
 			puppet: STFDataResourceReference = component.puppets.add()
 			puppet.name = puppet_json.get("name", "")
 			puppet.collection = context.get_root_collection()
@@ -164,16 +164,16 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	# breathing
 	if("breathing" in json_resource):
 		if("normal" in json_resource["breathing"]):
-			component.breathing_normal = import_resource(context, json_resource, json_resource["breathing"]["normal"])
+			component.breathing_normal = context.import_resource(json_resource, json_resource["breathing"]["normal"])
 		if("intense" in json_resource["breathing"]):
-			component.breathing_intense = import_resource(context, json_resource, json_resource["breathing"]["intense"])
+			component.breathing_intense = context.import_resource(json_resource, json_resource["breathing"]["intense"])
 
 	# additive
 	if("additive" in json_resource):
 		if("idle" in json_resource["additive"]):
-			component.additive_idle = import_resource(context, json_resource, json_resource["additive"]["idle"])
+			component.additive_idle = context.import_resource(json_resource, json_resource["additive"]["idle"])
 		if("excited" in json_resource["additive"]):
-			component.additive_excited = import_resource(context, json_resource, json_resource["additive"]["excited"])
+			component.additive_excited = context.import_resource(json_resource, json_resource["additive"]["excited"])
 
 	return component
 
@@ -190,8 +190,8 @@ def _stf_export(context: STF_ExportContext, component: Squirrelbite_Avatar_Setup
 			continue
 		toggles_pre.append({
 			"name": toggle.name,
-			"on": export_resource(context, ret, toggle.animation_on),
-			"off": export_resource(context, ret, toggle.animation_off),
+			"on": context.serialize_resource(ret, toggle.animation_on),
+			"off": context.serialize_resource(ret, toggle.animation_off),
 		})
 
 	# puppets pre
@@ -213,7 +213,7 @@ def _stf_export(context: STF_ExportContext, component: Squirrelbite_Avatar_Setup
 		if(puppet_ret := resolve_stf_data_resource_reference(puppet.blendtree)):
 			puppet_ref, puppet_resource = puppet_ret
 			if(puppet_ref.stf_type == "stfexp.animation_blendtree"):
-				puppet_json["blendtree"] = export_resource(context, ret, puppet_resource)
+				puppet_json["blendtree"] = context.serialize_resource(ret, puppet_resource)
 				puppets_pre.append(puppet_json)
 			else:
 				context.report(STFReport("module: %s stf_id: %s, context-object: %s :: blendtree invalid resource type" % (_stf_type, component.stf_id, context_object), STFReportSeverity.Warn, component.stf_id, _stf_type, context_object))
@@ -229,8 +229,8 @@ def _stf_export(context: STF_ExportContext, component: Squirrelbite_Avatar_Setup
 			continue
 		toggles.append({
 			"name": toggle.name,
-			"on": export_resource(context, ret, toggle.animation_on),
-			"off": export_resource(context, ret, toggle.animation_off),
+			"on": context.serialize_resource(ret, toggle.animation_on),
+			"off": context.serialize_resource(ret, toggle.animation_off),
 		})
 
 	# puppets
@@ -242,7 +242,7 @@ def _stf_export(context: STF_ExportContext, component: Squirrelbite_Avatar_Setup
 			if(puppet_ref.stf_type == "stfexp.animation_blendtree"):
 				puppets.append({
 					"name": puppet.name,
-					"blendtree": export_resource(context, ret, puppet_resource)
+					"blendtree": context.serialize_resource(ret, puppet_resource)
 				})
 			else:
 				context.report(STFReport("module: %s stf_id: %s, context-object: %s :: blendtree invalid resource type" % (_stf_type, component.stf_id, context_object), STFReportSeverity.Warn, component.stf_id, _stf_type, context_object))
@@ -251,17 +251,17 @@ def _stf_export(context: STF_ExportContext, component: Squirrelbite_Avatar_Setup
 	if(component.breathing_intense or component.breathing_normal):
 		ret["breathing"] = {}
 		if(component.breathing_normal):
-			ret["breathing"]["normal"] = export_resource(context, ret, component.breathing_normal)
+			ret["breathing"]["normal"] = context.serialize_resource(ret, component.breathing_normal)
 		if(component.breathing_intense):
-			ret["breathing"]["intense"] = export_resource(context, ret, component.breathing_intense)
+			ret["breathing"]["intense"] = context.serialize_resource(ret, component.breathing_intense)
 
 	# additive
 	if(component.additive_idle or component.additive_excited):
 		ret["additive"] = {}
 		if(component.additive_idle):
-			ret["additive"]["idle"] = export_resource(context, ret, component.additive_idle)
+			ret["additive"]["idle"] = context.serialize_resource(ret, component.additive_idle)
 		if(component.additive_excited):
-			ret["additive"]["excited"] = export_resource(context, ret, component.additive_excited)
+			ret["additive"]["excited"] = context.serialize_resource(ret, component.additive_excited)
 
 	return ret, component.stf_id
 

@@ -7,7 +7,6 @@ from ....common import STF_ExportContext, STFReportSeverity, STFReport, STF_Task
 from ....common.utils.buffer_utils import serialize_float
 from ....common.utils.id_utils import ensure_stf_id
 from ....common.slot_link import ActionSlotLink
-from ....common.helpers import export_resource, export_buffer
 from .stf_animation_common import *
 from .stf_animation_bake import bake_constraints
 
@@ -70,7 +69,7 @@ def stf_animation_export(context: STF_ExportContext, application_object: Any, co
 			if(action_slot_link.is_reset_animation):
 				ret["is_reset_animation"] = True
 			elif(action_slot_link.reset_animation):
-				if(reset_animation_id := export_resource(context, ret, action_slot_link.reset_animation)):
+				if(reset_animation_id := context.serialize_resource(ret, action_slot_link.reset_animation)):
 					ret["reset_animation"] = reset_animation_id
 		context.add_task(STF_TaskSteps.AFTER_ANIMATION, _handle_reset_animation)
 
@@ -264,7 +263,7 @@ def __serialize_subtracks(context: STF_ExportContext, blender_animation: bpy.typ
 		# Serialize buffers for each subtrack
 		for _, fcurve in fcurves.items():
 			if(ret[index_conversion[fcurve.array_index]]):
-				ret[index_conversion[fcurve.array_index]]["baked"] = export_buffer(context, reference_holder, baked_values[index_conversion[fcurve.array_index]].getbuffer())
+				ret[index_conversion[fcurve.array_index]]["baked"] = context.serialize_buffer(reference_holder, baked_values[index_conversion[fcurve.array_index]].getbuffer())
 
 	return {
 		"target": stf_target,

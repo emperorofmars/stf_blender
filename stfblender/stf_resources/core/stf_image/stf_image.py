@@ -5,7 +5,6 @@ from ....common import STF_ExportContext, STF_ImportContext, STFReport, STFRepor
 from ....common.resource.blender_native import STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister
 from ....common.resource.component.component_utils import get_components_from_object
 from ....common.utils.id_utils import ensure_stf_id
-from ....common.helpers import export_buffer, import_buffer
 
 
 _stf_type = "stf.image"
@@ -23,7 +22,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 		blender_image.stf_info.stf_name_source_of_truth = True
 
 	try:
-		image_buffer = import_buffer(context, json_resource, json_resource["buffer"])
+		image_buffer = context.import_buffer(json_resource, json_resource["buffer"])
 		blender_image.pack(data=image_buffer, data_len=len(image_buffer))
 		blender_image.source = "FILE"
 
@@ -63,7 +62,7 @@ def _stf_export(context: STF_ExportContext, application_object: Any, context_obj
 			"format": blender_image.file_format.lower(),
 			"data_type": "non_color" if blender_image.colorspace_settings.name == "Non-Color" else "color"
 		}
-		ret["buffer"] = export_buffer(context, ret, image_bytes)
+		ret["buffer"] = context.serialize_buffer(ret, image_bytes)
 
 		if(blender_image.stf_image.is_normal_map):
 			ret["data_type"] = "normal"

@@ -20,7 +20,7 @@ class STF_ExportContext(ISTF_ExportContext):
 		self._prefab = prefab
 
 	def run(self) -> str:
-		root_id = self.serialize_resource(self._prefab)
+		root_id = self._serialize_resource(self._prefab)
 		if(not root_id):
 			raise Exception("Failed to import root resource")
 		self._state.set_root_id(root_id)
@@ -65,7 +65,21 @@ class STF_ExportContext(ISTF_ExportContext):
 					self.report(STFReport("Unsupported Component", STFReportSeverity.Warn, None, None, application_object))
 
 
-	def serialize_resource(self, application_object: Any, context_object: Any = None, stf_category: str | None = None, export_fail_severity: STFReportSeverity = STFReportSeverity.Error) -> str | None:
+	def serialize_resource(self, json_parent: dict, application_object: Any, context_object: Any = None, stf_category: str | None = None, export_fail_severity: STFReportSeverity = STFReportSeverity.Error) -> int | None:
+		if(resource_id := self._serialize_resource(application_object, context_object, stf_category, export_fail_severity)):
+			if("referenced_resources" not in json_parent):
+				json_parent["referenced_resources"] = [resource_id]
+				return 0
+			else:
+				if(resource_id not in json_parent["referenced_resources"]):
+					json_parent["referenced_resources"].append(resource_id)
+					return len(json_parent["referenced_resources"]) - 1
+				else:
+					return json_parent["referenced_resources"].index(resource_id)
+		else:
+			return None
+
+	def _serialize_resource(self, application_object: Any, context_object: Any = None, stf_category: str | None = None, export_fail_severity: STFReportSeverity = STFReportSeverity.Error) -> str | None:
 		"""Run all logic to serialize an application resource. If it already has been serialized, return the existing ID."""
 
 		if(application_object is None): return None
@@ -102,7 +116,21 @@ class STF_ExportContext(ISTF_ExportContext):
 		return None
 
 
-	def serialize_buffer(self, data: bytes, buffer_id: str | None = None) -> str:
+	def serialize_buffer(self, json_parent: dict, data: bytes, buffer_id: str | None = None) -> str:
+		if(buffer_id := self._state.serialize_buffer(data, buffer_id)):
+			if("referenced_buffers" not in json_parent):
+				json_parent["referenced_buffers"] = [buffer_id]
+				return 0
+			else:
+				if(buffer_id not in json_parent["referenced_buffers"]):
+					json_parent["referenced_buffers"].append(buffer_id)
+					return len(json_parent["referenced_buffers"]) - 1
+				else:
+					return json_parent["referenced_buffers"].index(buffer_id)
+		else:
+			return None
+
+	def _serialize_buffer(self, data: bytes, buffer_id: str | None = None) -> str:
 		return self._state.serialize_buffer(data, buffer_id)
 
 
