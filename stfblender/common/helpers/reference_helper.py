@@ -10,18 +10,6 @@ def register_exported_resource(json_resource: dict, resource_id: str) -> int:
 		else:
 			return json_resource["referenced_resources"].index(resource_id)
 
-def register_exported_buffer(json_resource: dict, buffer_id: str) -> int:
-	if("referenced_buffers" not in json_resource):
-		json_resource["referenced_buffers"] = [buffer_id]
-		return 0
-	else:
-		if(buffer_id not in json_resource["referenced_buffers"]):
-			json_resource["referenced_buffers"].append(buffer_id)
-			return len(json_resource["referenced_buffers"]) - 1
-		else:
-			return json_resource["referenced_buffers"].index(buffer_id)
-
-
 def get_resource_id(json_resource: dict, resource_index: int) -> str:
 	if(type(resource_index) is str): # todo remove this possibility sometime after stf v0.1.x
 		return resource_index
@@ -29,11 +17,3 @@ def get_resource_id(json_resource: dict, resource_index: int) -> str:
 		return None
 	else:
 		return json_resource["referenced_resources"][resource_index]
-
-def get_buffer_id(json_resource: dict, buffer_index: int) -> str:
-	if(type(buffer_index) is str): # todo remove this possibility sometime after stf v0.1.x
-		return buffer_index
-	if(buffer_index is None or "referenced_buffers" not in json_resource or len(json_resource["referenced_buffers"]) < buffer_index):
-		return None
-	else:
-		return json_resource["referenced_buffers"][buffer_index]

@@ -5,7 +5,6 @@ from typing import Any
 from ...common import STF_ExportContext, STF_ImportContext, STF_TaskSteps, STF_Category
 from ...common.resource.data import STF_Handler_Data, STF_DataResourceBase, STF_Data_Ref
 from ...common.resource.data.data_resource_utils import add_resource, export_data_resource_base, get_components_from_data_resource, import_data_resource_base
-from ...common.helpers import register_exported_buffer, register_exported_resource
 from ...common.blender_grr import BlenderGRR, construct_blender_grr, resolve_blender_grr
 from .json_fallback_buffer import STF_FallbackBuffer, decode_buffer, encode_buffer
 from .json_fallback_ui import draw_fallback
@@ -61,11 +60,11 @@ def _stf_export(context: STF_ExportContext, resource: JsonFallbackData, context_
 			referenced_resource: BlenderGRR = referenced_resource
 			if(blender_resource := resolve_blender_grr(referenced_resource)):
 				def _handle():
-					register_exported_resource(ret, context._serialize_resource(blender_resource))
+					context.serialize_resource(ret, blender_resource)
 				context.add_task(STF_TaskSteps.DEFAULT, _handle)
 
 		for buffer in resource.buffers:
-			register_exported_buffer(ret, decode_buffer(context, buffer))
+			decode_buffer(context, ret, buffer)
 
 		return ret, resource.stf_id
 	except:
