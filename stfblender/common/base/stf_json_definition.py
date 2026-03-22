@@ -60,7 +60,7 @@ class STF_Meta:
 		import datetime
 
 		self.version_major: int = 0
-		self.version_minor: int = 0
+		self.version_minor: int = 1
 		self.generator: str = "stf_blender"
 		self.generator_version = "0.0.0"
 		self.timestamp: str = datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat()
@@ -72,8 +72,12 @@ class STF_Meta:
 	@staticmethod
 	def from_dict(dict: dict[str, Any]):
 		ret = STF_Meta()
-		ret.version_major = dict["version_major"]
-		ret.version_minor = dict["version_minor"]
+		if("version" in dict):
+			ret.version_major = dict["version"][0]
+			ret.version_minor = dict["version"][1]
+		else:
+			ret.version_major = dict["version_major"]
+			ret.version_minor = dict["version_minor"]
 		ret.root = dict["root"]
 		ret.asset_info = STF_Meta_AssetInfo.from_dict(dict.get("asset_info", {}))
 		ret.asset_properties = STF_Meta_AssetProperties.from_dict(dict.get("asset_properties", {}))
@@ -85,8 +89,7 @@ class STF_Meta:
 
 	def to_dict(self) -> dict[str, Any]:
 		return {
-			"version_major": self.version_major,
-			"version_minor": self.version_minor,
+			"version": [self.version_major, self.version_minor],
 			"root": self.root,
 			"asset_info": self.asset_info.to_dict(),
 			"asset_properties": self.asset_properties.to_dict(),
