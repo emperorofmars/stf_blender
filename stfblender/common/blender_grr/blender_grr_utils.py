@@ -2,7 +2,7 @@ import bpy
 from typing import Any
 
 from .blender_grr import BlenderGRR
-from .stf_data_resource_reference_utils import draw_stf_data_resource_reference, resolve_stf_data_resource_reference, validate_stf_data_resource_reference
+from .stf_data_resource_reference_utils import draw_stf_data_resource_reference, pretty_print_data_resource_reference, resolve_stf_data_resource_holder, resolve_stf_data_resource_reference, validate_stf_data_resource_reference
 from .blender_resource_reference import draw_blender_resource_reference, pretty_print_blender_resource_reference, resolve_blender_resource_reference, validate_blender_resource_reference
 from ..resource.data.stf_handler_data import STF_DataResourceBase, STF_Data_Ref
 from ..resource.component.stf_handler_component import STF_ComponentResourceBase, STF_Component_Editmode_Resistant_Reference, STF_Component_Ref
@@ -20,8 +20,15 @@ It works right now, however making this actually user friendly and nice to handl
 def pretty_print_blender_grr(grr: BlenderGRR) -> str:
 	match(grr.reference_type):
 		case "blender": return pretty_print_blender_resource_reference(grr.blender_resource_reference)
-		case "stf_data_resource": return "foo"
-		case "stf_component": return "bar"
+		case "stf_data_resource": return pretty_print_data_resource_reference(grr.stf_data_resource_reference)
+		case "stf_component":
+			if(validate_blender_resource_reference(grr.blender_resource_reference)):
+				if(component := resolve_blender_grr(grr)):
+					return pretty_print_blender_resource_reference(grr.blender_resource_reference) + " / " + (component.stf_name if component.stf_name else component.stf_id)
+			elif(validate_stf_data_resource_reference(grr.stf_data_resource_reference)):
+				if(component := resolve_blender_grr(grr)):
+					return pretty_print_data_resource_reference(grr.blender_resource_reference) + " / " + (component.stf_name if component.stf_name else component.stf_id)
+	return "Invalid"
 
 
 def draw_blender_grr(layout: bpy.types.UILayout, grr: BlenderGRR, reference_type_filter: str | None = None):
@@ -51,13 +58,14 @@ def draw_blender_grr(layout: bpy.types.UILayout, grr: BlenderGRR, reference_type
 
 					case "stf_data_resource":
 						draw_stf_data_resource_reference(layout, grr.stf_data_resource_reference)
-						component_holder_ret = resolve_stf_data_resource_reference(grr.stf_data_resource_reference)
-						if(component_holder_ret):
-							_, component_holder = component_holder_ret
-							layout.prop_search(grr, "stf_component_id", component_holder, "stf_components", icon="ERROR" if not grr.stf_component_id or grr.stf_component_id not in component_holder.stf_components else "NONE")
+						data_component_holder_ret = resolve_stf_data_resource_reference(grr.stf_data_resource_reference)
+						component_holder = resolve_stf_data_resource_holder(grr.stf_data_resource_reference)
+						if(data_component_holder_ret and component_holder):
+							_, resource = data_component_holder_ret
+							layout.prop_search(grr, "stf_component_id", resource, "stf_components", icon="ERROR" if not grr.stf_component_id or grr.stf_component_id not in resource.stf_components else "NONE")
 
-							if(grr.stf_component_id and grr.stf_component_id in component_holder.stf_components):
-								draw_component_info(layout, component_holder, component_holder.stf_info, grr.stf_component_id)
+							if(grr.stf_component_id and grr.stf_component_id in resource.stf_components):
+								draw_component_info(layout, component_holder, resource, grr.stf_component_id)
 
 
 def resolve_blender_grr(grr: BlenderGRR) -> Any:
@@ -140,5 +148,5 @@ def validate_blender_grr(grr: BlenderGRR) -> bool:
 	match(grr.reference_type):
 		case "blender": return validate_blender_resource_reference(grr.blender_resource_reference)
 		case "stf_data_resource": return validate_stf_data_resource_reference(grr.stf_data_resource_reference)
-		case "stf_component": return True # todo
+		case "stf_component": return grr.stf_component_id and (validate_blender_resource_reference(grr.blender_resource_reference) or validate_stf_data_resource_reference(grr.stf_data_resource_reference))
 	return False

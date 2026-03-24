@@ -83,7 +83,7 @@ def stf_material_to_blender(blender_material: bpy.types.Material):
 			node_position_index += set_image_value(blender_material, normal_node, property, "Color" ,position_index_v = node_position_index, position_index_h = 1)
 			node_position_index += 1
 
-	# TODO parse stf material
+	# TODO convert vastly more properties
 
 
 class STFConvertSTFMaterialToBlender(bpy.types.Operator):

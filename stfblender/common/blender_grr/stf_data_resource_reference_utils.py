@@ -70,10 +70,33 @@ def resolve_stf_data_resource_reference(drr: STFDataResourceReference) -> tuple[
 	else:
 		return None
 
+def resolve_stf_data_resource_holder(drr: STFDataResourceReference) -> bpy.types.Collection:
+	if(drr.use_scene_collection and drr.scene):
+		return drr.scene.collection
+	elif(not drr.use_scene_collection and drr.collection):
+		return drr.collection
+	else:
+		return None
+
 def validate_stf_data_resource_reference(drr: STFDataResourceReference, valid_types: Sequence[str] = ()) -> bool:
 	if(drr):
 		if(res := resolve_stf_data_resource_reference(drr)):
-			resource_ref, resource = res
+			resource_ref, _resource = res
 			if(not valid_types or resource_ref.stf_type in valid_types):
 				return True
 	return False
+
+def pretty_print_data_resource_reference(drr: STFDataResourceReference) -> str:
+	ret = ""
+	if(drr.use_scene_collection and drr.scene):
+		ret = "Scene Collection / STF Data Resources / " + drr.stf_data_resource_id
+	elif(not drr.use_scene_collection and drr.collection):
+		ret = "Collection \"" + drr.collection.name + "\" / STF Data Resources / "
+	else:
+		return "Invalid"
+
+	if(res := resolve_stf_data_resource_reference(drr)):
+		_, resource = res
+		return ret + (resource.stf_name if resource.stf_name else resource.stf_id)
+	else:
+		return "Invalid"

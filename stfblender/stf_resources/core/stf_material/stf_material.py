@@ -1,6 +1,8 @@
 import bpy
 from typing import Any
 
+from ....common.stf_report import STFReportSeverity
+
 from ....common import STF_ExportContext, STF_ImportContext, STF_Category, STFReport
 from ....common.resource.blender_native import STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister
 from ....common.resource.component.component_utils import get_components_from_object
@@ -37,20 +39,18 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 			shader.value = stf_shader
 
 	for property_type, stf_property in json_resource.get("properties", {}).items():
-		for material_value_module in blender_material_value_modules:
-			material_value_module: STF_Material_Value_Module_Base = material_value_module
-			if(material_value_module.value_type == stf_property.get("type")):
-				prop, value_ref, value = add_property(blender_material, property_type, material_value_module)
+		for mat_module in blender_material_value_modules:
+			mat_module: STF_Material_Value_Module_Base = mat_module
+			if(mat_module.value_type == stf_property.get("type")):
+				prop, value_ref, value = add_property(blender_material, property_type, mat_module)
 				stf_values = stf_property.get("values")
-				prop.multi_value = True
 				if(len(stf_values) > 0):
-					material_value_module.value_import_func(context, json_resource, blender_material, stf_values[0], value)
+					mat_module.value_import_func(context, json_resource, blender_material, stf_values[0], value)
 					if(len(stf_values) > 1):
+						prop.multi_value = True
 						for stf_value in stf_values[1:]:
 							value_ref, value = add_value_to_property(blender_material, len(blender_material.stf_material.properties) - 1)
-							material_value_module.value_import_func(context, json_resource, blender_material, stf_value, value)
-				else:
-					pass # TODO report fail
+							mat_module.value_import_func(context, json_resource, blender_material, stf_value, value)
 				break
 
 	stf_material_to_blender(blender_material)
@@ -89,11 +89,14 @@ def _stf_export(context: STF_ExportContext, application_object: Any, context_obj
 		values = []
 		for value_ref in property.values:
 			for mat_module in blender_material_value_modules:
+				mat_module: STF_Material_Value_Module_Base = mat_module
 				if(mat_module.property_name == property.value_property_name):
 					for property_value in getattr(blender_material, property.value_property_name):
 						if(property_value.value_id == value_ref.value_id):
-							# TODO check if export succeeded and warn if not
-							values.append(mat_module.value_export_func(context, ret, blender_material, property_value))
+							if(serialized_value := mat_module.value_export_func(context, ret, blender_material, property_value)):
+								values.append(serialized_value)
+							else:
+								context.report(STFReport("Failed to export material property: " + property.value_property_name, STFReportSeverity.Warn, blender_material.stf_info.stf_id, _stf_type, blender_material))
 							break
 
 		json_prop["values"] = values

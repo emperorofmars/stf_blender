@@ -200,7 +200,6 @@ def stf_node_resolve_stf_property_to_blender_func(context: STF_ImportContext, st
 	blender_object = context.get_imported_resource(stf_path[0])
 	match(stf_path[1]):
 		case "t":
-			# todo handle parenting everywhere
 			return BlenderPropertyPathPart("OBJECT", "location", _create_translation_to_blender_func(blender_object), translation_index_conversion_to_blender, blender_object)
 		case "r":
 			return BlenderPropertyPathPart("OBJECT", "rotation_quaternion", _create_rotation_to_blender_func(blender_object), rotation_index_conversion_to_blender, blender_object)

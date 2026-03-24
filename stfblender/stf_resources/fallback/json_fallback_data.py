@@ -37,7 +37,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 			resource_grr = resource.referenced_resources.add()
 			if(referenced_resource := context._import_resource(resource_id)):
 				construct_blender_grr(referenced_resource, resource_grr, resource_id)
-	context.add_task(STF_TaskSteps.DEFAULT, _handle)
+	context.add_task(STF_TaskSteps.FINALE, _handle)
 
 	for buffer_id in json_resource.get("referenced_buffers", []):
 		encode_buffer(context, buffer_id, resource)
@@ -61,7 +61,7 @@ def _stf_export(context: STF_ExportContext, resource: JsonFallbackData, context_
 			if(blender_resource := resolve_blender_grr(referenced_resource)):
 				def _handle():
 					context.serialize_resource(ret, blender_resource)
-				context.add_task(STF_TaskSteps.DEFAULT, _handle)
+				context.add_task(STF_TaskSteps.FINALE, _handle)
 
 		for buffer in resource.buffers:
 			decode_buffer(context, ret, buffer)

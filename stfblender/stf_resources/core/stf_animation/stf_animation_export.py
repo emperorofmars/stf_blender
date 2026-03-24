@@ -69,8 +69,7 @@ def stf_animation_export(context: STF_ExportContext, application_object: Any, co
 			if(action_slot_link.is_reset_animation):
 				ret["is_reset_animation"] = True
 			elif(action_slot_link.reset_animation):
-				if(reset_animation_id := context.serialize_resource(ret, action_slot_link.reset_animation)):
-					ret["reset_animation"] = reset_animation_id
+				ret["reset_animation"] = context.serialize_resource(ret, action_slot_link.reset_animation)
 		context.add_task(STF_TaskSteps.AFTER_ANIMATION, _handle_reset_animation)
 
 		return ret, blender_animation.stf_info.stf_id
@@ -216,6 +215,8 @@ def __serialize_subtracks(context: STF_ExportContext, blender_animation: bpy.typ
 					stf_keyframe.append("quadratic")
 				elif(keyframe.interpolation == "CUBIC"):
 					stf_keyframe.append("cubic")
+				else:
+					context.report(STFReport("Unsupported interpolation type: " + str(keyframe.interpolation), STFReportSeverity.Warn, blender_animation.stf_info.stf_id, _stf_type, blender_animation))
 
 				if(left_tangent):
 					stf_keyframe = stf_keyframe + left_tangent

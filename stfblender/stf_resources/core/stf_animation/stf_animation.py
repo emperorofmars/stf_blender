@@ -15,7 +15,7 @@ class STF_Animation(bpy.types.PropertyGroup):
 	exclude: bpy.props.BoolProperty(name="Exclude from STF export", default=False, options=set()) # type: ignore
 	fps_override: bpy.props.BoolProperty(name="FPS Override", default=False, options=set()) # type: ignore
 	fps: bpy.props.FloatProperty(name="FPS", default=30, options=set()) # type: ignore
-	is_baked_from: bpy.props.PointerProperty(name="Is Baked From", type=bpy.types.Action) # type: ignore # todo poll
+	is_baked_from: bpy.props.PointerProperty(name="Is Baked From", type=bpy.types.Action) # type: ignore
 	constraint_bake: bpy.props.EnumProperty(name="Constraint-Baking", items=(("auto", "Automatic", ""), ("bake", "Bake", ""), ("nobake", "Don't Bake", "")), default="auto") # type: ignore
 
 

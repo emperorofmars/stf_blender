@@ -39,7 +39,7 @@ class AVA_Expression(bpy.types.PropertyGroup):
 	expression: bpy.props.EnumProperty(name="Expression", items=expression_values, description="The semantic meaning of the mapped animation", options=set()) # type: ignore
 	custom_expression: bpy.props.StringProperty(name="Custom Expression", options=set()) # type: ignore
 
-	animation: bpy.props.PointerProperty(type=bpy.types.Action, name="Animation", description="The animation which represents the expression", options=set(), poll=poll_valid_animations) # type: ignore # todo select only actions with a valid slot-link setup
+	animation: bpy.props.PointerProperty(type=bpy.types.Action, name="Animation", description="The animation which represents the expression", options=set(), poll=poll_valid_animations) # type: ignore
 
 	use_blendshape_fallback: bpy.props.BoolProperty(name="Provide Blendshape Only Fallback", default=False, description="Some targets like VRM have a very limited system for avatar expressions. Provide a blendshape-only pose for these applications", options=set()) # type: ignore
 	blendshape_fallback: bpy.props.PointerProperty(type=STFDataResourceReference, options=set()) # type: ignore

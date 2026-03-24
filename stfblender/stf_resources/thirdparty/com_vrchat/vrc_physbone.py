@@ -15,7 +15,6 @@ from ....common.blender_grr.stf_node_path_component_selector import NodePathComp
 _stf_type = "com.vrchat.physbone"
 _blender_property_name = "vrc_physbone"
 
-# todo: this is quite jank, make this able to select the object/armature->bone/component etc..
 class VRC_Physbone(STF_ComponentResourceBase):
 	ignores: bpy.props.CollectionProperty(type=NodePathSelector, name="Ignored Children", options=set()) # type: ignore
 	colliders: bpy.props.CollectionProperty(type=NodePathComponentSelector, name="Colliders", options=set()) # type: ignore

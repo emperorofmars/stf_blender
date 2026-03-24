@@ -105,7 +105,7 @@ def _stf_export(context: STF_ExportContext, blender_object: bpy.types.Object, co
 				case "OBJECT":
 					pass
 				case "BONE":
-					# TODO make this more generic
+					# This path works like animation paths
 					json_resource["parent_binding"] = [register_exported_resource(json_resource, blender_object.parent.stf_info.stf_id), "instance", register_exported_resource(json_resource, blender_object.parent.data.bones[blender_object.parent_bone].stf_info.stf_id)]
 				case _:
 					context.report(STFReport("Unsupported object parent_type: " + str(blender_object.parent_type), STFReportSeverity.FatalError, blender_object.stf_info.stf_id, json_resource.get("type"), blender_object))

@@ -58,7 +58,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	if(not blender_object or type(blender_object) is not bpy.types.Object):
 		context.report(STFReport("Failed to import light", STFReportSeverity.Error, stf_id, _stf_type, context_object))
 
-	# todo figure out energy conversion
+	# todo figure out energy conversion properly
 	if("brightness" in json_resource): blender_light.energy = json_resource["brightness"]
 	if("color" in json_resource): blender_light.color = tuple(json_resource["color"])
 	if("temperature" in json_resource): blender_light.temperature = json_resource["temperature"]

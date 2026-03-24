@@ -211,7 +211,7 @@ class STFMaterialSpatialPanel(bpy.types.Panel):
 			prop: STF_Material_Property = context.material.stf_material.properties[context.material.stf_material.active_property_index]
 			property_type_row = box.row()
 			if(not prop.property_type or prop.property_type.strip() == ""): property_type_row.alert = True
-			property_type_row.prop(prop, "property_type", icon="WARNING_LARGE" if not prop.property_type or prop.property_type.strip() == "" else "NONE") # TODO handle understood property types
+			property_type_row.prop(prop, "property_type", icon="WARNING_LARGE" if not prop.property_type or prop.property_type.strip() == "" else "NONE")
 			box.prop(prop, "multi_value")
 
 			# Draw property value(s)

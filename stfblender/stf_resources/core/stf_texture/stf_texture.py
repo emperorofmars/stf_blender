@@ -17,7 +17,7 @@ class STF_Texture(STF_ComponentResourceBase):
 	downscale_priority: bpy.props.IntProperty(name="Downscale Priority", default=0, min=-1, options=set()) # type: ignore
 	quality: bpy.props.FloatProperty(name="Quality", subtype="FACTOR", default=1, min=0, max=1, options=set()) # type: ignore
 	mipmaps: bpy.props.BoolProperty(name="Mipmaps", default=True, options=set()) # type: ignore
-	# TODO much more
+	# TODO more gpu texture relevant properties
 
 
 def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: STF_Texture):

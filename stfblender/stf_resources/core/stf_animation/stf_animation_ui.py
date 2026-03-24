@@ -71,7 +71,6 @@ class STFAnimationSpatialPanel(bpy.types.Panel):
 			layout.prop(context.active_action.stf_animation, "constraint_bake")
 			if(context.active_action.stf_animation.constraint_bake != "nobake"):
 				layout.operator(STFBakeAnimationOperator.bl_idname)
-				# todo list baked actions
 
 		layout.separator(factor=2, type="LINE")
 

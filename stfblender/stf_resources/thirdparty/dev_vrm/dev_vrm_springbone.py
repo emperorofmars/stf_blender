@@ -15,7 +15,6 @@ from ....common.blender_grr.stf_node_path_component_selector import NodePathComp
 _stf_type = "dev.vrm.springbone"
 _blender_property_name = "dev_vrm_springbone"
 
-# todo: this is quite jank, make this able to select the object/armature->bone/component etc..
 class VRM_Springbone(STF_ComponentResourceBase):
 	stiffness: bpy.props.FloatProperty(default=1, min=0, soft_max=4, precision=2, name="Stiffness Force", description="The resilience of the swaying object (the power of returning to the initial pose)") # type: ignore
 	gravityPower: bpy.props.FloatProperty(min=0, soft_max=1, precision=2, name="Gravity Power", description="The strength of gravity") # type: ignore

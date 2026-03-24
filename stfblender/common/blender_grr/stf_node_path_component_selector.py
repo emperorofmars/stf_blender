@@ -33,7 +33,7 @@ def resolve_node_path_component_selector(nps: NodePathComponentSelector) -> bpy.
 
 
 def validate_node_path_component_selector(nps: NodePathComponentSelector) -> bool:
-	return resolve_node_path_component_selector(nps) != None
+	return nps and resolve_node_path_component_selector(nps) != None
 
 
 def node_path_component_selector_to_stf(context: STF_ExportContext, nps: NodePathComponentSelector, json_resource: dict[str, Any]) -> Sequence:
@@ -49,3 +49,6 @@ def node_path_component_selector_from_stf(context: STF_ImportContext, json_resou
 		if(len(node_path) > idx + 1):
 			node_path_selector_from_stf(context, json_resource, node_path[0 : idx], nps.target)
 			nps.target_component = get_resource_id( json_resource, node_path[idx + 1])
+
+
+
