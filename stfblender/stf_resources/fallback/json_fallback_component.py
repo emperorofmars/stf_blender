@@ -62,7 +62,6 @@ def _stf_export(context: STF_ExportContext, component: JsonFallbackComponent, co
 		def _handle():
 			for referenced_resource in component.referenced_resources:
 				if(blender_resource := resolve_blender_grr(referenced_resource)):
-					print("Exporting From Fallback")
 					context.serialize_resource(ret, blender_resource)
 
 		context.add_task(STF_TaskSteps.FINALE, _handle)
