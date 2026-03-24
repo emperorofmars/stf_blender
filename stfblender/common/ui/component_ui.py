@@ -9,10 +9,8 @@ from ..base.stf_registry import find_component_handler, get_all_component_handle
 from ...stf_resources.fallback.json_fallback_component import Handler_JsonFallbackComponent
 
 
-class STFDrawComponentList(bpy.types.UIList):
+class STFDrawComponentList:
 	"""List of STF components"""
-	bl_idname = "COLLECTION_UL_stf_component_list"
-
 	sort_reverse: bpy.props.BoolProperty(default=False, name="Reverse") # type: ignore
 	sort_by: bpy.props.EnumProperty(items=[("original", "Added Order", "", "SORTSIZE", 0),("stf_type", "Component Type", "", "GROUP", 1),("stf_name", "Name", "", "FILE_TEXT", 2)], name="Sort by")# type: ignore
 	filter_name: bpy.props.StringProperty(name="Filter Name")# type: ignore
@@ -104,6 +102,12 @@ class STFDrawComponentList(bpy.types.UIList):
 		row_r.alignment = "RIGHT"
 		row_r.label(text=item.stf_id[:8] + "..")
 		row_r.operator(CopyToClipboard.bl_idname, text="", icon="DUPLICATE", emboss=False).text = item.stf_id
+
+# Both lists can be on screen at the same time. They need different 'bl_idname' properties to have separate size and scroll values.
+class STFDrawBlenderComponentList(STFDrawComponentList, bpy.types.UIList):
+	bl_idname = "COLLECTION_UL_stf_components_blender_list"
+class STFDrawDataComponentList(STFDrawComponentList, bpy.types.UIList):
+	bl_idname = "COLLECTION_UL_stf_components_data_list"
 
 
 class STFDrawInstanceComponentList(bpy.types.UIList):
@@ -290,7 +294,7 @@ def draw_components_ui(
 		row.label(text="Please select a component type")
 
 	row = layout.row(align=True)
-	row.template_list(STFDrawComponentList.bl_idname, "", ref_holder, "stf_components", ref_holder, "stf_active_component_index")
+	row.template_list(STFDrawDataComponentList.bl_idname if is_data_resource_component else STFDrawBlenderComponentList.bl_idname, "", ref_holder, "stf_components", ref_holder, "stf_active_component_index")
 	if(len(ref_holder.stf_components) > ref_holder.stf_active_component_index):
 		component_ref = ref_holder.stf_components[ref_holder.stf_active_component_index]
 
