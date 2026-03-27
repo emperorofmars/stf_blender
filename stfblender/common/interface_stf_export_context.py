@@ -17,28 +17,34 @@ class STF_ExportContext:
 		pass
 
 	def serialize_resource(self, json_parent: dict, application_object: Any, context_object: Any = None, stf_category: str | None = None, export_fail_severity: STFReportSeverity = STFReportSeverity.Error) -> int | None:
+		"""Export a Blender 'thing' to a STF resource. The exported resources ID will be written into the json_parent's 'referenced_resources' array. Returns the index of the ID in the 'referenced_resources' array."""
 		pass
 
 	def _serialize_resource(self, application_object: Any, context_object: Any = None, stf_category: str | None = None, export_fail_severity: STFReportSeverity = STFReportSeverity.Error) -> str | None:
+		"""Export a Blender 'thing' to a STF resource. Returns the exported resources ID."""
 		pass
 
 	def serialize_buffer(self, json_parent: dict, data: bytes, buffer_id: str | None = None) -> str:
+		"""Export 'bytes' to a STF buffer. The exported buffers ID will be written into the json_parent's 'referenced_buffers' array. Returns the index of the ID in the 'referenced_buffers' array."""
 		pass
 
 	def _serialize_buffer(self, data: bytes, buffer_id: str | None = None) -> str:
+		"""Export 'bytes' to a STF buffer. Returns the exported buffers ID."""
 		pass
 
 	def resolve_application_property_path(self, application_object: Any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart | None:
 		pass
 
 	def add_task(self, step: int | STF_TaskSteps, task: Callable):
-		"""Will be executed after all other resources have been exported"""
+		"""Will be executed after all other resources have been exported."""
 		pass
 
 	def add_cleanup_task(self, task: Callable):
+		"""Add a task which will be executed after the exported concluded."""
 		pass
 
 	def register_trash_object(self, trash: bpy.types.Object):
+		"""Register a Blender Object for deletion after the export concluded"""
 		pass
 
 	def get_root(self) -> bpy.types.Collection:

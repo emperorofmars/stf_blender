@@ -80,8 +80,6 @@ class STF_ExportContext(ISTF_ExportContext):
 			return None
 
 	def _serialize_resource(self, application_object: Any, context_object: Any = None, stf_category: str | None = None, export_fail_severity: STFReportSeverity = STFReportSeverity.Error) -> str | None:
-		"""Run all logic to serialize an application resource. If it already has been serialized, return the existing ID."""
-
 		if(application_object is None): return None
 		if(existing_id := self.get_resource_id(application_object)): return existing_id
 
