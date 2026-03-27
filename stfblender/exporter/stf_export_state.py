@@ -144,7 +144,7 @@ class STF_ExportState(STF_State_Base):
 			raise Exception("Invalid root ID")
 		ret = STF_JsonDefinition()
 		ret.stf.version_major = 0
-		ret.stf.version_minor = 0
+		ret.stf.version_minor = 1
 		ret.stf.root = self._root_id
 		ret.stf.generator = "stf_blender"
 		ret.stf.generator_version = get_stf_version()
