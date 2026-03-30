@@ -22,7 +22,7 @@ def draw_node_path_selector(layout: bpy.types.UILayout, nps: NodePathSelector, t
 
 def resolve_node_path_selector(nps: NodePathSelector) -> bpy.types.Object | bpy.types.Bone | None:
 	if(not nps): return None
-	if(type(nps.id_data) == bpy.types.Object and nps.target_object):
+	if(type(nps.id_data) != bpy.types.Armature and nps.target_object):
 		if(type(nps.target_object.data) == bpy.types.Armature):
 			if(not nps.target_bone):
 				return nps.target_object
@@ -44,7 +44,7 @@ def validate_node_path_selector(nps: NodePathSelector) -> bool:
 
 def node_path_selector_to_string(nps: NodePathSelector) -> str:
 	if(not nps): return "Invalid"
-	if(type(nps.id_data) == bpy.types.Object and nps.target_object):
+	if(type(nps.id_data) != bpy.types.Armature and nps.target_object):
 		if(type(nps.target_object.data) == bpy.types.Armature):
 			if(not nps.target_bone):
 				return nps.target_object.name
@@ -61,7 +61,7 @@ def node_path_selector_to_string(nps: NodePathSelector) -> str:
 
 
 def node_path_selector_to_stf(context: STF_ExportContext, nps: NodePathSelector, json_resource: dict[str, Any]) -> Sequence[str]:
-	if(type(nps.id_data) == bpy.types.Object and nps.target_object):
+	if(type(nps.id_data) != bpy.types.Armature and nps.target_object):
 		if(type(nps.target_object.data) == bpy.types.Armature):
 			if(not nps.target_bone):
 				return [context.serialize_resource(json_resource, nps.target_object, stf_category=STF_Category.NODE)]
@@ -78,7 +78,7 @@ def node_path_selector_to_stf(context: STF_ExportContext, nps: NodePathSelector,
 
 
 def node_path_selector_from_stf(context: STF_ImportContext, json_resource: dict[str, Any], node_path: Sequence[str], nps: NodePathSelector):
-	if(type(nps.id_data) == bpy.types.Object):
+	if(type(nps.id_data) != bpy.types.Armature):
 		if(len(node_path) == 1):
 			nps.target_object = context.import_resource(json_resource, node_path[0], STF_Category.NODE)
 		if(len(node_path) == 3 and node_path[1] == "instance"):

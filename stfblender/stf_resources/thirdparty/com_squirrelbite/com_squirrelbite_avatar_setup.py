@@ -1,7 +1,7 @@
 import bpy
 from typing import Any
 
-from ....common import STF_ExportContext, STF_ImportContext, STFReportSeverity, STFReport, STF_Category
+from ....common import STF_ExportContext, STF_ImportContext, STFReportSeverity, STFReport, STF_Category, STF_TaskSteps
 from ....common.resource.component import STF_ComponentResourceBase, STF_Handler_Component, STF_Component_Ref
 from ....common.resource.component.component_utils import add_component, export_component_base, import_component_base
 from ....common.helpers import draw_list, poll_valid_animations
@@ -15,6 +15,13 @@ _blender_property_name = "com_squirrelbite_avatar_setup"
 class Toggle(bpy.types.PropertyGroup):
 	animation_on: bpy.props.PointerProperty(name="On", type=bpy.types.Action, options=set(), poll=poll_valid_animations) # type: ignore
 	animation_off: bpy.props.PointerProperty(name="Off", type=bpy.types.Action, options=set(), poll=poll_valid_animations) # type: ignore
+
+
+class GrabToggle(bpy.types.PropertyGroup):
+	toggle: bpy.props.PointerProperty(name="Toggle", type=Toggle, options=set()) # type: ignore
+	grab_collider: bpy.props.PointerProperty(name="Contact", type=NodePathComponentSelector, options=set()) # type: ignore
+	hand_filter: bpy.props.EnumProperty(name="Filter Hands", items=(("left", "Left Only", ""), ("right", "Right Only", ""), ("both", "Both Hands", "")), default="both", options=set()) # type: ignore
+
 
 class PersistentPuppet(bpy.types.PropertyGroup):
 	type: bpy.props.EnumProperty(name="Type", items=(("1d", "1D", ""), ("2d", "2D", ""))) # type: ignore
@@ -30,6 +37,7 @@ class Squirrelbite_Avatar_Setup(STF_ComponentResourceBase):
 
 	puppets: bpy.props.CollectionProperty(name="Puppets", type=STFDataResourceReference, options=set()) # type: ignore
 	toggles: bpy.props.CollectionProperty(name="Toggles", type=Toggle, options=set()) # type: ignore
+	grab_toggles: bpy.props.CollectionProperty(name="Grab Toggles", type=GrabToggle, options=set()) # type: ignore
 
 	breathing_normal: bpy.props.PointerProperty(name="Breathing Normal Animation", type=bpy.types.Action, options=set(), poll=poll_valid_animations) # type: ignore
 	breathing_intense: bpy.props.PointerProperty(name="Breathing Intense Animation", type=bpy.types.Action, options=set(), poll=poll_valid_animations) # type: ignore
@@ -39,12 +47,23 @@ class Squirrelbite_Avatar_Setup(STF_ComponentResourceBase):
 
 
 def _draw_func_toggle(layout: bpy.types.UILayout, element: Any) -> bpy.types.UILayout:
-	box_inner = layout.box()
-	row = box_inner.row(align=True)
+	box = layout.box()
+	row = box.row(align=True)
 	col = row.column(align=True)
 	col.prop(element, "name")
 	col.prop(element, "animation_on")
 	col.prop(element, "animation_off")
+	return row
+
+def _draw_func_grab_toggle(layout: bpy.types.UILayout, element: Any) -> bpy.types.UILayout:
+	box = layout.box()
+	row = box.row(align=True)
+	col = row.column(align=True)
+	col.prop(element, "name")
+	col.prop(element, "hand_filter")
+	draw_node_path_component_selector(col.box().column(align=True), element.grab_collider)
+	col.prop(element.toggle, "animation_on")
+	col.prop(element.toggle, "animation_off")
 	return row
 
 def _draw_func_puppet(layout: bpy.types.UILayout, element: Any) -> bpy.types.UILayout:
@@ -98,6 +117,10 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 	header.label(text="Toggles (" + str(len(component.toggles)) + ")")
 	if(body): draw_list(body, "collection", component, "toggles", _blender_property_name, _draw_func_toggle)
 
+	header, body = layout.panel("com.squirrelbite_avatar_setup_grab_toggles", default_closed = True)
+	header.label(text="Grab Toggles (" + str(len(component.grab_toggles)) + ")")
+	if(body): draw_list(body, "collection", component, "grab_toggles", _blender_property_name, _draw_func_grab_toggle)
+
 	header, body = layout.panel("com.squirrelbite_avatar_setup_puppets", default_closed = True)
 	header.label(text="Puppets (" + str(len(component.puppets)) + ")")
 	if(body): draw_list(body, "collection", component, "puppets", _blender_property_name, _draw_func_blendtree)
@@ -121,59 +144,72 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	component: Squirrelbite_Avatar_Setup = component
 	import_component_base(context, component, json_resource, _blender_property_name, context_object)
 
-	# toggles pre
-	for toggle_json in json_resource.get("toggles_pre", []):
-		toggle: Toggle = component.toggles_pre.add()
-		toggle.name = toggle_json.get("name", "")
-		toggle.animation_on = context.import_resource(json_resource, toggle_json.get("on"))
-		toggle.animation_off = context.import_resource(json_resource, toggle_json.get("off"))
+	def _handle():
+		# toggles pre
+		for toggle_json in json_resource.get("toggles_pre", []):
+			toggle: Toggle = component.toggles_pre.add()
+			toggle.name = toggle_json.get("name", "")
+			toggle.animation_on = context.import_resource(json_resource, toggle_json.get("on"))
+			toggle.animation_off = context.import_resource(json_resource, toggle_json.get("off"))
 
-	# puppets pre
-	for puppet_json in json_resource.get("puppets_pre", []):
-		puppet: PersistentPuppet = component.puppets_pre.add()
-		puppet.type = puppet_json["puppet_type"]
-		puppet.name = puppet_json.get("name", "")
-		puppet.property_enabled = puppet_json.get("property_enabled")
-		puppet.property_x = puppet_json.get("property_x")
-		if(puppet.type == "2d"):
-			puppet.property_y = puppet_json.get("property_x")
-
-		if(blendtree_resource := context.import_resource(json_resource, puppet_json["blendtree"], STF_Category.DATA)):
-			puppet.blendtree.collection = context.get_root_collection()
-			puppet.blendtree.stf_data_resource_id = blendtree_resource.stf_id
-		else:
-			context.report(STFReport("module: %s stf_id: %s, context-object: %s" % (_stf_type, stf_id, context_object), STFReportSeverity.Warn, stf_id, _stf_type, context_object))
-
-	# toggles
-	for toggle_json in json_resource.get("toggles", []):
-		toggle: Toggle = component.toggles.add()
-		toggle.name = toggle_json.get("name", "")
-		toggle.animation_on = context.import_resource(json_resource, toggle_json.get("on"))
-		toggle.animation_off = context.import_resource(json_resource, toggle_json.get("off"))
-
-	# puppets
-	for puppet_json in json_resource.get("puppets", []):
-		if(blendtree_resource := context.import_resource(json_resource, puppet_json["blendtree"], STF_Category.DATA)):
-			puppet: STFDataResourceReference = component.puppets.add()
+		# puppets pre
+		for puppet_json in json_resource.get("puppets_pre", []):
+			puppet: PersistentPuppet = component.puppets_pre.add()
+			puppet.type = puppet_json["puppet_type"]
 			puppet.name = puppet_json.get("name", "")
-			puppet.collection = context.get_root_collection()
-			puppet.stf_data_resource_id = blendtree_resource.stf_id
-		else:
-			context.report(STFReport("module: %s stf_id: %s, context-object: %s" % (_stf_type, stf_id, context_object), STFReportSeverity.Warn, stf_id, _stf_type, context_object))
+			puppet.property_enabled = puppet_json.get("property_enabled")
+			puppet.property_x = puppet_json.get("property_x")
+			if(puppet.type == "2d"):
+				puppet.property_y = puppet_json.get("property_x")
 
-	# breathing
-	if("breathing" in json_resource):
-		if("normal" in json_resource["breathing"]):
-			component.breathing_normal = context.import_resource(json_resource, json_resource["breathing"]["normal"])
-		if("intense" in json_resource["breathing"]):
-			component.breathing_intense = context.import_resource(json_resource, json_resource["breathing"]["intense"])
+			if(blendtree_resource := context.import_resource(json_resource, puppet_json["blendtree"], STF_Category.DATA)):
+				puppet.blendtree.collection = context.get_root_collection()
+				puppet.blendtree.stf_data_resource_id = blendtree_resource.stf_id
+			else:
+				context.report(STFReport("module: %s stf_id: %s, context-object: %s" % (_stf_type, stf_id, context_object), STFReportSeverity.Warn, stf_id, _stf_type, context_object))
 
-	# additive
-	if("additive" in json_resource):
-		if("idle" in json_resource["additive"]):
-			component.additive_idle = context.import_resource(json_resource, json_resource["additive"]["idle"])
-		if("excited" in json_resource["additive"]):
-			component.additive_excited = context.import_resource(json_resource, json_resource["additive"]["excited"])
+		# toggles
+		for toggle_json in json_resource.get("toggles", []):
+			toggle: Toggle = component.toggles.add()
+			toggle.name = toggle_json.get("name", "")
+			toggle.animation_on = context.import_resource(json_resource, toggle_json.get("on"))
+			toggle.animation_off = context.import_resource(json_resource, toggle_json.get("off"))
+
+		# grab toggles
+		for toggle_json in json_resource.get("grab_toggles", []):
+			toggle: GrabToggle = component.grab_toggles.add()
+			toggle.name = toggle_json.get("name", "")
+			toggle.hand_filter = toggle_json.get("hand", "both")
+			node_path_component_selector_from_stf(context, json_resource, toggle_json.get("collider"), toggle.grab_collider)
+			toggle.toggle.animation_on = context.import_resource(json_resource, toggle_json.get("on"))
+			toggle.toggle.animation_off = context.import_resource(json_resource, toggle_json.get("off"))
+
+
+		# puppets
+		for puppet_json in json_resource.get("puppets", []):
+			if(blendtree_resource := context.import_resource(json_resource, puppet_json["blendtree"], STF_Category.DATA)):
+				puppet: STFDataResourceReference = component.puppets.add()
+				puppet.name = puppet_json.get("name", "")
+				puppet.collection = context.get_root_collection()
+				puppet.stf_data_resource_id = blendtree_resource.stf_id
+			else:
+				context.report(STFReport("module: %s stf_id: %s, context-object: %s" % (_stf_type, stf_id, context_object), STFReportSeverity.Warn, stf_id, _stf_type, context_object))
+
+		# breathing
+		if("breathing" in json_resource):
+			if("normal" in json_resource["breathing"]):
+				component.breathing_normal = context.import_resource(json_resource, json_resource["breathing"]["normal"])
+			if("intense" in json_resource["breathing"]):
+				component.breathing_intense = context.import_resource(json_resource, json_resource["breathing"]["intense"])
+
+		# additive
+		if("additive" in json_resource):
+			if("idle" in json_resource["additive"]):
+				component.additive_idle = context.import_resource(json_resource, json_resource["additive"]["idle"])
+			if("excited" in json_resource["additive"]):
+				component.additive_excited = context.import_resource(json_resource, json_resource["additive"]["excited"])
+
+	context.add_task(STF_TaskSteps.AFTER_ANIMATION, _handle)
 
 	return component
 
@@ -181,87 +217,105 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 def _stf_export(context: STF_ExportContext, component: Squirrelbite_Avatar_Setup, context_object: Any) -> tuple[dict, str] | STFReport:
 	ret = export_component_base(context, _stf_type, component, _blender_property_name, context_object)
 
-	# toggles pre
-	toggles_pre = []
-	ret["toggles_pre"] = toggles_pre
-	for toggle in component.toggles_pre:
-		toggle: Toggle = toggle
-		if(not toggle.animation_off and not toggle.animation_on):
-			continue
-		toggles_pre.append({
-			"name": toggle.name,
-			"on": context.serialize_resource(ret, toggle.animation_on),
-			"off": context.serialize_resource(ret, toggle.animation_off),
-		})
+	def _handle():
+		# toggles pre
+		toggles_pre = []
+		ret["toggles_pre"] = toggles_pre
+		for toggle in component.toggles_pre:
+			toggle: Toggle = toggle
+			if(not toggle.animation_off and not toggle.animation_on):
+				continue
+			toggles_pre.append({
+				"name": toggle.name,
+				"on": context.serialize_resource(ret, toggle.animation_on),
+				"off": context.serialize_resource(ret, toggle.animation_off),
+			})
 
-	# puppets pre
-	puppets_pre = []
-	ret["puppets_pre"] = puppets_pre
-	for puppet in component.puppets_pre:
-		puppet: PersistentPuppet = puppet
-		if(not puppet.blendtree):
-			continue
-		puppet_json = {
-			"name": puppet.name,
-			"puppet_type": puppet.type,
-			"property_enabled": puppet.property_enabled,
-			"property_x": puppet.property_x
-		}
-		if(puppet.type == "2d"):
-			puppet_json["property_y"] = puppet.property_y
+		# puppets pre
+		puppets_pre = []
+		ret["puppets_pre"] = puppets_pre
+		for puppet in component.puppets_pre:
+			puppet: PersistentPuppet = puppet
+			if(not puppet.blendtree):
+				continue
+			puppet_json = {
+				"name": puppet.name,
+				"puppet_type": puppet.type,
+				"property_enabled": puppet.property_enabled,
+				"property_x": puppet.property_x
+			}
+			if(puppet.type == "2d"):
+				puppet_json["property_y"] = puppet.property_y
 
-		if(puppet_ret := resolve_stf_data_resource_reference(puppet.blendtree)):
-			puppet_ref, puppet_resource = puppet_ret
-			if(puppet_ref.stf_type == "stfexp.animation_blendtree"):
-				puppet_json["blendtree"] = context.serialize_resource(ret, puppet_resource)
-				puppets_pre.append(puppet_json)
+			if(puppet_ret := resolve_stf_data_resource_reference(puppet.blendtree)):
+				puppet_ref, puppet_resource = puppet_ret
+				if(puppet_ref.stf_type == "stfexp.animation_blendtree"):
+					puppet_json["blendtree"] = context.serialize_resource(ret, puppet_resource)
+					puppets_pre.append(puppet_json)
+				else:
+					context.report(STFReport("module: %s stf_id: %s, context-object: %s :: blendtree invalid resource type" % (_stf_type, component.stf_id, context_object), STFReportSeverity.Warn, component.stf_id, _stf_type, context_object))
 			else:
-				context.report(STFReport("module: %s stf_id: %s, context-object: %s :: blendtree invalid resource type" % (_stf_type, component.stf_id, context_object), STFReportSeverity.Warn, component.stf_id, _stf_type, context_object))
-		else:
-			context.report(STFReport("module: %s stf_id: %s, context-object: %s :: failed to resolve blendtree resource" % (_stf_type, component.stf_id, context_object), STFReportSeverity.Warn, component.stf_id, _stf_type, context_object))
+				context.report(STFReport("module: %s stf_id: %s, context-object: %s :: failed to resolve blendtree resource" % (_stf_type, component.stf_id, context_object), STFReportSeverity.Warn, component.stf_id, _stf_type, context_object))
 
-	# toggles
-	toggles = []
-	ret["toggles"] = toggles
-	for toggle in component.toggles:
-		toggle: Toggle = toggle
-		if(not toggle.animation_off and not toggle.animation_on):
-			continue
-		toggles.append({
-			"name": toggle.name,
-			"on": context.serialize_resource(ret, toggle.animation_on),
-			"off": context.serialize_resource(ret, toggle.animation_off),
-		})
+		# toggles
+		toggles = []
+		ret["toggles"] = toggles
+		for toggle in component.toggles:
+			toggle: Toggle = toggle
+			if(not toggle.animation_off and not toggle.animation_on):
+				continue
+			toggles.append({
+				"name": toggle.name,
+				"on": context.serialize_resource(ret, toggle.animation_on),
+				"off": context.serialize_resource(ret, toggle.animation_off),
+			})
 
-	# puppets
-	puppets = []
-	ret["puppets"] = puppets
-	for puppet in component.puppets:
-		if(puppet_ret := resolve_stf_data_resource_reference(puppet)):
-			puppet_ref, puppet_resource = puppet_ret
-			if(puppet_ref.stf_type == "stfexp.animation_blendtree"):
-				puppets.append({
-					"name": puppet.name,
-					"blendtree": context.serialize_resource(ret, puppet_resource)
-				})
-			else:
-				context.report(STFReport("module: %s stf_id: %s, context-object: %s :: blendtree invalid resource type" % (_stf_type, component.stf_id, context_object), STFReportSeverity.Warn, component.stf_id, _stf_type, context_object))
+		# grab toggles
+		grab_toggles = []
+		ret["grab_toggles"] = grab_toggles
+		for toggle in component.grab_toggles:
+			toggle: GrabToggle = toggle
+			if(not toggle.toggle.animation_off and not toggle.toggle.animation_on):
+				continue
+			grab_toggles.append({
+				"name": toggle.name,
+				"hand": toggle.hand_filter,
+				"collider": node_path_component_selector_to_stf(context, toggle.grab_collider, ret),
+				"on": context.serialize_resource(ret, toggle.toggle.animation_on, stf_category=STF_Category.DATA),
+				"off": context.serialize_resource(ret, toggle.toggle.animation_off, stf_category=STF_Category.DATA),
+			})
 
-	# breathing
-	if(component.breathing_intense or component.breathing_normal):
-		ret["breathing"] = {}
-		if(component.breathing_normal):
-			ret["breathing"]["normal"] = context.serialize_resource(ret, component.breathing_normal)
-		if(component.breathing_intense):
-			ret["breathing"]["intense"] = context.serialize_resource(ret, component.breathing_intense)
+		# puppets
+		puppets = []
+		ret["puppets"] = puppets
+		for puppet in component.puppets:
+			if(puppet_ret := resolve_stf_data_resource_reference(puppet)):
+				puppet_ref, puppet_resource = puppet_ret
+				if(puppet_ref.stf_type == "stfexp.animation_blendtree"):
+					puppets.append({
+						"name": puppet.name,
+						"blendtree": context.serialize_resource(ret, puppet_resource)
+					})
+				else:
+					context.report(STFReport("module: %s stf_id: %s, context-object: %s :: blendtree invalid resource type" % (_stf_type, component.stf_id, context_object), STFReportSeverity.Warn, component.stf_id, _stf_type, context_object))
 
-	# additive
-	if(component.additive_idle or component.additive_excited):
-		ret["additive"] = {}
-		if(component.additive_idle):
-			ret["additive"]["idle"] = context.serialize_resource(ret, component.additive_idle)
-		if(component.additive_excited):
-			ret["additive"]["excited"] = context.serialize_resource(ret, component.additive_excited)
+		# breathing
+		if(component.breathing_intense or component.breathing_normal):
+			ret["breathing"] = {}
+			if(component.breathing_normal):
+				ret["breathing"]["normal"] = context.serialize_resource(ret, component.breathing_normal)
+			if(component.breathing_intense):
+				ret["breathing"]["intense"] = context.serialize_resource(ret, component.breathing_intense)
+
+		# additive
+		if(component.additive_idle or component.additive_excited):
+			ret["additive"] = {}
+			if(component.additive_idle):
+				ret["additive"]["idle"] = context.serialize_resource(ret, component.additive_idle)
+			if(component.additive_excited):
+				ret["additive"]["excited"] = context.serialize_resource(ret, component.additive_excited)
+
+	context.add_task(STF_TaskSteps.AFTER_ANIMATION, _handle)
 
 	return ret, component.stf_id
 

@@ -20,6 +20,8 @@ def draw_node_path_component_selector(layout: bpy.types.UILayout, nps: NodePathC
 		layout.prop_search(nps, "target_component", target.stf_info, "stf_components", icon="ERROR" if not nps.target_component or nps.target_component not in target.stf_info.stf_components else "NONE")
 		if(nps.target_component):
 			draw_component_info(layout, target, target.stf_info, nps.target_component)
+	else:
+		layout.label(text="Invalid target", icon="ERROR")
 
 
 def resolve_node_path_component_selector(nps: NodePathComponentSelector) -> bpy.types.Object | bpy.types.Bone | None:
@@ -44,7 +46,7 @@ def node_path_component_selector_to_stf(context: STF_ExportContext, nps: NodePat
 
 
 def node_path_component_selector_from_stf(context: STF_ImportContext, json_resource: dict[str, Any], node_path: Sequence, nps: NodePathComponentSelector):
-	if("components" in node_path):
+	if(node_path and "components" in node_path):
 		idx = node_path.index("components")
 		if(len(node_path) > idx + 1):
 			node_path_selector_from_stf(context, json_resource, node_path[0 : idx], nps.target)
