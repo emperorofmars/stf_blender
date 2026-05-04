@@ -1,3 +1,5 @@
+# pyright: strict
+
 import io
 import json
 
@@ -40,7 +42,7 @@ class STF_File:
 		json_buffer_len = buffer_utils.parse_uint(buffer, 8)
 
 		# Read the length of all other buffers
-		buffer_lens = []
+		buffer_lens: list[int] = []
 		for buffer_idx in range(0, num_buffers):
 			buffer_lens.append(buffer_utils.parse_uint(buffer, 8))
 

@@ -63,7 +63,7 @@ def export_stf_file(collection: bpy.types.Collection, filepath: str, export_sett
 				bpy.data.objects.remove(trash)
 
 
-class ExportSTF(bpy.types.Operator, ExportHelper):
+class ExportSTF(bpy.types.Operator, ExportHelper): # pyright: ignore[reportIncompatibleMethodOverride]
 	"""Export as STF file (.stf)"""
 	bl_idname = "stf.export"
 	bl_label = "Export STF"
@@ -80,7 +80,7 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 	debug: bpy.props.BoolProperty(name="Export Debug Json File", default="bl_ext.vscode_development" in package_key, description="Useful for inspection the exported file in a text-editor") # type: ignore
 
 
-	def invoke(self, context: bpy.types.Context, event: bpy.types.Event):
+	def invoke(self, context: bpy.types.Context, event: bpy.types.Event) -> set: # pyright: ignore[reportIncompatibleMethodOverride]
 		if(self.scene_collection_as_root):
 			context.scene.stf_collection_selector = None
 		elif(self.current_collection_as_root):
@@ -88,10 +88,10 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 		elif(context.scene.stf_root_collection):
 			context.scene.stf_collection_selector = context.scene.stf_root_collection
 
-		return ExportHelper.invoke(self, context, event)
+		return ExportHelper.invoke(self, context, event) # pyright: ignore[reportReturnType]
 
 
-	def execute(self, context: bpy.types.Context):
+	def execute(self, context: bpy.types.Context) -> set:
 		context.window.cursor_modal_set("WAIT")
 		called_from_collection_exporter = not context.space_data or context.space_data.type != "FILE_BROWSER"
 		try:
@@ -105,7 +105,7 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 			if(not export_filepath.endswith(".stf")):
 				export_filepath += ".stf"
 
-			ret = export_stf_file(collection, export_filepath, self.export_settings, self.debug)
+			ret = export_stf_file(collection, export_filepath, self.export_settings, self.debug) # pyright: ignore[reportArgumentType]
 			if(ret.success):
 				do_report = False
 				if(len(ret.warnings) > 0):
@@ -144,7 +144,7 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 			self.layout.label(text="STF version: " + get_stf_version())
 			self.layout.separator(factor=1, type="SPACE")
 
-		draw_slot_link_warning(self.layout)
+		draw_slot_link_warning(self.layout) # pyright: ignore[reportArgumentType]
 
 		if(not called_from_collection_exporter):
 			self.layout.prop_search(bpy.context.scene, "stf_collection_selector", bpy.data, "collections", text="Root")
@@ -161,7 +161,7 @@ class ExportSTF(bpy.types.Operator, ExportHelper):
 		box = self.layout.box()
 		box.label(text="Asset Meta")
 		if(called_from_collection_exporter):
-			draw_meta_editor(box, context.collection, False)
+			draw_meta_editor(box, context.collection, False) # pyright: ignore[reportArgumentType]
 		else:
 			draw_meta_editor(box, context.scene.stf_collection_selector if context.scene.stf_collection_selector else context.scene.collection, context.scene.stf_collection_selector != context.scene.collection)
 

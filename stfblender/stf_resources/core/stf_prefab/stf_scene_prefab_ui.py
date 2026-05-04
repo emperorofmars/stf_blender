@@ -16,7 +16,7 @@ class STFSetSceneCollectionAsRootOperator(bpy.types.Operator):
 	def poll(cls, context: bpy.types.Context):
 		return hasattr(context, "scene") and context.scene is not None
 
-	def execute(self, context: bpy.types.Context):
+	def execute(self, context: bpy.types.Context) -> set:
 		context.scene.stf_root_collection = None
 		if(not context.scene.collection.stf_info.stf_id):
 			import uuid
@@ -70,4 +70,4 @@ class STFSceneCollectionPanel(bpy.types.Panel):
 		set_stf_component_filter(bpy.types.Collection)
 		self.layout.prop(context.scene.collection, "stf_use_collection_as_prefab")
 
-		draw_prefab_ui(self.layout, context, context.scene.collection, STFSetSceneCollectionAsRootOperator.bl_idname, STFSetSceneCollectionIDOperator.bl_idname, STFAddSceneCollectionComponentOperator.bl_idname, STFRemoveSceneCollectionComponentOperator.bl_idname, STFEditSceneCollectionComponentIdOperator.bl_idname)
+		draw_prefab_ui(self.layout, context, context.scene.collection, STFSetSceneCollectionAsRootOperator.bl_idname, STFSetSceneCollectionIDOperator.bl_idname, STFAddSceneCollectionComponentOperator.bl_idname, STFRemoveSceneCollectionComponentOperator.bl_idname, STFEditSceneCollectionComponentIdOperator.bl_idname) # pyright: ignore[reportArgumentType]

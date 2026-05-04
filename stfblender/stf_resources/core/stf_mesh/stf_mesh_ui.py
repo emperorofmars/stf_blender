@@ -44,13 +44,13 @@ class STFMeshSpatialPanel(bpy.types.Panel):
 		return hasattr(context, "mesh") and context.mesh is not None
 
 	def draw(self, context: bpy.types.Context):
-		layout = self.layout
+		layout: bpy.types.UILayout = self.layout # pyright: ignore[reportAssignmentType]
 		set_stf_component_filter(bpy.types.Mesh)
 
 		if(context.object.find_armature()):
 			t, r, s = context.object.matrix_local.decompose()
 			if(t.length > 0.0001 or abs(r.x) > 0.0001 or abs(r.y) > 0.0001 or abs(r.z) > 0.0001 or abs((r.w - 1)) > 0.0001 or abs(s.x - 1) > 0.0001 or abs(s.y - 1) > 0.0001 or abs(s.z - 1) > 0.0001):
-				text_row = draw_multiline_text(layout, "Warning, this mesh is not aligned with its Armature!\nThis will lead to differing behavior outside of Blender.\nApplying all Transforms for the Mesh and Armature will likely fix this.", width=80, icon="ERROR", alert=True)
+				draw_multiline_text(layout, "Warning, this mesh is not aligned with its Armature!\nThis will lead to differing behavior outside of Blender.\nApplying all Transforms for the Mesh and Armature will likely fix this.", width=80, icon="ERROR", alert=True)
 				layout.separator(factor=2, type="LINE")
 
 		# Set ID

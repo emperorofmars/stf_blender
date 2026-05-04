@@ -136,7 +136,7 @@ def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_o
 
 def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: Any) -> BlenderPropertyPathPart:
 	blender_object = context.get_imported_resource(stf_path[0])
-	if(component_index := get_component_index(application_object, _blender_property_name, blender_object.stf_id)):
+	if(component_index := get_component_index(application_object, _blender_property_name, blender_object.stf_id) is not None):
 		match(stf_path[1]):
 			case "enabled":
 				return BlenderPropertyPathPart("OBJECT", _blender_property_name + "[" + str(component_index) + "].enabled")

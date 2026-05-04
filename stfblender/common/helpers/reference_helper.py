@@ -10,7 +10,7 @@ def register_exported_resource(json_resource: dict, resource_id: str) -> int:
 		else:
 			return json_resource["referenced_resources"].index(resource_id)
 
-def get_resource_id(json_resource: dict, resource_index: int) -> str:
+def get_resource_id(json_resource: dict, resource_index: int) -> str | None:
 	if(type(resource_index) is str): # todo remove this possibility sometime after stf v0.1.x
 		return resource_index
 	if(resource_index is None or "referenced_resources" not in json_resource or len(json_resource["referenced_resources"]) < resource_index):

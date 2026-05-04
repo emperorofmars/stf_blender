@@ -39,4 +39,4 @@ if(__name__ == "__main__"):
 	with open("blender_manifest.toml", "r") as blender_manifest:
 		manifest = blender_manifest.read()
 		with open(os.path.join(args.output_dir, package_name_from_manifest(manifest)), "wb") as package:
-			build_blender_package(manifest, package)
+			build_blender_package(manifest, package) # pyright: ignore[reportArgumentType]

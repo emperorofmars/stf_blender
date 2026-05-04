@@ -25,7 +25,7 @@ def draw_node_path_component_selector(layout: bpy.types.UILayout, nps: NodePathC
 
 
 def resolve_node_path_component_selector(nps: NodePathComponentSelector) -> bpy.types.Object | bpy.types.Bone | None:
-	if(component_holder := resolve_node_path_selector(nps)):
+	if(component_holder := resolve_node_path_selector(nps)): # pyright: ignore[reportArgumentType]
 		if(nps.target_component in component_holder.stf_info.stf_components):
 			component_ref: STF_Component_Ref = component_holder.stf_info.stf_components[nps.target_component]
 			for component in getattr(component_holder, component_ref.blender_property_name):
@@ -38,10 +38,10 @@ def validate_node_path_component_selector(nps: NodePathComponentSelector) -> boo
 	return nps and resolve_node_path_component_selector(nps) != None
 
 
-def node_path_component_selector_to_stf(context: STF_ExportContext, nps: NodePathComponentSelector, json_resource: dict[str, Any]) -> Sequence:
+def node_path_component_selector_to_stf(context: STF_ExportContext, nps: NodePathComponentSelector, json_resource: dict[str, Any]) -> Sequence | None:
 	if(nps.target_component):
 		if(ret := node_path_selector_to_stf(context, nps.target, json_resource)):
-			return ret + ["components", register_exported_resource(json_resource, nps.target_component)]
+			return ret + ["components", register_exported_resource(json_resource, nps.target_component)] # pyright: ignore[reportOperatorIssue]
 	return None
 
 
@@ -51,6 +51,3 @@ def node_path_component_selector_from_stf(context: STF_ImportContext, json_resou
 		if(len(node_path) > idx + 1):
 			node_path_selector_from_stf(context, json_resource, node_path[0 : idx], nps.target)
 			nps.target_component = get_resource_id( json_resource, node_path[idx + 1])
-
-
-

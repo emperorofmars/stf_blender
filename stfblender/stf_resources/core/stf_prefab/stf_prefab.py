@@ -45,7 +45,7 @@ def _stf_export(context: STF_ExportContext, application_object: Any, context_obj
 	}
 
 	for blender_object in collection.all_objects[:]:
-		if(type(blender_object) is bpy.types.Object and blender_object.parent == None):
+		if(type(blender_object) is bpy.types.Object and blender_object.parent is None):
 			root_nodes.append(context.serialize_resource(ret, blender_object, context_object=collection, stf_category="node", export_fail_severity=STFReportSeverity.FatalError))
 
 	def _handle_animations():

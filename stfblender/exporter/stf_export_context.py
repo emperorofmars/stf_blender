@@ -52,7 +52,7 @@ class STF_ExportContext(ISTF_ExportContext):
 				if(selected_handler := self._state.determine_handler(component, "component")):
 					component_ret = selected_handler.export_func(self, component, application_object)
 					if(component_ret and type(component_ret) is not STFReport):
-						component_json_resource, component_id = component_ret
+						component_json_resource, component_id = component_ret # pyright: ignore[reportGeneralTypeIssues]
 						self._state.register_serialized_resource(component, component_json_resource, component_id)
 						json_resource["components"].append(component_id)
 					else:
@@ -87,7 +87,7 @@ class STF_ExportContext(ISTF_ExportContext):
 			handler_ret = selected_handler.export_func(self, application_object, context_object)
 
 			if(handler_ret and type(handler_ret) is not STFReport):
-				json_resource, resource_id = handler_ret
+				json_resource, resource_id = handler_ret # pyright: ignore[reportGeneralTypeIssues]
 				self._state.register_serialized_resource(application_object, json_resource, resource_id)
 
 				if(selected_handler.stf_category not in ["component", "instance"]):
@@ -114,7 +114,7 @@ class STF_ExportContext(ISTF_ExportContext):
 		return None
 
 
-	def serialize_buffer(self, json_parent: dict, data: bytes, buffer_id: str | None = None) -> str:
+	def serialize_buffer(self, json_parent: dict, data: bytes, buffer_id: str | None = None) -> int:
 		if(buffer_id := self._state.serialize_buffer(data, buffer_id)):
 			if("referenced_buffers" not in json_parent):
 				json_parent["referenced_buffers"] = [buffer_id]
@@ -126,7 +126,7 @@ class STF_ExportContext(ISTF_ExportContext):
 				else:
 					return json_parent["referenced_buffers"].index(buffer_id)
 		else:
-			return None
+			raise Exception("Invalid code path!")
 
 	def _serialize_buffer(self, data: bytes, buffer_id: str | None = None) -> str:
 		return self._state.serialize_buffer(data, buffer_id)

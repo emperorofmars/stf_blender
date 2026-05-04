@@ -1,0 +1,40 @@
+
+[project]
+name = "stf_blender"
+license = "MIT AND Apache-2.0"
+dynamic = ["version"]
+dependencies = [
+	"fake-bpy-module",
+	"numpy"
+]
+
+[tool.pyright]
+include = [
+	"."
+]
+exclude = [
+	".venv",
+	".vscode",
+	"packages",
+	"**/__pycache__"
+]
+ignore = [
+	"stfblender/common/interface_stf_*.py"
+]
+defineConstant = { DEBUG = true }
+pythonVersion = "3.13"
+
+useLibraryCodeForTypes = true
+typeCheckingMode = "standard"
+reportInvalidTypeForm = "none"
+reportAttributeAccessIssue = "information"
+reportOptionalMemberAccess = "information"
+
+
+[tool.ruff]
+ignore = [
+	"E701"
+]
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "tab"

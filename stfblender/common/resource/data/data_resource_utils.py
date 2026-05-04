@@ -32,9 +32,9 @@ class STFCreateDataResourceOperator(bpy.types.Operator):
 	stf_type: bpy.props.StringProperty(name="Type") # type: ignore
 	property_name: bpy.props.StringProperty() # type: ignore
 
-	def execute(self, context):
+	def execute(self, context) -> set:
 		import uuid
-		add_resource(context.scene.collection if self.use_scene_collection else context.collection, self.property_name, str(uuid.uuid4()), self.stf_type)
+		add_resource(context.scene.collection if self.use_scene_collection else context.collection, self.property_name, str(uuid.uuid4()), self.stf_type) # pyright: ignore[reportArgumentType]
 		return {"FINISHED"}
 
 
@@ -51,7 +51,7 @@ class STFRemoveDataResourceOperator(bpy.types.Operator):
 	def invoke(self, context, event):
 		return context.window_manager.invoke_confirm(self, event)
 
-	def execute(self, context):
+	def execute(self, context) -> set:
 		collection = context.scene.collection if self.use_scene_collection else context.collection
 		if(hasattr(collection, self.property_name)):
 			resource_type_list = getattr(collection, self.property_name)
@@ -86,7 +86,7 @@ class STFEditDataResourceOperator(bpy.types.Operator):
 
 		return context.window_manager.invoke_props_dialog(self)
 
-	def execute(self, context):
+	def execute(self, context) -> set:
 		if(not self.edit_id):
 			self.report({"ERROR"}, "ID can't be empty!")
 			return {"CANCELLED"}
@@ -116,7 +116,7 @@ class STFEditDataResourceOperator(bpy.types.Operator):
 
 
 	def draw(self, context):
-		layout: bpy.types.UILayout = self.layout
+		layout: bpy.types.UILayout = self.layout # pyright: ignore[reportAssignmentType]
 		layout.prop(self, "edit_id")
 
 
@@ -140,4 +140,3 @@ def export_data_resource_base(stf_context: Any, stf_type: str, resource: STF_Dat
 	ret = { "type": stf_type }
 	if(resource.stf_name): ret["name"] = resource.stf_name
 	return ret
-

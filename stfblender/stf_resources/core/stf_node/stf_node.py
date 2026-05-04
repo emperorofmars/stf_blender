@@ -25,7 +25,7 @@ class STF_Instance(bpy.types.PropertyGroup):
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any | STFReport:
 	if("instance" in json_resource):
-		blender_object: bpy.types.Object = context.import_resource(json_resource, json_resource["instance"], stf_category=STF_Category.INSTANCE)
+		blender_object: bpy.types.Object = context.import_resource(json_resource, json_resource["instance"], stf_category=STF_Category.INSTANCE) # pyright: ignore[reportRedeclaration]
 	else:
 		blender_object: bpy.types.Object = bpy.data.objects.new(json_resource.get("name", "STF Node"), None)
 	context.register_imported_resource(stf_id, blender_object)
@@ -45,7 +45,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 		matrix_local = trs_utils.stf_to_blender_matrix(json_resource["trs"])
 		if(blender_object.parent):
 			if("parent_binding" in json_resource and json_resource["parent_binding"] and len(json_resource["parent_binding"]) == 3):
-				bone: bpy.types.Bone = context.get_imported_resource(get_resource_id(json_resource, json_resource["parent_binding"][2])).get_bone()
+				bone: bpy.types.Bone = context.get_imported_resource(get_resource_id(json_resource, json_resource["parent_binding"][2])).get_bone() # pyright: ignore[reportArgumentType]
 				pose_bone = blender_object.parent.pose.bones[bone.name]
 				blender_object.parent_type = "BONE"
 				blender_object.parent_bone = bone.name
@@ -66,14 +66,14 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 		else:
 			context.report(STFReport("Invalid Child: " + str(child_id), STFReportSeverity.Error, stf_id, json_resource["type"], blender_object))
 
-	if("enabled" in json_resource and json_resource["enabled"] == False):
+	if("enabled" in json_resource and not json_resource["enabled"]):
 		blender_object.hide_render = True
 
 	return blender_object
 
 
 def _can_handle_application_object_func(application_object: Any) -> int:
-	if(type(application_object) == bpy.types.Object):
+	if(type(application_object) is bpy.types.Object):
 		if(not application_object.instance_collection and not application_object.data):
 			return 1000
 		else:
@@ -119,14 +119,14 @@ def _stf_export(context: STF_ExportContext, blender_object: bpy.types.Object, co
 			t, r, s = ((blender_object.parent.matrix_world @ (blender_object.parent.pose.bones[blender_object.parent_bone].matrix @ mathutils.Matrix.Rotation(math.radians(-90), 4, "X"))).inverted_safe() @ blender_object.matrix_world).decompose() # Blender why
 	else:
 		t, r, s = blender_object.matrix_world.decompose()
-	json_resource["trs"] = trs_utils.blender_to_trs(t, r, s)
+	json_resource["trs"] = trs_utils.blender_to_trs(t, r, s) # pyright: ignore[reportPossiblyUnboundVariable]
 
 	if(blender_object.hide_render):
 		json_resource["enabled"] = False
 
 	if(blender_object.data):
 		instance_id = context.serialize_resource(json_resource, (blender_object, blender_object.data), context_object, stf_category="instance")
-		if(instance_id >= 0):
+		if(instance_id is not None):
 			json_resource["instance"] = instance_id
 
 	return json_resource, blender_object.stf_info.stf_id

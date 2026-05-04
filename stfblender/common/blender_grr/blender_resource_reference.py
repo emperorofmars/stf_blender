@@ -90,6 +90,7 @@ def pretty_print_blender_resource_reference(brr: BlenderResourceReference) -> st
 		for t in blender_type_values:
 			if(t[0] == brr.blender_type):
 				return t[1] + " \"" + str(brr[brr.blender_type.lower()]) + "\""
+	return "Invalid"
 
 
 def draw_blender_resource_reference(layout: bpy.types.UILayout, brr: BlenderResourceReference):
@@ -108,4 +109,4 @@ def resolve_blender_resource_reference(brr: BlenderResourceReference) -> bpy.typ
 	return None
 
 def validate_blender_resource_reference(brr: BlenderResourceReference) -> bool:
-	return brr and resolve_blender_resource_reference(brr)
+	return brr and resolve_blender_resource_reference(brr) is not None

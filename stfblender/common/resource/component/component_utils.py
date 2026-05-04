@@ -42,7 +42,7 @@ class STFAddComponentOperatorBase:
 	property_name: bpy.props.StringProperty() # type: ignore
 	default_name: bpy.props.StringProperty() # type: ignore
 
-	def execute(self, context):
+	def execute(self, context) -> set:
 		import uuid
 		add_component(self.get_property(context), self.property_name, str(uuid.uuid4()), self.stf_type, self.get_components_ref_property(context), self.default_name)
 		return {"FINISHED"}
@@ -65,7 +65,7 @@ class STFRemoveComponentOperatorBase:
 	def invoke(self, context, event):
 		return context.window_manager.invoke_confirm(self, event)
 
-	def execute(self, context):
+	def execute(self, context) -> set:
 		target = self.get_property(context)
 		component_ref = self.get_components_ref_property(context)[self.index]
 
@@ -100,7 +100,7 @@ class STFEditComponentOperatorBase:
 		self.edit_component_id = self.component_id
 		return context.window_manager.invoke_props_dialog(self)
 
-	def execute(self, context):
+	def execute(self, context) -> set:
 		if(not self.edit_component_id):
 			self.report({"ERROR"}, "ID can't be empty!")
 			return {"CANCELLED"}
@@ -134,24 +134,25 @@ class STFEditComponentOperatorBase:
 
 def preserve_component_reference(component: STF_ComponentResourceBase, blender_property_name: str, context_object: Any) -> Callable[[], STF_ComponentResourceBase]:
 	component_id = component.stf_id
-	if(type(context_object) == bpy.types.Bone and type(component.id_data) == bpy.types.Armature):
+	if(type(context_object) is bpy.types.Bone and type(component.id_data) is bpy.types.Armature):
 		armature_bone = ArmatureBone(component.id_data, context_object.name)
 		def _get_component() -> STF_ComponentResourceBase:
 			for candidate in getattr(armature_bone.get_bone(), blender_property_name):
 				if(candidate.stf_id == component_id):
 					return candidate
-	elif(type(context_object) == ArmatureBone):
+			raise Exception("Invalid code path")
+	elif(type(context_object) is ArmatureBone):
 		def _get_component() -> STF_ComponentResourceBase:
 			for candidate in getattr(context_object.get_bone(), blender_property_name):
 				if(candidate.stf_id == component_id):
 					return candidate
-			return None
+			raise Exception("Invalid code path")
 	else:
 		def _get_component() -> STF_ComponentResourceBase:
 			for candidate in getattr(context_object, blender_property_name):
 				if(candidate.stf_id == component_id):
 					return candidate
-			return None
+			raise Exception("Invalid code path")
 	return _get_component
 
 
@@ -180,10 +181,10 @@ def import_component_base(context: STF_ImportContext, component: STF_ComponentRe
 
 def export_component_base(context: STF_ExportContext, stf_type: str, component: STF_ComponentResourceBase, blender_property_name: str, context_object: Any) -> dict:
 	ensure_stf_id(context, component, component)
-	ret = { "type": stf_type }
+	ret: dict[str, Any] = { "type": stf_type }
 	if(component.stf_name): ret["name"] = component.stf_name
 	if(component.exclusion_group): ret["exclusion_group"] = component.exclusion_group
-	if(component.enabled == False): ret["enabled"] = False
+	if(not component.enabled): ret["enabled"] = False
 	return ret
 
 
@@ -247,13 +248,13 @@ class STF_RegisterExclusionGroup(bpy.types.Operator):
 	@classmethod
 	def poll(cls, context): return context.collection is not None
 
-	def invoke(self, context, event):
+	def invoke(self, context: bpy.types.Context, event: bpy.types.Event) -> set:
 		if(self.group_name):
 			return self.execute(context)
 		else:
 			return context.window_manager.invoke_props_dialog(self)
 
-	def execute(self, context: bpy.types.Context):
+	def execute(self, context: bpy.types.Context) -> set:
 		if(self.group_name and self.group_name not in context.collection.stf_exclusion_groups):
 			group = context.collection.stf_exclusion_groups.add()
 			group.name = self.group_name
@@ -271,7 +272,7 @@ class STF_RemoveExclusionGroup(bpy.types.Operator):
 	@classmethod
 	def poll(cls, context): return context.collection is not None
 
-	def execute(self, context: bpy.types.Context):
+	def execute(self, context: bpy.types.Context) -> set:
 		for index, g in enumerate(context.collection.stf_exclusion_groups):
 			if(g.name == self.group_name):
 				context.collection.stf_exclusion_groups.remove(index)
@@ -294,7 +295,7 @@ class STF_ManageExclusionGroups(bpy.types.Operator):
 			new_g.name = g.name
 		return context.window_manager.invoke_props_dialog(self, confirm_text="Done")
 
-	def execute(self, context: bpy.types.Context):
+	def execute(self, context: bpy.types.Context) -> set:
 		return {"FINISHED"}
 
 	def cancel(self, context: bpy.types.Context):
@@ -305,7 +306,7 @@ class STF_ManageExclusionGroups(bpy.types.Operator):
 			new_g.group_name = g.name
 
 	def draw(self, context: bpy.types.Context):
-		layout = self.layout
+		layout: bpy.types.UILayout = self.layout # pyright: ignore[reportAssignmentType]
 		for g in context.collection.stf_exclusion_groups:
 			row = layout.row(align=True)
 			row.label(text=g.name)

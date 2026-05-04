@@ -55,10 +55,11 @@ class STF_Component_Editmode_Resistant_Reference:
 	def __init__(self, component: STF_ComponentResourceBase, context_object: Any):
 		self.component_id = component.stf_id
 		self.stf_id = component.stf_id
-		if(type(context_object) == bpy.types.Bone):
-			self.armature_bone = ArmatureBone(component.id_data, context_object.name)
+		if(type(context_object) is bpy.types.Bone):
+			self.armature_bone = ArmatureBone(component.id_data, context_object.name) # pyright: ignore[reportArgumentType]
 		else:
 			self.component = component
+
 	def get(self) -> STF_ComponentResourceBase:
 		if(hasattr(self, "component")):
 			return self.component
@@ -68,7 +69,7 @@ class STF_Component_Editmode_Resistant_Reference:
 					for component in getattr(self.armature_bone.get_bone(), component_ref.blender_property_name):
 						if(component.stf_id == self.component_id):
 							return component
-		return None
+		raise Exception("Invalid code path")
 
 
 class InstanceModComponentRef(STF_Component_Ref):

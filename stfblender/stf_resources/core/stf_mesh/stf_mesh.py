@@ -11,8 +11,8 @@ _stf_type = "stf.mesh"
 
 
 class STF_Mesh(bpy.types.PropertyGroup):
-	export_blendshape_normals: bpy.props.BoolProperty(name="Export Shapekey Normals", default=True, options=set()) # type: ignore
-	export_vertex_colors: bpy.props.BoolProperty(name="Export Vertex Colors", default=True, options=set()) # type: ignore
+	export_blendshape_normals: bpy.props.BoolProperty(name="Export Shapekey Normals", default=True, options=set())
+	export_vertex_colors: bpy.props.BoolProperty(name="Export Vertex Colors", default=True, options=set())
 
 
 class Handler_STF_Mesh(STF_Handler_BlenderNative):

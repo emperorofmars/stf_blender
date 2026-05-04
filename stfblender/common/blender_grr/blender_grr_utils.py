@@ -80,7 +80,7 @@ def resolve_blender_grr(grr: BlenderGRR) -> Any:
 				case "blender":
 					component_holder = resolve_blender_resource_reference(grr.blender_resource_reference)
 					if(component_holder and grr.stf_component_id and grr.stf_component_id in component_holder.stf_info.stf_components):
-						component_ref: STF_Component_Ref = component_holder.stf_info.stf_components[grr.stf_component_id]
+						component_ref: STF_Component_Ref = component_holder.stf_info.stf_components[grr.stf_component_id] # pyright: ignore[reportRedeclaration]
 						for component in getattr(component_holder, component_ref.blender_property_name):
 							if(component.stf_id == grr.stf_component_id):
 								return component
@@ -96,7 +96,7 @@ def resolve_blender_grr(grr: BlenderGRR) -> Any:
 	return None
 
 
-def construct_blender_grr(generic_resource: Any, grr: BlenderGRR, force_resource_id: str = None):
+def construct_blender_grr(generic_resource: Any, grr: BlenderGRR, force_resource_id: str | None = None):
 	if(isinstance(generic_resource, bpy.types.ID)):
 		grr.reference_type = "blender"
 		grr.blender_resource_reference.blender_type = generic_resource.id_type
@@ -116,7 +116,7 @@ def construct_blender_grr(generic_resource: Any, grr: BlenderGRR, force_resource
 		grr.reference_type = "stf_component"
 		target_id = force_resource_id if force_resource_id else generic_resource.stf_id
 		# try if component sits on a stf-data-resource
-		if(type(generic_resource.id_data) == bpy.types.Collection):
+		if(type(generic_resource.id_data) is bpy.types.Collection):
 			for data_resource_ref in generic_resource.id_data.stf_data_refs:
 				data_resource_ref: STF_Data_Ref = data_resource_ref
 				for data_resource in getattr(generic_resource.id_data, data_resource_ref.blender_property_name):
@@ -132,7 +132,7 @@ def construct_blender_grr(generic_resource: Any, grr: BlenderGRR, force_resource
 		grr.blender_resource_reference.blender_type = generic_resource.id_data.id_type
 		grr.blender_resource_reference[generic_resource.id_data.id_type.lower()] = generic_resource.id_data
 		# if the id_data this component sits on is an armature, it can be referenced by one of its bones
-		if(type(generic_resource.id_data) == bpy.types.Armature):
+		if(type(generic_resource.id_data) is bpy.types.Armature):
 			for bone in generic_resource.id_data.bones:
 				for component_ref in bone.stf_info.stf_components:
 					if(component_ref.stf_id == target_id):

@@ -11,7 +11,7 @@ class STFSetIDOperatorBase:
 	bl_label = "Set STF-ID"
 	bl_options = {"REGISTER", "UNDO", "INTERNAL"}
 
-	def execute(self, context):
+	def execute(self, context) -> set:
 		self.get_property(context).stf_id = str(uuid.uuid4())
 		return {"FINISHED"}
 

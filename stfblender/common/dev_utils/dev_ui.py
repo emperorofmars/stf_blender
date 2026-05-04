@@ -25,4 +25,4 @@ class STF_Devtools(bpy.types.Panel):
 
 	def draw(self, context: bpy.types.Context):
 		self.layout.use_property_split = True
-		draw_dev_tools(self.layout)
+		draw_dev_tools(self.layout) # pyright: ignore[reportArgumentType]

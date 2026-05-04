@@ -19,13 +19,13 @@ class Edit_Component_Collection(bpy.types.Operator):
 	component_property: bpy.props.StringProperty() # type: ignore
 	index: bpy.props.IntProperty() # type: ignore
 
-	def invoke(self, context: bpy.types.Context, event):
+	def invoke(self, context: bpy.types.Context, event) -> set:
 		if(self.op == "remove"):
 			return context.window_manager.invoke_confirm(self, event)
 		else:
 			return self.execute(context)
 
-	def execute(self, context: bpy.types.Context):
+	def execute(self, context: bpy.types.Context) -> set:
 		blender_id = getattr(context, self.blender_id_type) if not self.scene_collection else context.scene.collection
 		if(blender_id):
 			for component in getattr(blender_id, self.blender_property_name):
@@ -41,9 +41,9 @@ class Edit_Component_Collection(bpy.types.Operator):
 		return {"CANCELLED"}
 
 
-def create_add_button(layout: bpy.types.UILayout, blender_id_type: str | bool, blender_property_name: str, component_id: str, component_property: str, text: str = "Add", icon: str = "ADD") -> bpy.types.OperatorProperties:
-	ret = layout.operator(Edit_Component_Collection.bl_idname, text=text, icon=icon)
-	if(type(blender_id_type) == str):
+def create_add_button(layout: bpy.types.UILayout, blender_id_type: str | bool, blender_property_name: str, component_id: str, component_property: str, text: str = "Add", icon: str | None = "ADD") -> bpy.types.OperatorProperties:
+	ret = layout.operator(Edit_Component_Collection.bl_idname, text=text, icon=icon) # pyright: ignore[reportArgumentType]
+	if(type(blender_id_type) is str):
 		ret.blender_id_type = blender_id_type
 		ret.scene_collection = False
 	else:
@@ -53,11 +53,11 @@ def create_add_button(layout: bpy.types.UILayout, blender_id_type: str | bool, b
 	ret.component_id = component_id
 	ret.component_property = component_property
 	ret.op = "add"
-	return
+	return ret
 
-def create_remove_button(layout: bpy.types.UILayout, blender_id_type: str | bool, blender_property_name: str, component_id: str, component_property: str, index: int, text: str = "", icon: str = "X") -> bpy.types.OperatorProperties:
-	ret = layout.operator(Edit_Component_Collection.bl_idname, text=text, icon=icon)
-	if(type(blender_id_type) == str):
+def create_remove_button(layout: bpy.types.UILayout, blender_id_type: str | bool, blender_property_name: str, component_id: str, component_property: str, index: int, text: str = "", icon: str | None = "X") -> bpy.types.OperatorProperties:
+	ret = layout.operator(Edit_Component_Collection.bl_idname, text=text, icon=icon) # pyright: ignore[reportArgumentType]
+	if(type(blender_id_type) is str):
 		ret.blender_id_type = blender_id_type
 		ret.scene_collection = False
 	else:
@@ -68,7 +68,7 @@ def create_remove_button(layout: bpy.types.UILayout, blender_id_type: str | bool
 	ret.component_property = component_property
 	ret.index = index
 	ret.op = "remove"
-	return
+	return ret
 
 
 def draw_list(layout: bpy.types.UILayout, blender_id_type: str | bool, resource: STF_ComponentResourceBase | STF_DataResourceBase, attr: str, blender_property_name: str, draw_func: Callable):
@@ -77,4 +77,3 @@ def draw_list(layout: bpy.types.UILayout, blender_id_type: str | bool, resource:
 		layout_remove_btn = draw_func(col, element)
 		create_remove_button(layout_remove_btn, blender_id_type, blender_property_name, resource.stf_id, attr, index_element)
 	create_add_button(layout, blender_id_type, blender_property_name, resource.stf_id, attr)
-

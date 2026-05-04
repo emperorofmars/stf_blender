@@ -136,8 +136,8 @@ class Handler_STF_Bone(STF_Handler_BlenderNative):
 
 	understood_application_property_path_types = [ArmatureBone]
 	understood_application_property_path_parts = ["location", "rotation_quaternion", "rotation_euler", "scale"]
-	resolve_property_path_to_stf_func = resolve_property_path_to_stf_func
-	resolve_stf_property_to_blender_func = resolve_stf_property_to_blender_func
+	resolve_property_path_to_stf_func = resolve_property_path_to_stf_func # pyright: ignore[reportAssignmentType]
+	resolve_stf_property_to_blender_func = resolve_stf_property_to_blender_func # pyright: ignore[reportAssignmentType]
 
 
 register_stf_handlers = [

@@ -11,11 +11,11 @@ class STFDataResourcesCollectionPanel(bpy.types.Panel):
 	bl_context = "collection"
 
 	@classmethod
-	def poll(cls, context: bpy.types.Context):
+	def poll(cls, context: bpy.types.Context) -> bool:
 		return (context.collection is not None)
 
 	def draw(self, context: bpy.types.Context):
-		draw_data_resources_ui(self.layout, context, context.collection)
+		draw_data_resources_ui(self.layout, context, context.collection) # pyright: ignore[reportArgumentType]
 
 
 class STFDataResourcesSceneCollectionPanel(bpy.types.Panel):
@@ -30,4 +30,4 @@ class STFDataResourcesSceneCollectionPanel(bpy.types.Panel):
 		return (context.scene is not None)
 
 	def draw(self, context: bpy.types.Context):
-		draw_data_resources_ui(self.layout, context, context.scene.collection)
+		draw_data_resources_ui(self.layout, context, context.scene.collection) # pyright: ignore[reportArgumentType]

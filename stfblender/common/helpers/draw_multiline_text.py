@@ -7,7 +7,7 @@ def draw_multiline_text(layout: bpy.types.UILayout, text: str, width: int = 80, 
 	if(alert):
 		row.alert = True
 	if(icon):
-		row.column().label(text="", icon=icon)
+		row.column().label(text="", icon=icon) # pyright: ignore[reportArgumentType]
 	col_r = row.column()
 	if(not text.endswith(".")):
 		text += "."

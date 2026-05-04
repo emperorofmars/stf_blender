@@ -84,14 +84,14 @@ def export_stf_mesh(context: STF_ExportContext, application_object: Any, parent_
 		return (mathutils.Vector(blender_mesh.color_attributes.active_color.data[a].color[:]) - mathutils.Vector(blender_mesh.color_attributes.active_color.data[b].color[:])).length < float_threshold
 
 	verts_to_split: dict[int, list] = {}
-	deduped_split_indices: list[int] = [] # indices of unique face corners
-	face_corners_to_split: list[int] = [] # if multiple face corners share the same attributes, point to the same split
+	deduped_split_indices_list: list[int] = [] # indices of unique face corners
+	face_corners_to_split_list: list[int] = [] # if multiple face corners share the same attributes, point to the same split
 
 	for loop in blender_mesh.loops:
 		if (loop.vertex_index not in verts_to_split):
 			verts_to_split[loop.vertex_index] = [loop.index]
-			deduped_split_indices.append(loop.index)
-			face_corners_to_split.append(len(deduped_split_indices) - 1)
+			deduped_split_indices_list.append(loop.index)
+			face_corners_to_split_list.append(len(deduped_split_indices_list) - 1)
 		else:
 			for candidate_index in range(len(verts_to_split[loop.vertex_index])):
 				split_candidate = verts_to_split[loop.vertex_index][candidate_index]
@@ -100,15 +100,15 @@ def export_stf_mesh(context: STF_ExportContext, application_object: Any, parent_
 					and compareUVs(loop.index, split_candidate)
 					and compareColors(loop.index, split_candidate)
 				):
-					face_corners_to_split.append(face_corners_to_split[split_candidate])
+					face_corners_to_split_list.append(face_corners_to_split_list[split_candidate])
 					break
 			else:
 				verts_to_split[loop.vertex_index].append(loop.index)
-				deduped_split_indices.append(loop.index)
-				face_corners_to_split.append(len(deduped_split_indices) - 1)
+				deduped_split_indices_list.append(loop.index)
+				face_corners_to_split_list.append(len(deduped_split_indices_list) - 1)
 
-	deduped_split_indices = np.array(deduped_split_indices, dtype=determine_pack_format_uint(indices_width))
-	face_corners_to_split = np.array(face_corners_to_split, dtype=determine_pack_format_uint(indices_width))
+	deduped_split_indices = np.array(deduped_split_indices_list, dtype=determine_pack_format_uint(indices_width))
+	face_corners_to_split = np.array(face_corners_to_split_list, dtype=determine_pack_format_uint(indices_width))
 
 	# Splits & face corners
 	buffer_splits = np.zeros(len(blender_mesh.loops), dtype=determine_pack_format_uint(indices_width))
@@ -129,10 +129,10 @@ def export_stf_mesh(context: STF_ExportContext, application_object: Any, parent_
 
 	# Uvs
 	uvs = []
-	for buffer_uv in uv_layers:
+	for index, buffer_uv in enumerate(uv_layers):
 		buffer_uv = buffer_uv[deduped_split_indices]
 		buffer_uv[:, 1] = 1 - buffer_uv[:, 1]
-		uvs.append({"name": uv_layer.name, "uv": context.serialize_buffer(stf_mesh, buffer_uv.tobytes())})
+		uvs.append({"name": blender_mesh.uv_layers[index].name, "uv": context.serialize_buffer(stf_mesh, buffer_uv.tobytes())})
 	stf_mesh["uvs"] = uvs
 
 	# Split colors
@@ -329,15 +329,15 @@ def export_stf_mesh(context: STF_ExportContext, application_object: Any, parent_
 				"limit_lower": shape_key.slider_min,
 			}
 			if(indexed):
-				blendshape["indices"] = context.serialize_buffer(stf_mesh, blendshape_indices_buffer.tobytes())
-				blendshape["position_offsets"] = context.serialize_buffer(stf_mesh, np.take(blendshape_offsets_buffer, blendshape_indices_buffer, 0).tobytes())
+				blendshape["indices"] = context.serialize_buffer(stf_mesh, blendshape_indices_buffer.tobytes()) # pyright: ignore[reportPossiblyUnboundVariable]
+				blendshape["position_offsets"] = context.serialize_buffer(stf_mesh, np.take(blendshape_offsets_buffer, blendshape_indices_buffer, 0).tobytes()) # pyright: ignore[reportPossiblyUnboundVariable]
 				if(blender_mesh.stf_mesh.export_blendshape_normals):
-					blendshape["split_indices"] = context.serialize_buffer(stf_mesh, blendshape_split_indices_buffer.tobytes())
-					blendshape["split_normals"] = context.serialize_buffer(stf_mesh, np.take(blendshape_normals_split_buffer, blendshape_split_indices_buffer, 0).tobytes())
+					blendshape["split_indices"] = context.serialize_buffer(stf_mesh, blendshape_split_indices_buffer.tobytes()) # pyright: ignore[reportPossiblyUnboundVariable]
+					blendshape["split_normals"] = context.serialize_buffer(stf_mesh, np.take(blendshape_normals_split_buffer, blendshape_split_indices_buffer, 0).tobytes()) # pyright: ignore[reportPossiblyUnboundVariable]
 			else:
 				blendshape["position_offsets"] = context.serialize_buffer(stf_mesh, blendshape_offsets_buffer.tobytes())
 				if(blender_mesh.stf_mesh.export_blendshape_normals):
-					blendshape["split_normals"] = context.serialize_buffer(stf_mesh, blendshape_normals_split_buffer.tobytes())
+					blendshape["split_normals"] = context.serialize_buffer(stf_mesh, blendshape_normals_split_buffer.tobytes()) # pyright: ignore[reportPossiblyUnboundVariable]
 			blendshapes.append(blendshape)
 		stf_mesh["blendshapes"] = blendshapes
 

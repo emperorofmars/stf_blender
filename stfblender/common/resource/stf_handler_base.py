@@ -39,10 +39,10 @@ class STF_HandlerBase:
 	understood_application_property_path_parts: list[str] = []
 
 	# (Export Context, Application Object, Application Object Property Index,, Application Path) -> BlenderPropertyPathPart
-	resolve_property_path_to_stf_func: Callable[[STF_ExportContext, Any, int, str], STFPropertyPathPart]
+	resolve_property_path_to_stf_func: Callable[[STF_ExportContext, Any, int, str], STFPropertyPathPart | None]
 
 	# (Import Context, Target Application Node, List of STF Path Elements, Base Target Application Object) -> BlenderPropertyPathPart
-	resolve_stf_property_to_blender_func: Callable[[STF_ImportContext, list[str], Any], BlenderPropertyPathPart]
+	resolve_stf_property_to_blender_func: Callable[[STF_ImportContext, list[str], Any], BlenderPropertyPathPart | None]
 
 	"""
 	Handling components if applicable. `get_components_func` must be assigned if the resource supports components

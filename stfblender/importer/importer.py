@@ -55,7 +55,7 @@ def import_stf_file(filepath: str, import_settings: STF_ImportSettings) -> STF_I
 				bpy.data.objects.remove(trash)
 
 
-class ImportSTF(bpy.types.Operator, ImportHelper):
+class ImportSTF(bpy.types.Operator, ImportHelper): # pyright: ignore[reportIncompatibleMethodOverride]
 	"""Import an STF file (.stf)"""
 	bl_idname = "stf.import_files"
 	bl_label = "Import STF"
@@ -69,12 +69,12 @@ class ImportSTF(bpy.types.Operator, ImportHelper):
 	import_settings: bpy.props.PointerProperty(type=STF_ImportSettings) # type: ignore
 
 
-	def invoke(self, context: bpy.types.Context, event: bpy.types.Event):
+	def invoke(self, context: bpy.types.Context, event: bpy.types.Event) -> set: # pyright: ignore[reportIncompatibleMethodOverride]
 		self.invoking_from_ui = True
-		return ImportHelper.invoke_popup(self, context)
+		return ImportHelper.invoke_popup(self, context) # pyright: ignore[reportReturnType]
 
 
-	def execute(self, context: bpy.types.Context):
+	def execute(self, context: bpy.types.Context) -> set:
 		context.window.cursor_modal_set("WAIT")
 		try:
 			result_str = ""
@@ -116,6 +116,7 @@ class ImportSTF(bpy.types.Operator, ImportHelper):
 		except Exception as error:
 			print(error)
 			print(traceback.format_exc())
+			raise error
 		finally:
 			context.window.cursor_modal_restore()
 

@@ -24,7 +24,7 @@ class STF_ExportContext:
 		"""Export a Blender 'thing' to a STF resource. Returns the exported resources ID."""
 		pass
 
-	def serialize_buffer(self, json_parent: dict, data: bytes, buffer_id: str | None = None) -> str:
+	def serialize_buffer(self, json_parent: dict, data: bytes, buffer_id: str | None = None) -> int:
 		"""Export 'bytes' to a STF buffer. The exported buffers ID will be written into the json_parent's 'referenced_buffers' array. Returns the index of the ID in the 'referenced_buffers' array."""
 		pass
 

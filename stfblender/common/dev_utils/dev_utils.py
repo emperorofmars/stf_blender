@@ -100,7 +100,7 @@ class CleanupOp(bpy.types.Operator):
 	def invoke(self, context, event):
 		return context.window_manager.invoke_confirm(self, event)
 
-	def execute(self, context):
+	def execute(self, context) -> set:
 		cleanup_unreferenced_components()
 		return {"FINISHED"}
 
@@ -114,10 +114,10 @@ class QuaternionsEverywhere(bpy.types.Operator):
 	def invoke(self, context, event):
 		return context.window_manager.invoke_confirm(self, event)
 
-	def execute(self, context):
+	def execute(self, context) -> set:
 		for blender_object in bpy.data.objects[:]:
 			blender_object.rotation_mode = "QUATERNION"
-			if(type(blender_object.data) == bpy.types.Armature):
+			if(type(blender_object.data) is bpy.types.Armature):
 				for bone in blender_object.pose.bones[:]:
 					bone.rotation_mode = "QUATERNION"
 		return {"FINISHED"}
@@ -132,11 +132,10 @@ class UnfuckMatrixParentInverse(bpy.types.Operator):
 	def invoke(self, context, event):
 		return context.window_manager.invoke_confirm(self, event)
 
-	def execute(self, context):
+	def execute(self, context) -> set:
 		for blender_object in bpy.data.objects[:]:
 			if(blender_object.parent):
 				tmp = blender_object.matrix_world.copy()
 				blender_object.matrix_parent_inverse = blender_object.parent.matrix_world.inverted_safe()
 				blender_object.matrix_world = tmp
 		return {"FINISHED"}
-

@@ -14,7 +14,7 @@ def draw_prefab_ui(layout: bpy.types.UILayout, context: bpy.types.Context, colle
 
 		# Export Functionality
 		from ....exporter.exporter import ExportSTF
-		if(context.scene.stf_root_collection == collection or collection == context.scene.collection and context.scene.stf_root_collection == None):
+		if(context.scene.stf_root_collection == collection or collection == context.scene.collection and context.scene.stf_root_collection is None):
 			layout.operator(operator=ExportSTF.bl_idname, text="Export as STF", icon="EXPORT")
 		else:
 			layout.operator(operator_set_as_root)
@@ -38,4 +38,3 @@ def draw_prefab_ui(layout: bpy.types.UILayout, context: bpy.types.Context, colle
 		header, body = layout.panel("stf.prefab_components", default_closed = False)
 		header.label(text="STF Components (" + str(len(collection.stf_info.stf_components)) + ")", icon="GROUP")
 		if(body): draw_components_ui(layout, context, collection.stf_info, collection, operator_add_component, operator_remove_component, operator_edit_component_id)
-

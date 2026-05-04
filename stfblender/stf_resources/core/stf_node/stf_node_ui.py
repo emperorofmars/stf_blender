@@ -45,7 +45,7 @@ class STFNodeFixRotationMode(bpy.types.Operator):
 	def invoke(self, context, event):
 		return context.window_manager.invoke_confirm(self, event, title="Set the rotation-mode to Quaternion", message=self.bl_description)
 
-	def execute(self, context: bpy.types.Context):
+	def execute(self, context: bpy.types.Context) -> set:
 		context.object.rotation_mode = "QUATERNION"
 		return {"FINISHED"}
 
@@ -59,11 +59,11 @@ class STFNodePanel(bpy.types.Panel):
 	bl_context = "object"
 
 	@classmethod
-	def poll(cls, context):
+	def poll(cls, context: bpy.types.Context):
 		return hasattr(context, "object") and context.object is not None
 
-	def draw(self, context):
-		layout = self.layout
+	def draw(self, context: bpy.types.Context):
+		layout: bpy.types.UILayout = self.layout # pyright: ignore[reportAssignmentType]
 		set_stf_component_filter(bpy.types.Object)
 
 		if(context.object.rotation_mode != "QUATERNION"):

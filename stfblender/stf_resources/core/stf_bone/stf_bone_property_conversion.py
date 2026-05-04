@@ -24,8 +24,8 @@ def _create_translation_to_stf_func(blender_object: ArmatureBone) -> Callable:
 	else:
 		offset = (mathutils.Matrix.Rotation(math.radians(-90), 4, "X") @ blender_object.get_bone().matrix_local)
 
-	def _ret(value: list[float]) -> float:
-		value = mathutils.Matrix.Translation(mathutils.Vector(value))
+	def _ret(value: list[float]) -> list[float]:
+		value = mathutils.Matrix.Translation(mathutils.Vector(value)) # pyright: ignore[reportAssignmentType]
 		return convert_bone_translation_to_stf((offset @ value).translation[:])
 	return _ret
 
@@ -36,9 +36,9 @@ def _create_rotation_to_stf_func(blender_object: ArmatureBone) -> Callable:
 	else:
 		_, offset, _ = (mathutils.Matrix.Rotation(math.radians(-90), 4, "X") @ blender_object.get_bone().matrix_local).decompose()
 
-	def _ret(value: list[float]) -> float:
-		value = mathutils.Quaternion(value)
-		return convert_bone_rotation_to_stf((offset @ value)[:])
+	def _ret(value: list[float]) -> list[float]:
+		value = mathutils.Quaternion(value) # pyright: ignore[reportAssignmentType]
+		return convert_bone_rotation_to_stf((offset @ value)[:]) # pyright: ignore[reportOperatorIssue]
 	return _ret
 
 def _create_rotation_euler_to_stf_func(blender_object: ArmatureBone) -> Callable:
@@ -48,9 +48,9 @@ def _create_rotation_euler_to_stf_func(blender_object: ArmatureBone) -> Callable
 	else:
 		_, offset, _ = (mathutils.Matrix.Rotation(math.radians(-90), 4, "X") @ blender_object.get_bone().matrix_local).decompose()
 
-	def _ret(value: list[float]) -> float:
-		value = mathutils.Euler(value).to_quaternion()
-		value = (offset @ value).to_euler()
+	def _ret(value: list[float]) -> list[float]:
+		value = mathutils.Euler(value).to_quaternion() # pyright: ignore[reportAssignmentType]
+		value = (offset @ value).to_euler() # pyright: ignore[reportOperatorIssue]
 		return convert_bone_rotation_euler_to_stf(value[:])
 	return _ret
 
@@ -62,13 +62,13 @@ def _create_scale_to_stf_func(blender_object: ArmatureBone) -> Callable:
 	else:
 		_, _, offset = blender_object.get_bone().matrix_local.decompose()
 
-	def _ret(value: list[float]) -> float:
+	def _ret(value: list[float]) -> list[float]:
 		value = [value[i] * offset[i] for i in range(len(value))]
 		return convert_bone_scale_to_stf(value)
 	return _ret
 
 
-def resolve_property_path_to_stf_func(context: STF_ExportContext, blender_object: ArmatureBone, application_object_property_index: int, data_path: str) -> STFPropertyPathPart:
+def resolve_property_path_to_stf_func(context: STF_ExportContext, blender_object: ArmatureBone, application_object_property_index: int, data_path: str) -> STFPropertyPathPart | None:
 	import re
 
 	has_constraints = False
@@ -114,8 +114,8 @@ def _create_translation_to_blender_func(blender_object: ArmatureBone) -> Callabl
 	else:
 		offset = (mathutils.Matrix.Rotation(math.radians(-90), 4, "X") @ blender_object.get_bone().matrix_local).inverted_safe()
 
-	def _ret(value: list[float]) -> float:
-		value = mathutils.Matrix.Translation(mathutils.Vector(value))
+	def _ret(value: list[float]) -> list[float]:
+		value = mathutils.Matrix.Translation(mathutils.Vector(value)) # pyright: ignore[reportAssignmentType]
 		return convert_bone_translation_to_blender((offset @ value).translation[:])
 	return _ret
 
@@ -126,9 +126,9 @@ def _create_rotation_to_blender_func(blender_object: ArmatureBone) -> Callable:
 	else:
 		_, offset, _ = (mathutils.Matrix.Rotation(math.radians(-90), 4, "X") @ blender_object.get_bone().matrix_local).inverted_safe().decompose()
 
-	def _ret(value: list[float]) -> float:
-		value = mathutils.Quaternion(convert_bone_rotation_to_blender(value))
-		return (offset @ value)[:]
+	def _ret(value: list[float]) -> list[float]:
+		value = mathutils.Quaternion(convert_bone_rotation_to_blender(value)) # pyright: ignore[reportAssignmentType]
+		return (offset @ value)[:] # pyright: ignore[reportOperatorIssue]
 	return _ret
 
 def _create_rotation_euler_to_blender_func(blender_object: ArmatureBone) -> Callable:
@@ -138,9 +138,9 @@ def _create_rotation_euler_to_blender_func(blender_object: ArmatureBone) -> Call
 	else:
 		_, offset, _ = (mathutils.Matrix.Rotation(math.radians(-90), 4, "X") @ blender_object.get_bone().matrix_local).inverted_safe().decompose()
 
-	def _ret(value: list[float]) -> float:
-		value = mathutils.Euler(convert_bone_rotation_euler_to_blender(value)).to_quaternion()
-		return (offset @ value).to_euler()[:]
+	def _ret(value: list[float]) -> list[float]:
+		value = mathutils.Euler(convert_bone_rotation_euler_to_blender(value)).to_quaternion() # pyright: ignore[reportAssignmentType]
+		return (offset @ value).to_euler()[:] # pyright: ignore[reportOperatorIssue]
 	return _ret
 
 def _create_scale_to_blender_func(blender_object: ArmatureBone) -> Callable:
@@ -150,14 +150,16 @@ def _create_scale_to_blender_func(blender_object: ArmatureBone) -> Callable:
 	else:
 		_, _, offset = blender_object.get_bone().matrix_local.inverted_safe().decompose()
 
-	def _ret(value: list[float]) -> float:
+	def _ret(value: list[float]) -> list[float]:
 		value = convert_bone_scale_to_blender(value)
 		return [value[i] * offset[i] for i in range(len(value))]
 	return _ret
 
 
-def resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: Any) -> BlenderPropertyPathPart:
+def resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: Any) -> BlenderPropertyPathPart | None:
 	blender_object = context.get_imported_resource(stf_path[0])
+	if(blender_object is None):
+		return None
 	match(stf_path[1]):
 		case "t":
 			return BlenderPropertyPathPart("OBJECT", "pose.bones[\"" + blender_object.name + "\"].location", _create_translation_to_blender_func(blender_object), translation_bone_index_conversion_to_blender)

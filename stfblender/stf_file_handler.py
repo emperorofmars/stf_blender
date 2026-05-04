@@ -13,8 +13,8 @@ class IO_FH_stf(bpy.types.FileHandler):
 	bl_file_extensions = ".stf"
 
 	@classmethod
-	def poll_drop(cls, context):
-		return poll_file_object_drop(context)
+	def poll_drop(cls, context) -> bool:
+		return poll_file_object_drop(context) # type: ignore
 
 
 def register():

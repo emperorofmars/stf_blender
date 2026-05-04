@@ -1,3 +1,5 @@
+# pyright: reportCallIssue=false, reportArgumentType=false
+
 import bpy
 from io import BytesIO
 from typing import Any
@@ -195,7 +197,7 @@ def import_stf_mesh(context: STF_ImportContext, json_resource: dict, stf_id: str
 			for index in range(int(buffer_vertex_weights.getbuffer().nbytes / float_width)):
 				## let vertex_index
 				if(indexed):
-					vertex_index = parse_uint(buffer_vertex_indices, indices_width)
+					vertex_index = parse_uint(buffer_vertex_indices, indices_width) # pyright: ignore[reportPossiblyUnboundVariable]
 				else:
 					vertex_index = index
 				weight = parse_float(buffer_vertex_weights, float_width)

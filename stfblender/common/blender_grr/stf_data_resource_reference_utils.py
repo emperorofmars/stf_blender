@@ -11,7 +11,7 @@ STF Data-Resource Reference
 Bringing polymorphism to Blender
 """
 
-def __draw_blender_collection_selection(layout: bpy.types.UILayout, drr: STFDataResourceReference) -> bpy.types.Collection:
+def __draw_blender_collection_selection(layout: bpy.types.UILayout, drr: STFDataResourceReference) -> bpy.types.Collection | None:
 	layout.prop(drr, "use_scene_collection")
 	if(not drr.use_scene_collection):
 		layout.prop(drr, "collection")
@@ -45,7 +45,7 @@ def draw_stf_data_resource_reference(layout: bpy.types.UILayout, drr: STFDataRes
 				split.row()
 				info_layout = split.row()
 			info_layout.label(text="Invalid Type: " + resource_ref.stf_type, icon="ERROR")
-		elif(resource_ref and resource):
+		elif(resource_ref and resource): # pyright: ignore[reportPossiblyUnboundVariable]
 			info_layout = layout
 			if(layout.use_property_split):
 				split = layout.split(factor=0.4)
@@ -54,7 +54,7 @@ def draw_stf_data_resource_reference(layout: bpy.types.UILayout, drr: STFDataRes
 			info_layout.label(text=resource_ref.stf_type + " - " + (resource.stf_name if resource.stf_name and len(resource.stf_name) > 0 else "Unnamed"))
 
 
-def __get_blender_property(ref_holder: Any, property_holder: Any, target_id: str) -> tuple[STF_Data_Ref, STF_DataResourceBase]:
+def __get_blender_property(ref_holder: Any, property_holder: Any, target_id: str) -> tuple[STF_Data_Ref, STF_DataResourceBase] | None:
 	for resource_ref in ref_holder:
 		if(resource_ref.stf_id == target_id):
 			for resource in getattr(property_holder, resource_ref.blender_property_name):
@@ -62,7 +62,7 @@ def __get_blender_property(ref_holder: Any, property_holder: Any, target_id: str
 					return resource_ref, resource
 	return None
 
-def resolve_stf_data_resource_reference(drr: STFDataResourceReference) -> tuple[STF_Data_Ref, STF_DataResourceBase]:
+def resolve_stf_data_resource_reference(drr: STFDataResourceReference) -> tuple[STF_Data_Ref, STF_DataResourceBase] | None:
 	if(drr.use_scene_collection and drr.scene):
 		return __get_blender_property(drr.scene.collection.stf_data_refs, drr.scene.collection, drr.stf_data_resource_id)
 	elif(not drr.use_scene_collection and drr.collection):
@@ -70,7 +70,7 @@ def resolve_stf_data_resource_reference(drr: STFDataResourceReference) -> tuple[
 	else:
 		return None
 
-def resolve_stf_data_resource_holder(drr: STFDataResourceReference) -> bpy.types.Collection:
+def resolve_stf_data_resource_holder(drr: STFDataResourceReference) -> bpy.types.Collection | None:
 	if(drr.use_scene_collection and drr.scene):
 		return drr.scene.collection
 	elif(not drr.use_scene_collection and drr.collection):

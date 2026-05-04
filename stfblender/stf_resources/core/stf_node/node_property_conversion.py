@@ -1,3 +1,4 @@
+import bpy
 import math
 import re
 import mathutils
@@ -17,11 +18,10 @@ Export
 """
 
 def _create_translation_to_stf_func(blender_object: bpy.types.Object) -> Callable:
-
 	if(blender_object.parent_type == "OBJECT" and blender_object.parent):
 		offset = blender_object.matrix_parent_inverse.copy()
 
-		def _ret(value: list[float]) -> float:
+		def _ret(value: list[float]) -> list[float]: # pyright: ignore[reportRedeclaration]
 			return convert_translation_to_stf((offset @ mathutils.Matrix.Translation(value)).translation)
 		return _ret
 
@@ -29,7 +29,7 @@ def _create_translation_to_stf_func(blender_object: bpy.types.Object) -> Callabl
 		pose_bone = blender_object.parent.pose.bones[blender_object.parent_bone]
 		offset = mathutils.Matrix.Translation([0, 0, (pose_bone.tail - pose_bone.head).length]) @ mathutils.Matrix.Rotation(math.radians(90), 4, "X") @ blender_object.matrix_parent_inverse
 
-		def _ret(value: list[float]) -> float:
+		def _ret(value: list[float]) -> list[float]:
 			return convert_translation_to_stf((offset @ mathutils.Matrix.Translation(value)).translation)
 		return _ret
 
@@ -43,14 +43,14 @@ def _create_rotation_to_stf_func(blender_object: bpy.types.Object) -> Callable:
 	if(blender_object.parent_type == "OBJECT" and blender_object.parent):
 		offset = blender_object.matrix_parent_inverse.copy()
 
-		def _ret(value: list[float]) -> float:
+		def _ret(value: list[float]) -> list[float]: # pyright: ignore[reportRedeclaration]
 			return convert_rotation_to_stf((offset @ mathutils.Quaternion(value).to_matrix().to_4x4()).to_quaternion())
 		return _ret
 
 	elif(blender_object.parent_type == "BONE" and blender_object.parent and blender_object.parent_bone):
 		offset = _convert_bone_offset_rotation_to_stf(blender_object)
 
-		def _ret(value: list[float]) -> float:
+		def _ret(value: list[float]) -> list[float]:
 			return convert_rotation_to_stf((offset @ mathutils.Quaternion(value).to_matrix().to_4x4()).to_quaternion())
 		return _ret
 
@@ -61,15 +61,15 @@ def _create_rotation_euler_to_stf_func(blender_object: bpy.types.Object) -> Call
 	if(blender_object.parent_type == "OBJECT" and blender_object.parent):
 		offset = blender_object.matrix_parent_inverse.copy()
 
-		def _ret(value: list[float]) -> float:
-			return convert_rotation_euler_to_stf((offset @ mathutils.Euler(value).to_matrix().to_4x4()).to_euler())
+		def _ret(value: list[float]) -> list[float]: # pyright: ignore[reportRedeclaration]
+			return convert_rotation_euler_to_stf((offset @ mathutils.Euler(value).to_matrix().to_4x4()).to_euler()) # pyright: ignore[reportArgumentType]
 		return _ret
 
 	elif(blender_object.parent_type == "BONE" and blender_object.parent and blender_object.parent_bone):
 		offset = _convert_bone_offset_rotation_to_stf(blender_object)
 
-		def _ret(value: list[float]) -> float:
-			return convert_rotation_euler_to_stf((offset @ mathutils.Euler(value).to_matrix().to_4x4()).to_euler())
+		def _ret(value: list[float]) -> list[float]:
+			return convert_rotation_euler_to_stf((offset @ mathutils.Euler(value).to_matrix().to_4x4()).to_euler()) # pyright: ignore[reportArgumentType]
 		return _ret
 
 	else:
@@ -85,13 +85,13 @@ def _create_scale_to_stf_func(blender_object: bpy.types.Object) -> Callable:
 		_, _, s = ((blender_object.parent.matrix_world @ (blender_object.parent.pose.bones[blender_object.parent_bone].matrix @ mathutils.Matrix.Rotation(math.radians(-90), 4, "X"))).inverted_safe() @ blender_object.matrix_world).decompose() # Blender why
 		offset = [s[i] / blender_object.scale[i] for i in range(3)]
 
-	def _ret(value: list[float]) -> float:
+	def _ret(value: list[float]) -> list[float]:
 		value = [value[i] * offset[i] for i in range(3)]
 		return convert_scale_to_stf(value)
 	return _ret
 
 
-def stf_node_resolve_property_path_to_stf_func(context: STF_ExportContext, blender_object: bpy.types.Object, application_object_property_index: int, data_path: str) -> STFPropertyPathPart:
+def stf_node_resolve_property_path_to_stf_func(context: STF_ExportContext, blender_object: bpy.types.Object, application_object_property_index: int, data_path: str) -> STFPropertyPathPart | None:
 
 	has_constraints = len(blender_object.constraints) > 0
 
@@ -121,18 +121,18 @@ def _create_translation_to_blender_func(blender_object: bpy.types.Object) -> Cal
 	if(blender_object.parent_type == "OBJECT" and blender_object.parent):
 		parent_mat = blender_object.parent.matrix_world.copy()
 
-		def _ret(value: list[float]) -> float:
-			value = convert_translation_to_blender(value)
-			return (parent_mat @ mathutils.Matrix.Translation(value)).translation
+		def _ret(value: list[float]) -> list[float]: # pyright: ignore[reportRedeclaration]
+			value = convert_translation_to_blender(value) # pyright: ignore[reportAssignmentType]
+			return (parent_mat @ mathutils.Matrix.Translation(value)).translation # pyright: ignore[reportReturnType]
 		return _ret
 
 	elif(blender_object.parent_type == "BONE" and blender_object.parent and blender_object.parent_bone):
 		pose_bone = blender_object.parent.pose.bones[blender_object.parent_bone]
 		parent_mat = blender_object.parent.matrix_world @ pose_bone.matrix @ mathutils.Matrix.Rotation(math.radians(-90), 4, "X")
 
-		def _ret(value: list[float]) -> float:
-			value = convert_translation_to_blender(value)
-			return (parent_mat @ mathutils.Matrix.Translation(value)).translation
+		def _ret(value: list[float]) -> list[float]:
+			value = convert_translation_to_blender(value) # pyright: ignore[reportAssignmentType]
+			return (parent_mat @ mathutils.Matrix.Translation(value)).translation # pyright: ignore[reportReturnType]
 		return _ret
 
 	else:
@@ -146,16 +146,16 @@ def _create_rotation_to_blender_func(blender_object: bpy.types.Object) -> Callab
 	if(blender_object.parent_type == "OBJECT" and blender_object.parent):
 		parent_mat = blender_object.parent.matrix_world.copy()
 
-		def _ret(value: list[float]) -> float:
-			value = convert_rotation_to_blender(value).to_matrix().to_4x4()
+		def _ret(value: list[float]) -> list[float]:
+			value = convert_rotation_to_blender(value).to_matrix().to_4x4() # pyright: ignore[reportAssignmentType]
 			return (parent_mat @ value).to_quaternion()
 		return _ret
 
 	elif(blender_object.parent_type == "BONE" and blender_object.parent and blender_object.parent_bone):
 		parent_mat = _convert_bone_offset_rotation_to_blender(blender_object)
 
-		def _ret(value: list[float]) -> float:
-			value = convert_rotation_to_blender(value).to_matrix().to_4x4()
+		def _ret(value: list[float]) -> list[float]:
+			value = convert_rotation_to_blender(value).to_matrix().to_4x4() # pyright: ignore[reportAssignmentType]
 			return (parent_mat @ value).to_quaternion()
 		return _ret
 
@@ -166,16 +166,16 @@ def _create_rotation_euler_to_blender_func(blender_object: bpy.types.Object) -> 
 	if(blender_object.parent_type == "OBJECT" and blender_object.parent):
 		parent_mat = blender_object.parent.matrix_world.copy()
 
-		def _ret(value: list[float]) -> float:
-			value = mathutils.Euler(convert_rotation_euler_to_blender(value)).to_matrix().to_4x4()
+		def _ret(value: list[float]) -> list[float]:
+			value = mathutils.Euler(convert_rotation_euler_to_blender(value)).to_matrix().to_4x4() # pyright: ignore[reportAssignmentType, reportArgumentType]
 			return (parent_mat @ value).to_euler()
 		return _ret
 
 	elif(blender_object.parent_type == "BONE" and blender_object.parent and blender_object.parent_bone):
 		parent_mat = _convert_bone_offset_rotation_to_blender(blender_object) # blender_object.parent.matrix_world.copy()
 
-		def _ret(value: list[float]) -> float:
-			value = mathutils.Euler(convert_rotation_euler_to_blender(value)).to_matrix().to_4x4()
+		def _ret(value: list[float]) -> list[float]:
+			value = mathutils.Euler(convert_rotation_euler_to_blender(value)).to_matrix().to_4x4() # pyright: ignore[reportAssignmentType, reportArgumentType]
 			return (parent_mat @ value).to_euler()
 		return _ret
 
@@ -190,13 +190,13 @@ def _create_scale_to_blender_func(blender_object: bpy.types.Object) -> Callable:
 	elif(blender_object.parent_type == "BONE" and blender_object.parent and blender_object.parent_bone):
 		_, _, offset = (blender_object.parent.matrix_world).decompose()
 
-	def _ret(value: list[float]) -> float:
+	def _ret(value: list[float]) -> list[float]:
 		value = [value[i] * offset[i] for i in range(3)]
 		return convert_scale_to_stf(value)
 	return _ret
 
 
-def stf_node_resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], blender_object: Any) -> BlenderPropertyPathPart:
+def stf_node_resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], blender_object: Any) -> BlenderPropertyPathPart | None:
 	blender_object = context.get_imported_resource(stf_path[0])
 	match(stf_path[1]):
 		case "t":

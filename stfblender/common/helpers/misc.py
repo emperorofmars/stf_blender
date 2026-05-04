@@ -12,7 +12,7 @@ def draw_slot_link_warning(layout: bpy.types.UILayout):
 
 def get_stf_version() -> str:
 	import addon_utils
-	for module in addon_utils.modules():
+	for module in addon_utils.modules(): # pyright: ignore[reportGeneralTypeIssues]
 		if module.__name__.endswith("stf_blender"):
 			version = module.bl_info.get("version", (0, 0, 0))
 			return str(version[0]) + "." + str(version[1]) + "." + str(version[2])
@@ -27,7 +27,7 @@ class SetActiveObjectOperator(bpy.types.Operator):
 
 	target_name: bpy.props.StringProperty(name = "target_name") # type: ignore
 
-	def execute(self, context):
+	def execute(self, context) -> set:
 		blender_object = bpy.data.objects.get(self.target_name)
 		for selected in bpy.context.selected_objects:
 			selected.select_set(False)
@@ -43,7 +43,7 @@ class OpenWebpage(bpy.types.Operator):
 
 	url: bpy.props.StringProperty(name = "URL") # type: ignore
 
-	def execute(self, context):
+	def execute(self, context) -> set:
 		import webbrowser
 		webbrowser.open(self.url)
 		return {"FINISHED"}
@@ -57,6 +57,6 @@ class CopyToClipboard(bpy.types.Operator):
 
 	text: bpy.props.StringProperty() # type: ignore
 
-	def execute(self, context):
+	def execute(self, context) -> set:
 		bpy.context.window_manager.clipboard = self.text
 		return {"FINISHED"}

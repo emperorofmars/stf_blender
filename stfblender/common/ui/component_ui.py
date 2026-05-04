@@ -75,7 +75,7 @@ class STFDrawComponentList:
 		parent = None
 		if(stf_component_filter == bpy.types.Bone):
 			anc = item.rna_ancestors()
-			if(anc and len(anc) > 1 and type(anc[len(anc) - 2]) == bpy.types.Bone):
+			if(anc and len(anc) > 1 and type(anc[len(anc) - 2]) is bpy.types.Bone):
 				parent = anc[len(anc) - 2]
 		else:
 			parent = item.id_data
@@ -104,9 +104,9 @@ class STFDrawComponentList:
 		row_r.operator(CopyToClipboard.bl_idname, text="", icon="DUPLICATE", emboss=False).text = item.stf_id
 
 # Both lists can be on screen at the same time. They need different 'bl_idname' properties to have separate size and scroll values.
-class STFDrawBlenderComponentList(STFDrawComponentList, bpy.types.UIList):
+class STFDrawBlenderComponentList(STFDrawComponentList, bpy.types.UIList): # pyright: ignore[reportIncompatibleMethodOverride]
 	bl_idname = "COLLECTION_UL_stf_components_blender_list"
-class STFDrawDataComponentList(STFDrawComponentList, bpy.types.UIList):
+class STFDrawDataComponentList(STFDrawComponentList, bpy.types.UIList): # pyright: ignore[reportIncompatibleMethodOverride]
 	bl_idname = "COLLECTION_UL_stf_components_data_list"
 
 
@@ -130,7 +130,7 @@ class STFDrawInstanceComponentList(bpy.types.UIList):
 		row_r.alignment = "RIGHT"
 		row_r.prop(self, "sort_reverse", text="", icon="SORT_DESC" if self.sort_reverse else "SORT_ASC")
 
-	def filter_items(self, context: bpy.types.Context, data, propname: str):
+	def filter_items(self, context: bpy.types.Context, data, propname: str) -> tuple[list[int], list[int]]: # pyright: ignore[reportIncompatibleMethodOverride]
 		items: list[InstanceModComponentRef] = getattr(data, propname)
 
 		filter = [self.bitflag_filter_item] * len(items)
@@ -143,16 +143,16 @@ class STFDrawInstanceComponentList(bpy.types.UIList):
 					filter_match = False
 				if(not filter_match):
 					filter[idx] = ~self.bitflag_filter_item
-			filter[idx] = ~self.bitflag_filter_item
+			filter[idx] = ~self.bitflag_filter_item # pyright: ignore[reportPossiblyUnboundVariable]
 
 		_sort = [(idx, item) for idx, item in enumerate(items)]
 		def _sort_func(item: tuple[int, InstanceModComponentRef]):
 			return item[1][self.sort_by] + (item[1].stf_type if self.sort_by == "bone" else item[1].bone)
-		sortorder = bpy.types.UI_UL_list.sort_items_helper(_sort, _sort_func, self.sort_reverse)
+		sortorder: list[int] = bpy.types.UI_UL_list.sort_items_helper(_sort, _sort_func, self.sort_reverse) # pyright: ignore[reportAssignmentType]
 
 		return filter, sortorder
 
-	def draw_item(self, context: bpy.types.Context, layout: bpy.types.UILayout, data, item: InstanceModComponentRef, icon, active_data, active_propname):
+	def draw_item(self, context: bpy.types.Context, layout: bpy.types.UILayout, data, item: InstanceModComponentRef, icon, active_data, active_propname): # pyright: ignore[reportIncompatibleMethodOverride]
 		split = layout.split(factor=0.75)
 		row = split.split(factor=0.5)
 		row_l = row.row()
@@ -165,7 +165,7 @@ class STFDrawInstanceComponentList(bpy.types.UIList):
 		row_r.operator(CopyToClipboard.bl_idname, text="", icon="DUPLICATE", emboss=False).text = item.stf_id
 
 
-def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, stf_application_object: Any, component: STF_ComponentResourceBase, edit_op: str, is_instance: bool, inject_ui: Callable = None):
+def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, stf_application_object: Any, component: STF_ComponentResourceBase, edit_op: str, is_instance: bool, inject_ui: Callable | None = None):
 	box = layout.box()
 	# Component header info
 	row = box.row()
@@ -248,7 +248,7 @@ def draw_components_ui(
 		add_component_op: str,
 		remove_component_op: str,
 		edit_component_id_op: str,
-		get_target_object_func: Callable = None,
+		get_target_object_func: Callable | None = None,
 		inject_ui: Any = None,
 		is_data_resource_component: bool = False,
 		is_component_instance: bool = False
@@ -268,7 +268,7 @@ def draw_components_ui(
 		row.prop(bpy.context.scene, "stf_component_modules", text="")
 
 	selected_add_module = find_component_handler(stf_modules, available_component_modules)
-	if(selected_add_module and selected_add_module.stf_type == None): # Fallback
+	if(selected_add_module and selected_add_module.stf_type is None): # Fallback
 		row2 = layout.row(align=True)
 		row2_l = row2.row(align=True)
 		if(not bpy.context.scene.stf_fallback_component_type or len(bpy.context.scene.stf_fallback_component_type) < 3 or "." not in bpy.context.scene.stf_fallback_component_type):
@@ -320,10 +320,9 @@ def draw_instance_standin_components_ui(
 		ref_holder: Any,
 		component_holder: Any,
 		edit_component_id_op: str,
-		get_target_object_func: Callable = None,
-		inject_ui: Callable = None
+		get_target_object_func: Callable | None = None,
+		inject_ui: Callable | None = None
 		):
-	stf_modules = get_component_handlers()
 	row = layout.row()
 	row.template_list(STFDrawInstanceComponentList.bl_idname, "", ref_holder, "stf_components", ref_holder, "stf_active_component_index")
 	if(len(ref_holder.stf_components) > ref_holder.stf_active_component_index):

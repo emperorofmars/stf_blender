@@ -20,7 +20,7 @@ class STFReport:
 
 	def to_string(self) -> str:
 		self.severity.name
-		ret = "== STF " + self.severity.name + " =="
+		ret: str = "== STF " + self.severity.name + " =="
 		if(self.stf_type): ret += "\nSTF Type: " + str(self.stf_type)
 		if(self.stf_id): ret += "\nID: " + str(self.stf_id)
 		if(self.application_object is not None): ret += "\nApp Object: " + str(self.application_object)

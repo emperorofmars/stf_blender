@@ -30,7 +30,7 @@ class STFDrawDataResourceList(bpy.types.UIList):
 		row_r.alignment = "RIGHT"
 		row_r.prop(self, "sort_reverse", text="", icon="SORT_DESC" if self.sort_reverse else "SORT_ASC")
 
-	def filter_items(self, context: bpy.types.Context, data, propname: str):
+	def filter_items(self, context: bpy.types.Context, data, propname: str) -> tuple[list[int], list[int]]: # pyright: ignore[reportIncompatibleMethodOverride]
 		items: list[STF_Data_Ref] = getattr(data, propname)
 
 		filter = [self.bitflag_filter_item] * len(items)
@@ -62,11 +62,11 @@ class STFDrawDataResourceList(bpy.types.UIList):
 					return item[1].stf_type
 				case _:
 					return item[0]
-		sortorder = bpy.types.UI_UL_list.sort_items_helper(_sort, _sort_func, self.sort_reverse)
+		sortorder: list[int] = bpy.types.UI_UL_list.sort_items_helper(_sort, _sort_func, self.sort_reverse) # pyright: ignore[reportAssignmentType]
 
 		return filter, sortorder
 
-	def draw_item(self, context: bpy.types.Context, layout: bpy.types.UILayout, data, item: STF_Data_Ref, icon, active_data, active_propname):
+	def draw_item(self, context: bpy.types.Context, layout: bpy.types.UILayout, data, item: STF_Data_Ref, icon, active_data, active_propname): # pyright: ignore[reportIncompatibleMethodOverride]
 		component = None
 		if(hasattr(item.id_data, item.blender_property_name)):
 			for component in getattr(item.id_data, item.blender_property_name):
@@ -94,7 +94,6 @@ class STFDrawDataResourceList(bpy.types.UIList):
 
 def _get_data_resource_component_ref_property_collection(context: bpy.types.Context) -> Any:
 	for resource in getattr(context.scene.collection if stf_data_resource_use_scene_collection else context.collection, stf_data_resource_property):
-		if(resource.stf_id == stf_data_resource_id):
 			return resource.stf_components
 
 class STFAddDataResourceComponentOperator(bpy.types.Operator, STFAddComponentOperatorBase):
@@ -179,7 +178,7 @@ def draw_data_resources_ui(
 	row.prop(bpy.context.scene, "stf_data_modules", text="")
 	selected_add_module = find_data_handler(get_blender_non_native_data_handlers(), context.scene.stf_data_modules)
 
-	if(selected_add_module and selected_add_module.stf_type == None): # Fallback
+	if(selected_add_module and selected_add_module.stf_type is None): # Fallback
 		row2 = layout.row(align=True)
 		row2_l = row2.row(align=True)
 		if(not bpy.context.scene.stf_fallback_data_type or len(bpy.context.scene.stf_fallback_data_type) < 3 or "." not in bpy.context.scene.stf_fallback_data_type):
@@ -223,8 +222,8 @@ def draw_data_resources_ui(
 			layout.label(text="Invalid Resource: " + resource_ref.blender_property_name)
 
 
-stf_data_resource_property = None
-stf_data_resource_id = None
+stf_data_resource_property: str
+stf_data_resource_id: str
 stf_data_resource_use_scene_collection = False
 def set_stf_data_resource_property(use_scene_collection: bool, blender_property: str, resource_id: str):
 	global stf_data_resource_use_scene_collection
