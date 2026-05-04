@@ -1,10 +1,10 @@
 import bpy
 
-from .stf_material_definition import STF_Material_Property, STF_Material_Value_Module_Base, STF_Material_Value_Ref
+from .stf_material_definition import STF_Material_Property, STF_Material_Value_Base, STF_Material_Value_Module_Base, STF_Material_Value_Ref
 from .material_value_modules import blender_material_value_modules
 
 
-def add_property(blender_material: bpy.types.Material, property_type: str, value_module: STF_Material_Value_Module_Base) -> tuple[STF_Material_Property, STF_Material_Value_Ref, STF_Material_Value_Module_Base]:
+def add_property(blender_material: bpy.types.Material, property_type: str, value_module: STF_Material_Value_Module_Base) -> tuple[STF_Material_Property, STF_Material_Value_Ref, STF_Material_Value_Base]:
 	prop = blender_material.stf_material.properties.add()
 	prop.property_type = property_type
 	prop.value_property_name = value_module.property_name
@@ -28,7 +28,7 @@ def remove_property(blender_material: bpy.types.Material, index: int):
 			break
 
 
-def add_value_to_property(blender_material: bpy.types.Material, index: int) -> tuple[STF_Material_Value_Ref, STF_Material_Value_Module_Base]:
+def add_value_to_property(blender_material: bpy.types.Material, index: int) -> tuple[STF_Material_Value_Ref, STF_Material_Value_Base]:
 	property: STF_Material_Property = blender_material.stf_material.properties[index]
 	value_ref = property.values.add()
 	max_id = 0
@@ -68,10 +68,10 @@ class STFAddMaterialProperty(bpy.types.Operator):
 
 	property_type: bpy.props.StringProperty() # type: ignore
 
-	def execute(self, context):
+	def execute(self, context) -> set:
 		for mat_module in blender_material_value_modules:
 			if(mat_module.value_type == context.scene.stf_material_value_modules):
-				add_property(context.material, self.property_type, mat_module)
+				add_property(context.material, self.property_type, mat_module) # pyright: ignore[reportArgumentType]
 				return {"FINISHED"}
 		self.report({"ERROR"}, "Invalid material value module!")
 		return {"CANCELLED"}
@@ -87,8 +87,8 @@ class STFRemoveMaterialProperty(bpy.types.Operator):
 	def invoke(self, context, event):
 		return context.window_manager.invoke_confirm(self, event)
 
-	def execute(self, context):
-		remove_property(context.material, self.index)
+	def execute(self, context) -> set:
+		remove_property(context.material, self.index) # pyright: ignore[reportArgumentType]
 		return {"FINISHED"}
 
 
@@ -100,8 +100,8 @@ class STFAddMaterialPropertyValue(bpy.types.Operator):
 
 	index: bpy.props.IntProperty() # type: ignore
 
-	def execute(self, context):
-		add_value_to_property(context.material, self.index)
+	def execute(self, context) -> set:
+		add_value_to_property(context.material, self.index) # pyright: ignore[reportArgumentType]
 		return {"FINISHED"}
 
 class STFRemoveMaterialPropertyValue(bpy.types.Operator):
@@ -115,8 +115,8 @@ class STFRemoveMaterialPropertyValue(bpy.types.Operator):
 	def invoke(self, context, event):
 		return context.window_manager.invoke_confirm(self, event)
 
-	def execute(self, context):
-		remove_property_value(context.material, self.index)
+	def execute(self, context) -> set:
+		remove_property_value(context.material, self.index) # pyright: ignore[reportArgumentType]
 		return {"FINISHED"}
 
 class STFClearMaterial(bpy.types.Operator):
@@ -128,6 +128,6 @@ class STFClearMaterial(bpy.types.Operator):
 	def invoke(self, context, event):
 		return context.window_manager.invoke_confirm(self, event)
 
-	def execute(self, context):
-		clear_stf_material(context.material)
+	def execute(self, context) -> set:
+		clear_stf_material(context.material) # pyright: ignore[reportArgumentType]
 		return {"FINISHED"}

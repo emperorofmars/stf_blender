@@ -1,49 +1,40 @@
+# pyright: reportArgumentType=false
+
 import bpy
 
 from .stf_material_definition import STF_Material_Property
 
 
 def set_image_value(blender_material: bpy.types.Material, surface: bpy.types.ShaderNode, property: STF_Material_Property, target_input: str | int, position_index_v = 0, position_index_h = 0) -> bool:
-	property: STF_Material_Property = property
 	if(property.value_type == "image"):
 		value_id = property.values[0].value_id
 		## let value
 		for value in getattr(blender_material, property.value_property_name):
 			if(value.value_id == value_id):
-				break
-		if(value):
-			image_node: bpy.types.ShaderNodeTexImage = blender_material.node_tree.nodes.new("ShaderNodeTexImage")
-			image_node.location.y = position_index_v * -300
-			image_node.location.x = position_index_h * -400
-			image_node.image = value.image
-			blender_material.node_tree.links.new(image_node.outputs[0], surface.inputs[target_input])
-			return True
+				image_node: bpy.types.ShaderNodeTexImage = blender_material.node_tree.nodes.new("ShaderNodeTexImage") # pyright: ignore[reportAssignmentType, reportOptionalMemberAccess]
+				image_node.location.y = position_index_v * -300
+				image_node.location.x = position_index_h * -400
+				image_node.image = value.image
+				blender_material.node_tree.links.new(image_node.outputs[0], surface.inputs[target_input])
+				return True
 	return False
 
 def set_color_value(blender_material: bpy.types.Material, surface: bpy.types.ShaderNode, property: STF_Material_Property, target_input: str | int, position_index_v = 0, position_index_h = 0) -> bool:
-	property: STF_Material_Property = property
 	if(property.value_type == "color"):
 		value_id = property.values[0].value_id
-		## let value
 		for value in getattr(blender_material, property.value_property_name):
 			if(value.value_id == value_id):
-				break
-		if(value):
-			surface.inputs[target_input].default_value = value.color
-			return True
+				surface.inputs[target_input].default_value = value.color
+				return True
 	return False
 
 def set_float_value(blender_material: bpy.types.Material, surface: bpy.types.ShaderNode, property: STF_Material_Property, target_input: str | int, position_index_v = 0, position_index_h = 0) -> bool:
-	property: STF_Material_Property = property
 	if(property.value_type == "float"):
 		value_id = property.values[0].value_id
-		## let value
 		for value in getattr(blender_material, property.value_property_name):
 			if(value.value_id == value_id):
-				break
-		if(value):
-			surface.inputs[target_input].default_value = value.number
-			return True
+				surface.inputs[target_input].default_value = value.number
+				return True
 	return False
 
 
@@ -95,6 +86,6 @@ class STFConvertSTFMaterialToBlender(bpy.types.Operator):
 	def invoke(self, context, event):
 		return context.window_manager.invoke_confirm(self, event)
 
-	def execute(self, context):
+	def execute(self, context) -> set:
 		stf_material_to_blender(context.material)
 		return {"FINISHED"}

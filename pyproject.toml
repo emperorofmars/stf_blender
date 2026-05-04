@@ -33,7 +33,7 @@ reportOptionalMemberAccess = "information"
 
 [tool.ruff]
 ignore = [
-	"E701"
+	"E701",
 ]
 [tool.ruff.format]
 quote-style = "double"

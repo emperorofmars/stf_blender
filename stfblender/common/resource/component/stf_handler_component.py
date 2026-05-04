@@ -2,7 +2,7 @@ import bpy
 from typing import Any, Callable
 
 from ..blender_native import STF_Handler_BlenderNative
-from ... import STF_Category, STF_ExportContext
+from ... import STF_Category, STF_ImportContext, STF_ExportContext
 from ...utils.armature_bone import ArmatureBone
 
 """
@@ -86,9 +86,9 @@ class STF_Handler_BoneComponent(STF_Handler_Component):
 	set_component_instance_standin_func: Callable[[bpy.types.Context, STF_Component_Ref, Any, Any, Any], None]
 
 	# (context: bpy.types.Context, component_ref: STF_Component_Ref, standin_component: STF_BlenderComponentBase, context_object: Any) -> json_resource: dict
-	serialize_component_instance_standin_func: Callable[[bpy.types.Context, STF_Component_Ref, STF_ComponentResourceBase, Any], dict]
+	serialize_component_instance_standin_func: Callable[[STF_ExportContext, STF_Component_Ref, STF_ComponentResourceBase, Any], dict]
 	# (context: bpy.types.Context, json_resource: dict, component_ref: STF_Component_Ref, standin_component: STF_BlenderComponentBase, context_object: Any) -> None
-	parse_component_instance_standin_func: Callable[[bpy.types.Context, dict, STF_Component_Ref, STF_ComponentResourceBase, Any], None]
+	parse_component_instance_standin_func: Callable[[STF_ImportContext, dict, STF_Component_Ref, STF_ComponentResourceBase, Any], None]
 
 
 class STF_ExportComponentHook:

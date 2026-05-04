@@ -50,7 +50,8 @@ def _stf_export(context: STF_ExportContext, application_object: Any, context_obj
 
 	def _handle_animations():
 		for action in bpy.data.actions:
-			if(stf_animation_id := context.serialize_resource(ret, action, context_object=collection, stf_category="data", export_fail_severity=STFReportSeverity.Debug)):
+			stf_animation_id = context.serialize_resource(ret, action, context_object=collection, stf_category="data", export_fail_severity=STFReportSeverity.Debug)
+			if(stf_animation_id is not None):
 				animations.append(stf_animation_id)
 	context.add_task(STF_TaskSteps.ANIMATION, _handle_animations)
 

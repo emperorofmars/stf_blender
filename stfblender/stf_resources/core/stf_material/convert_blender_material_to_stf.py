@@ -1,3 +1,4 @@
+# pyright: reportArgumentType=false, reportOptionalSubscript=false
 import bpy
 
 from .stf_material_operators import add_property, clear_stf_material
@@ -79,6 +80,6 @@ class STFConvertBlenderMaterialToSTF(bpy.types.Operator):
 	def invoke(self, context, event):
 		return context.window_manager.invoke_confirm(self, event)
 
-	def execute(self, context):
+	def execute(self, context) -> set:
 		blender_material_to_stf(context.material)
 		return {"FINISHED"}

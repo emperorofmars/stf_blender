@@ -27,22 +27,22 @@ def _draw_func(layout: bpy.types.UILayout, context: bpy.types.Context, blender_m
 	layout.prop(value, "image")
 
 
-def _resolve_property_path_to_stf_func(context: STF_ExportContext, blender_property_path: str, value: STF_Material_Value_Image) -> STFPropertyPathPart:
+def _resolve_property_path_to_stf_func(context: STF_ExportContext, blender_property_path: str, value: STF_Material_Value_Image) -> STFPropertyPathPart | None:
 	return None
 
-def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str]) -> BlenderPropertyPathPart:
+def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str]) -> BlenderPropertyPathPart | None:
 	return None
 
 
 class STF_Material_Value_Module_Image(STF_Material_Value_Module_Base):
 	value_type = "image"
 	property_name = "stf_material_value_image"
-	value_import_func = _value_import_func
-	value_export_func = _value_export_func
-	draw_func = _draw_func
+	value_import_func = _value_import_func # pyright: ignore[reportAssignmentType]
+	value_export_func = _value_export_func # pyright: ignore[reportAssignmentType]
+	draw_func = _draw_func # pyright: ignore[reportAssignmentType]
 
-	resolve_property_path_to_stf_func = _resolve_property_path_to_stf_func
-	resolve_stf_property_to_blender_func = _resolve_stf_property_to_blender_func
+	resolve_property_path_to_stf_func = _resolve_property_path_to_stf_func # pyright: ignore[reportAssignmentType]
+	resolve_stf_property_to_blender_func = _resolve_stf_property_to_blender_func # pyright: ignore[reportAssignmentType]
 
 
 def register():

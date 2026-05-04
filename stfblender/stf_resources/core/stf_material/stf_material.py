@@ -93,10 +93,11 @@ def _stf_export(context: STF_ExportContext, application_object: Any, context_obj
 				if(mat_module.property_name == property.value_property_name):
 					for property_value in getattr(blender_material, property.value_property_name):
 						if(property_value.value_id == value_ref.value_id):
-							if(serialized_value := mat_module.value_export_func(context, ret, blender_material, property_value)):
+							serialized_value = mat_module.value_export_func(context, ret, blender_material, property_value)
+							if(serialized_value is not None):
 								values.append(serialized_value)
 							else:
-								context.report(STFReport("Failed to export material property: " + property.value_property_name, STFReportSeverity.Warn, blender_material.stf_info.stf_id, _stf_type, blender_material))
+								context.report(STFReport("Failed to export material property: " + property.property_type + " ( " + property.value_property_name + " )", STFReportSeverity.Warn, blender_material.stf_info.stf_id, _stf_type, blender_material))
 							break
 
 		json_prop["values"] = values

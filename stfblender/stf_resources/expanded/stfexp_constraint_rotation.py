@@ -25,7 +25,7 @@ class STFEXP_Constraint_Rotation(STF_ComponentResourceBase):
 class STFDrawAVAExpressionList(bpy.types.UIList):
 	bl_idname = "COLLECTION_UL_stfexp_constraint_rotation_sources_list"
 
-	def draw_item(self, context: bpy.types.Context, layout: bpy.types.UILayout, data, item: ConstraintSource, icon, active_data, active_propname, index):
+	def draw_item(self, context: bpy.types.Context, layout: bpy.types.UILayout, data, item: ConstraintSource, icon, active_data, active_propname, index): # pyright: ignore[reportIncompatibleMethodOverride]
 		if(validate_node_path_selector(item.source)):
 			layout.label(text=node_path_selector_to_string(item.source), icon="RIGHTARROW")
 			layout.prop(item, "weight")
@@ -63,7 +63,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 """Import export"""
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
-	component_ref, component = add_component(context_object, _blender_property_name, stf_id, _stf_type)
+	component_ref, component = add_component(context_object, _blender_property_name, stf_id, _stf_type) # pyright: ignore[reportAssignmentType]
 	import_component_base(context, component, json_resource, _blender_property_name, context_object)
 	component: STFEXP_Constraint_Rotation = component
 
@@ -153,7 +153,7 @@ def _parse_component_instance_standin_func(context: STF_ImportContext, json_reso
 
 """Animation"""
 
-def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: Any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart:
+def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: Any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart | None:
 	if(match := re.search(r"^" + _blender_property_name + r"\[(?P<component_index>[\d]+)\].enabled", data_path)):
 		if(component_path := get_component_stf_path_from_collection(application_object, _blender_property_name, int(match.groupdict()["component_index"]))):
 			return STFPropertyPathPart(component_path + ["enabled"])
@@ -166,9 +166,10 @@ def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_o
 	return None
 
 
-def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: Any) -> BlenderPropertyPathPart:
+def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: Any) -> BlenderPropertyPathPart | None:
 	blender_object = context.get_imported_resource(stf_path[0])
-	if(component_index := get_component_index(application_object, _blender_property_name, blender_object.stf_id) is not None):
+	component_index = get_component_index(application_object, _blender_property_name, blender_object.stf_id)
+	if(component_index is not None):
 		match(stf_path[1]):
 			case "enabled":
 				return BlenderPropertyPathPart("OBJECT", _blender_property_name + "[" + str(component_index) + "].enabled")
@@ -203,8 +204,8 @@ class Handler_STFEXP_Constraint_Rotation(STF_Handler_BoneComponent):
 	draw_component_instance_func = _draw_component
 	set_component_instance_standin_func = _set_component_instance_standin
 
-	serialize_component_instance_standin_func = _serialize_component_instance_standin_func
-	parse_component_instance_standin_func = _parse_component_instance_standin_func
+	serialize_component_instance_standin_func = _serialize_component_instance_standin_func # pyright: ignore[reportAssignmentType]
+	parse_component_instance_standin_func = _parse_component_instance_standin_func # pyright: ignore[reportAssignmentType]
 
 	pretty_name_template = "Rotation Constraint"
 
