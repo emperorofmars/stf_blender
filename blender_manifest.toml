@@ -82,6 +82,7 @@ paths_exclude_pattern = [
 	"/.git/",
 	"/*.zip",
 	"/.vscode/",
+	"/.zed/",
 	".venv",
 	"/testsuite",
 	"/stf_blender_module_template",
@@ -97,4 +98,8 @@ paths_exclude_pattern = [
 	"/out",
 	"/build_extension.py",
 	".forgejo",
+	"bpydev.py",
+	"bpydev.toml",
+	"pyproject.toml",
+	"requirements.txt",
 ]
