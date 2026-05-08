@@ -46,7 +46,7 @@ class STFArmatureSpatialPanel(bpy.types.Panel):
 		set_stf_component_filter(bpy.types.Armature)
 
 		# Set ID
-		draw_stf_id_ui(self.layout, context, context.armature, context.armature.stf_info, STFSetArmatureIDOperator.bl_idname)
+		draw_stf_id_ui(self.layout, context, context.armature, context.armature.stf_info, STFSetArmatureIDOperator.bl_idname)  # pyright: ignore[reportArgumentType]
 
 		self.layout.separator(factor=2, type="LINE")
 
@@ -54,4 +54,4 @@ class STFArmatureSpatialPanel(bpy.types.Panel):
 		self.layout.separator(factor=1, type="SPACE")
 		header, body = self.layout.panel("stf.armature_components", default_closed = False)
 		header.label(text="STF Components (" + str(len(context.armature.stf_info.stf_components)) + ")", icon="GROUP")
-		if(body): draw_components_ui(self.layout, context, context.armature.stf_info, context.armature, STFAddArmatureComponentOperator.bl_idname, STFRemoveArmatureComponentOperator.bl_idname, STFEditArmatureComponentIdOperator.bl_idname)
+		if(body): draw_components_ui(self.layout, context, context.armature.stf_info, context.armature, STFAddArmatureComponentOperator.bl_idname, STFRemoveArmatureComponentOperator.bl_idname, STFEditArmatureComponentIdOperator.bl_idname)  # pyright: ignore[reportArgumentType]

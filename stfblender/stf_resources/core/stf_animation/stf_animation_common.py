@@ -1,5 +1,5 @@
 
-stf_animation_type = "stf.animation"
+stf_animation_type: str = "stf.animation"
 
 
 handle_type_to_stf = {

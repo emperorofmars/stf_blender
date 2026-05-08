@@ -16,21 +16,18 @@ _stf_type = stf_animation_type
 
 def stf_animation_export(context: STF_ExportContext, application_object: Any, context_object: Any) -> tuple[dict, str] | STFReport:
 	blender_animation: bpy.types.Action = application_object
-	if(blender_animation.stf_animation.exclude): return None
+	if(blender_animation.stf_animation.exclude): return None  # pyright: ignore[reportReturnType]
 	if(blender_animation.is_action_legacy):
-		context.report(STFReport("Ignoring legacy animation: " + blender_animation.name, STFReportSeverity.Debug, blender_animation.stf_info.stf_id, _stf_type, application_object))
-		return None
+		return STFReport("Ignoring legacy animation: " + blender_animation.name, STFReportSeverity.Debug, blender_animation.stf_info.stf_id, _stf_type, application_object)
 	if(not hasattr(blender_animation, "slot_link")):
-		context.report(STFReport("Slot-Link is required to export animations!", STFReportSeverity.Debug, blender_animation.stf_info.stf_id, _stf_type, application_object))
-		return None
+		return STFReport("Slot-Link is required to export animations!", STFReportSeverity.Debug, blender_animation.stf_info.stf_id, _stf_type, application_object)
 
 	action_slot_link: ActionSlotLink = blender_animation.slot_link
 	for slot_link in action_slot_link.links:
 		if(slot_link.target):
 			break
 	else:
-		context.report(STFReport("No valid Slot Link target specified!", STFReportSeverity.Debug, blender_animation.stf_info.stf_id, _stf_type, application_object))
-		return None
+		return STFReport("No valid Slot Link target specified!", STFReportSeverity.Debug, blender_animation.stf_info.stf_id, _stf_type, application_object)
 
 	animation_range = [blender_animation.frame_start, blender_animation.frame_end] if blender_animation.use_frame_range else [blender_animation.frame_range[0], blender_animation.frame_range[1]]
 
@@ -81,7 +78,7 @@ def __convert(context: STF_ExportContext, blender_animation: bpy.types.Action, a
 	requires_constraint_bake = False
 	action_slot_link: ActionSlotLink = blender_animation.slot_link
 	for layer in blender_animation.layers:
-		for strip in layer.strips:
+		for strip in layer.strips:  # pyright: ignore[reportAssignmentType]
 			if(strip.type == "KEYFRAME"):
 				strip: bpy.types.ActionKeyframeStrip = strip
 				for channelbag in strip.channelbags:
@@ -103,7 +100,7 @@ def __convert(context: STF_ExportContext, blender_animation: bpy.types.Action, a
 								kurwas[fcurve.data_path][fcurve.array_index] = fcurve
 
 						for data_path, fcurves in kurwas.items():
-							fcurve.update()
+							fcurve.update()  # pyright: ignore[reportPossiblyUnboundVariable]
 
 							# See if this data_path can be exported
 							property_translation = context.resolve_application_property_path(selected_slot_link.target, selected_slot_link.datablock_index, data_path)
@@ -120,7 +117,7 @@ def __convert(context: STF_ExportContext, blender_animation: bpy.types.Action, a
 									if(fcurve):
 										index_conversion.append(fcurve.array_index)
 
-							sub_tracks_serialized = __serialize_subtracks(context, blender_animation, property_translation.stf_path_part, fcurves, animation_range, index_conversion, property_translation.convert_func, bake_only, reference_holder)
+							sub_tracks_serialized = __serialize_subtracks(context, blender_animation, property_translation.stf_path_part, fcurves, animation_range, index_conversion, property_translation.convert_func, bake_only, reference_holder)  # pyright: ignore[reportArgumentType]
 							if(sub_tracks_serialized):
 								stf_tracks.append(sub_tracks_serialized)
 					else:
@@ -142,7 +139,7 @@ def __serialize_subtracks(context: STF_ExportContext, blender_animation: bpy.typ
 	for _, fcurve in fcurves.items():
 		ret[index_conversion[fcurve.array_index]] = {"keyframes": []}
 
-	interpolation: str = None
+	interpolation: str
 
 	# Convert keyframes
 	keyframe_indices: list[int] = [0] * len(index_conversion)
@@ -151,7 +148,7 @@ def __serialize_subtracks(context: STF_ExportContext, blender_animation: bpy.typ
 	#	return None
 
 	for real_timepoint in real_timepoints:
-		value_convert: list[float] = [None] * len(index_conversion)
+		value_convert: list[float] = [None] * len(index_conversion)  # pyright: ignore[reportAssignmentType]
 		left_tangent_convert: list[float] = [0] * len(index_conversion)
 		right_tangent_convert: list[float] = [0] * len(index_conversion)
 
@@ -180,7 +177,7 @@ def __serialize_subtracks(context: STF_ExportContext, blender_animation: bpy.typ
 				prev_keyframe = fcurve.keyframe_points[keyframe_indices[fcurve.array_index] - 1] if keyframe_indices[fcurve.array_index] > 0 else None
 				next_keyframe = fcurve.keyframe_points[keyframe_indices[fcurve.array_index] + 1] if keyframe_indices[fcurve.array_index] + 1 < len(fcurve.keyframe_points) else None
 
-				if(not interpolation):
+				if(not interpolation):  # pyright: ignore[reportPossiblyUnboundVariable]
 					interpolation = keyframe.interpolation
 				elif(keyframe.interpolation != interpolation):
 					interpolation = "mixed"
@@ -224,18 +221,18 @@ def __serialize_subtracks(context: STF_ExportContext, blender_animation: bpy.typ
 				# todo more interpolation types, for sure cubic & quatratic
 
 				# Finally write the stf_keyframe
-				ret[index_conversion[fcurve.array_index]]["keyframes"].append(stf_keyframe)
+				ret[index_conversion[fcurve.array_index]]["keyframes"].append(stf_keyframe)  # pyright: ignore[reportOptionalSubscript]
 
 				keyframe_indices[fcurve.array_index] += 1
 			else:
 				# If one of the curves for this data_path doesn't contain a keyframe when the others do, bake it, regardles of the `bake` setting
-				ret[index_conversion[fcurve.array_index]]["keyframes"].append([
+				ret[index_conversion[fcurve.array_index]]["keyframes"].append([  # pyright: ignore[reportOptionalSubscript]
 					False, # is source of truth, false because it's baked
 					value_convert[index_conversion[fcurve.array_index]], #value
 					"baked",
 				]) # don't add the left tangent at all, since this is not a real keyframe
 
-	match(interpolation):
+	match(interpolation):  # pyright: ignore[reportPossiblyUnboundVariable]
 		case "mixed": interpolation = "mixed"
 		case "BEZIER": interpolation = "bezier"
 		case "CONSTANT": interpolation = "constant"
@@ -252,7 +249,7 @@ def __serialize_subtracks(context: STF_ExportContext, blender_animation: bpy.typ
 			baked_values[index_conversion[fcurve.array_index]] = BytesIO()
 
 		for timepoint in range(int(animation_range[0]), int(animation_range[1] + 1)):
-			value_convert = [None] * len(index_conversion)
+			value_convert = [None] * len(index_conversion)  # pyright: ignore[reportAssignmentType]
 			# Get evaluated value from each subtrack
 			for _, fcurve in fcurves.items():
 				value_convert[fcurve.array_index] = fcurve.evaluate(timepoint)
@@ -264,7 +261,7 @@ def __serialize_subtracks(context: STF_ExportContext, blender_animation: bpy.typ
 		# Serialize buffers for each subtrack
 		for _, fcurve in fcurves.items():
 			if(ret[index_conversion[fcurve.array_index]]):
-				ret[index_conversion[fcurve.array_index]]["baked"] = context.serialize_buffer(reference_holder, baked_values[index_conversion[fcurve.array_index]].getbuffer())
+				ret[index_conversion[fcurve.array_index]]["baked"] = context.serialize_buffer(reference_holder, baked_values[index_conversion[fcurve.array_index]].getbuffer())  # pyright: ignore[reportOptionalSubscript, reportArgumentType]
 
 	return {
 		"target": stf_target,
@@ -273,4 +270,3 @@ def __serialize_subtracks(context: STF_ExportContext, blender_animation: bpy.typ
 		"interpolation": interpolation,
 		"track_baked": bake_only,
 	}
-

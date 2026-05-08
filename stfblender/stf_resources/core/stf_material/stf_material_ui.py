@@ -54,7 +54,7 @@ class STFDrawMaterialPropertyList(bpy.types.UIList):
 		row_r.alignment = "RIGHT"
 		row_r.prop(self, "sort_reverse", text="", icon="SORT_DESC" if self.sort_reverse else "SORT_ASC")
 
-	def filter_items(self, context: bpy.types.Context, data, propname: str):
+	def filter_items(self, context: bpy.types.Context, data, propname: str):  # pyright: ignore[reportIncompatibleMethodOverride]
 		items: list[STF_Material_Property] = getattr(data, propname)
 
 		filter = [self.bitflag_filter_item] * len(items)
@@ -81,7 +81,7 @@ class STFDrawMaterialPropertyList(bpy.types.UIList):
 		sortorder = bpy.types.UI_UL_list.sort_items_helper(_sort, _sort_func, self.sort_reverse)
 		return filter, sortorder
 
-	def draw_item(self, context, layout, data, item: STF_Material_Property, icon, active_data, active_propname, index: int):
+	def draw_item(self, context, layout, data, item: STF_Material_Property, icon, active_data, active_propname, index: int):  # pyright: ignore[reportIncompatibleMethodOverride]
 		alert = not item.property_type or item.property_type.strip() == ""
 		layout.alert = alert
 		split = layout.split(factor=0.55)
@@ -94,7 +94,7 @@ class STFDrawMaterialPropertyList(bpy.types.UIList):
 
 class STFDrawMaterialPropertyValueList(bpy.types.UIList):
 	bl_idname = "COLLECTION_UL_stf_material_value_list"
-	def draw_item(self, context, layout, data, item: STF_Material_Value_Ref, icon, active_data, active_propname, index: int):
+	def draw_item(self, context, layout, data, item: STF_Material_Value_Ref, icon, active_data, active_propname, index: int):  # pyright: ignore[reportIncompatibleMethodOverride]
 		layout.label(text="Value " + str(index))
 
 
@@ -103,7 +103,7 @@ class STFMaterialHintAdd(bpy.types.Operator):
 	bl_idname = "stf.material_hint_add"
 	bl_label = "Add Style Hint"
 	bl_options = {"REGISTER", "UNDO"}
-	def execute(self, context):
+	def execute(self, context) -> set:
 		context.material.stf_material.style_hints.add()
 		return {"FINISHED"}
 
@@ -113,7 +113,7 @@ class STFMaterialHintRemove(bpy.types.Operator):
 	bl_label = "Remove Style Hint"
 	bl_options = {"REGISTER", "UNDO"}
 	index: bpy.props.IntProperty() # type: ignore
-	def execute(self, context):
+	def execute(self, context) -> set:
 		context.material.stf_material.style_hints.remove(self.index)
 		return {"FINISHED"}
 
@@ -123,7 +123,7 @@ class STFMaterialShaderTargetAdd(bpy.types.Operator):
 	bl_idname = "stf.material_shader_target_add"
 	bl_label = "Add Shader Target"
 	bl_options = {"REGISTER", "UNDO"}
-	def execute(self, context):
+	def execute(self, context) -> set:
 		context.material.stf_material.shader_targets.add()
 		return {"FINISHED"}
 
@@ -133,7 +133,7 @@ class STFMaterialShaderTargetRemove(bpy.types.Operator):
 	bl_label = "Remove Shader Target"
 	bl_options = {"REGISTER", "UNDO"}
 	index: bpy.props.IntProperty() # type: ignore
-	def execute(self, context):
+	def execute(self, context) -> set:
 		context.material.stf_material.shader_targets.remove(self.index)
 		return {"FINISHED"}
 
@@ -143,7 +143,7 @@ class STFMaterialShaderTargetShaderAdd(bpy.types.Operator):
 	bl_label = "Add Shader"
 	bl_options = {"REGISTER", "UNDO"}
 	index: bpy.props.IntProperty() # type: ignore
-	def execute(self, context):
+	def execute(self, context) -> set:
 		context.material.stf_material.shader_targets[self.index].shaders.add()
 		return {"FINISHED"}
 
@@ -154,7 +154,7 @@ class STFMaterialShaderTargetShaderRemove(bpy.types.Operator):
 	bl_options = {"REGISTER", "UNDO"}
 	index: bpy.props.IntProperty() # type: ignore
 	index_shader: bpy.props.IntProperty() # type: ignore
-	def execute(self, context):
+	def execute(self, context) -> set:
 		context.material.stf_material.shader_targets[self.index].shaders.remove(self.index_shader)
 		return {"FINISHED"}
 
@@ -175,7 +175,7 @@ class STFMaterialSpatialPanel(bpy.types.Panel):
 		set_stf_component_filter(bpy.types.Material)
 
 		# Set ID
-		draw_stf_id_ui(self.layout, context, context.material, context.material.stf_info, STFSetMaterialIDOperator.bl_idname)
+		draw_stf_id_ui(self.layout, context, context.material, context.material.stf_info, STFSetMaterialIDOperator.bl_idname)  # pyright: ignore[reportArgumentType]
 
 		self.layout.separator(factor=2, type="LINE")
 
@@ -222,7 +222,7 @@ class STFMaterialSpatialPanel(bpy.types.Panel):
 			if(value := _find_value(context, prop)):
 				if(prop.multi_value):
 					if(len(prop.values) > 1):
-						row_value_list.operator(STFRemoveMaterialPropertyValue.bl_idname, text="", icon="X").index = context.material.stf_material.active_property_index
+						row_value_list.operator(STFRemoveMaterialPropertyValue.bl_idname, text="", icon="X").index = context.material.stf_material.active_property_index  # pyright: ignore[reportPossiblyUnboundVariable]
 					box.operator(STFAddMaterialPropertyValue.bl_idname).index = context.material.stf_material.active_property_index
 
 				box.separator(factor=1, type="LINE")
@@ -295,7 +295,7 @@ class STFMaterialSpatialPanel(bpy.types.Panel):
 		self.layout.separator(factor=2, type="LINE")
 		header, body = self.layout.panel("stf.material_components", default_closed = True)
 		header.label(text="STF Components (" + str(len(context.material.stf_info.stf_components)) + ")", icon="GROUP")
-		if(body): draw_components_ui(self.layout, context, context.material.stf_info, context.material, STFAddMaterialComponentOperator.bl_idname, STFRemoveMaterialComponentOperator.bl_idname, STFEditMaterialComponentIdOperator.bl_idname)
+		if(body): draw_components_ui(self.layout, context, context.material.stf_info, context.material, STFAddMaterialComponentOperator.bl_idname, STFRemoveMaterialComponentOperator.bl_idname, STFEditMaterialComponentIdOperator.bl_idname)  # pyright: ignore[reportArgumentType]
 
 
 def _find_value(context: bpy.types.Context, prop: STF_Material_Property):

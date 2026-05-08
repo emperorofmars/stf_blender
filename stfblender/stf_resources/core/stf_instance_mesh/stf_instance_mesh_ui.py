@@ -13,13 +13,14 @@ class SetInstanceBlendshapes(bpy.types.Operator):
 	bl_options = {"REGISTER", "UNDO"}
 
 	@classmethod
-	def poll(cls, context): return hasattr(context, "object") and context.object is not None and context.object.stf_instance is not None and context.object.data and type(context.object.data) is bpy.types.Mesh
+	def poll(cls, context) -> bool:
+		return hasattr(context, "object") and context.object is not None and context.object.stf_instance is not None and context.object.data and type(context.object.data) is bpy.types.Mesh  # pyright: ignore[reportReturnType]
 
 	def invoke(self, context, event):
 		return context.window_manager.invoke_confirm(self, event)
 
-	def execute(self, context):
-		set_instance_blendshapes(context.object)
+	def execute(self, context) -> set:
+		set_instance_blendshapes(context.object)  # pyright: ignore[reportArgumentType]
 		return {"FINISHED"}
 
 
@@ -27,7 +28,8 @@ class STFSetMeshInstanceIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
 	"""Set STF-ID for MeshInstance"""
 	bl_idname = "stf.set_mesh_instance_stf_id"
 	@classmethod
-	def poll(cls, context): return hasattr(context, "object") and context.object is not None and context.object.stf_instance is not None and context.object.data and type(context.object.data) is bpy.types.Mesh
+	def poll(cls, context) -> bool:
+		return hasattr(context, "object") and context.object is not None and context.object.stf_instance is not None and context.object.data and type(context.object.data) is bpy.types.Mesh  # pyright: ignore[reportReturnType]
 	def get_property(self, context): return context.object.stf_instance
 
 
@@ -35,7 +37,7 @@ class STFDrawMeshInstanceBlendshapeList(bpy.types.UIList):
 	"""Override blendshapes on this meshinstance"""
 	bl_idname = "COLLECTION_UL_stf_instance_mesh_blendshapes"
 
-	def draw_item(self, context: bpy.types.Context, layout: bpy.types.UILayout, data, item: STF_Instance_Mesh_Blendshape_Value, icon, active_data, active_propname, index):
+	def draw_item(self, context: bpy.types.Context, layout: bpy.types.UILayout, data, item: STF_Instance_Mesh_Blendshape_Value, icon, active_data, active_propname, index):  # pyright: ignore[reportIncompatibleMethodOverride]
 		if(item.name == "Basis"):
 			layout.label(text="Basis")
 			return
@@ -57,7 +59,7 @@ class STFDrawMeshInstanceBlendshapeList(bpy.types.UIList):
 			row_outer.label(text="Invalid Value ( " + item.name + " )")
 
 
-	def filter_items(self, context: bpy.types.Context, data, propname: str):
+	def filter_items(self, context: bpy.types.Context, data, propname: str):  # pyright: ignore[reportIncompatibleMethodOverride]
 		items: list[STF_Instance_Mesh_Blendshape_Value] = getattr(data, propname)
 
 		_sort = [(idx, item) for idx, item in enumerate(items)]
@@ -77,19 +79,19 @@ class STFMeshInstancePanel(bpy.types.Panel):
 	bl_context = "object"
 
 	@classmethod
-	def poll(cls, context: bpy.types.Context):
-		return hasattr(context, "object") and context.object is not None and context.object.stf_instance is not None and context.object.data and type(context.object.data) is bpy.types.Mesh
+	def poll(cls, context: bpy.types.Context) -> bool:
+		return hasattr(context, "object") and context.object is not None and context.object.stf_instance is not None and context.object.data and type(context.object.data) is bpy.types.Mesh  # pyright: ignore[reportReturnType]
 
 	def draw(self, context: bpy.types.Context):
 		layout = self.layout
 		if(context.object.find_armature()):
 			t, r, s = context.object.matrix_local.decompose()
 			if(t.length > 0.0001 or abs(r.x) > 0.0001 or abs(r.y) > 0.0001 or abs(r.z) > 0.0001 or abs((r.w - 1)) > 0.0001 or abs(s.x - 1) > 0.0001 or abs(s.y - 1) > 0.0001 or abs(s.z - 1) > 0.0001):
-				text_row = draw_multiline_text(layout, "Warning, this mesh is not aligned with its Armature!\nThis will lead to differing behavior outside of Blender.\nApplying all Transforms for the Mesh and Armature will likely fix this.", width=80, icon="ERROR", alert=True)
+				draw_multiline_text(layout, "Warning, this mesh is not aligned with its Armature!\nThis will lead to differing behavior outside of Blender.\nApplying all Transforms for the Mesh and Armature will likely fix this.", width=80, icon="ERROR", alert=True)  # pyright: ignore[reportArgumentType]
 				layout.separator(factor=2, type="LINE")
 
 		# Set ID
-		draw_stf_id_ui(layout, context, context.object.stf_instance, context.object.stf_instance, STFSetMeshInstanceIDOperator.bl_idname, True)
+		draw_stf_id_ui(layout, context, context.object.stf_instance, context.object.stf_instance, STFSetMeshInstanceIDOperator.bl_idname, True)  # pyright: ignore[reportArgumentType]
 
 		layout.separator(factor=2, type="LINE")
 
@@ -98,8 +100,7 @@ class STFMeshInstancePanel(bpy.types.Panel):
 			layout.prop(context.object.stf_instance_mesh, "override_blendshape_values", text="Use Instance Shape Keys")
 			#if(context.object.stf_instance_mesh.override_blendshape_values):
 			row = layout.row()
-			if(instance_blendshapes_requires_update(context.object)):
+			if(instance_blendshapes_requires_update(context.object)):  # pyright: ignore[reportArgumentType]
 				row.alert = True
 			row.operator(SetInstanceBlendshapes.bl_idname, text="Update Shape Keys", icon="LOOP_FORWARDS")
 			layout.template_list(STFDrawMeshInstanceBlendshapeList.bl_idname, "", context.object.stf_instance_mesh, "blendshape_values", context.object.stf_instance_mesh, "active_blendshape")
-

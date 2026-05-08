@@ -2,7 +2,7 @@ import bpy
 
 
 def instance_blendshapes_requires_update(blender_object: bpy.types.Object) -> bool:
-	blender_mesh: bpy.types.Mesh = blender_object.data
+	blender_mesh: bpy.types.Mesh = blender_object.data  # pyright: ignore[reportAssignmentType]
 	if(blender_mesh.shape_keys and len(blender_mesh.shape_keys.key_blocks) > 0):
 		if(len(blender_mesh.shape_keys.key_blocks) != len(blender_object.stf_instance_mesh.blendshape_values)):
 			return True
@@ -19,7 +19,7 @@ def instance_blendshapes_requires_update(blender_object: bpy.types.Object) -> bo
 
 
 def set_instance_blendshapes(blender_object: bpy.types.Object):
-	blender_mesh: bpy.types.Mesh = blender_object.data
+	blender_mesh: bpy.types.Mesh = blender_object.data  # pyright: ignore[reportAssignmentType]
 	if(blender_mesh.shape_keys and len(blender_mesh.shape_keys.key_blocks) > 0):
 		for blendshape in blender_mesh.shape_keys.key_blocks:
 			if(blendshape.name in blender_object.stf_instance_mesh.blendshape_values):

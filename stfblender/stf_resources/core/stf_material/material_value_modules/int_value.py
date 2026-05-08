@@ -21,21 +21,21 @@ def _draw_func(layout: bpy.types.UILayout, context: bpy.types.Context, blender_m
 	layout.prop(value, "number")
 
 
-def _resolve_property_path_to_stf_func(context: STF_ExportContext, blender_property_path: str, value: STF_Material_Value_Int) -> STFPropertyPathPart:
+def _resolve_property_path_to_stf_func(context: STF_ExportContext, blender_property_path: str, value: STF_Material_Value_Int) -> STFPropertyPathPart | None:
 	return STFPropertyPathPart(["number"])
 
-def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str]) -> BlenderPropertyPathPart:
+def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str]) -> BlenderPropertyPathPart | None:
 	return BlenderPropertyPathPart("MATERIAL", "number")
 
 
 class STF_Material_Value_Module_Int(STF_Material_Value_Module_Base):
 	value_type = "int"
 	property_name = "stf_material_value_int"
-	value_import_func = _value_import_func
-	value_export_func = _value_export_func
-	draw_func = _draw_func
+	value_import_func = _value_import_func  # pyright: ignore[reportAssignmentType]
+	value_export_func = _value_export_func  # pyright: ignore[reportAssignmentType]
+	draw_func = _draw_func  # pyright: ignore[reportAssignmentType]
 
-	resolve_property_path_to_stf_func = _resolve_property_path_to_stf_func
+	resolve_property_path_to_stf_func = _resolve_property_path_to_stf_func  # pyright: ignore[reportAssignmentType]
 	resolve_stf_property_to_blender_func = _resolve_stf_property_to_blender_func
 
 

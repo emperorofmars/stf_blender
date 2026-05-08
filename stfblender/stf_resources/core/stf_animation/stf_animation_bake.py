@@ -1,3 +1,5 @@
+# pyright: reportCallIssue=false
+
 import bpy
 from bpy_extras import anim_utils
 
@@ -30,7 +32,7 @@ def bake_constraints(action: bpy.types.Action) -> bpy.types.Action:
 			slotlink.target.animation_data.action = action
 			slotlink.target.animation_data.action_slot_handle = slotlink.slot_handle
 
-			anim_utils.bake_action(slotlink.target, action=ret, frames=range(animation_range[0], animation_range[1]), bake_options=anim_utils.BakeOptions(
+			anim_utils.bake_action(slotlink.target, action=ret, frames=range(animation_range[0], animation_range[1]), bake_options=anim_utils.BakeOptions( # pyright: ignore[reportArgumentType]
 				only_selected=False,
 				do_pose=True,
 				do_object=True,
@@ -75,7 +77,6 @@ class STFBakeAnimationOperator(bpy.types.Operator):
 	def invoke(self, context: bpy.types.Context, event: bpy.types.Event):
 		return context.window_manager.invoke_confirm(self, event)
 
-	def execute(self, context: bpy.types.Context):
-		bake_constraints(context.active_action)
+	def execute(self, context: bpy.types.Context) -> set:
+		bake_constraints(context.active_action)  # pyright: ignore[reportArgumentType]
 		return {"FINISHED"}
-

@@ -47,7 +47,7 @@ class STFBoneSpatialPanel(bpy.types.Panel):
 		layout = self.layout
 
 		# Set ID
-		draw_stf_id_ui(layout, context, context.bone, context.bone.stf_info, STFSetBoneIDOperator.bl_idname)
+		draw_stf_id_ui(layout, context, context.bone, context.bone.stf_info, STFSetBoneIDOperator.bl_idname)  # pyright: ignore[reportArgumentType]
 
 		layout.separator(factor=2, type="LINE")
 
@@ -61,4 +61,4 @@ class STFBoneSpatialPanel(bpy.types.Panel):
 		layout.separator(factor=1, type="SPACE")
 		header, body = layout.panel("stf.bone_components", default_closed = False)
 		header.label(text="STF Components (" + str(len(context.bone.stf_info.stf_components)) + ")", icon="GROUP")
-		if(body): draw_components_ui(layout, context, context.bone.stf_info, context.bone, STFAddBoneComponentOperator.bl_idname, STFRemoveBoneComponentOperator.bl_idname, STFEditBoneComponentIdOperator.bl_idname)
+		if(body): draw_components_ui(layout, context, context.bone.stf_info, context.bone, STFAddBoneComponentOperator.bl_idname, STFRemoveBoneComponentOperator.bl_idname, STFEditBoneComponentIdOperator.bl_idname)  # pyright: ignore[reportArgumentType]

@@ -39,7 +39,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 		if(not armature_instance):
 			context.report(STFReport("Invalid armature instance: " + str(json_resource["armature_instance"]), STFReportSeverity.Error, stf_id, _stf_type, context_object))
 		else:
-			modifier: bpy.types.ArmatureModifier = blender_object.modifiers.new("Armature", "ARMATURE")
+			modifier: bpy.types.ArmatureModifier = blender_object.modifiers.new("Armature", "ARMATURE")  # pyright: ignore[reportAssignmentType]
 			modifier.object = armature_instance
 
 	# blendshape values per instance
@@ -64,7 +64,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 
 
 def _can_handle_application_object_func(application_object: Any) -> int:
-	if(type(application_object) == tuple and type(application_object[0]) == bpy.types.Object and type(application_object[1]) == bpy.types.Mesh):
+	if(type(application_object) is tuple and type(application_object[0]) is bpy.types.Object and type(application_object[1]) is bpy.types.Mesh):
 		return 1000
 	else:
 		return -1
@@ -85,14 +85,12 @@ def _stf_export(context: STF_ExportContext, application_object: Any, context_obj
 
 	if(len(blender_armatures) == 1 and blender_armatures[0] and blender_armatures[0].object and blender_armatures[0].object.data):
 		if(not context_object.is_embedded_data and context_object not in blender_armatures[0].object.users_collection):
-			context.report(STFReport("Armature sits outside the exported asset", severity=STFReportSeverity.FatalError, stf_id=blender_object.stf_info.stf_id, stf_type=_stf_type, application_object=blender_object))
-			return None
+			return STFReport("Armature sits outside the exported asset", severity=STFReportSeverity.FatalError, stf_id=blender_object.stf_info.stf_id, stf_type=_stf_type, application_object=blender_object)
 		# The armature has to be passed, because in Blenders datamodel, the relationship between mesh and armature is loose.
 		ret["mesh"] = context.serialize_resource(ret, blender_mesh, blender_armatures[0].object.data, stf_category=STF_Category.DATA)
 		ret["armature_instance"] = context.serialize_resource(ret, blender_armatures[0].object, stf_category=STF_Category.NODE)
 	elif(len(blender_armatures) > 1):
-		context.report(STFReport("More than one Armature per mesh is not supported!", severity=STFReportSeverity.FatalError, stf_id=blender_object.stf_info.stf_id, stf_type=_stf_type, application_object=blender_object))
-		return None
+		return STFReport("More than one Armature per mesh is not supported!", severity=STFReportSeverity.FatalError, stf_id=blender_object.stf_info.stf_id, stf_type=_stf_type, application_object=blender_object)
 	else:
 		ret["mesh"] = context.serialize_resource(ret, blender_mesh, stf_category=STF_Category.DATA)
 
@@ -118,14 +116,14 @@ def _stf_export(context: STF_ExportContext, application_object: Any, context_obj
 	return ret, blender_object.stf_instance.stf_id
 
 
-def _resolve_property_path_to_stf_func(context: STF_ExportContext, blender_object: Any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart:
+def _resolve_property_path_to_stf_func(context: STF_ExportContext, blender_object: Any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart | None:
 	import re
 	match = re.search(r"^key_blocks\[\"(?P<blendshape_name>[\w. -:,]+)\"\].value", data_path)
 	if(match and "blendshape_name" in match.groupdict()):
 		return STFPropertyPathPart([blender_object.stf_info.stf_id, "instance", "blendshape", match.groupdict()["blendshape_name"], "value"])
 	return None
 
-def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], blender_object: bpy.types.Object) -> BlenderPropertyPathPart:
+def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], blender_object: bpy.types.Object) -> BlenderPropertyPathPart | None:
 	if(len(stf_path) == 4 and stf_path[1] == "blendshape" and stf_path[3] == "value"):
 		return BlenderPropertyPathPart("KEY", "key_blocks[\"" + stf_path[2] + "\"].value")
 	elif(len(stf_path) >= 5 and stf_path[1] == "material"):

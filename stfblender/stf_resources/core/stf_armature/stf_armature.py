@@ -44,7 +44,7 @@ def _stf_export(context: STF_ExportContext, application_object: Any, context_obj
 
 	root_bone_definitions = []
 	for blender_bone in blender_armature.bones:
-		if(blender_bone.parent == None):
+		if(blender_bone.parent is None):
 			root_bone_definitions.append(ArmatureBone(blender_armature, blender_bone.name))
 
 	for root_bone_definition in root_bone_definitions:

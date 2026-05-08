@@ -8,8 +8,8 @@ from ....common.base.stf_registry import find_component_handler, get_component_h
 from ....common.resource.component.component_utils import add_component
 
 
-def update_armature_instance_component_standins(context: bpy.types.Context, blender_object: bpy.types.Object, stf_modules: list[STF_Handler_Component] = None):
-	blender_armature: bpy.types.Armature = blender_object.data
+def update_armature_instance_component_standins(context: bpy.types.Context, blender_object: bpy.types.Object, stf_modules: list[STF_Handler_Component] | None = None):
+	blender_armature: bpy.types.Armature = blender_object.data  # pyright: ignore[reportAssignmentType]
 	handled_ids = []
 	if(not stf_modules):
 		stf_modules = get_component_handlers()
@@ -35,15 +35,14 @@ def update_armature_instance_component_standins(context: bpy.types.Context, blen
 					standin_component_ref.bone = bone.name
 					if(not standin_component_ref.override):
 						set_func = getattr(stf_module, "set_component_instance_standin_func")
-						set_func(context, component_ref, blender_object, component, standin_component)
+						set_func(context, component_ref, blender_object, component, standin_component)  # pyright: ignore[reportPossiblyUnboundVariable]
 					handled_ids.append(component_ref.stf_id)
 
 	standin_ref_index = 0
 	while(standin_ref_index < len(blender_object.stf_instance_armature_component_standins.stf_components)):
-		#for standin_ref_index in range(len(blender_object.stf_instance_armature_component_standins.stf_components)):
 		standin_ref = blender_object.stf_instance_armature_component_standins.stf_components[standin_ref_index]
 		if(standin_ref.stf_id not in handled_ids):
-			if(hasattr(bone, component_ref.blender_property_name) and hasattr(blender_object, standin_ref.blender_property_name)):
+			if(hasattr(bpy.types.Bone, standin_ref.blender_property_name) and hasattr(blender_object, standin_ref.blender_property_name)):
 				for standin_component_index, standin_component in enumerate(getattr(blender_object, standin_ref.blender_property_name)):
 					if(standin_component.stf_id == standin_ref.stf_id):
 						getattr(blender_object, standin_ref.blender_property_name).remove(standin_component_index)
@@ -54,7 +53,7 @@ def update_armature_instance_component_standins(context: bpy.types.Context, blen
 		standin_ref_index += 1
 
 
-def serialize_standin(context: STF_ExportContext, blender_object: bpy.types.Object, component_standin_ref: InstanceModComponentRef) -> dict:
+def serialize_standin(context: STF_ExportContext, blender_object: bpy.types.Object, component_standin_ref: InstanceModComponentRef) -> dict | None:
 	for standin_component in getattr(blender_object, component_standin_ref.blender_property_name):
 		if(standin_component.stf_id == component_standin_ref.stf_id):
 			break
@@ -92,13 +91,13 @@ class UpdateArmatureInstanceComponentStandins(bpy.types.Operator):
 	bl_label = "Update Standins"
 	bl_options = {"REGISTER", "UNDO"}
 
-	def execute(self, context: bpy.types.Context):
-		update_armature_instance_component_standins(context, context.object, get_component_handlers())
+	def execute(self, context: bpy.types.Context) -> set:
+		update_armature_instance_component_standins(context, context.object, get_component_handlers())  # pyright: ignore[reportArgumentType]
 		return {"FINISHED"}
 
 
 
-def process_components(armature_instance: bpy.types.Object, stf_resources: list[STF_Handler_Component] = None):
+def process_components(armature_instance: bpy.types.Object, stf_resources: list[STF_Handler_Component] | None = None):
 	if(not stf_resources):
 		stf_resources = get_component_handlers()
 
@@ -108,7 +107,7 @@ def process_components(armature_instance: bpy.types.Object, stf_resources: list[
 
 	for bone in armature_instance.data.bones:
 		for component_ref in bone.stf_info.stf_components:
-			component_ref: STF_Component_Ref = component_ref
+			component_ref: STF_Component_Ref = component_ref  # pyright: ignore[reportRedeclaration]
 			for stf_module in stf_resources:
 				if(stf_module.stf_type == component_ref.stf_type and hasattr(stf_module, "process_func") and getattr(stf_module, "process_func")):
 					for component in getattr(bone, component_ref.blender_property_name):
@@ -146,12 +145,11 @@ class ProcessComponentsOntoArmatureInstance(bpy.types.Operator):
 	bl_options = {"REGISTER", "UNDO"}
 
 	@classmethod
-	def poll(cls, context: bpy.types.Context): return context.object is not None and type(context.object.data) == bpy.types.Armature
+	def poll(cls, context: bpy.types.Context): return context.object is not None and type(context.object.data) is bpy.types.Armature
 
 	def invoke(self, context, event):
 		return context.window_manager.invoke_confirm(self, event, message="This will overwrite constraints and other values!")
 
-	def execute(self, context: bpy.types.Context):
-		process_components(context.object, get_component_handlers())
+	def execute(self, context: bpy.types.Context) -> set:
+		process_components(context.object, get_component_handlers())  # pyright: ignore[reportArgumentType]
 		return {"FINISHED"}
-

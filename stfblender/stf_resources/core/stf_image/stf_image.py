@@ -23,7 +23,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 
 	try:
 		image_buffer = context.import_buffer(json_resource, json_resource["buffer"])
-		blender_image.pack(data=image_buffer, data_len=len(image_buffer))
+		blender_image.pack(data=image_buffer, data_len=len(image_buffer))  # pyright: ignore[reportArgumentType]
 		blender_image.source = "FILE"
 
 		if("data_type" in json_resource):

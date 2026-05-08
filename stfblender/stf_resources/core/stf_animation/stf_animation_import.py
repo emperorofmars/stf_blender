@@ -33,10 +33,10 @@ def stf_animation_import(context: STF_ImportContext, json_resource: dict, stf_id
 		blender_animation.frame_end = json_resource["range"][1]
 
 	layer = blender_animation.layers.new("stf_layer")
-	strip: bpy.types.ActionKeyframeStrip = layer.strips.new(type="KEYFRAME")
+	strip: bpy.types.ActionKeyframeStrip = layer.strips.new(type="KEYFRAME")  # pyright: ignore[reportAssignmentType]
 	__parse_tracks(context, stf_id, json_resource.get("tracks", []), blender_animation, strip, False)
 
-	if("tracks_baked" in json_resource and context.get_setting("import_baked_animations") == True):
+	if("tracks_baked" in json_resource and context.get_setting("import_baked_animations")):
 		baked_blender_animation = bpy.data.actions.new(blender_animation.name + "_baked")
 		baked_blender_animation.stf_animation.is_baked_from = blender_animation
 		baked_blender_animation.stf_animation.exclude = True
@@ -50,11 +50,11 @@ def stf_animation_import(context: STF_ImportContext, json_resource: dict, stf_id
 		baked_blender_animation.frame_end = blender_animation.frame_end
 
 		baked_layer = baked_blender_animation.layers.new("stf_layer")
-		baked_strip: bpy.types.ActionKeyframeStrip = baked_layer.strips.new(type="KEYFRAME")
+		baked_strip: bpy.types.ActionKeyframeStrip = baked_layer.strips.new(type="KEYFRAME")  # pyright: ignore[reportAssignmentType]
 
 		__parse_tracks(context, stf_id, json_resource.get("tracks_baked", []), baked_blender_animation, baked_strip, True)
 
-	if("is_reset_animation" in json_resource and json_resource["is_reset_animation"] == True):
+	if("is_reset_animation" in json_resource and json_resource["is_reset_animation"]):
 		blender_animation.slot_link.is_reset_animation = True
 
 	if("reset_animation" in json_resource):
@@ -94,7 +94,7 @@ def __parse_tracks(context: STF_ImportContext, stf_id: str, tracks: list, blende
 
 		selected_channelbag = None
 		if(not selected_slot_link):
-			blender_slot = blender_animation.slots.new(target_ret.slot_type, target_ret.slot_link_target.name + " - " + target_ret.slot_type)
+			blender_slot = blender_animation.slots.new(target_ret.slot_type, target_ret.slot_link_target.name + " - " + target_ret.slot_type)  # pyright: ignore[reportOperatorIssue, reportArgumentType]
 			selected_slot_link = blender_animation.slot_link.links.add()
 			selected_slot_link.slot_handle = blender_slot.handle
 			selected_slot_link.target = target_ret.slot_link_target
@@ -106,12 +106,12 @@ def __parse_tracks(context: STF_ImportContext, stf_id: str, tracks: list, blende
 				blender_slot = slot
 				break
 		for channelbag in strip.channelbags:
-			if(channelbag.slot_handle == blender_slot.handle):
+			if(channelbag.slot_handle == blender_slot.handle):  # pyright: ignore[reportPossiblyUnboundVariable]
 				selected_channelbag = channelbag
 				break
 
 		# Yay we can finally deal with curves
-		__parse_subtracks(context, stf_id, track, selected_channelbag, target_ret.blender_path, index_conversion, target_ret.convert_func, is_baked_only)
+		__parse_subtracks(context, stf_id, track, selected_channelbag, target_ret.blender_path, index_conversion, target_ret.convert_func, is_baked_only)  # pyright: ignore[reportArgumentType]
 
 
 def __parse_subtracks(context: STF_ImportContext, stf_id: str, track: dict, selected_channelbag: bpy.types.ActionChannelbag, fcurve_target: Any, index_conversion: list[int], conversion_func: Callable[[list[float]], list[float]], is_baked_only: bool):
@@ -121,7 +121,7 @@ def __parse_subtracks(context: STF_ImportContext, stf_id: str, track: dict, sele
 
 	num_frames = -1
 
-	fcurves: list[bpy.types.FCurve] = [None] * len(subtracks)
+	fcurves: list[bpy.types.FCurve] = [None] * len(subtracks)  # pyright: ignore[reportAssignmentType]
 	for subtrack_index, subtrack in enumerate(subtracks):
 		if(subtrack):
 			fcurves[subtrack_index] = selected_channelbag.fcurves.new(fcurve_target, index=index_conversion[subtrack_index])
@@ -131,7 +131,7 @@ def __parse_subtracks(context: STF_ImportContext, stf_id: str, track: dict, sele
 
 	for keyframe_index in range(num_frames):
 		timepoint = timepoints[keyframe_index]
-		value_convert: list[float] = [None] * len(index_conversion)
+		value_convert: list[float] = [None] * len(index_conversion)  # pyright: ignore[reportAssignmentType]
 		left_tangent_convert: list[float] = [0] * len(index_conversion)
 		right_tangent_convert: list[float] = [0] * len(index_conversion)
 
@@ -191,9 +191,9 @@ def __parse_subtracks(context: STF_ImportContext, stf_id: str, track: dict, sele
 			else:
 				context.report(STFReport("Unsupported interpolation type: " + str(interpolation_type), STFReportSeverity.Warn, stf_id, _stf_type))
 
-			if(has_left_tangent and len(stf_keyframe) > left_tangent_index):
+			if(has_left_tangent and len(stf_keyframe) > left_tangent_index):  # pyright: ignore[reportPossiblyUnboundVariable]
 				#keyframe.handle_left_type = "FREE"
-				keyframe.handle_left.x = keyframe.co.x + stf_keyframe[left_tangent_index][0]
+				keyframe.handle_left.x = keyframe.co.x + stf_keyframe[left_tangent_index][0]  # pyright: ignore[reportPossiblyUnboundVariable]
 				keyframe.handle_left.y =  left_tangent_convert[index_conversion[subtrack_index]]
 
 	for fcurve in fcurves:

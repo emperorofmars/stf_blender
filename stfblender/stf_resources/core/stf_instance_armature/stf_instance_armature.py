@@ -76,7 +76,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 							instance_component_ref.stf_id = component_id
 							instance_component_ref.stf_type = component_ref.stf_type
 							instance_component_ref.blender_property_name = component_ref.blender_property_name
-							instance_component_ref.bone = context.get_imported_resource(get_resource_id(json_resource, bone_id)).name
+							instance_component_ref.bone = context.get_imported_resource(get_resource_id(json_resource, bone_id)).name  # pyright: ignore[reportArgumentType]
 							blender_object.stf_info.stf_components.remove(component_ref_index)
 							break
 
@@ -95,7 +95,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 
 
 def _can_handle_application_object_func(application_object: Any) -> int:
-	if(type(application_object) == tuple and type(application_object[0]) == bpy.types.Object and type(application_object[1]) == bpy.types.Armature):
+	if(type(application_object) is tuple and type(application_object[0]) is bpy.types.Object and type(application_object[1]) is bpy.types.Armature):
 		return 1000
 	else:
 		return -1
@@ -163,15 +163,15 @@ def _stf_export(context: STF_ExportContext, application_object: Any, context_obj
 	return ret, blender_object.stf_instance.stf_id
 
 
-def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: Any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart:
+def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: Any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart | None:
 	import re
 	if(match := re.search(r"^pose.bones\[\"(?P<bone_name>[\w. -:,]+)\"\]", data_path)):
-		if(type(application_object.data) != bpy.types.Armature or match.groupdict()["bone_name"] not in application_object.data.bones):
+		if(type(application_object.data) is not bpy.types.Armature or match.groupdict()["bone_name"] not in application_object.data.bones):
 			return None
 		return STFPropertyPathPart([application_object.stf_info.stf_id, "instance"]) + context.resolve_application_property_path(ArmatureBone(application_object.data, match.groupdict()["bone_name"]), application_object_property_index, data_path[match.span()[1] :])
 	return None
 
-def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: Any) -> BlenderPropertyPathPart:
+def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: Any) -> BlenderPropertyPathPart | None:
 	return context.resolve_stf_property_path(stf_path[1:], application_object)
 
 

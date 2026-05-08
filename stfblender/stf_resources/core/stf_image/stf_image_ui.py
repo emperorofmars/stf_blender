@@ -40,7 +40,7 @@ class STFImageFixColorspace(bpy.types.Operator):
 	@classmethod
 	def poll(cls, context): return context.edit_image is not None
 
-	def execute(self, context):
+	def execute(self, context) -> set:
 		context.edit_image.colorspace_settings.name = "Non-Color"
 		return {"FINISHED"}
 
@@ -61,7 +61,7 @@ class STFImageSpatialPanel(bpy.types.Panel):
 		set_stf_component_filter(bpy.types.Image)
 
 		# Set ID
-		draw_stf_id_ui(self.layout, context, context.edit_image, context.edit_image.stf_info, STFSetImageIDOperator.bl_idname)
+		draw_stf_id_ui(self.layout, context, context.edit_image, context.edit_image.stf_info, STFSetImageIDOperator.bl_idname)  # pyright: ignore[reportArgumentType]
 
 		self.layout.separator(factor=1, type="SPACE")
 
@@ -79,5 +79,4 @@ class STFImageSpatialPanel(bpy.types.Panel):
 		self.layout.separator(factor=1, type="SPACE")
 		header, body = self.layout.panel("stf.image_components", default_closed = False)
 		header.label(text="STF Components (" + str(len(context.edit_image.stf_info.stf_components)) + ")", icon="GROUP")
-		if(body): draw_components_ui(self.layout, context, context.edit_image.stf_info, context.edit_image, STFAddImageComponentOperator.bl_idname, STFRemoveImageComponentOperator.bl_idname, STFEditImageComponentIdOperator.bl_idname)
-
+		if(body): draw_components_ui(self.layout, context, context.edit_image.stf_info, context.edit_image, STFAddImageComponentOperator.bl_idname, STFRemoveImageComponentOperator.bl_idname, STFEditImageComponentIdOperator.bl_idname)  # pyright: ignore[reportArgumentType]

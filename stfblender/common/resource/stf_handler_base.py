@@ -49,7 +49,7 @@ class STF_HandlerBase:
 	"""
 	# Get a list of application-components on the application object.
 	# (Application Object) -> List[Application Component Object]
-	get_components_func: Callable[[Any], list[Any]]
+	get_components_func: Callable[[Any], list[Any]] | None
 
 	# Get the object which has the `stf_components` property. Mostly a workaround for Bone references getting invalidated by Blender on mode-switch.
-	get_components_holder_func: Callable[[Any], Any]
+	get_components_holder_func: Callable[[Any], Any] | None
