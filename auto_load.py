@@ -17,6 +17,14 @@ modules = None
 ordered_classes = None
 
 
+ignore_modules = [
+	"bpydev",
+	"build_extension",
+	"testsuite",
+	"stf_blender_module_template",
+]
+
+
 def init():
 	global modules
 	global ordered_classes
@@ -57,9 +65,11 @@ def get_all_submodules(directory):
 
 def iter_submodules(path, package_name):
 	for name in sorted(iter_submodule_names(path)):
-		if(name.startswith("stf_blender_module_template") or name.startswith("testsuite")): # Skip stf template
-			continue
-		yield importlib.import_module("." + name, package_name)
+		for ignore in ignore_modules:
+			if(name.startswith(ignore)):
+				break
+		else:
+			yield importlib.import_module("." + name, package_name)
 
 
 def iter_submodule_names(path, root=""):

@@ -1,13 +1,4 @@
 
-[project]
-name = "stf_blender"
-license = "MIT AND Apache-2.0"
-dynamic = ["version"]
-dependencies = [
-	"fake-bpy-module",
-	"numpy"
-]
-
 [tool.pyright]
 include = [
 	"."
@@ -15,11 +6,16 @@ include = [
 exclude = [
 	".venv",
 	".vscode",
+	".zed",
 	"packages",
-	"**/__pycache__"
+	"stf_blender_module_template",
+	"**/__pycache__",
+	"**/node_modules",
+	"**/.*"
 ]
 ignore = [
-	"stfblender/common/interface_stf_*.py"
+	"stfblender/common/interface_stf_*.py",
+	"auto_load.py"
 ]
 defineConstant = { DEBUG = true }
 pythonVersion = "3.13"
