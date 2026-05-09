@@ -139,7 +139,7 @@ def __serialize_subtracks(context: STF_ExportContext, blender_animation: bpy.typ
 	for _, fcurve in fcurves.items():
 		ret[index_conversion[fcurve.array_index]] = {"keyframes": []}
 
-	interpolation: str
+	interpolation: str | None = None
 
 	# Convert keyframes
 	keyframe_indices: list[int] = [0] * len(index_conversion)
