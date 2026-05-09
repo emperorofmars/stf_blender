@@ -43,7 +43,7 @@ class STFTextSpatialPanel(bpy.types.Panel):
 		return hasattr(context, "curve") and context.curve is not None and isinstance(context.curve, bpy.types.TextCurve)
 
 	def draw(self, context: bpy.types.Context):
-		layout = self.layout
+		layout: bpy.types.UILayout = self.layout  # pyright: ignore[reportAssignmentType]
 		set_stf_component_filter(bpy.types.TextCurve)
 
 		# Set ID

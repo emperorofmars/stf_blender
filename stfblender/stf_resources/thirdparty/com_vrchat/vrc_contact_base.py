@@ -97,8 +97,8 @@ def vrc_contact_draw_base(layout: bpy.types.UILayout, context: bpy.types.Context
 	for index_coltag, coltag in enumerate(component.collision_tags):
 		row = col.row(align=True)
 		row.prop(coltag, "tag_name")
-		create_remove_button(row, "object" if type(component.id_data) == bpy.types.Object else "bone", blender_property_name, component.stf_id, "collision_tags", index_coltag)
-	create_add_button(box, "object" if type(component.id_data) == bpy.types.Object else "bone", blender_property_name, component.stf_id, "collision_tags")
+		create_remove_button(row, "object" if type(component.id_data) is bpy.types.Object else "bone", blender_property_name, component.stf_id, "collision_tags", index_coltag)
+	create_add_button(box, "object" if type(component.id_data) is bpy.types.Object else "bone", blender_property_name, component.stf_id, "collision_tags")
 
 
 def vrc_contact_import_base(component: VRC_ContactBase, json_resource: dict):
@@ -109,12 +109,12 @@ def vrc_contact_import_base(component: VRC_ContactBase, json_resource: dict):
 		offset_position = mathutils.Vector()
 		for index in range(3):
 			offset_position[index] = json_resource["offset_position"][index]
-		component.offset_position = stf_translation_to_blender(offset_position)
+		component.offset_position = stf_translation_to_blender(offset_position)  # pyright: ignore[reportArgumentType]
 	if("offset_rotation" in json_resource):
 		offset_rotation = mathutils.Vector((0, 0, 0, 0))
 		for index in range(4):
 			offset_rotation[index] = json_resource["offset_rotation"][index]
-		component.offset_rotation = stf_rotation_to_blender(offset_rotation).to_euler("XYZ")
+		component.offset_rotation = stf_rotation_to_blender(offset_rotation).to_euler("XYZ")  # pyright: ignore[reportArgumentType]
 
 	component.filter_avatar = json_resource.get("filter_avatar", False)
 	component.filter_world = json_resource.get("filter_world", False)

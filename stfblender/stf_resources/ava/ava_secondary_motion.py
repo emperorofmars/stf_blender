@@ -94,8 +94,8 @@ class Handler_AVA_SecondaryMotion(STF_Handler_BoneComponent):
 	draw_component_instance_func = _draw_component
 	set_component_instance_standin_func = _set_component_instance_standin
 
-	serialize_component_instance_standin_func = _serialize_component_instance_standin_func
-	parse_component_instance_standin_func = _parse_component_instance_standin_func
+	serialize_component_instance_standin_func = _serialize_component_instance_standin_func  # pyright: ignore[reportAssignmentType]
+	parse_component_instance_standin_func = _parse_component_instance_standin_func  # pyright: ignore[reportAssignmentType]
 
 	pretty_name_template = "Secondary Motion"
 

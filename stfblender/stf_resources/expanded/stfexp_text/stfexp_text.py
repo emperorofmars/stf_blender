@@ -16,7 +16,7 @@ class STFEXP_Text(bpy.types.PropertyGroup):
 
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
-	blender_text: bpy.types.TextCurve = bpy.data.curves.new(json_resource.get("name", "STF Text"), "FONT")
+	blender_text: bpy.types.TextCurve = bpy.data.curves.new(json_resource.get("name", "STF Text"), "FONT")  # pyright: ignore[reportAssignmentType]
 	blender_text.stf_info.stf_id = stf_id
 	if(json_resource.get("name")):
 		blender_text.stf_info.stf_name = json_resource["name"]

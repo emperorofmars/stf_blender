@@ -25,12 +25,12 @@ def _process_func(component: STFEXP_Constraint_IK, context_object: bpy.types.Bon
 
 	index = 0
 	while index < len(pose_bone.constraints):
-		if(type(pose_bone.constraints[index]) == bpy.types.KinematicConstraint):
+		if(type(pose_bone.constraints[index]) is bpy.types.KinematicConstraint):
 			pose_bone.constraints.remove(pose_bone.constraints[index])
 			index -= 1
 		index += 1
 
-	constraint: bpy.types.KinematicConstraint = pose_bone.constraints.new("IK")
+	constraint: bpy.types.KinematicConstraint = pose_bone.constraints.new("IK")  # pyright: ignore[reportAssignmentType]
 	constraint.chain_count = component.chain_length
 
 	if(component.target.target_object):
@@ -81,13 +81,13 @@ class ParseFromCurrentArmatureInstance(bpy.types.Operator):
 	component_id: bpy.props.StringProperty() # type: ignore
 
 	@classmethod
-	def poll(cls, context: bpy.types.Context): return context.object is not None and type(context.object.data) == bpy.types.Armature and context.bone
+	def poll(cls, context: bpy.types.Context) -> bool: return context.object is not None and type(context.object.data) is bpy.types.Armature and context.bone  # pyright: ignore[reportReturnType]
 
 	def invoke(self, context, event):
 		return context.window_manager.invoke_confirm(self, event, message="This will overwrite current values!")
 
-	def execute(self, context: bpy.types.Context):
-		component: STFEXP_Constraint_IK = None
+	def execute(self, context: bpy.types.Context) -> set:
+		component: STFEXP_Constraint_IK
 		for component in getattr(context.bone, _blender_property_name):
 			if(component.stf_id == self.component_id):
 				break
@@ -96,9 +96,8 @@ class ParseFromCurrentArmatureInstance(bpy.types.Operator):
 
 		posebone = context.object.pose.bones[context.bone.name]
 
-		constraint: bpy.types.KinematicConstraint = None
 		for constraint in posebone.constraints:
-			if(type(constraint) == bpy.types.KinematicConstraint):
+			if(type(constraint) is bpy.types.KinematicConstraint):
 				break
 		else:
 			# Nothing to do
@@ -125,20 +124,20 @@ class ApplyToCurrentArmatureInstance(bpy.types.Operator):
 	component_id: bpy.props.StringProperty() # type: ignore
 
 	@classmethod
-	def poll(cls, context: bpy.types.Context): return context.object is not None and type(context.object.data) == bpy.types.Armature and context.bone
+	def poll(cls, context: bpy.types.Context) -> bool: return context.object is not None and type(context.object.data) is bpy.types.Armature and context.bone  # pyright: ignore[reportReturnType]
 
 	def invoke(self, context, event):
 		return context.window_manager.invoke_confirm(self, event, message="This will modify the PoseBone's constraints!")
 
-	def execute(self, context: bpy.types.Context):
-		component: STFEXP_Constraint_IK = None
+	def execute(self, context: bpy.types.Context) -> set:
+		component: STFEXP_Constraint_IK
 		for component in getattr(context.bone, _blender_property_name):
 			if(component.stf_id == self.component_id):
 				break
 		else:
 			return {"CANCELLED"}
 
-		_process_func(component, context.bone, context.object)
+		_process_func(component, context.bone, context.object)  # pyright: ignore[reportArgumentType]
 		return {"FINISHED"}
 
 
@@ -270,10 +269,10 @@ class Handler_STFEXP_Constraint_IK(STF_Handler_BoneComponent):
 	draw_component_instance_func = _draw_component
 	set_component_instance_standin_func = _set_component_instance_standin
 
-	serialize_component_instance_standin_func = _serialize_component_instance_standin_func
-	parse_component_instance_standin_func = _parse_component_instance_standin_func
+	serialize_component_instance_standin_func = _serialize_component_instance_standin_func  # pyright: ignore[reportAssignmentType]
+	parse_component_instance_standin_func = _parse_component_instance_standin_func  # pyright: ignore[reportAssignmentType]
 
-	process_func = _process_func
+	process_func = _process_func  # pyright: ignore[reportAssignmentType]
 
 	pretty_name_template = "IK Constraint"
 

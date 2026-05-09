@@ -22,7 +22,7 @@ class Edit_VRM_Blendshape_Pose_Target(bpy.types.Operator):
 	op: bpy.props.BoolProperty() # type: ignore
 	index: bpy.props.IntProperty() # type: ignore
 
-	def execute(self, context):
+	def execute(self, context) -> set:
 		collection = context.scene.collection if self.use_scene_collection else context.collection
 		# let resource
 		for resource in collection.dev_vrm_blendshape_pose:
@@ -50,7 +50,7 @@ class Edit_VRM_Blendshape_Pose_Value(bpy.types.Operator):
 	op: bpy.props.BoolProperty() # type: ignore
 	index: bpy.props.IntProperty() # type: ignore
 
-	def execute(self, context):
+	def execute(self, context) -> set:
 		collection = context.scene.collection if self.use_scene_collection else context.collection
 		# let resource
 		for resource in collection.dev_vrm_blendshape_pose:
@@ -72,7 +72,7 @@ class VRM_Blendshape_Pose_Value(bpy.types.PropertyGroup):
 	blendshape_value: bpy.props.FloatProperty(name="Value", default=0, soft_min=0, soft_max=1, subtype="FACTOR", options=set()) # type: ignore
 
 class VRM_Blendshape_Pose_Target(bpy.types.PropertyGroup):
-	mesh_instance: bpy.props.PointerProperty(type=bpy.types.Object, name="Meshinstance", poll=lambda _, o: o.data and type(o.data) == bpy.types.Mesh, options=set()) # type: ignore
+	mesh_instance: bpy.props.PointerProperty(type=bpy.types.Object, name="Meshinstance", poll=lambda _, o: o.data and type(o.data) is bpy.types.Mesh, options=set()) # type: ignore
 	values: bpy.props.CollectionProperty(type=VRM_Blendshape_Pose_Value, options=set()) # type: ignore
 
 class VRM_Blendshape_Pose(STF_DataResourceBase):
@@ -97,7 +97,7 @@ def _draw_resource(layout: bpy.types.UILayout, context: bpy.types.Context, resou
 
 		row = box.row()
 		row.label(text="Blendshapes")
-		if(target.mesh_instance and type(target.mesh_instance.data) == bpy.types.Mesh):
+		if(target.mesh_instance and type(target.mesh_instance.data) is bpy.types.Mesh):
 			add_value_button = row.operator(Edit_VRM_Blendshape_Pose_Value.bl_idname, icon="ADD", text="Add Value")
 			add_value_button.use_scene_collection = context_object == context.scene.collection
 			add_value_button.resource_id = resource.stf_id
@@ -151,7 +151,7 @@ def _stf_export(context: STF_ExportContext, resource: VRM_Blendshape_Pose, conte
 				value_dict: dict[str, float] = {}
 				mesh_id_index = register_exported_resource(ret, target.mesh_instance.stf_info.stf_id)
 				if(mesh_id_index not in target_dict):
-					target_dict[mesh_id_index] = value_dict
+					target_dict[mesh_id_index] = value_dict  # pyright: ignore[reportArgumentType]
 				else:
 					value_dict = target_dict[mesh_id_index]
 				for value in target.values:

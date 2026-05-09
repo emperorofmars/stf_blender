@@ -19,7 +19,7 @@ class STFEXP_LightprobeAnchor(STF_ComponentResourceBase):
 def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: STFEXP_LightprobeAnchor):
 	layout.use_property_split = True
 	layout.prop(component, "anchor_object")
-	if(component.anchor_object and type(component.anchor_object.data) == bpy.types.Armature):
+	if(component.anchor_object and type(component.anchor_object.data) is bpy.types.Armature):
 		layout.prop_search(component, "anchor_bone", component.anchor_object.data, "bones")
 
 
@@ -35,7 +35,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, contex
 		elif(len(json_resource["anchor"]) == 3):
 			def _handle_target_object():
 				component.anchor_object = context.import_resource(json_resource, json_resource["anchor"][0], STF_Category.NODE)
-				if(bone := context.import_resource(json_resource, json_resource["anchor"][2]), STF_Category.NODE):
+				if(bone := context.import_resource(json_resource, json_resource["anchor"][2], STF_Category.NODE)):
 					component.anchor_bone = bone.name
 			context.add_task(STF_TaskSteps.DEFAULT, _handle_target_object)
 
@@ -47,7 +47,7 @@ def _stf_export(context: STF_ExportContext, component: STFEXP_LightprobeAnchor, 
 
 	if(component.anchor_object):
 		def _handle():
-			if(type(component.anchor_object.data) == bpy.types.Armature and component.anchor_bone):
+			if(type(component.anchor_object.data) is bpy.types.Armature and component.anchor_bone):
 				ret["anchor"] = [register_exported_resource(ret, component.anchor_object.stf_info.stf_id), "instance", register_exported_resource(ret, component.anchor_object.data.bones[component.anchor_bone].stf_info.stf_id)]
 			else:
 				ret["anchor"] = [register_exported_resource(ret, component.anchor_object.stf_info.stf_id)]

@@ -25,7 +25,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 	box = layout.box().column(align=True)
 	row = box.row()
 	row.label(text="Colliders")
-	create_add_button(row, "bone" if type(component.id_data) == bpy.types.Armature else "object", _blender_property_name, component.stf_id, "colliders")
+	create_add_button(row, "bone" if type(component.id_data) is bpy.types.Armature else "object", _blender_property_name, component.stf_id, "colliders")
 	box.separator(factor=1)
 	for index, collider in enumerate(component.colliders):
 		if(index > 0):
@@ -34,17 +34,17 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 		col = row.column(align=True)
 		col.use_property_split = True
 		draw_node_path_component_selector(col, collider)
-		create_remove_button(row, "bone" if type(component.id_data) == bpy.types.Armature else "object", _blender_property_name, component.stf_id, "colliders", index)
+		create_remove_button(row, "bone" if type(component.id_data) is bpy.types.Armature else "object", _blender_property_name, component.stf_id, "colliders", index)
 
 	box = layout.box().column(align=True)
 	row = box.row()
 	row.label(text="Ignores")
-	create_add_button(row, "bone" if type(component.id_data) == bpy.types.Armature else "object", _blender_property_name, component.stf_id, "ignores")
+	create_add_button(row, "bone" if type(component.id_data) is bpy.types.Armature else "object", _blender_property_name, component.stf_id, "ignores")
 	box.separator(factor=1)
 	for index, ignore in enumerate(component.ignores):
 		row = box.row(align=True)
 		draw_node_path_selector(row, ignore)
-		create_remove_button(row, "bone" if type(component.id_data) == bpy.types.Armature else "object", _blender_property_name, component.stf_id, "ignores", index)
+		create_remove_button(row, "bone" if type(component.id_data) is bpy.types.Armature else "object", _blender_property_name, component.stf_id, "ignores", index)
 
 	layout.separator(factor=1)
 	col = layout.column(align=True)
@@ -52,7 +52,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 	json_error = False
 	try:
 		json.loads(component.values)
-	except:
+	except Exception:
 		json_error = True
 	col.alert = json_error
 	col.prop(component, "values", text="", icon="ERROR" if json_error else "NONE")
@@ -103,7 +103,7 @@ def _stf_export(context: STF_ExportContext, component: VRC_Physbone, context_obj
 
 		return ret, component.stf_id
 	except Exception:
-		return None
+		return None  # pyright: ignore[reportReturnType]
 
 
 """Animation"""

@@ -14,7 +14,7 @@ class STFSetSTFEXPLightIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
 	"""Set STF-ID for Light"""
 	bl_idname = "stf.set_stfexp_light_stf_id"
 	@classmethod
-	def poll(cls, context): return context.object.stf_instance is not None and context.object.data and isinstance(context.object.data, bpy.types.Light)
+	def poll(cls, context) -> bool: return context.object.stf_instance is not None and context.object.data and isinstance(context.object.data, bpy.types.Light)  # pyright: ignore[reportReturnType]
 	def get_property(self, context): return context.object.stf_instance
 
 class STFEXP_Light_Panel(bpy.types.Panel):
@@ -26,12 +26,12 @@ class STFEXP_Light_Panel(bpy.types.Panel):
 	bl_context = "data"
 
 	@classmethod
-	def poll(cls, context):
-		return context.object.stf_instance is not None and context.object.data and isinstance(context.object.data, bpy.types.Light)
+	def poll(cls, context) -> bool:
+		return context.object.stf_instance is not None and context.object.data and isinstance(context.object.data, bpy.types.Light)  # pyright: ignore[reportReturnType]
 
 	def draw(self, context):
 		# Set ID
-		draw_stf_id_ui(self.layout, context, context.object.stf_instance, context.object.stf_instance, STFSetSTFEXPLightIDOperator.bl_idname, True)
+		draw_stf_id_ui(self.layout, context, context.object.stf_instance, context.object.stf_instance, STFSetSTFEXPLightIDOperator.bl_idname, True)  # pyright: ignore[reportArgumentType]
 
 
 """
@@ -82,7 +82,7 @@ Export
 """
 
 def _can_handle_application_object_func(application_object: Any) -> int:
-	if(type(application_object) == tuple and type(application_object[0]) == bpy.types.Object and isinstance(application_object[1], bpy.types.Light) and application_object[1].type in ["POINT", "SUN", "SPOT"]):
+	if(type(application_object) is tuple and type(application_object[0]) is bpy.types.Object and isinstance(application_object[1], bpy.types.Light) and application_object[1].type in ["POINT", "SUN", "SPOT"]):
 		return 1000
 	else:
 		return -1
@@ -122,7 +122,7 @@ def _stf_export(context: STF_ExportContext, application_object: Any, context_obj
 Animation
 """
 
-def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: Any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart:
+def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: Any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart | None:
 	if(match := re.search(r"^temperature", data_path)):
 		return STFPropertyPathPart([application_object.stf_info.stf_id, "instance", "temperature"])
 	elif(match := re.search(r"^color", data_path)):
@@ -137,7 +137,7 @@ def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_o
 	return None
 
 
-def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: Any) -> BlenderPropertyPathPart:
+def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: Any) -> BlenderPropertyPathPart | None:
 	match(stf_path[1]):
 		case "temperature":
 			return BlenderPropertyPathPart("LIGHT", "temperature")

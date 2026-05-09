@@ -25,7 +25,7 @@ def _parse_json(component: STFEXP_Collider_Sphere, json_resource: dict):
 		offset_position = mathutils.Vector()
 		for index in range(3):
 			offset_position[index] = json_resource["offset_position"][index]
-		component.offset_position = stf_translation_to_blender(offset_position)
+		component.offset_position = stf_translation_to_blender(offset_position)  # pyright: ignore[reportArgumentType]
 
 def _serialize_json(component: STFEXP_Collider_Sphere, json_resource: dict = {}) -> dict:
 	json_resource["radius"] = component.radius
@@ -44,7 +44,7 @@ class STFEXP_Collider_Sphere_LoadJsonOperator(ComponentLoadJsonOperatorBase, bpy
 		else:
 			return getattr(context.bone, _blender_property_name)
 
-	def parse_json(self, context, component: Any, json_resource: dict):
+	def parse_json(self, context, component: Any, json_resource: dict) -> set[str]:  # pyright: ignore[reportIncompatibleMethodOverride]
 		if(json_resource.get("type") != _stf_type): raise Exception("Invalid Type")
 		_parse_json(component, json_resource)
 		return {"FINISHED"}
@@ -57,7 +57,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 	layout.prop(component, "offset_position")
 
 	load_json_button = layout.operator(STFEXP_Collider_Sphere_LoadJsonOperator.bl_idname)
-	load_json_button.blender_bone = type(component.id_data) == bpy.types.Armature
+	load_json_button.blender_bone = type(component.id_data) is bpy.types.Armature
 	load_json_button.component_id = component.stf_id
 
 
@@ -80,7 +80,7 @@ def _parse_component_instance_standin_func(context: STF_ImportContext, json_reso
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
 	component_ref, component = add_component(context_object, _blender_property_name, stf_id, _stf_type)
 	import_component_base(context, component, json_resource, _blender_property_name, context_object)
-	_parse_json(component, json_resource)
+	_parse_json(component, json_resource)  # pyright: ignore[reportArgumentType]
 	return component
 
 def _stf_export(context: STF_ExportContext, component: STFEXP_Collider_Sphere, context_object: Any) -> tuple[dict, str]:
@@ -132,8 +132,8 @@ class Handler_STFEXP_Collider_Sphere(STF_Handler_BoneComponent):
 	draw_component_instance_func = _draw_component
 	set_component_instance_standin_func = _set_component_instance_standin
 
-	serialize_component_instance_standin_func = _serialize_component_instance_standin_func
-	parse_component_instance_standin_func = _parse_component_instance_standin_func
+	serialize_component_instance_standin_func = _serialize_component_instance_standin_func  # pyright: ignore[reportAssignmentType]
+	parse_component_instance_standin_func = _parse_component_instance_standin_func  # pyright: ignore[reportAssignmentType]
 
 	pretty_name_template = "Sphere Collider"
 

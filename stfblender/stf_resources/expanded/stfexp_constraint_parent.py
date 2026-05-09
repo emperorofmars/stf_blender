@@ -27,7 +27,7 @@ class STFEXP_Constraint_Parent(STF_ComponentResourceBase):
 class STFDrawAVAExpressionList(bpy.types.UIList):
 	bl_idname = "COLLECTION_UL_stfexp_constraint_parent_sources_list"
 
-	def draw_item(self, context: bpy.types.Context, layout: bpy.types.UILayout, data, item: ConstraintSource, icon, active_data, active_propname, index):
+	def draw_item(self, context: bpy.types.Context, layout: bpy.types.UILayout, data, item: ConstraintSource, icon, active_data, active_propname, index):  # pyright: ignore[reportIncompatibleMethodOverride]
 		if(validate_node_path_selector(item.source)):
 			layout.label(text=node_path_selector_to_string(item.source), icon="RIGHTARROW")
 			layout.prop(item, "weight")
@@ -51,11 +51,11 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 
 	layout.separator(factor=1)
 
-	create_add_button(layout, "bone" if type(context_object) == bpy.types.Bone else "object", _blender_property_name, component.stf_id, "sources", text="Add Constraint Source")
+	create_add_button(layout, "bone" if type(context_object) is bpy.types.Bone else "object", _blender_property_name, component.stf_id, "sources", text="Add Constraint Source")
 
 	row = layout.row(align=True)
 	row.template_list(STFDrawAVAExpressionList.bl_idname, "", component, "sources", component, "active_source_index")
-	create_remove_button(row, "bone" if type(context_object) == bpy.types.Bone else "object", _blender_property_name, component.stf_id, "sources", component.active_source_index)
+	create_remove_button(row, "bone" if type(context_object) is bpy.types.Bone else "object", _blender_property_name, component.stf_id, "sources", component.active_source_index)
 
 	if(component.active_source_index < len(component.sources)):
 		source = component.sources[component.active_source_index]
@@ -69,7 +69,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 """Import export"""
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
-	component_ref, component = add_component(context_object, _blender_property_name, stf_id, _stf_type)
+	component_ref, component = add_component(context_object, _blender_property_name, stf_id, _stf_type)  # pyright: ignore[reportAssignmentType]
 	import_component_base(context, component, json_resource, _blender_property_name, context_object)
 	component: STFEXP_Constraint_Parent = component
 
@@ -214,8 +214,8 @@ class Handler_STFEXP_Constraint_Parent(STF_Handler_BoneComponent):
 	draw_component_instance_func = _draw_component
 	set_component_instance_standin_func = _set_component_instance_standin
 
-	serialize_component_instance_standin_func = _serialize_component_instance_standin_func
-	parse_component_instance_standin_func = _parse_component_instance_standin_func
+	serialize_component_instance_standin_func = _serialize_component_instance_standin_func  # pyright: ignore[reportAssignmentType]
+	parse_component_instance_standin_func = _parse_component_instance_standin_func  # pyright: ignore[reportAssignmentType]
 
 	pretty_name_template = "Parent Constraint"
 

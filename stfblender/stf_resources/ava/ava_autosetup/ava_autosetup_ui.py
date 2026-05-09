@@ -21,9 +21,9 @@ class AVA_Autosetup_Operator(bpy.types.Operator):
 	def invoke(self, context, event):
 		return context.window_manager.invoke_confirm(self, event)
 
-	def execute(self, context):
+	def execute(self, context) -> set:
 		try:
-			ava_autosetup(context.scene.collection if context.scene.ava_autosetup.use_scene_collection else context.collection)
+			ava_autosetup(context.scene.collection if context.scene.ava_autosetup.use_scene_collection else context.collection)  # pyright: ignore[reportArgumentType]
 			self.report({"INFO"}, "AVA autosetup succeeded")
 			return {"FINISHED"}
 		except Exception as e:

@@ -67,7 +67,7 @@ class STFDrawAVAExpressionList(bpy.types.UIList):
 		row_r.alignment = "RIGHT"
 		row_r.prop(self, "sort_reverse", text="", icon="SORT_DESC" if self.sort_reverse else "SORT_ASC")
 
-	def filter_items(self, context: bpy.types.Context, data, propname: str):
+	def filter_items(self, context: bpy.types.Context, data, propname: str):  # pyright: ignore[reportIncompatibleMethodOverride]
 		items: list[AVA_Expression] = getattr(data, propname)
 
 		filter = [self.bitflag_filter_item] * len(items)
@@ -96,7 +96,7 @@ class STFDrawAVAExpressionList(bpy.types.UIList):
 
 		return filter, sortorder
 
-	def draw_item(self, context: bpy.types.Context, layout: bpy.types.UILayout, data, item: AVA_Expression, icon, active_data, active_propname, index):
+	def draw_item(self, context: bpy.types.Context, layout: bpy.types.UILayout, data, item: AVA_Expression, icon, active_data, active_propname, index):  # pyright: ignore[reportIncompatibleMethodOverride]
 		layout.label(text=item.custom_expression.capitalize() if item.expression == "custom" else str(item.expression).capitalize())
 		if(item.animation):
 			layout.label(text=item.animation.name, icon="ACTION")
@@ -199,7 +199,7 @@ def _stf_export(context: STF_ExportContext, component: AVA_Expressions, context_
 					if(fallback_ret := resolve_stf_data_resource_reference(blender_expression.blendshape_fallback)):
 						fallback_ref, fallback_resource = fallback_ret
 						if(fallback_ref.stf_type == "dev.vrm.blendshape_pose"):
-							json_expression["fallback"] = context.serialize_resource(ret, fallback_resource, stf_category=STF_Category.DATA)
+							json_expression["fallback"] = context.serialize_resource(ret, fallback_resource, stf_category=STF_Category.DATA)  # pyright: ignore[reportArgumentType]
 						else:
 							context.report(STFReport("module: %s stf_id: %s, context-object: %s :: blendshape fallback invalid resource type" % (_stf_type, component.stf_id, context_object), STFReportSeverity.Warn, component.stf_id, _stf_type, context_object))
 					else:

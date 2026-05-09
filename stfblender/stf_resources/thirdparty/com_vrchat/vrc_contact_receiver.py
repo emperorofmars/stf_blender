@@ -26,12 +26,11 @@ class VRC_ContactReceiver_LoadJsonOperator(ComponentLoadJsonOperatorBase, bpy.ty
 		else:
 			return getattr(context.bone, _blender_property_name)
 
-	def parse_json(self, context, component: Any, json_resource: dict):
+	def parse_json(self, context: bpy.types.Context, component: Any, json_resource: dict):
 		if(json_resource.get("type") != _stf_type): raise Exception("Invalid Type")
 		vrc_contact_import_base(component, json_resource)
 		component.receiver_type = json_resource.get("receiver_type", "constant")
 		component.parameter = json_resource.get("parameter", "")
-		return {"FINISHED"}
 
 
 def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: VRC_ContactReceiver):
@@ -43,14 +42,14 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 	col.prop(component, "parameter")
 
 	load_json_button = layout.operator(VRC_ContactReceiver_LoadJsonOperator.bl_idname)
-	load_json_button.blender_bone = type(component.id_data) == bpy.types.Armature
+	load_json_button.blender_bone = type(component.id_data) is bpy.types.Armature
 	load_json_button.component_id = component.stf_id
 
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, context_object: Any) -> Any:
 	component_ref, component = add_component(context_object, _blender_property_name, id, _stf_type)
 	import_component_base(context, component, json_resource, _blender_property_name, context_object)
-	vrc_contact_import_base(component, json_resource)
+	vrc_contact_import_base(component, json_resource)  # pyright: ignore[reportArgumentType]
 	component.receiver_type = json_resource.get("receiver_type", "constant")
 	component.parameter = json_resource.get("parameter", "")
 	return component

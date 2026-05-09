@@ -45,7 +45,7 @@ class STF_Module_Blender_Armature_Display(STF_Handler_Component):
 
 
 def _hook_can_handle_func(application_object: bpy.types.Object) -> bool:
-	if(not type(application_object.data) is bpy.types.Armature): return False
+	if(type(application_object.data) is not bpy.types.Armature): return False
 	blender_object: bpy.types.Object = application_object
 	if(blender_object.org_blender_instance_armature_display and len(blender_object.org_blender_instance_armature_display) > 0): return False
 	return True

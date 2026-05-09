@@ -18,7 +18,7 @@ class STFEXP_Mesh_Seams(STF_ComponentResourceBase):
 
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: bpy.types.Mesh) -> Any:
-	buffer_seams = BytesIO(context.import_buffer(json_resource, json_resource["seams"]))
+	buffer_seams = BytesIO(context.import_buffer(json_resource, json_resource["seams"]))  # pyright: ignore[reportArgumentType]
 
 	indices_width: int = json_resource.get("indices_width", 4)
 
@@ -32,8 +32,8 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 		edge_dict[edge.vertices[1]][edge.vertices[0]] = edge
 
 	for _ in range(int((buffer_seams.getbuffer().nbytes / indices_width) / 2)):
-		v0_index = parse_uint(buffer_seams, indices_width)
-		v1_index = parse_uint(buffer_seams, indices_width)
+		v0_index = parse_uint(buffer_seams, indices_width)  # pyright: ignore[reportArgumentType]
+		v1_index = parse_uint(buffer_seams, indices_width)  # pyright: ignore[reportArgumentType]
 		edge_dict[v0_index][v1_index].use_seam = True
 
 	component_ref, component = add_component(context_object, _blender_property_name, stf_id, _stf_type)

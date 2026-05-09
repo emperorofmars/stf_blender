@@ -140,21 +140,21 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any | STFReport:
-	component_ref, component = add_component(context_object, _blender_property_name, stf_id, _stf_type)
+	component_ref, component = add_component(context_object, _blender_property_name, stf_id, _stf_type)  # pyright: ignore[reportAssignmentType]
 	component: Squirrelbite_Avatar_Setup = component
 	import_component_base(context, component, json_resource, _blender_property_name, context_object)
 
 	def _handle():
 		# toggles pre
 		for toggle_json in json_resource.get("toggles_pre", []):
-			toggle: Toggle = component.toggles_pre.add()
+			toggle: Toggle = component.toggles_pre.add()  # pyright: ignore[reportRedeclaration]
 			toggle.name = toggle_json.get("name", "")
 			toggle.animation_on = context.import_resource(json_resource, toggle_json.get("on"))
 			toggle.animation_off = context.import_resource(json_resource, toggle_json.get("off"))
 
 		# puppets pre
 		for puppet_json in json_resource.get("puppets_pre", []):
-			puppet: PersistentPuppet = component.puppets_pre.add()
+			puppet: PersistentPuppet = component.puppets_pre.add()  # pyright: ignore[reportRedeclaration]
 			puppet.type = puppet_json["puppet_type"]
 			puppet.name = puppet_json.get("name", "")
 			puppet.property_enabled = puppet_json.get("property_enabled")
@@ -170,7 +170,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 
 		# toggles
 		for toggle_json in json_resource.get("toggles", []):
-			toggle: Toggle = component.toggles.add()
+			toggle: Toggle = component.toggles.add()  # pyright: ignore[reportRedeclaration]
 			toggle.name = toggle_json.get("name", "")
 			toggle.animation_on = context.import_resource(json_resource, toggle_json.get("on"))
 			toggle.animation_off = context.import_resource(json_resource, toggle_json.get("off"))
@@ -222,7 +222,7 @@ def _stf_export(context: STF_ExportContext, component: Squirrelbite_Avatar_Setup
 		toggles_pre = []
 		ret["toggles_pre"] = toggles_pre
 		for toggle in component.toggles_pre:
-			toggle: Toggle = toggle
+			toggle: Toggle = toggle  # pyright: ignore[reportRedeclaration]
 			if(not toggle.animation_off and not toggle.animation_on):
 				continue
 			toggles_pre.append({
@@ -261,7 +261,7 @@ def _stf_export(context: STF_ExportContext, component: Squirrelbite_Avatar_Setup
 		toggles = []
 		ret["toggles"] = toggles
 		for toggle in component.toggles:
-			toggle: Toggle = toggle
+			toggle: Toggle = toggle  # pyright: ignore[reportRedeclaration]
 			if(not toggle.animation_off and not toggle.animation_on):
 				continue
 			toggles.append({
@@ -289,7 +289,7 @@ def _stf_export(context: STF_ExportContext, component: Squirrelbite_Avatar_Setup
 		puppets = []
 		ret["puppets"] = puppets
 		for puppet in component.puppets:
-			if(puppet_ret := resolve_stf_data_resource_reference(puppet)):
+			if(puppet_ret := resolve_stf_data_resource_reference(puppet)):  # pyright: ignore[reportArgumentType]
 				puppet_ref, puppet_resource = puppet_ret
 				if(puppet_ref.stf_type == "stfexp.animation_blendtree"):
 					puppets.append({

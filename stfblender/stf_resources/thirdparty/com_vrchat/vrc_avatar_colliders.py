@@ -22,7 +22,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 	json_error = False
 	try:
 		json.loads(component.data)
-	except:
+	except Exception:
 		json_error = True
 	col.alert = json_error
 	col.prop(component, "data", text="", icon="ERROR" if json_error else "NONE")
@@ -40,8 +40,8 @@ def _stf_export(context: STF_ExportContext, component: VRC_AvatarColliders, cont
 	try:
 		ret["values"] = json.loads(component.data)
 		return ret, component.stf_id
-	except:
-		return None
+	except Exception:
+		return None  # pyright: ignore[reportReturnType]
 
 
 class STF_Module_VRC_AvatarColliders(STF_Handler_Component):

@@ -52,7 +52,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	resource.type = json_resource["blendtree_type"]
 
 	def _handle():
-		for animation_mapping in json_resource.get("animations"):
+		for animation_mapping in json_resource.get("animations"):  # pyright: ignore[reportOptionalIterable]
 			mapping: BlendtreeAnimationMapping = resource.animations.add()
 			mapping.position[0] = animation_mapping["position"][0]
 			if(resource.type == "2d"):
@@ -72,7 +72,7 @@ def _stf_export(context: STF_ExportContext, resource: STFEXP_Animation_Blendtree
 		for mapping in resource.animations:
 			if(mapping.animation):
 				anim_id = context.serialize_resource(ret, mapping.animation, stf_category=STF_Category.DATA)
-				if(anim_id >= 0):
+				if(anim_id is not None):
 					animations.append({
 						"position": mapping.position[:] if resource.type == "2d" else mapping.position[0],
 						"animation": anim_id,

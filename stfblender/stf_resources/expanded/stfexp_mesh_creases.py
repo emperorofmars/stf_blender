@@ -19,17 +19,17 @@ class STFEXP_Mesh_Creases(STF_ComponentResourceBase):
 
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: bpy.types.Mesh) -> Any:
-	buffer_edge_creases = BytesIO(context.import_buffer(json_resource, json_resource["edge_creases"]))
+	buffer_edge_creases = BytesIO(context.import_buffer(json_resource, json_resource["edge_creases"]))  # pyright: ignore[reportArgumentType]
 
 	if("vertex_creases" in json_resource):
-		buffer_vertex_creases = np.frombuffer(context.import_buffer(json_resource, json_resource["vertex_creases"]), dtype=determine_pack_format_float(4))
+		buffer_vertex_creases = np.frombuffer(context.import_buffer(json_resource, json_resource["vertex_creases"]), dtype=determine_pack_format_float(4))  # pyright: ignore[reportCallIssue, reportArgumentType]
 		vertex_creases_attribute = context_object.attributes.new("crease_vert", "FLOAT", "POINT")
 		vertex_creases_attribute.data.foreach_set("value", buffer_vertex_creases)
 
 	if("edge_creases" in json_resource):
 		indices_width: int = json_resource.get("indices_width", 4)
-		buffer_edge_creases = np.frombuffer(context.import_buffer(json_resource, json_resource["edge_creases"]), dtype=determine_pack_format_float(4))
-		buffer_edges = np.frombuffer(context.import_buffer(json_resource, json_resource["edges"]), dtype=determine_pack_format_float(indices_width))
+		buffer_edge_creases = np.frombuffer(context.import_buffer(json_resource, json_resource["edge_creases"]), dtype=determine_pack_format_float(4))  # pyright: ignore[reportCallIssue, reportArgumentType]
+		buffer_edges = np.frombuffer(context.import_buffer(json_resource, json_resource["edges"]), dtype=determine_pack_format_float(indices_width))  # pyright: ignore[reportCallIssue, reportArgumentType]
 		buffer_edges = np.reshape(buffer_edges, (-1, 2))
 
 		edge_dict: dict[int, dict[int, int]] = {}

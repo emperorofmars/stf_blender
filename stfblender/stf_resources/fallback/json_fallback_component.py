@@ -26,7 +26,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, context_object: Any) -> Any:
-	component_ref, component = add_component(context_object, _blender_property_name, id, json_resource["type"])
+	component_ref, component = add_component(context_object, _blender_property_name, id, json_resource["type"])  # pyright: ignore[reportAssignmentType]
 	component: JsonFallbackComponent = component
 	import_component_base(context, component, json_resource, _blender_property_name, context_object)
 
@@ -43,7 +43,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, contex
 	context.add_task(STF_TaskSteps.FINALE, _handle)
 
 	for buffer_id in json_resource.get("referenced_buffers", []):
-		encode_buffer(context, buffer_id, component)
+		encode_buffer(context, buffer_id, component)  # pyright: ignore[reportArgumentType]
 
 	return component
 
@@ -52,7 +52,7 @@ def _stf_export(context: STF_ExportContext, component: JsonFallbackComponent, co
 	try:
 		json_component = json.loads(component.json)
 		if("type" not in json_component or not json_component["type"]):
-			return None
+			return None  # pyright: ignore[reportReturnType]
 		ret = export_component_base(context, json_component["type"], component, _blender_property_name, context_object)
 		ret = ret | json_component
 
@@ -70,14 +70,14 @@ def _stf_export(context: STF_ExportContext, component: JsonFallbackComponent, co
 			decode_buffer(context, ret, buffer)
 
 		return ret, component.stf_id
-	except:
-		return None
+	except Exception:
+		return None  # pyright: ignore[reportReturnType]
 
 
 class Handler_JsonFallbackComponent(STF_Handler_Component):
 	"""This type is not supported.
 	You have to edit the raw json string, resource references and base64 encoded binary buffers"""
-	stf_type = None
+	stf_type = None  # pyright: ignore[reportAssignmentType]
 	stf_category = STF_Category.COMPONENT
 	understood_application_types = [JsonFallbackComponent]
 	import_func = _stf_import

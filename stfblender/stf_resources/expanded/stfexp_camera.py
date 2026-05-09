@@ -16,7 +16,7 @@ class STFSetSTFEXPCameraIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
 	"""Set STF-ID for Camera"""
 	bl_idname = "stf.set_stfexp_camera_stf_id"
 	@classmethod
-	def poll(cls, context): return context.object.stf_instance is not None and context.object.data and isinstance(context.object.data, bpy.types.Camera)
+	def poll(cls, context) -> bool: return context.object.stf_instance is not None and context.object.data and isinstance(context.object.data, bpy.types.Camera)  # pyright: ignore[reportReturnType]
 	def get_property(self, context): return context.object.stf_instance
 
 class STFEXP_Camera_Panel(bpy.types.Panel):
@@ -28,12 +28,12 @@ class STFEXP_Camera_Panel(bpy.types.Panel):
 	bl_context = "data"
 
 	@classmethod
-	def poll(cls, context):
-		return context.object.stf_instance is not None and context.object.data and isinstance(context.object.data, bpy.types.Camera)
+	def poll(cls, context) -> bool:
+		return context.object.stf_instance is not None and context.object.data and isinstance(context.object.data, bpy.types.Camera)  # pyright: ignore[reportReturnType]
 
 	def draw(self, context):
 		# Set ID
-		draw_stf_id_ui(self.layout, context, context.object.stf_instance, context.object.stf_instance, STFSetSTFEXPCameraIDOperator.bl_idname, True)
+		draw_stf_id_ui(self.layout, context, context.object.stf_instance, context.object.stf_instance, STFSetSTFEXPCameraIDOperator.bl_idname, True)  # pyright: ignore[reportArgumentType]
 
 
 """
@@ -71,7 +71,7 @@ Export
 """
 
 def _can_handle_application_object_func(application_object: Any) -> int:
-	if(type(application_object) == tuple and type(application_object[0]) == bpy.types.Object and type(application_object[1]) == bpy.types.Camera):
+	if(type(application_object) is tuple and type(application_object[0]) is bpy.types.Object and type(application_object[1]) is bpy.types.Camera):
 		return 1000
 	else:
 		return -1
@@ -130,7 +130,7 @@ def _get__convert_lens_to_fov_func(camera: bpy.types.Camera) -> Callable:
 			return [_h_fov_to_v_fov(camera, 2 * math.atan((camera.sensor_width if _is_sensor_fit_horizontal(camera) else camera.sensor_height) / (2 * value[0])), 0)] # convert lens to fov
 	return _ret
 
-def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: Any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart:
+def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: Any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart | None:
 	if(application_object.data.type == "ORTHO"):
 		if(match := re.search(r"^ortho_scale", data_path)):
 			return STFPropertyPathPart([application_object.stf_info.stf_id, "instance", "fov"], _get__convert_lens_to_fov_func(application_object.data))
@@ -146,7 +146,7 @@ def _get__convert_fov_to_blender_func(camera: bpy.types.Camera) -> Callable:
 		return [(camera.sensor_width if _is_sensor_fit_horizontal(camera) else camera.sensor_height) / (2 * math.tan(value[0] / 2))] # convert fov to lens
 	return _ret
 
-def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: Any) -> BlenderPropertyPathPart:
+def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: Any) -> BlenderPropertyPathPart | None:
 	match(stf_path[1]):
 		case "fov":
 			if(application_object.data.type == "ORTHO"):
@@ -178,4 +178,3 @@ class Handler_STFEXP_Camera(STF_Handler_BlenderNative):
 register_stf_handlers = [
 	Handler_STFEXP_Camera
 ]
-

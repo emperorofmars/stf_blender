@@ -22,7 +22,7 @@ _eyelid_suffixes_left = [".l", ".left", "_l", "_left", " left", "left", "left ey
 _eyelid_suffixes_right = [".r", ".right", "_r", "_right", " right", "right", "right eye", " right eye"]
 
 
-def _map_blendshape(blendshape_name: str) -> str:
+def _map_blendshape(blendshape_name: str) -> str | None:
 	for prefix in _eyelid_prefixes:
 		for shape_name, shape_mappings in _eyelid_shapes.items():
 			for shape in shape_mappings:
@@ -73,14 +73,13 @@ class AutomapEyelids(bpy.types.Operator):
 
 	component_id: bpy.props.StringProperty() # type: ignore
 
-	def execute(self, context):
+	def execute(self, context) -> set:
 		for component in context.mesh.ava_eyelids_blendshape:
 			if(component.stf_id == self.component_id):
-				break
+				automap(component, context.mesh)  # pyright: ignore[reportArgumentType]
+				return {"FINISHED"}
+		return {"CANCELLED"}
 
-		automap(component, context.mesh)
-
-		return {"FINISHED"}
 
 
 def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: AVA_Eyelids_Blendshape):

@@ -18,4 +18,4 @@ def encode_buffer(context: STF_ImportContext, buffer_id: str, stf_fallback: bpy.
 
 
 def decode_buffer(context: STF_ExportContext, json_parent: dict, stf_fallback: STF_FallbackBuffer) -> str:
-	return context.serialize_buffer(json_parent, base64.standard_b64decode(stf_fallback.buffer_base64), stf_fallback.stf_id)
+	return context.serialize_buffer(json_parent, base64.standard_b64decode(stf_fallback.buffer_base64), stf_fallback.stf_id)  # pyright: ignore[reportReturnType]

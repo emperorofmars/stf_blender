@@ -199,7 +199,7 @@ class ComponentLoadJsonOperatorBase():
 	def invoke(self, context, event):
 		return context.window_manager.invoke_props_dialog(self)
 
-	def execute(self, context):
+	def execute(self, context: bpy.types.Context) -> set:
 		try:
 			import json
 			json_resource = json.loads(self.json_string)
@@ -213,13 +213,13 @@ class ComponentLoadJsonOperatorBase():
 		self.report({"ERROR"}, "Failed applying Json values.")
 		return {"CANCELLED"}
 
-	def get_property(self, context) -> Any:
+	def get_property(self, context: bpy.types.Context) -> Any:
 		pass
 
-	def parse_json(self, context, component: Any, json_resource: dict):
+	def parse_json(self, context: bpy.types.Context, component: Any, json_resource: dict):
 		pass
 
-	def draw(self, context):
+	def draw(self, context: bpy.types.Context):
 		layout: bpy.types.UILayout = self.layout
 		layout.label(text="Paste json setup string.")
 		layout.label(text="(This will overwrite your current values)")
@@ -227,7 +227,7 @@ class ComponentLoadJsonOperatorBase():
 		json_error = False
 		try:
 			json.loads(self.json_string)
-		except:
+		except Exception:
 			json_error = True
 		layout.alert = json_error
 		layout.prop(self, "json_string", text="", icon="ERROR" if json_error else "NONE")

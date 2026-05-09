@@ -13,7 +13,7 @@ _blender_property_name = "ava_face_tracking_blendshape"
 
 
 def _match_ft_blendshapes(mesh: bpy.types.Mesh, shapes: list[str]) -> tuple[int, int]:
-	if(not mesh.shape_keys or not mesh.shape_keys.key_blocks): return 0
+	if(not mesh.shape_keys or not mesh.shape_keys.key_blocks): return (0, 0)
 	shapes_matched = 0
 	for shape in shapes:
 		if(shape in mesh.shape_keys.key_blocks.keys()):
@@ -21,7 +21,7 @@ def _match_ft_blendshapes(mesh: bpy.types.Mesh, shapes: list[str]) -> tuple[int,
 	return (shapes_matched, len(shapes))
 
 
-def automap(mesh: bpy.types.Mesh) -> str:
+def automap(mesh: bpy.types.Mesh) -> str | None:
 	best = None
 	best_percent = 0
 	for ft_type in ft_definitions:
@@ -103,4 +103,3 @@ def register():
 def unregister():
 	if hasattr(bpy.types.Mesh, _blender_property_name):
 		delattr(bpy.types.Mesh, _blender_property_name)
-

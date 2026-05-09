@@ -24,7 +24,7 @@ class CreateVoicePositionObjectOperator(bpy.types.Operator):
 	blender_collection: bpy.props.StringProperty() # type: ignore
 	component_id: bpy.props.StringProperty() # type: ignore
 
-	def execute(self, context):
+	def execute(self, context) -> set:
 		target_object = bpy.data.collections[self.blender_collection]
 		if("$VoicePosition" in bpy.data.objects):
 			voice_object = bpy.data.objects["$VoicePosition"]
@@ -71,7 +71,7 @@ def _stf_export(context: STF_ExportContext, component: AVA_VoicePosition, contex
 
 	if(component.voice_position):
 		def _handle():
-			ret["voice_position"] = register_exported_resource(ret, context.get_resource_id(component.voice_position))
+			ret["voice_position"] = register_exported_resource(ret, context.get_resource_id(component.voice_position))  # pyright: ignore[reportArgumentType]
 		context.add_task(STF_TaskSteps.DEFAULT, _handle)
 
 	return ret, component.stf_id

@@ -17,7 +17,7 @@ _mappings_left_side = (("left", "_l", ".l", "-l"), ("left", ))
 _mappings_right_side = (("right", "_r", ".r", "-r"), ("right", ))
 
 # (humanoid_name, display_name, matching_conditions, side (None | "l" | "r"), muscle_rotation_limits(False | [[p_min, p_max],[s_min, s_max],[t_min, t_max]]))
-_humanoid_bones: Sequence[tuple[str, str, Sequence[Sequence[Sequence[str]]], str | None, Sequence[Sequence[float] | None] | None]] = (
+_humanoid_bones: Sequence[tuple[str, str, Sequence[Sequence[Sequence[str]]], str | None, Sequence[Sequence[float] | None] | None]] = (  # pyright: ignore[reportAssignmentType]
 	("hip", "Hip", ((("hip", "hips"),),), None, False),
 	("spine", "Spine", ((("spine",),),), None, [[-40, 40],[-40, 40],[-40, 40]]),
 	("chest", "Chest", ((("chest",),),), None, [[-40, 40],[-40, 40],[-40, 40]]),
@@ -85,7 +85,7 @@ def _get_display_name(humanoid_name: str) -> str:
 	for bone in _humanoid_bones:
 		if(bone[0] == humanoid_name):
 			return bone[1]
-	return None
+	return "INVALID"
 
 
 class HumanoidBone(bpy.types.PropertyGroup):
@@ -147,7 +147,7 @@ def _map_humanoid_bones(component: STFEXP_Armature_Humanoid, armature: bpy.types
 		_setup_humanoid_collection(component)
 
 	for bone_mapping in _humanoid_bones:
-		mapping_conditions: tuple = bone_mapping[2]
+		mapping_conditions = bone_mapping[2]
 		side: str | None = bone_mapping[3]
 		candidate = None
 		candidate_confidence = -1
@@ -216,11 +216,11 @@ class ResetHumanoidCollectionOperator(bpy.types.Operator):
 	def invoke(self, context: bpy.types.Context, event: bpy.types.Event):
 		return context.window_manager.invoke_confirm(self, event)
 
-	def execute(self, context: bpy.types.Context):
+	def execute(self, context: bpy.types.Context) -> set:
 		# let component
 		for component in context.armature.stfexp_armature_humanoid:
-			component.stf_id == self.component_id
-			break
+			if(component.stf_id == self.component_id):
+				break
 		else:
 			self.report({"ERROR"}, "Failed")
 			return {"CANCELLED"}
@@ -242,22 +242,22 @@ class MapHumanoidCollectionOperator(bpy.types.Operator):
 	def invoke(self, context: bpy.types.Context, event: bpy.types.Event):
 		return context.window_manager.invoke_confirm(self, event)
 
-	def execute(self, context: bpy.types.Context):
+	def execute(self, context: bpy.types.Context) -> set:
 		# let component
 		for component in context.armature.stfexp_armature_humanoid:
-			component.stf_id == self.component_id
-			break
+			if(component.stf_id == self.component_id):
+				break
 		else:
 			self.report({"ERROR"}, "Failed")
 			return {"CANCELLED"}
-		_map_humanoid_bones(component, context.armature)
+		_map_humanoid_bones(component, context.armature)  # pyright: ignore[reportArgumentType]
 		return {"FINISHED"}
 
 
 class STFEXP_HumanoidMappingsList(bpy.types.UIList):
 	bl_idname = "COLLECTION_UL_stfexp_humanoid_mappings_list"
 
-	def draw_item(self, context: bpy.types.Context, layout: bpy.types.UILayout, data: STFEXP_Armature_Humanoid, item: HumanoidBone, icon, active_data, active_propname, index):
+	def draw_item(self, context: bpy.types.Context, layout: bpy.types.UILayout, data: STFEXP_Armature_Humanoid, item: HumanoidBone, icon, active_data, active_propname, index):  # pyright: ignore[reportIncompatibleMethodOverride]
 		for candidate_mapping in data.bone_mappings:
 			if(candidate_mapping != item and candidate_mapping.bone == item.bone):
 				layout.alert = True
@@ -342,7 +342,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, context_object: Any) -> Any | STFReport:
-	component_ref, component = add_component(context_object, _blender_property_name, id, _stf_type)
+	component_ref, component = add_component(context_object, _blender_property_name, id, _stf_type)  # pyright: ignore[reportAssignmentType]
 	component: STFEXP_Armature_Humanoid = component
 	import_component_base(context, component, json_resource, _blender_property_name, context_object)
 

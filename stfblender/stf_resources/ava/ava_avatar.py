@@ -14,9 +14,9 @@ _blender_property_name = "stf_ava_avatar"
 
 
 def _poll_armature_instance(self, blender_object: bpy.types.Object) -> bool:
-	return blender_object.data and type(blender_object.data) == bpy.types.Armature
+	return blender_object.data and type(blender_object.data) is bpy.types.Armature  # pyright: ignore[reportReturnType]
 def _poll_mesh_instance(self, blender_object: bpy.types.Object) -> bool:
-	return blender_object.data and type(blender_object.data) == bpy.types.Mesh
+	return blender_object.data and type(blender_object.data) is bpy.types.Mesh  # pyright: ignore[reportReturnType]
 
 class AVA_Avatar(STF_ComponentResourceBase):
 	viewport: bpy.props.PointerProperty(type=bpy.types.Object, name="Viewport", description="This Object's location will be used to determine the viewport location", options=set()) # type: ignore
@@ -33,7 +33,7 @@ class CreateViewportObjectOperator(bpy.types.Operator):
 	blender_collection: bpy.props.StringProperty() # type: ignore
 	component_id: bpy.props.StringProperty() # type: ignore
 
-	def execute(self, context):
+	def execute(self, context) -> set:
 		target_object = bpy.data.collections[self.blender_collection]
 		if("$ViewportFirstPerson" in bpy.data.objects):
 			viewport_object = bpy.data.objects["$ViewportFirstPerson"]
@@ -99,17 +99,17 @@ def _stf_export(context: STF_ExportContext, component: AVA_Avatar, context_objec
 
 	if(component.viewport):
 		def _handle_viewport():
-			ret["viewport"] = register_exported_resource(ret, context.get_resource_id(component.viewport))
+			ret["viewport"] = register_exported_resource(ret, context.get_resource_id(component.viewport))  # pyright: ignore[reportArgumentType]
 		context.add_task(STF_TaskSteps.DEFAULT, _handle_viewport)
 
-	if(component.primary_armature_instance and component.primary_armature_instance.data and type(component.primary_armature_instance.data) == bpy.types.Armature):
+	if(component.primary_armature_instance and component.primary_armature_instance.data and type(component.primary_armature_instance.data) is bpy.types.Armature):
 		def _handle_primary_armature_instance():
-			ret["primary_armature_instance"] = register_exported_resource(ret, context.get_resource_id(component.primary_armature_instance))
+			ret["primary_armature_instance"] = register_exported_resource(ret, context.get_resource_id(component.primary_armature_instance))  # pyright: ignore[reportArgumentType]
 		context.add_task(STF_TaskSteps.DEFAULT, _handle_primary_armature_instance)
 
-	if(component.primary_mesh_instance and component.primary_mesh_instance.data and type(component.primary_mesh_instance.data) == bpy.types.Mesh):
+	if(component.primary_mesh_instance and component.primary_mesh_instance.data and type(component.primary_mesh_instance.data) is bpy.types.Mesh):
 		def _handle_primary_mesh_instance():
-			ret["primary_mesh_instance"] = register_exported_resource(ret, context.get_resource_id(component.primary_mesh_instance))
+			ret["primary_mesh_instance"] = register_exported_resource(ret, context.get_resource_id(component.primary_mesh_instance))  # pyright: ignore[reportArgumentType]
 		context.add_task(STF_TaskSteps.DEFAULT, _handle_primary_mesh_instance)
 
 	return ret, component.stf_id

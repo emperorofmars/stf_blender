@@ -40,7 +40,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	context.add_task(STF_TaskSteps.FINALE, _handle)
 
 	for buffer_id in json_resource.get("referenced_buffers", []):
-		encode_buffer(context, buffer_id, resource)
+		encode_buffer(context, buffer_id, resource)  # pyright: ignore[reportArgumentType]
 
 	return resource
 
@@ -49,7 +49,7 @@ def _stf_export(context: STF_ExportContext, resource: JsonFallbackData, context_
 	try:
 		json_resource = json.loads(resource.json)
 		if("type" not in json_resource or not json_resource["type"]):
-			return None
+			return None  # pyright: ignore[reportReturnType]
 		ret = export_data_resource_base(context, json_resource["type"], resource)
 		ret = ret | json_resource
 
@@ -67,14 +67,14 @@ def _stf_export(context: STF_ExportContext, resource: JsonFallbackData, context_
 			decode_buffer(context, ret, buffer)
 
 		return ret, resource.stf_id
-	except:
-		return None
+	except Exception:
+		return None  # pyright: ignore[reportReturnType]
 
 
 class Handler_JsonFallbackData(STF_Handler_Data):
 	"""This type is not supported.
 	You have to edit the raw json string, resource references and base64 encoded binary buffers"""
-	stf_type = None
+	stf_type = None  # pyright: ignore[reportAssignmentType]
 	stf_category = STF_Category.DATA
 	understood_application_types = [JsonFallbackData]
 	import_func = _stf_import

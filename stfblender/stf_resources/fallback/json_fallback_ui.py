@@ -18,7 +18,7 @@ class FallbackResourcesAdd(bpy.types.Operator):
 	blender_property_name: bpy.props.StringProperty() # type: ignore
 	resource_id: bpy.props.StringProperty() # type: ignore
 
-	def execute(self, context):
+	def execute(self, context) -> set:
 		if(blender_id_property := getattr(bpy.data, self.blender_id_property.lower() + "s")):
 			for component in getattr(blender_id_property[self.blender_id_object], self.blender_property_name):
 				if(component.stf_id == self.resource_id):
@@ -38,7 +38,7 @@ class FallbackResourcesRemove(bpy.types.Operator):
 	resource_id: bpy.props.StringProperty() # type: ignore
 	reference_index: bpy.props.IntProperty() # type: ignore
 
-	def execute(self, context):
+	def execute(self, context) -> set:
 		if(blender_id_property := getattr(bpy.data, self.blender_id_property.lower() + "s")):
 			for component in getattr(blender_id_property[self.blender_id_object], self.blender_property_name):
 				if(component.stf_id == self.resource_id):
@@ -58,7 +58,7 @@ class FallbackBuffersAdd(bpy.types.Operator):
 	blender_property_name: bpy.props.StringProperty() # type: ignore
 	resource_id: bpy.props.StringProperty() # type: ignore
 
-	def execute(self, context):
+	def execute(self, context) -> set:
 		if(blender_id_property := getattr(bpy.data, self.blender_id_property.lower() + "s")):
 			for component in getattr(blender_id_property[self.blender_id_object], self.blender_property_name):
 				if(component.stf_id == self.resource_id):
@@ -80,7 +80,7 @@ class FallbackBuffersRemove(bpy.types.Operator):
 	resource_id: bpy.props.StringProperty() # type: ignore
 	buffer_index: bpy.props.IntProperty() # type: ignore
 
-	def execute(self, context):
+	def execute(self, context) -> set:
 		if(blender_id_property := getattr(bpy.data, self.blender_id_property.lower() + "s")):
 			for component in getattr(blender_id_property[self.blender_id_object], self.blender_property_name):
 				if(component.stf_id == self.resource_id):
@@ -92,14 +92,14 @@ class FallbackBuffersRemove(bpy.types.Operator):
 class FallbackResourcesList(bpy.types.UIList):
 	bl_idname = "COLLECTION_UL_stf_fallback_resources_list"
 
-	def draw_item(self, context: bpy.types.Context, layout: bpy.types.UILayout, data, item: BlenderGRR, icon, active_data, active_propname, index):
+	def draw_item(self, context: bpy.types.Context, layout: bpy.types.UILayout, data, item: BlenderGRR, icon, active_data, active_propname, index):  # pyright: ignore[reportIncompatibleMethodOverride]
 		layout.label(text=item.reference_type)
 
 
 class FallbackBuffersList(bpy.types.UIList):
 	bl_idname = "COLLECTION_UL_stf_fallback_buffers_list"
 
-	def draw_item(self, context: bpy.types.Context, layout: bpy.types.UILayout, data, item: BlenderGRR, icon, active_data, active_propname, index):
+	def draw_item(self, context: bpy.types.Context, layout: bpy.types.UILayout, data, item: BlenderGRR, icon, active_data, active_propname, index):  # pyright: ignore[reportIncompatibleMethodOverride]
 		layout.label(text=item.stf_id)
 		layout.label(text=str(len(item.buffer_base64)))
 
@@ -114,7 +114,7 @@ def draw_fallback(layout: bpy.types.UILayout, resource_ref: STF_Component_Ref | 
 		if("type" not in json_resource or json_resource["type"] != resource_ref.stf_type):
 			col.label(text="Invalid 'type' in Json", icon="ERROR")
 			json_error = True
-	except:
+	except Exception:
 		col.label(text="Json Invalid", icon="ERROR")
 		json_error = True
 	col.alert = json_error

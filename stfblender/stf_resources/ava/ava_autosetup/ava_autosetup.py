@@ -10,15 +10,15 @@ from ..ava_eyerotation_bone import Handler_AVA_EyeRotation_Bone
 from ...expanded.stfexp_armature_humanoid import Handler_STFEXP_Armature_Humanoid, STFEXP_Armature_Humanoid, _map_humanoid_bones as automap_humanoid
 
 
-def detect_mesh_and_armature(collection: bpy.types.Collection) -> tuple[bpy.types.Object, bpy.types.Object]:
+def detect_mesh_and_armature(collection: bpy.types.Collection) -> tuple[bpy.types.Object | None, bpy.types.Object | None]:
 	main_mesh = None
 	main_armature = None
 	for object in collection.all_objects[:]:
-		if(type(object.data) == bpy.types.Mesh and ("body" in object.name.lower() or "face" in object.name.lower())):
+		if(type(object.data) is bpy.types.Mesh and ("body" in object.name.lower() or "face" in object.name.lower())):
 			if(not main_mesh or len(object.name) < len(main_mesh.name)):
 				main_mesh = object
 	for object in collection.all_objects[:]:
-		if(type(object.data) == bpy.types.Armature and ("armature" in object.name.lower() or "skeleton" in object.name.lower())):
+		if(type(object.data) is bpy.types.Armature and ("armature" in object.name.lower() or "skeleton" in object.name.lower())):
 			if(not main_armature or len(object.name) < len(main_armature.name)):
 				main_armature = object
 	return main_mesh, main_armature
@@ -42,22 +42,22 @@ def ava_autosetup(target: bpy.types.Collection):
 
 	# Clear existing components
 	clear_components(target, Handler_AVA_Avatar.blender_property_name)
-	clear_components(main_armature.data, Handler_STFEXP_Armature_Humanoid.blender_property_name)
-	clear_components(main_armature.data, Handler_AVA_EyeRotation_Bone.blender_property_name)
-	clear_components(main_mesh.data, Handler_AVA_Visemes_Blendshape.blender_property_name)
-	clear_components(main_mesh.data, Handler_AVA_Eyelids_Blendshape.blender_property_name)
-	clear_components(main_mesh.data, Handler_AVA_FaceTracking_Blendshapes.blender_property_name)
+	clear_components(main_armature.data, Handler_STFEXP_Armature_Humanoid.blender_property_name)  # pyright: ignore[reportArgumentType]
+	clear_components(main_armature.data, Handler_AVA_EyeRotation_Bone.blender_property_name)  # pyright: ignore[reportArgumentType]
+	clear_components(main_mesh.data, Handler_AVA_Visemes_Blendshape.blender_property_name)  # pyright: ignore[reportArgumentType]
+	clear_components(main_mesh.data, Handler_AVA_Eyelids_Blendshape.blender_property_name)  # pyright: ignore[reportArgumentType]
+	clear_components(main_mesh.data, Handler_AVA_FaceTracking_Blendshapes.blender_property_name)  # pyright: ignore[reportArgumentType]
 
 	# Apply
-	_, avatar = add_component(target, Handler_AVA_Avatar.blender_property_name, str(uuid.uuid4()), Handler_AVA_Avatar.stf_type)
+	_, avatar = add_component(target, Handler_AVA_Avatar.blender_property_name, str(uuid.uuid4()), Handler_AVA_Avatar.stf_type)  # pyright: ignore[reportAssignmentType]
 	avatar: AVA_Avatar = avatar # autocomplete
 	avatar.name = target.name
 	avatar.primary_mesh_instance = main_mesh
 	avatar.primary_armature_instance = main_armature
 
-	_, humanoid = add_component(main_armature.data, Handler_STFEXP_Armature_Humanoid.blender_property_name, str(uuid.uuid4()), Handler_STFEXP_Armature_Humanoid.stf_type)
+	_, humanoid = add_component(main_armature.data, Handler_STFEXP_Armature_Humanoid.blender_property_name, str(uuid.uuid4()), Handler_STFEXP_Armature_Humanoid.stf_type)  # pyright: ignore[reportAssignmentType]
 	humanoid: STFEXP_Armature_Humanoid  = humanoid
-	automap_humanoid(humanoid, main_armature.data)
+	automap_humanoid(humanoid, main_armature.data)  # pyright: ignore[reportArgumentType]
 
 	eye_l = humanoid.bone_mappings["eye.l"].bone if "eye.l" in humanoid.bone_mappings else None
 	eye_r = humanoid.bone_mappings["eye.r"].bone if "eye.r" in humanoid.bone_mappings else None
@@ -76,13 +76,12 @@ def ava_autosetup(target: bpy.types.Collection):
 	_, eyerotation = add_component(main_armature.data, Handler_AVA_EyeRotation_Bone.blender_property_name, str(uuid.uuid4()), Handler_AVA_EyeRotation_Bone.stf_type)
 
 	_, visemes = add_component(main_mesh.data, Handler_AVA_Visemes_Blendshape.blender_property_name, str(uuid.uuid4()), Handler_AVA_Visemes_Blendshape.stf_type)
-	automap_visemes(visemes, main_mesh.data)
+	automap_visemes(visemes, main_mesh.data)  # pyright: ignore[reportArgumentType]
 
 	_, eyelids = add_component(main_mesh.data, Handler_AVA_Eyelids_Blendshape.blender_property_name, str(uuid.uuid4()), Handler_AVA_Eyelids_Blendshape.stf_type)
-	automap_eyelids(eyelids, main_mesh.data)
+	automap_eyelids(eyelids, main_mesh.data)  # pyright: ignore[reportArgumentType]
 
-	ft_match = automap_ft(main_mesh.data)
+	ft_match = automap_ft(main_mesh.data)  # pyright: ignore[reportArgumentType]
 	if(ft_match):
 		_, facetracking = add_component(main_mesh.data, Handler_AVA_FaceTracking_Blendshapes.blender_property_name, str(uuid.uuid4()), Handler_AVA_FaceTracking_Blendshapes.stf_type)
 		facetracking.ft_type = ft_match
-

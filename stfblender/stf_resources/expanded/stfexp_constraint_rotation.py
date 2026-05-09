@@ -45,11 +45,11 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 
 	layout.separator(factor=1)
 
-	create_add_button(layout, "bone" if type(context_object) == bpy.types.Bone else "object", _blender_property_name, component.stf_id, "sources", text="Add Constraint Source")
+	create_add_button(layout, "bone" if type(context_object) is bpy.types.Bone else "object", _blender_property_name, component.stf_id, "sources", text="Add Constraint Source")
 
 	row = layout.row(align=True)
 	row.template_list(STFDrawAVAExpressionList.bl_idname, "", component, "sources", component, "active_source_index")
-	create_remove_button(row, "bone" if type(context_object) == bpy.types.Bone else "object", _blender_property_name, component.stf_id, "sources", component.active_source_index)
+	create_remove_button(row, "bone" if type(context_object) is bpy.types.Bone else "object", _blender_property_name, component.stf_id, "sources", component.active_source_index)
 
 	if(component.active_source_index < len(component.sources)):
 		source = component.sources[component.active_source_index]

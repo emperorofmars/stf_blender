@@ -49,7 +49,7 @@ def automap(component: AVA_Visemes_Blendshape, mesh: bpy.types.Mesh):
 
 					if(test in shape and shape_confidence > confidences[viseme]):
 						component["vis_" + viseme] = shape_key.name
-						confidences[viseme] = shape_confidence
+						confidences[viseme] = shape_confidence # pyright: ignore[reportArgumentType]
 
 
 class AutomapVisemes(bpy.types.Operator):
@@ -60,14 +60,13 @@ class AutomapVisemes(bpy.types.Operator):
 
 	component_id: bpy.props.StringProperty() # type: ignore
 
-	def execute(self, context):
+	def execute(self, context) -> set:
 		for component in context.mesh.stf_ava_visemes_blendshape:
 			if(component.stf_id == self.component_id):
-				break
-
-		automap(component, context.mesh)
-
-		return {"FINISHED"}
+				automap(component, context.mesh) # pyright: ignore[reportArgumentType]
+				return {"FINISHED"}
+		else:
+			return {"CANCELLED"}
 
 
 def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: AVA_Visemes_Blendshape):

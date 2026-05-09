@@ -14,7 +14,7 @@ class STFSetSTFEXPInstanceTextIDOperator(bpy.types.Operator, STFSetIDOperatorBas
 	"""Set STF-ID for Text Instance"""
 	bl_idname = "stf.set_stfexp_instance_text_stf_id"
 	@classmethod
-	def poll(cls, context): return context.object.stf_instance is not None and context.object.data and isinstance(context.object.data, bpy.types.TextCurve)
+	def poll(cls, context) -> bool: return context.object.stf_instance is not None and context.object.data and isinstance(context.object.data, bpy.types.TextCurve)  # pyright: ignore[reportReturnType]
 	def get_property(self, context): return context.object.stf_instance
 
 class STFEXP_Instance_Text_Panel(bpy.types.Panel):
@@ -26,12 +26,12 @@ class STFEXP_Instance_Text_Panel(bpy.types.Panel):
 	bl_context = "object"
 
 	@classmethod
-	def poll(cls, context):
-		return context.object.stf_instance is not None and context.object.data and isinstance(context.object.data, bpy.types.TextCurve)
+	def poll(cls, context) -> bool:
+		return context.object.stf_instance is not None and context.object.data and isinstance(context.object.data, bpy.types.TextCurve)  # pyright: ignore[reportReturnType]
 
 	def draw(self, context):
 		# Set ID
-		draw_stf_id_ui(self.layout, context, context.object.stf_instance, context.object.stf_instance, STFSetSTFEXPInstanceTextIDOperator.bl_idname, True)
+		draw_stf_id_ui(self.layout, context, context.object.stf_instance, context.object.stf_instance, STFSetSTFEXPInstanceTextIDOperator.bl_idname, True)  # pyright: ignore[reportArgumentType]
 
 
 """
@@ -60,7 +60,7 @@ Export
 """
 
 def _can_handle_application_object_func(application_object: Any) -> int:
-	if(type(application_object) == tuple and type(application_object[0]) == bpy.types.Object and isinstance(application_object[1], bpy.types.TextCurve)):
+	if(type(application_object) is tuple and type(application_object[0]) is bpy.types.Object and isinstance(application_object[1], bpy.types.TextCurve)):
 		return 1000
 	else:
 		return -1
