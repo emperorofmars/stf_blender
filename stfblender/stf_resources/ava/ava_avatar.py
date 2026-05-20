@@ -4,7 +4,6 @@ from typing import Any
 from ...common import STF_ExportContext, STF_ImportContext, STF_TaskSteps, STF_Category
 from ...common.resource.component import STF_ComponentResourceBase, STF_Handler_Component, STF_Component_Ref
 from ...common.helpers import register_exported_resource
-
 from ...common.resource.component.component_utils import add_component, export_component_base, import_component_base
 from ...common.helpers.misc import SetActiveObjectOperator
 
@@ -39,6 +38,7 @@ class CreateViewportObjectOperator(bpy.types.Operator):
 			viewport_object = bpy.data.objects["$ViewportFirstPerson"]
 		else:
 			viewport_object = bpy.data.objects.new("$ViewportFirstPerson", None)
+			viewport_object.rotation_mode = "QUATERNION"
 			viewport_object.empty_display_size = 0.1
 			viewport_object.empty_display_type = "SINGLE_ARROW"
 			target_object.objects.link(viewport_object)

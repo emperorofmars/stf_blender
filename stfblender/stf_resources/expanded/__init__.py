@@ -15,6 +15,7 @@ from . import stfexp_light
 from .stfexp_text import stfexp_text
 from . import stfexp_instance_text
 from . import stfexp_animation_blendtree
+from . import stfexp_node_ethereal
 
 register_stf_handlers = \
 	stfexp_mesh_seams.register_stf_handlers + \
@@ -32,4 +33,5 @@ register_stf_handlers = \
 	stfexp_light.register_stf_handlers + \
 	stfexp_text.register_stf_handlers + \
 	stfexp_instance_text.register_stf_handlers + \
-	stfexp_animation_blendtree.register_stf_handlers
+	stfexp_animation_blendtree.register_stf_handlers + \
+	stfexp_node_ethereal.register_stf_handlers

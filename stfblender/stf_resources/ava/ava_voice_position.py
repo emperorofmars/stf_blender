@@ -30,6 +30,7 @@ class CreateVoicePositionObjectOperator(bpy.types.Operator):
 			voice_object = bpy.data.objects["$VoicePosition"]
 		else:
 			voice_object = bpy.data.objects.new("$VoicePosition", None)
+			voice_object.rotation_mode = "QUATERNION"
 			voice_object.empty_display_size = 0.1
 			voice_object.empty_display_type = "SINGLE_ARROW"
 			target_object.objects.link(voice_object)
