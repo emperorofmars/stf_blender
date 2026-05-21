@@ -1,4 +1,5 @@
 import bpy
+import uuid
 from typing import Any
 
 from ...common import STF_ExportContext, STF_ImportContext, STF_TaskSteps, STF_Category
@@ -6,6 +7,7 @@ from ...common.resource.component import STF_ComponentResourceBase, STF_Handler_
 from ...common.helpers import register_exported_resource
 from ...common.resource.component.component_utils import add_component, export_component_base, import_component_base
 from ...common.helpers.misc import SetActiveObjectOperator
+from ..expanded import stfexp_node_ethereal
 
 
 _stf_type = "ava.avatar"
@@ -41,6 +43,8 @@ class CreateViewportObjectOperator(bpy.types.Operator):
 			viewport_object.rotation_mode = "QUATERNION"
 			viewport_object.empty_display_size = 0.1
 			viewport_object.empty_display_type = "SINGLE_ARROW"
+
+			add_component(viewport_object, stfexp_node_ethereal._blender_property_name, str(uuid.uuid4()), stfexp_node_ethereal._stf_type)
 			target_object.objects.link(viewport_object)
 		for avatar_component in getattr(target_object, _blender_property_name):
 			if(avatar_component.stf_id == self.component_id):

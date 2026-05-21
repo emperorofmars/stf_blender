@@ -1,10 +1,12 @@
 import bpy
+import uuid
 from typing import Any
 
 from ...common import STF_ExportContext, STF_ImportContext, STF_TaskSteps, STF_Category
 from ...common.resource.component import STF_ComponentResourceBase, STF_Handler_Component, STF_Component_Ref
 from ...common.resource.component.component_utils import add_component, export_component_base, import_component_base
 from ...common.helpers import register_exported_resource, SetActiveObjectOperator
+from ..expanded import stfexp_node_ethereal
 
 
 _stf_type = "ava.voice_position"
@@ -33,6 +35,7 @@ class CreateVoicePositionObjectOperator(bpy.types.Operator):
 			voice_object.rotation_mode = "QUATERNION"
 			voice_object.empty_display_size = 0.1
 			voice_object.empty_display_type = "SINGLE_ARROW"
+			add_component(voice_object, stfexp_node_ethereal._blender_property_name, str(uuid.uuid4()), stfexp_node_ethereal._stf_type)
 			target_object.objects.link(voice_object)
 		for voice_component in getattr(target_object, _blender_property_name):
 			if(voice_component.stf_id == self.component_id):
