@@ -20,7 +20,7 @@ class Toggle(bpy.types.PropertyGroup):
 class GrabToggle(bpy.types.PropertyGroup):
 	toggle: bpy.props.PointerProperty(name="Toggle", type=Toggle, options=set()) # type: ignore
 	grab_collider: bpy.props.PointerProperty(name="Contact", type=NodePathComponentSelector, options=set()) # type: ignore
-	hand_filter: bpy.props.EnumProperty(name="Filter Hands", items=(("left", "Left Only", ""), ("right", "Right Only", ""), ("both", "Both Hands", "")), default="both", options=set()) # type: ignore
+	hand_filter: bpy.props.EnumProperty(name="Filter Hands", items=(("left", "Left", ""), ("right", "Right", "")), default="both", options=set()) # type: ignore
 
 
 class PersistentPuppet(bpy.types.PropertyGroup):
@@ -179,7 +179,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 		for toggle_json in json_resource.get("grab_toggles", []):
 			toggle: GrabToggle = component.grab_toggles.add()
 			toggle.name = toggle_json.get("name", "")
-			toggle.hand_filter = toggle_json.get("hand", "both")
+			toggle.hand_filter = toggle_json.get("hand", "right")
 			node_path_component_selector_from_stf(context, json_resource, toggle_json.get("collider"), toggle.grab_collider)
 			toggle.toggle.animation_on = context.import_resource(json_resource, toggle_json.get("on"))
 			toggle.toggle.animation_off = context.import_resource(json_resource, toggle_json.get("off"))
