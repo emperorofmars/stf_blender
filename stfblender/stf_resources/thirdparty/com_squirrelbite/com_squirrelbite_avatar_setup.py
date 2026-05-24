@@ -20,7 +20,7 @@ class Toggle(bpy.types.PropertyGroup):
 class GrabToggle(bpy.types.PropertyGroup):
 	toggle: bpy.props.PointerProperty(name="Toggle", type=Toggle, options=set()) # type: ignore
 	grab_collider: bpy.props.PointerProperty(name="Contact", type=NodePathComponentSelector, options=set()) # type: ignore
-	hand_filter: bpy.props.EnumProperty(name="Filter Hands", items=(("left", "Left", ""), ("right", "Right", "")), default="both", options=set()) # type: ignore
+	hand_filter: bpy.props.EnumProperty(name="Filter Hands", items=(("left", "Left", ""), ("right", "Right", "")), default="right", options=set()) # type: ignore
 
 
 class PersistentPuppet(bpy.types.PropertyGroup):
