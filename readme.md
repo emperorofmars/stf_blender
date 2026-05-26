@@ -13,6 +13,7 @@ Follow the steps on [docs.stfform.at](https://docs.stfform.at/installation/blend
 ### Manual
 Download the [latest release](https://codeberg.org/stf_format/stf_blender/releases/latest)\
 Add it under: `Edit` → `Preferences` → `Get Extensions` → **Click on the top right most dropdown** → `Install from Disk...`
+
 ---
 
 > [!TIP]
