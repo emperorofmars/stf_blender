@@ -12,8 +12,8 @@ class STF_File:
 	Provides methods to parse and serialize it to and from a io-buffer, which can be a file"""
 
 	def __init__(self):
-		self.binary_version_major: int = 0
-		self.binary_version_minor: int = 0
+		self.binary_version: int = 0
+		self.padding_future_use: int = 0
 		self.definition: STF_JsonDefinition = STF_JsonDefinition()
 		self.buffers_included: list[bytes] = []
 		self.filename: str = ""
@@ -29,8 +29,8 @@ class STF_File:
 			raise ImportError("Invalid magic number, not an STF file! (" + str(magic_number) + ")")
 
 		# Read and check STF binary version
-		ret.binary_version_major = buffer_utils.parse_uint(buffer, 4)
-		ret.binary_version_minor = buffer_utils.parse_uint(buffer, 4)
+		ret.binary_version = buffer_utils.parse_uint(buffer, 4)
+		ret.padding_future_use = buffer_utils.parse_uint(buffer, 4)
 
 		# Read the number of buffers
 		num_buffers_with_json = buffer_utils.parse_uint(buffer, 4)
@@ -60,8 +60,8 @@ class STF_File:
 		buffer.write("STF0".encode("ascii"))
 
 		# Serialize STF binary version
-		buffer.write(buffer_utils.serialize_uint(self.binary_version_major, 4))
-		buffer.write(buffer_utils.serialize_uint(self.binary_version_minor, 4))
+		buffer.write(buffer_utils.serialize_uint(self.binary_version, 4))
+		buffer.write(buffer_utils.serialize_uint(self.padding_future_use, 4))
 
 		# Serialize Number of buffers
 		num_buffers = len(self.buffers_included)

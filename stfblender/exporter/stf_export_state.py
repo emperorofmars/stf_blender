@@ -43,7 +43,7 @@ class STF_ExportState(STF_State_Base):
 		self._exported_buffers: dict[str, bytes] = {} # ID -> exported STF Json buffer
 
 		self._asset_info: STF_Meta_AssetInfo = asset_info[0]
-		self._asset_properties: STF_Meta_AssetInfo = asset_info[1]
+		self._asset_properties: STF_Meta_AssetProperties = asset_info[1]
 		self._permit_id_reassignment: bool = permit_id_reassignment
 		self._root_id: str | None = None
 		self._metric_multiplier: float = metric_multiplier
@@ -164,8 +164,6 @@ class STF_ExportState(STF_State_Base):
 
 	def create_stf_binary_file(self) -> STF_File:
 		ret = STF_File()
-		ret.binary_version_major = 0
-		ret.binary_version_minor = 0
 		ret.definition = self.create_stf_definition()
 		for _, buffer in self._exported_buffers.items():
 			ret.buffers_included.append(buffer)
