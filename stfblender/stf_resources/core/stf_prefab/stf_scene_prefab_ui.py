@@ -68,6 +68,5 @@ class STFSceneCollectionPanel(bpy.types.Panel):
 
 	def draw(self, context: bpy.types.Context):
 		set_stf_component_filter(bpy.types.Collection)
-		self.layout.prop(context.scene.collection, "stf_use_collection_as_prefab")
 
 		draw_prefab_ui(self.layout, context, context.scene.collection, STFSetSceneCollectionAsRootOperator.bl_idname, STFSetSceneCollectionIDOperator.bl_idname, STFAddSceneCollectionComponentOperator.bl_idname, STFRemoveSceneCollectionComponentOperator.bl_idname, STFEditSceneCollectionComponentIdOperator.bl_idname) # pyright: ignore[reportArgumentType]

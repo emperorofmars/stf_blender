@@ -175,13 +175,10 @@ def export_button(self, context: bpy.types.Context):
 	self.layout.operator(ExportSTF.bl_idname, text="STF (.stf)")
 
 
-def __poll_collection(self, object) -> bool:
-	return object.stf_use_collection_as_prefab
-
 def register():
 	bpy.types.TOPBAR_MT_file_export.append(export_button)
 
-	bpy.types.Scene.stf_collection_selector = bpy.props.PointerProperty(type=bpy.types.Collection, poll=__poll_collection, name="Collection", options={"SKIP_SAVE"}, description="Select a Collection for export") # type: ignore
+	bpy.types.Scene.stf_collection_selector = bpy.props.PointerProperty(type=bpy.types.Collection, name="Collection", options={"SKIP_SAVE"}, description="Select a Collection for export") # type: ignore
 
 def unregister():
 	bpy.types.TOPBAR_MT_file_export.remove(export_button)

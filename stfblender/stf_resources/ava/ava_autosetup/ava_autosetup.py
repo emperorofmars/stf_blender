@@ -38,8 +38,6 @@ def ava_autosetup(target: bpy.types.Collection):
 	if(not main_mesh or not main_armature):
 		return
 
-	target.stf_use_collection_as_prefab = True
-
 	# Clear existing components
 	clear_components(target, Handler_AVA_Avatar.blender_property_name)
 	clear_components(main_armature.data, Handler_STFEXP_Armature_Humanoid.blender_property_name)  # pyright: ignore[reportArgumentType]

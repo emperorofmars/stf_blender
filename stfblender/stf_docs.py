@@ -10,7 +10,6 @@ def stf_docs():
 		("bpy.ops.stf.remove_collection_component", "/guide/blender/stf_concepts.html"),
 		("bpy.ops.stf.add_scene_collection_component", "/guide/blender/stf_concepts.html"),
 		("bpy.ops.stf.remove_scene_collection_component", "/guide/blender/stf_concepts.html"),
-		("bpy.types.collection.stf_use_collection_as_prefab", "/guide/blender/stf_concepts.html"),
 		("bpy.types.ava_emotes.*", "/modules/ava/ava_emotes.html"),
 		("bpy.ops.stf.add_ava_emote*", "/modules/ava/ava_emotes.html"),
 	)

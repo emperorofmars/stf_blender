@@ -56,7 +56,7 @@ def import_stf_file(filepath: str, import_settings: STF_ImportSettings) -> STF_I
 
 
 class ImportSTF(bpy.types.Operator, ImportHelper): # pyright: ignore[reportIncompatibleMethodOverride]
-	"""Import an STF file (.stf)"""
+	"""Import STF files (.stf)"""
 	bl_idname = "stf.import_files"
 	bl_label = "Import STF"
 	bl_options = {"PRESET", "REGISTER", "UNDO"}
