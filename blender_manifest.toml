@@ -102,4 +102,5 @@ paths_exclude_pattern = [
 	"/bpydev.toml",
 	"/pyproject.toml",
 	"/requirements.txt",
+	"/CONTRIBUTING.md",
 ]
