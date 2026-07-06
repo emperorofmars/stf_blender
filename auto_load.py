@@ -21,7 +21,7 @@ ignore_modules = [
 	"bpydev",
 	"build_extension",
 	"testsuite",
-	"stf_blender_module_template",
+	"stf_blender_resource_template",
 ]
 
 
