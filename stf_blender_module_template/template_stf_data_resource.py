@@ -19,7 +19,7 @@ def _stf_import(context: stfblender.common.STF_ImportContext, json_resource: dic
 	return application_object
 
 
-def _stf_export(context: stfblender.common.STF_ExportContext, application_object: Any, context_object: Any) -> tuple[dict, str]:
+def _stf_export(context: stfblender.common.STF_ExportContext, application_object: Any, context_object: Any) -> tuple[dict, str]: # pyright: ignore[reportRedeclaration]
 	application_object: bpy.types.Brush = application_object
 	stfblender.common.utils.id_utils.ensure_stf_id(context, application_object)
 

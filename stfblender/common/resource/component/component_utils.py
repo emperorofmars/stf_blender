@@ -1,6 +1,7 @@
 import bpy
 import json
-from typing import Any, Callable
+from typing import Any
+from collections.abc import Callable
 
 from ... import STF_ExportContext, STF_ImportContext
 from .stf_handler_component import STF_ComponentResourceBase, STF_Component_Ref

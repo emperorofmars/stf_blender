@@ -5,7 +5,9 @@ import addon_utils
 __installed_and_enabled_stf_extensions = []
 for m in {m.module for m in bpy.context.preferences.extensions.repos}:
 	loaded_default, loaded_state = addon_utils.check("bl_ext." + m + ".stf_blender")
-	if(loaded_state and m == "vscode_development"):
+	if(loaded_state and m == "local_development"):
+		__installed_and_enabled_stf_extensions.append(m)
+	elif(loaded_state and m == "vscode_development"):
 		__installed_and_enabled_stf_extensions.append(m)
 	elif(loaded_state and m == "user_default"):
 		__installed_and_enabled_stf_extensions.append(m)
@@ -16,20 +18,20 @@ for m in {m.module for m in bpy.context.preferences.extensions.repos}:
 
 if(len(__installed_and_enabled_stf_extensions) == 1):
 	if("vscode_development" in __installed_and_enabled_stf_extensions):
-		print("Enabling custom STF modules for development extension.")
+		print("Enabling custom STF resources for development extension.")
 		selected_stf_extension = "bl_ext.vscode_development.stf_blender"
 	elif("blender_stfform_at" in __installed_and_enabled_stf_extensions):
-		print("Enabling custom STF modules for official STF distribution.")
+		print("Enabling custom STF resources for official STF distribution.")
 		selected_stf_extension = "bl_ext.blender_stfform_at.stf_blender"
 	else:
-		print("Enabling STF modules for user STF install!")
+		print("Enabling STF resources for user STF install!")
 		selected_stf_extension = "bl_ext." + __installed_and_enabled_stf_extensions[0] + ".stf_blender"
 elif(len(__installed_and_enabled_stf_extensions) > 1):
 	print("Warning: Detected more than one enabled STF extension! Using the first one from the '" + __installed_and_enabled_stf_extensions[0] + "' repository")
 	selected_stf_extension = "bl_ext." + __installed_and_enabled_stf_extensions[0] + ".stf_blender"
 else:
 	selected_stf_extension = None
-	print("No STF extension detected. Not enabling custom STF modules!")
+	print("No STF extension detected. Not enabling custom STF resources!")
 
 if(selected_stf_extension):
 	import importlib
