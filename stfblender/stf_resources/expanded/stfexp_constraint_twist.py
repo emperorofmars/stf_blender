@@ -2,10 +2,11 @@ import bpy
 import re
 from typing import Any
 
-from ...common import PSTF_ExportContext, PSTF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STF_TaskSteps, STF_Category
-from ...common.resource.component import STF_ComponentResourceBase, STF_Handler_BoneComponent, STF_Component_Ref
-from ....stf_blender_common.operators.base_operators_component import add_component, export_component_base, import_component_base, preserve_component_reference
+from ....stf_blender_common.blender_data.stf_resource_component import STF_ComponentResourceBase
+from ....stf_blender_common.protocols import PSTF_ExportContext, PSTF_ImportContext, PSTF_Component_Ref, STF_Handler_BoneComponent
+from ....stf_blender_common.base import STF_Category, BlenderPropertyPathPart, STFPropertyPathPart, STF_TaskSteps
 from ....stf_blender_common.utils.animation_conversion_utils import get_component_index, get_component_stf_path_from_collection
+from ....stf_blender_common.utils.component_resource_utils import add_component, export_component_base, import_component_base, preserve_component_reference
 from ...common.blender_grr.stf_node_path_selector import NodePathSelector, draw_node_path_selector, node_path_selector_from_stf, node_path_selector_to_stf
 
 
@@ -18,7 +19,7 @@ class STFEXP_Constraint_Twist(STF_ComponentResourceBase):
 	source: bpy.props.PointerProperty(name="Source", type=NodePathSelector) # type: ignore
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: STFEXP_Constraint_Twist):
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: PSTF_Component_Ref, context_object: Any, component: STFEXP_Constraint_Twist):
 	layout.use_property_split = True
 	layout.prop(component, "weight")
 	layout.label(text="If no Source is selected, the parent of the parent will be assumed.", icon="INFO")
@@ -60,13 +61,13 @@ def _stf_export(context: PSTF_ExportContext, component: STFEXP_Constraint_Twist,
 
 """Bone instance handling"""
 
-def _set_component_instance_standin(context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: STFEXP_Constraint_Twist, standin_component: STFEXP_Constraint_Twist):
+def _set_component_instance_standin(context: bpy.types.Context, component_ref: PSTF_Component_Ref, context_object: Any, component: STFEXP_Constraint_Twist, standin_component: STFEXP_Constraint_Twist):
 	standin_component.weight = component.weight
 	standin_component.source.target_object = context_object
 	standin_component.source.target_bone = component.source.target_bone
 
 
-def _serialize_component_instance_standin_func(context: PSTF_ExportContext, component_ref: STF_Component_Ref, standin_component: STFEXP_Constraint_Twist, context_object: Any) -> dict:
+def _serialize_component_instance_standin_func(context: PSTF_ExportContext, component_ref: PSTF_Component_Ref, standin_component: STFEXP_Constraint_Twist, context_object: Any) -> dict:
 	ret = { "weight": standin_component.weight }
 	def _handle():
 		if(source_ret := node_path_selector_to_stf(context, standin_component.source, ret)):
@@ -74,7 +75,7 @@ def _serialize_component_instance_standin_func(context: PSTF_ExportContext, comp
 	context.add_task(STF_TaskSteps.DEFAULT, _handle)
 	return ret
 
-def _parse_component_instance_standin_func(context: PSTF_ImportContext, json_resource: dict, component_ref: STF_Component_Ref, standin_component: STFEXP_Constraint_Twist, context_object: Any):
+def _parse_component_instance_standin_func(context: PSTF_ImportContext, json_resource: dict, component_ref: PSTF_Component_Ref, standin_component: STFEXP_Constraint_Twist, context_object: Any):
 	if("weight" in json_resource): standin_component.weight = json_resource["weight"]
 	if("source" in json_resource and len(json_resource["source"]) > 0):
 		_get_component = preserve_component_reference(standin_component, _blender_property_name, context_object)
@@ -129,7 +130,7 @@ class Handler_STFEXP_Constraint_Twist(STF_Handler_BoneComponent):
 	filter = [bpy.types.Object, bpy.types.Bone]
 	draw_component_func = _draw_component
 
-	draw_component_instance_func = _draw_component
+	draw_component_instance_func = _draw_component # pyright: ignore[reportAssignmentType]
 	set_component_instance_standin_func = _set_component_instance_standin
 
 	serialize_component_instance_standin_func = _serialize_component_instance_standin_func # pyright: ignore[reportAssignmentType]

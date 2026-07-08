@@ -2,9 +2,10 @@ import bpy
 import re
 from typing import Any
 
-from ...common import PSTF_ExportContext, PSTF_ImportContext, STFReportSeverity, STFReport, BlenderPropertyPathPart, STFPropertyPathPart, STF_Category
-from ...common.resource.blender_native import STF_Handler_BlenderNative
-from ....stf_blender_common.utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui, ensure_stf_id
+from ....stf_blender_common.protocols import PSTF_ExportContext, PSTF_ImportContext, STF_Handler_BlenderNative
+from ....stf_blender_common.base import STF_Category, BlenderPropertyPathPart, STFPropertyPathPart, STFReport, STFReportSeverity
+from ....stf_blender_common.operators.base_operators import STFSetIDOperatorBase
+from ....stf_blender_common.utils.id_utils import draw_stf_id_ui, ensure_stf_id
 
 
 _stf_type = "stfexp.light"

@@ -1,10 +1,11 @@
 import bpy
 from typing import Any
 
-from ...common import PSTF_ExportContext, PSTF_ImportContext, STF_TaskSteps, STF_Category
-from ...common.resource.component import STF_ComponentResourceBase, STF_Handler_Component, STF_Component_Ref
-from ....stf_blender_common.operators.base_operators_component import add_component, export_component_base, import_component_base
-from ...common.helpers import register_exported_resource
+from ....stf_blender_common.blender_data.stf_resource_component import STF_ComponentResourceBase
+from ....stf_blender_common.protocols import PSTF_ExportContext, PSTF_ImportContext, PSTF_Component_Ref, STF_Handler_Component
+from ....stf_blender_common.base import STF_Category, STF_TaskSteps
+from ....stf_blender_common.utils.component_resource_utils import add_component, export_component_base, import_component_base
+from ....stf_blender_common.utils.reference_helper import register_exported_resource
 
 
 _stf_type = "stfexp.lightprobe_anchor"
@@ -16,7 +17,7 @@ class STFEXP_LightprobeAnchor(STF_ComponentResourceBase):
 	anchor_bone: bpy.props.StringProperty(name="Anchor Bone", options=set()) # type: ignore
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: STFEXP_LightprobeAnchor):
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: PSTF_Component_Ref, context_object: Any, component: STFEXP_LightprobeAnchor):
 	layout.use_property_split = True
 	layout.prop(component, "anchor_object")
 	if(component.anchor_object and type(component.anchor_object.data) is bpy.types.Armature):

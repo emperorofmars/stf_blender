@@ -3,9 +3,10 @@ import math
 from typing import Any
 from collections.abc import Sequence
 
-from ...common import PSTF_ExportContext, PSTF_ImportContext, STF_Category, STFReport
-from ...common.resource.component import STF_ComponentResourceBase, STF_Handler_Component, STF_Component_Ref
-from ....stf_blender_common.operators.base_operators_component import add_component, export_component_base, import_component_base
+from ....stf_blender_common.blender_data.stf_resource_component import STF_ComponentResourceBase
+from ....stf_blender_common.base import STFReport, STF_Category
+from ....stf_blender_common.protocols import PSTF_ExportContext, PSTF_ImportContext, PSTF_Component_Ref, STF_Handler_Component
+from ....stf_blender_common.utils.component_resource_utils import add_component, export_component_base, import_component_base
 
 
 _stf_type = "stfexp.armature.humanoid"
@@ -266,7 +267,7 @@ class STFEXP_HumanoidMappingsList(bpy.types.UIList):
 		layout.label(text=_get_display_name(item.name), icon="NONE" if item.bone else "ERROR")
 		layout.label(text=item.bone if item.bone else "Not Mapped!", icon="BONE_DATA" if item.bone else "ERROR")
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: bpy.types.Armature, component: STFEXP_Armature_Humanoid):
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: PSTF_Component_Ref, context_object: bpy.types.Armature, component: STFEXP_Armature_Humanoid):
 	layout.use_property_split = True
 
 	col = layout.column(align=True)

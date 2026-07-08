@@ -4,12 +4,11 @@ from io import BytesIO
 from typing import Any
 import numpy as np
 
-from ....stf_blender_common.base import STF_Category
-from ....stf_blender_common.protocols import STF_ExportComponentHook, STF_Handler_Component, PSTF_ExportContext, PSTF_ImportContext
 from ....stf_blender_common.blender_data.stf_resource_component import STF_ComponentResourceBase
+from ....stf_blender_common.protocols import PSTF_ExportContext, PSTF_ImportContext, STF_Handler_Component, STF_ExportComponentHook
+from ....stf_blender_common.base import STF_Category
+from ....stf_blender_common.utils.component_resource_utils import add_component, export_component_base, import_component_base
 from ....stf_blender_common.utils.buffer_utils import determine_indices_width, determine_pack_format_float
-
-from ....stf_blender_common.operators.base_operators_component import add_component, export_component_base, import_component_base
 
 
 _stf_type = "stfexp.mesh.creases"
@@ -36,12 +35,12 @@ def _stf_import(context: PSTF_ImportContext, json_resource: dict, stf_id: str, c
 
 		edge_dict: dict[int, dict[int, int]] = {}
 		for edge in context_object.edges:
-			if(edge.vertices[0] not in edge_dict):
-				edge_dict[edge.vertices[0]] = {}
-			if(edge.vertices[1] not in edge_dict):
-				edge_dict[edge.vertices[1]] = {}
-			edge_dict[edge.vertices[0]][edge.vertices[1]] = edge.index
-			edge_dict[edge.vertices[1]][edge.vertices[0]] = edge.index
+			if(edge.vertices[0] not in edge_dict): # pyright: ignore[reportIndexIssue]
+				edge_dict[edge.vertices[0]] = {} # pyright: ignore[reportIndexIssue]
+			if(edge.vertices[1] not in edge_dict): # pyright: ignore[reportIndexIssue]
+				edge_dict[edge.vertices[1]] = {} # pyright: ignore[reportIndexIssue]
+			edge_dict[edge.vertices[0]][edge.vertices[1]] = edge.index # pyright: ignore[reportIndexIssue]
+			edge_dict[edge.vertices[1]][edge.vertices[0]] = edge.index # pyright: ignore[reportIndexIssue]
 
 		edge_creases_attribute = context_object.attributes.new("crease_edge", "FLOAT", "EDGE")
 
@@ -83,8 +82,8 @@ class Handler_STF_Mesh_Creases(STF_Handler_Component):
 	stf_type = _stf_type
 	stf_category = STF_Category.COMPONENT
 	understood_application_types = [STFEXP_Mesh_Creases]
-	import_func = _stf_import
-	export_func = _stf_export
+	import_func = _stf_import # pyright: ignore[reportAssignmentType]
+	export_func = _stf_export # pyright: ignore[reportAssignmentType]
 
 	blender_property_name = _blender_property_name
 	single = True

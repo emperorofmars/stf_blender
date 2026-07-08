@@ -1,11 +1,11 @@
 import bpy
 from typing import Any
 
+from ....stf_blender_common.blender_data.stf_resource_data import STF_DataResourceBase
 from ....stf_blender_common.base import STFReport, STF_Category, STF_TaskSteps
 from ....stf_blender_common.protocols import PSTF_Data_Ref, STF_Handler_Data, PSTF_ExportContext, PSTF_ImportContext
 from ....stf_blender_common.utils.data_resource_utils import add_resource, export_data_resource_base, get_components_from_data_resource, import_data_resource_base
 from ....stf_blender_common.utils.collection_helpers import draw_list
-from ...common.resource.data import STF_DataResourceBase
 from ...common.helpers import poll_valid_animations
 
 

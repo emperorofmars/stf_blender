@@ -3,11 +3,13 @@ import mathutils
 import re
 from typing import Any
 
-from ...common import PSTF_ExportContext, PSTF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STF_Category, STFReport
-from ...common.resource.component import STF_ComponentResourceBase, STF_Handler_BoneComponent, STF_Component_Ref
-from ....stf_blender_common.operators.base_operators_component import ComponentLoadJsonOperatorBase, add_component, export_component_base, import_component_base
+from ....stf_blender_common.blender_data.stf_resource_component import STF_ComponentResourceBase
+from ....stf_blender_common.protocols import PSTF_ExportContext, PSTF_ImportContext, PSTF_Component_Ref, STF_Handler_BoneComponent
+from ....stf_blender_common.base import STF_Category, BlenderPropertyPathPart, STFPropertyPathPart, STFReport
+from ....stf_blender_common.operators.base_operators_component import ComponentLoadJsonOperatorBase
 from ....stf_blender_common.utils.trs_utils import blender_rotation_to_stf, blender_translation_to_stf, stf_rotation_to_blender, stf_translation_to_blender
 from ....stf_blender_common.utils.animation_conversion_utils import get_component_index, get_component_stf_path_from_collection
+from ....stf_blender_common.utils.component_resource_utils import add_component, export_component_base, import_component_base
 
 _stf_type = "stfexp.collider.plane"
 _blender_property_name = "stfexp_collider_plane"
@@ -55,7 +57,7 @@ class STFEXP_Collider_Plane_LoadJsonOperator(ComponentLoadJsonOperatorBase, bpy.
 		return {"FINISHED"}
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: STF_ComponentResourceBase): # pyright: ignore[reportRedeclaration]
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: PSTF_Component_Ref, context_object: Any, component: STF_ComponentResourceBase): # pyright: ignore[reportRedeclaration]
 	component: STFEXP_Collider_Plane = component # pyright: ignore[reportAssignmentType]
 	layout.use_property_split = True
 	layout.prop(component, "offset_position")
@@ -68,15 +70,15 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 
 """Bone instance handling"""
 
-def _set_component_instance_standin(context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: STFEXP_Collider_Plane, standin_component: STFEXP_Collider_Plane):
+def _set_component_instance_standin(context: bpy.types.Context, component_ref: PSTF_Component_Ref, context_object: Any, component: STFEXP_Collider_Plane, standin_component: STFEXP_Collider_Plane):
 	standin_component.offset_position = component.offset_position
 	standin_component.offset_rotation = component.offset_rotation
 
 
-def _serialize_component_instance_standin_func(context: PSTF_ExportContext, component_ref: STF_Component_Ref, standin_component: STFEXP_Collider_Plane, context_object: Any) -> dict:
+def _serialize_component_instance_standin_func(context: PSTF_ExportContext, component_ref: PSTF_Component_Ref, standin_component: STFEXP_Collider_Plane, context_object: Any) -> dict:
 	return _serialize_json(standin_component)
 
-def _parse_component_instance_standin_func(context: PSTF_ImportContext, json_resource: dict, component_ref: STF_Component_Ref, standin_component: STFEXP_Collider_Plane, context_object: Any):
+def _parse_component_instance_standin_func(context: PSTF_ImportContext, json_resource: dict, component_ref: PSTF_Component_Ref, standin_component: STFEXP_Collider_Plane, context_object: Any):
 	_parse_json(standin_component, json_resource)
 
 
@@ -135,7 +137,7 @@ class Handler_STFEXP_Collider_Plane(STF_Handler_BoneComponent):
 	resolve_property_path_to_stf_func = _resolve_property_path_to_stf_func
 	resolve_stf_property_to_blender_func = _resolve_stf_property_to_blender_func
 
-	draw_component_instance_func = _draw_component
+	draw_component_instance_func = _draw_component # pyright: ignore[reportAssignmentType]
 	set_component_instance_standin_func = _set_component_instance_standin
 
 	serialize_component_instance_standin_func = _serialize_component_instance_standin_func  # pyright: ignore[reportAssignmentType]

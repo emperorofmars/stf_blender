@@ -4,13 +4,14 @@ import math
 from typing import Any
 from collections.abc import Sequence
 
-from ....common import PSTF_ImportContext, PSTF_ExportContext, STFReportSeverity, STFReport, STF_Category
-from ....common.resource.blender_native import STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister
+from .....stf_blender_common.protocols import PSTF_ExportContext, PSTF_ImportContext, STF_Handler_BlenderNative
+from .....stf_blender_common.protocols.stf_info import boilerplate_register, boilerplate_unregister
+from .....stf_blender_common.base import STF_Category, STFReport, STFReportSeverity
+from .....stf_blender_common.utils.id_utils import ensure_stf_id
+from .....stf_blender_common.utils.component_resource_utils import get_components_from_object
 from .....stf_blender_common.utils import trs_utils
 from .....stf_blender_common.utils.armature_bone import ArmatureBone
 from .....stf_blender_common.utils.animation_conversion_utils import *
-from .....stf_blender_common.operators.base_operators_component import get_components_from_object
-from .....stf_blender_common.utils.id_utils import ensure_stf_id
 from .stf_bone_property_conversion import resolve_property_path_to_stf_func, resolve_stf_property_to_blender_func
 
 
@@ -52,7 +53,7 @@ def _stf_import(context: PSTF_ImportContext, json_resource: dict, stf_id: str, c
 	blender_edit_bone.tail = mathutils.Vector([0, 0, 1])
 	blender_edit_bone.roll = 0
 
-	blender_edit_bone.matrix = mathutils.Matrix.LocRotScale(trs_utils.stf_translation_to_blender(json_resource["translation"]), trs_utils.stf_rotation_to_blender(json_resource["rotation"]), mathutils.Vector([1, 1, 1])) @ mathutils.Matrix.Rotation(math.radians(90), 4, "X")
+	blender_edit_bone.matrix = mathutils.Matrix.LocRotScale(trs_utils.stf_translation_to_blender(json_resource["translation"]), trs_utils.stf_rotation_to_blender(json_resource["rotation"]), mathutils.Vector([1, 1, 1])) @ mathutils.Matrix.Rotation(math.radians(90), 4, "X") # pyright: ignore[reportArgumentType]
 	blender_edit_bone.length = json_resource["length"]
 
 	if("connected" in json_resource): blender_edit_bone.use_connect = json_resource["connected"]

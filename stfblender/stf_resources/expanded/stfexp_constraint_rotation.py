@@ -2,12 +2,13 @@ import bpy
 import re
 from typing import Any
 
-from ....stf_blender_common.utils.collection_helpers import create_add_button, create_remove_button
 from .util.constraint_source import ConstraintSource
-from ...common import PSTF_ExportContext, PSTF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STF_TaskSteps, STF_Category
-from ...common.resource.component import STF_ComponentResourceBase, STF_Handler_BoneComponent, STF_Component_Ref
-from ....stf_blender_common.operators.base_operators_component import add_component, export_component_base, import_component_base, preserve_component_reference
+from ....stf_blender_common.blender_data.stf_resource_component import STF_ComponentResourceBase
+from ....stf_blender_common.protocols import PSTF_ExportContext, PSTF_ImportContext, PSTF_Component_Ref, STF_Handler_BoneComponent
+from ....stf_blender_common.base import STF_Category, BlenderPropertyPathPart, STFPropertyPathPart, STF_TaskSteps
 from ....stf_blender_common.utils.animation_conversion_utils import get_component_index, get_component_stf_path_from_collection
+from ....stf_blender_common.utils.component_resource_utils import add_component, export_component_base, import_component_base, preserve_component_reference
+from ....stf_blender_common.utils.collection_helpers import create_add_button, create_remove_button
 from ...common.blender_grr.stf_node_path_selector import draw_node_path_selector, node_path_selector_from_stf, node_path_selector_to_stf, node_path_selector_to_string, validate_node_path_selector
 
 
@@ -34,7 +35,7 @@ class STFDrawAVAExpressionList(bpy.types.UIList):
 			layout.label(text="No source selected!")
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: STFEXP_Constraint_Rotation):
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: PSTF_Component_Ref, context_object: Any, component: STFEXP_Constraint_Rotation):
 	layout.use_property_split = True
 
 	layout.prop(component, "weight")
@@ -107,7 +108,7 @@ def _stf_export(context: PSTF_ExportContext, component: STFEXP_Constraint_Rotati
 
 """Bone instance handling"""
 
-def _set_component_instance_standin(context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: STFEXP_Constraint_Rotation, standin_component: STFEXP_Constraint_Rotation):
+def _set_component_instance_standin(context: bpy.types.Context, component_ref: PSTF_Component_Ref, context_object: Any, component: STFEXP_Constraint_Rotation, standin_component: STFEXP_Constraint_Rotation):
 	for source_original in component.sources:
 		source = standin_component.sources.add()
 		source.weight = source_original.weight
@@ -115,7 +116,7 @@ def _set_component_instance_standin(context: bpy.types.Context, component_ref: S
 		source.source.target_bone = source_original.source.target_bone
 
 
-def _serialize_component_instance_standin_func(context: PSTF_ExportContext, component_ref: STF_Component_Ref, standin_component: STFEXP_Constraint_Rotation, context_object: Any) -> dict:
+def _serialize_component_instance_standin_func(context: PSTF_ExportContext, component_ref: PSTF_Component_Ref, standin_component: STFEXP_Constraint_Rotation, context_object: Any) -> dict:
 	ret = {}
 
 	ret["weight"] = standin_component.weight
@@ -136,7 +137,7 @@ def _serialize_component_instance_standin_func(context: PSTF_ExportContext, comp
 	context.add_task(STF_TaskSteps.DEFAULT, _handle)
 	return ret
 
-def _parse_component_instance_standin_func(context: PSTF_ImportContext, json_resource: dict, component_ref: STF_Component_Ref, standin_component: STFEXP_Constraint_Rotation, context_object: Any):
+def _parse_component_instance_standin_func(context: PSTF_ImportContext, json_resource: dict, component_ref: PSTF_Component_Ref, standin_component: STFEXP_Constraint_Rotation, context_object: Any):
 	_get_component = preserve_component_reference(standin_component, _blender_property_name, context_object)
 
 	standin_component.weight = json_resource.get("weight", 1)

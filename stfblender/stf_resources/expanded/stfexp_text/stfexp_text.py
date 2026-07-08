@@ -1,10 +1,11 @@
 import bpy
 from typing import Any
 
-from ....common import PSTF_ExportContext, PSTF_ExportContext, PSTF_ImportContext, STF_Category
-from ....common.resource.blender_native import STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister
-from .....stf_blender_common.operators.base_operators_component import get_components_from_object
+from .....stf_blender_common.protocols import PSTF_ExportContext, PSTF_ImportContext, STF_Handler_BlenderNative
+from .....stf_blender_common.protocols.stf_info import boilerplate_register, boilerplate_unregister
+from .....stf_blender_common.base import STF_Category
 from .....stf_blender_common.utils.id_utils import ensure_stf_id
+from .....stf_blender_common.utils.component_resource_utils import get_components_from_object
 
 # TODO this module is at a bare minimum level, improve it
 

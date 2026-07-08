@@ -3,12 +3,11 @@ import uuid
 from io import BytesIO
 from typing import Any
 
-from ....stf_blender_common.base import STF_Category
-from ....stf_blender_common.protocols import STF_ExportComponentHook, STF_Handler_Component, PSTF_ExportContext, PSTF_ImportContext
 from ....stf_blender_common.blender_data.stf_resource_component import STF_ComponentResourceBase
+from ....stf_blender_common.protocols import PSTF_ExportContext, PSTF_ImportContext, STF_Handler_Component, STF_ExportComponentHook
+from ....stf_blender_common.base import STF_Category
+from ....stf_blender_common.utils.component_resource_utils import add_component, export_component_base, import_component_base
 from ....stf_blender_common.utils.buffer_utils import determine_indices_width, parse_uint, serialize_uint
-
-from ....stf_blender_common.operators.base_operators_component import add_component, export_component_base, import_component_base
 
 
 _stf_type = "stfexp.mesh.seams"
@@ -20,22 +19,22 @@ class STFEXP_Mesh_Seams(STF_ComponentResourceBase):
 
 
 def _stf_import(context: PSTF_ImportContext, json_resource: dict, stf_id: str, context_object: bpy.types.Mesh) -> Any:
-	buffer_seams = BytesIO(context.import_buffer(json_resource, json_resource["seams"]))  # pyright: ignore[reportArgumentType]
+	buffer_seams = BytesIO(context.import_buffer(json_resource, json_resource["seams"])) # pyright: ignore[reportArgumentType]
 
 	indices_width: int = json_resource.get("indices_width", 4)
 
 	edge_dict: dict[int, dict[int, bpy.types.MeshEdge]] = {}
 	for edge in context_object.edges:
-		if(edge.vertices[0] not in edge_dict):
-			edge_dict[edge.vertices[0]] = {}
-		if(edge.vertices[1] not in edge_dict):
-			edge_dict[edge.vertices[1]] = {}
-		edge_dict[edge.vertices[0]][edge.vertices[1]] = edge
-		edge_dict[edge.vertices[1]][edge.vertices[0]] = edge
+		if(edge.vertices[0] not in edge_dict): # pyright: ignore[reportIndexIssue]
+			edge_dict[edge.vertices[0]] = {} # pyright: ignore[reportIndexIssue]
+		if(edge.vertices[1] not in edge_dict): # pyright: ignore[reportIndexIssue]
+			edge_dict[edge.vertices[1]] = {} # pyright: ignore[reportIndexIssue]
+		edge_dict[edge.vertices[0]][edge.vertices[1]] = edge # pyright: ignore[reportIndexIssue]
+		edge_dict[edge.vertices[1]][edge.vertices[0]] = edge # pyright: ignore[reportIndexIssue]
 
 	for _ in range(int((buffer_seams.getbuffer().nbytes / indices_width) / 2)):
-		v0_index = parse_uint(buffer_seams, indices_width)  # pyright: ignore[reportArgumentType]
-		v1_index = parse_uint(buffer_seams, indices_width)  # pyright: ignore[reportArgumentType]
+		v0_index = parse_uint(buffer_seams, indices_width) # pyright: ignore[reportArgumentType]
+		v1_index = parse_uint(buffer_seams, indices_width) # pyright: ignore[reportArgumentType]
 		edge_dict[v0_index][v1_index].use_seam = True
 
 	component_ref, component = add_component(context_object, _blender_property_name, stf_id, _stf_type)
@@ -52,7 +51,7 @@ def _stf_export(context: PSTF_ExportContext, component: STFEXP_Mesh_Seams, conte
 	buffer_seams = BytesIO()
 	for edge in context_object.edges:
 		if(edge.use_seam and not edge.is_loose):
-			for edge_vertex_index in edge.vertices:
+			for edge_vertex_index in edge.vertices: # pyright: ignore[reportGeneralTypeIssues]
 				buffer_seams.write(serialize_uint(edge_vertex_index, indices_width))
 	ret["indices_width"] = indices_width
 	ret["seams"] = context.serialize_buffer(ret, buffer_seams.getvalue())
@@ -65,8 +64,8 @@ class Handler_STF_Mesh_Seams(STF_Handler_Component):
 	stf_type = _stf_type
 	stf_category = STF_Category.COMPONENT
 	understood_application_types = [STFEXP_Mesh_Seams]
-	import_func = _stf_import
-	export_func = _stf_export
+	import_func = _stf_import # pyright: ignore[reportAssignmentType]
+	export_func = _stf_export # pyright: ignore[reportAssignmentType]
 
 	blender_property_name = _blender_property_name
 	single = True

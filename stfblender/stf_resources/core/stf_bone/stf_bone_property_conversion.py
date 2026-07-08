@@ -2,11 +2,10 @@ import mathutils
 import math
 from typing import Any, Callable
 
-from ....importer.stf_import_context import STF_ImportContext
-from ....exporter.stf_export_context import STF_ExportContext
+from .....stf_blender_common.protocols import PSTF_ImportContext, PSTF_ExportContext
+from .....stf_blender_common.base import BlenderPropertyPathPart, STFPropertyPathPart
 from .....stf_blender_common.utils.armature_bone import ArmatureBone
 from .....stf_blender_common.utils.animation_conversion_utils import *
-from .....stf_blender_common.base.property_path_part import BlenderPropertyPathPart, STFPropertyPathPart
 
 
 # In Blender, bones get animated relative to their own rest pose.
@@ -25,7 +24,7 @@ def _create_translation_to_stf_func(blender_object: ArmatureBone) -> Callable:
 		offset = (mathutils.Matrix.Rotation(math.radians(-90), 4, "X") @ blender_object.get_bone().matrix_local)
 
 	def _ret(value: list[float]) -> list[float]:
-		value = mathutils.Matrix.Translation(mathutils.Vector(value)) # pyright: ignore[reportAssignmentType]
+		value = mathutils.Matrix.Translation(mathutils.Vector(value)) # pyright: ignore[reportArgumentType, reportAssignmentType]
 		return convert_bone_translation_to_stf((offset @ value).translation[:])
 	return _ret
 
@@ -68,7 +67,7 @@ def _create_scale_to_stf_func(blender_object: ArmatureBone) -> Callable:
 	return _ret
 
 
-def resolve_property_path_to_stf_func(context: STF_ExportContext, blender_object: ArmatureBone, application_object_property_index: int, data_path: str) -> STFPropertyPathPart | None:
+def resolve_property_path_to_stf_func(context: PSTF_ExportContext, blender_object: ArmatureBone, application_object_property_index: int, data_path: str) -> STFPropertyPathPart | None:
 	import re
 
 	has_constraints = False
@@ -115,7 +114,7 @@ def _create_translation_to_blender_func(blender_object: ArmatureBone) -> Callabl
 		offset = (mathutils.Matrix.Rotation(math.radians(-90), 4, "X") @ blender_object.get_bone().matrix_local).inverted_safe()
 
 	def _ret(value: list[float]) -> list[float]:
-		value = mathutils.Matrix.Translation(mathutils.Vector(value)) # pyright: ignore[reportAssignmentType]
+		value = mathutils.Matrix.Translation(mathutils.Vector(value)) # pyright: ignore[reportArgumentType, reportAssignmentType]
 		return convert_bone_translation_to_blender((offset @ value).translation[:])
 	return _ret
 
@@ -156,7 +155,7 @@ def _create_scale_to_blender_func(blender_object: ArmatureBone) -> Callable:
 	return _ret
 
 
-def resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: Any) -> BlenderPropertyPathPart | None:
+def resolve_stf_property_to_blender_func(context: PSTF_ImportContext, stf_path: list[str], application_object: Any) -> BlenderPropertyPathPart | None:
 	blender_object = context.get_imported_resource(stf_path[0])
 	if(blender_object is None):
 		return None
