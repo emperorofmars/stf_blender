@@ -2,7 +2,7 @@ import bpy
 from collections.abc import Sequence
 from typing import Any
 
-from .. import STF_ImportContext, STF_ExportContext, STF_Category
+from .. import PSTF_ImportContext, PSTF_ExportContext, STF_Category
 from ..helpers import register_exported_resource
 
 
@@ -60,7 +60,7 @@ def node_path_selector_to_string(nps: NodePathSelector) -> str:
 		return "Invalid"
 
 
-def node_path_selector_to_stf(context: STF_ExportContext, nps: NodePathSelector, json_resource: dict[str, Any]) -> Sequence[str | int] | None:
+def node_path_selector_to_stf(context: PSTF_ExportContext, nps: NodePathSelector, json_resource: dict[str, Any]) -> Sequence[str | int] | None:
 	if(type(nps.id_data) is not bpy.types.Armature and nps.target_object):
 		if(type(nps.target_object.data) is bpy.types.Armature):
 			if(not nps.target_bone):
@@ -77,7 +77,7 @@ def node_path_selector_to_stf(context: STF_ExportContext, nps: NodePathSelector,
 		return None
 
 
-def node_path_selector_from_stf(context: STF_ImportContext, json_resource: dict[str, Any], node_path: Sequence[str | int], nps: NodePathSelector):
+def node_path_selector_from_stf(context: PSTF_ImportContext, json_resource: dict[str, Any], node_path: Sequence[str | int], nps: NodePathSelector):
 	if(type(nps.id_data) is not bpy.types.Armature):
 		if(len(node_path) == 1):
 			nps.target_object = context.import_resource(json_resource, node_path[0], STF_Category.NODE) # pyright: ignore[reportArgumentType]

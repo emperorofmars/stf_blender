@@ -2,9 +2,11 @@ import bpy
 import json
 from typing import Any
 
-from ...common import STF_ExportContext, STF_ImportContext, STF_TaskSteps, STF_Category
-from ...common.resource.component import STF_ComponentResourceBase, STF_Handler_Component, STF_Component_Ref
-from ...common.resource.component.component_utils import add_component, export_component_base, import_component_base, preserve_component_reference
+from ....stf_blender_common.base import STF_Category, STF_TaskSteps
+from ....stf_blender_common.protocols import PSTF_ExportContext, PSTF_ImportContext, PSTF_Component_Ref, STF_Handler_Component
+from ....stf_blender_common.utils.component_resource_utils import add_component, export_component_base, import_component_base, preserve_component_reference
+from ....stf_blender_common.blender_data.stf_resource_component import STF_ComponentResourceBase
+
 from ...common.blender_grr import BlenderGRR, construct_blender_grr, resolve_blender_grr
 from .json_fallback_buffer import STF_FallbackBuffer, decode_buffer, encode_buffer
 from .json_fallback_ui import draw_fallback
@@ -21,11 +23,11 @@ class JsonFallbackComponent(STF_ComponentResourceBase):
 	active_buffer: bpy.props.IntProperty() # type: ignore
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: JsonFallbackComponent):
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: PSTF_Component_Ref, context_object: Any, component: JsonFallbackComponent):
 	draw_fallback(layout, component_ref, component)
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, context_object: Any) -> Any:
+def _stf_import(context: PSTF_ImportContext, json_resource: dict, id: str, context_object: Any) -> Any:
 	component_ref, component = add_component(context_object, _blender_property_name, id, json_resource["type"])  # pyright: ignore[reportAssignmentType]
 	component: JsonFallbackComponent = component
 	import_component_base(context, component, json_resource, _blender_property_name, context_object)
@@ -48,7 +50,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, contex
 	return component
 
 
-def _stf_export(context: STF_ExportContext, component: JsonFallbackComponent, context_object: Any) -> tuple[dict, str]:
+def _stf_export(context: PSTF_ExportContext, component: JsonFallbackComponent, context_object: Any) -> tuple[dict, str]:
 	try:
 		json_component = json.loads(component.json)
 		if("type" not in json_component or not json_component["type"]):

@@ -4,8 +4,9 @@ import re
 import mathutils
 from typing import Any, Callable
 
-from ....common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart
-from ....common.utils.animation_conversion_utils import *
+from .....stf_blender_common.protocols.stf_export_context import PSTF_ImportContext, PSTF_ExportContext
+from .....stf_blender_common.base import BlenderPropertyPathPart, STFPropertyPathPart
+from .....stf_blender_common.utils.animation_conversion_utils import *
 
 # The values that get animated in Blender, like 'location' or 'rotation_quaternion', are likely to be nonsense when the object has a parent.
 # These properties likely won't be relative to the parent or world.
@@ -91,7 +92,7 @@ def _create_scale_to_stf_func(blender_object: bpy.types.Object) -> Callable:
 	return _ret
 
 
-def stf_node_resolve_property_path_to_stf_func(context: STF_ExportContext, blender_object: bpy.types.Object, application_object_property_index: int, data_path: str) -> STFPropertyPathPart | None:
+def stf_node_resolve_property_path_to_stf_func(context: PSTF_ExportContext, blender_object: bpy.types.Object, application_object_property_index: int, data_path: str) -> STFPropertyPathPart | None:
 
 	has_constraints = len(blender_object.constraints) > 0
 
@@ -196,7 +197,7 @@ def _create_scale_to_blender_func(blender_object: bpy.types.Object) -> Callable:
 	return _ret
 
 
-def stf_node_resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], blender_object: Any) -> BlenderPropertyPathPart | None:
+def stf_node_resolve_stf_property_to_blender_func(context: PSTF_ImportContext, stf_path: list[str], blender_object: Any) -> BlenderPropertyPathPart | None:
 	blender_object = context.get_imported_resource(stf_path[0])
 	match(stf_path[1]):
 		case "t":

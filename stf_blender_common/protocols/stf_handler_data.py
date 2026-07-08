@@ -1,8 +1,8 @@
 import bpy
 from typing import Any, Callable, Protocol
 
-from ..blender_native import STF_Handler_BlenderNative
-from ..component.stf_handler_component import STF_Component_Ref
+from . import STF_Handler_BlenderNative
+from . import PSTF_Component_Ref
 
 """
 STF data-resources that aren't natively supported by Blender, similar to components, are stored by the Collection that represents the STF-Prefab.
@@ -14,18 +14,12 @@ class PSTF_Data_Ref(Protocol): # Bringing polymorphism to Blender
 	stf_id: str
 	blender_property_name: str
 
-class STF_Data_Ref(bpy.types.PropertyGroup):
-	stf_type: bpy.props.StringProperty(name="Type", options=set()) # type: ignore
-	stf_id: bpy.props.StringProperty(name="ID", options=set()) # type: ignore
-	blender_property_name: bpy.props.StringProperty(name="Blender Property Name", options=set()) # type: ignore
-
-
-class STF_DataResourceBase(bpy.types.PropertyGroup):
+class PSTF_DataResourceBase(Protocol):
 	"""Base class for stf data-resources which are non-native to Blender"""
-	stf_id: bpy.props.StringProperty(name="ID", description="Universally unique ID", options=set()) # type: ignore
-	stf_name: bpy.props.StringProperty(name="Name", options=set()) # type: ignore
-	stf_components: bpy.props.CollectionProperty(type=STF_Component_Ref, name="Components", options=set()) # type: ignore
-	stf_active_component_index: bpy.props.IntProperty(name="Selected Component", options=set()) # type: ignore
+	stf_id: str
+	stf_name: str
+	stf_components: list[PSTF_Component_Ref]
+	stf_active_component_index: int
 
 
 class STF_Handler_Data(STF_Handler_BlenderNative, Protocol):
@@ -34,7 +28,7 @@ class STF_Handler_Data(STF_Handler_BlenderNative, Protocol):
 	blender_property_name: str
 	"""Blender collection property on which this resource can be added to"""
 
-	draw_resource_func: Callable[[bpy.types.UILayout, bpy.types.Context, STF_Data_Ref, Any, Any], None]
+	draw_resource_func: Callable[[bpy.types.UILayout, bpy.types.Context, PSTF_Data_Ref, Any, Any], None]
 	"""
 	`def draw_resource_func(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: STF_BlenderDataResourceBase) -> None`
 	"""

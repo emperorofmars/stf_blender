@@ -1,10 +1,11 @@
 import bpy
 from typing import Any
 
-from ...common import STF_ExportContext, STF_ImportContext, STFReportSeverity, STFReport, STF_TaskSteps, STF_Category
+from ....stf_blender_common.utils.collection_helpers import create_add_button, create_remove_button
+from ...common import PSTF_ExportContext, PSTF_ImportContext, STFReportSeverity, STFReport, STF_TaskSteps, STF_Category
 from ...common.resource.component import STF_ComponentResourceBase, STF_Handler_Component, STF_Component_Ref
-from ...common.helpers import register_exported_resource, create_add_button, create_remove_button, poll_valid_animations, draw_slot_link_warning
-from ...common.resource.component.component_utils import add_component, export_component_base, import_component_base
+from ...common.helpers import register_exported_resource, poll_valid_animations, draw_slot_link_warning
+from ....stf_blender_common.operators.base_operators_component import add_component, export_component_base, import_component_base
 from ...common.blender_grr import *
 
 
@@ -150,7 +151,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 		draw_stf_data_resource_reference(box.column(align=True), expression.blendshape_fallback, ["dev.vrm.blendshape_pose"])
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
+def _stf_import(context: PSTF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
 	component_ref, component = add_component(context_object, _blender_property_name, stf_id, _stf_type)
 	import_component_base(context, component, json_resource, _blender_property_name, context_object)
 
@@ -179,7 +180,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	return component
 
 
-def _stf_export(context: STF_ExportContext, component: AVA_Expressions, context_object: Any) -> tuple[dict, str]:
+def _stf_export(context: PSTF_ExportContext, component: AVA_Expressions, context_object: Any) -> tuple[dict, str]:
 	ret = export_component_base(context, _stf_type, component, _blender_property_name, context_object)
 
 	expressions = {}

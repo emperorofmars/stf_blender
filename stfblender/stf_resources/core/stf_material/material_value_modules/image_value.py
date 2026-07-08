@@ -1,7 +1,8 @@
 import bpy
 from typing import Any
 
-from .....common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STF_Category
+from ......stf_blender_common.base import STFPropertyPathPart, BlenderPropertyPathPart, STF_Category
+from ......stf_blender_common.protocols import PSTF_ExportContext, PSTF_ImportContext
 from ..stf_material_definition import STF_Material_Value_Base, STF_Material_Value_Module_Base
 
 
@@ -11,12 +12,12 @@ class STF_Material_Value_Image(STF_Material_Value_Base):
 	# uv_offset:
 
 
-def _value_import_func(context: STF_ImportContext, json_material: dict, blender_material: bpy.types.Material, json_resource: Any, value: STF_Material_Value_Image):
+def _value_import_func(context: PSTF_ImportContext, json_material: dict, blender_material: bpy.types.Material, json_resource: Any, value: STF_Material_Value_Image):
 	if("image" in json_resource and json_resource["image"] != None):
 		value.image = context.import_resource(json_material, json_resource["image"], stf_category=STF_Category.DATA)
 
 
-def _value_export_func(context: STF_ExportContext, json_material: dict, blender_material: bpy.types.Material, value: STF_Material_Value_Image) -> Any:
+def _value_export_func(context: PSTF_ExportContext, json_material: dict, blender_material: bpy.types.Material, value: STF_Material_Value_Image) -> Any:
 	ret = {}
 	if(value.image):
 		ret["image"] = context.serialize_resource(json_material, value.image, stf_category=STF_Category.DATA)
@@ -27,10 +28,10 @@ def _draw_func(layout: bpy.types.UILayout, context: bpy.types.Context, blender_m
 	layout.prop(value, "image")
 
 
-def _resolve_property_path_to_stf_func(context: STF_ExportContext, blender_property_path: str, value: STF_Material_Value_Image) -> STFPropertyPathPart | None:
+def _resolve_property_path_to_stf_func(context: PSTF_ExportContext, blender_property_path: str, value: STF_Material_Value_Image) -> STFPropertyPathPart | None:
 	return None
 
-def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str]) -> BlenderPropertyPathPart | None:
+def _resolve_stf_property_to_blender_func(context: PSTF_ImportContext, stf_path: list[str]) -> BlenderPropertyPathPart | None:
 	return None
 
 

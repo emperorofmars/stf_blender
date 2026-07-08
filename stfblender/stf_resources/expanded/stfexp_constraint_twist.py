@@ -2,10 +2,10 @@ import bpy
 import re
 from typing import Any
 
-from ...common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STF_TaskSteps, STF_Category
+from ...common import PSTF_ExportContext, PSTF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STF_TaskSteps, STF_Category
 from ...common.resource.component import STF_ComponentResourceBase, STF_Handler_BoneComponent, STF_Component_Ref
-from ...common.resource.component.component_utils import add_component, export_component_base, import_component_base, preserve_component_reference
-from ...common.utils.animation_conversion_utils import get_component_index, get_component_stf_path_from_collection
+from ....stf_blender_common.operators.base_operators_component import add_component, export_component_base, import_component_base, preserve_component_reference
+from ....stf_blender_common.utils.animation_conversion_utils import get_component_index, get_component_stf_path_from_collection
 from ...common.blender_grr.stf_node_path_selector import NodePathSelector, draw_node_path_selector, node_path_selector_from_stf, node_path_selector_to_stf
 
 
@@ -29,7 +29,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 
 """Import export"""
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
+def _stf_import(context: PSTF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
 	component_ref, component = add_component(context_object, _blender_property_name, stf_id, _stf_type)
 	import_component_base(context, component, json_resource, _blender_property_name, context_object)
 	component.weight = json_resource.get("weight")
@@ -44,7 +44,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	return component
 
 
-def _stf_export(context: STF_ExportContext, component: STFEXP_Constraint_Twist, context_object: Any) -> tuple[dict, str]:
+def _stf_export(context: PSTF_ExportContext, component: STFEXP_Constraint_Twist, context_object: Any) -> tuple[dict, str]:
 	ret = export_component_base(context, _stf_type, component, _blender_property_name, context_object)
 	ret["weight"] = component.weight
 
@@ -66,7 +66,7 @@ def _set_component_instance_standin(context: bpy.types.Context, component_ref: S
 	standin_component.source.target_bone = component.source.target_bone
 
 
-def _serialize_component_instance_standin_func(context: STF_ExportContext, component_ref: STF_Component_Ref, standin_component: STFEXP_Constraint_Twist, context_object: Any) -> dict:
+def _serialize_component_instance_standin_func(context: PSTF_ExportContext, component_ref: STF_Component_Ref, standin_component: STFEXP_Constraint_Twist, context_object: Any) -> dict:
 	ret = { "weight": standin_component.weight }
 	def _handle():
 		if(source_ret := node_path_selector_to_stf(context, standin_component.source, ret)):
@@ -74,7 +74,7 @@ def _serialize_component_instance_standin_func(context: STF_ExportContext, compo
 	context.add_task(STF_TaskSteps.DEFAULT, _handle)
 	return ret
 
-def _parse_component_instance_standin_func(context: STF_ImportContext, json_resource: dict, component_ref: STF_Component_Ref, standin_component: STFEXP_Constraint_Twist, context_object: Any):
+def _parse_component_instance_standin_func(context: PSTF_ImportContext, json_resource: dict, component_ref: STF_Component_Ref, standin_component: STFEXP_Constraint_Twist, context_object: Any):
 	if("weight" in json_resource): standin_component.weight = json_resource["weight"]
 	if("source" in json_resource and len(json_resource["source"]) > 0):
 		_get_component = preserve_component_reference(standin_component, _blender_property_name, context_object)
@@ -86,7 +86,7 @@ def _parse_component_instance_standin_func(context: STF_ImportContext, json_reso
 
 """Animation"""
 
-def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: Any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart | None:
+def _resolve_property_path_to_stf_func(context: PSTF_ExportContext, application_object: Any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart | None:
 	if(match := re.search(r"^" + _blender_property_name + r"\[(?P<component_index>[\d]+)\].weight", data_path)):
 		if(component_path := get_component_stf_path_from_collection(application_object, _blender_property_name, int(match.groupdict()["component_index"]))):
 			return STFPropertyPathPart(component_path + ["weight"])
@@ -96,7 +96,7 @@ def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_o
 	return None
 
 
-def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: Any) -> BlenderPropertyPathPart | None:
+def _resolve_stf_property_to_blender_func(context: PSTF_ImportContext, stf_path: list[str], application_object: Any) -> BlenderPropertyPathPart | None:
 	blender_object = context.get_imported_resource(stf_path[0])
 	component_index = get_component_index(application_object, _blender_property_name, blender_object.stf_id)
 	if(component_index is not None):

@@ -5,8 +5,8 @@ from collections.abc import Sequence
 
 from .export_settings import STF_ExportSettings
 from ..common import STFReportSeverity, STFReport
-from ..common.resource.stf_handler_base import STF_HandlerBase
-from ..common.base.stf_json_definition import STF_Buffer, STF_JsonDefinition, STF_Meta_AssetInfo, STF_Meta_AssetProperties
+from ...stf_blender_common.protocols.stf_handler_base import STF_HandlerBase
+from ...stf_blender_common.data.stf_json_definition import STF_Buffer, STF_JsonDefinition, STF_Meta_AssetInfo, STF_Meta_AssetProperties
 from ..common.resource.component import STF_ExportComponentHook
 from ..common.base.stf_file import STF_File
 from ..common.base.stf_state_base import STF_State_Base

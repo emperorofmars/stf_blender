@@ -1,11 +1,11 @@
 import bpy
 from typing import Any
 
+from .....stf_blender_common.protocols import PSTF_ExportContext, PSTF_ImportContext, STF_Handler_BlenderNative
+from .....stf_blender_common.base import STF_Category, STFReport, STFReportSeverity, BlenderPropertyPathPart, STFPropertyPathPart
+from .....stf_blender_common.utils.id_utils import ensure_stf_id
+from .....stf_blender_common.utils.component_resource_utils import get_components_from_object
 from .stf_instance_mesh_util import set_instance_blendshapes
-from ....common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STFReportSeverity, STFReport, STF_Category
-from ....common.resource.blender_native import STF_Handler_BlenderNative
-from ....common.resource.component.component_utils import get_components_from_object
-from ....common.utils.id_utils import ensure_stf_id
 
 
 _stf_type = "stf.instance.mesh"
@@ -23,7 +23,7 @@ class STF_Instance_Mesh(bpy.types.PropertyGroup):
 	active_blendshape: bpy.props.IntProperty(options=set()) # type: ignore
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any | STFReport:
+def _stf_import(context: PSTF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any | STFReport:
 	blender_resource = context.import_resource(json_resource, json_resource["mesh"], stf_category=STF_Category.DATA)
 	blender_object = bpy.data.objects.new(json_resource.get("name", "STF Node"), blender_resource)
 	blender_object.stf_instance.stf_id = stf_id
@@ -69,7 +69,7 @@ def _can_handle_application_object_func(application_object: Any) -> int:
 	else:
 		return -1
 
-def _stf_export(context: STF_ExportContext, application_object: Any, context_object: bpy.types.Collection) -> tuple[dict, str] | STFReport:
+def _stf_export(context: PSTF_ExportContext, application_object: Any, context_object: bpy.types.Collection) -> tuple[dict, str] | STFReport:
 	blender_object: bpy.types.Object = application_object[0]
 	blender_mesh: bpy.types.Mesh = application_object[1]
 
@@ -116,14 +116,14 @@ def _stf_export(context: STF_ExportContext, application_object: Any, context_obj
 	return ret, blender_object.stf_instance.stf_id
 
 
-def _resolve_property_path_to_stf_func(context: STF_ExportContext, blender_object: Any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart | None:
+def _resolve_property_path_to_stf_func(context: PSTF_ExportContext, blender_object: Any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart | None:
 	import re
 	match = re.search(r"^key_blocks\[\"(?P<blendshape_name>[\w. -:,]+)\"\].value", data_path)
 	if(match and "blendshape_name" in match.groupdict()):
 		return STFPropertyPathPart([blender_object.stf_info.stf_id, "instance", "blendshape", match.groupdict()["blendshape_name"], "value"])
 	return None
 
-def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], blender_object: bpy.types.Object) -> BlenderPropertyPathPart | None:
+def _resolve_stf_property_to_blender_func(context: PSTF_ImportContext, stf_path: list[str], blender_object: bpy.types.Object) -> BlenderPropertyPathPart | None:
 	if(len(stf_path) == 4 and stf_path[1] == "blendshape" and stf_path[3] == "value"):
 		return BlenderPropertyPathPart("KEY", "key_blocks[\"" + stf_path[2] + "\"].value")
 	elif(len(stf_path) >= 5 and stf_path[1] == "material"):
@@ -141,7 +141,7 @@ class Handler_STF_Instance_Mesh(STF_Handler_BlenderNative):
 	like_types = ["instance.mesh", "instance"]
 	understood_application_types = [tuple]
 	import_func = _stf_import
-	export_func = _stf_export
+	export_func = _stf_export # pyright: ignore[reportAssignmentType]
 	can_handle_application_object_func = _can_handle_application_object_func
 	get_components_func = get_components_from_object
 

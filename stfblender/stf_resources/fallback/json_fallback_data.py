@@ -2,9 +2,11 @@ import bpy
 import json
 from typing import Any
 
-from ...common import STF_ExportContext, STF_ImportContext, STF_TaskSteps, STF_Category
-from ...common.resource.data import STF_Handler_Data, STF_DataResourceBase, STF_Data_Ref
-from ...common.resource.data.data_resource_utils import add_resource, export_data_resource_base, get_components_from_data_resource, import_data_resource_base
+from ....stf_blender_common.base import STF_Category, STF_TaskSteps
+from ....stf_blender_common.protocols import PSTF_ExportContext, PSTF_Data_Ref, STF_Handler_Data, PSTF_ImportContext
+from ....stf_blender_common.blender_data.stf_resource_data import STF_DataResourceBase
+from ....stf_blender_common.utils.data_resource_utils import add_resource, export_data_resource_base, get_components_from_data_resource, import_data_resource_base
+
 from ...common.blender_grr import BlenderGRR, construct_blender_grr, resolve_blender_grr
 from .json_fallback_buffer import STF_FallbackBuffer, decode_buffer, encode_buffer
 from .json_fallback_ui import draw_fallback
@@ -21,11 +23,11 @@ class JsonFallbackData(STF_DataResourceBase):
 	active_buffer: bpy.props.IntProperty() # type: ignore
 
 
-def _draw_resource(layout: bpy.types.UILayout, context: bpy.types.Context, resource_ref: STF_Data_Ref, context_object: bpy.types.Collection, resource: JsonFallbackData):
+def _draw_resource(layout: bpy.types.UILayout, context: bpy.types.Context, resource_ref: PSTF_Data_Ref, context_object: Any, resource: JsonFallbackData):
 	draw_fallback(layout, resource_ref, resource)
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: bpy.types.Collection) -> Any:
+def _stf_import(context: PSTF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
 	resource_ref, resource = add_resource(context_object, _blender_property_name, stf_id, json_resource["type"])
 	resource: JsonFallbackData = resource
 	import_data_resource_base(resource, json_resource)
@@ -45,7 +47,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	return resource
 
 
-def _stf_export(context: STF_ExportContext, resource: JsonFallbackData, context_object: Any) -> tuple[dict, str]:
+def _stf_export(context: PSTF_ExportContext, resource: JsonFallbackData, context_object: Any) -> tuple[dict, str]:
 	try:
 		json_resource = json.loads(resource.json)
 		if("type" not in json_resource or not json_resource["type"]):

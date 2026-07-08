@@ -2,13 +2,11 @@ import bpy
 from typing import Any, Callable, Protocol
 from abc import abstractmethod
 
-from .stf_task_steps import STF_TaskSteps
-from .base.stf_json_definition import STF_Meta_AssetInfo
-from .stf_report import STFReportSeverity, STFReport
-from .property_path_part import STFPropertyPathPart
+from ..base import STF_TaskSteps, STFReportSeverity, STFReport, STFPropertyPathPart
+from ..data import STF_Meta_AssetInfo
 
 
-class STF_ExportContext(Protocol):
+class PSTF_ExportContext(Protocol):
 	"""Interface Context for resource export. It will be passed to each STF_Handler's export func."""
 
 	@abstractmethod

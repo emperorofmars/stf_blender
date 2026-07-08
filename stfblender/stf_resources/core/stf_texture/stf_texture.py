@@ -1,9 +1,11 @@
 import bpy
 from typing import Any
 
-from ....common import STF_ExportContext, STF_ImportContext, STF_Category, STFReport
-from ....common.resource.component import STF_ComponentResourceBase, STF_Handler_Component, STF_Component_Ref
-from ....common.resource.component.component_utils import add_component, export_component_base, import_component_base
+from .....stf_blender_common.blender_data.stf_resource_component import STF_ComponentResourceBase
+from .....stf_blender_common.protocols import PSTF_ExportContext, PSTF_ImportContext, PSTF_Component_Ref, STF_Handler_Component
+from .....stf_blender_common.base import STF_Category, STFReport
+from .....stf_blender_common.utils.component_resource_utils import export_component_base, import_component_base
+from .....stf_blender_common.operators.base_operators_component import add_component
 
 
 _stf_type = "stf.texture"
@@ -20,7 +22,7 @@ class STF_Texture(STF_ComponentResourceBase):
 	# TODO more gpu texture relevant properties
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: STF_Texture):
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: PSTF_Component_Ref, context_object: Any, component: STF_Texture):
 	col = layout.column(align=True)
 	col.use_property_split = True
 	col.prop(component, "width")
@@ -30,7 +32,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 	col.prop(component, "mipmaps")
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any | STFReport:
+def _stf_import(context: PSTF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any | STFReport:
 	component_ref, component = add_component(context_object, _blender_property_name, stf_id, _stf_type)
 	import_component_base(context, component, json_resource, _blender_property_name, context_object)
 
@@ -43,7 +45,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	return component
 
 
-def _stf_export(context: STF_ExportContext, component: STF_Texture, context_object: Any) -> tuple[dict, str] | STFReport:
+def _stf_export(context: PSTF_ExportContext, component: STF_Texture, context_object: Any) -> tuple[dict, str] | STFReport:
 	ret = export_component_base(context, _stf_type, component, _blender_property_name, context_object)
 	ret["width"] = component.width
 	ret["height"] = component.height

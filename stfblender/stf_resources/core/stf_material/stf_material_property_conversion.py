@@ -1,12 +1,13 @@
 import bpy
 import re
 
-from ....common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart
+from .....stf_blender_common.base import STFPropertyPathPart, BlenderPropertyPathPart
+from .....stf_blender_common.protocols import PSTF_ExportContext, PSTF_ImportContext
 from .stf_material_definition import STF_Material_Value_Base
 from .material_value_modules import blender_material_value_modules
 
 
-def stf_material_resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: bpy.types.Object, application_object_property_index: int, data_path: str) -> STFPropertyPathPart | None:
+def stf_material_resolve_property_path_to_stf_func(context: PSTF_ExportContext, application_object: bpy.types.Object, application_object_property_index: int, data_path: str) -> STFPropertyPathPart | None:
 	if(len(application_object.material_slots) <= application_object_property_index or not application_object.material_slots[application_object_property_index].material):
 		return None
 	blender_material: bpy.types.Material = application_object.material_slots[application_object_property_index].material # pyright: ignore[reportAssignmentType]
@@ -41,7 +42,7 @@ def stf_material_resolve_property_path_to_stf_func(context: STF_ExportContext, a
 	return None
 
 
-def stf_material_resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: bpy.types.Object) -> BlenderPropertyPathPart | None:
+def stf_material_resolve_stf_property_to_blender_func(context: PSTF_ImportContext, stf_path: list[str], application_object: bpy.types.Object) -> BlenderPropertyPathPart | None:
 	material_index = int(stf_path[1])
 	material_property_type = stf_path[2]
 	material_property_value_index = int(stf_path[3])

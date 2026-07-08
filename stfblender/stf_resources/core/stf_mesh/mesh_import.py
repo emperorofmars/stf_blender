@@ -5,8 +5,9 @@ from io import BytesIO
 from typing import Any
 import numpy as np
 
-from ....common import STF_ImportContext, STFReportSeverity, STFReport, STF_Category
-from ....common.utils.buffer_utils import determine_pack_format_float, determine_pack_format_uint, parse_float, parse_uint
+from .....stf_blender_common.protocols import PSTF_ImportContext
+from .....stf_blender_common.base import STF_Category, STFReport, STFReportSeverity
+from .....stf_blender_common.utils.buffer_utils import determine_pack_format_float, determine_pack_format_uint, parse_float, parse_uint
 
 
 _stf_type = "stf.mesh"
@@ -14,7 +15,7 @@ _stf_type = "stf.mesh"
 
 # Mesh import and export are the lowest hanging fruits for performance improvements.
 
-def import_stf_mesh(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any | STFReport:
+def import_stf_mesh(context: PSTF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any | STFReport:
 	blender_mesh = bpy.data.meshes.new(json_resource.get("name", "STF Mesh"))
 	blender_mesh.stf_info.stf_id = stf_id
 	if(json_resource.get("name")):
@@ -94,12 +95,12 @@ def import_stf_mesh(context: STF_ImportContext, json_resource: dict, stf_id: str
 		buffer_sharp_edges = BytesIO(context.import_buffer(json_resource, json_resource["sharp_edges"]))
 		edge_dict: dict[int, dict[int, bpy.types.MeshEdge]] = {}
 		for edge in blender_mesh.edges:
-			if(edge.vertices[0] not in edge_dict):
-				edge_dict[edge.vertices[0]] = {}
-			if(edge.vertices[1] not in edge_dict):
-				edge_dict[edge.vertices[1]] = {}
-			edge_dict[edge.vertices[0]][edge.vertices[1]] = edge
-			edge_dict[edge.vertices[1]][edge.vertices[0]] = edge
+			if(edge.vertices[0] not in edge_dict): # pyright: ignore[reportIndexIssue]
+				edge_dict[edge.vertices[0]] = {} # pyright: ignore[reportIndexIssue]
+			if(edge.vertices[1] not in edge_dict): # pyright: ignore[reportIndexIssue]
+				edge_dict[edge.vertices[1]] = {} # pyright: ignore[reportIndexIssue]
+			edge_dict[edge.vertices[0]][edge.vertices[1]] = edge # pyright: ignore[reportIndexIssue]
+			edge_dict[edge.vertices[1]][edge.vertices[0]] = edge # pyright: ignore[reportIndexIssue]
 		for _ in range(int(buffer_sharp_edges.getbuffer().nbytes / (indices_width * 2))):
 			v0_index = parse_uint(buffer_sharp_edges, indices_width)
 			v1_index = parse_uint(buffer_sharp_edges, indices_width)

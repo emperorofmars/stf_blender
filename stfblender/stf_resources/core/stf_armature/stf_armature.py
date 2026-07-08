@@ -1,17 +1,17 @@
 import bpy
 from typing import Any
 
-from ....common import STF_ImportContext, STF_ExportContext, STF_Category, STFReport
+from ....common import PSTF_ImportContext, PSTF_ExportContext, STF_Category, STFReport
 from ....common.resource.blender_native import STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister
-from ....common.resource.component.component_utils import get_components_from_object
-from ....common.utils.armature_bone import ArmatureBone
-from ....common.utils.id_utils import ensure_stf_id
+from .....stf_blender_common.operators.base_operators_component import get_components_from_object
+from .....stf_blender_common.utils.armature_bone import ArmatureBone
+from .....stf_blender_common.utils.id_utils import ensure_stf_id
 
 
 _stf_type = "stf.armature"
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any | STFReport:
+def _stf_import(context: PSTF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any | STFReport:
 	blender_armature = bpy.data.armatures.new(json_resource.get("name", "STF Armature"))
 	blender_armature.stf_info.stf_id = stf_id
 	if(json_resource.get("name")):
@@ -27,7 +27,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	return blender_armature
 
 
-def _stf_export(context: STF_ExportContext, application_object: Any, context_object: Any) -> tuple[dict, str] | STFReport:
+def _stf_export(context: PSTF_ExportContext, application_object: Any, context_object: Any) -> tuple[dict, str] | STFReport:
 	blender_armature: bpy.types.Armature = application_object
 	ensure_stf_id(context, blender_armature)
 

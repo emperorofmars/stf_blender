@@ -3,14 +3,13 @@ import math
 import mathutils
 from typing import Any
 
-from ....common.helpers.reference_helper import register_exported_resource
-
-from ....common import STF_ExportContext, STF_ImportContext, STF_TaskSteps, STFReportSeverity, STFReport, STF_Category
-from ....common.resource.blender_native import STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister
-from ....common.utils import trs_utils
-from ....common.resource.component.component_utils import get_components_from_object
-from ....common.utils.id_utils import ensure_stf_id
-from ....common.helpers import get_resource_id
+from .....stf_blender_common.protocols import PSTF_ExportContext, PSTF_ImportContext, STF_Handler_BlenderNative
+from .....stf_blender_common.protocols.stf_info import boilerplate_register, boilerplate_unregister
+from .....stf_blender_common.base import STF_TaskSteps, STF_Category, STFReport, STFReportSeverity
+from .....stf_blender_common.utils.id_utils import ensure_stf_id
+from .....stf_blender_common.utils.component_resource_utils import get_components_from_object
+from .....stf_blender_common.utils.reference_helper import get_resource_id, register_exported_resource
+from .....stf_blender_common.utils import trs_utils
 from .node_property_conversion import stf_node_resolve_property_path_to_stf_func, stf_node_resolve_stf_property_to_blender_func
 
 
@@ -23,7 +22,7 @@ class STF_Instance(bpy.types.PropertyGroup):
 	enabled: bpy.props.BoolProperty(name="Enabled", default=True, options=set()) # type: ignore
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any | STFReport:
+def _stf_import(context: PSTF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any | STFReport:
 	if("instance" in json_resource):
 		blender_object: bpy.types.Object = context.import_resource(json_resource, json_resource["instance"], stf_category=STF_Category.INSTANCE) # pyright: ignore[reportRedeclaration]
 	else:
@@ -49,7 +48,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 				pose_bone = blender_object.parent.pose.bones[bone.name]
 				blender_object.parent_type = "BONE"
 				blender_object.parent_bone = bone.name
-				blender_object.matrix_parent_inverse = (blender_object.parent.matrix_world @ mathutils.Matrix.Translation(pose_bone.tail - pose_bone.head) @ pose_bone.matrix).inverted_safe() # Blender why
+				blender_object.matrix_parent_inverse = (blender_object.parent.matrix_world @ mathutils.Matrix.Translation(pose_bone.tail - pose_bone.head) @ pose_bone.matrix).inverted_safe() # pyright: ignore[reportArgumentType] # Blender why
 				blender_object.matrix_world = blender_object.parent.matrix_world @ pose_bone.matrix @ mathutils.Matrix.Rotation(math.radians(-90), 4, "X") @ matrix_local # Blender why
 			else:
 				blender_object.parent_type = "OBJECT"
@@ -82,7 +81,7 @@ def _can_handle_application_object_func(application_object: Any) -> int:
 		return -1
 
 
-def _stf_export(context: STF_ExportContext, blender_object: bpy.types.Object, context_object: bpy.types.Collection) -> tuple[dict, str] | STFReport:
+def _stf_export(context: PSTF_ExportContext, blender_object: bpy.types.Object, context_object: bpy.types.Collection) -> tuple[dict, str] | STFReport:
 	ensure_stf_id(context, blender_object)
 
 	json_resource = {
@@ -138,7 +137,7 @@ class Handler_STF_Node(STF_Handler_BlenderNative):
 	like_types = ["node", "node.spatial"]
 	understood_application_types = [bpy.types.Object]
 	import_func = _stf_import
-	export_func = _stf_export
+	export_func = _stf_export # pyright: ignore[reportAssignmentType]
 	can_handle_application_object_func = _can_handle_application_object_func
 	get_components_func = get_components_from_object
 

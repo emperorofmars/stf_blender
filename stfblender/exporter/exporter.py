@@ -5,8 +5,8 @@ from bpy_extras.io_utils import ExportHelper
 from collections.abc import Sequence
 
 from ..common.base.stf_meta import draw_meta_editor
-from ..common.stf_report import STFReport, STFReportSeverity
-from ..common.base.stf_registry import get_export_handlers
+from ...stf_blender_common.base.stf_report import STFReport, STFReportSeverity
+from ...stf_blender_common.base.stf_registry import get_export_handlers
 from .stf_export_state import STF_ExportState
 from .stf_export_context import STF_ExportContext
 from ..common.helpers.misc import OpenWebpage, draw_slot_link_warning, get_stf_version

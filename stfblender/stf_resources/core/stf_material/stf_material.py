@@ -1,12 +1,11 @@
 import bpy
 from typing import Any
 
-from ....common.stf_report import STFReportSeverity
-
-from ....common import STF_ExportContext, STF_ImportContext, STF_Category, STFReport
-from ....common.resource.blender_native import STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister
-from ....common.resource.component.component_utils import get_components_from_object
-from ....common.utils.id_utils import ensure_stf_id
+from .....stf_blender_common.protocols import PSTF_ImportContext, PSTF_ExportContext, STF_Handler_BlenderNative
+from .....stf_blender_common.protocols.stf_info import boilerplate_register, boilerplate_unregister
+from .....stf_blender_common.base import STFReportSeverity, STFReport, STF_Category
+from .....stf_blender_common.utils.id_utils import ensure_stf_id
+from .....stf_blender_common.utils.component_resource_utils import get_components_from_object
 from .stf_material_definition import STF_Material_Property, STF_Material_Value_Module_Base
 from .material_value_modules import blender_material_value_modules
 from .stf_material_operators import add_property, add_value_to_property
@@ -18,7 +17,7 @@ from .stf_material_property_conversion import stf_material_resolve_property_path
 _stf_type = "stf.material"
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any | STFReport:
+def _stf_import(context: PSTF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any | STFReport:
 	blender_material = bpy.data.materials.new(json_resource.get("name", "STF Material"))
 	blender_material.stf_info.stf_id = stf_id
 	if(json_resource.get("name")):
@@ -58,7 +57,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	return blender_material
 
 
-def _stf_export(context: STF_ExportContext, application_object: Any, context_object: Any) -> tuple[dict, str] | STFReport:
+def _stf_export(context: PSTF_ExportContext, application_object: Any, context_object: Any) -> tuple[dict, str] | STFReport:
 	blender_material: bpy.types.Material = application_object
 	ensure_stf_id(context, blender_material)
 

@@ -1,9 +1,9 @@
 import bpy
 from typing import Any
 
-from ...common import STF_ExportContext, STF_ImportContext, STFReportSeverity, STFReport, STF_Category
+from ...common import PSTF_ExportContext, PSTF_ImportContext, STFReportSeverity, STFReport, STF_Category
 from ...common.resource.blender_native import STF_Handler_BlenderNative
-from ...common.utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui, ensure_stf_id
+from ....stf_blender_common.utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui, ensure_stf_id
 
 # TODO this module is at a bare minimum level, improve it
 
@@ -38,7 +38,7 @@ class STFEXP_Instance_Text_Panel(bpy.types.Panel):
 Import
 """
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
+def _stf_import(context: PSTF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
 	blender_text = context.import_resource(json_resource, json_resource["text"], STF_Category.DATA)
 
 	blender_object = bpy.data.objects.new(json_resource.get("name", "STFEXP Instance Text"), blender_text)
@@ -66,7 +66,7 @@ def _can_handle_application_object_func(application_object: Any) -> int:
 		return -1
 
 
-def _stf_export(context: STF_ExportContext, application_object: Any, context_object: Any) -> tuple[dict, str]:
+def _stf_export(context: PSTF_ExportContext, application_object: Any, context_object: Any) -> tuple[dict, str]:
 	blender_object: bpy.types.Object = application_object[0]
 	blender_text: bpy.types.Text = application_object[1]
 	ensure_stf_id(context, blender_object.stf_instance)

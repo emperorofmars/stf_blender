@@ -1,7 +1,8 @@
 import bpy
 from typing import Any
 
-from .....common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart
+from ......stf_blender_common.base import STFPropertyPathPart, BlenderPropertyPathPart
+from ......stf_blender_common.protocols import PSTF_ExportContext, PSTF_ImportContext
 from ..stf_material_definition import STF_Material_Value_Module_Base, STF_Material_Value_Base
 
 
@@ -9,11 +10,11 @@ class STF_Material_Value_Color(STF_Material_Value_Base):
 	color: bpy.props.FloatVectorProperty(name="Color", subtype="COLOR", size=4, min=0, max=1, default=(1,1,1,1)) # type: ignore
 
 
-def _value_import_func(context: STF_ImportContext, json_material: dict, blender_material: bpy.types.Material, json_resource: Any, value: STF_Material_Value_Color):
+def _value_import_func(context: PSTF_ImportContext, json_material: dict, blender_material: bpy.types.Material, json_resource: Any, value: STF_Material_Value_Color):
 	value.color = (json_resource[0],json_resource[1], json_resource[2], json_resource[3])
 
 
-def _value_export_func(context: STF_ExportContext, json_material: dict, blender_material: bpy.types.Material, value: STF_Material_Value_Color) -> Any:
+def _value_export_func(context: PSTF_ExportContext, json_material: dict, blender_material: bpy.types.Material, value: STF_Material_Value_Color) -> Any:
 	return [value.color[0], value.color[1], value.color[2], value.color[3]]
 
 
@@ -21,10 +22,10 @@ def _draw_func(layout: bpy.types.UILayout, context: bpy.types.Context, blender_m
 	layout.prop(value, "color")
 
 
-def _resolve_property_path_to_stf_func(context: STF_ExportContext, blender_property_path: str, value: STF_Material_Value_Color) -> STFPropertyPathPart | None:
+def _resolve_property_path_to_stf_func(context: PSTF_ExportContext, blender_property_path: str, value: STF_Material_Value_Color) -> STFPropertyPathPart | None:
 	return STFPropertyPathPart(["color"])
 
-def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str]) -> BlenderPropertyPathPart | None:
+def _resolve_stf_property_to_blender_func(context: PSTF_ImportContext, stf_path: list[str]) -> BlenderPropertyPathPart | None:
 	return BlenderPropertyPathPart("MATERIAL", "color")
 
 

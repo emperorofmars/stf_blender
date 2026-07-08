@@ -1,11 +1,13 @@
 import bpy
 
-from ....common import STF_Category
-from ....common.resource.blender_native import STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister
+from .....stf_blender_common.protocols import STF_Handler_BlenderNative
+from .....stf_blender_common.base import STF_Category
+from .....stf_blender_common.protocols.stf_info import boilerplate_register, boilerplate_unregister
+
 from .stf_animation_common import *
 from .stf_animation_export import stf_animation_export
 from .stf_animation_import import stf_animation_import
-from ....common.resource.component.component_utils import get_components_from_object
+from .....stf_blender_common.operators.base_operators_component import get_components_from_object
 
 
 _stf_type = stf_animation_type

@@ -1,13 +1,13 @@
 import bpy
 from typing import Any
 
-from .stf_instance_armature import InstanceModComponentRef
-from .stf_instance_armature_utils import ProcessComponentsOntoArmatureInstance, UpdateArmatureInstanceComponentStandins
-from ....common.resource.component import STF_Component_Ref
-from ....common.helpers import draw_multiline_text
-from ....common.resource.component.component_utils import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
-from ....common.utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
+from .....stf_blender_common.protocols import PInstanceModComponentRef, PSTF_Component_Ref
+from .....stf_blender_common.operators.base_operators_component import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
+from .....stf_blender_common.operators.base_operators import STFSetIDOperatorBase
+from .....stf_blender_common.utils.id_utils import draw_stf_id_ui
+from .....stf_blender_common.utils.draw_multiline_text import draw_multiline_text
 from ....common.ui.component_ui import draw_components_ui, draw_instance_standin_components_ui
+from .stf_instance_armature_utils import ProcessComponentsOntoArmatureInstance, UpdateArmatureInstanceComponentStandins
 
 
 class STFSetArmatureInstanceIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
@@ -23,19 +23,19 @@ class STFAddArmatureInstanceComponentOperator(bpy.types.Operator, STFAddComponen
 	@classmethod
 	def poll(cls, context) -> bool: return hasattr(context, "object") and context.object is not None and context.object.stf_instance_armature is not None and context.object.data and type(context.object.data) is bpy.types.Armature  # pyright: ignore[reportReturnType]
 	def get_property(self, context): return context.object
-	def get_components_ref_property(self, context) -> STF_Component_Ref: return context.object.stf_instance_armature.stf_components
+	def get_components_ref_property(self, context) -> list[PSTF_Component_Ref]: return context.object.stf_instance_armature.stf_components
 
 class STFRemoveArmatureInstanceComponentOperator(bpy.types.Operator, STFRemoveComponentOperatorBase):
 	"""Remove selected component from Armature-Instance"""
 	bl_idname = "stf.remove_armature_instance_component"
 	def get_property(self, context): return context.object
-	def get_components_ref_property(self, context) -> STF_Component_Ref: return context.object.stf_instance_armature.stf_components
+	def get_components_ref_property(self, context) -> list[PSTF_Component_Ref]: return context.object.stf_instance_armature.stf_components
 
 class STFEditArmatureInstanceComponentIdOperator(bpy.types.Operator, STFEditComponentOperatorBase):
 	"""Edit the ID of this Component"""
 	bl_idname = "stf.edit_armature_instance_component_id"
 	def get_property(self, context): return context.object
-	def get_components_ref_property(self, context) -> STF_Component_Ref: return context.object.stf_instance_armature.stf_components
+	def get_components_ref_property(self, context) -> list[PSTF_Component_Ref]: return context.object.stf_instance_armature.stf_components
 
 
 class STFArmatureInstanceFixRotationMode(bpy.types.Operator):
@@ -59,14 +59,14 @@ class STFArmatureInstanceFixRotationMode(bpy.types.Operator):
 		return {"FINISHED"}
 
 
-def _get_target_object_func(component_holder: bpy.types.Object, component_ref: InstanceModComponentRef) -> Any:
+def _get_target_object_func(component_holder: bpy.types.Object, component_ref: PInstanceModComponentRef) -> Any:
 	armature: bpy.types.Armature = component_holder.data  # pyright: ignore[reportAssignmentType]
 	for bone in armature.bones:
 		if(bone.stf_info.stf_id == component_ref.bone):
 			return bone
 	return None
 
-def _inject_ui(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: InstanceModComponentRef, context_object: Any, component: Any) -> bool:
+def _inject_ui(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: PInstanceModComponentRef, context_object: Any, component: Any) -> bool:
 	layout = layout.box()
 	if(not component_ref.bone):
 		layout.alert = True
@@ -76,7 +76,7 @@ def _inject_ui(layout: bpy.types.UILayout, context: bpy.types.Context, component
 		return False
 	return True
 
-def _inject_standin_ui(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: InstanceModComponentRef, context_object: Any, component: Any) -> bool:
+def _inject_standin_ui(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: PInstanceModComponentRef, context_object: Any, component: Any) -> bool:
 	layout = layout.box().row()
 	layout.prop(component_ref, "override")
 	layout.label(text="Target Bone: " + component_ref.bone)

@@ -1,9 +1,10 @@
 import bpy
 
-from ....common.utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
-from ....common.resource.component.component_utils import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
+from .....stf_blender_common.operators.base_operators import STFSetIDOperatorBase
+from .....stf_blender_common.utils.id_utils import draw_stf_id_ui
+from .....stf_blender_common.operators.base_operators_component import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
 from ....common.ui.component_ui import draw_components_ui
-from ....common.helpers import draw_multiline_text
+from .....stf_blender_common.utils.draw_multiline_text import draw_multiline_text
 
 
 class STFSetObjectIDOperator(bpy.types.Operator, STFSetIDOperatorBase):

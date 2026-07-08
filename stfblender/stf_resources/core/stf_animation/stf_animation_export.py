@@ -2,11 +2,12 @@ from io import BytesIO
 from typing import Any, Callable
 import bpy
 
+from .....stf_blender_common.base import STF_TaskSteps, STFReport, STFReportSeverity
+from .....stf_blender_common.protocols import PSTF_ExportContext
+from .....stf_blender_common.data.slot_link import ActionSlotLink
+from .....stf_blender_common.utils.buffer_utils import serialize_float
 
-from ....common import STF_ExportContext, STFReportSeverity, STFReport, STF_TaskSteps
-from ....common.utils.buffer_utils import serialize_float
-from ....common.utils.id_utils import ensure_stf_id
-from ....common.slot_link import ActionSlotLink
+from .....stf_blender_common.utils.id_utils import ensure_stf_id
 from .stf_animation_common import *
 from .stf_animation_bake import bake_constraints
 
@@ -14,7 +15,7 @@ from .stf_animation_bake import bake_constraints
 _stf_type = stf_animation_type
 
 
-def stf_animation_export(context: STF_ExportContext, application_object: Any, context_object: Any) -> tuple[dict, str] | STFReport:
+def stf_animation_export(context: PSTF_ExportContext, application_object: Any, context_object: Any) -> tuple[dict, str] | STFReport:
 	blender_animation: bpy.types.Action = application_object
 	if(blender_animation.stf_animation.exclude): return None  # pyright: ignore[reportReturnType]
 	if(blender_animation.is_action_legacy):
@@ -72,7 +73,7 @@ def stf_animation_export(context: STF_ExportContext, application_object: Any, co
 		return ret, blender_animation.stf_info.stf_id
 
 
-def __convert(context: STF_ExportContext, blender_animation: bpy.types.Action, animation_range: list[float], reference_holder: dict, bake_only: bool = False) -> tuple[list, bool]:
+def __convert(context: PSTF_ExportContext, blender_animation: bpy.types.Action, animation_range: list[float], reference_holder: dict, bake_only: bool = False) -> tuple[list, bool]:
 	# All of this is a mess
 	stf_tracks = []
 	requires_constraint_bake = False
@@ -125,7 +126,7 @@ def __convert(context: STF_ExportContext, blender_animation: bpy.types.Action, a
 	return stf_tracks, requires_constraint_bake
 
 
-def __serialize_subtracks(context: STF_ExportContext, blender_animation: bpy.types.Action, stf_target: list, fcurves: dict[int, bpy.types.FCurve], animation_range: list[float], index_conversion: list[int], conversion_func: Callable[[list[float]], list[float]], bake_only: bool, reference_holder: dict) -> dict:
+def __serialize_subtracks(context: PSTF_ExportContext, blender_animation: bpy.types.Action, stf_target: list, fcurves: dict[int, bpy.types.FCurve], animation_range: list[float], index_conversion: list[int], conversion_func: Callable[[list[float]], list[float]], bake_only: bool, reference_holder: dict) -> dict:
 	real_timepoints_set: set[float] = set()
 	# for each subtrack (i.e. the x,y,z components of a location), determine at which times have a keyframe at any of these subtracks
 	for _, fcurve in fcurves.items():

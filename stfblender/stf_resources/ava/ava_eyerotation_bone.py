@@ -2,9 +2,9 @@ import bpy
 import math
 from typing import Any
 
-from ...common import STF_ExportContext, STF_ImportContext, STF_Category
+from ...common import PSTF_ExportContext, PSTF_ImportContext, STF_Category
 from ...common.resource.component import STF_ComponentResourceBase, STF_Handler_Component, STF_Component_Ref
-from ...common.resource.component.component_utils import add_component, export_component_base, import_component_base
+from ....stf_blender_common.operators.base_operators_component import add_component, export_component_base, import_component_base
 
 
 _stf_type = "ava.eye_rotation.bone"
@@ -28,7 +28,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, context_object: Any) -> Any:
+def _stf_import(context: PSTF_ImportContext, json_resource: dict, id: str, context_object: Any) -> Any:
 	component_ref, component = add_component(context_object, _blender_property_name, id, _stf_type)
 	import_component_base(context, component, json_resource, _blender_property_name, context_object)
 
@@ -40,7 +40,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, contex
 	return component
 
 
-def _stf_export(context: STF_ExportContext, component: AVA_EyeRotation_Bone, context_object: Any) -> tuple[dict, str]:
+def _stf_export(context: PSTF_ExportContext, component: AVA_EyeRotation_Bone, context_object: Any) -> tuple[dict, str]:
 	ret = export_component_base(context, _stf_type, component, _blender_property_name, context_object)
 	ret["up"] = component.limit_up
 	ret["down"] = component.limit_down

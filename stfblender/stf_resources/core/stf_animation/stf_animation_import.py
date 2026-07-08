@@ -2,14 +2,16 @@ from typing import Any, Callable
 import bpy
 import numpy as np
 
-from ....common import STF_ImportContext, STF_TaskSteps, STFReportSeverity, STFReport, STF_Category
+from .....stf_blender_common.base import STF_TaskSteps, STFReport, STFReportSeverity, STF_Category
+from .....stf_blender_common.protocols.stf_import_context import PSTF_ImportContext
+
 from .stf_animation_common import *
 
 
 _stf_type = stf_animation_type
 
 
-def stf_animation_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any | STFReport:
+def stf_animation_import(context: PSTF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any | STFReport:
 	if(not hasattr(bpy.types.Action, "slot_link")):
 		context.report(STFReport("Slot-Link is required to import animations!", STFReportSeverity.Warn, stf_id, _stf_type))
 		return
@@ -68,7 +70,7 @@ def stf_animation_import(context: STF_ImportContext, json_resource: dict, stf_id
 	return blender_animation
 
 
-def __parse_tracks(context: STF_ImportContext, stf_id: str, tracks: list, blender_animation: bpy.types.Action, strip: bpy.types.ActionKeyframeStrip, is_baked_only: bool):
+def __parse_tracks(context: PSTF_ImportContext, stf_id: str, tracks: list, blender_animation: bpy.types.Action, strip: bpy.types.ActionKeyframeStrip, is_baked_only: bool):
 	# All of this is a mess
 	for track in tracks:
 		target_ret = context.resolve_stf_property_path(track.get("target", []))
@@ -114,7 +116,7 @@ def __parse_tracks(context: STF_ImportContext, stf_id: str, tracks: list, blende
 		__parse_subtracks(context, stf_id, track, selected_channelbag, target_ret.blender_path, index_conversion, target_ret.convert_func, is_baked_only)  # pyright: ignore[reportArgumentType]
 
 
-def __parse_subtracks(context: STF_ImportContext, stf_id: str, track: dict, selected_channelbag: bpy.types.ActionChannelbag, fcurve_target: Any, index_conversion: list[int], conversion_func: Callable[[list[float]], list[float]], is_baked_only: bool):
+def __parse_subtracks(context: PSTF_ImportContext, stf_id: str, track: dict, selected_channelbag: bpy.types.ActionChannelbag, fcurve_target: Any, index_conversion: list[int], conversion_func: Callable[[list[float]], list[float]], is_baked_only: bool):
 	subtracks = track.get("subtracks", [])
 	timepoints = track.get("timepoints", [])
 	if(len(subtracks) == 0 or len(timepoints) == 0): return

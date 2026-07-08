@@ -1,6 +1,6 @@
 import bpy
 
-from .stf_json_definition import STF_Meta_AssetInfo, STF_Meta_AssetProperties
+from ....stf_blender_common.data.stf_json_definition import STF_Meta_AssetInfo, STF_Meta_AssetProperties
 
 
 class STF_KV(bpy.types.PropertyGroup):
@@ -63,7 +63,7 @@ class STFAddMetaPropertyCollection(bpy.types.Operator):
 	@classmethod
 	def poll(cls, context: bpy.types.Context): return context.collection is not None
 
-	def execute(self, context: bpy.types.Context):
+	def execute(self, context: bpy.types.Context) -> set:
 		context.collection.stf_meta.custom_properties.add()
 		return {"FINISHED"}
 
@@ -76,7 +76,7 @@ class STFAddMetaPropertyScene(bpy.types.Operator):
 	@classmethod
 	def poll(cls, context: bpy.types.Context): return context.scene is not None and context.scene.collection is not None
 
-	def execute(self, context: bpy.types.Context):
+	def execute(self, context: bpy.types.Context) -> set:
 		context.scene.collection.stf_meta.custom_properties.add()
 		return {"FINISHED"}
 
@@ -92,7 +92,7 @@ class STFRemoveMetaPropertyCollection(bpy.types.Operator):
 	@classmethod
 	def poll(cls, context: bpy.types.Context): return context.collection is not None
 
-	def execute(self, context: bpy.types.Context):
+	def execute(self, context: bpy.types.Context) -> set:
 		context.collection.stf_meta.custom_properties.remove(self.index)
 		return {"FINISHED"}
 
@@ -108,7 +108,7 @@ class STFRemoveMetaPropertyScene(bpy.types.Operator):
 	@classmethod
 	def poll(cls, context: bpy.types.Context): return context.scene is not None and context.scene.collection is not None
 
-	def execute(self, context: bpy.types.Context):
+	def execute(self, context: bpy.types.Context) -> set:
 		context.scene.collection.stf_meta.custom_properties.remove(self.index)
 		return {"FINISHED"}
 

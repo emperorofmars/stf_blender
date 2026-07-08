@@ -4,10 +4,12 @@ from io import BytesIO
 from typing import Any
 import numpy as np
 
-from ...common import STF_ExportContext, STF_ImportContext, STF_Category
-from ...common.resource.component import STF_ComponentResourceBase, STF_Handler_Component, STF_ExportComponentHook
-from ...common.resource.component.component_utils import add_component, export_component_base, import_component_base
-from ...common.utils.buffer_utils import determine_indices_width, determine_pack_format_float
+from ....stf_blender_common.base import STF_Category
+from ....stf_blender_common.protocols import STF_ExportComponentHook, STF_Handler_Component, PSTF_ExportContext, PSTF_ImportContext
+from ....stf_blender_common.blender_data.stf_resource_component import STF_ComponentResourceBase
+from ....stf_blender_common.utils.buffer_utils import determine_indices_width, determine_pack_format_float
+
+from ....stf_blender_common.operators.base_operators_component import add_component, export_component_base, import_component_base
 
 
 _stf_type = "stfexp.mesh.creases"
@@ -18,7 +20,7 @@ class STFEXP_Mesh_Creases(STF_ComponentResourceBase):
 	pass
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: bpy.types.Mesh) -> Any:
+def _stf_import(context: PSTF_ImportContext, json_resource: dict, stf_id: str, context_object: bpy.types.Mesh) -> Any:
 	buffer_edge_creases = BytesIO(context.import_buffer(json_resource, json_resource["edge_creases"]))  # pyright: ignore[reportArgumentType]
 
 	if("vertex_creases" in json_resource):
@@ -54,7 +56,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	return component
 
 
-def _stf_export(context: STF_ExportContext, component: STFEXP_Mesh_Creases, context_object: bpy.types.Mesh) -> tuple[dict, str]:
+def _stf_export(context: PSTF_ExportContext, component: STFEXP_Mesh_Creases, context_object: bpy.types.Mesh) -> tuple[dict, str]:
 	ret = export_component_base(context, _stf_type, component, _blender_property_name, context_object)
 
 	indices_width = determine_indices_width(len(context_object.loops))
@@ -95,7 +97,7 @@ def _hook_can_handle_func(application_object: Any) -> bool:
 	if(mesh.stfexp_mesh_creases and len(mesh.stfexp_mesh_creases) > 0): return False
 	return True
 
-def _hook_apply_func(context: STF_ExportContext, application_object: bpy.types.Mesh, context_object: Any):
+def _hook_apply_func(context: PSTF_ExportContext, application_object: bpy.types.Mesh, context_object: Any):
 	add_component(application_object, _blender_property_name, str(uuid.uuid4()), _stf_type)
 
 

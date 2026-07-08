@@ -4,9 +4,9 @@ from typing import Any, Callable
 
 from ....importer.stf_import_context import STF_ImportContext
 from ....exporter.stf_export_context import STF_ExportContext
-from ....common.utils.armature_bone import ArmatureBone
-from ....common.utils.animation_conversion_utils import *
-from ....common.property_path_part import BlenderPropertyPathPart, STFPropertyPathPart
+from .....stf_blender_common.utils.armature_bone import ArmatureBone
+from .....stf_blender_common.utils.animation_conversion_utils import *
+from .....stf_blender_common.base.property_path_part import BlenderPropertyPathPart, STFPropertyPathPart
 
 
 # In Blender, bones get animated relative to their own rest pose.

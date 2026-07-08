@@ -1,10 +1,10 @@
 import bpy
 from typing import Any
 
-from ....common import STF_ExportContext, STF_ExportContext, STF_ImportContext, STF_Category
+from ....common import PSTF_ExportContext, PSTF_ExportContext, PSTF_ImportContext, STF_Category
 from ....common.resource.blender_native import STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister
-from ....common.resource.component.component_utils import get_components_from_object
-from ....common.utils.id_utils import ensure_stf_id
+from .....stf_blender_common.operators.base_operators_component import get_components_from_object
+from .....stf_blender_common.utils.id_utils import ensure_stf_id
 
 # TODO this module is at a bare minimum level, improve it
 
@@ -15,7 +15,7 @@ class STFEXP_Text(bpy.types.PropertyGroup):
 	pass
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
+def _stf_import(context: PSTF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
 	blender_text: bpy.types.TextCurve = bpy.data.curves.new(json_resource.get("name", "STF Text"), "FONT")  # pyright: ignore[reportAssignmentType]
 	blender_text.stf_info.stf_id = stf_id
 	if(json_resource.get("name")):
@@ -27,7 +27,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	return blender_text
 
 
-def _stf_export(context: STF_ExportContext, application_object: Any, context_object: Any) -> tuple[dict, str]:
+def _stf_export(context: PSTF_ExportContext, application_object: Any, context_object: Any) -> tuple[dict, str]:
 	blender_text: bpy.types.TextCurve = application_object
 	ensure_stf_id(context, blender_text)
 

@@ -2,8 +2,7 @@ import bpy
 import json
 from typing import Any
 
-from ...common.resource.component import STF_Component_Ref
-from ...common.resource.data import STF_Data_Ref
+from ....stf_blender_common.protocols import PSTF_Data_Ref, PSTF_Component_Ref
 from ...common.blender_grr import BlenderGRR, draw_blender_grr
 
 
@@ -105,7 +104,7 @@ class FallbackBuffersList(bpy.types.UIList):
 
 
 
-def draw_fallback(layout: bpy.types.UILayout, resource_ref: STF_Component_Ref | STF_Data_Ref, resource: Any):
+def draw_fallback(layout: bpy.types.UILayout, resource_ref: PSTF_Component_Ref | PSTF_Data_Ref, resource: Any):
 	col = layout.column(align=True)
 	col.label(text="Json Data:", icon="PASTEDOWN")
 	json_error = False

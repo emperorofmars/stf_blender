@@ -1,10 +1,12 @@
 import bpy
 from typing import Any
 
-from ...common import STF_ImportContext, STF_ExportContext, STF_TaskSteps, STF_Category, STFReport
-from ...common.resource.data import STF_DataResourceBase, STF_Handler_Data, STF_Data_Ref
-from ...common.resource.data.data_resource_utils import add_resource, export_data_resource_base, get_components_from_data_resource, import_data_resource_base
-from ...common.helpers import draw_list, poll_valid_animations
+from ....stf_blender_common.base import STFReport, STF_Category, STF_TaskSteps
+from ....stf_blender_common.protocols import PSTF_Data_Ref, STF_Handler_Data, PSTF_ExportContext, PSTF_ImportContext
+from ....stf_blender_common.utils.data_resource_utils import add_resource, export_data_resource_base, get_components_from_data_resource, import_data_resource_base
+from ....stf_blender_common.utils.collection_helpers import draw_list
+from ...common.resource.data import STF_DataResourceBase
+from ...common.helpers import poll_valid_animations
 
 
 _stf_type = "stfexp.animation_blendtree"
@@ -37,7 +39,7 @@ def _draw_func_animation1d(layout: bpy.types.UILayout, element: Any) -> bpy.type
 	return row
 
 
-def _draw_resource(layout: bpy.types.UILayout, context: bpy.types.Context, resource_ref: STF_Data_Ref, context_object: bpy.types.Collection, resource: STFEXP_Animation_Blendtree):
+def _draw_resource(layout: bpy.types.UILayout, context: bpy.types.Context, resource_ref: PSTF_Data_Ref, context_object: bpy.types.Collection, resource: STFEXP_Animation_Blendtree):
 	layout.prop(resource, "type")
 
 	if(resource.type == "2d"):
@@ -46,7 +48,7 @@ def _draw_resource(layout: bpy.types.UILayout, context: bpy.types.Context, resou
 		draw_list(layout, "collection", resource, "animations", _blender_property_name, _draw_func_animation1d)
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: bpy.types.Collection) -> Any | STFReport:
+def _stf_import(context: PSTF_ImportContext, json_resource: dict, stf_id: str, context_object: bpy.types.Collection) -> Any | STFReport:
 	resource_ref, resource = add_resource(context.get_root_collection(), _blender_property_name, stf_id, _stf_type)
 	import_data_resource_base(resource, json_resource)
 	resource.type = json_resource["blendtree_type"]
@@ -63,7 +65,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	return resource
 
 
-def _stf_export(context: STF_ExportContext, resource: STFEXP_Animation_Blendtree, context_object: bpy.types.Collection) -> tuple[dict, str] | STFReport:
+def _stf_export(context: PSTF_ExportContext, resource: STFEXP_Animation_Blendtree, context_object: bpy.types.Collection) -> tuple[dict, str] | STFReport:
 	ret = export_data_resource_base(context, _stf_type, resource)
 	ret["blendtree_type"] = resource.type
 
@@ -88,8 +90,8 @@ class Handler_STFEXP_Animation_Blendtree(STF_Handler_Data):
 	stf_type = _stf_type
 	stf_category = STF_Category.DATA
 	understood_application_types = [STFEXP_Animation_Blendtree]
-	import_func = _stf_import
-	export_func = _stf_export
+	import_func = _stf_import # pyright: ignore[reportAssignmentType]
+	export_func = _stf_export # pyright: ignore[reportAssignmentType]
 
 	blender_property_name = _blender_property_name
 	draw_resource_func = _draw_resource

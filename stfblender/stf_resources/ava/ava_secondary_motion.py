@@ -2,10 +2,10 @@ import bpy
 import re
 from typing import Any
 
-from ...common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STF_Category
+from ...common import PSTF_ExportContext, PSTF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STF_Category
 from ...common.resource.component import STF_ComponentResourceBase, STF_Handler_BoneComponent, STF_Component_Ref
-from ...common.resource.component.component_utils import add_component, export_component_base, import_component_base
-from ...common.utils.animation_conversion_utils import get_component_index, get_component_stf_path_from_collection
+from ....stf_blender_common.operators.base_operators_component import add_component, export_component_base, import_component_base
+from ....stf_blender_common.utils.animation_conversion_utils import get_component_index, get_component_stf_path_from_collection
 
 
 _stf_type = "ava.secondary_motion"
@@ -29,23 +29,23 @@ def _set_component_instance_standin(context: bpy.types.Context, component_ref: S
 	standin_component.intensity = component.intensity
 
 
-def _serialize_component_instance_standin_func(context: STF_ExportContext, component_ref: STF_Component_Ref, standin_component: AVA_SecondaryMotion, context_object: Any) -> dict:
+def _serialize_component_instance_standin_func(context: PSTF_ExportContext, component_ref: STF_Component_Ref, standin_component: AVA_SecondaryMotion, context_object: Any) -> dict:
 	return {"intensity": standin_component.intensity}
 
-def _parse_component_instance_standin_func(context: STF_ImportContext, json_resource: dict, component_ref: STF_Component_Ref, standin_component: AVA_SecondaryMotion, context_object: Any):
+def _parse_component_instance_standin_func(context: PSTF_ImportContext, json_resource: dict, component_ref: STF_Component_Ref, standin_component: AVA_SecondaryMotion, context_object: Any):
 	standin_component.intensity = json_resource.get("intensity", 0.3)
 
 
 """Import & export"""
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
+def _stf_import(context: PSTF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
 	component_ref, component = add_component(context_object, _blender_property_name, stf_id, _stf_type)
 	import_component_base(context, component, json_resource, _blender_property_name, context_object)
 	component.intensity = json_resource.get("intensity")
 	return component
 
 
-def _stf_export(context: STF_ExportContext, component: AVA_SecondaryMotion, context_object: Any) -> tuple[dict, str]:
+def _stf_export(context: PSTF_ExportContext, component: AVA_SecondaryMotion, context_object: Any) -> tuple[dict, str]:
 	ret = export_component_base(context, _stf_type, component, _blender_property_name, context_object)
 	ret["intensity"] = component.intensity
 	return ret, component.stf_id
@@ -53,14 +53,14 @@ def _stf_export(context: STF_ExportContext, component: AVA_SecondaryMotion, cont
 
 """Animation"""
 
-def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: Any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart | None:
+def _resolve_property_path_to_stf_func(context: PSTF_ExportContext, application_object: Any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart | None:
 	if(match := re.search(r"^" + _blender_property_name + r"\[(?P<component_index>[\d]+)\].enabled", data_path)):
 		if(component_path := get_component_stf_path_from_collection(application_object, _blender_property_name, int(match.groupdict()["component_index"]))):
 			return STFPropertyPathPart(component_path + ["enabled"])
 	return None
 
 
-def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: Any) -> BlenderPropertyPathPart | None:
+def _resolve_stf_property_to_blender_func(context: PSTF_ImportContext, stf_path: list[str], application_object: Any) -> BlenderPropertyPathPart | None:
 	blender_object = context.get_imported_resource(stf_path[0])
 	component_index = get_component_index(application_object, _blender_property_name, blender_object.stf_id)
 	if(component_index is not None):

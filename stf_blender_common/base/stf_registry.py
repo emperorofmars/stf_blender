@@ -1,11 +1,8 @@
 import bpy
-
 from typing import Any
 
-from ...common.stf_category import STF_Category
-from ..resource.stf_handler_base import STF_HandlerBase
-from ..resource.component.stf_handler_component import STF_Handler_Component, STF_ExportComponentHook
-from ..resource.data.stf_handler_data import STF_Handler_Data
+from ..protocols import STF_HandlerBase, STF_ExportComponentHook, STF_Handler_Data, STF_Handler_Component
+
 
 """
 Util to retrieve all existing STF-handlers

@@ -1,8 +1,10 @@
 import bpy
 from typing import Any, Callable, Protocol
 
-from ..stf_handler_base import STF_HandlerBase
-from ... import STF_Category, STF_ImportContext, STF_ExportContext
+from . import PSTF_ImportContext
+from . import PSTF_ExportContext
+from ..base import STF_Category
+from .stf_handler_base import STF_HandlerBase
 
 """
 STF Components aren't natively supported by Blender, they are stored by the Blender-ID-thingy they belong to.
@@ -14,22 +16,10 @@ class PSTF_Component_Ref(Protocol): # Bringing polymorphism to Blender
 	stf_id: str
 	blender_property_name: str
 
-class STF_Component_Ref(bpy.types.PropertyGroup): # Bringing polymorphism to Blender
-	"""Defines the ID, by which the correct `STF_ComponentResourceBase` in the `blender_property_name` property of the appropriate Blender construct can be found"""
-	stf_type: bpy.props.StringProperty(name="Type", options=set()) # type: ignore
-	stf_id: bpy.props.StringProperty(name="ID", options=set()) # type: ignore
-	blender_property_name: bpy.props.StringProperty(name="Blender Property Name", options=set()) # type: ignore
-
 class PInstanceModComponentRef(PSTF_Component_Ref, Protocol):
 	"""Used by armature instances to add or modify a component on an instance of a bone"""
 	bone: str
 	override: bool
-
-class InstanceModComponentRef(STF_Component_Ref):
-	"""Used by armature instances to add or modify a component on an instance of a bone"""
-	bone: bpy.props.StringProperty(name="Bone", options=set()) # type: ignore
-	override: bpy.props.BoolProperty(name="Enable Instance Override", default=False, options=set()) # type: ignore
-
 
 class PSTF_ComponentResourceBase(Protocol):
 	"""Base class for stf component property-groups"""
@@ -37,13 +27,6 @@ class PSTF_ComponentResourceBase(Protocol):
 	stf_name: str
 	exclusion_group: str
 	enabled: bool
-
-class STF_ComponentResourceBase(bpy.types.PropertyGroup):
-	"""Base class for stf component property-groups"""
-	stf_id: bpy.props.StringProperty(name="ID", description="Universally unique ID", options=set()) # type: ignore
-	stf_name: bpy.props.StringProperty(name="STF Name", description="Optional component name", options=set()) # type: ignore
-	exclusion_group: bpy.props.StringProperty(name="Exclusion Group", description="Game engines will import components of only one 'type' in this group.", options=set()) # type: ignore
-	enabled: bpy.props.BoolProperty(name="Enabled", default=True, options={"ANIMATABLE"}) # type: ignore
 
 
 class STF_Handler_Component(STF_HandlerBase, Protocol):
@@ -57,7 +40,7 @@ class STF_Handler_Component(STF_HandlerBase, Protocol):
 	filter: list
 	"""Filter of types this component can be placed on."""
 
-	draw_component_func: Callable[[bpy.types.UILayout, bpy.types.Context, STF_Component_Ref, Any, Any], None]
+	draw_component_func: Callable[[bpy.types.UILayout, bpy.types.Context, PSTF_Component_Ref, Any, Any], None]
 	"""
 	`def draw_component_func(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: STF_ComponentResourceBase) -> None`
 
@@ -70,7 +53,7 @@ class STF_Handler_Component(STF_HandlerBase, Protocol):
 	:param STF_ComponentResourceBase component: STF Component for which to draw GUI for
 	"""
 
-	process_func: Callable[[STF_ComponentResourceBase, Any, Any], None]
+	process_func: Callable[[PSTF_ComponentResourceBase, Any, Any], None]
 	"""
 	`def process_func(component: STF_ComponentResourceBase, context_object: Any, apply_object: Any) -> None`
 
@@ -94,7 +77,7 @@ class STF_Handler_Component(STF_HandlerBase, Protocol):
 class STF_Handler_BoneComponent(STF_Handler_Component, Protocol):
 	"""Use for components that are allowed on bones and are animatable or can have different values per instance of the armature"""
 
-	draw_component_instance_func: Callable[[bpy.types.UILayout, bpy.types.Context, STF_Component_Ref, Any, STF_ComponentResourceBase], None]
+	draw_component_instance_func: Callable[[bpy.types.UILayout, bpy.types.Context, PSTF_Component_Ref, Any, PSTF_ComponentResourceBase], None]
 	"""
 	`def draw_component_instance_func(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: STF_ComponentResourceBase) -> None`
 
@@ -107,7 +90,7 @@ class STF_Handler_BoneComponent(STF_Handler_Component, Protocol):
 	:param STF_ComponentResourceBase component: STF component for which to draw GUI for
 	"""
 
-	set_component_instance_standin_func: Callable[[bpy.types.Context, STF_Component_Ref, Any, Any, Any], None]
+	set_component_instance_standin_func: Callable[[bpy.types.Context, PSTF_Component_Ref, Any, Any, Any], None]
 	"""
 	`def set_component_instance_standin_func(context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: STF_ComponentResourceBase, standin_component: STF_ComponentResourceBase) -> None`
 
@@ -120,12 +103,12 @@ class STF_Handler_BoneComponent(STF_Handler_Component, Protocol):
 	:param STF_ComponentResourceBase standin_component: Target STF component instance
 	"""
 
-	serialize_component_instance_standin_func: Callable[[STF_ExportContext, STF_Component_Ref, STF_ComponentResourceBase, Any], dict]
+	serialize_component_instance_standin_func: Callable[[PSTF_ExportContext, PSTF_Component_Ref, PSTF_ComponentResourceBase, Any], dict]
 	"""
 	`def (context: bpy.types.Context, component_ref: STF_Component_Ref, standin_component: STF_ComponentResourceBase, context_object: Any) -> dict`
 	"""
 
-	parse_component_instance_standin_func: Callable[[STF_ImportContext, dict, STF_Component_Ref, STF_ComponentResourceBase, Any], None]
+	parse_component_instance_standin_func: Callable[[PSTF_ImportContext, dict, PSTF_Component_Ref, PSTF_ComponentResourceBase, Any], None]
 	"""
 	`def parse_component_instance_standin_func(context: bpy.types.Context, json_resource: dict, component_ref: STF_Component_Ref, standin_component: STF_ComponentResourceBase, context_object: Any) -> None`
 	"""
@@ -155,7 +138,27 @@ class STF_ExportComponentHook(Protocol):
 	`def hook_can_handle_application_object_func(blender_object: Any) -> bool`
 	"""
 
-	hook_apply_func: Callable[[STF_ExportContext, Any, Any], None]
+	hook_apply_func: Callable[[PSTF_ExportContext, Any, Any], None]
 	"""
 	`def hook_apply_func(context: STF_ExportContext, blender_object: Any, context_object: Any) -> None`
 	"""
+
+
+class STF_Component_Ref(bpy.types.PropertyGroup): # Bringing polymorphism to Blender
+	"""Defines the ID, by which the correct `STF_ComponentResourceBase` in the `blender_property_name` property of the appropriate Blender construct can be found"""
+	stf_type: bpy.props.StringProperty(name="Type", options=set()) # type: ignore
+	stf_id: bpy.props.StringProperty(name="ID", options=set()) # type: ignore
+	blender_property_name: bpy.props.StringProperty(name="Blender Property Name", options=set()) # type: ignore
+
+class InstanceModComponentRef(STF_Component_Ref):
+	"""Used by armature instances to add or modify a component on an instance of a bone"""
+	bone: bpy.props.StringProperty(name="Bone", options=set()) # type: ignore
+	override: bpy.props.BoolProperty(name="Enable Instance Override", default=False, options=set()) # type: ignore
+
+
+class STF_ComponentResourceBase(bpy.types.PropertyGroup):
+	"""Base class for stf component property-groups"""
+	stf_id: bpy.props.StringProperty(name="ID", description="Universally unique ID", options=set()) # type: ignore
+	stf_name: bpy.props.StringProperty(name="STF Name", description="Optional component name", options=set()) # type: ignore
+	exclusion_group: bpy.props.StringProperty(name="Exclusion Group", description="Game engines will import components of only one 'type' in this group.", options=set()) # type: ignore
+	enabled: bpy.props.BoolProperty(name="Enabled", default=True, options={"ANIMATABLE"}) # type: ignore

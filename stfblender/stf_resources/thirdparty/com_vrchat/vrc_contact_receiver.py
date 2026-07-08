@@ -2,9 +2,9 @@ import bpy
 from typing import Any
 
 from .vrc_contact_base import VRC_ContactBase, vrc_contact_create_resolve_property_path_to_stf_func, vrc_contact_create_resolve_stf_property_to_blender_func, vrc_contact_draw_base, vrc_contact_export_base, vrc_contact_import_base
-from ....common import STF_ExportContext, STF_ImportContext, STF_Category
+from ....common import PSTF_ExportContext, PSTF_ImportContext, STF_Category
 from ....common.resource.component import STF_Handler_BoneComponent, STF_Component_Ref
-from ....common.resource.component.component_utils import ComponentLoadJsonOperatorBase, add_component, export_component_base, import_component_base
+from .....stf_blender_common.operators.base_operators_component import ComponentLoadJsonOperatorBase, add_component, export_component_base, import_component_base
 
 
 _stf_type = "com.vrchat.contact_receiver"
@@ -46,7 +46,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 	load_json_button.component_id = component.stf_id
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, context_object: Any) -> Any:
+def _stf_import(context: PSTF_ImportContext, json_resource: dict, id: str, context_object: Any) -> Any:
 	component_ref, component = add_component(context_object, _blender_property_name, id, _stf_type)
 	import_component_base(context, component, json_resource, _blender_property_name, context_object)
 	vrc_contact_import_base(component, json_resource)  # pyright: ignore[reportArgumentType]
@@ -55,7 +55,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, contex
 	return component
 
 
-def _stf_export(context: STF_ExportContext, component: VRC_ContactReceiver, context_object: Any) -> tuple[dict, str]:
+def _stf_export(context: PSTF_ExportContext, component: VRC_ContactReceiver, context_object: Any) -> tuple[dict, str]:
 	ret = export_component_base(context, _stf_type, component, _blender_property_name, context_object)
 	vrc_contact_export_base(component, context_object, ret)
 	ret["receiver_type"] = component.receiver_type

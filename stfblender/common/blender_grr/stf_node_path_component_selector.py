@@ -4,7 +4,7 @@ from typing import Any
 
 from .utils import draw_component_info
 from .stf_node_path_selector import *
-from .. import STF_ImportContext, STF_ExportContext
+from .. import PSTF_ImportContext, PSTF_ExportContext
 from ..resource.component import STF_Component_Ref
 from ..helpers import get_resource_id, register_exported_resource
 
@@ -38,14 +38,14 @@ def validate_node_path_component_selector(nps: NodePathComponentSelector) -> boo
 	return nps and resolve_node_path_component_selector(nps) != None
 
 
-def node_path_component_selector_to_stf(context: STF_ExportContext, nps: NodePathComponentSelector, json_resource: dict[str, Any]) -> Sequence | None:
+def node_path_component_selector_to_stf(context: PSTF_ExportContext, nps: NodePathComponentSelector, json_resource: dict[str, Any]) -> Sequence | None:
 	if(nps.target_component):
 		if(ret := node_path_selector_to_stf(context, nps.target, json_resource)):
 			return ret + ["components", register_exported_resource(json_resource, nps.target_component)] # pyright: ignore[reportOperatorIssue]
 	return None
 
 
-def node_path_component_selector_from_stf(context: STF_ImportContext, json_resource: dict[str, Any], node_path: Sequence, nps: NodePathComponentSelector):
+def node_path_component_selector_from_stf(context: PSTF_ImportContext, json_resource: dict[str, Any], node_path: Sequence, nps: NodePathComponentSelector):
 	if(node_path and "components" in node_path):
 		idx = node_path.index("components")
 		if(len(node_path) > idx + 1):

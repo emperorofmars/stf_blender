@@ -8,8 +8,8 @@ from collections.abc import Sequence
 from .import_settings import STF_ImportSettings
 from .stf_import_state import STF_ImportState
 from .stf_import_context import STF_ImportContext
-from ..common.base.stf_registry import get_import_handlers, get_import_handlers_fallback
-from ..common.stf_report import STFException, STFReport, STFReportSeverity
+from ...stf_blender_common.base.stf_registry import get_import_handlers, get_import_handlers_fallback
+from ...stf_blender_common.base.stf_report import STFException, STFReport, STFReportSeverity
 from ..common.base.stf_file import STF_File
 from ..common.helpers import OpenWebpage, draw_slot_link_warning, get_stf_version
 

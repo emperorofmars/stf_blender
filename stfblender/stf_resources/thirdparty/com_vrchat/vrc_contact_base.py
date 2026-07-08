@@ -3,11 +3,11 @@ import mathutils
 import re
 from typing import Any, Callable
 
-from ....common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart
+from .....stf_blender_common.utils.collection_helpers import create_add_button, create_remove_button
+from ....common import PSTF_ExportContext, PSTF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart
 from ....common.resource.component import STF_ComponentResourceBase, STF_Component_Ref
-from ....common.helpers import create_add_button, create_remove_button
-from ....common.utils.trs_utils import blender_rotation_to_stf, blender_translation_to_stf, stf_rotation_to_blender, stf_translation_to_blender
-from ....common.utils.animation_conversion_utils import get_component_index, get_component_stf_path_from_collection
+from .....stf_blender_common.utils.trs_utils import blender_rotation_to_stf, blender_translation_to_stf, stf_rotation_to_blender, stf_translation_to_blender
+from .....stf_blender_common.utils.animation_conversion_utils import get_component_index, get_component_stf_path_from_collection
 
 
 def search_collision_tags(self, context: bpy.types.Context, edit_text: str):
@@ -150,7 +150,7 @@ def vrc_contact_export_base(component: VRC_ContactBase, context_object: Any, jso
 
 
 def vrc_contact_create_resolve_property_path_to_stf_func(blender_property_name: str) -> Callable:
-	def handle(context: STF_ExportContext, application_object: Any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart | None:
+	def handle(context: PSTF_ExportContext, application_object: Any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart | None:
 		if(match := re.search(r"^" + blender_property_name + r"\[(?P<component_index>[\d]+)\].enabled", data_path)):
 			if(component_path := get_component_stf_path_from_collection(application_object, blender_property_name, int(match.groupdict()["component_index"]))):
 				return STFPropertyPathPart(component_path + ["enabled"])
@@ -159,7 +159,7 @@ def vrc_contact_create_resolve_property_path_to_stf_func(blender_property_name: 
 
 
 def vrc_contact_create_resolve_stf_property_to_blender_func(blender_property_name: str) -> Callable:
-	def handle(context: STF_ImportContext, stf_path: list[str], application_object: Any) -> BlenderPropertyPathPart | None:
+	def handle(context: PSTF_ImportContext, stf_path: list[str], application_object: Any) -> BlenderPropertyPathPart | None:
 		blender_object = context.get_imported_resource(stf_path[0])
 		component_index = get_component_index(application_object, blender_property_name, blender_object.stf_id)
 		if(component_index is not None):

@@ -4,9 +4,10 @@ from io import BytesIO
 from typing import Any
 import numpy as np
 
-from ....common import STF_ExportContext, STFReport, STF_Category
-from ....common.utils.id_utils import ensure_stf_id
-from ....common.utils.buffer_utils import determine_indices_width, determine_pack_format_float, determine_pack_format_uint, serialize_float, serialize_uint
+from .....stf_blender_common.protocols import PSTF_ExportContext
+from .....stf_blender_common.base import STF_Category, STFReport
+from .....stf_blender_common.utils.id_utils import ensure_stf_id
+from .....stf_blender_common.utils.buffer_utils import determine_indices_width, determine_pack_format_float, determine_pack_format_uint, serialize_float, serialize_uint
 
 
 _stf_type = "stf.mesh"
@@ -18,7 +19,7 @@ float_threshold_blendshape = 0.0001
 
 # Mesh import and export are the lowest hanging fruits for performance improvements.
 
-def export_stf_mesh(context: STF_ExportContext, application_object: Any, parent_application_object: Any) -> tuple[dict, str] | STFReport:
+def export_stf_mesh(context: PSTF_ExportContext, application_object: Any, parent_application_object: Any) -> tuple[dict, str] | STFReport:
 	#import time
 	#time_start = time.time()
 
@@ -155,7 +156,7 @@ def export_stf_mesh(context: STF_ExportContext, application_object: Any, parent_
 			face_lens[len(face_lens) - 1] += 1
 		else:
 			face_lens.append(1)
-		for split_index in tris.loops:
+		for split_index in tris.loops: # pyright: ignore[reportGeneralTypeIssues]
 			buffer_tris.write(serialize_uint(split_index, indices_width))
 		last_face_index = tris.polygon_index
 
@@ -181,7 +182,7 @@ def export_stf_mesh(context: STF_ExportContext, application_object: Any, parent_
 	buffer_lines = BytesIO()
 	for edge in blender_mesh.edges:
 		if(edge.is_loose):
-			for edge_vertex_index in edge.vertices:
+			for edge_vertex_index in edge.vertices: # type: ignore
 				buffer_lines.write(serialize_uint(edge_vertex_index, indices_width))
 	stf_mesh["lines"] = context.serialize_buffer(stf_mesh, buffer_lines.getvalue())
 
@@ -189,7 +190,7 @@ def export_stf_mesh(context: STF_ExportContext, application_object: Any, parent_
 	buffer_sharp_edges = BytesIO()
 	for edge in blender_mesh.edges:
 		if(edge.use_edge_sharp and not edge.is_loose):
-			for edge_vertex_index in edge.vertices:
+			for edge_vertex_index in edge.vertices: # pyright: ignore[reportGeneralTypeIssues]
 				buffer_sharp_edges.write(serialize_uint(edge_vertex_index, indices_width))
 	stf_mesh["sharp_edges"] = context.serialize_buffer(stf_mesh, buffer_sharp_edges.getvalue())
 

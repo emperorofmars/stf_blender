@@ -1,12 +1,10 @@
 import bpy
-from typing import Callable
 
-from ..resource.component import STF_ComponentResourceBase
-from ..resource.data import STF_DataResourceBase
+from ....stf_blender_common.operators import OP_Edit_Component_Collection
 
 
 class Edit_Component_Collection(bpy.types.Operator):
-	bl_idname = "stf.edit_component_collection"
+	bl_idname = OP_Edit_Component_Collection
 	bl_label = "Edit"
 	bl_options = {"REGISTER", "UNDO", "INTERNAL"}
 
@@ -39,41 +37,3 @@ class Edit_Component_Collection(bpy.types.Operator):
 
 		self.report({"ERROR"}, "Couldn't edit component collection")
 		return {"CANCELLED"}
-
-
-def create_add_button(layout: bpy.types.UILayout, blender_id_type: str | bool, blender_property_name: str, component_id: str, component_property: str, text: str = "Add", icon: str | None = "ADD") -> bpy.types.OperatorProperties:
-	ret = layout.operator(Edit_Component_Collection.bl_idname, text=text, icon=icon) # pyright: ignore[reportArgumentType]
-	if(type(blender_id_type) is str):
-		ret.blender_id_type = blender_id_type
-		ret.scene_collection = False
-	else:
-		ret.blender_id_type = ""
-		ret.scene_collection = True
-	ret.blender_property_name = blender_property_name
-	ret.component_id = component_id
-	ret.component_property = component_property
-	ret.op = "add"
-	return ret
-
-def create_remove_button(layout: bpy.types.UILayout, blender_id_type: str | bool, blender_property_name: str, component_id: str, component_property: str, index: int, text: str = "", icon: str | None = "X") -> bpy.types.OperatorProperties:
-	ret = layout.operator(Edit_Component_Collection.bl_idname, text=text, icon=icon) # pyright: ignore[reportArgumentType]
-	if(type(blender_id_type) is str):
-		ret.blender_id_type = blender_id_type
-		ret.scene_collection = False
-	else:
-		ret.blender_id_type = ""
-		ret.scene_collection = True
-	ret.blender_property_name = blender_property_name
-	ret.component_id = component_id
-	ret.component_property = component_property
-	ret.index = index
-	ret.op = "remove"
-	return ret
-
-
-def draw_list(layout: bpy.types.UILayout, blender_id_type: str | bool, resource: STF_ComponentResourceBase | STF_DataResourceBase, attr: str, blender_property_name: str, draw_func: Callable):
-	col = layout.column(align=True)
-	for index_element, element in enumerate(getattr(resource, attr)):
-		layout_remove_btn = draw_func(col, element)
-		create_remove_button(layout_remove_btn, blender_id_type, blender_property_name, resource.stf_id, attr, index_element)
-	create_add_button(layout, blender_id_type, blender_property_name, resource.stf_id, attr)

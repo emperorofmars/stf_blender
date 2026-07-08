@@ -1,11 +1,9 @@
 import bpy
 
-from ....common import STF_ExportContext, STF_ImportContext
-from ....common.resource.component import InstanceModComponentRef, STF_Handler_Component, STF_Component_Ref
-from ....common.utils.animation_conversion_utils import *
-
-from ....common.base.stf_registry import find_component_handler, get_component_handlers
-from ....common.resource.component.component_utils import add_component
+from .....stf_blender_common.protocols import PSTF_ExportContext, PSTF_ImportContext, STF_Handler_Component, PInstanceModComponentRef, PSTF_Component_Ref, PSTF_ComponentResourceBase
+from .....stf_blender_common.utils.animation_conversion_utils import *
+from .....stf_blender_common.base.stf_registry import find_component_handler, get_component_handlers
+from .....stf_blender_common.operators.base_operators_component import add_component
 
 
 def update_armature_instance_component_standins(context: bpy.types.Context, blender_object: bpy.types.Object, stf_modules: list[STF_Handler_Component] | None = None):
@@ -53,7 +51,7 @@ def update_armature_instance_component_standins(context: bpy.types.Context, blen
 		standin_ref_index += 1
 
 
-def serialize_standin(context: STF_ExportContext, blender_object: bpy.types.Object, component_standin_ref: InstanceModComponentRef) -> dict | None:
+def serialize_standin(context: PSTF_ExportContext, blender_object: bpy.types.Object, component_standin_ref: PInstanceModComponentRef) -> dict | None:
 	for standin_component in getattr(blender_object, component_standin_ref.blender_property_name):
 		if(standin_component.stf_id == component_standin_ref.stf_id):
 			break
@@ -67,7 +65,7 @@ def serialize_standin(context: STF_ExportContext, blender_object: bpy.types.Obje
 	return None
 
 
-def parse_standin(context: STF_ImportContext, blender_object: bpy.types.Object, component_id: str, json_resource: dict):
+def parse_standin(context: PSTF_ImportContext, blender_object: bpy.types.Object, component_id: str, json_resource: dict):
 	for standin_ref in blender_object.stf_instance_armature_component_standins.stf_components:
 		if(standin_ref.stf_id == component_id):
 			break
@@ -107,7 +105,7 @@ def process_components(armature_instance: bpy.types.Object, stf_resources: list[
 
 	for bone in armature_instance.data.bones:
 		for component_ref in bone.stf_info.stf_components:
-			component_ref: STF_Component_Ref = component_ref  # pyright: ignore[reportRedeclaration]
+			component_ref: PSTF_Component_Ref = component_ref  # pyright: ignore[reportRedeclaration]
 			for stf_module in stf_resources:
 				if(stf_module.stf_type == component_ref.stf_type and hasattr(stf_module, "process_func") and getattr(stf_module, "process_func")):
 					for component in getattr(bone, component_ref.blender_property_name):
@@ -125,7 +123,7 @@ def process_components(armature_instance: bpy.types.Object, stf_resources: list[
 	for component_ref in armature_instance.stf_instance_armature.stf_components:
 		bone: bpy.types.Bone = armature_instance.data.bones[component_ref.bone]
 		for component_ref in bone.stf_info.stf_components:
-			component_ref: STF_Component_Ref = component_ref
+			component_ref: PSTF_Component_Ref = component_ref
 			for stf_module in stf_resources:
 				if(stf_module.stf_type == component_ref.stf_type and hasattr(stf_module, "process_func") and getattr(stf_module, "process_func")):
 					for component in getattr(bone, component_ref.blender_property_name):
@@ -135,7 +133,7 @@ def process_components(armature_instance: bpy.types.Object, stf_resources: list[
 
 	for component_id in components_to_process:
 		component, bone, stf_module = components_to_process[component_id]
-		component: STF_ComponentResourceBase = component
+		component: PSTF_ComponentResourceBase = component
 		stf_module.process_func(component, bone, armature_instance)
 
 

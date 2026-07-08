@@ -1,7 +1,7 @@
 import bpy
 from typing import Any, Protocol
 
-from ..component.stf_handler_component import PSTF_Component_Ref, STF_Component_Ref
+from . import PSTF_Component_Ref
 
 
 class PSTF_Info(Protocol):

@@ -1,8 +1,9 @@
 import bpy
 
-from ....common import STF_Category
-from ....common.resource.blender_native import STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister
-from ....common.resource.component.component_utils import get_components_from_object
+from .....stf_blender_common.protocols import STF_Handler_BlenderNative
+from .....stf_blender_common.protocols.stf_info import boilerplate_register, boilerplate_unregister
+from .....stf_blender_common.base import STF_Category
+from .....stf_blender_common.utils.component_resource_utils import get_components_from_object
 from .mesh_import import import_stf_mesh
 from .mesh_export import export_stf_mesh
 

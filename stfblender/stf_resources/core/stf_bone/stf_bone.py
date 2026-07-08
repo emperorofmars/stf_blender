@@ -4,13 +4,13 @@ import math
 from typing import Any
 from collections.abc import Sequence
 
-from ....common import STF_ImportContext, STF_ExportContext, STFReportSeverity, STFReport, STF_Category
+from ....common import PSTF_ImportContext, PSTF_ExportContext, STFReportSeverity, STFReport, STF_Category
 from ....common.resource.blender_native import STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister
-from ....common.utils import trs_utils
-from ....common.utils.armature_bone import ArmatureBone
-from ....common.utils.animation_conversion_utils import *
-from ....common.resource.component.component_utils import get_components_from_object
-from ....common.utils.id_utils import ensure_stf_id
+from .....stf_blender_common.utils import trs_utils
+from .....stf_blender_common.utils.armature_bone import ArmatureBone
+from .....stf_blender_common.utils.animation_conversion_utils import *
+from .....stf_blender_common.operators.base_operators_component import get_components_from_object
+from .....stf_blender_common.utils.id_utils import ensure_stf_id
 from .stf_bone_property_conversion import resolve_property_path_to_stf_func, resolve_stf_property_to_blender_func
 
 
@@ -28,7 +28,7 @@ class STF_Bone(bpy.types.PropertyGroup):
 	non_deform_use: bpy.props.StringProperty(name="Use non-deform Bone as", options=set(), search=search_uses) # type: ignore
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any | STFReport:
+def _stf_import(context: PSTF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any | STFReport:
 	blender_armature: bpy.types.Armature = context_object.data
 	blender_object: bpy.types.Object = context_object
 
@@ -80,7 +80,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	return blender_bone
 
 
-def _stf_export(context: STF_ExportContext, application_object: Any, context_object: Any) -> tuple[dict, str] | STFReport:
+def _stf_export(context: PSTF_ExportContext, application_object: Any, context_object: Any) -> tuple[dict, str] | STFReport:
 	blender_bone_def: ArmatureBone = application_object
 	ensure_stf_id(context, blender_bone_def.get_bone(), blender_bone_def.get_bone().stf_info)
 

@@ -1,10 +1,10 @@
 import bpy
 from typing import Any
 
-from ....common import STF_ExportContext, STF_ImportContext, STFReport, STFReportSeverity, STF_Category
+from ....common import PSTF_ExportContext, PSTF_ImportContext, STFReport, STFReportSeverity, STF_Category
 from ....common.resource.blender_native import STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister
-from ....common.resource.component.component_utils import get_components_from_object
-from ....common.utils.id_utils import ensure_stf_id
+from .....stf_blender_common.operators.base_operators_component import get_components_from_object
+from .....stf_blender_common.utils.id_utils import ensure_stf_id
 
 
 _stf_type = "stf.image"
@@ -14,7 +14,7 @@ class STF_Image(bpy.types.PropertyGroup):
 	is_normal_map: bpy.props.BoolProperty(name="Use as Normal-Map", default=False, options=set()) # type: ignore
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any | STFReport:
+def _stf_import(context: PSTF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any | STFReport:
 	blender_image = bpy.data.images.new(json_resource.get("name", "STF Image"), 8, 8)
 	blender_image.stf_info.stf_id = stf_id
 	if(json_resource.get("name")):
@@ -44,7 +44,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 		return STFReport("Could not import image", STFReportSeverity.Error, stf_id, _stf_type)
 
 
-def _stf_export(context: STF_ExportContext, application_object: Any, context_object: Any) -> tuple[dict, str] | STFReport:
+def _stf_export(context: PSTF_ExportContext, application_object: Any, context_object: Any) -> tuple[dict, str] | STFReport:
 	blender_image: bpy.types.Image = application_object
 	ensure_stf_id(context, blender_image)
 

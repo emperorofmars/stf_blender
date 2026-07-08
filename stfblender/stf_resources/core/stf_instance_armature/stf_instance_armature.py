@@ -3,15 +3,15 @@ import mathutils
 import math
 from typing import Any
 
+from .....stf_blender_common.protocols import PSTF_ExportContext, PSTF_ImportContext, STF_Handler_BlenderNative
+from .....stf_blender_common.base import STF_TaskSteps, STF_Category, STFReport, STFReportSeverity, BlenderPropertyPathPart, STFPropertyPathPart
+from .....stf_blender_common.utils.id_utils import ensure_stf_id
+from .....stf_blender_common.utils.animation_conversion_utils import *
+from .....stf_blender_common.utils.armature_bone import ArmatureBone
+from .....stf_blender_common.utils.trs_utils import close_enough
+from .....stf_blender_common.utils.id_utils import ensure_stf_id
+from .....stf_blender_common.utils.reference_helper import get_resource_id
 from .stf_instance_armature_utils import parse_standin, process_components, serialize_standin, update_armature_instance_component_standins
-from ....common import STF_ExportContext, STF_ImportContext, STF_TaskSteps, STFReportSeverity, STFReport, BlenderPropertyPathPart, STFPropertyPathPart, STF_Category
-from ....common.resource.blender_native import STF_Handler_BlenderNative
-from ....common.resource.component import InstanceModComponentRef
-from ....common.utils.animation_conversion_utils import *
-from ....common.utils.armature_bone import ArmatureBone
-from ....common.utils.trs_utils import close_enough
-from ....common.utils.id_utils import ensure_stf_id
-from ....common.helpers import get_resource_id
 
 
 _stf_type = "stf.instance.armature"
@@ -21,7 +21,7 @@ class STF_Instance_Armature(bpy.types.PropertyGroup):
 	stf_components: bpy.props.CollectionProperty(type=InstanceModComponentRef, options=set()) # type: ignore
 	stf_active_component_index: bpy.props.IntProperty(options=set()) # type: ignore
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any | STFReport:
+def _stf_import(context: PSTF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any | STFReport:
 	blender_armature = context.import_resource(json_resource, json_resource["armature"], stf_category=STF_Category.DATA)
 	if(not blender_armature or type(blender_armature) is not bpy.types.Armature):
 		context.report(STFReport("Failed to import armature: " + str(json_resource.get("instance", {}).get("armature")), STFReportSeverity.Error, stf_id, _stf_type, context_object))
@@ -49,9 +49,9 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 					bone_id = blender_armature.bones[pose.name].stf_info.stf_id
 
 					blender_matrix = mathutils.Matrix.LocRotScale(
-						mathutils.Vector((json_resource["pose"][bone_id][0][0], json_resource["pose"][bone_id][0][1], json_resource["pose"][bone_id][0][2])),
+						mathutils.Vector((json_resource["pose"][bone_id][0][0], json_resource["pose"][bone_id][0][1], json_resource["pose"][bone_id][0][2])), # pyright: ignore[reportArgumentType]
 						mathutils.Quaternion((json_resource["pose"][bone_id][1][3], json_resource["pose"][bone_id][1][0], json_resource["pose"][bone_id][1][1], json_resource["pose"][bone_id][1][2])),
-						mathutils.Vector((json_resource["pose"][bone_id][2][0], json_resource["pose"][bone_id][2][1], json_resource["pose"][bone_id][2][2]))
+						mathutils.Vector((json_resource["pose"][bone_id][2][0], json_resource["pose"][bone_id][2][1], json_resource["pose"][bone_id][2][2])) # pyright: ignore[reportArgumentType]
 					)
 					if(pose.parent):
 						pose.matrix = pose.parent.matrix @ blender_matrix
@@ -100,7 +100,7 @@ def _can_handle_application_object_func(application_object: Any) -> int:
 	else:
 		return -1
 
-def _stf_export(context: STF_ExportContext, application_object: Any, context_object: Any) -> tuple[dict, str] | STFReport:
+def _stf_export(context: PSTF_ExportContext, application_object: Any, context_object: Any) -> tuple[dict, str] | STFReport:
 	blender_object: bpy.types.Object = application_object[0]
 	blender_armature: bpy.types.Armature = application_object[1]
 
@@ -163,7 +163,7 @@ def _stf_export(context: STF_ExportContext, application_object: Any, context_obj
 	return ret, blender_object.stf_instance.stf_id
 
 
-def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: Any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart | None:
+def _resolve_property_path_to_stf_func(context: PSTF_ExportContext, application_object: Any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart | None:
 	import re
 	if(match := re.search(r"^pose.bones\[\"(?P<bone_name>[\w. -:,]+)\"\]", data_path)):
 		if(type(application_object.data) is not bpy.types.Armature or match.groupdict()["bone_name"] not in application_object.data.bones):
@@ -171,7 +171,7 @@ def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_o
 		return STFPropertyPathPart([application_object.stf_info.stf_id, "instance"]) + context.resolve_application_property_path(ArmatureBone(application_object.data, match.groupdict()["bone_name"]), application_object_property_index, data_path[match.span()[1] :])
 	return None
 
-def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: Any) -> BlenderPropertyPathPart | None:
+def _resolve_stf_property_to_blender_func(context: PSTF_ImportContext, stf_path: list[str], application_object: Any) -> BlenderPropertyPathPart | None:
 	return context.resolve_stf_property_path(stf_path[1:], application_object)
 
 

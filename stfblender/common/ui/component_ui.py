@@ -1,16 +1,19 @@
 import bpy
 from typing import Any, Callable
 
-from ..resource.component.component_utils import STF_ManageExclusionGroups, STF_RegisterExclusionGroup
-from ..resource.component.stf_handler_component import InstanceModComponentRef, STF_ComponentResourceBase, STF_Component_Ref
-from ..helpers import CopyToClipboard, draw_multiline_text
+from ....stf_blender_common.protocols import PInstanceModComponentRef, PSTF_Component_Ref, PSTF_ComponentResourceBase
+from ....stf_blender_common.utils.draw_multiline_text import draw_multiline_text
+from ....stf_blender_common.operators import OP_CopyToClipboard
+from ....stf_blender_common.base.stf_registry import find_component_handler, get_all_component_handlers, get_component_handlers, get_data_component_handlers
+
+
 from ..blender_grr import *
-from ..base.stf_registry import find_component_handler, get_all_component_handlers, get_component_handlers, get_data_component_handlers
 from ...stf_resources.fallback.json_fallback_component import Handler_JsonFallbackComponent
+from ..resource.component_exclusion_group import STF_ManageExclusionGroups, STF_RegisterExclusionGroup
 
 
 # Because Blender is weird with bones :/
-def _get_component_holder(component_ref: STF_Component_Ref) -> bpy.types.bpy_struct | None:
+def _get_component_holder(component_ref: PSTF_Component_Ref) -> bpy.types.bpy_struct | None:
 	anc = component_ref.rna_ancestors()
 	if(anc is not None and len(anc) > 1 and type(anc[len(anc) - 2]) is bpy.types.Bone):
 		return anc[len(anc) - 2]
@@ -37,7 +40,7 @@ class STFDrawComponentList:
 		row_r.prop(self, "sort_reverse", text="", icon="SORT_DESC" if self.sort_reverse else "SORT_ASC")
 
 	def filter_items(self, context: bpy.types.Context, data, propname: str):
-		items: list[InstanceModComponentRef] = getattr(data, propname)
+		items: list[PInstanceModComponentRef] = getattr(data, propname)
 		filter = [self.bitflag_filter_item] * len(items)
 		if(self.filter_name or self.filter_type):
 			for idx, item in enumerate(items):
@@ -56,7 +59,7 @@ class STFDrawComponentList:
 					filter[idx] = ~self.bitflag_filter_item
 
 		_sort = [(idx, item) for idx, item in enumerate(items)]
-		def _sort_func(item: tuple[int, InstanceModComponentRef]):
+		def _sort_func(item: tuple[int, PInstanceModComponentRef]):
 			match(self.sort_by):
 				case "stf_name":
 					component_holder = _get_component_holder(item[1])
@@ -73,7 +76,7 @@ class STFDrawComponentList:
 
 		return filter, sortorder
 
-	def draw_item(self, context: bpy.types.Context, layout: bpy.types.UILayout, data, item: STF_Component_Ref, icon, active_data, active_propname):
+	def draw_item(self, context: bpy.types.Context, layout: bpy.types.UILayout, data, item: PSTF_Component_Ref, icon, active_data, active_propname):
 		component_holder = _get_component_holder(item)
 		component = None
 		if(hasattr(component_holder, item.blender_property_name)):
@@ -97,7 +100,7 @@ class STFDrawComponentList:
 		row_r = row.row()
 		row_r.alignment = "RIGHT"
 		row_r.label(text=item.stf_id[:8] + "..")
-		row_r.operator(CopyToClipboard.bl_idname, text="", icon="DUPLICATE", emboss=False).text = item.stf_id
+		row_r.operator(OP_CopyToClipboard, text="", icon="DUPLICATE", emboss=False).text = item.stf_id
 
 # Both lists can be on screen at the same time. They need different 'bl_idname' properties to have separate size and scroll values.
 # On an Collection one will show the components on the Collection (stf.prefab) itself, the other will show components on data-resources which have no Blender-native representation.
@@ -128,7 +131,7 @@ class STFDrawInstanceComponentList(bpy.types.UIList):
 		row_r.prop(self, "sort_reverse", text="", icon="SORT_DESC" if self.sort_reverse else "SORT_ASC")
 
 	def filter_items(self, context: bpy.types.Context, data, propname: str) -> tuple[list[int], list[int]]: # pyright: ignore[reportIncompatibleMethodOverride]
-		items: list[InstanceModComponentRef] = getattr(data, propname)
+		items: list[PInstanceModComponentRef] = getattr(data, propname)
 
 		filter = [self.bitflag_filter_item] * len(items)
 		if(self.filter_bone or self.filter_type):
@@ -143,13 +146,13 @@ class STFDrawInstanceComponentList(bpy.types.UIList):
 			filter[idx] = ~self.bitflag_filter_item # pyright: ignore[reportPossiblyUnboundVariable]
 
 		_sort = [(idx, item) for idx, item in enumerate(items)]
-		def _sort_func(item: tuple[int, InstanceModComponentRef]):
-			return item[1][self.sort_by] + (item[1].stf_type if self.sort_by == "bone" else item[1].bone)
+		def _sort_func(item: tuple[int, PInstanceModComponentRef]):
+			return item[1][self.sort_by] + (item[1].stf_type if self.sort_by == "bone" else item[1].bone) # pyright: ignore[reportIndexIssue]
 		sortorder: list[int] = bpy.types.UI_UL_list.sort_items_helper(_sort, _sort_func, self.sort_reverse) # pyright: ignore[reportAssignmentType]
 
 		return filter, sortorder
 
-	def draw_item(self, context: bpy.types.Context, layout: bpy.types.UILayout, data, item: InstanceModComponentRef, icon, active_data, active_propname): # pyright: ignore[reportIncompatibleMethodOverride]
+	def draw_item(self, context: bpy.types.Context, layout: bpy.types.UILayout, data, item: PInstanceModComponentRef, icon, active_data, active_propname): # pyright: ignore[reportIncompatibleMethodOverride]
 		split = layout.split(factor=0.75)
 		row = split.split(factor=0.5)
 		row_l = row.row()
@@ -159,10 +162,10 @@ class STFDrawInstanceComponentList(bpy.types.UIList):
 		row_r = split.row()
 		row_r.alignment = "RIGHT"
 		row_r.label(text=item.stf_id[:8] + "..")
-		row_r.operator(CopyToClipboard.bl_idname, text="", icon="DUPLICATE", emboss=False).text = item.stf_id
+		row_r.operator(OP_CopyToClipboard, text="", icon="DUPLICATE", emboss=False).text = item.stf_id
 
 
-def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, stf_application_object: Any, component: STF_ComponentResourceBase, edit_op: str, is_instance: bool, inject_ui: Callable | None = None):
+def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: PSTF_Component_Ref, stf_application_object: Any, component: PSTF_ComponentResourceBase, edit_op: str, is_instance: bool, inject_ui: Callable | None = None):
 	box = layout.box()
 	# Component header info
 	row = box.row()
@@ -172,7 +175,7 @@ def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, compo
 	row_r = row.row()
 	row_r.alignment = "RIGHT"
 	row_r.label(text="ID: " + component_ref.stf_id, icon="TAG")
-	row_r.operator(CopyToClipboard.bl_idname, text="", icon="DUPLICATE").text = component_ref.stf_id
+	row_r.operator(OP_CopyToClipboard.bl_idname, text="", icon="DUPLICATE").text = component_ref.stf_id
 	row_r.operator(edit_op, text="", icon="MODIFIER").component_id = component_ref.stf_id
 
 	# relevant for component instances & standins
@@ -200,7 +203,7 @@ def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, compo
 		exclusion_row_buttons = exclusion_row.row(align=True)
 		exclusion_row_buttons.alignment = "RIGHT"
 		if(component.exclusion_group):
-			exclusion_row_buttons.operator(CopyToClipboard.bl_idname, icon="DUPLICATE", text="")
+			exclusion_row_buttons.operator(OP_CopyToClipboard, icon="DUPLICATE", text="")
 		exclusion_row_buttons.separator(factor=2)
 		if(component.exclusion_group and component.exclusion_group not in context.collection.stf_exclusion_groups):
 			exclusion_row_buttons.operator(STF_RegisterExclusionGroup.bl_idname, text="Make Group Selectable").group_name = component.exclusion_group

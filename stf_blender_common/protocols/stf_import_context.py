@@ -2,13 +2,10 @@ import bpy
 from typing import Any, Callable, Protocol
 from abc import abstractmethod
 
-from . import STF_Category
-from .stf_task_steps import STF_TaskSteps
-from .stf_report import STFReport
-from .property_path_part import BlenderPropertyPathPart
+from ..base import STF_Category, STF_TaskSteps, STFReport, BlenderPropertyPathPart
 
 
-class STF_ImportContext(Protocol):
+class PSTF_ImportContext(Protocol):
 	"""Interface Context for resource import. It will be passed to each STF_Handlers's import func"""
 
 	@abstractmethod

@@ -1,5 +1,7 @@
 import bpy
 
+from ....stf_blender_common.operators import OP_CopyToClipboard, OP_OpenWebpage
+
 
 def draw_slot_link_warning(layout: bpy.types.UILayout):
 	if(not hasattr(bpy.types.Action, "slot_link")):
@@ -29,7 +31,7 @@ class SetActiveObjectOperator(bpy.types.Operator):
 
 	def execute(self, context) -> set:
 		blender_object = bpy.data.objects.get(self.target_name)
-		for selected in bpy.context.selected_objects:
+		for selected in bpy.context.selected_objects: # pyright: ignore[reportOptionalIterable]
 			selected.select_set(False)
 		blender_object.select_set(True)
 		bpy.context.view_layer.objects.active = blender_object
@@ -38,7 +40,7 @@ class SetActiveObjectOperator(bpy.types.Operator):
 
 class OpenWebpage(bpy.types.Operator):
 	"""Open in Webbrowser"""
-	bl_idname = "stf.open_webpage"
+	bl_idname = OP_OpenWebpage
 	bl_label = "Open Webpage"
 
 	url: bpy.props.StringProperty(name = "URL") # type: ignore
@@ -51,7 +53,7 @@ class OpenWebpage(bpy.types.Operator):
 
 class CopyToClipboard(bpy.types.Operator):
 	"""Copy to Clipboard"""
-	bl_idname = "stf.copy_to_clipboard"
+	bl_idname = OP_CopyToClipboard
 	bl_label = "Copy to Clipboard"
 	bl_options = {"REGISTER", "UNDO"}
 

@@ -1,7 +1,8 @@
 from typing import Any, Protocol
 from collections.abc import Callable
 
-from .. import STF_ImportContext, STF_ExportContext, BlenderPropertyPathPart, STFPropertyPathPart, STFReport
+from . import PSTF_ImportContext, PSTF_ExportContext
+from ..base import BlenderPropertyPathPart, STFPropertyPathPart, STFReport
 
 
 class STF_HandlerBase(Protocol):
@@ -34,7 +35,7 @@ class STF_HandlerBase(Protocol):
 	:return int: The determined priority value
 	"""
 
-	import_func: Callable[[STF_ImportContext, dict, str, Any | None], Any | STFReport]
+	import_func: Callable[[PSTF_ImportContext, dict, str, Any | None], Any | STFReport]
 	"""
 	`def import_func(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any | None) -> Any | STFReport`
 
@@ -48,7 +49,7 @@ class STF_HandlerBase(Protocol):
 	:return STFReport: In case of failure
 	"""
 
-	export_func: Callable[[STF_ExportContext, Any, Any | None], tuple[dict, str] | STFReport]
+	export_func: Callable[[PSTF_ExportContext, Any, Any | None], tuple[dict, str] | STFReport]
 	"""
 	`def export_func(context: STF_ExportContext, blender_object: Any, context_object: Any | None) -> tuple[dict, str] | STFReport`
 
@@ -70,7 +71,7 @@ class STF_HandlerBase(Protocol):
 	understood_application_property_path_parts: list[str] = []
 	"""List of paths which this component can convert into stf paths"""
 
-	resolve_property_path_to_stf_func: Callable[[STF_ExportContext, Any, int, str], STFPropertyPathPart | None]
+	resolve_property_path_to_stf_func: Callable[[PSTF_ExportContext, Any, int, str], STFPropertyPathPart | None]
 	"""
 	`def resolve_property_path_to_stf_func(context: STF_ExportContext, blender_object: Any, property_index: int, blender_property_path: str) -> STFPropertyPathPart | None`
 	Resolves a Blender animation property path part into STF
@@ -83,7 +84,7 @@ class STF_HandlerBase(Protocol):
 	:return None: Failure
 	"""
 
-	resolve_stf_property_to_blender_func: Callable[[STF_ImportContext, list[str], Any], BlenderPropertyPathPart | None]
+	resolve_stf_property_to_blender_func: Callable[[PSTF_ImportContext, list[str], Any], BlenderPropertyPathPart | None]
 	"""
 	`def resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_property_path: list[str], blender_object: Any) -> BlenderPropertyPathPart | None`
 
@@ -99,7 +100,7 @@ class STF_HandlerBase(Protocol):
 
 	### Handling components if applicable. `get_components_func` must be assigned/implemented if the resource supports components
 
-	get_components_func: Callable[[Any], list[Any] | None]
+	get_components_func: Callable[[Any], list[Any] | None] | None
 	"""
 	`def get_components_func(blender_object: Any) -> list[Any] | None`
 
@@ -110,7 +111,7 @@ class STF_HandlerBase(Protocol):
 	:return None: No components present
 	"""
 
-	get_components_holder_func: Callable[[Any], Any | None]
+	get_components_holder_func: Callable[[Any], Any | None] | None
 	"""
 	`def get_components_holder_func(blender_object: Any) -> Any | None`
 

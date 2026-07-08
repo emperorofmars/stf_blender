@@ -1,7 +1,7 @@
 import bpy
 
-from ....common.utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
-from ....common.resource.component.component_utils import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
+from .....stf_blender_common.utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
+from .....stf_blender_common.operators.base_operators_component import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
 from ....common.ui.component_ui import draw_components_ui
 from ....common.helpers.misc import draw_slot_link_warning
 from .stf_animation_bake import STFBakeAnimationOperator

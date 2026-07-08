@@ -1,25 +1,6 @@
 import bpy
-from typing import Any
 
-from .stf_handler_data import STF_DataResourceBase, STF_Data_Ref
-from ...utils.id_utils import ensure_stf_id
-
-
-def add_resource(collection: bpy.types.Collection, blender_property_name: str, stf_id: str, stf_type: str) -> tuple[STF_Data_Ref, Any]:
-	resource_ref: STF_Data_Ref = collection.stf_data_refs.add()
-	resource_ref.stf_id = stf_id
-	resource_ref.stf_type = stf_type
-	resource_ref.blender_property_name = blender_property_name
-	resource_ref.name = stf_id
-
-	new_resource = getattr(collection, blender_property_name).add()
-	new_resource.stf_id = stf_id
-	new_resource.name = stf_id
-
-	if(blender_property_name == "stf_json_fallback_data"):
-		new_resource.json = "{\"type\": \"" + stf_type + "\"}"
-
-	return (resource_ref, new_resource)
+from ..utils.data_resource_utils import add_resource
 
 
 class STFCreateDataResourceOperator(bpy.types.Operator):
@@ -32,7 +13,7 @@ class STFCreateDataResourceOperator(bpy.types.Operator):
 	stf_type: bpy.props.StringProperty(name="Type") # type: ignore
 	property_name: bpy.props.StringProperty() # type: ignore
 
-	def execute(self, context) -> set:
+	def execute(self, context: bpy.types.Context) -> set:
 		import uuid
 		add_resource(context.scene.collection if self.use_scene_collection else context.collection, self.property_name, str(uuid.uuid4()), self.stf_type) # pyright: ignore[reportArgumentType]
 		return {"FINISHED"}
@@ -48,10 +29,10 @@ class STFRemoveDataResourceOperator(bpy.types.Operator):
 	index: bpy.props.IntProperty(name="Resource Index", default=-1) # type: ignore
 	property_name: bpy.props.StringProperty() # type: ignore
 
-	def invoke(self, context, event):
+	def invoke(self, context: bpy.types.Context, event):
 		return context.window_manager.invoke_confirm(self, event)
 
-	def execute(self, context) -> set:
+	def execute(self, context: bpy.types.Context) -> set:
 		collection = context.scene.collection if self.use_scene_collection else context.collection
 		if(hasattr(collection, self.property_name)):
 			resource_type_list = getattr(collection, self.property_name)
@@ -81,12 +62,12 @@ class STFEditDataResourceOperator(bpy.types.Operator):
 	resource_id: bpy.props.StringProperty() # type: ignore
 	edit_id: bpy.props.StringProperty(name="ID") # type: ignore
 
-	def invoke(self, context, event):
+	def invoke(self, context: bpy.types.Context, event):
 		self.edit_id = self.resource_id
 
 		return context.window_manager.invoke_props_dialog(self)
 
-	def execute(self, context) -> set:
+	def execute(self, context: bpy.types.Context) -> set:
 		if(not self.edit_id):
 			self.report({"ERROR"}, "ID can't be empty!")
 			return {"CANCELLED"}
@@ -115,28 +96,6 @@ class STFEditDataResourceOperator(bpy.types.Operator):
 		return {"FINISHED"}
 
 
-	def draw(self, context):
+	def draw(self, context: bpy.types.Context):
 		layout: bpy.types.UILayout = self.layout # pyright: ignore[reportAssignmentType]
 		layout.prop(self, "edit_id")
-
-
-def get_components_from_data_resource(resource: STF_DataResourceBase) -> list:
-	collection = resource.id_data
-	ret = []
-	for component_ref in resource.stf_components:
-		if(hasattr(collection, component_ref.blender_property_name)):
-			components = getattr(collection, component_ref.blender_property_name)
-			for component in components:
-				if(component.stf_id == component_ref.stf_id):
-					ret.append(component)
-	return ret
-
-
-def import_data_resource_base(resource: STF_DataResourceBase, json_resource: Any):
-	if("name" in json_resource): resource.stf_name = json_resource["name"]
-
-def export_data_resource_base(stf_context: Any, stf_type: str, resource: STF_DataResourceBase) -> dict:
-	ensure_stf_id(stf_context, resource, resource)
-	ret = { "type": stf_type }
-	if(resource.stf_name): ret["name"] = resource.stf_name
-	return ret
