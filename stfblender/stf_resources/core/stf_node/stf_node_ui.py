@@ -2,7 +2,7 @@ import bpy
 
 from ....common.utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
 from ....common.resource.component.component_utils import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
-from ....common.ui.component_ui import draw_components_ui, set_stf_component_filter
+from ....common.ui.component_ui import draw_components_ui
 from ....common.helpers import draw_multiline_text
 
 
@@ -64,7 +64,6 @@ class STFNodePanel(bpy.types.Panel):
 
 	def draw(self, context: bpy.types.Context):
 		layout: bpy.types.UILayout = self.layout # pyright: ignore[reportAssignmentType]
-		set_stf_component_filter(bpy.types.Object)
 
 		if(context.object.rotation_mode != "QUATERNION"):
 			text_row = draw_multiline_text(layout, "Please set the Rotation-Mode to 'Quaternion (WXYZ)'\nDoing so ensures consistency with game-engines.\nBe aware that existing rotation animations will break!", width=80, icon="ERROR", alert=True)

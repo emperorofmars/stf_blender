@@ -133,6 +133,28 @@ class STFEditComponentOperatorBase:
 		return self.get_property(context).stf_info.stf_components
 
 
+class STF_Component_Editmode_Resistant_Reference:
+	"""Because Blender"""
+	def __init__(self, component: STF_ComponentResourceBase, context_object: Any):
+		self.component_id = component.stf_id
+		self.stf_id = component.stf_id
+		if(type(context_object) is bpy.types.Bone):
+			self.armature_bone = ArmatureBone(component.id_data, context_object.name) # pyright: ignore[reportArgumentType]
+		else:
+			self.component = component
+
+	def get(self) -> STF_ComponentResourceBase:
+		if(hasattr(self, "component")):
+			return self.component
+		else:
+			for component_ref in self.armature_bone.get_bone().stf_info.stf_components:
+				if(component_ref.stf_id == self.component_id):
+					for component in getattr(self.armature_bone.get_bone(), component_ref.blender_property_name):
+						if(component.stf_id == self.component_id):
+							return component
+		raise Exception("Invalid code path")
+
+
 def preserve_component_reference(component: STF_ComponentResourceBase, blender_property_name: str, context_object: Any) -> Callable[[], STF_ComponentResourceBase]:
 	component_id = component.stf_id
 	if(type(context_object) is bpy.types.Bone and type(component.id_data) is bpy.types.Armature):
@@ -157,12 +179,13 @@ def preserve_component_reference(component: STF_ComponentResourceBase, blender_p
 	return _get_component
 
 
-def get_components_from_object(application_object: Any) -> list:
+def get_components_from_object(blender_object: Any) -> list[Any]:
+	"""Retrieves Blender STF components from an Blender object"""
 	ret = []
-	if(hasattr(application_object, "stf_info")):
-		for component_ref in application_object.stf_info.stf_components:
-			if(hasattr(application_object, component_ref.blender_property_name)):
-				components = getattr(application_object, component_ref.blender_property_name)
+	if(hasattr(blender_object, "stf_info")):
+		for component_ref in blender_object.stf_info.stf_components:
+			if(hasattr(blender_object, component_ref.blender_property_name)):
+				components = getattr(blender_object, component_ref.blender_property_name)
 				for component in components:
 					if(component.stf_id == component_ref.stf_id):
 						ret.append(component)

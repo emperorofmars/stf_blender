@@ -2,7 +2,7 @@ import bpy
 
 from ....common.utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
 from ....common.resource.component.component_utils import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
-from ....common.ui.component_ui import draw_components_ui, set_stf_component_filter
+from ....common.ui.component_ui import draw_components_ui
 
 
 class STFSetBoneIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
@@ -43,11 +43,10 @@ class STFBoneSpatialPanel(bpy.types.Panel):
 		return hasattr(context, "bone") and context.bone is not None
 
 	def draw(self, context: bpy.types.Context):
-		set_stf_component_filter(bpy.types.Bone)
 		layout = self.layout
 
 		# Set ID
-		draw_stf_id_ui(layout, context, context.bone, context.bone.stf_info, STFSetBoneIDOperator.bl_idname)  # pyright: ignore[reportArgumentType]
+		draw_stf_id_ui(layout, context, context.bone, context.bone.stf_info, STFSetBoneIDOperator.bl_idname) # pyright: ignore[reportArgumentType]
 
 		layout.separator(factor=2, type="LINE")
 
@@ -61,4 +60,4 @@ class STFBoneSpatialPanel(bpy.types.Panel):
 		layout.separator(factor=1, type="SPACE")
 		header, body = layout.panel("stf.bone_components", default_closed = False)
 		header.label(text="STF Components (" + str(len(context.bone.stf_info.stf_components)) + ")", icon="GROUP")
-		if(body): draw_components_ui(layout, context, context.bone.stf_info, context.bone, STFAddBoneComponentOperator.bl_idname, STFRemoveBoneComponentOperator.bl_idname, STFEditBoneComponentIdOperator.bl_idname)  # pyright: ignore[reportArgumentType]
+		if(body): draw_components_ui(layout, context, context.bone.stf_info, context.bone, STFAddBoneComponentOperator.bl_idname, STFRemoveBoneComponentOperator.bl_idname, STFEditBoneComponentIdOperator.bl_idname) # pyright: ignore[reportArgumentType]

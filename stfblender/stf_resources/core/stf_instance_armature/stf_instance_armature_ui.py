@@ -1,14 +1,13 @@
 import bpy
 from typing import Any
 
-from ....common.resource.component import STF_Component_Ref
-from ....common.helpers import draw_multiline_text
 from .stf_instance_armature import InstanceModComponentRef
 from .stf_instance_armature_utils import ProcessComponentsOntoArmatureInstance, UpdateArmatureInstanceComponentStandins
-
-from ....common.utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
+from ....common.resource.component import STF_Component_Ref
+from ....common.helpers import draw_multiline_text
 from ....common.resource.component.component_utils import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
-from ....common.ui.component_ui import draw_components_ui, draw_instance_standin_components_ui, set_stf_component_filter, set_stf_component_instance_filter
+from ....common.utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
+from ....common.ui.component_ui import draw_components_ui, draw_instance_standin_components_ui
 
 
 class STFSetArmatureInstanceIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
@@ -98,7 +97,6 @@ class STFArmatureInstancePanel(bpy.types.Panel):
 
 	def draw(self, context: bpy.types.Context):
 		layout = self.layout
-		set_stf_component_instance_filter(bpy.types.Bone)
 
 		non_quat_bones = ""
 		for pose_bone in context.object.pose.bones:
@@ -113,14 +111,14 @@ class STFArmatureInstancePanel(bpy.types.Panel):
 			layout.separator(factor=2, type="LINE")
 
 		# Set ID
-		draw_stf_id_ui(layout, context, context.object.stf_instance, context.object.stf_instance, STFSetArmatureInstanceIDOperator.bl_idname, True)  # pyright: ignore[reportArgumentType]
+		draw_stf_id_ui(layout, context, context.object.stf_instance, context.object.stf_instance, STFSetArmatureInstanceIDOperator.bl_idname, True) # pyright: ignore[reportArgumentType]
 
 		layout.separator(factor=2, type="LINE")
 
 		# Components specific to this instance
 		header, body = layout.panel("stf.instance_armature_components", default_closed = False)
 		header.label(text="Bone-Instance Components", icon="GROUP")
-		if(body): draw_components_ui(layout, context, context.object.stf_instance_armature, context.object, STFAddArmatureInstanceComponentOperator.bl_idname, STFRemoveArmatureInstanceComponentOperator.bl_idname, STFEditArmatureInstanceComponentIdOperator.bl_idname, _get_target_object_func, _inject_ui, is_component_instance = True)  # pyright: ignore[reportArgumentType]
+		if(body): draw_components_ui(layout, context, context.object.stf_instance_armature, context.object, STFAddArmatureInstanceComponentOperator.bl_idname, STFRemoveArmatureInstanceComponentOperator.bl_idname, STFEditArmatureInstanceComponentIdOperator.bl_idname, bpy.types.Bone, _get_target_object_func, _inject_ui, is_component_instance = True) # pyright: ignore[reportArgumentType]
 
 		layout.separator(factor=4, type="LINE")
 
@@ -133,7 +131,7 @@ class STFArmatureInstancePanel(bpy.types.Panel):
 			layout.separator(factor=1, type="SPACE")
 
 			if(len(context.object.stf_instance_armature_component_standins.stf_components) > 0):
-				draw_instance_standin_components_ui(layout, context, context.object.stf_instance_armature_component_standins, context.object, STFEditArmatureInstanceComponentIdOperator.bl_idname, _get_target_object_func, _inject_standin_ui)  # pyright: ignore[reportArgumentType]
+				draw_instance_standin_components_ui(layout, context, context.object.stf_instance_armature_component_standins, context.object, STFEditArmatureInstanceComponentIdOperator.bl_idname, bpy.types.Bone, _get_target_object_func, _inject_standin_ui) # pyright: ignore[reportArgumentType]
 
 		layout.separator(factor=4, type="LINE")
 		layout.operator(ProcessComponentsOntoArmatureInstance.bl_idname)

@@ -25,6 +25,11 @@ class STF_DataResourceBase(bpy.types.PropertyGroup):
 
 class STF_Handler_Data(STF_Handler_BlenderNative):
 	"""Extension to STF_Module which also associates a function to draw the data-resources in Blender's UI"""
+
 	blender_property_name: str
-	# (layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: STF_BlenderDataResourceBase) -> None
+	"""Blender collection property on which this resource can be added to"""
+
 	draw_resource_func: Callable[[bpy.types.UILayout, bpy.types.Context, STF_Data_Ref, Any, Any], None]
+	"""
+	`def draw_resource_func(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: STF_BlenderDataResourceBase) -> None`
+	"""

@@ -2,7 +2,7 @@ import bpy
 
 from ....common.utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
 from ....common.resource.component.component_utils import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
-from ....common.ui.component_ui import draw_components_ui, set_stf_component_filter
+from ....common.ui.component_ui import draw_components_ui
 
 
 class STFSetArmatureIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
@@ -43,10 +43,8 @@ class STFArmatureSpatialPanel(bpy.types.Panel):
 		return hasattr(context, "armature") and context.armature is not None
 
 	def draw(self, context):
-		set_stf_component_filter(bpy.types.Armature)
-
 		# Set ID
-		draw_stf_id_ui(self.layout, context, context.armature, context.armature.stf_info, STFSetArmatureIDOperator.bl_idname)  # pyright: ignore[reportArgumentType]
+		draw_stf_id_ui(self.layout, context, context.armature, context.armature.stf_info, STFSetArmatureIDOperator.bl_idname) # pyright: ignore[reportArgumentType]
 
 		self.layout.separator(factor=2, type="LINE")
 
@@ -54,4 +52,4 @@ class STFArmatureSpatialPanel(bpy.types.Panel):
 		self.layout.separator(factor=1, type="SPACE")
 		header, body = self.layout.panel("stf.armature_components", default_closed = False)
 		header.label(text="STF Components (" + str(len(context.armature.stf_info.stf_components)) + ")", icon="GROUP")
-		if(body): draw_components_ui(self.layout, context, context.armature.stf_info, context.armature, STFAddArmatureComponentOperator.bl_idname, STFRemoveArmatureComponentOperator.bl_idname, STFEditArmatureComponentIdOperator.bl_idname)  # pyright: ignore[reportArgumentType]
+		if(body): draw_components_ui(self.layout, context, context.armature.stf_info, context.armature, STFAddArmatureComponentOperator.bl_idname, STFRemoveArmatureComponentOperator.bl_idname, STFEditArmatureComponentIdOperator.bl_idname) # pyright: ignore[reportArgumentType]

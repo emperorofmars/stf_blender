@@ -2,6 +2,8 @@ import bpy
 import uuid
 from typing import Any
 
+from ...common.stf_report import STFReport
+
 from ...common import STF_ExportContext, STF_ImportContext, STF_TaskSteps, STF_Category
 from ...common.resource.component import STF_ComponentResourceBase, STF_Handler_Component, STF_Component_Ref
 from ...common.helpers import register_exported_resource
@@ -76,8 +78,8 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, context_object: Any) -> Any:
-	component_ref, component = add_component(context_object, _blender_property_name, id, _stf_type)
+def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any | STFReport:
+	component_ref, component = add_component(context_object, _blender_property_name, stf_id, _stf_type)
 	import_component_base(context, component, json_resource, _blender_property_name, context_object)
 
 	if("viewport" in json_resource):
@@ -98,7 +100,8 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, contex
 	return component
 
 
-def _stf_export(context: STF_ExportContext, component: AVA_Avatar, context_object: Any) -> tuple[dict, str]:
+def _stf_export(context: STF_ExportContext, blender_object: AVA_Avatar, context_object: Any) -> tuple[dict, str] | STFReport:
+	component = blender_object
 	ret = export_component_base(context, _stf_type, component, _blender_property_name, context_object)
 
 	if(component.viewport):

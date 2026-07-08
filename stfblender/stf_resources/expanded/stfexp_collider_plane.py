@@ -3,7 +3,7 @@ import mathutils
 import re
 from typing import Any
 
-from ...common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STF_Category
+from ...common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STF_Category, STFReport
 from ...common.resource.component import STF_ComponentResourceBase, STF_Handler_BoneComponent, STF_Component_Ref
 from ...common.resource.component.component_utils import ComponentLoadJsonOperatorBase, add_component, export_component_base, import_component_base
 from ...common.utils.trs_utils import blender_rotation_to_stf, blender_translation_to_stf, stf_rotation_to_blender, stf_translation_to_blender
@@ -55,7 +55,8 @@ class STFEXP_Collider_Plane_LoadJsonOperator(ComponentLoadJsonOperatorBase, bpy.
 		return {"FINISHED"}
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: STFEXP_Collider_Plane):
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: STF_ComponentResourceBase): # pyright: ignore[reportRedeclaration]
+	component: STFEXP_Collider_Plane = component # pyright: ignore[reportAssignmentType]
 	layout.use_property_split = True
 	layout.prop(component, "offset_position")
 	layout.prop(component, "offset_rotation")
@@ -87,7 +88,8 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	_parse_json(component, json_resource)  # pyright: ignore[reportArgumentType]
 	return component
 
-def _stf_export(context: STF_ExportContext, component: STFEXP_Collider_Plane, context_object: Any) -> tuple[dict, str]:
+def _stf_export(context: STF_ExportContext, blender_object: STFEXP_Collider_Plane, context_object: Any) -> tuple[dict, str] | STFReport:
+	component = blender_object
 	ret = export_component_base(context, _stf_type, component, _blender_property_name, context_object)
 	ret = _serialize_json(component, ret)
 	return ret, component.stf_id
@@ -95,18 +97,18 @@ def _stf_export(context: STF_ExportContext, component: STFEXP_Collider_Plane, co
 
 """Animation"""
 
-def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: Any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart | None:
-	if(match := re.search(r"^" + _blender_property_name + r"\[(?P<component_index>[\d]+)\].enabled", data_path)):
-		if(component_path := get_component_stf_path_from_collection(application_object, _blender_property_name, int(match.groupdict()["component_index"]))):
+def _resolve_property_path_to_stf_func(context: STF_ExportContext, blender_object: Any, property_index: int, blender_property_path: str) -> STFPropertyPathPart | None:
+	if(match := re.search(r"^" + _blender_property_name + r"\[(?P<component_index>[\d]+)\].enabled", blender_property_path)):
+		if(component_path := get_component_stf_path_from_collection(blender_object, _blender_property_name, int(match.groupdict()["component_index"]))):
 			return STFPropertyPathPart(component_path + ["enabled"])
 	return None
 
 
-def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: Any) -> BlenderPropertyPathPart | None:
-	blender_object = context.get_imported_resource(stf_path[0])
-	component_index = get_component_index(application_object, _blender_property_name, blender_object.stf_id)
+def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_property_path: list[str], blender_object: Any) -> BlenderPropertyPathPart | None:
+	blender_object = context.get_imported_resource(stf_property_path[0])
+	component_index = get_component_index(blender_object, _blender_property_name, blender_object.stf_id)
 	if(component_index is not None):
-		match(stf_path[1]):
+		match(stf_property_path[1]):
 			case "enabled":
 				return BlenderPropertyPathPart("OBJECT", _blender_property_name + "[" + str(component_index) + "].enabled")
 	return None

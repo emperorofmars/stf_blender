@@ -69,8 +69,8 @@ class ExportSTF(bpy.types.Operator, ExportHelper): # pyright: ignore[reportIncom
 	bl_label = "Export STF"
 	bl_options = {"PRESET", "BLOCKING"}
 
-	filename_ext = ""
-	filter_glob: bpy.props.StringProperty(default="*.stf") # type: ignore
+	filename_ext = ".stf"
+	filter_glob: bpy.props.StringProperty(default="*.stf", options={"HIDDEN"}) # type: ignore
 
 	current_collection_as_root: bpy.props.BoolProperty(default=False, name="Scene Collection as Export Root") # type: ignore
 	scene_collection_as_root: bpy.props.BoolProperty(default=False, name="Current Collection as Export Root") # type: ignore

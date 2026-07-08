@@ -2,7 +2,7 @@ import bpy
 
 from ....common.utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
 from ....common.resource.component.component_utils import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
-from ....common.ui.component_ui import draw_components_ui, set_stf_component_filter
+from ....common.ui.component_ui import draw_components_ui
 from ....common.helpers import draw_multiline_text
 
 
@@ -45,7 +45,6 @@ class STFMeshSpatialPanel(bpy.types.Panel):
 
 	def draw(self, context: bpy.types.Context):
 		layout: bpy.types.UILayout = self.layout # pyright: ignore[reportAssignmentType]
-		set_stf_component_filter(bpy.types.Mesh)
 
 		if(context.object.find_armature()):
 			t, r, s = context.object.matrix_local.decompose()

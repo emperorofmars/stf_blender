@@ -2,7 +2,6 @@ import bpy
 
 from ....common.utils.id_utils import STFSetIDOperatorBase
 from ....common.resource.component.component_utils import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
-from ....common.ui.component_ui import set_stf_component_filter
 from .draw_prefab_ui import draw_prefab_ui
 
 
@@ -67,6 +66,4 @@ class STFCollectionPanel(bpy.types.Panel):
 			self.layout.label(text="Root")
 
 	def draw(self, context: bpy.types.Context):
-		set_stf_component_filter(bpy.types.Collection)
-
 		draw_prefab_ui(self.layout, context, context.collection, STFSetCollectionAsRootOperator.bl_idname, STFSetCollectionIDOperator.bl_idname, STFAddCollectionComponentOperator.bl_idname, STFRemoveCollectionComponentOperator.bl_idname, STFEditCollectionComponentIdOperator.bl_idname) # pyright: ignore[reportArgumentType]

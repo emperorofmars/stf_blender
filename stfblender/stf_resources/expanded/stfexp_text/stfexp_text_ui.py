@@ -2,7 +2,7 @@ import bpy
 
 from ....common.utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
 from ....common.resource.component.component_utils import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
-from ....common.ui.component_ui import draw_components_ui, set_stf_component_filter
+from ....common.ui.component_ui import draw_components_ui
 
 
 class STFSetTextIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
@@ -44,7 +44,6 @@ class STFTextSpatialPanel(bpy.types.Panel):
 
 	def draw(self, context: bpy.types.Context):
 		layout: bpy.types.UILayout = self.layout  # pyright: ignore[reportAssignmentType]
-		set_stf_component_filter(bpy.types.TextCurve)
 
 		# Set ID
 		draw_stf_id_ui(layout, context, context.curve, context.curve.stf_info, STFSetTextIDOperator.bl_idname)
@@ -55,4 +54,4 @@ class STFTextSpatialPanel(bpy.types.Panel):
 		layout.separator(factor=2, type="LINE")
 		header, body = layout.panel("stf.text_components", default_closed = False)
 		header.label(text="STF Components (" + str(len(context.curve.stf_info.stf_components)) + ")", icon="GROUP")
-		if(body): draw_components_ui(layout, context, context.curve.stf_info, context.curve, STFAddTextComponentOperator.bl_idname, STFRemoveTextComponentOperator.bl_idname, STFEditTextComponentIdOperator.bl_idname)
+		if(body): draw_components_ui(layout, context, context.curve.stf_info, context.curve, STFAddTextComponentOperator.bl_idname, STFRemoveTextComponentOperator.bl_idname, STFEditTextComponentIdOperator.bl_idname, component_filter=bpy.types.TextCurve)

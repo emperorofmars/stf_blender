@@ -29,9 +29,8 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 
 	return collection
 
-
-def _stf_export(context: STF_ExportContext, application_object: Any, context_object: Any) -> tuple[dict, str] | STFReport:
-	collection: bpy.types.Collection = application_object
+def _stf_export(context: STF_ExportContext, blender_object: Any, context_object: Any | None) -> tuple[dict, str] | STFReport:
+	collection: bpy.types.Collection = blender_object
 	ensure_stf_id(context, collection)
 
 	root_nodes = []

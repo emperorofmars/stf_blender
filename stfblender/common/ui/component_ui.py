@@ -9,6 +9,15 @@ from ..base.stf_registry import find_component_handler, get_all_component_handle
 from ...stf_resources.fallback.json_fallback_component import Handler_JsonFallbackComponent
 
 
+# Because Blender is weird with bones :/
+def _get_component_holder(component_ref: STF_Component_Ref) -> bpy.types.bpy_struct | None:
+	anc = component_ref.rna_ancestors()
+	if(anc is not None and len(anc) > 1 and type(anc[len(anc) - 2]) is bpy.types.Bone):
+		return anc[len(anc) - 2]
+	else:
+		return component_ref.id_data
+
+
 class STFDrawComponentList:
 	"""List of STF components"""
 	sort_reverse: bpy.props.BoolProperty(default=False, name="Reverse") # type: ignore
@@ -21,9 +30,7 @@ class STFDrawComponentList:
 		row_l = row.row(align=True)
 		row_l.alignment = "LEFT"
 		row.prop(self, "filter_type", text="", placeholder="Filter Type", icon="FILTER")
-		global stf_component_filter
-		if(stf_component_filter != bpy.types.Bone):
-			row.prop(self, "filter_name", text="", placeholder="Filter Name", icon="FILTER")
+		row.prop(self, "filter_name", text="", placeholder="Filter Name", icon="FILTER")
 		row.prop(self, "sort_by", text="", icon="SORTSIZE")
 		row_r = row.row(align=True)
 		row_r.alignment = "RIGHT"
@@ -31,15 +38,14 @@ class STFDrawComponentList:
 
 	def filter_items(self, context: bpy.types.Context, data, propname: str):
 		items: list[InstanceModComponentRef] = getattr(data, propname)
-
 		filter = [self.bitflag_filter_item] * len(items)
 		if(self.filter_name or self.filter_type):
 			for idx, item in enumerate(items):
 				filter_match = True
 				if(self.filter_name):
-					global stf_component_filter
-					if(hasattr(item.id_data, item.blender_property_name) and stf_component_filter != bpy.types.Bone):
-						for component in getattr(item.id_data, item.blender_property_name):
+					component_holder = _get_component_holder(item)
+					if(hasattr(component_holder, item.blender_property_name)):
+						for component in getattr(component_holder, item.blender_property_name):
 							if(component.stf_id == item.stf_id):
 								if(not component.stf_name or not (self.filter_name.lower() in component.stf_name.lower() or component.stf_name.lower() in self.filter_name.lower())):
 									filter_match = False
@@ -53,9 +59,9 @@ class STFDrawComponentList:
 		def _sort_func(item: tuple[int, InstanceModComponentRef]):
 			match(self.sort_by):
 				case "stf_name":
-					global stf_component_filter
-					if(hasattr(item[1].id_data, item[1].blender_property_name) and stf_component_filter != bpy.types.Bone):
-						for component in getattr(item[1].id_data, item[1].blender_property_name):
+					component_holder = _get_component_holder(item[1])
+					if(hasattr(component_holder, item[1].blender_property_name)):
+						for component in getattr(component_holder, item[1].blender_property_name):
 							if(component.stf_id == item[1].stf_id):
 								return component.stf_name
 					return ""
@@ -68,20 +74,10 @@ class STFDrawComponentList:
 		return filter, sortorder
 
 	def draw_item(self, context: bpy.types.Context, layout: bpy.types.UILayout, data, item: STF_Component_Ref, icon, active_data, active_propname):
-		global stf_component_filter
+		component_holder = _get_component_holder(item)
 		component = None
-
-		# Because Blender is weird with bones :/
-		parent = None
-		if(stf_component_filter == bpy.types.Bone):
-			anc = item.rna_ancestors()
-			if(anc and len(anc) > 1 and type(anc[len(anc) - 2]) is bpy.types.Bone):
-				parent = anc[len(anc) - 2]
-		else:
-			parent = item.id_data
-
-		if(hasattr(parent, item.blender_property_name)):
-			for component in getattr(parent, item.blender_property_name):
+		if(hasattr(component_holder, item.blender_property_name)):
+			for component in getattr(component_holder, item.blender_property_name):
 				if(component.stf_id == item.stf_id):
 					break
 		split = layout.split(factor=0.4)
@@ -104,6 +100,7 @@ class STFDrawComponentList:
 		row_r.operator(CopyToClipboard.bl_idname, text="", icon="DUPLICATE", emboss=False).text = item.stf_id
 
 # Both lists can be on screen at the same time. They need different 'bl_idname' properties to have separate size and scroll values.
+# On an Collection one will show the components on the Collection (stf.prefab) itself, the other will show components on data-resources which have no Blender-native representation.
 class STFDrawBlenderComponentList(STFDrawComponentList, bpy.types.UIList): # pyright: ignore[reportIncompatibleMethodOverride]
 	bl_idname = "COLLECTION_UL_stf_components_blender_list"
 class STFDrawDataComponentList(STFDrawComponentList, bpy.types.UIList): # pyright: ignore[reportIncompatibleMethodOverride]
@@ -248,6 +245,7 @@ def draw_components_ui(
 		add_component_op: str,
 		remove_component_op: str,
 		edit_component_id_op: str,
+		component_filter: Any = None,
 		get_target_object_func: Callable | None = None,
 		inject_ui: Any = None,
 		is_data_resource_component: bool = False,
@@ -255,15 +253,21 @@ def draw_components_ui(
 		):
 	stf_modules = get_data_component_handlers() if is_data_resource_component else get_component_handlers()
 
+	if(component_filter is None):
+		component_filter = type(component_holder)
+
 	row = layout.row(align=True)
 	# let available_component_modules
 	if(is_data_resource_component):
+		set_stf_data_resource_component_filter(component_filter)
 		available_component_modules = context.scene.stf_data_resource_component_modules
 		row.prop(bpy.context.scene, "stf_data_resource_component_modules", text="")
 	elif(is_component_instance):
+		set_stf_component_instance_filter(component_filter)
 		available_component_modules = context.scene.stf_component_instance_modules
 		row.prop(bpy.context.scene, "stf_component_instance_modules", text="")
 	else:
+		set_stf_component_filter(component_filter)
 		available_component_modules = context.scene.stf_component_modules
 		row.prop(bpy.context.scene, "stf_component_modules", text="")
 
@@ -320,9 +324,14 @@ def draw_instance_standin_components_ui(
 		ref_holder: Any,
 		component_holder: Any,
 		edit_component_id_op: str,
+		component_filter: Any = None,
 		get_target_object_func: Callable | None = None,
 		inject_ui: Callable | None = None
 		):
+	if(component_filter is None):
+		component_filter = type(component_holder)
+	set_stf_component_instance_filter(component_filter)
+
 	row = layout.row()
 	row.template_list(STFDrawInstanceComponentList.bl_idname, "", ref_holder, "stf_components", ref_holder, "stf_active_component_index")
 	if(len(ref_holder.stf_components) > ref_holder.stf_active_component_index):

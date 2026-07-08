@@ -20,7 +20,8 @@ def get_stf_handlers() -> list[STF_HandlerBase]:
 			if(stf_handler_list := getattr(python_module, "register_stf_handlers", None)):
 				if(isinstance(stf_handler_list, list)):
 					for stf_handler in stf_handler_list:
-						stf_handlers.append(stf_handler)
+						if(stf_handler and hasattr(stf_handler, "stf_type")):
+							stf_handlers.append(stf_handler)
 		except Exception:
 			continue
 	return stf_handlers
@@ -92,7 +93,7 @@ def get_component_handlers(filter = None) -> list[STF_Handler_Component]:
 	for stf_handler in get_stf_handlers():
 		if(hasattr(stf_handler, "stf_type") and getattr(stf_handler, "stf_type") and hasattr(stf_handler, "blender_property_name") and getattr(stf_handler, "stf_category") == "component"):
 			if(hasattr(stf_handler, "filter_all_data_modules") and getattr(stf_handler, "filter_all_data_modules")):
-				continue
+				continue # Ignore, this component can only exist on non-Blender-native data resources
 			elif(hasattr(stf_handler, "filter") and getattr(stf_handler, "filter") and filter):
 				if(filter in getattr(stf_handler, "filter")):
 					ret.append(stf_handler)

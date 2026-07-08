@@ -3,7 +3,7 @@ import bpy
 from .stf_material_definition import STF_Material_Property, STF_Material_Value_Base, STF_Material_Value_Ref
 from ....common.utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
 from ....common.resource.component.component_utils import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
-from ....common.ui.component_ui import draw_components_ui, set_stf_component_filter
+from ....common.ui.component_ui import draw_components_ui
 from .material_value_modules import blender_material_value_modules
 from .stf_material_operators import STFAddMaterialProperty, STFAddMaterialPropertyValue, STFClearMaterial, STFRemoveMaterialProperty, STFRemoveMaterialPropertyValue
 from .convert_blender_material_to_stf import STFConvertBlenderMaterialToSTF
@@ -172,8 +172,6 @@ class STFMaterialSpatialPanel(bpy.types.Panel):
 		return hasattr(context, "material") and context.material is not None
 
 	def draw(self, context: bpy.types.Context):
-		set_stf_component_filter(bpy.types.Material)
-
 		# Set ID
 		draw_stf_id_ui(self.layout, context, context.material, context.material.stf_info, STFSetMaterialIDOperator.bl_idname)  # pyright: ignore[reportArgumentType]
 

@@ -2,7 +2,7 @@ import bpy
 
 from ....common.utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
 from ....common.resource.component.component_utils import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
-from ....common.ui.component_ui import draw_components_ui, set_stf_component_filter
+from ....common.ui.component_ui import draw_components_ui
 from ....common.helpers.misc import draw_slot_link_warning
 from .stf_animation_bake import STFBakeAnimationOperator
 
@@ -47,10 +47,9 @@ class STFAnimationSpatialPanel(bpy.types.Panel):
 	def draw(self, context: bpy.types.Context):
 		layout = self.layout
 		layout.use_property_split = True
-		set_stf_component_filter(bpy.types.Action)
 
 		if(not hasattr(bpy.types.Action, "slot_link")):
-			draw_slot_link_warning(layout)  # pyright: ignore[reportArgumentType]
+			draw_slot_link_warning(layout) # pyright: ignore[reportArgumentType]
 			return
 
 		if(context.active_action.stf_animation.is_baked_from):
@@ -63,7 +62,7 @@ class STFAnimationSpatialPanel(bpy.types.Panel):
 			return
 
 		# Set ID
-		draw_stf_id_ui(layout, context, context.active_action, context.active_action.stf_info, STFSetAnimationIDOperator.bl_idname)  # pyright: ignore[reportArgumentType]
+		draw_stf_id_ui(layout, context, context.active_action, context.active_action.stf_info, STFSetAnimationIDOperator.bl_idname) # pyright: ignore[reportArgumentType]
 
 		if(not context.active_action.stf_animation.is_baked_from):
 			layout.separator(factor=2, type="SPACE")
@@ -78,4 +77,4 @@ class STFAnimationSpatialPanel(bpy.types.Panel):
 		layout.separator(factor=1, type="SPACE")
 		header, body = layout.panel("stf.animation_components", default_closed = True)
 		header.label(text="STF Components (" + str(len(context.active_action.stf_info.stf_components)) + ")", icon="GROUP")
-		if(body): draw_components_ui(layout, context, context.active_action.stf_info, context.active_action, STFAddAnimationComponentOperator.bl_idname, STFRemoveAnimationComponentOperator.bl_idname, STFEditAnimationComponentIdOperator.bl_idname)  # pyright: ignore[reportArgumentType]
+		if(body): draw_components_ui(layout, context, context.active_action.stf_info, context.active_action, STFAddAnimationComponentOperator.bl_idname, STFRemoveAnimationComponentOperator.bl_idname, STFEditAnimationComponentIdOperator.bl_idname) # pyright: ignore[reportArgumentType]

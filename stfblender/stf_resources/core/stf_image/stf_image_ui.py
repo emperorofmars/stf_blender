@@ -2,7 +2,7 @@ import bpy
 
 from ....common.utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
 from ....common.resource.component.component_utils import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
-from ....common.ui.component_ui import draw_components_ui, set_stf_component_filter
+from ....common.ui.component_ui import draw_components_ui
 
 
 class STFSetImageIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
@@ -58,10 +58,8 @@ class STFImageSpatialPanel(bpy.types.Panel):
 		return hasattr(context, "edit_image") and context.edit_image is not None
 
 	def draw(self, context):
-		set_stf_component_filter(bpy.types.Image)
-
 		# Set ID
-		draw_stf_id_ui(self.layout, context, context.edit_image, context.edit_image.stf_info, STFSetImageIDOperator.bl_idname)  # pyright: ignore[reportArgumentType]
+		draw_stf_id_ui(self.layout, context, context.edit_image, context.edit_image.stf_info, STFSetImageIDOperator.bl_idname) # pyright: ignore[reportArgumentType]
 
 		self.layout.separator(factor=1, type="SPACE")
 
@@ -79,4 +77,4 @@ class STFImageSpatialPanel(bpy.types.Panel):
 		self.layout.separator(factor=1, type="SPACE")
 		header, body = self.layout.panel("stf.image_components", default_closed = False)
 		header.label(text="STF Components (" + str(len(context.edit_image.stf_info.stf_components)) + ")", icon="GROUP")
-		if(body): draw_components_ui(self.layout, context, context.edit_image.stf_info, context.edit_image, STFAddImageComponentOperator.bl_idname, STFRemoveImageComponentOperator.bl_idname, STFEditImageComponentIdOperator.bl_idname)  # pyright: ignore[reportArgumentType]
+		if(body): draw_components_ui(self.layout, context, context.edit_image.stf_info, context.edit_image, STFAddImageComponentOperator.bl_idname, STFRemoveImageComponentOperator.bl_idname, STFEditImageComponentIdOperator.bl_idname) # pyright: ignore[reportArgumentType]
