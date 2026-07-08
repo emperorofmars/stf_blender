@@ -14,7 +14,7 @@ exclude = [
 	"**/.*"
 ]
 ignore = [
-	"stfblender/common/interface_stf_*.py",
+	#"stfblender/common/interface_stf_*.py",
 	"auto_load.py"
 ]
 defineConstant = { DEBUG = true }

@@ -1,8 +1,16 @@
 import bpy
-from typing import Any
+from typing import Any, Protocol
 
-from ..component.stf_handler_component import STF_Component_Ref
+from ..component.stf_handler_component import PSTF_Component_Ref, STF_Component_Ref
 
+
+class PSTF_Info(Protocol):
+	"""Basic STF properties"""
+	stf_id: str
+	stf_name: str
+	stf_name_source_of_truth: bool
+	stf_components: list[PSTF_Component_Ref]
+	stf_active_component_index: int
 
 class STF_Info(bpy.types.PropertyGroup):
 	"""Basic STF properties"""

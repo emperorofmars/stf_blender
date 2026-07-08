@@ -3,11 +3,16 @@ from typing import Any, Callable, Protocol
 
 from ..stf_handler_base import STF_HandlerBase
 from ... import STF_Category, STF_ImportContext, STF_ExportContext
-from ...utils.armature_bone import ArmatureBone
 
 """
 STF Components aren't natively supported by Blender, they are stored by the Blender-ID-thingy they belong to.
 """
+
+class PSTF_Component_Ref(Protocol): # Bringing polymorphism to Blender
+	"""Defines the ID, by which the correct `STF_ComponentResourceBase` in the `blender_property_name` property of the appropriate Blender construct can be found"""
+	stf_type: str
+	stf_id: str
+	blender_property_name: str
 
 class STF_Component_Ref(bpy.types.PropertyGroup): # Bringing polymorphism to Blender
 	"""Defines the ID, by which the correct `STF_ComponentResourceBase` in the `blender_property_name` property of the appropriate Blender construct can be found"""
@@ -15,6 +20,23 @@ class STF_Component_Ref(bpy.types.PropertyGroup): # Bringing polymorphism to Ble
 	stf_id: bpy.props.StringProperty(name="ID", options=set()) # type: ignore
 	blender_property_name: bpy.props.StringProperty(name="Blender Property Name", options=set()) # type: ignore
 
+class PInstanceModComponentRef(PSTF_Component_Ref, Protocol):
+	"""Used by armature instances to add or modify a component on an instance of a bone"""
+	bone: str
+	override: bool
+
+class InstanceModComponentRef(STF_Component_Ref):
+	"""Used by armature instances to add or modify a component on an instance of a bone"""
+	bone: bpy.props.StringProperty(name="Bone", options=set()) # type: ignore
+	override: bpy.props.BoolProperty(name="Enable Instance Override", default=False, options=set()) # type: ignore
+
+
+class PSTF_ComponentResourceBase(Protocol):
+	"""Base class for stf component property-groups"""
+	stf_id: str
+	stf_name: str
+	exclusion_group: str
+	enabled: bool
 
 class STF_ComponentResourceBase(bpy.types.PropertyGroup):
 	"""Base class for stf component property-groups"""
@@ -67,12 +89,6 @@ class STF_Handler_Component(STF_HandlerBase, Protocol):
 	Default stf_name newly added components will get.
 	Substitutes $parent with the name of the object the component is added to.
 	"""
-
-
-class InstanceModComponentRef(STF_Component_Ref):
-	"""Used by armature instances to add or modify a component on an instance of a bone"""
-	bone: bpy.props.StringProperty(name="Bone", options=set()) # type: ignore
-	override: bpy.props.BoolProperty(name="Enable Instance Override", default=False, options=set()) # type: ignore
 
 
 class STF_Handler_BoneComponent(STF_Handler_Component, Protocol):

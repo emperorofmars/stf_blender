@@ -110,17 +110,16 @@ class STF_ImportContext(ISTF_ImportContext):
 		return self._state.import_buffer(stf_id)
 
 
-	def resolve_stf_property_path(self, stf_path: list[str], application_object: Any = None) -> BlenderPropertyPathPart | None:
+	def resolve_stf_property_path(self, stf_path: list[str], blender_object: Any = None) -> BlenderPropertyPathPart | None:
 		if(stf_path is None or len(stf_path) == 0): return None
 
 		if(selected_handler := self._state.determine_property_resolution_handler(stf_path[0])):
-			return selected_handler.resolve_stf_property_to_blender_func(self, stf_path, application_object)
+			return selected_handler.resolve_stf_property_to_blender_func(self, stf_path, blender_object)
 
 		return None
 
 
 	def add_task(self, step: int | STF_TaskSteps, task: Callable):
-		"""Will be executed after all other resources have been exported"""
 		self._state.add_task(step, task)
 
 	def add_cleanup_task(self, task: Callable):
