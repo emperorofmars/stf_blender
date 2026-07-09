@@ -14,12 +14,18 @@ class PSTF_Data_Ref(Protocol): # Bringing polymorphism to Blender
 	stf_id: str
 	blender_property_name: str
 
+	id_data: bpy.types.ID | None
+	rna_ancestors: Callable[[], list[bpy.types.bpy_struct]]
+
 class PSTF_DataResourceBase(Protocol):
 	"""Base class for stf data-resources which are non-native to Blender"""
 	stf_id: str
 	stf_name: str
 	stf_components: list[PSTF_Component_Ref]
 	stf_active_component_index: int
+
+	id_data: bpy.types.ID | None
+	rna_ancestors: Callable[[], list[bpy.types.bpy_struct]]
 
 
 class STF_Handler_Data(STF_Handler_BlenderNative, Protocol):

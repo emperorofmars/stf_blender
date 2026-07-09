@@ -16,6 +16,9 @@ class PSTF_Component_Ref(Protocol): # Bringing polymorphism to Blender
 	stf_id: str
 	blender_property_name: str
 
+	id_data: bpy.types.ID | None
+	rna_ancestors: Callable[[], list[bpy.types.bpy_struct]]
+
 class PInstanceModComponentRef(PSTF_Component_Ref, Protocol):
 	"""Used by armature instances to add or modify a component on an instance of a bone"""
 	bone: str
@@ -27,6 +30,9 @@ class PSTF_ComponentResourceBase(Protocol):
 	stf_name: str
 	exclusion_group: str
 	enabled: bool
+
+	id_data: bpy.types.ID | None
+	rna_ancestors: Callable[[], list[bpy.types.bpy_struct]]
 
 
 class STF_Handler_Component(STF_HandlerBase, Protocol):
