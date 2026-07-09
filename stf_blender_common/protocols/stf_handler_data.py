@@ -14,7 +14,7 @@ class PSTF_Data_Ref(Protocol): # Bringing polymorphism to Blender
 	stf_id: str
 	blender_property_name: str
 
-	id_data: bpy.types.ID | None
+	id_data: Any
 	rna_ancestors: Callable[[], list[bpy.types.bpy_struct]]
 
 class PSTF_DataResourceBase(Protocol):
@@ -24,7 +24,7 @@ class PSTF_DataResourceBase(Protocol):
 	stf_components: list[PSTF_Component_Ref]
 	stf_active_component_index: int
 
-	id_data: bpy.types.ID | None
+	id_data: Any
 	rna_ancestors: Callable[[], list[bpy.types.bpy_struct]]
 
 

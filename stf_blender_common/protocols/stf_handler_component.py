@@ -16,7 +16,7 @@ class PSTF_Component_Ref(Protocol): # Bringing polymorphism to Blender
 	stf_id: str
 	blender_property_name: str
 
-	id_data: bpy.types.ID | None
+	id_data: Any
 	rna_ancestors: Callable[[], list[bpy.types.bpy_struct]]
 
 class PInstanceModComponentRef(PSTF_Component_Ref, Protocol):
@@ -31,7 +31,7 @@ class PSTF_ComponentResourceBase(Protocol):
 	exclusion_group: str
 	enabled: bool
 
-	id_data: bpy.types.ID | None
+	id_data: Any
 	rna_ancestors: Callable[[], list[bpy.types.bpy_struct]]
 
 
