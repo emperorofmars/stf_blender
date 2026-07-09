@@ -8,17 +8,11 @@ from ..component.stf_handler_component import STF_Component_Ref
 STF data-resources that aren't natively supported by Blender, similar to components, are stored by the Collection that represents the STF-Prefab.
 """
 
-class PSTF_Data_Ref(Protocol): # Bringing polymorphism to Blender
-	"""Defines the ID, by which the correct data-resource in the `blender_property_name` property of the appropriate Blender construct can be found"""
-	stf_type: str
-	stf_id: str
-	blender_property_name: str
-
 class STF_Data_Ref(bpy.types.PropertyGroup):
+	"""Defines the ID, by which the correct data-resource in the `blender_property_name` property of the appropriate Blender construct can be found"""
 	stf_type: bpy.props.StringProperty(name="Type", options=set()) # type: ignore
 	stf_id: bpy.props.StringProperty(name="ID", options=set()) # type: ignore
 	blender_property_name: bpy.props.StringProperty(name="Blender Property Name", options=set()) # type: ignore
-
 
 class STF_DataResourceBase(bpy.types.PropertyGroup):
 	"""Base class for stf data-resources which are non-native to Blender"""
