@@ -3,8 +3,7 @@ import re
 from typing import Any
 
 from ....common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STF_TaskSteps, STF_Category
-from ....common.resource.component import STF_ComponentResourceBase, STF_Handler_BoneComponent, STF_Component_Ref
-from ....common.resource.component.component_utils import ComponentLoadJsonOperatorBase, add_component, export_component_base, import_component_base, preserve_component_reference
+from ....common.resource.component import STF_ComponentResourceBase, STF_Handler_BoneComponent, STF_Component_Ref, ComponentLoadJsonOperatorBase, add_component, export_component_base, import_component_base, preserve_component_reference
 from ....common.utils.animation_conversion_utils import get_component_index, get_component_stf_path_from_collection
 from ....common.utils import trs_utils
 from ....common.helpers import create_add_button, create_remove_button

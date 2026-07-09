@@ -1,7 +1,7 @@
 import uuid
 import bpy
 
-from ....common.resource.component.component_utils import add_component
+from ....common.resource.component import add_component
 from ..ava_avatar import Handler_AVA_Avatar, AVA_Avatar
 from ..ava_visemes_blendshape import Handler_AVA_Visemes_Blendshape, automap as automap_visemes
 from ..ava_eyelids_blendshape import Handler_AVA_Eyelids_Blendshape, automap as automap_eyelids

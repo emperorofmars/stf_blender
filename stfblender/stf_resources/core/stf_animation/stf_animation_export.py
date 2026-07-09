@@ -5,7 +5,7 @@ import bpy
 
 from ....common import STF_ExportContext, STFReportSeverity, STFReport, STF_TaskSteps
 from ....common.utils.buffer_utils import serialize_float
-from ....common.utils.id_utils import ensure_stf_id
+from ....common.resource.resource_id import ensure_stf_id
 from ....common.slot_link import ActionSlotLink
 from .stf_animation_common import *
 from .stf_animation_bake import bake_constraints

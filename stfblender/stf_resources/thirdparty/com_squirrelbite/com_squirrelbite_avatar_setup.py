@@ -2,8 +2,7 @@ import bpy
 from typing import Any
 
 from ....common import STF_ExportContext, STF_ImportContext, STFReportSeverity, STFReport, STF_Category, STF_TaskSteps
-from ....common.resource.component import STF_ComponentResourceBase, STF_Handler_Component, STF_Component_Ref
-from ....common.resource.component.component_utils import add_component, export_component_base, import_component_base
+from ....common.resource.component import STF_ComponentResourceBase, STF_Handler_Component, STF_Component_Ref, add_component, export_component_base, import_component_base
 from ....common.helpers import draw_list, poll_valid_animations
 from ....common.blender_grr import *
 

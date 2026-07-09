@@ -10,7 +10,7 @@ from ....common.resource.component import InstanceModComponentRef
 from ....common.utils.animation_conversion_utils import *
 from ....common.utils.armature_bone import ArmatureBone
 from ....common.utils.trs_utils import close_enough
-from ....common.utils.id_utils import ensure_stf_id
+from ....common.resource.resource_id import ensure_stf_id
 from ....common.helpers import get_resource_id
 
 

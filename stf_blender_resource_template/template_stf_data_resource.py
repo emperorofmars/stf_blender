@@ -21,7 +21,7 @@ def _stf_import(context: stfblender.common.STF_ImportContext, json_resource: dic
 
 def _stf_export(context: stfblender.common.STF_ExportContext, application_object: Any, context_object: Any) -> tuple[dict, str]: # pyright: ignore[reportRedeclaration]
 	application_object: bpy.types.Brush = application_object
-	stfblender.common.utils.id_utils.ensure_stf_id(context, application_object)
+	stfblender.common.resource.ensure_stf_id(context, application_object)
 
 	json_resource = {
 		"type": _stf_type,
@@ -41,14 +41,14 @@ class CustomSTFBrushHandler(stfblender.common.resource.STF_Handler_Data):
 	understood_application_types = [bpy.types.Brush]
 	import_func = _stf_import
 	export_func = _stf_export
-	get_components_func = stfblender.common.resource.component.component_utils.get_components_from_object
+	get_components_func = stfblender.common.resource.get_components_from_object
 
 
 register_stf_handlers = [CustomSTFBrushHandler]
 
 
 def register():
-	stfblender.common.resource.blender_native.boilerplate_register(bpy.types.Brush)
+	stfblender.common.resource.boilerplate_register(bpy.types.Brush)
 
 def unregister():
-	stfblender.common.resource.blender_native.boilerplate_unregister(bpy.types.Brush)
+	stfblender.common.resource.boilerplate_unregister(bpy.types.Brush)

@@ -1,4 +1,4 @@
 
-from .stf_handler_component import STF_Handler_Component, STF_Component_Ref, STF_ComponentResourceBase, InstanceModComponentRef, STF_Handler_BoneComponent, STF_ExportComponentHook
-
-__all__ = ["STF_Handler_Component", "STF_Component_Ref", "STF_ComponentResourceBase", "InstanceModComponentRef", "STF_Handler_BoneComponent", "STF_ExportComponentHook"]
+from .stf_component_resource import *
+from .component_base_ops import *
+from .stf_handler_component import *

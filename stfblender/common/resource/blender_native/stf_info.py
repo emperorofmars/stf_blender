@@ -3,6 +3,7 @@ from typing import Any
 
 from ..component.stf_handler_component import STF_Component_Ref
 
+__all__ = ["STF_Info", "boilerplate_register", "boilerplate_unregister", "get_components_from_object"]
 
 class STF_Info(bpy.types.PropertyGroup):
 	"""Basic STF properties for Blender structs that represent stf-node or stf-data resources"""
@@ -19,3 +20,16 @@ def boilerplate_register(blender_type: Any):
 def boilerplate_unregister(blender_type: Any):
 	if hasattr(blender_type, "stf_info"):
 		del blender_type.stf_info
+
+
+def get_components_from_object(blender_object: Any) -> list[Any]:
+	"""Retrieves Blender STF components from an Blender object"""
+	ret = []
+	if(hasattr(blender_object, "stf_info")):
+		for component_ref in blender_object.stf_info.stf_components:
+			if(hasattr(blender_object, component_ref.blender_property_name)):
+				components = getattr(blender_object, component_ref.blender_property_name)
+				for component in components:
+					if(component.stf_id == component_ref.stf_id):
+						ret.append(component)
+	return ret

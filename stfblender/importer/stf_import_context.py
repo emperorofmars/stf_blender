@@ -8,7 +8,7 @@ from ..common.stf_task_steps import STF_TaskSteps
 from .stf_import_state import STF_ImportState
 from ..common.stf_report import STFReportSeverity, STFReport
 from ..common.property_path_part import BlenderPropertyPathPart
-from ..common.resource.component.component_utils import STF_Component_Editmode_Resistant_Reference
+from ..common.resource.component import STF_Component_Editmode_Resistant_Reference
 
 
 _logger = logging.getLogger(__name__)

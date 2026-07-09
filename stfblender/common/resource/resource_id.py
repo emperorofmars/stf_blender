@@ -6,6 +6,9 @@ from .. import STF_ExportContext, STFReportSeverity, STFReport
 from ..helpers.misc import CopyToClipboard
 
 
+__all__ = ["STFSetIDOperatorBase", "draw_stf_id_ui", "ensure_stf_id"]
+
+
 class STFSetIDOperatorBase:
 	"""Set STF-ID"""
 	bl_label = "Set STF-ID"

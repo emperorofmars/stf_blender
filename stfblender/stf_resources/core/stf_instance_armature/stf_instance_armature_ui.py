@@ -3,11 +3,10 @@ from typing import Any
 
 from .stf_instance_armature import InstanceModComponentRef
 from .stf_instance_armature_utils import ProcessComponentsOntoArmatureInstance, UpdateArmatureInstanceComponentStandins
-from ....common.resource.component import STF_Component_Ref
+from ....common.resource.component import STF_Component_Ref, STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
+from ....common.resource.resource_id import STFSetIDOperatorBase, draw_stf_id_ui
 from ....common.helpers import draw_multiline_text
-from ....common.resource.component.component_utils import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
-from ....common.utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
-from ....common.ui.component_ui import draw_components_ui, draw_instance_standin_components_ui
+from ....common.ui import draw_components_ui, draw_instance_standin_components_ui
 
 
 class STFSetArmatureInstanceIDOperator(bpy.types.Operator, STFSetIDOperatorBase):

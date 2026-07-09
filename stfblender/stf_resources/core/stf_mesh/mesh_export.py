@@ -5,7 +5,7 @@ from typing import Any
 import numpy as np
 
 from ....common import STF_ExportContext, STFReport, STF_Category
-from ....common.utils.id_utils import ensure_stf_id
+from ....common.resource.resource_id import ensure_stf_id
 from ....common.utils.buffer_utils import determine_indices_width, determine_pack_format_float, determine_pack_format_uint, serialize_float, serialize_uint
 
 

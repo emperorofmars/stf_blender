@@ -1,9 +1,9 @@
 import bpy
 
+from ....common.resource.resource_id import STFSetIDOperatorBase, draw_stf_id_ui
+from ....common.resource.component import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
+from ....common.ui import draw_components_ui
 from .stf_material_definition import STF_Material_Property, STF_Material_Value_Base, STF_Material_Value_Ref
-from ....common.utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
-from ....common.resource.component.component_utils import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
-from ....common.ui.component_ui import draw_components_ui
 from .material_value_modules import blender_material_value_modules
 from .stf_material_operators import STFAddMaterialProperty, STFAddMaterialPropertyValue, STFClearMaterial, STFRemoveMaterialProperty, STFRemoveMaterialPropertyValue
 from .convert_blender_material_to_stf import STFConvertBlenderMaterialToSTF

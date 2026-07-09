@@ -6,10 +6,9 @@ from typing import Any
 from ....common.helpers.reference_helper import register_exported_resource
 
 from ....common import STF_ExportContext, STF_ImportContext, STF_TaskSteps, STFReportSeverity, STFReport, STF_Category
-from ....common.resource.blender_native import STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister
+from ....common.resource.blender_native import STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister, get_components_from_object
 from ....common.utils import trs_utils
-from ....common.resource.component.component_utils import get_components_from_object
-from ....common.utils.id_utils import ensure_stf_id
+from ....common.resource.resource_id import ensure_stf_id
 from ....common.helpers import get_resource_id
 from .node_property_conversion import stf_node_resolve_property_path_to_stf_func, stf_node_resolve_stf_property_to_blender_func
 
@@ -49,7 +48,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 				pose_bone = blender_object.parent.pose.bones[bone.name]
 				blender_object.parent_type = "BONE"
 				blender_object.parent_bone = bone.name
-				blender_object.matrix_parent_inverse = (blender_object.parent.matrix_world @ mathutils.Matrix.Translation(pose_bone.tail - pose_bone.head) @ pose_bone.matrix).inverted_safe() # Blender why
+				blender_object.matrix_parent_inverse = (blender_object.parent.matrix_world @ mathutils.Matrix.Translation(pose_bone.tail - pose_bone.head) @ pose_bone.matrix).inverted_safe() # pyright: ignore[reportArgumentType] # Blender why
 				blender_object.matrix_world = blender_object.parent.matrix_world @ pose_bone.matrix @ mathutils.Matrix.Rotation(math.radians(-90), 4, "X") @ matrix_local # Blender why
 			else:
 				blender_object.parent_type = "OBJECT"
@@ -138,7 +137,7 @@ class Handler_STF_Node(STF_Handler_BlenderNative):
 	like_types = ["node", "node.spatial"]
 	understood_application_types = [bpy.types.Object]
 	import_func = _stf_import
-	export_func = _stf_export
+	export_func = _stf_export # pyright: ignore[reportAssignmentType]
 	can_handle_application_object_func = _can_handle_application_object_func
 	get_components_func = get_components_from_object
 

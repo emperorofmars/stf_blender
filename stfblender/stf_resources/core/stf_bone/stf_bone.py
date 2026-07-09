@@ -5,12 +5,11 @@ from typing import Any
 from collections.abc import Sequence
 
 from ....common import STF_ImportContext, STF_ExportContext, STFReportSeverity, STFReport, STF_Category
-from ....common.resource.blender_native import STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister
+from ....common.resource.blender_native import STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister, get_components_from_object
 from ....common.utils import trs_utils
 from ....common.utils.armature_bone import ArmatureBone
 from ....common.utils.animation_conversion_utils import *
-from ....common.resource.component.component_utils import get_components_from_object
-from ....common.utils.id_utils import ensure_stf_id
+from ....common.resource.resource_id import ensure_stf_id
 from .stf_bone_property_conversion import resolve_property_path_to_stf_func, resolve_stf_property_to_blender_func
 
 
@@ -52,7 +51,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	blender_edit_bone.tail = mathutils.Vector([0, 0, 1])
 	blender_edit_bone.roll = 0
 
-	blender_edit_bone.matrix = mathutils.Matrix.LocRotScale(trs_utils.stf_translation_to_blender(json_resource["translation"]), trs_utils.stf_rotation_to_blender(json_resource["rotation"]), mathutils.Vector([1, 1, 1])) @ mathutils.Matrix.Rotation(math.radians(90), 4, "X")
+	blender_edit_bone.matrix = mathutils.Matrix.LocRotScale(trs_utils.stf_translation_to_blender(json_resource["translation"]), trs_utils.stf_rotation_to_blender(json_resource["rotation"]), mathutils.Vector([1, 1, 1])) @ mathutils.Matrix.Rotation(math.radians(90), 4, "X") # pyright: ignore[reportArgumentType]
 	blender_edit_bone.length = json_resource["length"]
 
 	if("connected" in json_resource): blender_edit_bone.use_connect = json_resource["connected"]

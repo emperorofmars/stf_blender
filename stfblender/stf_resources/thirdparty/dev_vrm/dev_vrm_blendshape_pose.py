@@ -2,8 +2,7 @@ import bpy
 from typing import Any
 
 from ....common import STF_ExportContext, STF_ImportContext, STF_TaskSteps, STF_Category
-from ....common.resource.data import STF_DataResourceBase, STF_Handler_Data, STF_Data_Ref
-from ....common.resource.data.data_resource_utils import add_resource, export_data_resource_base, get_components_from_data_resource, import_data_resource_base
+from ....common.resource.data import STF_DataResourceBase, STF_Handler_Data, STF_Data_Ref, add_resource, export_data_resource_base, get_components_from_data_resource, import_data_resource_base
 from ....common.helpers import register_exported_resource
 
 

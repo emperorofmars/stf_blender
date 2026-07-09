@@ -1,8 +1,9 @@
 import bpy
 from typing import Any, Callable
 
-from ..resource.component.component_utils import STF_ManageExclusionGroups, STF_RegisterExclusionGroup
-from ..resource.component.stf_handler_component import InstanceModComponentRef, STF_ComponentResourceBase, STF_Component_Ref
+
+from ..resource.component import InstanceModComponentRef, STF_ComponentResourceBase, STF_Component_Ref
+from ..resource.component.component_exclusion_groups import STF_ManageExclusionGroups, STF_RegisterExclusionGroup
 from ..helpers import CopyToClipboard, draw_multiline_text
 from ..blender_grr import *
 from ..base.stf_registry import find_component_handler, get_all_component_handlers, get_component_handlers, get_data_component_handlers

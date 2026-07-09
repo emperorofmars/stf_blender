@@ -3,13 +3,11 @@ import re
 from typing import Any
 
 from ...common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STF_TaskSteps, STF_Category
-from ...common.resource.component import STF_ComponentResourceBase, STF_Handler_BoneComponent, STF_Component_Ref
+from ...common.resource.component import STF_ComponentResourceBase, STF_Handler_BoneComponent, STF_Component_Ref, add_component, export_component_base, import_component_base, preserve_component_reference
 from ...common.utils.animation_conversion_utils import get_component_index, get_component_stf_path_from_collection
 from ...common.helpers import create_add_button, create_remove_button
-from .util.constraint_source import ConstraintSource
-
-from ...common.resource.component.component_utils import add_component, export_component_base, import_component_base, preserve_component_reference
 from ...common.blender_grr.stf_node_path_selector import draw_node_path_selector, node_path_selector_from_stf, node_path_selector_to_stf, node_path_selector_to_string, validate_node_path_selector
+from .util.constraint_source import ConstraintSource
 
 
 _stf_type = "stfexp.constraint.parent"
@@ -211,7 +209,7 @@ class Handler_STFEXP_Constraint_Parent(STF_Handler_BoneComponent):
 	filter = [bpy.types.Object, bpy.types.Bone]
 	draw_component_func = _draw_component
 
-	draw_component_instance_func = _draw_component
+	draw_component_instance_func = _draw_component # pyright: ignore[reportAssignmentType]
 	set_component_instance_standin_func = _set_component_instance_standin
 
 	serialize_component_instance_standin_func = _serialize_component_instance_standin_func  # pyright: ignore[reportAssignmentType]

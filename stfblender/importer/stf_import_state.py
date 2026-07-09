@@ -5,9 +5,8 @@ from typing import Any
 from .import_settings import STF_ImportSettings
 
 from ..common import STFReportSeverity, STFReport, STF_Category
-from ..common.resource import STF_HandlerBase
+from ..common.resource.stf_handler_base import STF_HandlerBase
 from ..common.base.stf_file import STF_File
-from ..common.resource.blender_native.stf_handler_blender_native import STF_Handler_BlenderNative
 from ..common.base.stf_json_definition import STF_Meta_AssetInfo
 from ..common.base.stf_state_base import STF_State_Base
 

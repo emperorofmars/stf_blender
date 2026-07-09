@@ -4,8 +4,7 @@ import re
 from typing import Any
 
 from ...common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STF_Category
-from ...common.resource.component import STF_ComponentResourceBase, STF_Handler_BoneComponent, STF_Component_Ref
-from ...common.resource.component.component_utils import ComponentLoadJsonOperatorBase, add_component, export_component_base, import_component_base
+from ...common.resource.component import STF_ComponentResourceBase, STF_Handler_BoneComponent, STF_Component_Ref, ComponentLoadJsonOperatorBase, add_component, export_component_base, import_component_base
 from ...common.utils.trs_utils import blender_rotation_to_stf, blender_translation_to_stf, stf_rotation_to_blender, stf_translation_to_blender
 from ...common.utils.animation_conversion_utils import get_component_index, get_component_stf_path_from_collection
 
@@ -144,7 +143,7 @@ class Handler_STFEXP_Collider_Capsule(STF_Handler_BoneComponent):
 	resolve_property_path_to_stf_func = _resolve_property_path_to_stf_func
 	resolve_stf_property_to_blender_func = _resolve_stf_property_to_blender_func
 
-	draw_component_instance_func = _draw_component
+	draw_component_instance_func = _draw_component # pyright: ignore[reportAssignmentType]
 	set_component_instance_standin_func = _set_component_instance_standin
 
 	serialize_component_instance_standin_func = _serialize_component_instance_standin_func  # pyright: ignore[reportAssignmentType]

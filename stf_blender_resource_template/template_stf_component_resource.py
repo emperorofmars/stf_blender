@@ -17,8 +17,8 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 
 
 def _stf_import(context: stfblender.common.STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
-	component_ref, component = stfblender.common.resource.component.component_utils.add_component(context_object, _blender_property_name, stf_id, _stf_type)
-	ret = stfblender.common.resource.component.component_utils.import_component_base(context, component, json_resource, _blender_property_name, context_object)
+	component_ref, component = stfblender.common.resource.component.add_component(context_object, _blender_property_name, stf_id, _stf_type)
+	ret = stfblender.common.resource.component.import_component_base(context, component, json_resource, _blender_property_name, context_object)
 
 	component.squeak = json_resource.get("squeak", True)
 
@@ -26,7 +26,7 @@ def _stf_import(context: stfblender.common.STF_ImportContext, json_resource: dic
 
 
 def _stf_export(context: stfblender.common.STF_ExportContext, component: SqueakComponent, context_object: Any) -> tuple[dict, str]:
-	ret = stfblender.common.resource.component.component_utils.export_component_base(context, _stf_type, component, _blender_property_name, context_object)
+	ret = stfblender.common.resource.component.export_component_base(context, _stf_type, component, _blender_property_name, context_object)
 	ret["squeak"] = component.squeak
 	return ret, component.stf_id
 

@@ -3,9 +3,8 @@ from typing import Any
 
 from .stf_instance_mesh_util import set_instance_blendshapes
 from ....common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STFReportSeverity, STFReport, STF_Category
-from ....common.resource.blender_native import STF_Handler_BlenderNative
-from ....common.resource.component.component_utils import get_components_from_object
-from ....common.utils.id_utils import ensure_stf_id
+from ....common.resource.blender_native import STF_Handler_BlenderNative, get_components_from_object
+from ....common.resource.resource_id import ensure_stf_id
 
 
 _stf_type = "stf.instance.mesh"
@@ -141,7 +140,7 @@ class Handler_STF_Instance_Mesh(STF_Handler_BlenderNative):
 	like_types = ["instance.mesh", "instance"]
 	understood_application_types = [tuple]
 	import_func = _stf_import
-	export_func = _stf_export
+	export_func = _stf_export # pyright: ignore[reportAssignmentType]
 	can_handle_application_object_func = _can_handle_application_object_func
 	get_components_func = get_components_from_object
 

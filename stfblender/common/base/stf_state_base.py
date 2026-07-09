@@ -4,7 +4,6 @@ from typing import Callable
 from ..stf_task_steps import STF_TaskSteps
 from ..stf_report import STFReportSeverity, STFException, STFReport
 
-
 class STF_State_Base:
 	def __init__(self, fail_on_severity: STFReportSeverity = STFReportSeverity.FatalError):
 		self._tasks: dict[int, list[Callable]] = {}

@@ -3,6 +3,7 @@ from collections.abc import Callable
 
 from .. import STF_ImportContext, STF_ExportContext, BlenderPropertyPathPart, STFPropertyPathPart, STFReport
 
+__all__ = ["STF_HandlerBase"]
 
 class STF_HandlerBase(Protocol):
 	"""

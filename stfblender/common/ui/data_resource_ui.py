@@ -4,9 +4,9 @@ from typing import Any
 from ..base.stf_registry import find_data_handler, get_blender_non_native_data_handlers
 from ..helpers import CopyToClipboard, draw_multiline_text
 from ..resource.data import STF_DataResourceBase, STF_Data_Ref
-from ..resource.data.data_resource_utils import STFCreateDataResourceOperator, STFEditDataResourceOperator, STFRemoveDataResourceOperator
+from ..resource.data.data_resource_ops import STFCreateDataResourceOperator, STFEditDataResourceOperator, STFRemoveDataResourceOperator
 from .component_ui import draw_components_ui
-from ..resource.component.component_utils import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
+from ..resource.component import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
 from ...stf_resources.fallback.json_fallback_data import Handler_JsonFallbackData
 
 

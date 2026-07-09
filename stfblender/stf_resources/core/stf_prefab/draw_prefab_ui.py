@@ -1,7 +1,7 @@
 import bpy
 
-from ....common.utils.id_utils import draw_stf_id_ui
-from ....common.ui.component_ui import draw_components_ui
+from ....common.resource.resource_id import draw_stf_id_ui
+from ....common.ui import draw_components_ui
 from ....common.base.stf_meta import draw_meta_editor
 from ....common.helpers.misc import draw_slot_link_warning
 

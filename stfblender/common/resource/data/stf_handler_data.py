@@ -1,28 +1,16 @@
 import bpy
 from typing import Any, Callable, Protocol
 
-from ..blender_native import STF_Handler_BlenderNative
-from ..component.stf_handler_component import STF_Component_Ref
+from ..stf_handler_base import STF_HandlerBase
+from .stf_data_resource import STF_Data_Ref
 
 """
 STF data-resources that aren't natively supported by Blender, similar to components, are stored by the Collection that represents the STF-Prefab.
 """
 
-class STF_Data_Ref(bpy.types.PropertyGroup):
-	"""Defines the ID, by which the correct data-resource in the `blender_property_name` property of the appropriate Blender construct can be found"""
-	stf_type: bpy.props.StringProperty(name="Type", options=set()) # type: ignore
-	stf_id: bpy.props.StringProperty(name="ID", options=set()) # type: ignore
-	blender_property_name: bpy.props.StringProperty(name="Blender Property Name", options=set()) # type: ignore
+__all__ = ["STF_Handler_Data"]
 
-class STF_DataResourceBase(bpy.types.PropertyGroup):
-	"""Base class for stf data-resources which are non-native to Blender"""
-	stf_id: bpy.props.StringProperty(name="ID", description="Universally unique ID", options=set()) # type: ignore
-	stf_name: bpy.props.StringProperty(name="Name", options=set()) # type: ignore
-	stf_components: bpy.props.CollectionProperty(type=STF_Component_Ref, name="Components", options=set()) # type: ignore
-	stf_active_component_index: bpy.props.IntProperty(name="Selected Component", options=set()) # type: ignore
-
-
-class STF_Handler_Data(STF_Handler_BlenderNative, Protocol):
+class STF_Handler_Data(STF_HandlerBase, Protocol):
 	"""Extension to STF_Module which also associates a function to draw the data-resources in Blender's UI"""
 
 	blender_property_name: str

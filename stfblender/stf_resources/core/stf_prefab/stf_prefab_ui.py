@@ -1,7 +1,7 @@
 import bpy
 
-from ....common.utils.id_utils import STFSetIDOperatorBase
-from ....common.resource.component.component_utils import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
+from ....common.resource.resource_id import STFSetIDOperatorBase
+from ....common.resource.component import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
 from .draw_prefab_ui import draw_prefab_ui
 
 

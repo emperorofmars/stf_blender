@@ -2,9 +2,8 @@ import bpy
 from typing import Any
 
 from ....common import STF_ExportContext, STF_ImportContext, STFReport, STFReportSeverity, STF_Category
-from ....common.resource.blender_native import STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister
-from ....common.resource.component.component_utils import get_components_from_object
-from ....common.utils.id_utils import ensure_stf_id
+from ....common.resource.blender_native import STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister, get_components_from_object
+from ....common.resource.resource_id import ensure_stf_id
 
 
 _stf_type = "stf.image"

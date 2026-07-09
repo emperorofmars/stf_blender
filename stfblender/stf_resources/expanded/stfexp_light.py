@@ -4,7 +4,7 @@ from typing import Any
 
 from ...common import STF_ExportContext, STF_ImportContext, STFReportSeverity, STFReport, BlenderPropertyPathPart, STFPropertyPathPart, STF_Category
 from ...common.resource.blender_native import STF_Handler_BlenderNative
-from ...common.utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui, ensure_stf_id
+from ...common.resource.resource_id import STFSetIDOperatorBase, draw_stf_id_ui, ensure_stf_id
 
 
 _stf_type = "stfexp.light"

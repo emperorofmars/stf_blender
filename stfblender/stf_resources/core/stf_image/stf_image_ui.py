@@ -1,8 +1,8 @@
 import bpy
 
-from ....common.utils.id_utils import STFSetIDOperatorBase, draw_stf_id_ui
-from ....common.resource.component.component_utils import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
-from ....common.ui.component_ui import draw_components_ui
+from ....common.resource.resource_id import STFSetIDOperatorBase, draw_stf_id_ui
+from ....common.resource.component import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
+from ....common.ui import draw_components_ui
 
 
 class STFSetImageIDOperator(bpy.types.Operator, STFSetIDOperatorBase):

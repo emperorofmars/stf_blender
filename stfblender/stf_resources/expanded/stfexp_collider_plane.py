@@ -4,8 +4,7 @@ import re
 from typing import Any
 
 from ...common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STF_Category, STFReport
-from ...common.resource.component import STF_ComponentResourceBase, STF_Handler_BoneComponent, STF_Component_Ref
-from ...common.resource.component.component_utils import ComponentLoadJsonOperatorBase, add_component, export_component_base, import_component_base
+from ...common.resource.component import STF_ComponentResourceBase, STF_Handler_BoneComponent, STF_Component_Ref, ComponentLoadJsonOperatorBase, add_component, export_component_base, import_component_base
 from ...common.utils.trs_utils import blender_rotation_to_stf, blender_translation_to_stf, stf_rotation_to_blender, stf_translation_to_blender
 from ...common.utils.animation_conversion_utils import get_component_index, get_component_stf_path_from_collection
 
