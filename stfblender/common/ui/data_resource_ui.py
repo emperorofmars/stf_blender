@@ -3,8 +3,7 @@ from typing import Any
 
 from ....stf_blender_common.protocols import PSTF_Data_Ref, PSTF_DataResourceBase
 from ....stf_blender_common.base.stf_registry import find_data_handler, get_blender_non_native_data_handlers
-from ....stf_blender_common.operators.base_operators_data import STFCreateDataResourceOperator, STFEditDataResourceOperator, STFRemoveDataResourceOperator
-from ....stf_blender_common.operators.base_operators_component import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
+from ....stf_blender_common.operators import *
 from ....stf_blender_common.utils.draw_multiline_text import draw_multiline_text
 from .component_ui import draw_components_ui
 from ...stf_resources.fallback.json_fallback_data import Handler_JsonFallbackData

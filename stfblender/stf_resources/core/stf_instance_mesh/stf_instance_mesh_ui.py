@@ -1,6 +1,6 @@
 import bpy
 
-from .....stf_blender_common.operators.base_operators import STFSetIDOperatorBase
+from .....stf_blender_common.operators import STFSetIDOperatorBase
 from .....stf_blender_common.utils.id_utils import draw_stf_id_ui
 from .....stf_blender_common.utils.draw_multiline_text import draw_multiline_text
 from .stf_instance_mesh import STF_Instance_Mesh_Blendshape_Value

@@ -1,4 +1,7 @@
 
-OP_Edit_Component_Collection = "stf.edit_component_collection"
-OP_CopyToClipboard = "stf.copy_to_clipboard"
-OP_OpenWebpage = "stf.open_webpage"
+from .stf_operators import STF_Operators
+from .base_operators import STFSetIDOperatorBase
+from .base_operators_component import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase, ComponentLoadJsonOperatorBase
+from .base_operators_data import STFCreateDataResourceOperator, STFEditDataResourceOperator, STFRemoveDataResourceOperator
+
+__all__ = ["STF_Operators", "STFSetIDOperatorBase", "STFAddComponentOperatorBase", "STFEditComponentOperatorBase", "STFRemoveComponentOperatorBase", "ComponentLoadJsonOperatorBase", "STFCreateDataResourceOperator", "STFEditDataResourceOperator", "STFRemoveDataResourceOperator"]

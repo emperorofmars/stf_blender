@@ -6,7 +6,7 @@ from typing import Any
 from ....stf_blender_common.blender_data.stf_resource_component import STF_ComponentResourceBase
 from ....stf_blender_common.protocols import PSTF_ExportContext, PSTF_ImportContext, PSTF_Component_Ref, STF_Handler_BoneComponent
 from ....stf_blender_common.base import STF_Category, BlenderPropertyPathPart, STFPropertyPathPart, STFReport
-from ....stf_blender_common.operators.base_operators_component import ComponentLoadJsonOperatorBase
+from ....stf_blender_common.operators import ComponentLoadJsonOperatorBase
 from ....stf_blender_common.utils.trs_utils import blender_rotation_to_stf, blender_translation_to_stf, stf_rotation_to_blender, stf_translation_to_blender
 from ....stf_blender_common.utils.animation_conversion_utils import get_component_index, get_component_stf_path_from_collection
 from ....stf_blender_common.utils.component_resource_utils import add_component, export_component_base, import_component_base

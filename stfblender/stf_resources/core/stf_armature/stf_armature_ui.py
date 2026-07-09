@@ -1,8 +1,7 @@
 import bpy
 
 from .....stf_blender_common.utils.id_utils import draw_stf_id_ui
-from .....stf_blender_common.operators.base_operators import STFSetIDOperatorBase
-from .....stf_blender_common.operators.base_operators_component import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
+from .....stf_blender_common.operators import STFSetIDOperatorBase, STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
 from ....common.ui.component_ui import draw_components_ui
 
 

@@ -4,8 +4,7 @@ from typing import Any
 from .....stf_blender_common.blender_data.stf_resource_component import STF_ComponentResourceBase
 from .....stf_blender_common.protocols import PSTF_ExportContext, PSTF_ImportContext, PSTF_Component_Ref, STF_Handler_Component
 from .....stf_blender_common.base import STF_Category, STFReport
-from .....stf_blender_common.utils.component_resource_utils import export_component_base, import_component_base
-from .....stf_blender_common.operators.base_operators_component import add_component
+from .....stf_blender_common.utils.component_resource_utils import add_component, export_component_base, import_component_base
 
 
 _stf_type = "stf.texture"

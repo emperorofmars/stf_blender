@@ -4,9 +4,8 @@ import bpy
 
 from .....stf_blender_common.base import STF_TaskSteps, STFReport, STFReportSeverity
 from .....stf_blender_common.protocols import PSTF_ExportContext
-from .....stf_blender_common.data.slot_link import ActionSlotLink
+from .....stf_blender_common.protocols.slot_link import ActionSlotLink
 from .....stf_blender_common.utils.buffer_utils import serialize_float
-
 from .....stf_blender_common.utils.id_utils import ensure_stf_id
 from .stf_animation_common import *
 from .stf_animation_bake import bake_constraints

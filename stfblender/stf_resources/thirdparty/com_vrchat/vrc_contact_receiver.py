@@ -5,7 +5,7 @@ from typing import Any
 from .vrc_contact_base import VRC_ContactBase, vrc_contact_create_resolve_property_path_to_stf_func, vrc_contact_create_resolve_stf_property_to_blender_func, vrc_contact_draw_base, vrc_contact_export_base, vrc_contact_import_base
 from .....stf_blender_common.base import STF_Category
 from .....stf_blender_common.protocols import PSTF_ExportContext, PSTF_ImportContext, PSTF_Component_Ref, STF_Handler_BoneComponent
-from .....stf_blender_common.operators.base_operators_component import ComponentLoadJsonOperatorBase
+from .....stf_blender_common.operators import ComponentLoadJsonOperatorBase
 from .....stf_blender_common.utils.component_resource_utils import add_component, export_component_base, import_component_base
 
 

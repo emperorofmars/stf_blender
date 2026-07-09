@@ -1,9 +1,9 @@
 import bpy
 
 from .....stf_blender_common.protocols import PSTF_ExportContext, PSTF_ImportContext, STF_Handler_Component, PInstanceModComponentRef, PSTF_Component_Ref, PSTF_ComponentResourceBase
-from .....stf_blender_common.utils.animation_conversion_utils import *
 from .....stf_blender_common.base.stf_registry import find_component_handler, get_component_handlers
-from .....stf_blender_common.operators.base_operators_component import add_component
+from .....stf_blender_common.utils.animation_conversion_utils import *
+from .....stf_blender_common.utils.component_resource_utils import add_component
 
 
 def update_armature_instance_component_standins(context: bpy.types.Context, blender_object: bpy.types.Object, stf_modules: list[STF_Handler_Component] | None = None):

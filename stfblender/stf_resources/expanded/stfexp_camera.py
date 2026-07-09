@@ -5,7 +5,7 @@ from typing import Any, Callable
 
 from ....stf_blender_common.protocols import PSTF_ExportContext, PSTF_ImportContext, STF_Handler_BlenderNative
 from ....stf_blender_common.base import STF_Category, STFReport, STFReportSeverity, BlenderPropertyPathPart, STFPropertyPathPart
-from ....stf_blender_common.operators.base_operators import STFSetIDOperatorBase
+from ....stf_blender_common.operators import STFSetIDOperatorBase
 from ....stf_blender_common.utils.id_utils import ensure_stf_id, draw_stf_id_ui
 
 

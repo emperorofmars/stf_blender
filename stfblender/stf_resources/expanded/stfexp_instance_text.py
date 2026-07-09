@@ -3,7 +3,7 @@ from typing import Any
 
 from ....stf_blender_common.protocols import PSTF_ExportContext, PSTF_ImportContext, STF_Handler_BlenderNative
 from ....stf_blender_common.base import STF_Category, STFReport, STFReportSeverity
-from ....stf_blender_common.operators.base_operators import STFSetIDOperatorBase
+from ....stf_blender_common.operators import STFSetIDOperatorBase
 from ....stf_blender_common.utils.id_utils import draw_stf_id_ui, ensure_stf_id
 
 # TODO this module is at a bare minimum level, improve it

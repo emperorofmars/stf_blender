@@ -1,10 +1,10 @@
 import bpy
 
-from ....stf_blender_common.operators import OP_Edit_Component_Collection
+from ....stf_blender_common.operators import STF_Operators
 
 
 class Edit_Component_Collection(bpy.types.Operator):
-	bl_idname = OP_Edit_Component_Collection
+	bl_idname = STF_Operators.OP_Edit_Component_Collection
 	bl_label = "Edit"
 	bl_options = {"REGISTER", "UNDO", "INTERNAL"}
 

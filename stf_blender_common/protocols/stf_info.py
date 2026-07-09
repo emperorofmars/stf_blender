@@ -1,8 +1,6 @@
-import bpy
-from typing import Any, Protocol
+from typing import Protocol
 
-from . import PSTF_Component_Ref
-from ..blender_data.stf_resource_component import STF_Component_Ref
+from ..protocols import PSTF_Component_Ref
 
 
 class PSTF_Info(Protocol):
@@ -12,19 +10,3 @@ class PSTF_Info(Protocol):
 	stf_name_source_of_truth: bool
 	stf_components: list[PSTF_Component_Ref]
 	stf_active_component_index: int
-
-class STF_Info(bpy.types.PropertyGroup):
-	"""Basic STF properties"""
-	stf_id: bpy.props.StringProperty(name="ID", description="Universally unique ID", options=set()) # type: ignore
-	stf_name: bpy.props.StringProperty(name="STF Name", description="Optional Name for STF export", options=set()) # type: ignore
-	stf_name_source_of_truth: bpy.props.BoolProperty(name="STF Name Is Source Of Truth", description="Use Blender name or specify one manually", options=set()) # type: ignore
-	stf_components: bpy.props.CollectionProperty(type=STF_Component_Ref, name="Components", options=set()) # type: ignore
-	stf_active_component_index: bpy.props.IntProperty(name="Selected Component", options=set()) # type: ignore
-
-
-def boilerplate_register(blender_type: Any):
-	blender_type.stf_info = bpy.props.PointerProperty(type=STF_Info, name="STF Info", options=set())
-
-def boilerplate_unregister(blender_type: Any):
-	if hasattr(blender_type, "stf_info"):
-		del blender_type.stf_info

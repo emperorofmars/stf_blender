@@ -2,8 +2,7 @@ import bpy
 from typing import Any
 
 from .....stf_blender_common.protocols import PInstanceModComponentRef, PSTF_Component_Ref
-from .....stf_blender_common.operators.base_operators_component import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
-from .....stf_blender_common.operators.base_operators import STFSetIDOperatorBase
+from .....stf_blender_common.operators import STFSetIDOperatorBase, STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
 from .....stf_blender_common.utils.id_utils import draw_stf_id_ui
 from .....stf_blender_common.utils.draw_multiline_text import draw_multiline_text
 from ....common.ui.component_ui import draw_components_ui, draw_instance_standin_components_ui

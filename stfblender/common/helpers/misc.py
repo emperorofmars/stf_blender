@@ -1,6 +1,6 @@
 import bpy
 
-from ....stf_blender_common.operators import OP_CopyToClipboard, OP_OpenWebpage
+from ....stf_blender_common.operators import STF_Operators
 
 
 def draw_slot_link_warning(layout: bpy.types.UILayout):
@@ -40,7 +40,7 @@ class SetActiveObjectOperator(bpy.types.Operator):
 
 class OpenWebpage(bpy.types.Operator):
 	"""Open in Webbrowser"""
-	bl_idname = OP_OpenWebpage
+	bl_idname = STF_Operators.OP_OpenWebpage
 	bl_label = "Open Webpage"
 
 	url: bpy.props.StringProperty(name = "URL") # type: ignore
@@ -53,7 +53,7 @@ class OpenWebpage(bpy.types.Operator):
 
 class CopyToClipboard(bpy.types.Operator):
 	"""Copy to Clipboard"""
-	bl_idname = OP_CopyToClipboard
+	bl_idname = STF_Operators.OP_CopyToClipboard
 	bl_label = "Copy to Clipboard"
 	bl_options = {"REGISTER", "UNDO"}
 

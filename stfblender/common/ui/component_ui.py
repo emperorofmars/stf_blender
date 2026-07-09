@@ -3,7 +3,7 @@ from typing import Any, Callable
 
 from ....stf_blender_common.protocols import PInstanceModComponentRef, PSTF_Component_Ref, PSTF_ComponentResourceBase
 from ....stf_blender_common.utils.draw_multiline_text import draw_multiline_text
-from ....stf_blender_common.operators import OP_CopyToClipboard
+from ....stf_blender_common.operators import STF_Operators
 from ....stf_blender_common.base.stf_registry import find_component_handler, get_all_component_handlers, get_component_handlers, get_data_component_handlers
 
 
@@ -100,7 +100,7 @@ class STFDrawComponentList:
 		row_r = row.row()
 		row_r.alignment = "RIGHT"
 		row_r.label(text=item.stf_id[:8] + "..")
-		row_r.operator(OP_CopyToClipboard, text="", icon="DUPLICATE", emboss=False).text = item.stf_id
+		row_r.operator(STF_Operators.OP_CopyToClipboard, text="", icon="DUPLICATE", emboss=False).text = item.stf_id
 
 # Both lists can be on screen at the same time. They need different 'bl_idname' properties to have separate size and scroll values.
 # On an Collection one will show the components on the Collection (stf.prefab) itself, the other will show components on data-resources which have no Blender-native representation.
@@ -162,7 +162,7 @@ class STFDrawInstanceComponentList(bpy.types.UIList):
 		row_r = split.row()
 		row_r.alignment = "RIGHT"
 		row_r.label(text=item.stf_id[:8] + "..")
-		row_r.operator(OP_CopyToClipboard, text="", icon="DUPLICATE", emboss=False).text = item.stf_id
+		row_r.operator(STF_Operators.OP_CopyToClipboard, text="", icon="DUPLICATE", emboss=False).text = item.stf_id
 
 
 def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: PSTF_Component_Ref, stf_application_object: Any, component: PSTF_ComponentResourceBase, edit_op: str, is_instance: bool, inject_ui: Callable | None = None):
@@ -175,7 +175,7 @@ def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, compo
 	row_r = row.row()
 	row_r.alignment = "RIGHT"
 	row_r.label(text="ID: " + component_ref.stf_id, icon="TAG")
-	row_r.operator(OP_CopyToClipboard, text="", icon="DUPLICATE").text = component_ref.stf_id
+	row_r.operator(STF_Operators.OP_CopyToClipboard, text="", icon="DUPLICATE").text = component_ref.stf_id
 	row_r.operator(edit_op, text="", icon="MODIFIER").component_id = component_ref.stf_id
 
 	# relevant for component instances & standins
@@ -203,7 +203,7 @@ def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, compo
 		exclusion_row_buttons = exclusion_row.row(align=True)
 		exclusion_row_buttons.alignment = "RIGHT"
 		if(component.exclusion_group):
-			exclusion_row_buttons.operator(OP_CopyToClipboard, icon="DUPLICATE", text="")
+			exclusion_row_buttons.operator(STF_Operators.OP_CopyToClipboard, icon="DUPLICATE", text="")
 		exclusion_row_buttons.separator(factor=2)
 		if(component.exclusion_group and component.exclusion_group not in context.collection.stf_exclusion_groups):
 			exclusion_row_buttons.operator(STF_RegisterExclusionGroup.bl_idname, text="Make Group Selectable").group_name = component.exclusion_group

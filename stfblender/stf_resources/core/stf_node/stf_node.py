@@ -4,7 +4,7 @@ import mathutils
 from typing import Any
 
 from .....stf_blender_common.protocols import PSTF_ExportContext, PSTF_ImportContext, STF_Handler_BlenderNative
-from .....stf_blender_common.protocols.stf_info import boilerplate_register, boilerplate_unregister
+from .....stf_blender_common.blender_data import boilerplate_register, boilerplate_unregister
 from .....stf_blender_common.base import STF_TaskSteps, STF_Category, STFReport, STFReportSeverity
 from .....stf_blender_common.utils.id_utils import ensure_stf_id
 from .....stf_blender_common.utils.component_resource_utils import get_components_from_object

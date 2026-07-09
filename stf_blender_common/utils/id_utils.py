@@ -4,7 +4,7 @@ from typing import Any
 
 from ..base import STFReport, STFReportSeverity
 from ..protocols import PSTF_ExportContext
-from ..operators import OP_CopyToClipboard
+from ..operators import STF_Operators
 
 
 def draw_stf_id_ui(layout: bpy.types.UILayout, context: bpy.types.Context, blender_object: Any, stf_prop_holder: Any, set_id_op: str, is_instance: bool = False):
@@ -20,7 +20,7 @@ def draw_stf_id_ui(layout: bpy.types.UILayout, context: bpy.types.Context, blend
 			row_l.label(text=stf_prop_holder.stf_id)
 		row_r = row.row(align=False)
 		row_r.alignment = "RIGHT"
-		row_r.operator(OP_CopyToClipboard, text="", icon="DUPLICATE").text = stf_prop_holder.stf_id
+		row_r.operator(STF_Operators.OP_CopyToClipboard, text="", icon="DUPLICATE").text = stf_prop_holder.stf_id
 		row_r.prop(context.scene, "stf_edit_resource_id", text="", icon="MODIFIER")
 	else:
 		flow.operator(set_id_op)
