@@ -1,11 +1,14 @@
 import bpy
 from typing import Any
 
+from ....stf_blender_common.blender_data.stf_resource_component import STF_ComponentResourceBase
+from ....stf_blender_common.base import STF_Category, STF_TaskSteps, STFReport, STFReportSeverity
+from ....stf_blender_common.protocols import PSTF_ExportContext, PSTF_ImportContext, PSTF_Component_Ref, STF_Handler_Component
+from ....stf_blender_common.utils.component_resource_utils import add_component, export_component_base, import_component_base
 from ....stf_blender_common.utils.collection_helpers import create_add_button, create_remove_button
-from ...common import PSTF_ExportContext, PSTF_ImportContext, STFReportSeverity, STFReport, STF_TaskSteps, STF_Category
-from ...common.resource.component import STF_ComponentResourceBase, STF_Handler_Component, STF_Component_Ref
-from ...common.helpers import register_exported_resource, poll_valid_animations, draw_slot_link_warning
-from ....stf_blender_common.operators.base_operators_component import add_component, export_component_base, import_component_base
+from ....stf_blender_common.utils.reference_helper import register_exported_resource
+from ...common.helpers.misc import draw_slot_link_warning
+from ...common.helpers.poll_helpers import poll_valid_animations
 from ...common.blender_grr import *
 
 
@@ -111,7 +114,7 @@ class STFDrawAVAExpressionList(bpy.types.UIList):
 			layout.label(text="No Fallback", icon="X")
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: AVA_Expressions):
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: PSTF_Component_Ref, context_object: Any, component: AVA_Expressions):
 	if(not hasattr(bpy.types.Action, "slot_links")):
 		draw_slot_link_warning(layout)
 

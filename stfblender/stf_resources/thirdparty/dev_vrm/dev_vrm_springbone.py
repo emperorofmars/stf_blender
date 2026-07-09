@@ -2,12 +2,12 @@ import bpy
 import re
 from typing import Any
 
+from .....stf_blender_common.blender_data.stf_resource_component import STF_ComponentResourceBase
 from .....stf_blender_common.base import STF_Category, STF_TaskSteps, BlenderPropertyPathPart, STFPropertyPathPart
 from .....stf_blender_common.protocols import PSTF_ExportContext, PSTF_ImportContext, PSTF_Component_Ref, STF_Handler_BoneComponent
+from .....stf_blender_common.operators.base_operators_component import ComponentLoadJsonOperatorBase
+from .....stf_blender_common.utils.component_resource_utils import add_component, export_component_base, import_component_base, preserve_component_reference
 from .....stf_blender_common.utils.collection_helpers import create_add_button, create_remove_button
-
-from ....common.resource.component import STF_ComponentResourceBase
-from .....stf_blender_common.operators.base_operators_component import ComponentLoadJsonOperatorBase, add_component, export_component_base, import_component_base, preserve_component_reference
 from .....stf_blender_common.utils.animation_conversion_utils import get_component_index, get_component_stf_path_from_collection
 from .....stf_blender_common.utils import trs_utils
 from ....common.blender_grr.stf_node_path_selector import NodePathSelector, draw_node_path_selector, node_path_selector_from_stf, node_path_selector_to_stf

@@ -8,7 +8,7 @@ from ....stf_blender_common.protocols import PSTF_ExportContext, PSTF_ImportCont
 from ....stf_blender_common.base import STF_Category, BlenderPropertyPathPart, STFPropertyPathPart, STF_TaskSteps
 from ....stf_blender_common.utils.animation_conversion_utils import get_component_index, get_component_stf_path_from_collection
 from ....stf_blender_common.utils.component_resource_utils import add_component, export_component_base, import_component_base, preserve_component_reference
-from ...common.blender_grr.stf_node_path_selector import draw_node_path_selector, node_path_selector_from_stf, node_path_selector_to_stf
+from ...common.blender_grr.stf_node_path_selector import draw_node_path_selector, node_path_selector_from_stf, node_path_selector_to_stf, NodePathSelector
 
 
 _stf_type = "stfexp.constraint.ik"

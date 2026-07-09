@@ -3,9 +3,10 @@ import mathutils
 import re
 from typing import Any, Callable
 
+from .....stf_blender_common.blender_data.stf_resource_component import STF_ComponentResourceBase
+from .....stf_blender_common.base import BlenderPropertyPathPart, STFPropertyPathPart
+from .....stf_blender_common.protocols import PSTF_ExportContext, PSTF_ImportContext, PSTF_Component_Ref
 from .....stf_blender_common.utils.collection_helpers import create_add_button, create_remove_button
-from ....common import PSTF_ExportContext, PSTF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart
-from ....common.resource.component import STF_ComponentResourceBase, STF_Component_Ref
 from .....stf_blender_common.utils.trs_utils import blender_rotation_to_stf, blender_translation_to_stf, stf_rotation_to_blender, stf_translation_to_blender
 from .....stf_blender_common.utils.animation_conversion_utils import get_component_index, get_component_stf_path_from_collection
 
@@ -75,7 +76,7 @@ class VRC_ContactBase(STF_ComponentResourceBase):
 	collision_tags: bpy.props.CollectionProperty(name="Collision Tags", type=CollisionTag, options=set()) # type: ignore
 
 
-def vrc_contact_draw_base(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: VRC_ContactBase, blender_property_name: str):
+def vrc_contact_draw_base(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: PSTF_Component_Ref, context_object: Any, component: VRC_ContactBase, blender_property_name: str):
 	col = layout.column(align=True)
 	col.prop(component, "shape")
 	col.prop(component, "radius")

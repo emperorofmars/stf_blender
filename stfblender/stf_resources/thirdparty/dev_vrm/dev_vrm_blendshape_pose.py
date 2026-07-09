@@ -170,8 +170,8 @@ class STF_Module_VRM_Blendshape_Pose(STF_Handler_Data):
 	stf_type = _stf_type
 	stf_category = STF_Category.DATA
 	understood_application_types = [VRM_Blendshape_Pose]
-	import_func = _stf_import
-	export_func = _stf_export
+	import_func = _stf_import # pyright: ignore[reportAssignmentType]
+	export_func = _stf_export # pyright: ignore[reportAssignmentType]
 
 	blender_property_name = _blender_property_name
 	draw_resource_func = _draw_resource

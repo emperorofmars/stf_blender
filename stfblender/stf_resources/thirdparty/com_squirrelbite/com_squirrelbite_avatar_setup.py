@@ -1,10 +1,12 @@
 import bpy
 from typing import Any
 
-from ....common import PSTF_ExportContext, PSTF_ImportContext, STFReportSeverity, STFReport, STF_Category, STF_TaskSteps
-from ....common.resource.component import STF_ComponentResourceBase, STF_Handler_Component, STF_Component_Ref
-from .....stf_blender_common.operators.base_operators_component import add_component, export_component_base, import_component_base
-from ....common.helpers import draw_list, poll_valid_animations
+from .....stf_blender_common.blender_data.stf_resource_component import STF_ComponentResourceBase
+from .....stf_blender_common.base import STF_Category, STFReport, STFReportSeverity, STF_TaskSteps
+from .....stf_blender_common.protocols import PSTF_ExportContext, PSTF_ImportContext, PSTF_Component_Ref, STF_Handler_Component
+from .....stf_blender_common.utils.component_resource_utils import add_component, export_component_base, import_component_base
+from .....stf_blender_common.utils.collection_helpers import draw_list
+from ....common.helpers import poll_valid_animations
 from ....common.blender_grr import *
 
 
@@ -100,7 +102,7 @@ def _draw_func_blendtree(layout: bpy.types.UILayout, element: Any) -> bpy.types.
 	return row
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: Squirrelbite_Avatar_Setup):
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: PSTF_Component_Ref, context_object: Any, component: Squirrelbite_Avatar_Setup):
 	layout.use_property_split = True
 
 	header, body = layout.panel("com.squirrelbite_avatar_setup_toggles_pre", default_closed = True)

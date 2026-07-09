@@ -2,9 +2,10 @@ import bpy
 from typing import Any
 
 from .vrc_contact_base import VRC_ContactBase, vrc_contact_create_resolve_property_path_to_stf_func, vrc_contact_create_resolve_stf_property_to_blender_func, vrc_contact_draw_base, vrc_contact_export_base, vrc_contact_import_base
-from ....common import PSTF_ExportContext, PSTF_ImportContext, STF_Category
-from ....common.resource.component import STF_Handler_BoneComponent, STF_Component_Ref
-from .....stf_blender_common.operators.base_operators_component import ComponentLoadJsonOperatorBase, add_component, export_component_base, import_component_base
+from .....stf_blender_common.base import STF_Category
+from .....stf_blender_common.protocols import PSTF_ExportContext, PSTF_ImportContext, PSTF_Component_Ref, STF_Handler_BoneComponent
+from .....stf_blender_common.operators.base_operators_component import ComponentLoadJsonOperatorBase
+from .....stf_blender_common.utils.component_resource_utils import add_component, export_component_base, import_component_base
 
 
 _stf_type = "com.vrchat.contact_sender"
@@ -29,7 +30,7 @@ class VRC_ContactSender_LoadJsonOperator(ComponentLoadJsonOperatorBase, bpy.type
 		if(json_resource.get("type") != _stf_type): raise Exception("Invalid Type")
 		vrc_contact_import_base(component, json_resource)
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: VRC_ContactSender):
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: PSTF_Component_Ref, context_object: Any, component: VRC_ContactSender):
 	layout.use_property_split = True
 	vrc_contact_draw_base(layout, context, component_ref, context_object, component, _blender_property_name)
 

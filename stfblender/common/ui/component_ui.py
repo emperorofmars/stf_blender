@@ -175,7 +175,7 @@ def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, compo
 	row_r = row.row()
 	row_r.alignment = "RIGHT"
 	row_r.label(text="ID: " + component_ref.stf_id, icon="TAG")
-	row_r.operator(OP_CopyToClipboard.bl_idname, text="", icon="DUPLICATE").text = component_ref.stf_id
+	row_r.operator(OP_CopyToClipboard, text="", icon="DUPLICATE").text = component_ref.stf_id
 	row_r.operator(edit_op, text="", icon="MODIFIER").component_id = component_ref.stf_id
 
 	# relevant for component instances & standins

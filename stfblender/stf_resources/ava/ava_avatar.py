@@ -2,12 +2,11 @@ import bpy
 import uuid
 from typing import Any
 
-from ....stf_blender_common.base.stf_report import STFReport
-
-from ...common import PSTF_ExportContext, PSTF_ImportContext, STF_TaskSteps, STF_Category
-from ...common.resource.component import STF_ComponentResourceBase, STF_Handler_Component, STF_Component_Ref
-from ...common.helpers import register_exported_resource
-from ....stf_blender_common.operators.base_operators_component import add_component, export_component_base, import_component_base
+from ....stf_blender_common.blender_data.stf_resource_component import STF_ComponentResourceBase
+from ....stf_blender_common.base import STF_Category, STF_TaskSteps, STFReport
+from ....stf_blender_common.protocols import PSTF_ExportContext, PSTF_ImportContext, PSTF_Component_Ref, STF_Handler_Component
+from ....stf_blender_common.utils.component_resource_utils import add_component, export_component_base, import_component_base
+from ....stf_blender_common.utils.reference_helper import register_exported_resource
 from ...common.helpers.misc import SetActiveObjectOperator
 from ..expanded import stfexp_node_ethereal
 
@@ -56,7 +55,7 @@ class CreateViewportObjectOperator(bpy.types.Operator):
 		return {"FINISHED"}
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: AVA_Avatar):
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: PSTF_Component_Ref, context_object: Any, component: AVA_Avatar):
 	layout.use_property_split = True
 	if(component.viewport):
 		layout.prop(component, "viewport")

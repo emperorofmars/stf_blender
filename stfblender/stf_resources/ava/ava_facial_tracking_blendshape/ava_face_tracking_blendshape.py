@@ -1,10 +1,11 @@
 import bpy
 from typing import Any
 
+from .....stf_blender_common.blender_data.stf_resource_component import STF_ComponentResourceBase
+from .....stf_blender_common.base import STF_Category
+from .....stf_blender_common.protocols import PSTF_ExportContext, PSTF_ImportContext, PSTF_Component_Ref, STF_Handler_Component
+from .....stf_blender_common.utils.component_resource_utils import add_component, export_component_base, import_component_base
 from .ft_csv import ft_definitions
-from ....common import PSTF_ExportContext, PSTF_ImportContext, STF_Category
-from ....common.resource.component import STF_ComponentResourceBase, STF_Handler_Component, STF_Component_Ref
-from .....stf_blender_common.operators.base_operators_component import add_component, export_component_base, import_component_base
 from ....common.helpers import OpenWebpage
 
 
@@ -38,7 +39,7 @@ class AVA_FaceTracking_Blendshapes(STF_ComponentResourceBase):
 	ft_type_custom: bpy.props.StringProperty(name="Unknown Tracking Type", options=set()) # type: ignore
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: bpy.types.Mesh, component: AVA_FaceTracking_Blendshapes):
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: PSTF_Component_Ref, context_object: bpy.types.Mesh, component: AVA_FaceTracking_Blendshapes):
 	row = layout.row()
 	row.operator(OpenWebpage.bl_idname, text="VRCFT Documentation", icon="HELP").url = "https://docs.vrcft.io/docs/tutorial-avatars/tutorial-avatars-extras/compatibility/overview"
 	row.operator(OpenWebpage.bl_idname, text="Mappings Definition", icon="DOCUMENTS").url = "https://docs.google.com/spreadsheets/d/118jo960co3Mgw8eREFVBsaJ7z0GtKNr52IB4Bz99VTA"
@@ -80,8 +81,8 @@ class Handler_AVA_FaceTracking_Blendshapes(STF_Handler_Component):
 	stf_type = _stf_type
 	stf_category = STF_Category.COMPONENT
 	understood_application_types = [AVA_FaceTracking_Blendshapes]
-	import_func = _stf_import
-	export_func = _stf_export
+	import_func = _stf_import # pyright: ignore[reportAssignmentType]
+	export_func = _stf_export # pyright: ignore[reportAssignmentType]
 
 	blender_property_name = _blender_property_name
 	single = True

@@ -2,10 +2,12 @@ import bpy
 import uuid
 from typing import Any
 
-from ...common import PSTF_ExportContext, PSTF_ImportContext, STF_TaskSteps, STF_Category
-from ...common.resource.component import STF_ComponentResourceBase, STF_Handler_Component, STF_Component_Ref
-from ....stf_blender_common.operators.base_operators_component import add_component, export_component_base, import_component_base
-from ...common.helpers import register_exported_resource, SetActiveObjectOperator
+from ....stf_blender_common.blender_data.stf_resource_component import STF_ComponentResourceBase
+from ....stf_blender_common.base import STF_Category, STF_TaskSteps
+from ....stf_blender_common.protocols import PSTF_ExportContext, PSTF_ImportContext, PSTF_Component_Ref, STF_Handler_Component
+from ....stf_blender_common.utils.component_resource_utils import add_component, export_component_base, import_component_base
+from ....stf_blender_common.utils.reference_helper import register_exported_resource
+from ...common.helpers import SetActiveObjectOperator
 from ..expanded import stfexp_node_ethereal
 
 
@@ -45,7 +47,7 @@ class CreateVoicePositionObjectOperator(bpy.types.Operator):
 		return {"FINISHED"}
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: AVA_VoicePosition):
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: PSTF_Component_Ref, context_object: Any, component: AVA_VoicePosition):
 	layout.use_property_split = True
 	if(component.voice_position):
 		layout.prop(component, "voice_position")

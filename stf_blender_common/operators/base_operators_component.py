@@ -3,7 +3,6 @@ import json
 from typing import Any
 
 from ..protocols import PSTF_Component_Ref
-from ..blender_data.stf_resource_component import STF_Component_Ref
 from ..utils.component_resource_utils import add_component
 
 class STFAddComponentOperatorBase:

@@ -1,9 +1,10 @@
 import bpy
 from typing import Any
 
-from ...common import PSTF_ExportContext, PSTF_ImportContext, STF_Category
-from ...common.resource.component import STF_ComponentResourceBase, STF_Handler_Component, STF_Component_Ref
-from ....stf_blender_common.operators.base_operators_component import add_component, export_component_base, import_component_base
+from ....stf_blender_common.blender_data.stf_resource_component import STF_ComponentResourceBase
+from ....stf_blender_common.base import STF_Category
+from ....stf_blender_common.protocols import PSTF_ExportContext, PSTF_ImportContext, PSTF_Component_Ref, STF_Handler_Component
+from ....stf_blender_common.utils.component_resource_utils import add_component, export_component_base, import_component_base
 
 
 _stf_type = "ava.eyelids.blendshape"
@@ -82,7 +83,7 @@ class AutomapEyelids(bpy.types.Operator):
 
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: AVA_Eyelids_Blendshape):
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: PSTF_Component_Ref, context_object: Any, component: AVA_Eyelids_Blendshape):
 	if(not context_object or type(context_object) is not bpy.types.Mesh):
 		return
 

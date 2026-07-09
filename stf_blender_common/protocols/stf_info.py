@@ -2,6 +2,7 @@ import bpy
 from typing import Any, Protocol
 
 from . import PSTF_Component_Ref
+from ..blender_data.stf_resource_component import STF_Component_Ref
 
 
 class PSTF_Info(Protocol):

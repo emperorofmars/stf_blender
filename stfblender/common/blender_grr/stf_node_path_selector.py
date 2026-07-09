@@ -2,8 +2,8 @@ import bpy
 from collections.abc import Sequence
 from typing import Any
 
-from .. import PSTF_ImportContext, PSTF_ExportContext, STF_Category
-from ..helpers import register_exported_resource
+from ....stf_blender_common.protocols import PSTF_ImportContext, PSTF_ExportContext
+from ....stf_blender_common.base.stf_category import STF_Category
 
 
 class NodePathSelector(bpy.types.PropertyGroup):

@@ -2,11 +2,10 @@ import bpy
 from collections.abc import Sequence
 from typing import Any
 
+from ....stf_blender_common.protocols import PSTF_Component_Ref
+from ....stf_blender_common.utils.reference_helper import get_resource_id, register_exported_resource
 from .utils import draw_component_info
 from .stf_node_path_selector import *
-from .. import PSTF_ImportContext, PSTF_ExportContext
-from ..resource.component import STF_Component_Ref
-from ..helpers import get_resource_id, register_exported_resource
 
 
 class NodePathComponentSelector(bpy.types.PropertyGroup):
@@ -27,7 +26,7 @@ def draw_node_path_component_selector(layout: bpy.types.UILayout, nps: NodePathC
 def resolve_node_path_component_selector(nps: NodePathComponentSelector) -> bpy.types.Object | bpy.types.Bone | None:
 	if(component_holder := resolve_node_path_selector(nps)): # pyright: ignore[reportArgumentType]
 		if(nps.target_component in component_holder.stf_info.stf_components):
-			component_ref: STF_Component_Ref = component_holder.stf_info.stf_components[nps.target_component]
+			component_ref: PSTF_Component_Ref = component_holder.stf_info.stf_components[nps.target_component]
 			for component in getattr(component_holder, component_ref.blender_property_name):
 				if(component.stf_id == component_ref.stf_id):
 					return component

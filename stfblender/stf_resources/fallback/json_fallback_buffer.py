@@ -1,7 +1,7 @@
 import bpy
 import base64
 
-from ...common import PSTF_ExportContext, PSTF_ImportContext
+from ....stf_blender_common.protocols import PSTF_ExportContext, PSTF_ImportContext
 
 
 class STF_FallbackBuffer(bpy.types.PropertyGroup):

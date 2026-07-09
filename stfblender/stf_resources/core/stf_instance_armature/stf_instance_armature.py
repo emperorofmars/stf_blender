@@ -3,6 +3,7 @@ import mathutils
 import math
 from typing import Any
 
+from .....stf_blender_common.blender_data.stf_resource_component import InstanceModComponentRef
 from .....stf_blender_common.protocols import PSTF_ExportContext, PSTF_ImportContext, STF_Handler_BlenderNative
 from .....stf_blender_common.base import STF_TaskSteps, STF_Category, STFReport, STFReportSeverity, BlenderPropertyPathPart, STFPropertyPathPart
 from .....stf_blender_common.utils.id_utils import ensure_stf_id

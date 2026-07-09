@@ -2,9 +2,10 @@ import bpy
 import uuid
 from typing import Any
 
-from ....common import PSTF_ExportContext, PSTF_ImportContext, STF_TaskSteps, STF_Category
-from ....common.resource.component import STF_ComponentResourceBase, STF_Handler_Component, STF_ExportComponentHook
-from .....stf_blender_common.operators.base_operators_component import add_component, export_component_base, import_component_base
+from .....stf_blender_common.blender_data.stf_resource_component import STF_ComponentResourceBase
+from .....stf_blender_common.base import STF_Category, STF_TaskSteps
+from .....stf_blender_common.protocols import PSTF_ExportContext, PSTF_ImportContext, STF_Handler_Component, STF_ExportComponentHook
+from .....stf_blender_common.utils.component_resource_utils import add_component, export_component_base, import_component_base
 
 
 _stf_type = "org.blender.object.rotation_mode"
@@ -37,8 +38,8 @@ class STF_Module_Blender_Object_Rotation_Mode(STF_Handler_Component):
 	stf_type = _stf_type
 	stf_category = STF_Category.COMPONENT
 	understood_application_types = [Blender_Object_Rotation_Mode]
-	import_func = _stf_import
-	export_func = _stf_export
+	import_func = _stf_import # pyright: ignore[reportAssignmentType]
+	export_func = _stf_export # pyright: ignore[reportAssignmentType]
 
 	blender_property_name = _blender_property_name
 	single = True

@@ -4,7 +4,7 @@ import re
 import mathutils
 from typing import Any, Callable
 
-from .....stf_blender_common.protocols.stf_export_context import PSTF_ImportContext, PSTF_ExportContext
+from .....stf_blender_common.protocols import PSTF_ImportContext, PSTF_ExportContext
 from .....stf_blender_common.base import BlenderPropertyPathPart, STFPropertyPathPart
 from .....stf_blender_common.utils.animation_conversion_utils import *
 

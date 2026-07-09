@@ -4,6 +4,8 @@ import bpy
 STF data-resources that aren't natively supported by Blender, similar to components, are stored by the Collection that represents the STF-Prefab.
 """
 
+from .stf_resource_component import STF_Component_Ref
+
 class STF_Data_Ref(bpy.types.PropertyGroup):
 	stf_type: bpy.props.StringProperty(name="Type", options=set()) # type: ignore
 	stf_id: bpy.props.StringProperty(name="ID", options=set()) # type: ignore
