@@ -2,9 +2,8 @@ import bpy
 from typing import Any
 
 from .ft_csv import ft_definitions
-from ....common import STF_ExportContext, STF_ImportContext, STF_Category
-from ....common.resource.component import STF_ComponentResourceBase, STF_Handler_Component, STF_Component_Ref, add_component, export_component_base, import_component_base
-from ....common.helpers import OP_OpenWebpage
+from .....stfblender_common import STF_ExportContext, STF_ImportContext, STF_Category, STF_ComponentResourceBase, STF_Handler_Component, STF_Component_Ref, add_component, export_component_base, import_component_base
+from .....stfblender_common.helpers import OP_OpenWebpage
 
 
 _stf_type = "ava.face_tracking.blendshape"

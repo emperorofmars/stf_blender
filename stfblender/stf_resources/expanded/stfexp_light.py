@@ -2,7 +2,7 @@ import bpy
 import re
 from typing import Any
 
-from ...common import STF_ExportContext, STF_ImportContext, STFReportSeverity, STFReport, BlenderPropertyPathPart, STFPropertyPathPart, STF_Category, STF_HandlerAnimation, STF_Handler_BlenderNative, STFSetIDOperatorBase, ensure_stf_id
+from ....stfblender_common import STF_ExportContext, STF_ImportContext, STFReportSeverity, STFReport, BlenderPropertyPathPart, STFPropertyPathPart, STF_Category, STF_HandlerAnimation, STF_Handler_BlenderNative, STFSetIDOperatorBase, ensure_stf_id
 
 
 _stf_type = "stfexp.light"

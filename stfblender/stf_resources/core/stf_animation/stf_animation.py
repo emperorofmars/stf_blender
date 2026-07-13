@@ -1,6 +1,6 @@
 import bpy
 
-from ....common import STF_Category, STF_HandlerComponents, STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister, get_components_from_object
+from .....stfblender_common import STF_Category, STF_HandlerComponents, STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister, get_components_from_object
 from .stf_animation_common import *
 from .stf_animation_export import stf_animation_export
 from .stf_animation_import import stf_animation_import

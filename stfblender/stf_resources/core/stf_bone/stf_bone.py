@@ -4,10 +4,10 @@ import math
 from typing import Any
 from collections.abc import Sequence
 
-from ....common import STF_ImportContext, STF_ExportContext, STFReportSeverity, STFReport, STF_Category, STF_HandlerAnimation, STF_HandlerComponents, STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister, get_components_from_object, ensure_stf_id
-from ....common.utils import trs_utils
-from ....common.utils.armature_bone import ArmatureBone
-from ....common.utils.animation_conversion_utils import *
+from .....stfblender_common import STF_ImportContext, STF_ExportContext, STFReportSeverity, STFReport, STF_Category, STF_HandlerAnimation, STF_HandlerComponents, STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister, get_components_from_object, ensure_stf_id
+from .....stfblender_common.utils import trs_utils
+from .....stfblender_common.utils.armature_bone import ArmatureBone
+from .....stfblender_common.utils.animation_conversion_utils import *
 from .stf_bone_property_conversion import resolve_property_path_to_stf_func, resolve_stf_property_to_blender_func
 from .stf_bone_ui import STFAddBoneComponentOperator, STFEditBoneComponentIdOperator, STFRemoveBoneComponentOperator, STFSetBoneIDOperator
 

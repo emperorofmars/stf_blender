@@ -3,10 +3,9 @@ from typing import Any, Callable
 import bpy
 
 
-from ....common import STF_ExportContext, STFReportSeverity, STFReport, STF_TaskSteps
-from ....common.utils.buffer_utils import serialize_float
-from ....common.resource.resource_id import ensure_stf_id
-from ....common.slot_link import ActionSlotLink
+from .....stfblender_common import STF_ExportContext, STFReportSeverity, STFReport, STF_TaskSteps, ensure_stf_id
+from .....stfblender_common.utils.buffer_utils import serialize_float
+from .....stfblender_common.slot_link import ActionSlotLink
 from .stf_animation_common import *
 from .stf_animation_bake import bake_constraints
 

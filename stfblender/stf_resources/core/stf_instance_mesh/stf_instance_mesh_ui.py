@@ -1,7 +1,7 @@
 import bpy
 
-from ....common.helpers import draw_multiline_text
-from ....common.resource.resource_id import STFSetIDOperatorBase
+from .....stfblender_common import STFSetIDOperatorBase
+from .....stfblender_common.helpers import draw_multiline_text
 from .stf_instance_mesh_data import STF_Instance_Mesh_Blendshape_Value
 from .stf_instance_mesh_util import instance_blendshapes_requires_update, set_instance_blendshapes
 

@@ -3,9 +3,8 @@ import uuid
 from io import BytesIO
 from typing import Any
 
-from ...common import STF_ExportContext, STF_ImportContext, STF_Category
-from ...common.resource.component import STF_ComponentResourceBase, STF_Handler_Component, STF_ExportComponentHook, add_component, export_component_base, import_component_base
-from ...common.utils.buffer_utils import determine_indices_width, parse_uint, serialize_uint
+from ....stfblender_common import STF_ExportContext, STF_ImportContext, STF_Category, STF_ComponentResourceBase, STF_Handler_Component, STF_ExportComponentHook, add_component, export_component_base, import_component_base
+from ....stfblender_common.utils.buffer_utils import determine_indices_width, parse_uint, serialize_uint
 
 
 _stf_type = "stfexp.mesh.seams"

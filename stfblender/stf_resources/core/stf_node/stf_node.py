@@ -3,10 +3,10 @@ import math
 import mathutils
 from typing import Any
 
-from ....common import STF_ExportContext, STF_ImportContext, STF_TaskSteps, STFReportSeverity, STFReport, STF_Category, STF_Handler_BlenderNative, STF_HandlerAnimation, STF_HandlerComponents, boilerplate_register, boilerplate_unregister, get_components_from_object, ensure_stf_id
-from ....common.utils import trs_utils
-from ....common.helpers import get_resource_id
-from ....common.helpers.reference_helper import register_exported_resource
+from .....stfblender_common import STF_ExportContext, STF_ImportContext, STF_TaskSteps, STFReportSeverity, STFReport, STF_Category, STF_Handler_BlenderNative, STF_HandlerAnimation, STF_HandlerComponents, boilerplate_register, boilerplate_unregister, get_components_from_object, ensure_stf_id
+from .....stfblender_common.utils import trs_utils
+from .....stfblender_common.helpers import get_resource_id
+from .....stfblender_common.helpers.reference_helper import register_exported_resource
 from .node_property_conversion import stf_node_resolve_property_path_to_stf_func, stf_node_resolve_stf_property_to_blender_func
 from .stf_node_ui import STFAddObjectComponentOperator, STFEditObjectComponentIdOperator, STFRemoveObjectComponentOperator, STFSetObjectIDOperator, draw_node_ui
 

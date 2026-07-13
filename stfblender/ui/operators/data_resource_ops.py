@@ -1,6 +1,6 @@
 import bpy
 
-from .stf_data_resource import add_resource
+from ....stfblender_common.resource.data.stf_data_resource import add_resource
 
 
 __all__ = ["STFCreateDataResourceOperator", "STFRemoveDataResourceOperator", "STFEditDataResourceOperator"]

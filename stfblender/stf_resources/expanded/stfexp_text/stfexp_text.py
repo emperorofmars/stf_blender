@@ -1,7 +1,7 @@
 import bpy
 from typing import Any
 
-from ....common import STF_ExportContext, STF_ImportContext, STF_Category, STF_Handler_BlenderNative, STF_HandlerComponents, boilerplate_register, boilerplate_unregister, get_components_from_object, ensure_stf_id
+from .....stfblender_common import STF_ExportContext, STF_ImportContext, STF_Category, STF_Handler_BlenderNative, STF_HandlerComponents, boilerplate_register, boilerplate_unregister, get_components_from_object, ensure_stf_id
 from .stfexp_text_ui import STFAddTextComponentOperator, STFEditTextComponentIdOperator, STFRemoveTextComponentOperator, STFSetTextIDOperator
 
 # TODO this module is at a bare minimum level, improve it

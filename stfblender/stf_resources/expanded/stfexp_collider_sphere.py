@@ -3,10 +3,9 @@ import mathutils
 import re
 from typing import Any
 
-from ...common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STF_Category
-from ...common.resource.component import STF_ComponentResourceBase, STF_Handler_BoneComponent, STF_Component_Ref, ComponentLoadJsonOperatorBase, add_component, export_component_base, import_component_base
-from ...common.utils.trs_utils import blender_translation_to_stf, stf_translation_to_blender
-from ...common.utils.animation_conversion_utils import get_component_index, get_component_stf_path_from_collection
+from ....stfblender_common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STF_Category, STF_ComponentResourceBase, STF_Handler_BoneComponent, STF_Component_Ref, ComponentLoadJsonOperatorBase, add_component, export_component_base, import_component_base
+from ....stfblender_common.utils.trs_utils import blender_translation_to_stf, stf_translation_to_blender
+from ....stfblender_common.utils.animation_conversion_utils import get_component_index, get_component_stf_path_from_collection
 
 
 _stf_type = "stfexp.collider.sphere"

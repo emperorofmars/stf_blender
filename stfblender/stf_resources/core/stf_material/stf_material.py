@@ -1,7 +1,7 @@
 import bpy
 from typing import Any
 
-from ....common import STF_ExportContext, STF_ImportContext, STF_Category, STFReport, STFReportSeverity, STF_HandlerAnimation, STF_HandlerComponents, STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister, get_components_from_object, ensure_stf_id
+from .....stfblender_common import STF_ExportContext, STF_ImportContext, STF_Category, STFReport, STFReportSeverity, STF_HandlerAnimation, STF_HandlerComponents, STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister, get_components_from_object, ensure_stf_id
 from .stf_material_definition import STF_Material_Property, STF_Material_Value_Module_Base
 from .material_value_modules import blender_material_value_modules
 from .stf_material_operators import add_property, add_value_to_property

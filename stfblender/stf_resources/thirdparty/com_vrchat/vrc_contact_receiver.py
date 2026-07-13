@@ -2,8 +2,7 @@ import bpy
 from typing import Any
 
 from .vrc_contact_base import VRC_ContactBase, vrc_contact_create_resolve_property_path_to_stf_func, vrc_contact_create_resolve_stf_property_to_blender_func, vrc_contact_draw_base, vrc_contact_export_base, vrc_contact_import_base
-from ....common import STF_ExportContext, STF_ImportContext, STF_Category
-from ....common.resource.component import STF_Handler_BoneComponent, STF_Component_Ref, ComponentLoadJsonOperatorBase, add_component, export_component_base, import_component_base
+from .....stfblender_common import STF_ExportContext, STF_ImportContext, STF_Category, STF_Handler_BoneComponent, STF_Component_Ref, ComponentLoadJsonOperatorBase, add_component, export_component_base, import_component_base
 
 
 _stf_type = "com.vrchat.contact_receiver"

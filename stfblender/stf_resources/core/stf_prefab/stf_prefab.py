@@ -1,7 +1,7 @@
 import bpy
 from typing import Any
 
-from ....common import STF_ImportContext, STF_ExportContext, STF_HandlerComponents, STF_TaskSteps, STFReportSeverity, STF_Category, STFReport, STF_Handler_BlenderNative, STF_Data_Ref, boilerplate_register, boilerplate_unregister, get_components_from_object, ensure_stf_id
+from .....stfblender_common import STF_ImportContext, STF_ExportContext, STF_HandlerComponents, STF_TaskSteps, STFReportSeverity, STF_Category, STFReport, STF_Handler_BlenderNative, STF_Data_Ref, boilerplate_register, boilerplate_unregister, get_components_from_object, ensure_stf_id
 
 
 _stf_type = "stf.prefab"

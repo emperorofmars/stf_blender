@@ -1,8 +1,8 @@
 import bpy
 from typing import Any
 
-from ....common.resource import STF_Component_Ref, STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase, InstanceModComponentRef
-from ....common.helpers import draw_multiline_text
+from .....stfblender_common.resource import STF_Component_Ref, STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase, InstanceModComponentRef
+from .....stfblender_common.helpers import draw_multiline_text
 from .stf_instance_armature_utils import ProcessComponentsOntoArmatureInstance, UpdateArmatureInstanceComponentStandins
 
 

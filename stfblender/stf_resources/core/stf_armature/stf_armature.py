@@ -1,9 +1,9 @@
 import bpy
 from typing import Any
 
-from ....common import STF_ImportContext, STF_ExportContext, STF_Category, STFReport
-from ....common.resource import STF_Handler_BlenderNative, STF_HandlerComponents, boilerplate_register, boilerplate_unregister, get_components_from_object, ensure_stf_id
-from ....common.utils.armature_bone import ArmatureBone
+from .....stfblender_common import STF_ImportContext, STF_ExportContext, STF_Category, STFReport
+from .....stfblender_common.resource import STF_Handler_BlenderNative, STF_HandlerComponents, boilerplate_register, boilerplate_unregister, get_components_from_object, ensure_stf_id
+from .....stfblender_common.utils.armature_bone import ArmatureBone
 from .stf_armature_ui import STFAddArmatureComponentOperator, STFEditArmatureComponentIdOperator, STFRemoveArmatureComponentOperator, STFSetArmatureIDOperator
 
 

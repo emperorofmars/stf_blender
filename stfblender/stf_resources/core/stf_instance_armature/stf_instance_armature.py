@@ -3,11 +3,11 @@ import mathutils
 import math
 from typing import Any
 
-from ....common import STF_ExportContext, STF_ImportContext, STF_TaskSteps, STFReportSeverity, STFReport, BlenderPropertyPathPart, STFPropertyPathPart, STF_Category, STF_Handler_BlenderNative, STF_HandlerAnimation, InstanceModComponentRef, ensure_stf_id, STFSetIDOperatorBase
-from ....common.utils.animation_conversion_utils import *
-from ....common.utils.armature_bone import ArmatureBone
-from ....common.utils.trs_utils import close_enough
-from ....common.helpers import get_resource_id
+from .....stfblender_common import STF_ExportContext, STF_ImportContext, STF_TaskSteps, STFReportSeverity, STFReport, BlenderPropertyPathPart, STFPropertyPathPart, STF_Category, STF_Handler_BlenderNative, STF_HandlerAnimation, InstanceModComponentRef, ensure_stf_id, STFSetIDOperatorBase
+from .....stfblender_common.utils.animation_conversion_utils import *
+from .....stfblender_common.utils.armature_bone import ArmatureBone
+from .....stfblender_common.utils.trs_utils import close_enough
+from .....stfblender_common.helpers import get_resource_id
 from .stf_instance_armature_ui import draw_armature_instance_ui
 from .stf_instance_armature_utils import parse_standin, process_components, serialize_standin, update_armature_instance_component_standins
 

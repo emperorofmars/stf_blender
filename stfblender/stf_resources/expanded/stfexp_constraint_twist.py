@@ -2,10 +2,9 @@ import bpy
 import re
 from typing import Any
 
-from ...common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STF_TaskSteps, STF_Category
-from ...common.resource.component import STF_ComponentResourceBase, STF_Handler_BoneComponent, STF_Component_Ref, add_component, export_component_base, import_component_base, preserve_component_reference
-from ...common.utils.animation_conversion_utils import get_component_index, get_component_stf_path_from_collection
-from ...common.blender_grr.stf_node_path_selector import NodePathSelector, draw_node_path_selector, node_path_selector_from_stf, node_path_selector_to_stf
+from ....stfblender_common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STF_TaskSteps, STF_Category, STF_ComponentResourceBase, STF_Handler_BoneComponent, STF_Component_Ref, add_component, export_component_base, import_component_base, preserve_component_reference
+from ....stfblender_common.utils.animation_conversion_utils import get_component_index, get_component_stf_path_from_collection
+from ....stfblender_common.blender_grr.stf_node_path_selector import NodePathSelector, draw_node_path_selector, node_path_selector_from_stf, node_path_selector_to_stf
 
 
 _stf_type = "stfexp.constraint.twist"

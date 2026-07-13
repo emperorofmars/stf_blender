@@ -1,8 +1,8 @@
 import bpy
 
-from ....common import STF_Category
-from ....common.resource import STF_Handler_BlenderNative, STF_HandlerComponents, boilerplate_register, boilerplate_unregister, get_components_from_object
-from ....common.helpers import draw_multiline_text
+from .....stfblender_common import STF_Category
+from .....stfblender_common.resource import STF_Handler_BlenderNative, STF_HandlerComponents, boilerplate_register, boilerplate_unregister, get_components_from_object
+from .....stfblender_common.helpers import draw_multiline_text
 from .mesh_import import import_stf_mesh
 from .mesh_export import export_stf_mesh
 from .stf_mesh_ui import STFAddMeshComponentOperator, STFEditMeshComponentIdOperator, STFRemoveMeshComponentOperator, STFSetMeshIDOperator

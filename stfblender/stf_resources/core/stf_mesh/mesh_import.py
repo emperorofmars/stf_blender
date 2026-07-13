@@ -5,8 +5,8 @@ from io import BytesIO
 from typing import Any
 import numpy as np
 
-from ....common import STF_ImportContext, STFReportSeverity, STFReport, STF_Category
-from ....common.utils.buffer_utils import determine_pack_format_float, determine_pack_format_uint, parse_float, parse_uint
+from .....stfblender_common import STF_ImportContext, STFReportSeverity, STFReport, STF_Category
+from .....stfblender_common.utils.buffer_utils import determine_pack_format_float, determine_pack_format_uint, parse_float, parse_uint
 
 
 _stf_type = "stf.mesh"

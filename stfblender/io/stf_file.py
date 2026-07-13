@@ -3,8 +3,8 @@
 import io
 import json
 
-from ..common.base.stf_json_definition import STF_JsonDefinition
-from ..common.utils import buffer_utils
+from ...stfblender_common import STF_JsonDefinition
+from ...stfblender_common.utils import buffer_utils
 
 __all__ = ["STF_File"]
 

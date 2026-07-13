@@ -4,10 +4,10 @@ from typing import Any
 from .stf_instance_mesh_data import STF_Instance_Mesh
 from .stf_instance_mesh_ui import draw_instance_mesh_ui
 from .stf_instance_mesh_util import set_instance_blendshapes
-from ....common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STFReportSeverity, STFReport, STF_Category
-from ....common.resource.blender_native import STF_Handler_BlenderNative, get_components_from_object
-from ....common.resource import ensure_stf_id
-from ....common.resource.stf_handler_base import STF_HandlerAnimation
+from .....stfblender_common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STFReportSeverity, STFReport, STF_Category
+from .....stfblender_common.resource.blender_native import STF_Handler_BlenderNative, get_components_from_object
+from .....stfblender_common.resource import ensure_stf_id
+from .....stfblender_common.resource.stf_handler_base import STF_HandlerAnimation
 
 
 _stf_type = "stf.instance.mesh"
@@ -25,7 +25,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 		context.report(STFReport("Failed to import mesh: " + str(json_resource.get("instance", {}).get("mesh")), STFReportSeverity.Error, stf_id, _stf_type, context_object))
 
 	if("armature_instance" in json_resource):
-		armature_instance: bpy.types.Object = context.import_resource(json_resource, json_resource["armature_instance"], stf_category=STF_Category.NODE)
+		armature_instance: bpy.types.Object | None = context.import_resource(json_resource, json_resource["armature_instance"], stf_category=STF_Category.NODE)
 		if(not armature_instance):
 			context.report(STFReport("Invalid armature instance: " + str(json_resource["armature_instance"]), STFReportSeverity.Error, stf_id, _stf_type, context_object))
 		else:

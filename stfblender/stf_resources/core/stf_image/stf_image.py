@@ -1,7 +1,7 @@
 import bpy
 from typing import Any
 
-from ....common import STF_ExportContext, STF_HandlerComponents, STF_Handler_BlenderNative, STF_ImportContext, STFReport, STFReportSeverity, STF_Category, STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister, get_components_from_object, ensure_stf_id
+from .....stfblender_common import STF_ExportContext, STF_HandlerComponents, STF_Handler_BlenderNative, STF_ImportContext, STFReport, STFReportSeverity, STF_Category, STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister, get_components_from_object, ensure_stf_id
 from .stf_image_ui import STFAddImageComponentOperator, STFEditImageComponentIdOperator, STFRemoveImageComponentOperator, STFSetImageIDOperator, draw_image_ui
 
 

@@ -5,9 +5,9 @@ import io
 import traceback
 from collections.abc import Sequence
 
-from ...common import STFReport, STFReportSeverity
-from ...common.resource.stf_registry import get_import_handlers, get_import_handlers_fallback
-from ...common.helpers import OP_OpenWebpage, draw_slot_link_warning, get_stf_version
+from ....stfblender_common import STFReport, STFReportSeverity
+from ....stfblender_common.resource.stf_registry import get_import_handlers, get_import_handlers_fallback
+from ....stfblender_common.helpers import OP_OpenWebpage, draw_slot_link_warning, get_stf_version
 from ..stf_file import STF_File
 from .import_settings import STF_ImportSettings
 from .stf_import_state import STF_ImportState

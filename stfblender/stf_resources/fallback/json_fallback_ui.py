@@ -2,9 +2,9 @@ import bpy
 import json
 from typing import Any
 
-from ...common.resource.component import STF_Component_Ref
-from ...common.resource.data import STF_Data_Ref
-from ...common.blender_grr import BlenderGRR, draw_blender_grr
+from ....stfblender_common.resource.component import STF_Component_Ref
+from ....stfblender_common.resource.data import STF_Data_Ref
+from ....stfblender_common.blender_grr import BlenderGRR, draw_blender_grr
 
 
 class FallbackResourcesAdd(bpy.types.Operator):

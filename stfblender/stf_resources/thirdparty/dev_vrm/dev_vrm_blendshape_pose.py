@@ -1,9 +1,9 @@
 import bpy
 from typing import Any
 
-from ....common import STF_ExportContext, STF_ImportContext, STF_TaskSteps, STF_Category
-from ....common.resource.data import STF_DataResourceBase, STF_Handler_Data, STF_Data_Ref, add_resource, export_data_resource_base, get_components_from_data_resource, import_data_resource_base
-from ....common.helpers import register_exported_resource
+from .....stfblender_common import STF_ExportContext, STF_ImportContext, STF_TaskSteps, STF_Category
+from .....stfblender_common.resource.data import STF_DataResourceBase, STF_Handler_Data, STF_Data_Ref, add_resource, export_data_resource_base, get_components_from_data_resource, import_data_resource_base
+from .....stfblender_common.helpers import register_exported_resource
 
 
 _stf_type = "dev.vrm.blendshape_pose"

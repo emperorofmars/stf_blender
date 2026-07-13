@@ -2,9 +2,9 @@ import mathutils
 import math
 from typing import Any, Callable
 
-from ....common import STF_ImportContext, STF_ExportContext, BlenderPropertyPathPart, STFPropertyPathPart
-from ....common.utils.armature_bone import ArmatureBone
-from ....common.utils.animation_conversion_utils import *
+from .....stfblender_common import STF_ImportContext, STF_ExportContext, BlenderPropertyPathPart, STFPropertyPathPart
+from .....stfblender_common.utils.armature_bone import ArmatureBone
+from .....stfblender_common.utils.animation_conversion_utils import *
 
 
 # In Blender, bones get animated relative to their own rest pose.

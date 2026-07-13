@@ -2,7 +2,7 @@ import bpy
 import logging
 from typing import Any, Callable
 
-from ...common import STF_ExportContext as ISTF_ExportContext, STF_TaskSteps, STF_Meta_AssetInfo_Json,  STFReportSeverity, STFReport, STFPropertyPathPart
+from ....stfblender_common import STF_ExportContext as ISTF_ExportContext, STF_TaskSteps, STF_Meta_AssetInfo_Json,  STFReportSeverity, STFReport, STFPropertyPathPart
 from .stf_export_state import STF_ExportState
 
 

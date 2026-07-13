@@ -1,7 +1,7 @@
 import bpy
 
-from ....common import STFSetIDOperatorBase, STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
-from ....common.helpers.misc import draw_slot_link_warning
+from .....stfblender_common import STFSetIDOperatorBase, STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
+from .....stfblender_common.helpers.misc import draw_slot_link_warning
 from .stf_animation_bake import STFBakeAnimationOperator
 
 

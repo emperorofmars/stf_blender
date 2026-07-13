@@ -1,7 +1,7 @@
 import bpy
 
-from ....common.resource import STFSetIDOperatorBase, STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
-from ....common.helpers import draw_multiline_text
+from .....stfblender_common.resource import STFSetIDOperatorBase, STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
+from .....stfblender_common.helpers import draw_multiline_text
 
 
 class STFSetObjectIDOperator(bpy.types.Operator, STFSetIDOperatorBase):

@@ -4,9 +4,9 @@ from io import BufferedWriter
 import traceback
 from collections.abc import Sequence
 
-from ...common import STFReport, STFReportSeverity, draw_meta_editor
-from ...common.resource.stf_registry import get_export_handlers
-from ...common.helpers.misc import OP_OpenWebpage, draw_slot_link_warning, get_stf_version
+from ....stfblender_common import STFReport, STFReportSeverity, draw_meta_editor
+from ....stfblender_common.resource.stf_registry import get_export_handlers
+from ....stfblender_common.helpers.misc import OP_OpenWebpage, draw_slot_link_warning, get_stf_version
 from ...package_key import package_key
 from .export_settings import STF_ExportSettings
 from .stf_export_state import STF_ExportState

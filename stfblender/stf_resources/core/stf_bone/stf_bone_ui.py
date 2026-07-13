@@ -1,6 +1,6 @@
 import bpy
 
-from ....common import STFSetIDOperatorBase, STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
+from .....stfblender_common import STFSetIDOperatorBase, STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
 
 
 class STFSetBoneIDOperator(bpy.types.Operator, STFSetIDOperatorBase):

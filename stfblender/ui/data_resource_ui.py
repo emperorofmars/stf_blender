@@ -1,12 +1,12 @@
 import bpy
 from typing import Any
 
-from ..common.resource.stf_registry import find_data_handler, get_blender_non_native_data_handlers
-from ..common.helpers import OP_CopyToClipboard, draw_multiline_text
-from ..common.resource.data import STF_DataResourceBase, STF_Data_Ref
-from ..common.resource.data.data_resource_ops import STFCreateDataResourceOperator, STFEditDataResourceOperator, STFRemoveDataResourceOperator
-from ..common.resource.component import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
+from ...stfblender_common.resource.stf_registry import find_data_handler, get_blender_non_native_data_handlers
+from ...stfblender_common.helpers import draw_multiline_text, OP_CopyToClipboard
+from ...stfblender_common.resource import STF_DataResourceBase, STF_Data_Ref
+from ...stfblender_common.resource.component import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
 from ..stf_resources.fallback.json_fallback_data import Handler_JsonFallbackData
+from .operators.data_resource_ops import STFCreateDataResourceOperator, STFEditDataResourceOperator, STFRemoveDataResourceOperator
 from .component_ui import draw_components_ui
 
 

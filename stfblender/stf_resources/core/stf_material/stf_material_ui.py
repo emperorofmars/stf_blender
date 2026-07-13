@@ -1,6 +1,6 @@
 import bpy
 
-from ....common import STFSetIDOperatorBase, STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
+from .....stfblender_common import STFSetIDOperatorBase, STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
 from .stf_material_definition import STF_Material_Property, STF_Material_Value_Base, STF_Material_Value_Ref
 from .material_value_modules import blender_material_value_modules
 from .stf_material_operators import STFAddMaterialProperty, STFAddMaterialPropertyValue, STFClearMaterial, STFRemoveMaterialProperty, STFRemoveMaterialPropertyValue

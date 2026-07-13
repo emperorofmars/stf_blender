@@ -1,8 +1,8 @@
 import bpy
 
+from ...stfblender_common.resource.stf_registry import find_export_handler
+from ...stfblender_common.utils.armature_bone import ArmatureBone
 from .blender_native_ui import draw_blender_native_panel
-from ..common.resource.stf_registry import find_export_handler
-from ..common.utils.armature_bone import ArmatureBone
 
 
 # TODO register a panel for all relevant bpy.types.*

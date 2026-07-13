@@ -3,11 +3,10 @@ import mathutils
 import re
 from typing import Any, Callable
 
-from ....common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart
-from ....common.resource.component import STF_ComponentResourceBase, STF_Component_Ref
-from ....common.helpers import create_add_button, create_remove_button
-from ....common.utils.trs_utils import blender_rotation_to_stf, blender_translation_to_stf, stf_rotation_to_blender, stf_translation_to_blender
-from ....common.utils.animation_conversion_utils import get_component_index, get_component_stf_path_from_collection
+from .....stfblender_common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STF_ComponentResourceBase, STF_Component_Ref
+from .....stfblender_common.helpers import create_add_button, create_remove_button
+from .....stfblender_common.utils.trs_utils import blender_rotation_to_stf, blender_translation_to_stf, stf_rotation_to_blender, stf_translation_to_blender
+from .....stfblender_common.utils.animation_conversion_utils import get_component_index, get_component_stf_path_from_collection
 
 
 def search_collision_tags(self, context: bpy.types.Context, edit_text: str):

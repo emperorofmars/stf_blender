@@ -1,7 +1,7 @@
 import bpy
 from typing import Any
 
-from ...common.resource.stf_registry import get_stf_handlers
+from ....stfblender_common.resource.stf_registry import get_stf_handlers
 
 
 def clean_id_thingy(id_thingy: Any):

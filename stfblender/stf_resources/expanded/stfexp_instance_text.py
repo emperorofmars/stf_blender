@@ -1,7 +1,7 @@
 import bpy
 from typing import Any
 
-from ...common import STF_ExportContext, STF_ImportContext, STFReportSeverity, STFReport, STF_Category, STF_Handler_BlenderNative, STFSetIDOperatorBase, ensure_stf_id
+from ....stfblender_common import STF_ExportContext, STF_ImportContext, STFReportSeverity, STFReport, STF_Category, STF_Handler_BlenderNative, STFSetIDOperatorBase, ensure_stf_id
 
 # TODO this module is at a bare minimum level, improve it
 

@@ -1,6 +1,6 @@
 import bpy
 
-from ....common.resource import STFSetIDOperatorBase, STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
+from .....stfblender_common.resource import STFSetIDOperatorBase, STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
 
 
 class STFSetMeshIDOperator(bpy.types.Operator, STFSetIDOperatorBase):

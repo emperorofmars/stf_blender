@@ -2,7 +2,7 @@ import bpy
 import logging
 from typing import Any, Callable
 
-from ...common import STF_ImportContext as ISTF_ImportContext, STF_Category, STF_TaskSteps, STFReportSeverity, STFReport, BlenderPropertyPathPart, STF_Component_Editmode_Resistant_Reference
+from ....stfblender_common import STF_ImportContext as ISTF_ImportContext, STF_Category, STF_TaskSteps, STFReportSeverity, STFReport, BlenderPropertyPathPart, STF_Component_Editmode_Resistant_Reference
 from .stf_import_state import STF_ImportState
 
 

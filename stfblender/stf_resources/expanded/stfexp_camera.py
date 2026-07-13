@@ -3,7 +3,7 @@ import math
 import re
 from typing import Any, Callable
 
-from ...common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STF_Category, STF_HandlerAnimation, STF_Handler_BlenderNative, STFReportSeverity, STFReport, STFSetIDOperatorBase, ensure_stf_id
+from ....stfblender_common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STF_Category, STF_HandlerAnimation, STF_Handler_BlenderNative, STFReportSeverity, STFReport, STFSetIDOperatorBase, ensure_stf_id
 
 
 _stf_type = "stfexp.camera"

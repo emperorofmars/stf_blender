@@ -1,7 +1,7 @@
 import sys
 from typing import Callable
 
-from ..common.base import STF_TaskSteps, STFReportSeverity, STFException, STFReport
+from ...stfblender_common.base import STF_TaskSteps, STFReportSeverity, STFException, STFReport
 
 __all__ = ["STF_State_Base"]
 
