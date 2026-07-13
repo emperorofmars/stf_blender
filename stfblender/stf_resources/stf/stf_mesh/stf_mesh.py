@@ -1,7 +1,7 @@
 import bpy
 
 from .....stfblender_common import STF_Category
-from .....stfblender_common.resource import STF_Handler_BlenderNative, STF_HandlerComponents, boilerplate_register, boilerplate_unregister, get_components_from_object
+from .....stfblender_common.resource import STF_Handler_BlenderNative, STF_Handler_ComponentHolder, boilerplate_register, boilerplate_unregister, get_components_from_object
 from .....stfblender_common.helpers import draw_multiline_text
 from .mesh_import import import_stf_mesh
 from .mesh_export import export_stf_mesh
@@ -27,7 +27,7 @@ def draw_mesh_ui(layout: bpy.types.UILayout, context: bpy.types.Context, blender
 	layout.prop(context.mesh.stf_mesh, "export_vertex_colors")
 
 
-class Handler_STF_Mesh(STF_Handler_BlenderNative, STF_HandlerComponents):
+class Handler_STF_Mesh(STF_Handler_BlenderNative, STF_Handler_ComponentHolder):
 	stf_type = _stf_type
 	stf_category = STF_Category.DATA
 	like_types = ["mesh"]

@@ -1,7 +1,7 @@
 import bpy
 from typing import Any
 
-from .....stfblender_common import STF_ImportContext, STF_ExportContext, STF_HandlerComponents, STF_TaskSteps, STFReportSeverity, STF_Category, STFReport, STF_Handler_BlenderNative, STF_Data_Ref, boilerplate_register, boilerplate_unregister, get_components_from_object, ensure_stf_id
+from .....stfblender_common import STF_ImportContext, STF_ExportContext, STF_Handler_ComponentHolder, STF_TaskSteps, STFReportSeverity, STF_Category, STFReport, STF_Handler_BlenderNative, STF_Data_Ref, boilerplate_register, boilerplate_unregister, get_components_from_object, ensure_stf_id
 
 
 _stf_type = "stf.prefab"
@@ -54,7 +54,7 @@ def _stf_export(context: STF_ExportContext, blender_object: Any, context_object:
 	return ret, collection.stf_info.stf_id
 
 
-class Handler_STF_Prefab(STF_Handler_BlenderNative, STF_HandlerComponents):
+class Handler_STF_Prefab(STF_Handler_BlenderNative, STF_Handler_ComponentHolder):
 	stf_type = _stf_type
 	stf_category = STF_Category.DATA
 	like_types = ["prefab"]

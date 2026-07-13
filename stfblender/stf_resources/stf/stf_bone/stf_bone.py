@@ -4,7 +4,7 @@ import math
 from typing import Any
 from collections.abc import Sequence
 
-from .....stfblender_common import STF_ImportContext, STF_ExportContext, STFReportSeverity, STFReport, STF_Category, STF_HandlerAnimation, STF_HandlerComponents, STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister, get_components_from_object, ensure_stf_id
+from .....stfblender_common import STF_ImportContext, STF_ExportContext, STFReportSeverity, STFReport, STF_Category, STF_Handler_Animation, STF_Handler_ComponentHolder, STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister, get_components_from_object, ensure_stf_id
 from .....stfblender_common.utils import trs_utils
 from .....stfblender_common.utils.armature_bone import ArmatureBone
 from .....stfblender_common.utils.animation_conversion_utils import *
@@ -122,7 +122,7 @@ def _draw_ui(layout: bpy.types.UILayout, context: bpy.types.Context, blender_res
 		col.prop(blender_resource.get_bone().stf_bone, "non_deform_use")
 
 
-class Handler_STF_Bone(STF_Handler_BlenderNative, STF_HandlerComponents, STF_HandlerAnimation):
+class Handler_STF_Bone(STF_Handler_BlenderNative, STF_Handler_ComponentHolder, STF_Handler_Animation):
 	stf_type = _stf_type
 	stf_category = STF_Category.NODE
 	like_types = ["bone", "node"]

@@ -2,7 +2,7 @@ import bpy
 from typing import Any
 
 from ...stfblender_common.base import STF_Category
-from ...stfblender_common.resource import STF_Handler_BlenderNative, STF_HandlerComponents
+from ...stfblender_common.resource import STF_Handler_BlenderNative, STF_Handler_ComponentHolder
 from .stf_id_ui import draw_stf_id_ui
 from .component_ui import draw_components_ui
 
@@ -11,7 +11,7 @@ def draw_blender_native_panel(
 		layout: bpy.types.UILayout,
 		context: bpy.types.Context,
 		blender_resource: Any,
-		stf_handler: STF_Handler_BlenderNative | STF_HandlerComponents
+		stf_handler: STF_Handler_BlenderNative | STF_Handler_ComponentHolder
 ) -> None:
 	if(not hasattr(stf_handler, "get_stf_prop_holder") or not hasattr(stf_handler, "operator_set_stf_id")):
 		layout.label(text="No get_stf_prop_holder or operator_set_stf_id: " + str(stf_handler))

@@ -1,7 +1,7 @@
 import bpy
 from typing import Any
 
-from .....stfblender_common import STF_ExportContext, STF_ImportContext, STF_Category, STF_Handler_BlenderNative, STF_HandlerComponents, boilerplate_register, boilerplate_unregister, get_components_from_object, ensure_stf_id
+from .....stfblender_common import STF_ExportContext, STF_ImportContext, STF_Category, STF_Handler_BlenderNative, STF_Handler_ComponentHolder, boilerplate_register, boilerplate_unregister, get_components_from_object, ensure_stf_id
 from .stfexp_text_ui import STFAddTextComponentOperator, STFEditTextComponentIdOperator, STFRemoveTextComponentOperator, STFSetTextIDOperator
 
 # TODO this module is at a bare minimum level, improve it
@@ -38,7 +38,7 @@ def _stf_export(context: STF_ExportContext, application_object: Any, context_obj
 	return ret, blender_text.stf_info.stf_id
 
 
-class Handler_STFEXP_Text(STF_Handler_BlenderNative, STF_HandlerComponents):
+class Handler_STFEXP_Text(STF_Handler_BlenderNative, STF_Handler_ComponentHolder):
 	stf_type = _stf_type
 	stf_category = STF_Category.DATA
 	like_types = ["text"]

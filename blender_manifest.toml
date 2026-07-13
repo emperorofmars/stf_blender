@@ -102,4 +102,11 @@ paths_exclude_pattern = [
 	"/pyproject.toml",
 	"/requirements.txt",
 	"/CONTRIBUTING.md",
+	"/stfblender_common/.gitignore",
+	"/stfblender_common/.editorconfig",
+	"/stfblender_common/readme.md",
+	"/stfblender_common/LICENSE-APACHE2",
+	"/stfblender_common/LICENSE-MIT",
+	"/stfblender_common/readme.md",
+	"/stfblender_common/CONTRIBUTING.md",
 ]

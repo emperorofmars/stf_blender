@@ -7,7 +7,7 @@ from .stf_instance_mesh_util import set_instance_blendshapes
 from .....stfblender_common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STFReportSeverity, STFReport, STF_Category
 from .....stfblender_common.resource.blender_native import STF_Handler_BlenderNative, get_components_from_object
 from .....stfblender_common.resource import ensure_stf_id
-from .....stfblender_common.resource.stf_handler_base import STF_HandlerAnimation
+from .....stfblender_common.resource.stf_handler_base import STF_Handler_Animation
 
 
 _stf_type = "stf.instance.mesh"
@@ -125,7 +125,7 @@ def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: 
 	return None
 
 
-class Handler_STF_Instance_Mesh(STF_Handler_BlenderNative, STF_HandlerAnimation):
+class Handler_STF_Instance_Mesh(STF_Handler_BlenderNative, STF_Handler_Animation):
 	stf_type = _stf_type
 	stf_category = STF_Category.INSTANCE
 	like_types = ["instance.mesh", "instance"]

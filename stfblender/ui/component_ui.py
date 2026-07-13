@@ -1,7 +1,7 @@
 import bpy
 from typing import Any, Callable
 
-from ...stfblender_common.resource.component import InstanceModComponentRef, STF_ComponentResourceBase, STF_Component_Ref
+from ...stfblender_common.resource.component import STF_ComponentBoneInstanceRef, STF_ComponentResourceBase, STF_Component_Ref
 from ...stfblender_common.helpers import draw_multiline_text, OP_CopyToClipboard
 from ...stfblender_common.blender_grr import *
 from ...stfblender_common.resource.stf_registry import find_component_handler, get_all_component_handlers, get_blender_native_component_handlers, get_data_component_handlers
@@ -37,7 +37,7 @@ class STFDrawComponentList:
 		row_r.prop(self, "sort_reverse", text="", icon="SORT_DESC" if self.sort_reverse else "SORT_ASC")
 
 	def filter_items(self, context: bpy.types.Context, data, propname: str):
-		items: list[InstanceModComponentRef] = getattr(data, propname)
+		items: list[STF_ComponentBoneInstanceRef] = getattr(data, propname)
 		filter = [self.bitflag_filter_item] * len(items)
 		if(self.filter_name or self.filter_type):
 			for idx, item in enumerate(items):
@@ -56,7 +56,7 @@ class STFDrawComponentList:
 					filter[idx] = ~self.bitflag_filter_item
 
 		_sort = [(idx, item) for idx, item in enumerate(items)]
-		def _sort_func(item: tuple[int, InstanceModComponentRef]):
+		def _sort_func(item: tuple[int, STF_ComponentBoneInstanceRef]):
 			match(self.sort_by):
 				case "stf_name":
 					component_holder = _get_component_holder(item[1])
@@ -128,7 +128,7 @@ class STFDrawInstanceComponentList(bpy.types.UIList):
 		row_r.prop(self, "sort_reverse", text="", icon="SORT_DESC" if self.sort_reverse else "SORT_ASC")
 
 	def filter_items(self, context: bpy.types.Context, data, propname: str) -> tuple[list[int], list[int]]: # pyright: ignore[reportIncompatibleMethodOverride]
-		items: list[InstanceModComponentRef] = getattr(data, propname)
+		items: list[STF_ComponentBoneInstanceRef] = getattr(data, propname)
 
 		filter = [self.bitflag_filter_item] * len(items)
 		if(self.filter_bone or self.filter_type):
@@ -143,13 +143,13 @@ class STFDrawInstanceComponentList(bpy.types.UIList):
 			filter[idx] = ~self.bitflag_filter_item # pyright: ignore[reportPossiblyUnboundVariable]
 
 		_sort = [(idx, item) for idx, item in enumerate(items)]
-		def _sort_func(item: tuple[int, InstanceModComponentRef]):
+		def _sort_func(item: tuple[int, STF_ComponentBoneInstanceRef]):
 			return item[1][self.sort_by] + (item[1].stf_type if self.sort_by == "bone" else item[1].bone)
 		sortorder: list[int] = bpy.types.UI_UL_list.sort_items_helper(_sort, _sort_func, self.sort_reverse) # pyright: ignore[reportAssignmentType]
 
 		return filter, sortorder
 
-	def draw_item(self, context: bpy.types.Context, layout: bpy.types.UILayout, data, item: InstanceModComponentRef, icon, active_data, active_propname): # pyright: ignore[reportIncompatibleMethodOverride]
+	def draw_item(self, context: bpy.types.Context, layout: bpy.types.UILayout, data, item: STF_ComponentBoneInstanceRef, icon, active_data, active_propname): # pyright: ignore[reportIncompatibleMethodOverride]
 		split = layout.split(factor=0.75)
 		row = split.split(factor=0.5)
 		row_l = row.row()

@@ -2,7 +2,7 @@ import bpy
 from typing import Any
 
 from .....stfblender_common import STF_ImportContext, STF_ExportContext, STF_Category, STFReport
-from .....stfblender_common.resource import STF_Handler_BlenderNative, STF_HandlerComponents, boilerplate_register, boilerplate_unregister, get_components_from_object, ensure_stf_id
+from .....stfblender_common.resource import STF_Handler_BlenderNative, STF_Handler_ComponentHolder, boilerplate_register, boilerplate_unregister, get_components_from_object, ensure_stf_id
 from .....stfblender_common.utils.armature_bone import ArmatureBone
 from .stf_armature_ui import STFAddArmatureComponentOperator, STFEditArmatureComponentIdOperator, STFRemoveArmatureComponentOperator, STFSetArmatureIDOperator
 
@@ -52,7 +52,7 @@ def _stf_export(context: STF_ExportContext, application_object: Any, context_obj
 	return ret, blender_armature.stf_info.stf_id
 
 
-class Handler_STF_Armature(STF_Handler_BlenderNative, STF_HandlerComponents):
+class Handler_STF_Armature(STF_Handler_BlenderNative, STF_Handler_ComponentHolder):
 	stf_type = _stf_type
 	stf_category = STF_Category.DATA
 	like_types = ["armature", "prefab"]

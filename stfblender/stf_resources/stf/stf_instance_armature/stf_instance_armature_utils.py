@@ -1,6 +1,6 @@
 import bpy
 
-from .....stfblender_common import STF_ExportContext, STF_ImportContext, InstanceModComponentRef, STF_Handler_Component, STF_Component_Ref, STF_ComponentResourceBase, add_component
+from .....stfblender_common import STF_ExportContext, STF_ImportContext, STF_ComponentBoneInstanceRef, STF_Handler_Component, STF_Component_Ref, STF_ComponentResourceBase, add_component
 from .....stfblender_common.resource.stf_registry import find_component_handler, get_blender_native_component_handlers
 from .....stfblender_common.utils.animation_conversion_utils import *
 
@@ -50,7 +50,7 @@ def update_armature_instance_component_standins(context: bpy.types.Context, blen
 		standin_ref_index += 1
 
 
-def serialize_standin(context: STF_ExportContext, blender_object: bpy.types.Object, component_standin_ref: InstanceModComponentRef) -> dict | None:
+def serialize_standin(context: STF_ExportContext, blender_object: bpy.types.Object, component_standin_ref: STF_ComponentBoneInstanceRef) -> dict | None:
 	for standin_component in getattr(blender_object, component_standin_ref.blender_property_name):
 		if(standin_component.stf_id == component_standin_ref.stf_id):
 			break

@@ -3,7 +3,7 @@ import mathutils
 import math
 from typing import Any
 
-from .....stfblender_common import STF_ExportContext, STF_ImportContext, STF_TaskSteps, STFReportSeverity, STFReport, BlenderPropertyPathPart, STFPropertyPathPart, STF_Category, STF_Handler_BlenderNative, STF_HandlerAnimation, InstanceModComponentRef, ensure_stf_id, STFSetIDOperatorBase
+from .....stfblender_common import STF_ExportContext, STF_ImportContext, STF_TaskSteps, STFReportSeverity, STFReport, BlenderPropertyPathPart, STFPropertyPathPart, STF_Category, STF_Handler_BlenderNative, STF_Handler_Animation, STF_ComponentBoneInstanceRef, ensure_stf_id, STFSetIDOperatorBase
 from .....stfblender_common.utils.animation_conversion_utils import *
 from .....stfblender_common.utils.armature_bone import ArmatureBone
 from .....stfblender_common.utils.trs_utils import close_enough
@@ -16,7 +16,7 @@ _stf_type = "stf.instance.armature"
 
 
 class STF_Instance_Armature(bpy.types.PropertyGroup):
-	stf_components: bpy.props.CollectionProperty(type=InstanceModComponentRef, options=set()) # type: ignore
+	stf_components: bpy.props.CollectionProperty(type=STF_ComponentBoneInstanceRef, options=set()) # type: ignore
 	stf_active_component_index: bpy.props.IntProperty(options=set()) # type: ignore
 
 
@@ -182,7 +182,7 @@ class STFSetArmatureInstanceIDOperator(bpy.types.Operator, STFSetIDOperatorBase)
 	def get_property(self, context): return context.object.stf_instance
 
 
-class Handler_STF_Instance_Armature(STF_Handler_BlenderNative, STF_HandlerAnimation):
+class Handler_STF_Instance_Armature(STF_Handler_BlenderNative, STF_Handler_Animation):
 	stf_type = _stf_type
 	stf_category = STF_Category.INSTANCE
 	like_types = ["instance.armature", "instance"]

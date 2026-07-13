@@ -2,7 +2,7 @@ import bpy
 import re
 from typing import Any
 
-from ....stfblender_common import STF_ExportContext, STF_ImportContext, STFReportSeverity, STFReport, BlenderPropertyPathPart, STFPropertyPathPart, STF_Category, STF_HandlerAnimation, STF_Handler_BlenderNative, STFSetIDOperatorBase, ensure_stf_id
+from ....stfblender_common import STF_ExportContext, STF_ImportContext, STFReportSeverity, STFReport, BlenderPropertyPathPart, STFPropertyPathPart, STF_Category, STF_Handler_Animation, STF_Handler_BlenderNative, STFSetIDOperatorBase, ensure_stf_id
 
 
 _stf_type = "stfexp.light"
@@ -137,7 +137,7 @@ def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: 
 Definition
 """
 
-class Handler_STFEXP_Light(STF_Handler_BlenderNative, STF_HandlerAnimation):
+class Handler_STFEXP_Light(STF_Handler_BlenderNative, STF_Handler_Animation):
 	stf_type = _stf_type
 	stf_category = STF_Category.INSTANCE
 	like_types = ["light"]

@@ -3,7 +3,7 @@ import math
 import mathutils
 from typing import Any
 
-from .....stfblender_common import STF_ExportContext, STF_ImportContext, STF_TaskSteps, STFReportSeverity, STFReport, STF_Category, STF_Handler_BlenderNative, STF_HandlerAnimation, STF_HandlerComponents, boilerplate_register, boilerplate_unregister, get_components_from_object, ensure_stf_id
+from .....stfblender_common import STF_ExportContext, STF_ImportContext, STF_TaskSteps, STFReportSeverity, STFReport, STF_Category, STF_Handler_BlenderNative, STF_Handler_Animation, STF_Handler_ComponentHolder, boilerplate_register, boilerplate_unregister, get_components_from_object, ensure_stf_id
 from .....stfblender_common.utils import trs_utils
 from .....stfblender_common.helpers import get_resource_id
 from .....stfblender_common.helpers.reference_helper import register_exported_resource
@@ -129,7 +129,7 @@ def _stf_export(context: STF_ExportContext, blender_object: bpy.types.Object, co
 	return json_resource, blender_object.stf_info.stf_id
 
 
-class Handler_STF_Node(STF_Handler_BlenderNative, STF_HandlerComponents, STF_HandlerAnimation):
+class Handler_STF_Node(STF_Handler_BlenderNative, STF_Handler_ComponentHolder, STF_Handler_Animation):
 	stf_type = _stf_type
 	stf_category = STF_Category.NODE
 	like_types = ["node", "node.spatial"]

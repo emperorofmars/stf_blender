@@ -1,6 +1,6 @@
 import bpy
 
-from .....stfblender_common import STF_Category, STF_HandlerComponents, STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister, get_components_from_object
+from .....stfblender_common import STF_Category, STF_Handler_ComponentHolder, STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister, get_components_from_object
 from .stf_animation_common import *
 from .stf_animation_export import stf_animation_export
 from .stf_animation_import import stf_animation_import
@@ -18,7 +18,7 @@ class STF_Animation(bpy.types.PropertyGroup):
 	constraint_bake: bpy.props.EnumProperty(name="Constraint-Baking", items=(("auto", "Automatic", ""), ("bake", "Bake", ""), ("nobake", "Don't Bake", "")), default="auto") # type: ignore
 
 
-class Handler_STF_Animation(STF_Handler_BlenderNative, STF_HandlerComponents):
+class Handler_STF_Animation(STF_Handler_BlenderNative, STF_Handler_ComponentHolder):
 	stf_type = _stf_type
 	stf_category = STF_Category.DATA
 	like_types = ["animation"]
