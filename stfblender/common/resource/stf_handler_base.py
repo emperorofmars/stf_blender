@@ -16,7 +16,7 @@ class STF_HandlerBase(Protocol):
 	"""STF type identifier"""
 
 	stf_category: str
-	"""The STF category string must match the `STF_Category` enum. This property is useful for validation"""
+	"""The STF category string must match the `STF_Category` enum"""
 
 	understood_application_types: list
 	"""List of application types this module can export"""
@@ -25,7 +25,7 @@ class STF_HandlerBase(Protocol):
 	"""If a module for the same `stf_type` is registered, the priority will decide which is preferred"""
 
 	like_types: list[str] = []
-	"""Behaves like this types. For example a `my.custom.super_fancy_mesh` is like `mesh`"""
+	"""Behaves like these types. For example a `my.custom.super_fancy_mesh` is like `mesh`"""
 
 	can_handle_application_object_func: Callable[[Any], int]
 	"""
@@ -72,7 +72,7 @@ class STF_HandlerAnimation(Protocol):
 
 	understood_application_property_path_types: list[Any] = []
 	"""
-	List of application types from which this module can convert paths.
+	List of Blender types from which this module can convert paths.
 
 	Except for rare cases this will always be `bpy.types.Object`.
 	"""
@@ -83,7 +83,7 @@ class STF_HandlerAnimation(Protocol):
 
 	E.g. `location`, `rotation_quaternion`, `pose.bones`, `key_blocks`, ...
 
-	In the case of component-handler will be always `_blender_property_name`.
+	For component-handlers will always be `_blender_property_name`.
 	"""
 
 	resolve_property_path_to_stf_func: Callable[[STF_ExportContext, Any, int, str], STFPropertyPathPart | None]

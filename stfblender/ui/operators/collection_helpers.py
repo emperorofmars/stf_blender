@@ -1,5 +1,5 @@
 import bpy
-from ..common.helpers.collection_helpers import OP_Edit_Component_Collection
+from ...common.helpers.collection_helpers import OP_Edit_Component_Collection
 
 
 class Edit_Component_Collection(bpy.types.Operator):

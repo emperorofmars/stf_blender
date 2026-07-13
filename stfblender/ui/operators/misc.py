@@ -1,6 +1,6 @@
 import bpy
 
-from ..common.helpers.misc import OP_CopyToClipboard, OP_OpenWebpage, OP_SetActiveObjectOperator
+from ...common.helpers.misc import OP_CopyToClipboard, OP_OpenWebpage, OP_SetActiveObjectOperator
 
 
 class SetActiveObjectOperator(bpy.types.Operator):

@@ -25,6 +25,15 @@ class STF_DataResourceBase(bpy.types.PropertyGroup):
 
 
 def add_resource(collection: bpy.types.Collection, blender_property_name: str, stf_id: str, stf_type: str) -> tuple[STF_Data_Ref, Any]:
+	"""
+	Add a Blender-NON-native STF resource to `bpy.types.Collection`.
+
+	:param bpy.types.Collection collection:
+	:param str blender_property_name: The property on `bpy.types.Collection` to which this resource-type can be added.
+	:param str stf_id:
+	:param str stf_type:
+	:return tuple[STF_Data_Ref, Any]: The data-resource reference and the actual resource object
+	"""
 	resource_ref: STF_Data_Ref = collection.stf_data_refs.add()
 	resource_ref.stf_id = stf_id
 	resource_ref.stf_type = stf_type
