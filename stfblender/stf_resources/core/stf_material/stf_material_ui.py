@@ -1,8 +1,6 @@
 import bpy
 
-from ....common.resource.resource_id import STFSetIDOperatorBase, draw_stf_id_ui
-from ....common.resource.component import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
-from ....common.ui import draw_components_ui
+from ....common import STFSetIDOperatorBase, STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
 from .stf_material_definition import STF_Material_Property, STF_Material_Value_Base, STF_Material_Value_Ref
 from .material_value_modules import blender_material_value_modules
 from .stf_material_operators import STFAddMaterialProperty, STFAddMaterialPropertyValue, STFClearMaterial, STFRemoveMaterialProperty, STFRemoveMaterialPropertyValue
@@ -158,142 +156,118 @@ class STFMaterialShaderTargetShaderRemove(bpy.types.Operator):
 		context.material.stf_material.shader_targets[self.index].shaders.remove(self.index_shader)
 		return {"FINISHED"}
 
+def draw_material_ui(layout: bpy.types.UILayout, context: bpy.types.Context, blender_resource: bpy.types.Material) -> None:
+	layout.prop(context.material.stf_material, "stf_is_source_of_truth")
 
-class STFMaterialSpatialPanel(bpy.types.Panel):
-	"""STF options & export helper"""
-	bl_idname = "OBJECT_PT_stf_material_spatial_editor"
-	bl_label = "STF Editor: stf.material"
-	bl_region_type = "WINDOW"
-	bl_space_type = "PROPERTIES"
-	bl_context = "material"
+	layout.separator(factor=1, type="SPACE")
+	row = layout.row()
+	row.operator(STFConvertBlenderMaterialToSTF.bl_idname, icon="WARNING_LARGE" if context.material.stf_material.stf_is_source_of_truth else "NONE")
+	row.operator(STFConvertSTFMaterialToBlender.bl_idname, icon="WARNING_LARGE" if not context.material.stf_material.stf_is_source_of_truth else "NONE")
+	row.operator(STFClearMaterial.bl_idname, icon="WARNING_LARGE" if context.material.stf_material.stf_is_source_of_truth else "NONE")
 
-	@classmethod
-	def poll(cls, context):
-		return hasattr(context, "material") and context.material is not None
+	layout.separator(factor=2, type="LINE")
 
-	def draw(self, context: bpy.types.Context):
-		# Set ID
-		draw_stf_id_ui(self.layout, context, context.material, context.material.stf_info, STFSetMaterialIDOperator.bl_idname)  # pyright: ignore[reportArgumentType]
+	# Material properties
+	# TODO list properties by group, allow for custom hot-loaded code to draw entire groups, only list properties manually like this in an 'advanced view'
+	layout.label(text="STF Material Properties")
 
-		self.layout.separator(factor=2, type="LINE")
+	row = layout.row(align=True)
+	row.prop(context.scene, "stf_material_value_modules", text="")
+	row.operator(STFAddMaterialProperty.bl_idname, icon="ADD")
 
-		self.layout.prop(context.material.stf_material, "stf_is_source_of_truth")
+	# Draw List of properties
+	row_property_list = layout.row(align=True)
+	row_property_list.template_list(STFDrawMaterialPropertyList.bl_idname, "", context.material.stf_material, "properties", context.material.stf_material, "active_property_index")
 
-		self.layout.separator(factor=1, type="SPACE")
-		row = self.layout.row()
-		row.operator(STFConvertBlenderMaterialToSTF.bl_idname, icon="WARNING_LARGE" if context.material.stf_material.stf_is_source_of_truth else "NONE")
-		row.operator(STFConvertSTFMaterialToBlender.bl_idname, icon="WARNING_LARGE" if not context.material.stf_material.stf_is_source_of_truth else "NONE")
-		row.operator(STFClearMaterial.bl_idname, icon="WARNING_LARGE" if context.material.stf_material.stf_is_source_of_truth else "NONE")
+	box = layout.box()
+	box.use_property_split = True
 
-		self.layout.separator(factor=2, type="LINE")
+	if(len(context.material.stf_material.properties) > context.material.stf_material.active_property_index):
+		row_property_list.operator(STFRemoveMaterialProperty.bl_idname, text="", icon="X").index = context.material.stf_material.active_property_index
 
-		# Material properties
-		# TODO list properties by group, allow for custom hot-loaded code to draw entire groups, only list properties manually like this in an 'advanced view'
-		self.layout.label(text="STF Material Properties")
+		# Draw property
+		prop: STF_Material_Property = context.material.stf_material.properties[context.material.stf_material.active_property_index]
+		property_type_row = box.row()
+		if(not prop.property_type or prop.property_type.strip() == ""): property_type_row.alert = True
+		property_type_row.prop(prop, "property_type", icon="WARNING_LARGE" if not prop.property_type or prop.property_type.strip() == "" else "NONE")
+		box.prop(prop, "multi_value")
 
-		row = self.layout.row(align=True)
-		row.prop(context.scene, "stf_material_value_modules", text="")
-		row.operator(STFAddMaterialProperty.bl_idname, icon="ADD")
-
-		# Draw List of properties
-		row_property_list = self.layout.row(align=True)
-		row_property_list.template_list(STFDrawMaterialPropertyList.bl_idname, "", context.material.stf_material, "properties", context.material.stf_material, "active_property_index")
-
-		box = self.layout.box()
-		box.use_property_split = True
-
-		if(len(context.material.stf_material.properties) > context.material.stf_material.active_property_index):
-			row_property_list.operator(STFRemoveMaterialProperty.bl_idname, text="", icon="X").index = context.material.stf_material.active_property_index
-
-			# Draw property
-			prop: STF_Material_Property = context.material.stf_material.properties[context.material.stf_material.active_property_index]
-			property_type_row = box.row()
-			if(not prop.property_type or prop.property_type.strip() == ""): property_type_row.alert = True
-			property_type_row.prop(prop, "property_type", icon="WARNING_LARGE" if not prop.property_type or prop.property_type.strip() == "" else "NONE")
-			box.prop(prop, "multi_value")
-
-			# Draw property value(s)
+		# Draw property value(s)
+		if(prop.multi_value):
+			box.separator(factor=1, type="SPACE")
+			row_value_list = box.row(align=True)
+			row_value_list.template_list(STFDrawMaterialPropertyValueList.bl_idname, "", prop, "values", prop, "active_value_index")
+		if(value := _find_value(context, prop)):
 			if(prop.multi_value):
-				box.separator(factor=1, type="SPACE")
-				row_value_list = box.row(align=True)
-				row_value_list.template_list(STFDrawMaterialPropertyValueList.bl_idname, "", prop, "values", prop, "active_value_index")
-			if(value := _find_value(context, prop)):
-				if(prop.multi_value):
-					if(len(prop.values) > 1):
-						row_value_list.operator(STFRemoveMaterialPropertyValue.bl_idname, text="", icon="X").index = context.material.stf_material.active_property_index  # pyright: ignore[reportPossiblyUnboundVariable]
-					box.operator(STFAddMaterialPropertyValue.bl_idname).index = context.material.stf_material.active_property_index
-
-				box.separator(factor=1, type="LINE")
-				_draw_value(box, context, prop, value)
-			else:
+				if(len(prop.values) > 1):
+					row_value_list.operator(STFRemoveMaterialPropertyValue.bl_idname, text="", icon="X").index = context.material.stf_material.active_property_index  # pyright: ignore[reportPossiblyUnboundVariable]
 				box.operator(STFAddMaterialPropertyValue.bl_idname).index = context.material.stf_material.active_property_index
 
-		# Hints
-		self.layout.separator(factor=2, type="LINE")
-		header, body = self.layout.panel("stf.material_hints", default_closed = False)
-		header.label(text="Shader Hints", icon="GROUP")
-		if(body):
-			box = body.box()
-			header_row = box.row()
-			header_row_l = header_row.row()
-			header_row_l.alignment = "LEFT"
-			header_row_l.label(text="Style Hints")
-			header_row_r = header_row.row()
-			header_row_r.alignment = "RIGHT"
-			header_row_r.operator(STFMaterialHintAdd.bl_idname, icon="ADD")
-			if(len(context.material.stf_material.style_hints)):
+			box.separator(factor=1, type="LINE")
+			_draw_value(box, context, prop, value)
+		else:
+			box.operator(STFAddMaterialPropertyValue.bl_idname).index = context.material.stf_material.active_property_index
+
+	# Hints
+	layout.separator(factor=2, type="LINE")
+	header, body = layout.panel("stf.material_hints", default_closed = False)
+	header.label(text="Shader Hints", icon="GROUP")
+	if(body):
+		box = body.box()
+		header_row = box.row()
+		header_row_l = header_row.row()
+		header_row_l.alignment = "LEFT"
+		header_row_l.label(text="Style Hints")
+		header_row_r = header_row.row()
+		header_row_r.alignment = "RIGHT"
+		header_row_r.operator(STFMaterialHintAdd.bl_idname, icon="ADD")
+		if(len(context.material.stf_material.style_hints)):
+			row = box.row()
+			row.separator(factor=2.0)
+			col = row.column(align=True)
+			for style_hint_index, style_hint in enumerate(context.material.stf_material.style_hints):
+				row_inner = col.row(align=True)
+				alert = not style_hint.value or style_hint.value.strip() == ""
+				row_inner.alert = alert
+				row_inner.prop(style_hint, "value", text="", icon="WARNING_LARGE" if alert else "NONE", placeholder="realistic / cartoony / outline / etc..")
+				row_inner.operator(STFMaterialHintRemove.bl_idname, text="", icon="X").index = style_hint_index
+
+		box = body.box()
+		header_row = box.row()
+		header_row_l = header_row.row()
+		header_row_l.alignment = "LEFT"
+		header_row_l.label(text="Shader Targets")
+		header_row_r = header_row.row()
+		header_row_r.alignment = "RIGHT"
+		header_row_r.operator(STFMaterialShaderTargetAdd.bl_idname, icon="ADD")
+		if(len(context.material.stf_material.shader_targets)):
+			for target_index, shader_target in enumerate(context.material.stf_material.shader_targets):
 				row = box.row()
-				row.separator(factor=2.0)
-				col = row.column(align=True)
-				for style_hint_index, style_hint in enumerate(context.material.stf_material.style_hints):
-					row_inner = col.row(align=True)
-					alert = not style_hint.value or style_hint.value.strip() == ""
-					row_inner.alert = alert
-					row_inner.prop(style_hint, "value", text="", icon="WARNING_LARGE" if alert else "NONE", placeholder="realistic / cartoony / outline / etc..")
-					row_inner.operator(STFMaterialHintRemove.bl_idname, text="", icon="X").index = style_hint_index
-
-			box = body.box()
-			header_row = box.row()
-			header_row_l = header_row.row()
-			header_row_l.alignment = "LEFT"
-			header_row_l.label(text="Shader Targets")
-			header_row_r = header_row.row()
-			header_row_r.alignment = "RIGHT"
-			header_row_r.operator(STFMaterialShaderTargetAdd.bl_idname, icon="ADD")
-			if(len(context.material.stf_material.shader_targets)):
-				for target_index, shader_target in enumerate(context.material.stf_material.shader_targets):
-					row = box.row()
-					col_outer = row.box().column()
-					row_header = col_outer.row()
-					row_header_l = row_header.row()
-					alert = not shader_target.target or shader_target.target.strip() == ""
-					row_header_l.alert = alert
-					row_header_l.prop(shader_target, "target", text="Application", placeholder="blender | unity | godot | etc..", icon="WARNING_LARGE" if alert else "NONE")
-					row_header_r = row_header.row()
-					row_header_r.alignment = "RIGHT"
-					row_header_r.operator(STFMaterialShaderTargetRemove.bl_idname, text="", icon="X").index = target_index
-					row_add = col_outer.row()
-					row_add.alignment = "RIGHT"
-					row_add.operator(STFMaterialShaderTargetShaderAdd.bl_idname, icon="ADD").index = target_index
-					col_outer.separator(factor=1.0)
-					if(len(shader_target.shaders)):
-						row_inner = col_outer.row()
-						row_inner.separator(factor=4.0)
-						col_inner = row_inner.column(align=True)
-						for shader_index, shader in enumerate(shader_target.shaders):
-							row_value = col_inner.row(align=True)
-							alert = not shader.value or shader.value.strip() == ""
-							row_value.alert = alert
-							row_value.prop(shader, "value", text="", placeholder="ShaderNodeBsdfPrincipled | .poiyomi/Poiyomi Toon | etc..", icon="WARNING_LARGE" if alert else "NONE")
-							btn = row_value.operator(STFMaterialShaderTargetShaderRemove.bl_idname, text="", icon="X")
-							btn.index = target_index
-							btn.index_shader = shader_index
-
-		# Components
-		self.layout.separator(factor=2, type="LINE")
-		header, body = self.layout.panel("stf.material_components", default_closed = True)
-		header.label(text="STF Components (" + str(len(context.material.stf_info.stf_components)) + ")", icon="GROUP")
-		if(body): draw_components_ui(self.layout, context, context.material.stf_info, context.material, STFAddMaterialComponentOperator.bl_idname, STFRemoveMaterialComponentOperator.bl_idname, STFEditMaterialComponentIdOperator.bl_idname)  # pyright: ignore[reportArgumentType]
+				col_outer = row.box().column()
+				row_header = col_outer.row()
+				row_header_l = row_header.row()
+				alert = not shader_target.target or shader_target.target.strip() == ""
+				row_header_l.alert = alert
+				row_header_l.prop(shader_target, "target", text="Application", placeholder="blender | unity | godot | etc..", icon="WARNING_LARGE" if alert else "NONE")
+				row_header_r = row_header.row()
+				row_header_r.alignment = "RIGHT"
+				row_header_r.operator(STFMaterialShaderTargetRemove.bl_idname, text="", icon="X").index = target_index
+				row_add = col_outer.row()
+				row_add.alignment = "RIGHT"
+				row_add.operator(STFMaterialShaderTargetShaderAdd.bl_idname, icon="ADD").index = target_index
+				col_outer.separator(factor=1.0)
+				if(len(shader_target.shaders)):
+					row_inner = col_outer.row()
+					row_inner.separator(factor=4.0)
+					col_inner = row_inner.column(align=True)
+					for shader_index, shader in enumerate(shader_target.shaders):
+						row_value = col_inner.row(align=True)
+						alert = not shader.value or shader.value.strip() == ""
+						row_value.alert = alert
+						row_value.prop(shader, "value", text="", placeholder="ShaderNodeBsdfPrincipled | .poiyomi/Poiyomi Toon | etc..", icon="WARNING_LARGE" if alert else "NONE")
+						btn = row_value.operator(STFMaterialShaderTargetShaderRemove.bl_idname, text="", icon="X")
+						btn.index = target_index
+						btn.index_shader = shader_index
 
 
 def _find_value(context: bpy.types.Context, prop: STF_Material_Property):

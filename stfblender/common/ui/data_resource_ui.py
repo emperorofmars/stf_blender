@@ -1,7 +1,7 @@
 import bpy
 from typing import Any
 
-from ..base.stf_registry import find_data_handler, get_blender_non_native_data_handlers
+from ..resource.stf_registry import find_data_handler, get_blender_non_native_data_handlers
 from ..helpers import CopyToClipboard, draw_multiline_text
 from ..resource.data import STF_DataResourceBase, STF_Data_Ref
 from ..resource.data.data_resource_ops import STFCreateDataResourceOperator, STFEditDataResourceOperator, STFRemoveDataResourceOperator

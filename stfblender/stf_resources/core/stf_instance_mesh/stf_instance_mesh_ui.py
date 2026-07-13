@@ -1,8 +1,8 @@
 import bpy
 
 from ....common.helpers import draw_multiline_text
-from ....common.resource.resource_id import STFSetIDOperatorBase, draw_stf_id_ui
-from .stf_instance_mesh import STF_Instance_Mesh_Blendshape_Value
+from ....common.resource.resource_id import STFSetIDOperatorBase
+from .stf_instance_mesh_data import STF_Instance_Mesh_Blendshape_Value
 from .stf_instance_mesh_util import instance_blendshapes_requires_update, set_instance_blendshapes
 
 
@@ -70,37 +70,18 @@ class STFDrawMeshInstanceBlendshapeList(bpy.types.UIList):
 		return [self.bitflag_filter_item] * len(items), sortorder
 
 
-class STFMeshInstancePanel(bpy.types.Panel):
-	"""STF options & export helper"""
-	bl_idname = "OBJECT_PT_stf_mesh_instance_editor"
-	bl_label = "STF Editor: stf.instance.mesh"
-	bl_region_type = "WINDOW"
-	bl_space_type = "PROPERTIES"
-	bl_context = "object"
+def draw_instance_mesh_ui(layout: bpy.types.UILayout, context: bpy.types.Context, blender_resource: tuple[bpy.types.Object, bpy.types.Mesh]) -> None:
+	if(blender_resource[0].find_armature()):
+		t, r, s = blender_resource[0].matrix_local.decompose()
+		if(t.length > 0.0001 or abs(r.x) > 0.0001 or abs(r.y) > 0.0001 or abs(r.z) > 0.0001 or abs((r.w - 1)) > 0.0001 or abs(s.x - 1) > 0.0001 or abs(s.y - 1) > 0.0001 or abs(s.z - 1) > 0.0001):
+			draw_multiline_text(layout, "Warning, this mesh is not aligned with its Armature!\nThis will lead to differing behavior outside of Blender.\nApplying all Transforms for the Mesh and Armature will likely fix this.", width=80, icon="ERROR", alert=True)  # pyright: ignore[reportArgumentType]
+			layout.separator(factor=2, type="LINE")
 
-	@classmethod
-	def poll(cls, context: bpy.types.Context) -> bool:
-		return hasattr(context, "object") and context.object is not None and context.object.stf_instance is not None and context.object.data and type(context.object.data) is bpy.types.Mesh  # pyright: ignore[reportReturnType]
-
-	def draw(self, context: bpy.types.Context):
-		layout = self.layout
-		if(context.object.find_armature()):
-			t, r, s = context.object.matrix_local.decompose()
-			if(t.length > 0.0001 or abs(r.x) > 0.0001 or abs(r.y) > 0.0001 or abs(r.z) > 0.0001 or abs((r.w - 1)) > 0.0001 or abs(s.x - 1) > 0.0001 or abs(s.y - 1) > 0.0001 or abs(s.z - 1) > 0.0001):
-				draw_multiline_text(layout, "Warning, this mesh is not aligned with its Armature!\nThis will lead to differing behavior outside of Blender.\nApplying all Transforms for the Mesh and Armature will likely fix this.", width=80, icon="ERROR", alert=True)  # pyright: ignore[reportArgumentType]
-				layout.separator(factor=2, type="LINE")
-
-		# Set ID
-		draw_stf_id_ui(layout, context, context.object.stf_instance, context.object.stf_instance, STFSetMeshInstanceIDOperator.bl_idname, True)  # pyright: ignore[reportArgumentType]
-
-		layout.separator(factor=2, type="LINE")
-
-		# Blendshape Values per Instance
-		if(context.object.data.shape_keys and len(context.object.data.shape_keys.key_blocks) > 0):
-			layout.prop(context.object.stf_instance_mesh, "override_blendshape_values", text="Use Instance Shape Keys")
-			#if(context.object.stf_instance_mesh.override_blendshape_values):
-			row = layout.row()
-			if(instance_blendshapes_requires_update(context.object)):  # pyright: ignore[reportArgumentType]
-				row.alert = True
-			row.operator(SetInstanceBlendshapes.bl_idname, text="Update Shape Keys", icon="LOOP_FORWARDS")
-			layout.template_list(STFDrawMeshInstanceBlendshapeList.bl_idname, "", context.object.stf_instance_mesh, "blendshape_values", context.object.stf_instance_mesh, "active_blendshape")
+	# Blendshape Values per Instance
+	if(blender_resource[1].shape_keys and len(blender_resource[1].shape_keys.key_blocks) > 0):
+		layout.prop(blender_resource[0].stf_instance_mesh, "override_blendshape_values", text="Use Instance Shape Keys")
+		row = layout.row()
+		if(instance_blendshapes_requires_update(blender_resource[0])):  # pyright: ignore[reportArgumentType]
+			row.alert = True
+		row.operator(SetInstanceBlendshapes.bl_idname, text="Update Shape Keys", icon="LOOP_FORWARDS")
+		layout.template_list(STFDrawMeshInstanceBlendshapeList.bl_idname, "", blender_resource[0].stf_instance_mesh, "blendshape_values", blender_resource[0].stf_instance_mesh, "active_blendshape")

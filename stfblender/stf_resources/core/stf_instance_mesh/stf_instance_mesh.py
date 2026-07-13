@@ -1,25 +1,16 @@
 import bpy
 from typing import Any
 
+from .stf_instance_mesh_data import STF_Instance_Mesh
+from .stf_instance_mesh_ui import draw_instance_mesh_ui
 from .stf_instance_mesh_util import set_instance_blendshapes
 from ....common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STFReportSeverity, STFReport, STF_Category
 from ....common.resource.blender_native import STF_Handler_BlenderNative, get_components_from_object
-from ....common.resource.resource_id import ensure_stf_id
+from ....common.resource import ensure_stf_id
+from ....common.resource.stf_handler_base import STF_HandlerAnimation
 
 
 _stf_type = "stf.instance.mesh"
-
-
-class STF_Instance_Mesh_Blendshape_Value(bpy.types.PropertyGroup):
-	name: bpy.props.StringProperty(name="Name", options=set()) # type: ignore
-	override: bpy.props.BoolProperty(name="Override", default=False, options=set()) # type: ignore
-	value: bpy.props.FloatProperty(name="Value", default=0, soft_min=0, soft_max=1, precision=3, subtype="FACTOR") # type: ignore
-	index_on_mesh: bpy.props.IntProperty(name="Index") # type: ignore
-
-class STF_Instance_Mesh(bpy.types.PropertyGroup):
-	override_blendshape_values: bpy.props.BoolProperty(name="Override Blendshape Values", default=False, options=set()) # type: ignore
-	blendshape_values: bpy.props.CollectionProperty(type=STF_Instance_Mesh_Blendshape_Value, name="Blendshape Values", options=set()) # type: ignore
-	active_blendshape: bpy.props.IntProperty(options=set()) # type: ignore
 
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any | STFReport:
@@ -134,7 +125,7 @@ def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: 
 	return None
 
 
-class Handler_STF_Instance_Mesh(STF_Handler_BlenderNative):
+class Handler_STF_Instance_Mesh(STF_Handler_BlenderNative, STF_HandlerAnimation):
 	stf_type = _stf_type
 	stf_category = STF_Category.INSTANCE
 	like_types = ["instance.mesh", "instance"]
@@ -142,7 +133,9 @@ class Handler_STF_Instance_Mesh(STF_Handler_BlenderNative):
 	import_func = _stf_import
 	export_func = _stf_export # pyright: ignore[reportAssignmentType]
 	can_handle_application_object_func = _can_handle_application_object_func
-	get_components_func = get_components_from_object
+	get_stf_prop_holder = lambda blender_object: blender_object[0].stf_instance
+	operator_set_stf_id = "stf.set_mesh_instance_stf_id"
+	draw = draw_instance_mesh_ui
 
 	understood_application_property_path_types = [bpy.types.Object]
 	understood_application_property_path_parts = ["key_blocks"]

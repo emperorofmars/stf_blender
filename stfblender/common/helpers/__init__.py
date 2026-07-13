@@ -1,4 +1,8 @@
 
+"""
+Helpers for creating GUI for STF resources and dealing with the STF framework.
+"""
+
 from .collection_helpers import create_add_button, create_remove_button, draw_list
 from .draw_multiline_text import draw_multiline_text
 from .poll_helpers import poll_valid_animations

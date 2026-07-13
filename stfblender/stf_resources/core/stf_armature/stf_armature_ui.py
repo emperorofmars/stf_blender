@@ -1,8 +1,6 @@
 import bpy
 
-from ....common.resource.resource_id import STFSetIDOperatorBase, draw_stf_id_ui
-from ....common.resource.component import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
-from ....common.ui import draw_components_ui
+from ....common.resource import STFSetIDOperatorBase, STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
 
 
 class STFSetArmatureIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
@@ -29,27 +27,3 @@ class STFEditArmatureComponentIdOperator(bpy.types.Operator, STFEditComponentOpe
 	bl_idname = "stf.edit_armature_component_id"
 	def get_property(self, context): return context.armature
 
-
-class STFArmatureSpatialPanel(bpy.types.Panel):
-	"""STF options & export helper"""
-	bl_idname = "OBJECT_PT_stf_armature_spatial_editor"
-	bl_label = "STF Editor: stf.armature"
-	bl_region_type = "WINDOW"
-	bl_space_type = "PROPERTIES"
-	bl_context = "data"
-
-	@classmethod
-	def poll(cls, context):
-		return hasattr(context, "armature") and context.armature is not None
-
-	def draw(self, context):
-		# Set ID
-		draw_stf_id_ui(self.layout, context, context.armature, context.armature.stf_info, STFSetArmatureIDOperator.bl_idname) # pyright: ignore[reportArgumentType]
-
-		self.layout.separator(factor=2, type="LINE")
-
-		# Components
-		self.layout.separator(factor=1, type="SPACE")
-		header, body = self.layout.panel("stf.armature_components", default_closed = False)
-		header.label(text="STF Components (" + str(len(context.armature.stf_info.stf_components)) + ")", icon="GROUP")
-		if(body): draw_components_ui(self.layout, context, context.armature.stf_info, context.armature, STFAddArmatureComponentOperator.bl_idname, STFRemoveArmatureComponentOperator.bl_idname, STFEditArmatureComponentIdOperator.bl_idname) # pyright: ignore[reportArgumentType]

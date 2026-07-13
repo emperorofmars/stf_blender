@@ -1,8 +1,8 @@
 import bpy
 from typing import Any, Callable, Protocol
 
-from ..stf_handler_base import STF_HandlerBase
 from ... import STF_Category, STF_ImportContext, STF_ExportContext
+from ..stf_handler_base import STF_HandlerBase
 from .stf_component_resource import STF_Component_Ref, STF_ComponentResourceBase
 
 """

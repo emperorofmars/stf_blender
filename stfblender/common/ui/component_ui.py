@@ -6,7 +6,7 @@ from ..resource.component import InstanceModComponentRef, STF_ComponentResourceB
 from ..resource.component.component_exclusion_groups import STF_ManageExclusionGroups, STF_RegisterExclusionGroup
 from ..helpers import CopyToClipboard, draw_multiline_text
 from ..blender_grr import *
-from ..base.stf_registry import find_component_handler, get_all_component_handlers, get_component_handlers, get_data_component_handlers
+from ..resource.stf_registry import find_component_handler, get_all_component_handlers, get_blender_native_component_handlers, get_data_component_handlers
 from ...stf_resources.fallback.json_fallback_component import Handler_JsonFallbackComponent
 
 
@@ -163,7 +163,16 @@ class STFDrawInstanceComponentList(bpy.types.UIList):
 		row_r.operator(CopyToClipboard.bl_idname, text="", icon="DUPLICATE", emboss=False).text = item.stf_id
 
 
-def draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, stf_application_object: Any, component: STF_ComponentResourceBase, edit_op: str, is_instance: bool, inject_ui: Callable | None = None):
+def draw_component(
+		layout: bpy.types.UILayout,
+		context: bpy.types.Context,
+		component_ref: STF_Component_Ref,
+		stf_application_object: Any,
+		component: STF_ComponentResourceBase,
+		edit_op: str,
+		is_instance: bool,
+		inject_ui: Callable[[bpy.types.UILayout, bpy.types.Context, STF_Component_Ref, Any, STF_ComponentResourceBase], bool] | None = None
+		):
 	box = layout.box()
 	# Component header info
 	row = box.row()
@@ -247,12 +256,28 @@ def draw_components_ui(
 		remove_component_op: str,
 		edit_component_id_op: str,
 		component_filter: Any = None,
-		get_target_object_func: Callable | None = None,
+		get_target_object_func: Callable[[Any, STF_Component_Ref], Any] | None = None,
 		inject_ui: Any = None,
 		is_data_resource_component: bool = False,
 		is_component_instance: bool = False
 		):
-	stf_modules = get_data_component_handlers() if is_data_resource_component else get_component_handlers()
+	"""
+	Draw a list of all components on an STF resource.
+
+	:param bpy.types.UILayout layout:
+	:param bpy.types.Context context:
+	:param Any ref_holder: The object that has the `stf_components` property. `stf_components` has to be a list of `STF_Component_Ref`.
+	:param Any component_holder: The object that contains the properties defined by each `STF_Component_Ref.blender_property_name`.
+	:param str add_component_op: The `bl_idname` of an operator that can add a component to the resource. The operator class should implement `STFAddComponentOperatorBase`.
+	:param str remove_component_op: The `bl_idname` of an operator that can remove a component from the resource. The operator class should implement `STFRemoveComponentOperatorBase`.
+	:param str edit_component_id_op: The `bl_idname` of an operator that can edit the `stf_id` of a component on the resource. The operator class should implement `STFEditComponentOperatorBase`.
+	:param Any component_filter: Type which will be used to filter the available components to add. By default will be the type of the `component_holder` argument.
+	:param Callable[[Any, STF_Component_Ref], Any] | None get_target_object_func: If the `component_holder` is not the object that holds the `stf_components`, this function will return the object that does.
+	:param Callable[[bpy.types.UILayout, bpy.types.Context, STF_Component_Ref, Any, STF_ComponentResourceBase], bool] inject_ui: Will be passed to the `draw_component` function.
+	:param bool is_data_resource_component: Is the list being drawn for a Blender-NON-native resource?
+	:param bool is_component_instance: Is the list being drawn for component instances (e.g. for bone-instances on an Armature)?
+	"""
+	stf_modules = get_data_component_handlers() if is_data_resource_component else get_blender_native_component_handlers()
 
 	if(component_filter is None):
 		component_filter = type(component_holder)
@@ -301,7 +326,7 @@ def draw_components_ui(
 	row = layout.row(align=True)
 	row.template_list(STFDrawDataComponentList.bl_idname if is_data_resource_component else STFDrawBlenderComponentList.bl_idname, "", ref_holder, "stf_components", ref_holder, "stf_active_component_index")
 	if(len(ref_holder.stf_components) > ref_holder.stf_active_component_index):
-		component_ref = ref_holder.stf_components[ref_holder.stf_active_component_index]
+		component_ref: STF_Component_Ref = ref_holder.stf_components[ref_holder.stf_active_component_index]
 
 		remove_button = row.operator(remove_component_op, icon="X", text="")
 		remove_button.index = ref_holder.stf_active_component_index
@@ -329,6 +354,18 @@ def draw_instance_standin_components_ui(
 		get_target_object_func: Callable | None = None,
 		inject_ui: Callable | None = None
 		):
+	"""
+	Draw a list of all components instantiated on an STF resource, e.g. components on bones of an Armature instantiated on an Object.
+
+	:param bpy.types.UILayout layout:
+	:param bpy.types.Context context:
+	:param Any ref_holder: The object that has the `stf_components` property. `stf_components` has to be a list of `STF_Component_Ref`.
+	:param Any component_holder: The object that contains the properties defined by each `STF_Component_Ref.blender_property_name`.
+	:param str edit_component_id_op: The `bl_idname` of an operator that can edit the `stf_id` of a component on the resource. The operator class should implement `STFEditComponentOperatorBase`.
+	:param Any component_filter: Typo which will be used to filter the available components to add. By default will be the type of the `component_holder` argument.
+	:param Callable[[Any, STF_Component_Ref], Any] | None get_target_object_func: If the `component_holder` is not the object that holds the `stf_components`, this function will return the object that does.
+	:param Callable[[bpy.types.UILayout, bpy.types.Context, STF_Component_Ref, Any, STF_ComponentResourceBase], bool] inject_ui: Will be passed to the `draw_component` function.
+	"""
 	if(component_filter is None):
 		component_filter = type(component_holder)
 	set_stf_component_instance_filter(component_filter)
@@ -366,10 +403,10 @@ def set_stf_data_resource_component_filter(filter = None):
 	stf_data_resource_component_filter = filter
 
 def _build_stf_component_types_enum_callback(self, context) -> list:
-	return [((stf_module.stf_type, stf_module.stf_type, stf_module.__doc__ if stf_module.__doc__ else "")) for stf_module in get_component_handlers(stf_component_filter)] + [("fallback", "Json Fallback", "Manual fallback for unsupported types")]
+	return [((stf_module.stf_type, stf_module.stf_type, stf_module.__doc__ if stf_module.__doc__ else "")) for stf_module in get_blender_native_component_handlers(stf_component_filter)] + [("fallback", "Json Fallback", "Manual fallback for unsupported types")]
 
 def _build_stf_component_instance_types_enum_callback(self, context) -> list:
-	return [((stf_module.stf_type, stf_module.stf_type, stf_module.__doc__ if stf_module.__doc__ else "")) for stf_module in get_component_handlers(stf_component_instance_filter)] + [("fallback", "Json Fallback", "Manual fallback for unsupported types")]
+	return [((stf_module.stf_type, stf_module.stf_type, stf_module.__doc__ if stf_module.__doc__ else "")) for stf_module in get_blender_native_component_handlers(stf_component_instance_filter)] + [("fallback", "Json Fallback", "Manual fallback for unsupported types")]
 
 def _build_stf_data_resource_component_types_enum_callback(self, context) -> list:
 	return [((stf_module.stf_type, stf_module.stf_type, stf_module.__doc__ if stf_module.__doc__ else "")) for stf_module in get_data_component_handlers(stf_data_resource_component_filter)] + [("fallback", "Json Fallback", "Manual fallback for unsupported types")]

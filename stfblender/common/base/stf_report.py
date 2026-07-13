@@ -2,6 +2,9 @@ from enum import IntEnum
 from typing import Any
 
 
+__all__ = ["STFReportSeverity", "STFReport", "STFException"]
+
+
 class STFReportSeverity(IntEnum):
 	Debug = 0
 	Info = 1

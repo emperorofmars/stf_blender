@@ -4,13 +4,12 @@ import math
 from typing import Any
 from collections.abc import Sequence
 
-from ....common import STF_ImportContext, STF_ExportContext, STFReportSeverity, STFReport, STF_Category
-from ....common.resource.blender_native import STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister, get_components_from_object
+from ....common import STF_ImportContext, STF_ExportContext, STFReportSeverity, STFReport, STF_Category, STF_HandlerAnimation, STF_HandlerComponents, STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister, get_components_from_object, ensure_stf_id
 from ....common.utils import trs_utils
 from ....common.utils.armature_bone import ArmatureBone
 from ....common.utils.animation_conversion_utils import *
-from ....common.resource.resource_id import ensure_stf_id
 from .stf_bone_property_conversion import resolve_property_path_to_stf_func, resolve_stf_property_to_blender_func
+from .stf_bone_ui import STFAddBoneComponentOperator, STFEditBoneComponentIdOperator, STFRemoveBoneComponentOperator, STFSetBoneIDOperator
 
 
 _stf_type = "stf.bone"
@@ -34,7 +33,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	# Once Blender enters into edit-mode, the Bone references will be invalidated. Store the child-names as string.
 	children = []
 	for child_id in json_resource.get("children", []):
-		child: ArmatureBone = context.import_resource(json_resource, child_id, context_object, STF_Category.NODE)
+		child: ArmatureBone | None = context.import_resource(json_resource, child_id, context_object, STF_Category.NODE)
 		if(child):
 			children.append(child.name)
 		else:
@@ -116,22 +115,30 @@ def _stf_export(context: STF_ExportContext, application_object: Any, context_obj
 	return ret, stf_id
 
 
-def _get_components_from_object(application_object: ArmatureBone) -> list:
-	return get_components_from_object(application_object.get_bone())
+def _draw_ui(layout: bpy.types.UILayout, context: bpy.types.Context, blender_resource: ArmatureBone) -> None:
+	if(not blender_resource.get_bone().use_deform):
+		col = layout.column()
+		col.use_property_split = True
+		col.prop(blender_resource.get_bone().stf_bone, "non_deform_use")
 
-def _get_components_holder_func(application_object: ArmatureBone) -> Any:
-	return application_object.get_bone()
 
-
-class Handler_STF_Bone(STF_Handler_BlenderNative):
+class Handler_STF_Bone(STF_Handler_BlenderNative, STF_HandlerComponents, STF_HandlerAnimation):
 	stf_type = _stf_type
 	stf_category = STF_Category.NODE
 	like_types = ["bone", "node"]
 	understood_application_types = [ArmatureBone]
 	import_func = _stf_import
 	export_func = _stf_export
-	get_components_func = _get_components_from_object
-	get_components_holder_func = _get_components_holder_func
+	get_resource_object = lambda bo: bo.get_bone()
+	get_stf_prop_holder = lambda bo: bo.get_bone().stf_info
+	operator_set_stf_id = STFSetBoneIDOperator.bl_idname
+	draw = _draw_ui
+
+	get_components_holder_func = lambda bo: bo.get_bone()
+	get_components_func = lambda bo: get_components_from_object(bo.get_bone())
+	operator_component_add = STFAddBoneComponentOperator.bl_idname
+	operator_component_remove = STFRemoveBoneComponentOperator.bl_idname
+	operator_component_edit = STFEditBoneComponentIdOperator.bl_idname
 
 	understood_application_property_path_types = [ArmatureBone]
 	understood_application_property_path_parts = ["location", "rotation_quaternion", "rotation_euler", "scale"]

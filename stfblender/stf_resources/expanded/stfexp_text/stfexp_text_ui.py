@@ -1,8 +1,6 @@
 import bpy
 
-from ....common.resource.resource_id import STFSetIDOperatorBase, draw_stf_id_ui
-from ....common.resource.component import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
-from ....common.ui import draw_components_ui
+from ....common import STFSetIDOperatorBase, STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
 
 
 class STFSetTextIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
@@ -29,29 +27,3 @@ class STFEditTextComponentIdOperator(bpy.types.Operator, STFEditComponentOperato
 	bl_idname = "stf.edit_text_component_id"
 	def get_property(self, context): return context.curve
 
-
-class STFTextSpatialPanel(bpy.types.Panel):
-	"""STF options & export helper"""
-	bl_idname = "OBJECT_PT_stf_text_editor"
-	bl_label = "STF Editor: stf.text"
-	bl_region_type = "WINDOW"
-	bl_space_type = "PROPERTIES"
-	bl_context = "data"
-
-	@classmethod
-	def poll(cls, context: bpy.types.Context):
-		return hasattr(context, "curve") and context.curve is not None and isinstance(context.curve, bpy.types.TextCurve)
-
-	def draw(self, context: bpy.types.Context):
-		layout: bpy.types.UILayout = self.layout  # pyright: ignore[reportAssignmentType]
-
-		# Set ID
-		draw_stf_id_ui(layout, context, context.curve, context.curve.stf_info, STFSetTextIDOperator.bl_idname)
-
-		layout.separator(factor=1, type="SPACE")
-
-		# Components
-		layout.separator(factor=2, type="LINE")
-		header, body = layout.panel("stf.text_components", default_closed = False)
-		header.label(text="STF Components (" + str(len(context.curve.stf_info.stf_components)) + ")", icon="GROUP")
-		if(body): draw_components_ui(layout, context, context.curve.stf_info, context.curve, STFAddTextComponentOperator.bl_idname, STFRemoveTextComponentOperator.bl_idname, STFEditTextComponentIdOperator.bl_idname, component_filter=bpy.types.TextCurve)

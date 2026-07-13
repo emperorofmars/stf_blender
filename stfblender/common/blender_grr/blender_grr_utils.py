@@ -10,13 +10,6 @@ from ..resource.component import STF_ComponentResourceBase, STF_Component_Ref, S
 from ..utils.armature_bone import ArmatureBone
 from .utils import draw_component_info
 
-"""
-Blender Generic Resource Reference
-
-Bringing polymorphism to Blender
-
-It works right now, however making this actually user friendly and nice to handle will take some more effort.
-"""
 
 def pretty_print_blender_grr(grr: BlenderGRR) -> str:
 	match(grr.reference_type):

@@ -3,7 +3,7 @@ from typing import Any, Callable, Protocol
 from abc import abstractmethod
 
 from .stf_task_steps import STF_TaskSteps
-from .base.stf_json_definition import STF_Meta_AssetInfo
+from .stf_json_definition import STF_Meta_AssetInfo_Json
 from .stf_report import STFReportSeverity, STFReport
 from .property_path_part import STFPropertyPathPart
 
@@ -75,5 +75,5 @@ class STF_ExportContext(Protocol):
 		pass
 
 	@abstractmethod
-	def get_asset_info(self) -> STF_Meta_AssetInfo:
+	def get_asset_info(self) -> STF_Meta_AssetInfo_Json:
 		pass

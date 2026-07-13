@@ -60,7 +60,7 @@ def stf_to_blender(trs: list[list[float]]) -> tuple[mathutils.Vector, mathutils.
 	return (stf_translation_to_blender(trs[0]), stf_rotation_to_blender(trs[1]), stf_scale_to_blender(trs[2]))
 
 def stf_to_blender_matrix(trs: list[list[float]]) -> mathutils.Matrix:
-	return mathutils.Matrix.LocRotScale(stf_translation_to_blender(trs[0]), stf_rotation_to_blender(trs[1]), stf_scale_to_blender(trs[2]))
+	return mathutils.Matrix.LocRotScale(stf_translation_to_blender(trs[0]), stf_rotation_to_blender(trs[1]), stf_scale_to_blender(trs[2])) # pyright: ignore[reportArgumentType]
 
 def stf_uv_to_blender(stf_uv: list[float]) -> mathutils.Vector:
 	return mathutils.Vector((stf_uv[0], 1 - stf_uv[1]))

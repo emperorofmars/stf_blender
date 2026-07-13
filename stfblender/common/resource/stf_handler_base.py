@@ -1,9 +1,11 @@
 from typing import Any, Protocol
 from collections.abc import Callable
 
-from .. import STF_ImportContext, STF_ExportContext, BlenderPropertyPathPart, STFPropertyPathPart, STFReport
+from .. import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STFReport
 
-__all__ = ["STF_HandlerBase"]
+
+__all__ = ["STF_HandlerBase", "STF_HandlerAnimation", "STF_HandlerComponents"]
+
 
 class STF_HandlerBase(Protocol):
 	"""
@@ -63,13 +65,26 @@ class STF_HandlerBase(Protocol):
 	"""
 
 
-	### Properties for animation handling
+class STF_HandlerAnimation(Protocol):
+	"""
+	Mix-in class for resource-handlers that support animations.
+	"""
 
 	understood_application_property_path_types: list[Any] = []
-	"""List of application types from which this module can convert paths"""
+	"""
+	List of application types from which this module can convert paths.
+
+	Except for rare cases this will always be `bpy.types.Object`.
+	"""
 
 	understood_application_property_path_parts: list[str] = []
-	"""List of paths which this component can convert into stf paths"""
+	"""
+	List of paths which this component can convert into stf paths.
+
+	E.g. `location`, `rotation_quaternion`, `pose.bones`, `key_blocks`, ...
+
+	In the case of component-handler will be always `_blender_property_name`.
+	"""
 
 	resolve_property_path_to_stf_func: Callable[[STF_ExportContext, Any, int, str], STFPropertyPathPart | None]
 	"""
@@ -98,9 +113,12 @@ class STF_HandlerBase(Protocol):
 	"""
 
 
-	### Handling components if applicable. `get_components_func` must be assigned/implemented if the resource supports components
+class STF_HandlerComponents(Protocol):
+	"""
+	Mix-in class for resource-handlers that can have components.
+	"""
 
-	get_components_func: Callable[[Any], list[Any] | None]
+	get_components_func: Callable[[Any], list[Any]]
 	"""
 	`def get_components_func(blender_object: Any) -> list[Any] | None`
 
@@ -111,13 +129,22 @@ class STF_HandlerBase(Protocol):
 	:return None: No components present
 	"""
 
-	get_components_holder_func: Callable[[Any], Any | None]
+	get_components_holder_func: Callable[[Any], Any] = lambda bo: bo
 	"""
 	`def get_components_holder_func(blender_object: Any) -> Any | None`
 
-	Get the object which has the `stf_components` property. Mostly a workaround for Bone references getting invalidated by Blender on mode-switch.
+	Get the object which actually stores `stf_components`. Mostly a workaround for Bone references getting invalidated by Blender on mode-switch.
 
 	:param Any blender_object: Blender object for which to get the component-holder property
-	:return Any: Blender object with the component-holder property
+	:return Any: Blender object which holds the actual components
 	:return None: No components present
 	"""
+
+	operator_component_add: str
+	"""`bl_idname` of the operator that can add a component to this resource"""
+
+	operator_component_remove: str
+	"""`bl_idname` of the operator that can remove a component from this resource"""
+
+	operator_component_edit: str
+	"""`bl_idname` of the operator that can edit the `stf_id` of a component from this resource"""

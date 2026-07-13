@@ -105,7 +105,6 @@ def convert_bone_scale_to_blender(value: list[float]): return value
 
 
 # Components
-
 def get_component_index(application_object, blender_property_name: str, component_id: str) -> int | None:
 	for component_index, component in enumerate(getattr(application_object, blender_property_name)):
 		if(component.stf_id == component_id):

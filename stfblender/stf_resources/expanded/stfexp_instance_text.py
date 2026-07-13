@@ -1,9 +1,7 @@
 import bpy
 from typing import Any
 
-from ...common import STF_ExportContext, STF_ImportContext, STFReportSeverity, STFReport, STF_Category
-from ...common.resource.blender_native import STF_Handler_BlenderNative
-from ...common.resource.resource_id import STFSetIDOperatorBase, draw_stf_id_ui, ensure_stf_id
+from ...common import STF_ExportContext, STF_ImportContext, STFReportSeverity, STFReport, STF_Category, STF_Handler_BlenderNative, STFSetIDOperatorBase, ensure_stf_id
 
 # TODO this module is at a bare minimum level, improve it
 
@@ -16,23 +14,6 @@ class STFSetSTFEXPInstanceTextIDOperator(bpy.types.Operator, STFSetIDOperatorBas
 	@classmethod
 	def poll(cls, context) -> bool: return context.object.stf_instance is not None and context.object.data and isinstance(context.object.data, bpy.types.TextCurve)  # pyright: ignore[reportReturnType]
 	def get_property(self, context): return context.object.stf_instance
-
-class STFEXP_Instance_Text_Panel(bpy.types.Panel):
-	"""STF options & export helper"""
-	bl_idname = "OBJECT_PT_stfexp_instance_text_editor"
-	bl_label = "STF Editor: stfexp.instance.text"
-	bl_region_type = "WINDOW"
-	bl_space_type = "PROPERTIES"
-	bl_context = "object"
-
-	@classmethod
-	def poll(cls, context) -> bool:
-		return context.object.stf_instance is not None and context.object.data and isinstance(context.object.data, bpy.types.TextCurve)  # pyright: ignore[reportReturnType]
-
-	def draw(self, context):
-		# Set ID
-		draw_stf_id_ui(self.layout, context, context.object.stf_instance, context.object.stf_instance, STFSetSTFEXPInstanceTextIDOperator.bl_idname, True)  # pyright: ignore[reportArgumentType]
-
 
 """
 Import
@@ -95,6 +76,8 @@ class Handler_STFEXP_Instance_Text(STF_Handler_BlenderNative):
 	import_func = _stf_import
 	export_func = _stf_export
 	can_handle_application_object_func = _can_handle_application_object_func
+	get_stf_prop_holder = lambda bo: bo[0].stf_instance
+	operator_set_stf_id = STFSetSTFEXPInstanceTextIDOperator.bl_idname
 
 
 register_stf_handlers = [

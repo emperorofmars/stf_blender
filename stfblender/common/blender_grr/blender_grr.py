@@ -3,13 +3,9 @@ import bpy
 from .stf_data_resource_reference import STFDataResourceReference
 from .blender_resource_reference import BlenderResourceReference
 
-"""
-Blender Generic Resource Reference
 
-Bringing polymorphism to Blender
+__all__ = ["BlenderGRR"]
 
-It works right now, however making this actually user friendly and nice to handle will take some more effort.
-"""
 
 reference_type_values = (
 	("blender", "Blender Native Resource", "Objects, Meshes, Armatures, etc.."),
@@ -22,7 +18,20 @@ component_reference_type_values = (
 )
 
 class BlenderGRR(bpy.types.PropertyGroup):
+	"""Blender Generic Resource Reference, bringing polymorphism to Blender"""
+
 	reference_type: bpy.props.EnumProperty(name="Reference Type", items=reference_type_values) # type: ignore
+	"""
+	Enum (`blender`, `stf_data_resource`, `stf_component`)
+
+	Which thing this reference targets.
+	* `blender`
+		Blender native resource (Objects, Meshes, Armatures, ...)
+	* `stf_data_resource`
+		STF Resources not natively supported by Blender
+	* `stf_component`
+		STF Components on a native Blender or STF-Data Resource
+	"""
 
 	blender_resource_reference: bpy.props.PointerProperty(type=BlenderResourceReference, name="Blender Resource Reference") # type: ignore
 	stf_data_resource_reference: bpy.props.PointerProperty(type=STFDataResourceReference, name="STF Data-Resource Reference") # type: ignore

@@ -2,11 +2,8 @@ import bpy
 import logging
 from typing import Any, Callable
 
-from ..common import STF_ExportContext as ISTF_ExportContext, STF_TaskSteps
+from ..common import STF_ExportContext as ISTF_ExportContext, STF_TaskSteps, STF_Meta_AssetInfo_Json,  STFReportSeverity, STFReport, STFPropertyPathPart
 from .stf_export_state import STF_ExportState
-from ..common.base.stf_json_definition import STF_Meta_AssetInfo
-from ..common.stf_report import STFReportSeverity, STFReport
-from ..common.property_path_part import STFPropertyPathPart
 
 
 _logger = logging.getLogger(__name__)
@@ -174,5 +171,5 @@ class STF_ExportContext(ISTF_ExportContext):
 	def get_root_id(self) -> str | None:
 		return self._state._root_id
 
-	def get_asset_info(self) -> STF_Meta_AssetInfo:
+	def get_asset_info(self) -> STF_Meta_AssetInfo_Json:
 		return self._state._asset_info

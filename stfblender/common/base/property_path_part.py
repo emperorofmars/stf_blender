@@ -2,6 +2,7 @@ import bpy
 from typing import Callable, Self
 from collections.abc import Sequence
 
+__all__ = ["STFPropertyPathPart", "BlenderPropertyPathPart"]
 
 class STFPropertyPathPart:
 	"""Represents a part of a path to an animatable property in Blender, so that it can be converted to STF"""

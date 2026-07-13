@@ -1,6 +1,9 @@
 import bpy
 
-from .stf_json_definition import STF_Meta_AssetInfo, STF_Meta_AssetProperties
+from .stf_json_definition import STF_Meta_AssetInfo_Json, STF_Meta_AssetProperties_Json
+
+
+__all__ = ["STF_KV", "STF_Meta", "draw_meta_editor"]
 
 
 class STF_KV(bpy.types.PropertyGroup):
@@ -20,9 +23,9 @@ class STF_Meta(bpy.types.PropertyGroup):
 
 	custom_properties: bpy.props.CollectionProperty(type=STF_KV, name="Type", options=set()) # type: ignore
 
-	def to_stf_meta_assetInfo(self) -> tuple[STF_Meta_AssetInfo, STF_Meta_AssetProperties]:
-		ret_meta = STF_Meta_AssetInfo()
-		ret_properties = STF_Meta_AssetProperties()
+	def to_stf_meta_assetInfo(self) -> tuple[STF_Meta_AssetInfo_Json, STF_Meta_AssetProperties_Json]:
+		ret_meta = STF_Meta_AssetInfo_Json()
+		ret_properties = STF_Meta_AssetProperties_Json()
 		if(self.asset_name): ret_meta.asset_name = self.asset_name
 		if(self.version): ret_meta.version = self.version
 		if(self.url): ret_meta.url = self.url
@@ -37,7 +40,7 @@ class STF_Meta(bpy.types.PropertyGroup):
 				ret_properties.custom_properties[custom_property.name] = custom_property.value
 		return (ret_meta, ret_properties)
 
-	def from_stf_meta_assetInfo(self, meta: STF_Meta_AssetInfo, properties: STF_Meta_AssetProperties):
+	def from_stf_meta_assetInfo(self, meta: STF_Meta_AssetInfo_Json, properties: STF_Meta_AssetProperties_Json):
 		if(meta.asset_name): self.asset_name = meta.asset_name
 		if(meta.version): self.version = meta.version
 		if(meta.url): self.url = meta.url
@@ -55,7 +58,7 @@ class STF_Meta(bpy.types.PropertyGroup):
 
 
 class STFAddMetaPropertyCollection(bpy.types.Operator):
-	"""Add custom property"""
+	"""Add custom STF meta-property to a Collection"""
 	bl_idname = "stf.add_meta_property_collection"
 	bl_label = "Add Property"
 	bl_options = {"REGISTER", "UNDO"}
@@ -68,7 +71,7 @@ class STFAddMetaPropertyCollection(bpy.types.Operator):
 		return {"FINISHED"}
 
 class STFAddMetaPropertyScene(bpy.types.Operator):
-	"""Add custom property"""
+	"""Add custom STF meta-property to a Scene-Collection"""
 	bl_idname = "stf.add_meta_property_scene"
 	bl_label = "Add Property"
 	bl_options = {"REGISTER", "UNDO"}
@@ -82,7 +85,7 @@ class STFAddMetaPropertyScene(bpy.types.Operator):
 
 
 class STFRemoveMetaPropertyCollection(bpy.types.Operator):
-	"""Remove custom property"""
+	"""Remove custom STF property from a Collection"""
 	bl_idname = "stf.remove_meta_property_collection"
 	bl_label = "Remove"
 	bl_options = {"REGISTER", "UNDO"}
@@ -98,7 +101,7 @@ class STFRemoveMetaPropertyCollection(bpy.types.Operator):
 
 
 class STFRemoveMetaPropertyScene(bpy.types.Operator):
-	"""Remove custom property"""
+	"""Remove custom STF property from a Scene"""
 	bl_idname = "stf.remove_meta_property_scene"
 	bl_label = "Remove"
 	bl_options = {"REGISTER", "UNDO"}
@@ -114,6 +117,7 @@ class STFRemoveMetaPropertyScene(bpy.types.Operator):
 
 
 def draw_meta_editor(layout: bpy.types.UILayout, collection: bpy.types.Collection, is_scene: bool):
+	"""Draw GUI for STF asset meta information"""
 	layout.prop(collection.stf_meta, "asset_name")
 	layout.prop(collection.stf_meta, "version")
 	layout.prop(collection.stf_meta, "url")

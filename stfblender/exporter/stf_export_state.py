@@ -2,14 +2,11 @@ import bpy
 import logging
 from typing import Any
 
-from .export_settings import STF_ExportSettings
-from ..common import STFReportSeverity, STFReport
+from ..common import STFReportSeverity, STFReport, STF_ExportComponentHook, STF_File, STF_Buffer_Json, STF_JsonDefinition, STF_Meta_AssetInfo_Json, STF_Meta_AssetProperties_Json
 from ..common.resource.stf_handler_base import STF_HandlerBase
-from ..common.resource.component import STF_ExportComponentHook
-from ..common.base.stf_json_definition import STF_Buffer, STF_JsonDefinition, STF_Meta_AssetInfo, STF_Meta_AssetProperties
-from ..common.base.stf_file import STF_File
 from ..common.base.stf_state_base import STF_State_Base
 from ..common.helpers import get_stf_version
+from .export_settings import STF_ExportSettings
 
 
 _logger = logging.getLogger(__name__)
@@ -23,7 +20,7 @@ class STF_ExportState(STF_State_Base):
 
 	def __init__(
 			self,
-			asset_info: tuple[STF_Meta_AssetInfo, STF_Meta_AssetProperties],
+			asset_info: tuple[STF_Meta_AssetInfo_Json, STF_Meta_AssetProperties_Json],
 			handlers: tuple[dict[Any, list[STF_HandlerBase]], dict[Any, list[STF_ExportComponentHook]]],
 			trash_objects: list[bpy.types.Object] = [],
 			fail_on_severity: STFReportSeverity = STFReportSeverity.FatalError,
@@ -41,8 +38,8 @@ class STF_ExportState(STF_State_Base):
 		self._exported_resources: dict[str, dict] = {} # ID -> exported STF Json resource
 		self._exported_buffers: dict[str, bytes] = {} # ID -> exported STF Json buffer
 
-		self._asset_info: STF_Meta_AssetInfo = asset_info[0]
-		self._asset_properties: STF_Meta_AssetProperties = asset_info[1]
+		self._asset_info: STF_Meta_AssetInfo_Json = asset_info[0]
+		self._asset_properties: STF_Meta_AssetProperties_Json = asset_info[1]
 		self._permit_id_reassignment: bool = permit_id_reassignment
 		self._root_id: str | None = None
 		self._metric_multiplier: float = metric_multiplier
@@ -155,7 +152,7 @@ class STF_ExportState(STF_State_Base):
 		ret.buffers = {}
 		buffer_index = 0
 		for id, buffer in self._exported_buffers.items():
-			json_buffer_def = STF_Buffer()
+			json_buffer_def = STF_Buffer_Json()
 			json_buffer_def.index = buffer_index
 			ret.buffers[id] = json_buffer_def
 			buffer_index += 1

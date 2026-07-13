@@ -1,8 +1,6 @@
 import bpy
 
-from ....common.resource.resource_id import STFSetIDOperatorBase, draw_stf_id_ui
-from ....common.resource.component import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
-from ....common.ui import draw_components_ui
+from ....common import STFSetIDOperatorBase, STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
 from ....common.helpers.misc import draw_slot_link_warning
 from .stf_animation_bake import STFBakeAnimationOperator
 
@@ -32,49 +30,25 @@ class STFEditAnimationComponentIdOperator(bpy.types.Operator, STFEditComponentOp
 	def get_property(self, context): return hasattr(context, "active_action") and context.active_action
 
 
-class STFAnimationSpatialPanel(bpy.types.Panel):
-	"""STF options & export helper"""
-	bl_idname = "OBJECT_PT_stf_animation_spatial_editor"
-	bl_label = "STF Editor: stf.animation"
-	bl_region_type = "UI"
-	bl_space_type = "DOPESHEET_EDITOR"
-	bl_category = "Action"
+def draw_animation_ui(layout: bpy.types.UILayout, context: bpy.types.Context, blender_resource: tuple[bpy.types.Object, bpy.types.Mesh]) -> None:
+	layout.use_property_split = True
 
-	@classmethod
-	def poll(cls, context):
-		return hasattr(context, "active_action") and context.active_action is not None
+	if(not hasattr(bpy.types.Action, "slot_link")):
+		draw_slot_link_warning(layout) # pyright: ignore[reportArgumentType]
+		return
 
-	def draw(self, context: bpy.types.Context):
-		layout = self.layout
-		layout.use_property_split = True
+	if(context.active_action.stf_animation.is_baked_from):
+		row_readonly =  layout.row()
+		row_readonly.enabled = False
+		row_readonly.prop(context.active_action.stf_animation, "is_baked_from")
 
-		if(not hasattr(bpy.types.Action, "slot_link")):
-			draw_slot_link_warning(layout) # pyright: ignore[reportArgumentType]
-			return
+	layout.prop(context.active_action.stf_animation, "exclude")
+	if(context.active_action.stf_animation.exclude):
+		return
 
-		if(context.active_action.stf_animation.is_baked_from):
-			row_readonly =  layout.row()
-			row_readonly.enabled = False
-			row_readonly.prop(context.active_action.stf_animation, "is_baked_from")
+	if(not context.active_action.stf_animation.is_baked_from):
+		layout.separator(factor=2, type="SPACE")
 
-		layout.prop(context.active_action.stf_animation, "exclude")
-		if(context.active_action.stf_animation.exclude):
-			return
-
-		# Set ID
-		draw_stf_id_ui(layout, context, context.active_action, context.active_action.stf_info, STFSetAnimationIDOperator.bl_idname) # pyright: ignore[reportArgumentType]
-
-		if(not context.active_action.stf_animation.is_baked_from):
-			layout.separator(factor=2, type="SPACE")
-
-			layout.prop(context.active_action.stf_animation, "constraint_bake")
-			if(context.active_action.stf_animation.constraint_bake != "nobake"):
-				layout.operator(STFBakeAnimationOperator.bl_idname)
-
-		layout.separator(factor=2, type="LINE")
-
-		# Components
-		layout.separator(factor=1, type="SPACE")
-		header, body = layout.panel("stf.animation_components", default_closed = True)
-		header.label(text="STF Components (" + str(len(context.active_action.stf_info.stf_components)) + ")", icon="GROUP")
-		if(body): draw_components_ui(layout, context, context.active_action.stf_info, context.active_action, STFAddAnimationComponentOperator.bl_idname, STFRemoveAnimationComponentOperator.bl_idname, STFEditAnimationComponentIdOperator.bl_idname) # pyright: ignore[reportArgumentType]
+		layout.prop(context.active_action.stf_animation, "constraint_bake")
+		if(context.active_action.stf_animation.constraint_bake != "nobake"):
+			layout.operator(STFBakeAnimationOperator.bl_idname)

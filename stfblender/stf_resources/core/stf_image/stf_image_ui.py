@@ -1,8 +1,6 @@
 import bpy
 
-from ....common.resource.resource_id import STFSetIDOperatorBase, draw_stf_id_ui
-from ....common.resource.component import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
-from ....common.ui import draw_components_ui
+from ....common import STFSetIDOperatorBase, STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
 
 
 class STFSetImageIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
@@ -45,36 +43,12 @@ class STFImageFixColorspace(bpy.types.Operator):
 		return {"FINISHED"}
 
 
-class STFImageSpatialPanel(bpy.types.Panel):
-	"""STF options & export helper"""
-	bl_idname = "OBJECT_PT_stf_image_editor"
-	bl_label = "STF Editor: stf.image"
-	bl_region_type = "UI"
-	bl_space_type = "IMAGE_EDITOR"
-	bl_category = "Image"
+def draw_image_ui(layout: bpy.types.UILayout, context: bpy.types.Context, blender_resource: tuple[bpy.types.Object, bpy.types.Mesh]) -> None:
+	layout.prop(context.edit_image.stf_image, "is_normal_map")
 
-	@classmethod
-	def poll(cls, context: bpy.types.Context):
-		return hasattr(context, "edit_image") and context.edit_image is not None
-
-	def draw(self, context):
-		# Set ID
-		draw_stf_id_ui(self.layout, context, context.edit_image, context.edit_image.stf_info, STFSetImageIDOperator.bl_idname) # pyright: ignore[reportArgumentType]
-
-		self.layout.separator(factor=1, type="SPACE")
-
-		self.layout.prop(context.edit_image.stf_image, "is_normal_map")
-		if(context.edit_image.stf_image.is_normal_map and context.edit_image.colorspace_settings.name != "Non-Color"):
-			warn_row = self.layout.row()
-			warn_row.alert = True
-			warn_row.label(text="Invalid Color Space!", icon="WARNING_LARGE")
-			warn_row.operator(STFImageFixColorspace.bl_idname)
-			self.layout.label(text="A Normal-Maps Color Space must be Non-Color!", icon="INFO_LARGE")
-
-		self.layout.separator(factor=2, type="LINE")
-
-		# Components
-		self.layout.separator(factor=1, type="SPACE")
-		header, body = self.layout.panel("stf.image_components", default_closed = False)
-		header.label(text="STF Components (" + str(len(context.edit_image.stf_info.stf_components)) + ")", icon="GROUP")
-		if(body): draw_components_ui(self.layout, context, context.edit_image.stf_info, context.edit_image, STFAddImageComponentOperator.bl_idname, STFRemoveImageComponentOperator.bl_idname, STFEditImageComponentIdOperator.bl_idname) # pyright: ignore[reportArgumentType]
+	if(context.edit_image.stf_image.is_normal_map and context.edit_image.colorspace_settings.name != "Non-Color"):
+		warn_row = layout.row()
+		warn_row.alert = True
+		warn_row.label(text="Invalid Color Space!", icon="WARNING_LARGE")
+		warn_row.operator(STFImageFixColorspace.bl_idname)
+		layout.label(text="A Normal-Maps Color Space must be Non-Color!", icon="INFO_LARGE")

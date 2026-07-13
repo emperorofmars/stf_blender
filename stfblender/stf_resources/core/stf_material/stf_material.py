@@ -1,17 +1,14 @@
 import bpy
 from typing import Any
 
-from ....common.stf_report import STFReportSeverity
-
-from ....common import STF_ExportContext, STF_ImportContext, STF_Category, STFReport
-from ....common.resource.blender_native import STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister, get_components_from_object
-from ....common.resource.resource_id import ensure_stf_id
+from ....common import STF_ExportContext, STF_ImportContext, STF_Category, STFReport, STFReportSeverity, STF_HandlerAnimation, STF_HandlerComponents, STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister, get_components_from_object, ensure_stf_id
 from .stf_material_definition import STF_Material_Property, STF_Material_Value_Module_Base
 from .material_value_modules import blender_material_value_modules
 from .stf_material_operators import add_property, add_value_to_property
 from .convert_blender_material_to_stf import blender_material_to_stf
 from .convert_stf_material_to_blender import stf_material_to_blender
 from .stf_material_property_conversion import stf_material_resolve_property_path_to_stf_func, stf_material_resolve_stf_property_to_blender_func
+from .stf_material_ui import STFAddMaterialComponentOperator, STFEditMaterialComponentIdOperator, STFRemoveMaterialComponentOperator, STFSetMaterialIDOperator, draw_material_ui
 
 
 _stf_type = "stf.material"
@@ -106,14 +103,20 @@ def _stf_export(context: STF_ExportContext, application_object: Any, context_obj
 	return ret, blender_material.stf_info.stf_id
 
 
-class Handler_STF_Material(STF_Handler_BlenderNative):
+class Handler_STF_Material(STF_Handler_BlenderNative, STF_HandlerComponents, STF_HandlerAnimation):
 	stf_type = _stf_type
 	stf_category = STF_Category.DATA
 	like_types = ["material"]
 	understood_application_types = [bpy.types.Material]
 	import_func = _stf_import
 	export_func = _stf_export
+	operator_set_stf_id = STFSetMaterialIDOperator.bl_idname
+	draw = draw_material_ui
+
 	get_components_func = get_components_from_object
+	operator_component_add = STFAddMaterialComponentOperator.bl_idname
+	operator_component_remove = STFRemoveMaterialComponentOperator.bl_idname
+	operator_component_edit = STFEditMaterialComponentIdOperator.bl_idname
 
 	understood_application_property_path_types = [bpy.types.Object]
 	understood_application_property_path_parts = ["stf_material_value_"]

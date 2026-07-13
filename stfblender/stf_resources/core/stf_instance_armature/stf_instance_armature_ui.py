@@ -1,20 +1,10 @@
 import bpy
 from typing import Any
 
-from .stf_instance_armature import InstanceModComponentRef
-from .stf_instance_armature_utils import ProcessComponentsOntoArmatureInstance, UpdateArmatureInstanceComponentStandins
-from ....common.resource.component import STF_Component_Ref, STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
-from ....common.resource.resource_id import STFSetIDOperatorBase, draw_stf_id_ui
+from ....common.resource import STF_Component_Ref, STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase, InstanceModComponentRef
 from ....common.helpers import draw_multiline_text
-from ....common.ui import draw_components_ui, draw_instance_standin_components_ui
+from .stf_instance_armature_utils import ProcessComponentsOntoArmatureInstance, UpdateArmatureInstanceComponentStandins
 
-
-class STFSetArmatureInstanceIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
-	"""Set STF-ID for Armature-Instance"""
-	bl_idname = "stf.set_armature_instance_stf_id"
-	@classmethod
-	def poll(cls, context) -> bool: return hasattr(context, "object") and context.object is not None and context.object.stf_instance is not None and context.object.data and type(context.object.data) is bpy.types.Armature  # pyright: ignore[reportReturnType]
-	def get_property(self, context): return context.object.stf_instance
 
 class STFAddArmatureInstanceComponentOperator(bpy.types.Operator, STFAddComponentOperatorBase):
 	"""Add Component to Armature-Instance"""
@@ -82,55 +72,38 @@ def _inject_standin_ui(layout: bpy.types.UILayout, context: bpy.types.Context, c
 	return True
 
 
-class STFArmatureInstancePanel(bpy.types.Panel):
-	"""STF options & export helper"""
-	bl_idname = "OBJECT_PT_stf_armature_instance_editor"
-	bl_label = "STF Editor: stf.instance.armature"
-	bl_region_type = "WINDOW"
-	bl_space_type = "PROPERTIES"
-	bl_context = "object"
+def draw_armature_instance_ui(layout: bpy.types.UILayout, context: bpy.types.Context, blender_resource: tuple[bpy.types.Object, bpy.types.Armature]) -> None:
+	from ....common.ui.component_ui import draw_components_ui, draw_instance_standin_components_ui
 
-	@classmethod
-	def poll(cls, context: bpy.types.Context) -> bool:
-		return hasattr(context, "object") and context.object is not None and context.object.stf_instance_armature is not None and context.object.data and type(context.object.data) is bpy.types.Armature  # pyright: ignore[reportReturnType]
-
-	def draw(self, context: bpy.types.Context):
-		layout = self.layout
-
-		non_quat_bones = ""
-		for pose_bone in context.object.pose.bones:
-			if(pose_bone.rotation_mode != "QUATERNION"):
-				if(len(non_quat_bones) > 0): non_quat_bones += ", "
-				non_quat_bones += pose_bone.name
-		if(len(non_quat_bones) > 0):
-			text_row = draw_multiline_text(layout, "Please set the Rotation-Mode of all bones to 'Quaternion (WXYZ)' for all PoseBones\nDoing so ensures consistency with game-engines.\nThe following bones are affected: %s\nBe aware that existing rotation animations will break!" % non_quat_bones, width=80, icon="ERROR", alert=True)  # pyright: ignore[reportArgumentType]
-			row_fix = text_row.row()
-			row_fix.alignment = "LEFT"
-			row_fix.operator(STFArmatureInstanceFixRotationMode.bl_idname)
-			layout.separator(factor=2, type="LINE")
-
-		# Set ID
-		draw_stf_id_ui(layout, context, context.object.stf_instance, context.object.stf_instance, STFSetArmatureInstanceIDOperator.bl_idname, True) # pyright: ignore[reportArgumentType]
-
+	non_quat_bones = ""
+	for pose_bone in blender_resource[0].pose.bones:
+		if(pose_bone.rotation_mode != "QUATERNION"):
+			if(len(non_quat_bones) > 0): non_quat_bones += ", "
+			non_quat_bones += pose_bone.name
+	if(len(non_quat_bones) > 0):
+		text_row = draw_multiline_text(layout, "Please set the Rotation-Mode of all bones to 'Quaternion (WXYZ)' for all PoseBones\nDoing so ensures consistency with game-engines.\nThe following bones are affected: %s\nBe aware that existing rotation animations will break!" % non_quat_bones, width=80, icon="ERROR", alert=True)  # pyright: ignore[reportArgumentType]
+		row_fix = text_row.row()
+		row_fix.alignment = "LEFT"
+		row_fix.operator(STFArmatureInstanceFixRotationMode.bl_idname)
 		layout.separator(factor=2, type="LINE")
 
-		# Components specific to this instance
-		header, body = layout.panel("stf.instance_armature_components", default_closed = False)
-		header.label(text="Bone-Instance Components", icon="GROUP")
-		if(body): draw_components_ui(layout, context, context.object.stf_instance_armature, context.object, STFAddArmatureInstanceComponentOperator.bl_idname, STFRemoveArmatureInstanceComponentOperator.bl_idname, STFEditArmatureInstanceComponentIdOperator.bl_idname, bpy.types.Bone, _get_target_object_func, _inject_ui, is_component_instance = True) # pyright: ignore[reportArgumentType]
+	# Components specific to this instance
+	header, body = layout.panel("stf.instance_armature_components", default_closed = False)
+	header.label(text="Bone-Instance Components", icon="GROUP")
+	if(body): draw_components_ui(layout, context, blender_resource[0].stf_instance_armature, blender_resource[0], STFAddArmatureInstanceComponentOperator.bl_idname, STFRemoveArmatureInstanceComponentOperator.bl_idname, STFEditArmatureInstanceComponentIdOperator.bl_idname, bpy.types.Bone, _get_target_object_func, _inject_ui, is_component_instance = True) # pyright: ignore[reportArgumentType]
 
-		layout.separator(factor=4, type="LINE")
+	layout.separator(factor=4, type="LINE")
 
-		# Standins for components on bones, so they can be animated and changed per instance
-		header, body = layout.panel("stf.instance_armature_bone_component_standins", default_closed = False)
-		header.label(text="Bone-Instance Component Standins", icon="GROUP")
-		if(body):
-			layout.label(text="Override and animate values of components on bones.")
-			layout.operator(UpdateArmatureInstanceComponentStandins.bl_idname)
-			layout.separator(factor=1, type="SPACE")
+	# Standins for components on bones, so they can be animated and changed per instance
+	header, body = layout.panel("stf.instance_armature_bone_component_standins", default_closed = False)
+	header.label(text="Bone-Instance Component Standins", icon="GROUP")
+	if(body):
+		layout.label(text="Override and animate values of components on bones.")
+		layout.operator(UpdateArmatureInstanceComponentStandins.bl_idname)
+		layout.separator(factor=1, type="SPACE")
 
-			if(len(context.object.stf_instance_armature_component_standins.stf_components) > 0):
-				draw_instance_standin_components_ui(layout, context, context.object.stf_instance_armature_component_standins, context.object, STFEditArmatureInstanceComponentIdOperator.bl_idname, bpy.types.Bone, _get_target_object_func, _inject_standin_ui) # pyright: ignore[reportArgumentType]
+		if(len(blender_resource[0].stf_instance_armature_component_standins.stf_components) > 0):
+			draw_instance_standin_components_ui(layout, context, blender_resource[0].stf_instance_armature_component_standins, blender_resource[0], STFEditArmatureInstanceComponentIdOperator.bl_idname, bpy.types.Bone, _get_target_object_func, _inject_standin_ui) # pyright: ignore[reportArgumentType]
 
-		layout.separator(factor=4, type="LINE")
-		layout.operator(ProcessComponentsOntoArmatureInstance.bl_idname)
+	layout.separator(factor=4, type="LINE")
+	layout.operator(ProcessComponentsOntoArmatureInstance.bl_idname)

@@ -1,9 +1,8 @@
 import bpy
 from typing import Any
 
-from ....common import STF_ExportContext, STF_ImportContext, STFReport, STFReportSeverity, STF_Category
-from ....common.resource.blender_native import STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister, get_components_from_object
-from ....common.resource.resource_id import ensure_stf_id
+from ....common import STF_ExportContext, STF_HandlerComponents, STF_Handler_BlenderNative, STF_ImportContext, STFReport, STFReportSeverity, STF_Category, STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister, get_components_from_object, ensure_stf_id
+from .stf_image_ui import STFAddImageComponentOperator, STFEditImageComponentIdOperator, STFRemoveImageComponentOperator, STFSetImageIDOperator, draw_image_ui
 
 
 _stf_type = "stf.image"
@@ -76,14 +75,20 @@ def _stf_export(context: STF_ExportContext, application_object: Any, context_obj
 		return STFReport("Could not export image: " + str(blender_image.filepath), STFReportSeverity.Error, blender_image.stf_info.stf_id, _stf_type, blender_image)
 
 
-class Handler_STF_Image(STF_Handler_BlenderNative):
+class Handler_STF_Image(STF_Handler_BlenderNative, STF_HandlerComponents):
 	stf_type = _stf_type
 	stf_category = STF_Category.DATA
 	like_types = ["image"]
 	understood_application_types = [bpy.types.Image]
 	import_func = _stf_import
 	export_func = _stf_export
+	operator_set_stf_id = STFSetImageIDOperator.bl_idname
+	draw = draw_image_ui
+
 	get_components_func = get_components_from_object
+	operator_component_add = STFAddImageComponentOperator.bl_idname
+	operator_component_remove = STFRemoveImageComponentOperator.bl_idname
+	operator_component_edit = STFEditImageComponentIdOperator.bl_idname
 
 
 register_stf_handlers = [

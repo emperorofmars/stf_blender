@@ -1,6 +1,7 @@
 import bpy
 from typing import Protocol
 
+__all__ = ["SlotLink", "ActionSlotLink"]
 
 class SlotLink(Protocol):
 	slot_handle: int

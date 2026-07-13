@@ -6,7 +6,7 @@ from ....importer.stf_import_context import STF_ImportContext
 from ....exporter.stf_export_context import STF_ExportContext
 from ....common.utils.armature_bone import ArmatureBone
 from ....common.utils.animation_conversion_utils import *
-from ....common.property_path_part import BlenderPropertyPathPart, STFPropertyPathPart
+from ....common.base.property_path_part import BlenderPropertyPathPart, STFPropertyPathPart
 
 
 # In Blender, bones get animated relative to their own rest pose.

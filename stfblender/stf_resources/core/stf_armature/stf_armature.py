@@ -2,9 +2,9 @@ import bpy
 from typing import Any
 
 from ....common import STF_ImportContext, STF_ExportContext, STF_Category, STFReport
-from ....common.resource.blender_native import STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister, get_components_from_object
+from ....common.resource import STF_Handler_BlenderNative, STF_HandlerComponents, boilerplate_register, boilerplate_unregister, get_components_from_object, ensure_stf_id
 from ....common.utils.armature_bone import ArmatureBone
-from ....common.resource.resource_id import ensure_stf_id
+from .stf_armature_ui import STFAddArmatureComponentOperator, STFEditArmatureComponentIdOperator, STFRemoveArmatureComponentOperator, STFSetArmatureIDOperator
 
 
 _stf_type = "stf.armature"
@@ -52,14 +52,19 @@ def _stf_export(context: STF_ExportContext, application_object: Any, context_obj
 	return ret, blender_armature.stf_info.stf_id
 
 
-class Handler_STF_Armature(STF_Handler_BlenderNative):
+class Handler_STF_Armature(STF_Handler_BlenderNative, STF_HandlerComponents):
 	stf_type = _stf_type
 	stf_category = STF_Category.DATA
 	like_types = ["armature", "prefab"]
 	understood_application_types = [bpy.types.Armature]
 	import_func = _stf_import
 	export_func = _stf_export
+	operator_set_stf_id = STFSetArmatureIDOperator.bl_idname
+
 	get_components_func = get_components_from_object
+	operator_component_add = STFAddArmatureComponentOperator.bl_idname
+	operator_component_remove = STFRemoveArmatureComponentOperator.bl_idname
+	operator_component_edit = STFEditArmatureComponentIdOperator.bl_idname
 
 
 register_stf_handlers = [

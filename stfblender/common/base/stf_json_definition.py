@@ -1,7 +1,9 @@
 from typing import Any
 
+__all__ = ["STF_Meta_AssetInfo_Json", "STF_Meta_AssetProperties_Json", "STF_Meta_Json", "STF_Buffer_Json", "STF_JsonDefinition"]
 
-class STF_Meta_AssetInfo:
+
+class STF_Meta_AssetInfo_Json:
 	def __init__(self):
 		self.asset_name: str | None = None
 		self.version: str | None = None
@@ -13,7 +15,7 @@ class STF_Meta_AssetInfo:
 
 	@staticmethod
 	def from_dict(dict: dict[str, str]):
-		ret = STF_Meta_AssetInfo()
+		ret = STF_Meta_AssetInfo_Json()
 		for key, value in dict.items():
 			match key:
 				case "asset_name": ret.asset_name = value
@@ -35,13 +37,13 @@ class STF_Meta_AssetInfo:
 		return ret
 
 
-class STF_Meta_AssetProperties:
+class STF_Meta_AssetProperties_Json:
 	def __init__(self):
 		self.custom_properties: dict[str, str] = {}
 
 	@staticmethod
 	def from_dict(dict: dict[str, str]):
-		ret = STF_Meta_AssetProperties()
+		ret = STF_Meta_AssetProperties_Json()
 		for key, value in dict.items():
 			ret.custom_properties[key] = value
 		return ret
@@ -55,7 +57,7 @@ class STF_Meta_AssetProperties:
 		return ret
 
 
-class STF_Meta:
+class STF_Meta_Json:
 	def __init__(self):
 		import datetime
 
@@ -65,13 +67,13 @@ class STF_Meta:
 		self.generator_version = "0.0.0"
 		self.timestamp: str = datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat()
 		self.root: str
-		self.asset_info: STF_Meta_AssetInfo = STF_Meta_AssetInfo()
-		self.asset_properties: STF_Meta_AssetProperties = STF_Meta_AssetProperties()
+		self.asset_info: STF_Meta_AssetInfo_Json = STF_Meta_AssetInfo_Json()
+		self.asset_properties: STF_Meta_AssetProperties_Json = STF_Meta_AssetProperties_Json()
 		self.metric_multiplier: float = 1
 
 	@staticmethod
 	def from_dict(dict: dict[str, Any]):
-		ret = STF_Meta()
+		ret = STF_Meta_Json()
 		if("version" in dict):
 			ret.version_major = dict["version"][0]
 			ret.version_minor = dict["version"][1]
@@ -79,8 +81,8 @@ class STF_Meta:
 			ret.version_major = dict["version_major"]
 			ret.version_minor = dict["version_minor"]
 		ret.root = dict["root"]
-		ret.asset_info = STF_Meta_AssetInfo.from_dict(dict.get("asset_info", {}))
-		ret.asset_properties = STF_Meta_AssetProperties.from_dict(dict.get("asset_properties", {}))
+		ret.asset_info = STF_Meta_AssetInfo_Json.from_dict(dict.get("asset_info", {}))
+		ret.asset_properties = STF_Meta_AssetProperties_Json.from_dict(dict.get("asset_properties", {}))
 		ret.generator = dict["generator"]
 		ret.generator_version = dict["generator_version"]
 		ret.timestamp = dict["timestamp"]
@@ -100,14 +102,14 @@ class STF_Meta:
 		}
 
 
-class STF_Buffer:
+class STF_Buffer_Json:
 	def __init__(self):
 		self.type: str = "stf.buffer.included"
 		self.index: int
 
 	@staticmethod
 	def from_dict(dict: dict[str, Any]):
-		ret = STF_Buffer()
+		ret = STF_Buffer_Json()
 		ret.index = dict["index"]
 		return ret
 
@@ -122,18 +124,18 @@ class STF_JsonDefinition:
 	"""Represents the STF Json definition's top level object"""
 
 	def __init__(self):
-		self.stf: STF_Meta = STF_Meta()
+		self.stf: STF_Meta_Json = STF_Meta_Json()
 		self.resources: dict[str, dict] = dict()
-		self.buffers: dict[str, STF_Buffer] = dict()
+		self.buffers: dict[str, STF_Buffer_Json] = dict()
 
 	@staticmethod
 	def from_dict(dict: dict[str, Any]):
 		ret = STF_JsonDefinition()
-		ret.stf = STF_Meta.from_dict(dict["stf"])
+		ret.stf = STF_Meta_Json.from_dict(dict["stf"])
 		ret.resources = dict["resources"]
 		for key, value in dict["buffers"].items():
 			match value["type"]:
-				case "stf.buffer.included": ret.buffers[key] = STF_Buffer.from_dict(value)
+				case "stf.buffer.included": ret.buffers[key] = STF_Buffer_Json.from_dict(value)
 				case _: raise RuntimeError("Invalid buffer type: " + value["type"])
 		return ret
 

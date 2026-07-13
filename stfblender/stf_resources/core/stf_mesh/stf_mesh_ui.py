@@ -1,9 +1,6 @@
 import bpy
 
-from ....common.resource.resource_id import STFSetIDOperatorBase, draw_stf_id_ui
-from ....common.resource.component import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
-from ....common.ui import draw_components_ui
-from ....common.helpers import draw_multiline_text
+from ....common.resource import STFSetIDOperatorBase, STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
 
 
 class STFSetMeshIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
@@ -29,39 +26,3 @@ class STFEditMeshComponentIdOperator(bpy.types.Operator, STFEditComponentOperato
 	"""Edit the ID of this Component"""
 	bl_idname = "stf.edit_mesh_component_id"
 	def get_property(self, context): return context.mesh
-
-
-class STFMeshSpatialPanel(bpy.types.Panel):
-	"""STF options & export helper"""
-	bl_idname = "OBJECT_PT_stf_mesh_editor"
-	bl_label = "STF Editor: stf.mesh"
-	bl_region_type = "WINDOW"
-	bl_space_type = "PROPERTIES"
-	bl_context = "data"
-
-	@classmethod
-	def poll(cls, context: bpy.types.Context):
-		return hasattr(context, "mesh") and context.mesh is not None
-
-	def draw(self, context: bpy.types.Context):
-		layout: bpy.types.UILayout = self.layout # pyright: ignore[reportAssignmentType]
-
-		if(context.object.find_armature()):
-			t, r, s = context.object.matrix_local.decompose()
-			if(t.length > 0.0001 or abs(r.x) > 0.0001 or abs(r.y) > 0.0001 or abs(r.z) > 0.0001 or abs((r.w - 1)) > 0.0001 or abs(s.x - 1) > 0.0001 or abs(s.y - 1) > 0.0001 or abs(s.z - 1) > 0.0001):
-				draw_multiline_text(layout, "Warning, this mesh is not aligned with its Armature!\nThis will lead to differing behavior outside of Blender.\nApplying all Transforms for the Mesh and Armature will likely fix this.", width=80, icon="ERROR", alert=True)
-				layout.separator(factor=2, type="LINE")
-
-		# Set ID
-		draw_stf_id_ui(layout, context, context.mesh, context.mesh.stf_info, STFSetMeshIDOperator.bl_idname)
-
-		layout.separator(factor=1, type="SPACE")
-
-		layout.prop(context.mesh.stf_mesh, "export_blendshape_normals")
-		layout.prop(context.mesh.stf_mesh, "export_vertex_colors")
-
-		# Components
-		layout.separator(factor=2, type="LINE")
-		header, body = layout.panel("stf.mesh_components", default_closed = False)
-		header.label(text="STF Components (" + str(len(context.mesh.stf_info.stf_components)) + ")", icon="GROUP")
-		if(body): draw_components_ui(layout, context, context.mesh.stf_info, context.mesh, STFAddMeshComponentOperator.bl_idname, STFRemoveMeshComponentOperator.bl_idname, STFEditMeshComponentIdOperator.bl_idname)

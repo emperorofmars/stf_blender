@@ -3,15 +3,13 @@ import mathutils
 import math
 from typing import Any
 
-from .stf_instance_armature_utils import parse_standin, process_components, serialize_standin, update_armature_instance_component_standins
-from ....common import STF_ExportContext, STF_ImportContext, STF_TaskSteps, STFReportSeverity, STFReport, BlenderPropertyPathPart, STFPropertyPathPart, STF_Category
-from ....common.resource.blender_native import STF_Handler_BlenderNative
-from ....common.resource.component import InstanceModComponentRef
+from ....common import STF_ExportContext, STF_ImportContext, STF_TaskSteps, STFReportSeverity, STFReport, BlenderPropertyPathPart, STFPropertyPathPart, STF_Category, STF_Handler_BlenderNative, STF_HandlerAnimation, InstanceModComponentRef, ensure_stf_id, STFSetIDOperatorBase
 from ....common.utils.animation_conversion_utils import *
 from ....common.utils.armature_bone import ArmatureBone
 from ....common.utils.trs_utils import close_enough
-from ....common.resource.resource_id import ensure_stf_id
 from ....common.helpers import get_resource_id
+from .stf_instance_armature_ui import draw_armature_instance_ui
+from .stf_instance_armature_utils import parse_standin, process_components, serialize_standin, update_armature_instance_component_standins
 
 
 _stf_type = "stf.instance.armature"
@@ -20,6 +18,7 @@ _stf_type = "stf.instance.armature"
 class STF_Instance_Armature(bpy.types.PropertyGroup):
 	stf_components: bpy.props.CollectionProperty(type=InstanceModComponentRef, options=set()) # type: ignore
 	stf_active_component_index: bpy.props.IntProperty(options=set()) # type: ignore
+
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any | STFReport:
 	blender_armature = context.import_resource(json_resource, json_resource["armature"], stf_category=STF_Category.DATA)
@@ -49,9 +48,9 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 					bone_id = blender_armature.bones[pose.name].stf_info.stf_id
 
 					blender_matrix = mathutils.Matrix.LocRotScale(
-						mathutils.Vector((json_resource["pose"][bone_id][0][0], json_resource["pose"][bone_id][0][1], json_resource["pose"][bone_id][0][2])),
+						mathutils.Vector((json_resource["pose"][bone_id][0][0], json_resource["pose"][bone_id][0][1], json_resource["pose"][bone_id][0][2])), # pyright: ignore[reportArgumentType]
 						mathutils.Quaternion((json_resource["pose"][bone_id][1][3], json_resource["pose"][bone_id][1][0], json_resource["pose"][bone_id][1][1], json_resource["pose"][bone_id][1][2])),
-						mathutils.Vector((json_resource["pose"][bone_id][2][0], json_resource["pose"][bone_id][2][1], json_resource["pose"][bone_id][2][2]))
+						mathutils.Vector((json_resource["pose"][bone_id][2][0], json_resource["pose"][bone_id][2][1], json_resource["pose"][bone_id][2][2])) # pyright: ignore[reportArgumentType]
 					)
 					if(pose.parent):
 						pose.matrix = pose.parent.matrix @ blender_matrix
@@ -175,7 +174,15 @@ def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: 
 	return context.resolve_stf_property_path(stf_path[1:], application_object)
 
 
-class Handler_STF_Instance_Armature(STF_Handler_BlenderNative):
+class STFSetArmatureInstanceIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
+	"""Set STF-ID for Armature-Instance"""
+	bl_idname = "stf.set_armature_instance_stf_id"
+	@classmethod
+	def poll(cls, context) -> bool: return hasattr(context, "object") and context.object is not None and context.object.stf_instance is not None and context.object.data and type(context.object.data) is bpy.types.Armature  # pyright: ignore[reportReturnType]
+	def get_property(self, context): return context.object.stf_instance
+
+
+class Handler_STF_Instance_Armature(STF_Handler_BlenderNative, STF_HandlerAnimation):
 	stf_type = _stf_type
 	stf_category = STF_Category.INSTANCE
 	like_types = ["instance.armature", "instance"]
@@ -184,6 +191,9 @@ class Handler_STF_Instance_Armature(STF_Handler_BlenderNative):
 	export_func = _stf_export
 	can_handle_application_object_func = _can_handle_application_object_func
 	get_components_func = None
+	get_stf_prop_holder = lambda bo: bo[0].stf_instance
+	operator_set_stf_id = STFSetArmatureInstanceIDOperator.bl_idname
+	draw = draw_armature_instance_ui
 
 	understood_application_property_path_types = [bpy.types.Object]
 	understood_application_property_path_parts = ["pose.bones"]

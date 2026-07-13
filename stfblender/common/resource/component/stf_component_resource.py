@@ -2,8 +2,8 @@ import bpy
 from typing import Any, Callable
 
 from ...utils.armature_bone import ArmatureBone
+from ... import STF_ExportContext, STF_ImportContext
 from ..resource_id import ensure_stf_id
-from ... import STF_ImportContext, STF_ExportContext
 
 """
 STF Components aren't natively supported by Blender, they are stored by the Blender-ID-thingy they belong to.

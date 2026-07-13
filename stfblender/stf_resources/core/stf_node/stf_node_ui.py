@@ -1,8 +1,6 @@
 import bpy
 
-from ....common.resource.resource_id import STFSetIDOperatorBase, draw_stf_id_ui
-from ....common.resource.component import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
-from ....common.ui import draw_components_ui
+from ....common.resource import STFSetIDOperatorBase, STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
 from ....common.helpers import draw_multiline_text
 
 
@@ -50,35 +48,11 @@ class STFNodeFixRotationMode(bpy.types.Operator):
 		return {"FINISHED"}
 
 
-class STFNodePanel(bpy.types.Panel):
-	"""STF options & export helper"""
-	bl_idname = "OBJECT_PT_stf_node_editor"
-	bl_label = "STF Editor: stf.node"
-	bl_region_type = "WINDOW"
-	bl_space_type = "PROPERTIES"
-	bl_context = "object"
-
-	@classmethod
-	def poll(cls, context: bpy.types.Context):
-		return hasattr(context, "object") and context.object is not None
-
-	def draw(self, context: bpy.types.Context):
-		layout: bpy.types.UILayout = self.layout # pyright: ignore[reportAssignmentType]
-
-		if(context.object.rotation_mode != "QUATERNION"):
-			text_row = draw_multiline_text(layout, "Please set the Rotation-Mode to 'Quaternion (WXYZ)'\nDoing so ensures consistency with game-engines.\nBe aware that existing rotation animations will break!", width=80, icon="ERROR", alert=True)
-			row_fix = text_row.row()
-			row_fix.alignment = "LEFT"
-			text_row.operator(STFNodeFixRotationMode.bl_idname)
-			layout.separator(factor=2, type="LINE")
-
-		# Set ID
-		draw_stf_id_ui(layout, context, context.object, context.object.stf_info, STFSetObjectIDOperator.bl_idname)
-
-		layout.separator(factor=2, type="LINE")
-
-		# Components
-		layout.separator(factor=1, type="SPACE")
-		header, body = layout.panel("stf.node_components", default_closed = False)
-		header.label(text="STF Components (" + str(len(context.object.stf_info.stf_components)) + ")", icon="GROUP")
-		if(body): draw_components_ui(body, context, context.object.stf_info, context.object, STFAddObjectComponentOperator.bl_idname, STFRemoveObjectComponentOperator.bl_idname, STFEditObjectComponentIdOperator.bl_idname)
+def draw_node_ui(layout: bpy.types.UILayout, context: bpy.types.Context, blender_resource: bpy.types.Object) -> None | bool:
+	if(context.object.rotation_mode != "QUATERNION"):
+		text_row = draw_multiline_text(layout, "Please set the Rotation-Mode to 'Quaternion (WXYZ)'\nDoing so ensures consistency with game-engines.\nBe aware that existing rotation animations will break!", width=80, icon="ERROR", alert=True)
+		row_fix = text_row.row()
+		row_fix.alignment = "LEFT"
+		text_row.operator(STFNodeFixRotationMode.bl_idname)
+	else:
+		return False

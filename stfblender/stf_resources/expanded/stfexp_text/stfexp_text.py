@@ -1,9 +1,8 @@
 import bpy
 from typing import Any
 
-from ....common import STF_ExportContext, STF_ExportContext, STF_ImportContext, STF_Category
-from ....common.resource.blender_native import STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister, get_components_from_object
-from ....common.resource.resource_id import ensure_stf_id
+from ....common import STF_ExportContext, STF_ImportContext, STF_Category, STF_Handler_BlenderNative, STF_HandlerComponents, boilerplate_register, boilerplate_unregister, get_components_from_object, ensure_stf_id
+from .stfexp_text_ui import STFAddTextComponentOperator, STFEditTextComponentIdOperator, STFRemoveTextComponentOperator, STFSetTextIDOperator
 
 # TODO this module is at a bare minimum level, improve it
 
@@ -39,14 +38,19 @@ def _stf_export(context: STF_ExportContext, application_object: Any, context_obj
 	return ret, blender_text.stf_info.stf_id
 
 
-class Handler_STFEXP_Text(STF_Handler_BlenderNative):
+class Handler_STFEXP_Text(STF_Handler_BlenderNative, STF_HandlerComponents):
 	stf_type = _stf_type
 	stf_category = STF_Category.DATA
 	like_types = ["text"]
 	understood_application_types = [bpy.types.TextCurve]
 	import_func = _stf_import
 	export_func = _stf_export
+	operator_set_stf_id = STFSetTextIDOperator.bl_idname
+
 	get_components_func = get_components_from_object
+	operator_component_add = STFAddTextComponentOperator.bl_idname
+	operator_component_remove = STFRemoveTextComponentOperator.bl_idname
+	operator_component_edit = STFEditTextComponentIdOperator.bl_idname
 
 
 register_stf_handlers = [

@@ -1,14 +1,13 @@
 import bpy
 
-from ....common.resource.resource_id import STFSetIDOperatorBase
-from ....common.resource.component import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
+from ....common import STFSetIDOperatorBase, STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
 from .draw_prefab_ui import draw_prefab_ui
 
 
 class STFSetCollectionAsRootOperator(bpy.types.Operator):
 	"""Set Collection as the default STF export"""
 	bl_idname = "stf.set_collection_as_export_root"
-	bl_label = "Set as STF export root"
+	bl_label = "Set Collection as default for export"
 	bl_options = {"REGISTER", "UNDO"}
 
 	@classmethod

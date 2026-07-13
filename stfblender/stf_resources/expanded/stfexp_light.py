@@ -2,9 +2,7 @@ import bpy
 import re
 from typing import Any
 
-from ...common import STF_ExportContext, STF_ImportContext, STFReportSeverity, STFReport, BlenderPropertyPathPart, STFPropertyPathPart, STF_Category
-from ...common.resource.blender_native import STF_Handler_BlenderNative
-from ...common.resource.resource_id import STFSetIDOperatorBase, draw_stf_id_ui, ensure_stf_id
+from ...common import STF_ExportContext, STF_ImportContext, STFReportSeverity, STFReport, BlenderPropertyPathPart, STFPropertyPathPart, STF_Category, STF_HandlerAnimation, STF_Handler_BlenderNative, STFSetIDOperatorBase, ensure_stf_id
 
 
 _stf_type = "stfexp.light"
@@ -16,23 +14,6 @@ class STFSetSTFEXPLightIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
 	@classmethod
 	def poll(cls, context) -> bool: return context.object.stf_instance is not None and context.object.data and isinstance(context.object.data, bpy.types.Light)  # pyright: ignore[reportReturnType]
 	def get_property(self, context): return context.object.stf_instance
-
-class STFEXP_Light_Panel(bpy.types.Panel):
-	"""STF options & export helper"""
-	bl_idname = "OBJECT_PT_stfexp_light_editor"
-	bl_label = "STF Editor: stfexp.light"
-	bl_region_type = "WINDOW"
-	bl_space_type = "PROPERTIES"
-	bl_context = "data"
-
-	@classmethod
-	def poll(cls, context) -> bool:
-		return context.object.stf_instance is not None and context.object.data and isinstance(context.object.data, bpy.types.Light)  # pyright: ignore[reportReturnType]
-
-	def draw(self, context):
-		# Set ID
-		draw_stf_id_ui(self.layout, context, context.object.stf_instance, context.object.stf_instance, STFSetSTFEXPLightIDOperator.bl_idname, True)  # pyright: ignore[reportArgumentType]
-
 
 """
 Import
@@ -156,7 +137,7 @@ def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: 
 Definition
 """
 
-class Handler_STFEXP_Light(STF_Handler_BlenderNative):
+class Handler_STFEXP_Light(STF_Handler_BlenderNative, STF_HandlerAnimation):
 	stf_type = _stf_type
 	stf_category = STF_Category.INSTANCE
 	like_types = ["light"]
@@ -164,6 +145,8 @@ class Handler_STFEXP_Light(STF_Handler_BlenderNative):
 	import_func = _stf_import
 	export_func = _stf_export
 	can_handle_application_object_func = _can_handle_application_object_func
+	get_stf_prop_holder = lambda bo: bo[0].stf_instance
+	operator_set_stf_id = STFSetSTFEXPLightIDOperator.bl_idname
 
 	understood_application_property_path_types = [bpy.types.Object]
 	understood_application_property_path_parts = ["temperature", "color", "energy", "shadow_soft_size", "spot_size"]

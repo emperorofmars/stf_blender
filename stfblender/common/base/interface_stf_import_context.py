@@ -2,7 +2,7 @@ import bpy
 from typing import Any, Callable, Protocol
 from abc import abstractmethod
 
-from . import STF_Category
+from .stf_category import STF_Category
 from .stf_task_steps import STF_TaskSteps
 from .stf_report import STFReport
 from .property_path_part import BlenderPropertyPathPart
@@ -29,7 +29,7 @@ class STF_ImportContext(Protocol):
 		"""
 
 	@abstractmethod
-	def import_resource(self, json_parent: dict, resource_index: int, context_object: Any = None, stf_category: str = STF_Category.DATA) -> Any:
+	def import_resource(self, json_parent: dict, resource_index: int, context_object: Any = None, stf_category: str = STF_Category.DATA) -> Any | None:
 		"""
 		Import a STF resource to a Blender 'thing'. The resources ID will be retrieved from the json_parent's `referenced_resources` array, based on the `resource_index` argument. Returns the imported Blender 'thing'.
 
@@ -37,7 +37,7 @@ class STF_ImportContext(Protocol):
 		:param int resource_index: Index of the resource-id in the `referenced_resources` array on the `json_parent`
 		:param Any context_object: Blender object that will be passed to the to be imported resources handler. E.g. the Collection for a `stf.node` or the Armature for a `stf.bone`.
 		:param str | STF_Category stf_category: The resources category, by default `STF_Category.DATA`.
-		:return Any: The imported Blender object
+		:return Any | None: The imported Blender object or `None` in case of failure
 		"""
 
 	def _import_resource(self, stf_id: str, context_object: Any = None, stf_category: str = STF_Category.DATA) -> Any | None:

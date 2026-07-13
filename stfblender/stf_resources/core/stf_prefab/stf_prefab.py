@@ -1,9 +1,7 @@
 import bpy
 from typing import Any
 
-from ....common import STF_ImportContext, STF_ExportContext, STF_TaskSteps, STFReportSeverity, STF_Category, STFReport
-from ....common.resource.blender_native import STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister, get_components_from_object
-from ....common.resource.resource_id import ensure_stf_id
+from ....common import STF_ImportContext, STF_ExportContext, STF_HandlerComponents, STF_TaskSteps, STFReportSeverity, STF_Category, STFReport, STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister, get_components_from_object, ensure_stf_id
 
 
 _stf_type = "stf.prefab"
@@ -27,6 +25,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	context.add_task(STF_TaskSteps.ANIMATION, _handle_animations)
 
 	return collection
+
 
 def _stf_export(context: STF_ExportContext, blender_object: Any, context_object: Any | None) -> tuple[dict, str] | STFReport:
 	collection: bpy.types.Collection = blender_object
@@ -55,7 +54,7 @@ def _stf_export(context: STF_ExportContext, blender_object: Any, context_object:
 	return ret, collection.stf_info.stf_id
 
 
-class Handler_STF_Prefab(STF_Handler_BlenderNative):
+class Handler_STF_Prefab(STF_Handler_BlenderNative, STF_HandlerComponents):
 	stf_type = _stf_type
 	stf_category = STF_Category.DATA
 	like_types = ["prefab"]

@@ -2,10 +2,7 @@ import bpy
 import uuid
 from typing import Any
 
-from ...common.stf_report import STFReport
-
-from ...common import STF_ExportContext, STF_ImportContext, STF_TaskSteps, STF_Category
-from ...common.resource.component import STF_ComponentResourceBase, STF_Handler_Component, STF_Component_Ref, add_component, export_component_base, import_component_base
+from ...common import STF_ExportContext, STF_ImportContext, STF_TaskSteps, STF_Category, STFReport, STF_ComponentResourceBase, STF_Handler_Component, STF_Component_Ref, add_component, export_component_base, import_component_base
 from ...common.helpers import register_exported_resource
 from ...common.helpers.misc import SetActiveObjectOperator
 from ..expanded import stfexp_node_ethereal

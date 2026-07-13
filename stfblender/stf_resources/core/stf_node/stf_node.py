@@ -3,14 +3,12 @@ import math
 import mathutils
 from typing import Any
 
-from ....common.helpers.reference_helper import register_exported_resource
-
-from ....common import STF_ExportContext, STF_ImportContext, STF_TaskSteps, STFReportSeverity, STFReport, STF_Category
-from ....common.resource.blender_native import STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister, get_components_from_object
+from ....common import STF_ExportContext, STF_ImportContext, STF_TaskSteps, STFReportSeverity, STFReport, STF_Category, STF_Handler_BlenderNative, STF_HandlerAnimation, STF_HandlerComponents, boilerplate_register, boilerplate_unregister, get_components_from_object, ensure_stf_id
 from ....common.utils import trs_utils
-from ....common.resource.resource_id import ensure_stf_id
 from ....common.helpers import get_resource_id
+from ....common.helpers.reference_helper import register_exported_resource
 from .node_property_conversion import stf_node_resolve_property_path_to_stf_func, stf_node_resolve_stf_property_to_blender_func
+from .stf_node_ui import STFAddObjectComponentOperator, STFEditObjectComponentIdOperator, STFRemoveObjectComponentOperator, STFSetObjectIDOperator, draw_node_ui
 
 
 _stf_type = "stf.node"
@@ -24,7 +22,7 @@ class STF_Instance(bpy.types.PropertyGroup):
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any | STFReport:
 	if("instance" in json_resource):
-		blender_object: bpy.types.Object = context.import_resource(json_resource, json_resource["instance"], stf_category=STF_Category.INSTANCE) # pyright: ignore[reportRedeclaration]
+		blender_object: bpy.types.Object = context.import_resource(json_resource, json_resource["instance"], stf_category=STF_Category.INSTANCE) # pyright: ignore[reportAssignmentType, reportRedeclaration]
 	else:
 		blender_object: bpy.types.Object = bpy.data.objects.new(json_resource.get("name", "STF Node"), None)
 	context.register_imported_resource(stf_id, blender_object)
@@ -59,7 +57,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	context.add_task(STF_TaskSteps.DEFAULT, _handle_parenting)
 
 	for child_id in json_resource.get("children", []):
-		child: bpy.types.Object = context.import_resource(json_resource, child_id, context_object, stf_category=STF_Category.NODE)
+		child: bpy.types.Object | None = context.import_resource(json_resource, child_id, context_object, stf_category=STF_Category.NODE)
 		if(child):
 			child.parent = blender_object
 		else:
@@ -131,7 +129,7 @@ def _stf_export(context: STF_ExportContext, blender_object: bpy.types.Object, co
 	return json_resource, blender_object.stf_info.stf_id
 
 
-class Handler_STF_Node(STF_Handler_BlenderNative):
+class Handler_STF_Node(STF_Handler_BlenderNative, STF_HandlerComponents, STF_HandlerAnimation):
 	stf_type = _stf_type
 	stf_category = STF_Category.NODE
 	like_types = ["node", "node.spatial"]
@@ -139,7 +137,13 @@ class Handler_STF_Node(STF_Handler_BlenderNative):
 	import_func = _stf_import
 	export_func = _stf_export # pyright: ignore[reportAssignmentType]
 	can_handle_application_object_func = _can_handle_application_object_func
+	operator_set_stf_id = STFSetObjectIDOperator.bl_idname
+	draw = draw_node_ui
+
 	get_components_func = get_components_from_object
+	operator_component_add = STFAddObjectComponentOperator.bl_idname
+	operator_component_remove = STFRemoveObjectComponentOperator.bl_idname
+	operator_component_edit = STFEditObjectComponentIdOperator.bl_idname
 
 	understood_application_property_path_types = [bpy.types.Object]
 	understood_application_property_path_parts = ["location", "rotation_quaternion", "rotation_euler", "scale", "hide_render"]

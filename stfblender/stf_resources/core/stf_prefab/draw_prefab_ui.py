@@ -1,12 +1,11 @@
 import bpy
 
-from ....common.resource.resource_id import draw_stf_id_ui
-from ....common.ui import draw_components_ui
-from ....common.base.stf_meta import draw_meta_editor
-from ....common.helpers.misc import draw_slot_link_warning
-
 
 def draw_prefab_ui(layout: bpy.types.UILayout, context: bpy.types.Context, collection: bpy.types.Collection, operator_set_as_root: str, operator_set_id: str, operator_add_component: str, operator_remove_component: str, operator_edit_component_id: str):
+	from ....common import draw_meta_editor
+	from ....common.ui import draw_components_ui
+	from ....common.ui.stf_id_ui import draw_stf_id_ui
+	from ....common.helpers.misc import draw_slot_link_warning
 
 	draw_slot_link_warning(layout)
 

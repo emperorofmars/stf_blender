@@ -1,17 +1,16 @@
-import traceback
 import bpy
+from bpy_extras.io_utils import ImportHelper
 import os
 import io
-from bpy_extras.io_utils import ImportHelper
+import traceback
 from collections.abc import Sequence
 
+from ..common import STFReport, STFReportSeverity, STF_File
+from ..common.resource.stf_registry import get_import_handlers, get_import_handlers_fallback
+from ..common.helpers import OpenWebpage, draw_slot_link_warning, get_stf_version
 from .import_settings import STF_ImportSettings
 from .stf_import_state import STF_ImportState
 from .stf_import_context import STF_ImportContext
-from ..common.base.stf_registry import get_import_handlers, get_import_handlers_fallback
-from ..common.stf_report import STFException, STFReport, STFReportSeverity
-from ..common.base.stf_file import STF_File
-from ..common.helpers import OpenWebpage, draw_slot_link_warning, get_stf_version
 
 
 class STF_Import_Result:
@@ -40,10 +39,6 @@ def import_stf_file(filepath: str, import_settings: STF_ImportSettings) -> STF_I
 			raise Exception("Import Failed, invalid root!")
 
 		return STF_Import_Result(True, collection = root, import_time=time.time() - time_start, warnings=stf_state._reports)
-	except STFException as error:
-		print(error)
-		print(traceback.format_exc())
-		return STF_Import_Result(False, error_message=str(error))
 	except Exception as error:
 		print(error)
 		print(traceback.format_exc())

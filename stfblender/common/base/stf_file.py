@@ -6,6 +6,7 @@ import json
 from .stf_json_definition import STF_JsonDefinition
 from ..utils import buffer_utils
 
+__all__ = ["STF_File"]
 
 class STF_File:
 	"""Holds all data of a binary STF file.

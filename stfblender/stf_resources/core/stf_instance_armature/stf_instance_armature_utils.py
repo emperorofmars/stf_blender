@@ -1,8 +1,8 @@
 import bpy
 
 from ....common import STF_ExportContext, STF_ImportContext
-from ....common.resource.component import InstanceModComponentRef, STF_Handler_Component, STF_Component_Ref, add_component
-from ....common.base.stf_registry import find_component_handler, get_component_handlers
+from ....common.resource import InstanceModComponentRef, STF_Handler_Component, STF_Component_Ref, STF_ComponentResourceBase, add_component
+from ....common.resource.stf_registry import find_component_handler, get_blender_native_component_handlers
 from ....common.utils.animation_conversion_utils import *
 
 
@@ -10,7 +10,7 @@ def update_armature_instance_component_standins(context: bpy.types.Context, blen
 	blender_armature: bpy.types.Armature = blender_object.data  # pyright: ignore[reportAssignmentType]
 	handled_ids = []
 	if(not stf_modules):
-		stf_modules = get_component_handlers()
+		stf_modules = get_blender_native_component_handlers()
 
 	for bone in blender_armature.bones:
 		for component_ref in bone.stf_info.stf_components:
@@ -58,7 +58,7 @@ def serialize_standin(context: STF_ExportContext, blender_object: bpy.types.Obje
 	else:
 		return None
 
-	stf_modules = get_component_handlers()
+	stf_modules = get_blender_native_component_handlers()
 	if(stf_module := find_component_handler(stf_modules, component_standin_ref.stf_type)):
 		if(hasattr(stf_module, "serialize_component_instance_standin_func")):
 			return stf_module.serialize_component_instance_standin_func(context, component_standin_ref, standin_component, blender_object)
@@ -77,7 +77,7 @@ def parse_standin(context: STF_ImportContext, blender_object: bpy.types.Object, 
 	else:
 		return
 
-	stf_modules = get_component_handlers()
+	stf_modules = get_blender_native_component_handlers()
 	if(stf_module := find_component_handler(stf_modules, standin_ref.stf_type)):
 		if(hasattr(stf_module, "serialize_component_instance_standin_func")):
 			standin_ref.override = True
@@ -90,14 +90,14 @@ class UpdateArmatureInstanceComponentStandins(bpy.types.Operator):
 	bl_options = {"REGISTER", "UNDO"}
 
 	def execute(self, context: bpy.types.Context) -> set:
-		update_armature_instance_component_standins(context, context.object, get_component_handlers())  # pyright: ignore[reportArgumentType]
+		update_armature_instance_component_standins(context, context.object, get_blender_native_component_handlers())  # pyright: ignore[reportArgumentType]
 		return {"FINISHED"}
 
 
 
 def process_components(armature_instance: bpy.types.Object, stf_resources: list[STF_Handler_Component] | None = None):
 	if(not stf_resources):
-		stf_resources = get_component_handlers()
+		stf_resources = get_blender_native_component_handlers()
 
 	components_to_process = {}
 
@@ -149,5 +149,5 @@ class ProcessComponentsOntoArmatureInstance(bpy.types.Operator):
 		return context.window_manager.invoke_confirm(self, event, message="This will overwrite constraints and other values!")
 
 	def execute(self, context: bpy.types.Context) -> set:
-		process_components(context.object, get_component_handlers())  # pyright: ignore[reportArgumentType]
+		process_components(context.object, get_blender_native_component_handlers())  # pyright: ignore[reportArgumentType]
 		return {"FINISHED"}

@@ -1,7 +1,16 @@
 
-from .blender_grr import BlenderGRR
+"""
+Blender Generic Resource Reference
+
+Bringing polymorphism to Blender
+
+It works right now, however making this actually user friendly and nice to handle will take some more effort.
+"""
+
+from .blender_grr import *
 from .blender_grr_utils import pretty_print_blender_grr, draw_blender_grr, resolve_blender_grr, construct_blender_grr, validate_blender_grr
 from .stf_data_resource_reference import STFDataResourceReference
 from .stf_data_resource_reference_utils import draw_stf_data_resource_reference, resolve_stf_data_resource_reference, validate_stf_data_resource_reference
 from .blender_resource_reference import BlenderResourceReference, pretty_print_blender_resource_reference, draw_blender_resource_reference, resolve_blender_resource_reference, validate_blender_resource_reference
 from .stf_node_path_component_selector import NodePathComponentSelector, draw_node_path_component_selector, validate_node_path_component_selector, node_path_component_selector_from_stf, node_path_component_selector_to_stf
+

@@ -1,10 +1,10 @@
 import bpy
 
-from ....common import STF_Category
-from ....common.resource.blender_native import STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister, get_components_from_object
+from ....common import STF_Category, STF_HandlerComponents, STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister, get_components_from_object
 from .stf_animation_common import *
 from .stf_animation_export import stf_animation_export
 from .stf_animation_import import stf_animation_import
+from .stf_animation_ui import STFAddAnimationComponentOperator, STFEditAnimationComponentIdOperator, STFRemoveAnimationComponentOperator, STFSetAnimationIDOperator, draw_animation_ui
 
 
 _stf_type = stf_animation_type
@@ -18,14 +18,20 @@ class STF_Animation(bpy.types.PropertyGroup):
 	constraint_bake: bpy.props.EnumProperty(name="Constraint-Baking", items=(("auto", "Automatic", ""), ("bake", "Bake", ""), ("nobake", "Don't Bake", "")), default="auto") # type: ignore
 
 
-class Handler_STF_Animation(STF_Handler_BlenderNative):
+class Handler_STF_Animation(STF_Handler_BlenderNative, STF_HandlerComponents):
 	stf_type = _stf_type
 	stf_category = STF_Category.DATA
 	like_types = ["animation"]
 	understood_application_types = [bpy.types.Action]
 	import_func = stf_animation_import
 	export_func = stf_animation_export
+	operator_set_stf_id = STFSetAnimationIDOperator.bl_idname
+	draw = draw_animation_ui
+
 	get_components_func = get_components_from_object
+	operator_component_add = STFAddAnimationComponentOperator.bl_idname
+	operator_component_remove = STFRemoveAnimationComponentOperator.bl_idname
+	operator_component_edit = STFEditAnimationComponentIdOperator.bl_idname
 
 
 register_stf_handlers = [

@@ -1,8 +1,6 @@
 import bpy
 
-from ....common.resource.resource_id import STFSetIDOperatorBase, draw_stf_id_ui
-from ....common.resource.component import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
-from ....common.ui import draw_components_ui
+from ....common import STFSetIDOperatorBase, STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
 
 
 class STFSetBoneIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
@@ -28,36 +26,3 @@ class STFEditBoneComponentIdOperator(bpy.types.Operator, STFEditComponentOperato
 	"""Edit the ID of this Component"""
 	bl_idname = "stf.edit_bone_component_id"
 	def get_property(self, context): return context.bone
-
-
-class STFBoneSpatialPanel(bpy.types.Panel):
-	"""STF options & export helper"""
-	bl_idname = "OBJECT_PT_stf_bone_spatial_editor"
-	bl_label = "STF Editor: stf.bone"
-	bl_region_type = "WINDOW"
-	bl_space_type = "PROPERTIES"
-	bl_context = "bone"
-
-	@classmethod
-	def poll(cls, context: bpy.types.Context):
-		return hasattr(context, "bone") and context.bone is not None
-
-	def draw(self, context: bpy.types.Context):
-		layout = self.layout
-
-		# Set ID
-		draw_stf_id_ui(layout, context, context.bone, context.bone.stf_info, STFSetBoneIDOperator.bl_idname) # pyright: ignore[reportArgumentType]
-
-		layout.separator(factor=2, type="LINE")
-
-		if(not context.bone.use_deform):
-			col = layout.column()
-			col.use_property_split = True
-			col.prop(context.bone.stf_bone, "non_deform_use")
-			layout.separator(factor=2, type="LINE")
-
-		# Components
-		layout.separator(factor=1, type="SPACE")
-		header, body = layout.panel("stf.bone_components", default_closed = False)
-		header.label(text="STF Components (" + str(len(context.bone.stf_info.stf_components)) + ")", icon="GROUP")
-		if(body): draw_components_ui(layout, context, context.bone.stf_info, context.bone, STFAddBoneComponentOperator.bl_idname, STFRemoveBoneComponentOperator.bl_idname, STFEditBoneComponentIdOperator.bl_idname) # pyright: ignore[reportArgumentType]
