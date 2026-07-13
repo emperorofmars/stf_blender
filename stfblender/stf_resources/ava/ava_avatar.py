@@ -4,7 +4,7 @@ from typing import Any
 
 from ....stfblender_common import STF_ExportContext, STF_ImportContext, STF_TaskSteps, STF_Category, STFReport, STF_ComponentResourceBase, STF_Handler_Component, STF_Component_Ref, add_component, export_component_base, import_component_base
 from ....stfblender_common.helpers import register_exported_resource, OP_SetActiveObjectOperator
-from ..expanded import stfexp_node_ethereal
+from ..stfexp import stfexp_node_ethereal
 
 
 _stf_type = "ava.avatar"
