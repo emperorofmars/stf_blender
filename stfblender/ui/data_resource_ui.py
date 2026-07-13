@@ -2,7 +2,7 @@ import bpy
 from typing import Any
 
 from ..common.resource.stf_registry import find_data_handler, get_blender_non_native_data_handlers
-from ..common.helpers import CopyToClipboard, draw_multiline_text
+from ..common.helpers import OP_CopyToClipboard, draw_multiline_text
 from ..common.resource.data import STF_DataResourceBase, STF_Data_Ref
 from ..common.resource.data.data_resource_ops import STFCreateDataResourceOperator, STFEditDataResourceOperator, STFRemoveDataResourceOperator
 from ..common.resource.component import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
@@ -89,7 +89,7 @@ class STFDrawDataResourceList(bpy.types.UIList):
 		row_r = row.row()
 		row_r.alignment = "RIGHT"
 		row_r.label(text=item.stf_id[:8] + "..")
-		row_r.operator(CopyToClipboard.bl_idname, text="", icon="DUPLICATE", emboss=False).text = item.stf_id
+		row_r.operator(OP_CopyToClipboard, text="", icon="DUPLICATE", emboss=False).text = item.stf_id
 
 
 def _get_data_resource_component_ref_property_collection(context: bpy.types.Context) -> Any:
@@ -131,7 +131,7 @@ def draw_resource(layout: bpy.types.UILayout, context: bpy.types.Context, resour
 	row_r = row.row()
 	row_r.alignment = "RIGHT"
 	row_r.label(text="ID: " + resource_ref.stf_id)
-	row_r.operator(CopyToClipboard.bl_idname, text="", icon="DUPLICATE").text = resource_ref.stf_id
+	row_r.operator(OP_CopyToClipboard, text="", icon="DUPLICATE").text = resource_ref.stf_id
 	row_r.operator(STFEditDataResourceOperator.bl_idname, text="", icon="MODIFIER").resource_id = resource_ref.stf_id
 
 	box.prop(resource, "stf_name")

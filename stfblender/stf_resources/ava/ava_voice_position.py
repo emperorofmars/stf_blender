@@ -4,7 +4,7 @@ from typing import Any
 
 from ...common import STF_ExportContext, STF_ImportContext, STF_TaskSteps, STF_Category
 from ...common.resource.component import STF_ComponentResourceBase, STF_Handler_Component, STF_Component_Ref, add_component, export_component_base, import_component_base
-from ...common.helpers import register_exported_resource, SetActiveObjectOperator
+from ...common.helpers import register_exported_resource, OP_SetActiveObjectOperator
 from ..expanded import stfexp_node_ethereal
 
 
@@ -50,7 +50,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 		layout.prop(component, "voice_position")
 		row = layout.row()
 		row.alignment = "RIGHT"
-		row.operator(SetActiveObjectOperator.bl_idname, text="Select Position Object", icon="EYEDROPPER").target_name = component.voice_position.name
+		row.operator(OP_SetActiveObjectOperator, text="Select Position Object", icon="EYEDROPPER").target_name = component.voice_position.name
 	else:
 		create_button = layout.operator(CreateVoicePositionObjectOperator.bl_idname, text="Create Position Object", icon="ADD")
 		create_button.blender_collection = context_object.name

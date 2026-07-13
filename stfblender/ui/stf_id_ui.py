@@ -1,7 +1,7 @@
 import bpy
 from typing import Any
 
-from ..common.helpers.misc import CopyToClipboard
+from ..common.helpers.misc import OP_CopyToClipboard
 
 
 __all__ = ["draw_stf_id_ui"]
@@ -20,7 +20,7 @@ def draw_stf_id_ui(layout: bpy.types.UILayout, context: bpy.types.Context, blend
 			row_l.label(text=stf_prop_holder.stf_id)
 		row_r = row.row(align=False)
 		row_r.alignment = "RIGHT"
-		row_r.operator(CopyToClipboard.bl_idname, text="", icon="DUPLICATE").text = stf_prop_holder.stf_id
+		row_r.operator(OP_CopyToClipboard, text="", icon="DUPLICATE").text = stf_prop_holder.stf_id
 		row_r.prop(context.scene, "stf_edit_resource_id", text="", icon="MODIFIER")
 	else:
 		flow.operator(set_id_op)

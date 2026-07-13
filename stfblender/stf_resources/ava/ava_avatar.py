@@ -4,7 +4,7 @@ from typing import Any
 
 from ...common import STF_ExportContext, STF_ImportContext, STF_TaskSteps, STF_Category, STFReport, STF_ComponentResourceBase, STF_Handler_Component, STF_Component_Ref, add_component, export_component_base, import_component_base
 from ...common.helpers import register_exported_resource
-from ...common.helpers.misc import SetActiveObjectOperator
+from ...common.helpers.misc import OP_SetActiveObjectOperator
 from ..expanded import stfexp_node_ethereal
 
 
@@ -58,7 +58,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 		layout.prop(component, "viewport")
 		row = layout.row()
 		row.alignment = "RIGHT"
-		row.operator(SetActiveObjectOperator.bl_idname, text="Select Viewport Object", icon="EYEDROPPER").target_name = component.viewport.name
+		row.operator(OP_SetActiveObjectOperator, text="Select Viewport Object", icon="EYEDROPPER").target_name = component.viewport.name
 	else:
 		create_viewport_button = layout.operator(CreateViewportObjectOperator.bl_idname, text="Create Viewport Object", icon="ADD")
 		create_viewport_button.blender_collection = context_object.name
