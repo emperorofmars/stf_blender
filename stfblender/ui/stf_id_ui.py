@@ -1,7 +1,7 @@
 import bpy
 from typing import Any
 
-from ..helpers.misc import CopyToClipboard
+from ..common.helpers.misc import CopyToClipboard
 
 
 __all__ = ["draw_stf_id_ui"]

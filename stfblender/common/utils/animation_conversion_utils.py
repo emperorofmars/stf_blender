@@ -1,7 +1,7 @@
 import bpy
 from typing import Any
 
-from ..resource.component import STF_ComponentResourceBase
+from ..resource import STF_ComponentResourceBase
 from . import trs_utils
 
 

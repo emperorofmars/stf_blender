@@ -29,7 +29,7 @@ class SetActiveObjectOperator(bpy.types.Operator):
 
 	def execute(self, context) -> set:
 		blender_object = bpy.data.objects.get(self.target_name)
-		for selected in bpy.context.selected_objects:
+		for selected in bpy.context.selected_objects: # pyright: ignore[reportOptionalIterable]
 			selected.select_set(False)
 		blender_object.select_set(True)
 		bpy.context.view_layer.objects.active = blender_object

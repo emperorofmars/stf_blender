@@ -1,8 +1,7 @@
 import bpy
 from typing import Any, Callable
 
-#from ..resource.data import STF_DataResourceBase
-#from ..resource.component import STF_ComponentResourceBase
+#from ..resource import STF_DataResourceBase, STF_ComponentResourceBase
 
 
 class Edit_Component_Collection(bpy.types.Operator):

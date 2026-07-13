@@ -1,7 +1,7 @@
 import bpy
 from typing import Any
 
-from ....common import STF_ImportContext, STF_ExportContext, STF_HandlerComponents, STF_TaskSteps, STFReportSeverity, STF_Category, STFReport, STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister, get_components_from_object, ensure_stf_id
+from ....common import STF_ImportContext, STF_ExportContext, STF_HandlerComponents, STF_TaskSteps, STFReportSeverity, STF_Category, STFReport, STF_Handler_BlenderNative, STF_Data_Ref, boilerplate_register, boilerplate_unregister, get_components_from_object, ensure_stf_id
 
 
 _stf_type = "stf.prefab"
@@ -71,5 +71,15 @@ register_stf_handlers = [
 def register():
 	boilerplate_register(bpy.types.Collection)
 
+	# STF-Data modules are stored on Collections
+	bpy.types.Collection.stf_data_refs = bpy.props.CollectionProperty(type=STF_Data_Ref, name="STF Data Refs", options=set())
+	bpy.types.Collection.stf_data_ref_selected = bpy.props.IntProperty(options=set())
+
 def unregister():
+	# STF-Data modules are stored on Collections
+	if hasattr(bpy.types.Collection, "stf_data_ref_selected"):
+		del bpy.types.Collection.stf_data_ref_selected
+	if hasattr(bpy.types.Collection, "stf_data_refs"):
+		del bpy.types.Collection.stf_data_refs
+
 	boilerplate_unregister(bpy.types.Collection)

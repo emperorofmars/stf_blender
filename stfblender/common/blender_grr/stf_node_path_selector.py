@@ -2,7 +2,7 @@ import bpy
 from collections.abc import Sequence
 from typing import Any
 
-from .. import STF_Category, STF_ExportContext, STF_ImportContext
+from ..base import STF_Category, STF_ExportContext, STF_ImportContext
 
 
 class NodePathSelector(bpy.types.PropertyGroup):

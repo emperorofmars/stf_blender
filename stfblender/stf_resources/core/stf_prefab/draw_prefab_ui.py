@@ -3,14 +3,13 @@ import bpy
 
 def draw_prefab_ui(layout: bpy.types.UILayout, context: bpy.types.Context, collection: bpy.types.Collection, operator_set_as_root: str, operator_set_id: str, operator_add_component: str, operator_remove_component: str, operator_edit_component_id: str):
 	from ....common import draw_meta_editor
-	from ....common.ui import draw_components_ui
-	from ....common.ui.stf_id_ui import draw_stf_id_ui
 	from ....common.helpers.misc import draw_slot_link_warning
+	from ....ui import draw_components_ui, draw_stf_id_ui
 
 	draw_slot_link_warning(layout)
 
 	# Export Functionality
-	from ....exporter.exporter import ExportSTF
+	from ....io.exporter.exporter import ExportSTF
 	if(context.scene.stf_root_collection == collection or collection == context.scene.collection and context.scene.stf_root_collection is None):
 		layout.operator(operator=ExportSTF.bl_idname, text="Export as STF", icon="EXPORT")
 	else:

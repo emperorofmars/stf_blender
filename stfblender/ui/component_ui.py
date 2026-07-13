@@ -2,12 +2,12 @@ import bpy
 from typing import Any, Callable
 
 
-from ..resource.component import InstanceModComponentRef, STF_ComponentResourceBase, STF_Component_Ref
-from ..resource.component.component_exclusion_groups import STF_ManageExclusionGroups, STF_RegisterExclusionGroup
-from ..helpers import CopyToClipboard, draw_multiline_text
-from ..blender_grr import *
-from ..resource.stf_registry import find_component_handler, get_all_component_handlers, get_blender_native_component_handlers, get_data_component_handlers
-from ...stf_resources.fallback.json_fallback_component import Handler_JsonFallbackComponent
+from ..common.resource.component import InstanceModComponentRef, STF_ComponentResourceBase, STF_Component_Ref
+from .component_exclusion_groups import STF_ManageExclusionGroups, STF_RegisterExclusionGroup
+from ..common.helpers import CopyToClipboard, draw_multiline_text
+from ..common.blender_grr import *
+from ..common.resource.stf_registry import find_component_handler, get_all_component_handlers, get_blender_native_component_handlers, get_data_component_handlers
+from ..stf_resources.fallback.json_fallback_component import Handler_JsonFallbackComponent
 
 
 # Because Blender is weird with bones :/

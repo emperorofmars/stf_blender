@@ -1,8 +1,8 @@
 import bpy
 from typing import Any
 
-from ..base import STF_Category
-from ..resource import STF_Handler_BlenderNative, STF_HandlerComponents
+from ..common.base import STF_Category
+from ..common.resource import STF_Handler_BlenderNative, STF_HandlerComponents
 from .stf_id_ui import draw_stf_id_ui
 from .component_ui import draw_components_ui
 

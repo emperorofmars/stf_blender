@@ -2,8 +2,8 @@ import bpy
 from typing import Any
 from collections.abc import Sequence
 
-from .stf_data_resource_reference import STFDataResourceReference
 from ..resource.data import STF_DataResourceBase, STF_Data_Ref
+from .stf_data_resource_reference import STFDataResourceReference
 
 """
 STF Data-Resource Reference

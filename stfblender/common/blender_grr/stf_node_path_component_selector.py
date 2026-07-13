@@ -2,11 +2,11 @@ import bpy
 from collections.abc import Sequence
 from typing import Any
 
-from .utils import draw_component_info
-from .stf_node_path_selector import *
-from .. import STF_ImportContext, STF_ExportContext
+from ..base import STF_ImportContext, STF_ExportContext
 from ..resource.component import STF_Component_Ref
 from ..helpers import get_resource_id, register_exported_resource
+from .utils import draw_component_info
+from .stf_node_path_selector import *
 
 
 class NodePathComponentSelector(bpy.types.PropertyGroup):

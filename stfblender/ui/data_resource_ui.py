@@ -1,13 +1,13 @@
 import bpy
 from typing import Any
 
-from ..resource.stf_registry import find_data_handler, get_blender_non_native_data_handlers
-from ..helpers import CopyToClipboard, draw_multiline_text
-from ..resource.data import STF_DataResourceBase, STF_Data_Ref
-from ..resource.data.data_resource_ops import STFCreateDataResourceOperator, STFEditDataResourceOperator, STFRemoveDataResourceOperator
+from ..common.resource.stf_registry import find_data_handler, get_blender_non_native_data_handlers
+from ..common.helpers import CopyToClipboard, draw_multiline_text
+from ..common.resource.data import STF_DataResourceBase, STF_Data_Ref
+from ..common.resource.data.data_resource_ops import STFCreateDataResourceOperator, STFEditDataResourceOperator, STFRemoveDataResourceOperator
+from ..common.resource.component import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
+from ..stf_resources.fallback.json_fallback_data import Handler_JsonFallbackData
 from .component_ui import draw_components_ui
-from ..resource.component import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
-from ...stf_resources.fallback.json_fallback_data import Handler_JsonFallbackData
 
 
 class STFDrawDataResourceList(bpy.types.UIList):
@@ -235,6 +235,7 @@ def set_stf_data_resource_property(use_scene_collection: bool, blender_property:
 
 def _build_stf_data_resource_types_enum_callback(self, context) -> list:
 	return [((stf_module.stf_type, stf_module.stf_type, stf_module.__doc__ if stf_module.__doc__ else "")) for stf_module in get_blender_non_native_data_handlers()] + [("fallback", "Json Fallback", "Manual fallback for unsupported types")]
+
 
 def register():
 	bpy.types.Scene.stf_data_modules = bpy.props.EnumProperty(

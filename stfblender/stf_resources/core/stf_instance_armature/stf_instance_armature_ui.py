@@ -73,7 +73,7 @@ def _inject_standin_ui(layout: bpy.types.UILayout, context: bpy.types.Context, c
 
 
 def draw_armature_instance_ui(layout: bpy.types.UILayout, context: bpy.types.Context, blender_resource: tuple[bpy.types.Object, bpy.types.Armature]) -> None:
-	from ....common.ui.component_ui import draw_components_ui, draw_instance_standin_components_ui
+	from ....ui.component_ui import draw_components_ui, draw_instance_standin_components_ui
 
 	non_quat_bones = ""
 	for pose_bone in blender_resource[0].pose.bones:

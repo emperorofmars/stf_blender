@@ -5,12 +5,16 @@ import io
 import traceback
 from collections.abc import Sequence
 
-from ..common import STFReport, STFReportSeverity, STF_File
-from ..common.resource.stf_registry import get_import_handlers, get_import_handlers_fallback
-from ..common.helpers import OpenWebpage, draw_slot_link_warning, get_stf_version
+from ...common import STFReport, STFReportSeverity
+from ...common.resource.stf_registry import get_import_handlers, get_import_handlers_fallback
+from ...common.helpers import OpenWebpage, draw_slot_link_warning, get_stf_version
+from ..stf_file import STF_File
 from .import_settings import STF_ImportSettings
 from .stf_import_state import STF_ImportState
 from .stf_import_context import STF_ImportContext
+
+
+__all__ = ["STF_Import_Result", "import_stf_file", "ImportSTF"]
 
 
 class STF_Import_Result:

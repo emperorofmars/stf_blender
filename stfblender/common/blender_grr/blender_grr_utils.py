@@ -1,13 +1,12 @@
 import bpy
 from typing import Any
 
-
-from .blender_grr import BlenderGRR
-from .stf_data_resource_reference_utils import draw_stf_data_resource_reference, pretty_print_data_resource_reference, resolve_stf_data_resource_holder, resolve_stf_data_resource_reference, validate_stf_data_resource_reference
-from .blender_resource_reference import draw_blender_resource_reference, pretty_print_blender_resource_reference, resolve_blender_resource_reference, validate_blender_resource_reference
 from ..resource.data import STF_DataResourceBase, STF_Data_Ref
 from ..resource.component import STF_ComponentResourceBase, STF_Component_Ref, STF_Component_Editmode_Resistant_Reference
 from ..utils.armature_bone import ArmatureBone
+from .blender_grr import BlenderGRR
+from .stf_data_resource_reference_utils import draw_stf_data_resource_reference, pretty_print_data_resource_reference, resolve_stf_data_resource_holder, resolve_stf_data_resource_reference, validate_stf_data_resource_reference
+from .blender_resource_reference import draw_blender_resource_reference, pretty_print_blender_resource_reference, resolve_blender_resource_reference, validate_blender_resource_reference
 from .utils import draw_component_info
 
 

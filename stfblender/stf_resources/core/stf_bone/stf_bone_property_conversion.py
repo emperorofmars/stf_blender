@@ -2,11 +2,9 @@ import mathutils
 import math
 from typing import Any, Callable
 
-from ....importer.stf_import_context import STF_ImportContext
-from ....exporter.stf_export_context import STF_ExportContext
+from ....common import STF_ImportContext, STF_ExportContext, BlenderPropertyPathPart, STFPropertyPathPart
 from ....common.utils.armature_bone import ArmatureBone
 from ....common.utils.animation_conversion_utils import *
-from ....common.base.property_path_part import BlenderPropertyPathPart, STFPropertyPathPart
 
 
 # In Blender, bones get animated relative to their own rest pose.
@@ -25,7 +23,7 @@ def _create_translation_to_stf_func(blender_object: ArmatureBone) -> Callable:
 		offset = (mathutils.Matrix.Rotation(math.radians(-90), 4, "X") @ blender_object.get_bone().matrix_local)
 
 	def _ret(value: list[float]) -> list[float]:
-		value = mathutils.Matrix.Translation(mathutils.Vector(value)) # pyright: ignore[reportAssignmentType]
+		value = mathutils.Matrix.Translation(mathutils.Vector(value)) # pyright: ignore[reportArgumentType, reportAssignmentType]
 		return convert_bone_translation_to_stf((offset @ value).translation[:])
 	return _ret
 
@@ -115,7 +113,7 @@ def _create_translation_to_blender_func(blender_object: ArmatureBone) -> Callabl
 		offset = (mathutils.Matrix.Rotation(math.radians(-90), 4, "X") @ blender_object.get_bone().matrix_local).inverted_safe()
 
 	def _ret(value: list[float]) -> list[float]:
-		value = mathutils.Matrix.Translation(mathutils.Vector(value)) # pyright: ignore[reportAssignmentType]
+		value = mathutils.Matrix.Translation(mathutils.Vector(value)) # pyright: ignore[reportArgumentType, reportAssignmentType]
 		return convert_bone_translation_to_blender((offset @ value).translation[:])
 	return _ret
 

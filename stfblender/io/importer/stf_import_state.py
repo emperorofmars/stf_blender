@@ -2,9 +2,10 @@ import bpy
 import logging
 from typing import Any
 
-from ..common import STFReportSeverity, STFReport, STF_Category, STF_File, STF_Meta_AssetInfo_Json
-from ..common.resource.stf_handler_base import STF_HandlerBase
-from ..common.base.stf_state_base import STF_State_Base
+from ...common import STFReportSeverity, STFReport, STF_Category, STF_Meta_AssetInfo_Json
+from ...common.resource.stf_handler_base import STF_HandlerBase
+from ..stf_state_base import STF_State_Base
+from ..stf_file import STF_File
 from .import_settings import STF_ImportSettings
 
 
