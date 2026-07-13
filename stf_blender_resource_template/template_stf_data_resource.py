@@ -50,9 +50,6 @@ class CustomSTFBrushHandler(stfblender.common.STF_Handler_Data, stfblender.commo
 	get_components_func = stfblender.common.get_components_from_object
 
 
-register_stf_handlers = [CustomSTFBrushHandler]
-
-
 def register():
 	stfblender.common.boilerplate_register(bpy.types.Brush)
 

@@ -46,9 +46,6 @@ class MyCustomSTFSqueakComponentHandler(stfblender.common.STF_Handler_Component)
 	like_types = ["squeak"]
 
 
-register_stf_handlers = [MyCustomSTFSqueakComponentHandler]
-
-
 def register():
 	bpy.utils.register_class(SqueakComponent)
 	bpy.types.Object.my_custom_namespaced_squeak_component = bpy.props.CollectionProperty(type=SqueakComponent) # type: ignore
