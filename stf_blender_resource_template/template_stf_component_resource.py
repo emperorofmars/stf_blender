@@ -8,17 +8,17 @@ _stf_type = "my_custom.namespaced.squeak_component"
 _blender_property_name = "my_custom_namespaced_squeak_component"
 
 
-class SqueakComponent(stfblender.common.resource.STF_ComponentResourceBase):
+class SqueakComponent(stfblender.common.STF_ComponentResourceBase):
 	squeak: bpy.props.BoolProperty(name="Squeak", default=True) # type: ignore
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: stfblender.common.resource.STF_Component_Ref, context_object: Any, component: SqueakComponent):
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: stfblender.common.STF_Component_Ref, context_object: Any, component: SqueakComponent):
 	layout.prop(component, "squeak")
 
 
 def _stf_import(context: stfblender.common.STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
-	component_ref, component = stfblender.common.resource.component.add_component(context_object, _blender_property_name, stf_id, _stf_type)
-	ret = stfblender.common.resource.component.import_component_base(context, component, json_resource, _blender_property_name, context_object)
+	component_ref, component = stfblender.common.add_component(context_object, _blender_property_name, stf_id, _stf_type)
+	ret = stfblender.common.import_component_base(context, component, json_resource, _blender_property_name, context_object)
 
 	component.squeak = json_resource.get("squeak", True)
 
@@ -26,12 +26,12 @@ def _stf_import(context: stfblender.common.STF_ImportContext, json_resource: dic
 
 
 def _stf_export(context: stfblender.common.STF_ExportContext, component: SqueakComponent, context_object: Any) -> tuple[dict, str]:
-	ret = stfblender.common.resource.component.export_component_base(context, _stf_type, component, _blender_property_name, context_object)
+	ret = stfblender.common.compent.export_component_base(context, _stf_type, component, _blender_property_name, context_object)
 	ret["squeak"] = component.squeak
 	return ret, component.stf_id
 
 
-class MyCustomSTFSqueakComponentHandler(stfblender.common.resource.STF_Handler_Component):
+class MyCustomSTFSqueakComponentHandler(stfblender.common.STF_Handler_Component):
 	stf_type = _stf_type
 	stf_category = "component"
 	understood_application_types = [SqueakComponent]
