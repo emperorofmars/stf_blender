@@ -1,7 +1,6 @@
 import bpy
 
 
-
 def draw_prefab_ui(layout: bpy.types.UILayout, context: bpy.types.Context, collection: bpy.types.Collection, operator_set_as_root: str, operator_set_id: str, operator_add_component: str, operator_remove_component: str, operator_edit_component_id: str):
 	from .....stfblender_common.helpers.misc import draw_slot_link_warning
 	from ....ui.operators.stf_meta import draw_meta_editor

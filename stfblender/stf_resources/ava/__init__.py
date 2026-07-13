@@ -1,4 +1,8 @@
 
+"""
+STF resources that specify functionality of humanoid avatars, useful for VR and V-Tubing.
+"""
+
 from . import ava_avatar
 from . import ava_voice_position
 from . import ava_visemes_blendshape

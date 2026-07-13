@@ -1,4 +1,10 @@
 
+"""
+Core STF resources for basic 3d model concepts.
+
+Should be fully supported by every STF implementation.
+"""
+
 from .stf_prefab import stf_prefab
 from .stf_node import stf_node
 from .stf_instance_mesh import stf_instance_mesh

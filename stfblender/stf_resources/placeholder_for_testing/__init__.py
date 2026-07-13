@@ -1,4 +1,8 @@
 
+"""
+For testing, should be restricted to development eventually.
+"""
+
 from . import data_resource_component_test
 
 register_stf_handlers = data_resource_component_test.register_stf_handlers

@@ -1,4 +1,10 @@
 
+"""
+Expanded STF resources that provide additional functionality.
+
+May not be supported by every STF implementation fully.
+"""
+
 from . import stfexp_mesh_seams
 from . import stfexp_mesh_creases
 from . import stfexp_armature_humanoid

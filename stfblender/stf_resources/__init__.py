@@ -1,4 +1,8 @@
 
+"""
+Handlers for import & export of STF resources.
+"""
+
 from . import stf
 from . import stfexp
 from . import ava
