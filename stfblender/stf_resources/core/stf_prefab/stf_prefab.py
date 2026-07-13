@@ -83,3 +83,4 @@ def unregister():
 		del bpy.types.Collection.stf_data_refs
 
 	boilerplate_unregister(bpy.types.Collection)
+

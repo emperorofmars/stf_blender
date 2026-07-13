@@ -85,7 +85,6 @@ paths_exclude_pattern = [
 	"/.zed/",
 	".venv",
 	"/testsuite",
-	"/stf_blender_resource_template",
 	"/examples",
 	"/assets",
 	"/.gitignore",
