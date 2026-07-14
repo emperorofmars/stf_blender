@@ -122,12 +122,14 @@ class ImportSTF(bpy.types.Operator, ImportHelper): # pyright: ignore[reportIncom
 
 	def draw(self, context: bpy.types.Context):
 		layout: bpy.types.UILayout = self.layout # type: ignore
-		layout.label(text=str(bpy.app.version))
-		layout.operator("wm.url_open", text="Open User Guide", icon="HELP").url = "https://docs.stfform.at/guide/blender.html"
+		if(bpy.app.version[0] < 5 or bpy.app.version[1] < 2):
+			layout.operator("wm.url_open", text="Open User Guide", icon="HELP").url = "https://docs.stfform.at/guide/blender.html"
+		else:
+			layout.link(text="Open User Guide", icon="HELP", url="https://docs.stfform.at/guide/blender.html")
 		layout.label(text="STF version: " + get_stf_version())
 		layout.separator(factor=1, type="SPACE")
 
-		draw_slot_link_warning(layout)
+		draw_slot_link_warning(layout, 30)
 
 		layout.prop(self.import_settings, "import_baked_animations")
 

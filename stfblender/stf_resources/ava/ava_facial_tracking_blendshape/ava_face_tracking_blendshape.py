@@ -37,8 +37,12 @@ class AVA_FaceTracking_Blendshapes(STF_ComponentResourceBase):
 
 def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: bpy.types.Mesh, component: AVA_FaceTracking_Blendshapes):
 	row = layout.row()
-	row.operator("wm.url_open", text="VRCFT Documentation", icon="HELP").url = "https://docs.vrcft.io/docs/tutorial-avatars/tutorial-avatars-extras/compatibility/overview"
-	row.operator("wm.url_open", text="Mappings Definition", icon="DOCUMENTS").url = "https://docs.google.com/spreadsheets/d/118jo960co3Mgw8eREFVBsaJ7z0GtKNr52IB4Bz99VTA"
+	if(bpy.app.version[0] < 5 or bpy.app.version[1] < 2):
+		row.operator("wm.url_open", text="VRCFT Documentation", icon="HELP").url = "https://docs.vrcft.io/docs/tutorial-avatars/tutorial-avatars-extras/compatibility/overview"
+		row.operator("wm.url_open", text="Mappings Definition", icon="DOCUMENTS").url = "https://docs.google.com/spreadsheets/d/118jo960co3Mgw8eREFVBsaJ7z0GtKNr52IB4Bz99VTA"
+	else:
+		row.link(text="VRCFT Documentation", icon="HELP", url="https://docs.vrcft.io/docs/tutorial-avatars/tutorial-avatars-extras/compatibility/overview")
+		row.link(text="Mappings Definition", icon="DOCUMENTS", url="https://docs.google.com/spreadsheets/d/118jo960co3Mgw8eREFVBsaJ7z0GtKNr52IB4Bz99VTA")
 
 	layout.use_property_split = True
 	layout.label(text="Not all shapes are required, consult the above links to learn more!", icon="INFO")

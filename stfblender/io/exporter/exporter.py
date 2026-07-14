@@ -137,40 +137,44 @@ class ExportSTF(bpy.types.Operator, ExportHelper): # pyright: ignore[reportIncom
 
 
 	def draw(self, context: bpy.types.Context):
+		layout = self.layout
 		called_from_collection_exporter = not context.space_data or context.space_data.type != "FILE_BROWSER" # Invoked as Collection Exporter
 		if(called_from_collection_exporter):
-			self.layout.use_property_split = True
+			layout.use_property_split = True
 
 		if(not called_from_collection_exporter):
-			self.layout.operator("wm.url_open", text="Open User Guide", icon="HELP").url = "https://docs.stfform.at/guide/blender.html"
-			self.layout.label(text="STF version: " + get_stf_version())
-			self.layout.separator(factor=1, type="SPACE")
-
-		draw_slot_link_warning(self.layout) # pyright: ignore[reportArgumentType]
-
-		if(not called_from_collection_exporter):
-			self.layout.prop_search(bpy.context.scene, "stf_collection_selector", bpy.data, "collections", text="Root")
-			if(bpy.context.scene.stf_collection_selector):
-				self.layout.label(text="Remove Collection to export the entire Scene", icon="INFO")
+			if(bpy.app.version[0] < 5 or bpy.app.version[1] < 2):
+				layout.operator("wm.url_open", text="Open User Guide", icon="HELP").url = "https://docs.stfform.at/guide/blender.html"
 			else:
-				self.layout.label(text="Exporting full Scene", icon="INFO")
+				layout.link(text="Open User Guide", icon="HELP", url="https://docs.stfform.at/guide/blender.html")
+			layout.label(text="STF version: " + get_stf_version())
+			layout.separator(factor=1, type="SPACE")
 
-			self.layout.separator(factor=2, type="LINE")
+		draw_slot_link_warning(layout, 30) # pyright: ignore[reportArgumentType]
 
-		self.layout.prop(self, property="debug")
+		if(not called_from_collection_exporter):
+			layout.prop_search(bpy.context.scene, "stf_collection_selector", bpy.data, "collections", text="Root")
+			if(bpy.context.scene.stf_collection_selector):
+				layout.label(text="Remove Collection to export the entire Scene", icon="INFO")
+			else:
+				layout.label(text="Exporting full Scene", icon="INFO")
+
+			layout.separator(factor=2, type="LINE")
+
+		layout.prop(self, property="debug")
 
 		self.layout.separator(factor=2, type="LINE")
-		box = self.layout.box()
+		box = layout.box()
 		box.label(text="Asset Meta")
 		if(called_from_collection_exporter):
 			draw_meta_editor(box, context.collection, False) # pyright: ignore[reportArgumentType]
 		else:
 			draw_meta_editor(box, context.scene.stf_collection_selector if context.scene.stf_collection_selector else context.scene.collection, context.scene.stf_collection_selector != context.scene.collection)
 
-		self.layout.separator(factor=2, type="LINE")
+		layout.separator(factor=2, type="LINE")
 
-		self.layout.prop(self.export_settings, property="stf_animation_bake_constraints")
-		self.layout.prop(self.export_settings, property="stf_animation_preserve_baked")
+		layout.prop(self.export_settings, property="stf_animation_bake_constraints")
+		layout.prop(self.export_settings, property="stf_animation_preserve_baked")
 
 
 def export_button(self, context: bpy.types.Context):
