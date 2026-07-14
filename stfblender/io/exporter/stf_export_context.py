@@ -42,7 +42,7 @@ class STF_ExportContext(ISTF_ExportContext):
 
 
 	def __run_components(self, application_object: Any, json_resource: dict, stf_id: str, components: list[Any]):
-		"""Export components explicitely defined by this application"""
+		"""Export components explicitly defined by this application"""
 		if(len(components) > 0):
 			if("components" not in json_resource): json_resource["components"] = []
 			for component in components:
@@ -92,7 +92,7 @@ class STF_ExportContext(ISTF_ExportContext):
 					self.__run_hooks(application_object, context_object, json_resource, resource_id)
 
 					if(hasattr(selected_handler, "get_components_func")):
-						# Export components explicitely defined
+						# Export components explicitly defined
 						components = selected_handler.get_components_func(application_object)
 						if(components):
 							self.__run_components(application_object, json_resource, resource_id, components)

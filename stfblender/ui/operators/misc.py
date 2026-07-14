@@ -1,6 +1,6 @@
 import bpy
 
-from ....stfblender_common.helpers.misc import OP_CopyToClipboard, OP_OpenWebpage, OP_SetActiveObjectOperator
+from ....stfblender_common.helpers.misc import OP_CopyToClipboard, OP_SetActiveObjectOperator
 
 
 class SetActiveObjectOperator(bpy.types.Operator):
@@ -17,19 +17,6 @@ class SetActiveObjectOperator(bpy.types.Operator):
 			selected.select_set(False)
 		blender_object.select_set(True)
 		bpy.context.view_layer.objects.active = blender_object
-		return {"FINISHED"}
-
-
-class OpenWebpage(bpy.types.Operator):
-	"""Open in Webbrowser"""
-	bl_idname = OP_OpenWebpage
-	bl_label = "Open Webpage"
-
-	url: bpy.props.StringProperty(name = "URL") # type: ignore
-
-	def execute(self, context) -> set:
-		import webbrowser
-		webbrowser.open(self.url)
 		return {"FINISHED"}
 
 

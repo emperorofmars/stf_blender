@@ -6,7 +6,7 @@ from collections.abc import Sequence
 
 from ....stfblender_common import STFReport, STFReportSeverity
 from ....stfblender_common.resource.stf_registry import get_export_handlers
-from ....stfblender_common.helpers.misc import OP_OpenWebpage, draw_slot_link_warning, get_stf_version
+from ....stfblender_common.helpers.misc import draw_slot_link_warning, get_stf_version
 from ...package_key import package_key
 from ...ui.operators.stf_meta import draw_meta_editor
 from .export_settings import STF_ExportSettings
@@ -142,7 +142,7 @@ class ExportSTF(bpy.types.Operator, ExportHelper): # pyright: ignore[reportIncom
 			self.layout.use_property_split = True
 
 		if(not called_from_collection_exporter):
-			self.layout.operator(OP_OpenWebpage, text="Open User Guide", icon="HELP").url = "https://docs.stfform.at/guide/blender.html"
+			self.layout.operator("wm.url_open", text="Open User Guide", icon="HELP").url = "https://docs.stfform.at/guide/blender.html"
 			self.layout.label(text="STF version: " + get_stf_version())
 			self.layout.separator(factor=1, type="SPACE")
 

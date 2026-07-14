@@ -9,10 +9,14 @@ auto_load.init()
 
 
 def register():
+	from .stfblender_common import register
+	register()
 	auto_load.register()
 
 def unregister():
+	from .stfblender_common import unregister
 	auto_load.unregister()
+	unregister()
 
 
 # Expose STF handlers to be loaded by `stfblender_common.resource.stf_registry`

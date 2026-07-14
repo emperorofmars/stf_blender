@@ -21,7 +21,7 @@ ignore_modules = [
 	"bpydev",
 	"build_extension",
 	"testsuite",
-	"stf_blender_resource_template",
+	"stfblender_common",
 ]
 
 
@@ -35,24 +35,40 @@ def init():
 
 def register():
 	for cls in ordered_classes:
-		bpy.utils.register_class(cls)
+		for ignore in ignore_modules:
+			if(cls.__module__.startswith(__package__ + "." + ignore)):
+				break
+		else:
+			bpy.utils.register_class(cls)
 
 	for module in modules:
 		if module.__name__ == __name__:
 			continue
 		if hasattr(module, "register"):
-			module.register()
+			for ignore in ignore_modules:
+				if(module.__name__.startswith(__package__ + "." + ignore)):
+					break
+			else:
+				module.register()
 
 
 def unregister():
 	for cls in reversed(ordered_classes):
-		bpy.utils.unregister_class(cls)
+		for ignore in ignore_modules:
+			if(ignore in cls.__module__):
+				break
+		else:
+			bpy.utils.unregister_class(cls)
 
 	for module in modules:
 		if module.__name__ == __name__:
 			continue
 		if hasattr(module, "unregister"):
-			module.unregister()
+			for ignore in ignore_modules:
+				if(module.__name__.startswith(__package__ + "." + ignore)):
+					break
+			else:
+				module.unregister()
 
 
 # Import modules

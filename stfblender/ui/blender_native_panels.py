@@ -189,3 +189,19 @@ class TextPanel(bpy.types.Panel):
 	def draw(self, context: bpy.types.Context):
 		handler = find_export_handler(context.curve)
 		draw_blender_native_panel(self.layout, context, context.curve, handler) # pyright: ignore[reportArgumentType]
+
+class LatticePanel(bpy.types.Panel):
+	"""STF Resources for Blender Lattices"""
+	bl_idname = "OBJECT_PT_stf_editor_lattice"
+	bl_label = "STF Editor"
+	bl_region_type = "WINDOW"
+	bl_space_type = "PROPERTIES"
+	bl_context = "data"
+
+	@classmethod
+	def poll(cls, context: bpy.types.Context):
+		return hasattr(context, "lattice") and context.lattice is not None and find_export_handler(context.lattice) is not None
+
+	def draw(self, context: bpy.types.Context):
+		handler = find_export_handler(context.lattice)
+		draw_blender_native_panel(self.layout, context, context.lattice, handler) # pyright: ignore[reportArgumentType]

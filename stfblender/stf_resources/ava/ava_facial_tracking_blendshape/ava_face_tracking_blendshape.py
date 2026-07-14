@@ -3,7 +3,6 @@ from typing import Any
 
 from .ft_csv import ft_definitions
 from .....stfblender_common import STF_ExportContext, STF_ImportContext, STF_Category, STF_ComponentResourceBase, STF_Handler_Component, STF_Component_Ref, add_component, export_component_base, import_component_base
-from .....stfblender_common.helpers import OP_OpenWebpage
 
 
 _stf_type = "ava.face_tracking.blendshape"
@@ -38,8 +37,8 @@ class AVA_FaceTracking_Blendshapes(STF_ComponentResourceBase):
 
 def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: bpy.types.Mesh, component: AVA_FaceTracking_Blendshapes):
 	row = layout.row()
-	row.operator(OP_OpenWebpage.bl_idname, text="VRCFT Documentation", icon="HELP").url = "https://docs.vrcft.io/docs/tutorial-avatars/tutorial-avatars-extras/compatibility/overview"
-	row.operator(OP_OpenWebpage.bl_idname, text="Mappings Definition", icon="DOCUMENTS").url = "https://docs.google.com/spreadsheets/d/118jo960co3Mgw8eREFVBsaJ7z0GtKNr52IB4Bz99VTA"
+	row.operator("wm.url_open", text="VRCFT Documentation", icon="HELP").url = "https://docs.vrcft.io/docs/tutorial-avatars/tutorial-avatars-extras/compatibility/overview"
+	row.operator("wm.url_open", text="Mappings Definition", icon="DOCUMENTS").url = "https://docs.google.com/spreadsheets/d/118jo960co3Mgw8eREFVBsaJ7z0GtKNr52IB4Bz99VTA"
 
 	layout.use_property_split = True
 	layout.label(text="Not all shapes are required, consult the above links to learn more!", icon="INFO")

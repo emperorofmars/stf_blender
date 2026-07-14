@@ -7,7 +7,7 @@ from collections.abc import Sequence
 
 from ....stfblender_common import STFReport, STFReportSeverity
 from ....stfblender_common.resource.stf_registry import get_import_handlers, get_import_handlers_fallback
-from ....stfblender_common.helpers import OP_OpenWebpage, draw_slot_link_warning, get_stf_version
+from ....stfblender_common.helpers import draw_slot_link_warning, get_stf_version
 from ..stf_file import STF_File
 from .import_settings import STF_ImportSettings
 from .stf_import_state import STF_ImportState
@@ -123,7 +123,7 @@ class ImportSTF(bpy.types.Operator, ImportHelper): # pyright: ignore[reportIncom
 	def draw(self, context: bpy.types.Context):
 		layout: bpy.types.UILayout = self.layout # type: ignore
 		layout.label(text=str(bpy.app.version))
-		layout.operator(OP_OpenWebpage, text="Open User Guide", icon="HELP").url = "https://docs.stfform.at/guide/blender.html"
+		layout.operator("wm.url_open", text="Open User Guide", icon="HELP").url = "https://docs.stfform.at/guide/blender.html"
 		layout.label(text="STF version: " + get_stf_version())
 		layout.separator(factor=1, type="SPACE")
 
