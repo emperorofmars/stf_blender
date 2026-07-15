@@ -2,11 +2,11 @@ import bpy
 import re
 from typing import Any
 
-from .util.constraint_source import ConstraintSource
-from ....stfblender_common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STF_TaskSteps, STF_Category, STF_ComponentResourceBase, STF_Handler_BoneComponent, STF_Component_Ref, add_component, export_component_base, import_component_base, preserve_component_reference
+from ....stfblender_common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STF_TaskSteps, STF_Category, STF_ComponentResourceBase, STF_Handler_BoneComponent, STF_Handler_Animation, STF_Component_Ref, add_component, export_component_base, import_component_base, preserve_component_reference
 from ....stfblender_common.utils.animation_conversion_utils import get_component_index, get_component_stf_path_from_collection
 from ....stfblender_common.helpers import create_add_button, create_remove_button
 from ....stfblender_common.blender_grr.stf_node_path_selector import draw_node_path_selector, node_path_selector_from_stf, node_path_selector_to_stf, node_path_selector_to_string, validate_node_path_selector
+from .util.constraint_source import ConstraintSource
 
 
 _stf_type = "stfexp.constraint.rotation"
@@ -106,10 +106,11 @@ def _stf_export(context: STF_ExportContext, component: STFEXP_Constraint_Rotatio
 """Bone instance handling"""
 
 def _set_component_instance_standin(context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: STFEXP_Constraint_Rotation, standin_component: STFEXP_Constraint_Rotation):
+	standin_component.sources.clear()
 	for source_original in component.sources:
 		source = standin_component.sources.add()
 		source.weight = source_original.weight
-		source.source.target_object = source_original.source.target_object
+		source.source.target_object = context_object
 		source.source.target_bone = source_original.source.target_bone
 
 
@@ -151,22 +152,22 @@ def _parse_component_instance_standin_func(context: STF_ImportContext, json_reso
 
 """Animation"""
 
-def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: Any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart | None:
+def _resolve_property_path_to_stf_func(context: STF_ExportContext, blender_object: Any, property_index: int, data_path: str) -> STFPropertyPathPart | None:
 	if(match := re.search(r"^" + _blender_property_name + r"\[(?P<component_index>[\d]+)\].enabled", data_path)):
-		if(component_path := get_component_stf_path_from_collection(application_object, _blender_property_name, int(match.groupdict()["component_index"]))):
+		if(component_path := get_component_stf_path_from_collection(blender_object, _blender_property_name, int(match.groupdict()["component_index"]))):
 			return STFPropertyPathPart(component_path + ["enabled"])
 	if(match := re.search(r"^" + _blender_property_name + r"\[(?P<component_index>[\d]+)\].weight", data_path)):
-		if(component_path := get_component_stf_path_from_collection(application_object, _blender_property_name, int(match.groupdict()["component_index"]))):
+		if(component_path := get_component_stf_path_from_collection(blender_object, _blender_property_name, int(match.groupdict()["component_index"]))):
 			return STFPropertyPathPart(component_path + ["weight"])
 	if(match := re.search(r"^" + _blender_property_name + r"\[(?P<component_index>[\d]+)\].sources\[(?P<source_index>[\d]+)\].weight", data_path)):
-		if(component_path := get_component_stf_path_from_collection(application_object, _blender_property_name, int(match.groupdict()["component_index"]))):
+		if(component_path := get_component_stf_path_from_collection(blender_object, _blender_property_name, int(match.groupdict()["component_index"]))):
 			return STFPropertyPathPart(component_path + ["sources", int(match.groupdict()["source_index"]), "weight"])
 	return None
 
 
-def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: Any) -> BlenderPropertyPathPart | None:
+def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], blender_object: Any) -> BlenderPropertyPathPart | None:
 	blender_object = context.get_imported_resource(stf_path[0])
-	component_index = get_component_index(application_object, _blender_property_name, blender_object.stf_id)
+	component_index = get_component_index(blender_object, _blender_property_name, blender_object.stf_id)
 	if(component_index is not None):
 		match(stf_path[1]):
 			case "enabled":
@@ -180,7 +181,7 @@ def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: 
 
 """Handler definition"""
 
-class Handler_STFEXP_Constraint_Rotation(STF_Handler_BoneComponent):
+class Handler_STFEXP_Constraint_Rotation(STF_Handler_BoneComponent, STF_Handler_Animation):
 	"""A rigging behaviour that applies rotation from its sources onto itself"""
 	stf_type = _stf_type
 	stf_category = STF_Category.COMPONENT

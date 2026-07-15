@@ -2,7 +2,7 @@ import bpy
 import re
 from typing import Any
 
-from ....stfblender_common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STF_TaskSteps, STF_Category, STF_ComponentResourceBase, STF_Handler_BoneComponent, STF_Component_Ref, add_component, export_component_base, import_component_base, preserve_component_reference
+from ....stfblender_common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STF_TaskSteps, STF_Category, STF_ComponentResourceBase, STF_Handler_BoneComponent, STF_Handler_Animation, STF_Component_Ref, add_component, export_component_base, import_component_base, preserve_component_reference
 from ....stfblender_common.utils.animation_conversion_utils import get_component_index, get_component_stf_path_from_collection
 from ....stfblender_common.blender_grr.stf_node_path_selector import NodePathSelector, draw_node_path_selector, node_path_selector_from_stf, node_path_selector_to_stf
 
@@ -108,7 +108,7 @@ def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: 
 
 """Handler definition"""
 
-class Handler_STFEXP_Constraint_Twist(STF_Handler_BoneComponent):
+class Handler_STFEXP_Constraint_Twist(STF_Handler_BoneComponent, STF_Handler_Animation):
 	"""A rigging behaviour which copies an amount of the Y-axis rotation from the source object/bone. If no source is selected, the parent of the parent will be assumed"""
 	stf_type = _stf_type
 	stf_category = STF_Category.COMPONENT

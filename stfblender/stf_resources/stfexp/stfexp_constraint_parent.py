@@ -2,7 +2,7 @@ import bpy
 import re
 from typing import Any
 
-from ....stfblender_common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STF_TaskSteps, STF_Category, STF_ComponentResourceBase, STF_Handler_BoneComponent, STF_Component_Ref, add_component, export_component_base, import_component_base, preserve_component_reference
+from ....stfblender_common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STF_TaskSteps, STF_Category, STF_ComponentResourceBase, STF_Handler_BoneComponent, STF_Handler_Animation, STF_Component_Ref, add_component, export_component_base, import_component_base, preserve_component_reference
 from ....stfblender_common.utils.animation_conversion_utils import get_component_index, get_component_stf_path_from_collection
 from ....stfblender_common.helpers import create_add_button, create_remove_button
 from ....stfblender_common.blender_grr.stf_node_path_selector import draw_node_path_selector, node_path_selector_from_stf, node_path_selector_to_stf, node_path_selector_to_string, validate_node_path_selector
@@ -113,10 +113,11 @@ def _stf_export(context: STF_ExportContext, component: STFEXP_Constraint_Parent,
 """Bone instance handling"""
 
 def _set_component_instance_standin(context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: STFEXP_Constraint_Parent, standin_component: STFEXP_Constraint_Parent):
+	standin_component.sources.clear()
 	for source_original in component.sources:
 		source = standin_component.sources.add()
 		source.weight = source_original.weight
-		source.source.target_object = source_original.source.target_object
+		source.source.target_object = context_object
 		source.source.target_bone = source_original.source.target_bone
 
 
@@ -189,7 +190,7 @@ def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: 
 
 """Handler definition"""
 
-class Handler_STFEXP_Constraint_Parent(STF_Handler_BoneComponent):
+class Handler_STFEXP_Constraint_Parent(STF_Handler_BoneComponent, STF_Handler_Animation):
 	"""A rigging behaviour that parents itself to its sources"""
 	stf_type = _stf_type
 	stf_category = STF_Category.COMPONENT

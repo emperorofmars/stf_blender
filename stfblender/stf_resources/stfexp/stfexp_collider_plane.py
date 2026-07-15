@@ -3,7 +3,7 @@ import mathutils
 import re
 from typing import Any
 
-from ....stfblender_common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STF_Category, STFReport, STF_ComponentResourceBase, STF_Handler_BoneComponent, STF_Component_Ref, ComponentLoadJsonOperatorBase, add_component, export_component_base, import_component_base
+from ....stfblender_common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STF_Category, STFReport, STF_ComponentResourceBase, STF_Handler_BoneComponent, STF_Handler_Animation, STF_Component_Ref, ComponentLoadJsonOperatorBase, add_component, export_component_base, import_component_base
 from ....stfblender_common.utils.trs_utils import blender_rotation_to_stf, blender_translation_to_stf, stf_rotation_to_blender, stf_translation_to_blender
 from ....stfblender_common.utils.animation_conversion_utils import get_component_index, get_component_stf_path_from_collection
 
@@ -114,7 +114,7 @@ def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_proper
 
 """Handler definition"""
 
-class Handler_STFEXP_Collider_Plane(STF_Handler_BoneComponent):
+class Handler_STFEXP_Collider_Plane(STF_Handler_BoneComponent, STF_Handler_Animation):
 	"""Infinitely big plane collider"""
 	stf_type = _stf_type
 	stf_category = STF_Category.COMPONENT

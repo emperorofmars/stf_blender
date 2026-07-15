@@ -3,7 +3,7 @@ import mathutils
 import re
 from typing import Any
 
-from ....stfblender_common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STF_Category, STF_ComponentResourceBase, STF_Handler_BoneComponent, STF_Component_Ref, ComponentLoadJsonOperatorBase, add_component, export_component_base, import_component_base
+from ....stfblender_common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STF_Category, STF_ComponentResourceBase, STF_Handler_BoneComponent, STF_Handler_Animation, STF_Component_Ref, ComponentLoadJsonOperatorBase, add_component, export_component_base, import_component_base
 from ....stfblender_common.utils.trs_utils import blender_translation_to_stf, stf_translation_to_blender
 from ....stfblender_common.utils.animation_conversion_utils import get_component_index, get_component_stf_path_from_collection
 
@@ -89,16 +89,16 @@ def _stf_export(context: STF_ExportContext, component: STFEXP_Collider_Sphere, c
 
 """Animation"""
 
-def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: Any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart | None:
+def _resolve_property_path_to_stf_func(context: STF_ExportContext, blender_object: Any, property_index: int, data_path: str) -> STFPropertyPathPart | None:
 	if(match := re.search(r"^" + _blender_property_name + r"\[(?P<component_index>[\d]+)\].enabled", data_path)):
-		if(component_path := get_component_stf_path_from_collection(application_object, _blender_property_name, int(match.groupdict()["component_index"]))):
+		if(component_path := get_component_stf_path_from_collection(blender_object, _blender_property_name, int(match.groupdict()["component_index"]))):
 			return STFPropertyPathPart(component_path + ["enabled"])
 	return None
 
 
-def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: Any) -> BlenderPropertyPathPart | None:
+def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], blender_object: Any) -> BlenderPropertyPathPart | None:
 	blender_object = context.get_imported_resource(stf_path[0])
-	component_index = get_component_index(application_object, _blender_property_name, blender_object.stf_id)
+	component_index = get_component_index(blender_object, _blender_property_name, blender_object.stf_id)
 	if(component_index is not None):
 		match(stf_path[1]):
 			case "enabled":
@@ -108,7 +108,7 @@ def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: 
 
 """Handler definition"""
 
-class Handler_STFEXP_Collider_Sphere(STF_Handler_BoneComponent):
+class Handler_STFEXP_Collider_Sphere(STF_Handler_BoneComponent, STF_Handler_Animation):
 	"""Sphere collider"""
 	stf_type = _stf_type
 	stf_category = STF_Category.COMPONENT
