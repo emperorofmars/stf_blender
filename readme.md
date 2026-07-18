@@ -22,6 +22,10 @@ Add it under: `Edit` → `Preferences` → `Get Extensions` → **Click on the t
 Please open issues for any bugs or misbehavior you notice. Feel free to open issues for feature requests.
 
 ## Development Setup
+* After cloning, change into the repo dir and run:
+	``` sh
+	git submodule update --init
+	```
 * Have an up to date version of Blender installed.
 * Either:
 	* Use `bpydev.py` included in this repository.
