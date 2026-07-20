@@ -1,13 +1,15 @@
+# pyright: reportPossiblyUnboundVariable=none
 """
 $BLENDER_EXECUTABLE -b --factory-startup -P testsuite/run_testsuite.py
 
 See readme.md for more info.
 """
 
-STF_BLENDER_MODULE = "bl_ext.blender_stfform_at.stf_blender"
+STF_BLENDER_MODULE = "local_stf_testsuite"
+STF_BLENDER_EXTENSION = f"bl_ext.{ STF_BLENDER_MODULE }.stf_blender"
 
 
-def setup_stf_extension():
+def _setup_stf_extension():
 	import bpy
 	from pathlib import Path
 
@@ -15,15 +17,15 @@ def setup_stf_extension():
 
 	bpy.context.preferences.extensions.repos.new(
 		name = "STF Testsuite Repository",
-		module = "blender_stfform_at",
+		module = STF_BLENDER_MODULE,
 		custom_directory = str(Path(__file__).parent.parent.parent),
 		source = "USER"
 	)
-	bpy.ops.preferences.addon_enable(module = STF_BLENDER_MODULE)
+	bpy.ops.preferences.addon_enable(module = STF_BLENDER_EXTENSION)
 
-def cleanup_stf_extension():
+def _cleanup_stf_extension():
 	import bpy
-	bpy.ops.preferences.addon_disable(module = STF_BLENDER_MODULE)
+	bpy.ops.preferences.addon_disable(module = STF_BLENDER_EXTENSION)
 
 
 if __name__ == "__main__":
@@ -31,7 +33,7 @@ if __name__ == "__main__":
 	from pathlib import Path
 
 	loader = unittest.TestLoader()
-	suite = loader.discover(str(Path(__file__).parent.joinpath("tests")))
+	suite = loader.discover(str(Path(__file__).parent.joinpath("tests")), top_level_dir=str(Path(__file__).parent.parent))
 	runner = unittest.TextTestRunner()
 
 	use_coverage = False
@@ -42,7 +44,7 @@ if __name__ == "__main__":
 	except:
 		print("Running STF testsuite without coverage")
 
-	setup_stf_extension()
+	_setup_stf_extension()
 
 	if(use_coverage):
 		cov = coverage.Coverage(
@@ -61,7 +63,7 @@ if __name__ == "__main__":
 	if(use_coverage):
 		cov.stop()
 
-	cleanup_stf_extension()
+	_cleanup_stf_extension()
 
 	if(use_coverage):
 		cov.save()

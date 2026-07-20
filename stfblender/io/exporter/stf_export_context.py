@@ -2,7 +2,7 @@ import bpy
 import logging
 from typing import Any, Callable
 
-from ....stfblender_common import STF_ExportContext as ISTF_ExportContext, STF_TaskSteps, STF_Meta_AssetInfo_Json,  STFReportSeverity, STFReport, STFPropertyPathPart
+from ....stfblender_common import STF_ExportContext as ISTF_ExportContext, STF_TaskSteps, STF_Meta_AssetInfo_Json,  STFReportSeverity, STFReport, STFPropertyPathPart, STF_Category
 from .stf_export_state import STF_ExportState
 
 
@@ -62,7 +62,7 @@ class STF_ExportContext(ISTF_ExportContext):
 					self.report(STFReport("Unsupported Component", STFReportSeverity.Warn, None, None, blender_object))
 
 
-	def serialize_resource(self, json_parent: dict, blender_object: Any, context_object: Any = None, stf_category: str | None = None, export_fail_severity: STFReportSeverity = STFReportSeverity.Error) -> int | None:
+	def serialize_resource(self, json_parent: dict, blender_object: Any, context_object: Any = None, stf_category: STF_Category | str | None = None, export_fail_severity: STFReportSeverity = STFReportSeverity.Error) -> int | None:
 		if(resource_id := self._serialize_resource(blender_object, context_object, stf_category, export_fail_severity)):
 			if("referenced_resources" not in json_parent):
 				json_parent["referenced_resources"] = [resource_id]
@@ -76,7 +76,7 @@ class STF_ExportContext(ISTF_ExportContext):
 		else:
 			return None
 
-	def _serialize_resource(self, blender_object: Any, context_object: Any = None, stf_category: str | None = None, export_fail_severity: STFReportSeverity = STFReportSeverity.Error) -> str | None:
+	def _serialize_resource(self, blender_object: Any, context_object: Any = None, stf_category: STF_Category | str | None = None, export_fail_severity: STFReportSeverity = STFReportSeverity.Error) -> str | None:
 		if(blender_object is None): return None
 		if(existing_id := self.get_resource_id(blender_object)): return existing_id
 
@@ -144,7 +144,6 @@ class STF_ExportContext(ISTF_ExportContext):
 
 
 	def add_task(self, step: int | STF_TaskSteps, task: Callable):
-		"""Will be executed after all other resources have been exported"""
 		self._state.add_task(step, task)
 
 	def add_cleanup_task(self, task: Callable):

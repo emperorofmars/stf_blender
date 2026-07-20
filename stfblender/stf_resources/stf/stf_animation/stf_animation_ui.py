@@ -1,7 +1,7 @@
 import bpy
 
 from .....stfblender_common import STFSetIDOperatorBase, STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
-from .....stfblender_common.helpers.misc import draw_slot_link_warning
+from .....stfblender_common.helpers import draw_slot_link_warning
 from .stf_animation_bake import STFBakeAnimationOperator
 
 
@@ -34,7 +34,7 @@ def draw_animation_ui(layout: bpy.types.UILayout, context: bpy.types.Context, bl
 	layout.use_property_split = True
 
 	if(not hasattr(bpy.types.Action, "slot_link")):
-		draw_slot_link_warning(layout) # pyright: ignore[reportArgumentType]
+		draw_slot_link_warning(layout)
 		return
 
 	if(context.active_action.stf_animation.is_baked_from):

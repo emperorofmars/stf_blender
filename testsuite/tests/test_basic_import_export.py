@@ -1,6 +1,6 @@
 import bpy
 import unittest
-
+from stfblender_common import STF_Info
 
 class TestBasicImportExport(unittest.TestCase):
 

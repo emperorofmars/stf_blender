@@ -10,8 +10,8 @@ def stf_docs():
 		("bpy.ops.stf.remove_collection_component", "/guide/blender/stf_concepts.html"),
 		("bpy.ops.stf.add_scene_collection_component", "/guide/blender/stf_concepts.html"),
 		("bpy.ops.stf.remove_scene_collection_component", "/guide/blender/stf_concepts.html"),
-		("bpy.types.ava_emotes.*", "/modules/ava/ava_emotes.html"),
-		("bpy.ops.stf.add_ava_emote*", "/modules/ava/ava_emotes.html"),
+		("bpy.types.ava_emotes.*", "/resources/ava/ava_expressions.html"),
+		("bpy.ops.stf.add_ava_emote*", "/resources/ava/ava_expressions.html"),
 	)
 	return "https://docs.stfform.at", manual_map
 

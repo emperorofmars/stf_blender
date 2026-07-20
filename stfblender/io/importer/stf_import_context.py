@@ -56,7 +56,7 @@ class STF_ImportContext(ISTF_ImportContext):
 					self.report(STFReport("Invalid JSON resource", STFReportSeverity.FatalError, component_id))
 
 
-	def import_resource(self, json_parent: dict, resource_index: int, context_object: Any = None, stf_category: str = STF_Category.DATA) -> Any:
+	def import_resource(self, json_parent: dict, resource_index: int, context_object: Any = None, stf_category: STF_Category | str = STF_Category.DATA) -> Any | None:
 		if(type(resource_index) is str): # todo remove this possibility sometime after stf v0.1.x
 			return self._import_resource(resource_index, context_object, stf_category)
 		if(resource_index is None or "referenced_resources" not in json_parent or len(json_parent["referenced_resources"]) < resource_index):

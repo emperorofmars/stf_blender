@@ -5,8 +5,7 @@ from typing import Any
 
 from .....stfblender_common import STF_ExportContext, STF_ImportContext, STF_TaskSteps, STFReportSeverity, STFReport, STF_Category, STF_Handler_BlenderNative, STF_Handler_Animation, STF_Handler_ComponentHolder, boilerplate_register, boilerplate_unregister, get_components_from_object, ensure_stf_id
 from .....stfblender_common.utils import trs_utils
-from .....stfblender_common.helpers import get_resource_id
-from .....stfblender_common.helpers.reference_helper import register_exported_resource
+from .....stfblender_common.helpers import get_resource_id, register_exported_resource
 from .node_property_conversion import stf_node_resolve_property_path_to_stf_func, stf_node_resolve_stf_property_to_blender_func
 from .stf_node_ui import STFAddObjectComponentOperator, STFEditObjectComponentIdOperator, STFRemoveObjectComponentOperator, STFSetObjectIDOperator, draw_node_ui
 
@@ -15,14 +14,14 @@ _stf_type = "stf.node"
 
 
 class STF_Instance(bpy.types.PropertyGroup):
-	stf_id: bpy.props.StringProperty(name="ID", options=set()) # type: ignore
-	stf_name: bpy.props.StringProperty(name="Name", options=set()) # type: ignore
-	enabled: bpy.props.BoolProperty(name="Enabled", default=True, options=set()) # type: ignore
+	stf_id: bpy.props.StringProperty(name="ID", options=set())
+	stf_name: bpy.props.StringProperty(name="Name", options=set())
+	enabled: bpy.props.BoolProperty(name="Enabled", default=True, options=set())
 
 
 def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any | STFReport:
 	if("instance" in json_resource):
-		blender_object: bpy.types.Object = context.import_resource(json_resource, json_resource["instance"], stf_category=STF_Category.INSTANCE) # pyright: ignore[reportAssignmentType, reportRedeclaration]
+		blender_object: bpy.types.Object = context.import_resource(json_resource, json_resource["instance"], stf_category=STF_Category.INSTANCE) # pyright: ignore[reportAssignmentType]
 	else:
 		blender_object: bpy.types.Object = bpy.data.objects.new(json_resource.get("name", "STF Node"), None)
 	context.register_imported_resource(stf_id, blender_object)
