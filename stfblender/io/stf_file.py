@@ -9,8 +9,11 @@ from ...stfblender_common.utils import buffer_utils
 __all__ = ["STF_File"]
 
 class STF_File:
-	"""Holds all data of a binary STF file.
-	Provides methods to parse and serialize it to and from a io-buffer, which can be a file"""
+	"""
+	Holds all data of a binary STF file.
+
+	Provides methods to parse and serialize it to and from a io.Buffer*Reader/Writer.
+	"""
 
 	def __init__(self):
 		self.binary_version: int = 0
@@ -21,6 +24,9 @@ class STF_File:
 
 	@staticmethod
 	def parse(buffer: io.BufferedReader):
+		"""
+		:param io.BufferedReader buffer: The `.stf` as it was read from disk.
+		"""
 		ret = STF_File()
 		ret.filename = buffer.name
 
@@ -57,6 +63,9 @@ class STF_File:
 		return ret
 
 	def serialize(self, buffer: io.BufferedWriter):
+		"""
+		:param io.BufferedWriter buffer: The buffer to which an `.stf` file containing this classes data will be written.
+		"""
 		# Serialize Magic number
 		buffer.write("STF0".encode("ascii"))
 
