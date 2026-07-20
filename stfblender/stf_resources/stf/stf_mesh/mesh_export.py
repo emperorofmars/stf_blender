@@ -1,3 +1,4 @@
+# pyright: reportGeneralTypeIssues=none, reportPossiblyUnboundVariable=none
 import bpy
 import mathutils
 from io import BytesIO
@@ -328,15 +329,15 @@ def export_stf_mesh(context: STF_ExportContext, application_object: Any, parent_
 				"limit_lower": shape_key.slider_min,
 			}
 			if(indexed):
-				blendshape["indices"] = context.serialize_buffer(stf_mesh, blendshape_indices_buffer.tobytes()) # pyright: ignore[reportPossiblyUnboundVariable]
-				blendshape["position_offsets"] = context.serialize_buffer(stf_mesh, np.take(blendshape_offsets_buffer, blendshape_indices_buffer, 0).tobytes()) # pyright: ignore[reportPossiblyUnboundVariable]
+				blendshape["indices"] = context.serialize_buffer(stf_mesh, blendshape_indices_buffer.tobytes())
+				blendshape["position_offsets"] = context.serialize_buffer(stf_mesh, np.take(blendshape_offsets_buffer, blendshape_indices_buffer, 0).tobytes())
 				if(blender_mesh.stf_mesh.export_blendshape_normals):
-					blendshape["split_indices"] = context.serialize_buffer(stf_mesh, blendshape_split_indices_buffer.tobytes()) # pyright: ignore[reportPossiblyUnboundVariable]
-					blendshape["split_normals"] = context.serialize_buffer(stf_mesh, np.take(blendshape_normals_split_buffer, blendshape_split_indices_buffer, 0).tobytes()) # pyright: ignore[reportPossiblyUnboundVariable]
+					blendshape["split_indices"] = context.serialize_buffer(stf_mesh, blendshape_split_indices_buffer.tobytes())
+					blendshape["split_normals"] = context.serialize_buffer(stf_mesh, np.take(blendshape_normals_split_buffer, blendshape_split_indices_buffer, 0).tobytes())
 			else:
 				blendshape["position_offsets"] = context.serialize_buffer(stf_mesh, blendshape_offsets_buffer.tobytes())
 				if(blender_mesh.stf_mesh.export_blendshape_normals):
-					blendshape["split_normals"] = context.serialize_buffer(stf_mesh, blendshape_normals_split_buffer.tobytes()) # pyright: ignore[reportPossiblyUnboundVariable]
+					blendshape["split_normals"] = context.serialize_buffer(stf_mesh, blendshape_normals_split_buffer.tobytes())
 			blendshapes.append(blendshape)
 		stf_mesh["blendshapes"] = blendshapes
 

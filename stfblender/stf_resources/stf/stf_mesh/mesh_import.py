@@ -1,4 +1,4 @@
-# pyright: reportCallIssue=false, reportArgumentType=false
+# pyright: reportCallIssue=none, reportArgumentType=none, reportIndexIssue=none
 
 import bpy
 from io import BytesIO
@@ -157,7 +157,7 @@ def import_stf_mesh(context: STF_ImportContext, json_resource: dict, stf_id: str
 
 	# Weight paint
 	if("armature" in json_resource and "weights" in json_resource and "bones" in json_resource):
-		armature: bpy.types.Armature = context.import_resource(json_resource, json_resource["armature"], stf_category=STF_Category.DATA)
+		armature: bpy.types.Armature | None = context.import_resource(json_resource, json_resource["armature"], stf_category=STF_Category.DATA)
 		if(not armature):
 			context.report(STFReport("Invalid Armature (armature id: " + json_resource["armature"] + " )", STFReportSeverity.Error, stf_id, _stf_type, blender_mesh))
 		else:
