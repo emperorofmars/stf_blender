@@ -64,18 +64,18 @@ def _set_component_instance_standin(context: bpy.types.Context, component_ref: S
 	component_instance.source.target_bone = component.source.target_bone
 
 
-def _export_component_instance(context: STF_ExportContext, component_ref: STF_Component_Ref, standin_component: STFEXP_Constraint_Twist, context_object: Any) -> dict:
-	ret = { "weight": standin_component.weight }
+def _export_component_instance(context: STF_ExportContext, component_ref: STF_Component_Ref, component_instance: STFEXP_Constraint_Twist, context_resource: Any) -> dict:
+	ret = { "weight": component_instance.weight }
 	def _handle():
-		if(source_ret := node_path_selector_to_stf(context, standin_component.source, ret)):
+		if(source_ret := node_path_selector_to_stf(context, component_instance.source, ret)):
 			ret["source"] = source_ret
 	context.add_task(STF_TaskSteps.DEFAULT, _handle)
 	return ret
 
-def _import_component_instance(context: STF_ImportContext, json_resource: dict, component_ref: STF_Component_Ref, standin_component: STFEXP_Constraint_Twist, context_object: Any):
-	if("weight" in json_resource): standin_component.weight = json_resource["weight"]
+def _import_component_instance(context: STF_ImportContext, json_resource: dict, component_ref: STF_Component_Ref, component_instance: STFEXP_Constraint_Twist, context_resource: Any):
+	if("weight" in json_resource): component_instance.weight = json_resource["weight"]
 	if("source" in json_resource and len(json_resource["source"]) > 0):
-		_get_component = preserve_component_reference(standin_component, _blender_property_name, context_object)
+		_get_component = preserve_component_reference(component_instance, _blender_property_name, context_resource)
 		def _handle():
 			standin_component = _get_component()
 			node_path_selector_from_stf(context, json_resource, json_resource["source"], standin_component.source)
@@ -127,18 +127,13 @@ class Handler_STFEXP_Constraint_Twist(STF_Handler_BoneComponent, STF_Handler_Ani
 	filter = [bpy.types.Object, bpy.types.Bone]
 	draw = _draw_component
 
-	draw_instance = _draw_component # pyright: ignore[reportAssignmentType]
+	draw_instance = _draw_component
 	update_component_instance = _set_component_instance_standin
 
-	export_component_instance = _export_component_instance # pyright: ignore[reportAssignmentType]
-	import_component_instance = _import_component_instance # pyright: ignore[reportAssignmentType]
+	export_component_instance = _export_component_instance
+	import_component_instance = _import_component_instance
 
 	pretty_name_template = "Twist Constraint"
-
-
-register_stf_handlers = [
-	Handler_STFEXP_Constraint_Twist
-]
 
 
 def register():

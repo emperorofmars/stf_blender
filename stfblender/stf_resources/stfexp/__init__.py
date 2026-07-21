@@ -5,10 +5,13 @@ Expanded STF resources that provide additional functionality.
 May not be supported by every STF implementation fully.
 """
 
-from . import stfexp_mesh_seams
-from . import stfexp_mesh_creases
-from . import stfexp_armature_humanoid
-from . import stfexp_constraint_twist
+__all__ = ["register_stf_handlers"]
+
+
+from .stfexp_mesh_seams import Handler_STF_Mesh_Seams, HOOK_STFEXP_Mesh_Seams
+from .stfexp_mesh_creases import Handler_STF_Mesh_Creases, HOOK_STFEXP_Mesh_Creases
+from .stfexp_armature_humanoid import Handler_STFEXP_Armature_Humanoid
+from .stfexp_constraint_twist import Handler_STFEXP_Constraint_Twist
 from . import stfexp_constraint_rotation
 from . import stfexp_constraint_parent
 from . import stfexp_constraint_ik
@@ -18,19 +21,25 @@ from . import stfexp_collider_capsule
 from . import stfexp_collider_plane
 from . import stfexp_camera
 from . import stfexp_light
+from .stfexp_instance_text import Handler_STFEXP_Instance_Text
 from .stfexp_text.stfexp_text import Handler_STFEXP_Text
-from . import stfexp_instance_text
 from .stfexp_animation_blendtree import Handler_STFEXP_Animation_Blendtree
-from . import stfexp_node_ethereal
+from .stfexp_node_ethereal import Handler_STFEXP_Node_Ethereal
+
 
 register_stf_handlers = [
+	Handler_STF_Mesh_Seams,
+	HOOK_STFEXP_Mesh_Seams,
+	Handler_STF_Mesh_Creases,
+	HOOK_STFEXP_Mesh_Creases,
+	Handler_STFEXP_Armature_Humanoid,
+	Handler_STFEXP_Constraint_Twist,
+
+	Handler_STFEXP_Instance_Text,
 	Handler_STFEXP_Text,
 	Handler_STFEXP_Animation_Blendtree,
+	Handler_STFEXP_Node_Ethereal,
 ] + \
-	stfexp_mesh_seams.register_stf_handlers + \
-	stfexp_mesh_creases.register_stf_handlers + \
-	stfexp_armature_humanoid.register_stf_handlers + \
-	stfexp_constraint_twist.register_stf_handlers + \
 	stfexp_constraint_rotation.register_stf_handlers + \
 	stfexp_constraint_parent.register_stf_handlers + \
 	stfexp_constraint_ik.register_stf_handlers + \
@@ -39,6 +48,4 @@ register_stf_handlers = [
 	stfexp_collider_capsule.register_stf_handlers + \
 	stfexp_collider_plane.register_stf_handlers + \
 	stfexp_camera.register_stf_handlers + \
-	stfexp_light.register_stf_handlers + \
-	stfexp_instance_text.register_stf_handlers + \
-	stfexp_node_ethereal.register_stf_handlers
+	stfexp_light.register_stf_handlers

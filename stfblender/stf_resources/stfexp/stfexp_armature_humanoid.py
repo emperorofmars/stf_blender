@@ -264,7 +264,7 @@ class STFEXP_HumanoidMappingsList(bpy.types.UIList):
 		layout.label(text=_get_display_name(item.name), icon="NONE" if item.bone else "ERROR")
 		layout.label(text=item.bone if item.bone else "Not Mapped!", icon="BONE_DATA" if item.bone else "ERROR")
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: bpy.types.Armature, component: STFEXP_Armature_Humanoid):
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_resource: bpy.types.Armature, component: STFEXP_Armature_Humanoid):
 	layout.use_property_split = True
 
 	col = layout.column(align=True)
@@ -290,7 +290,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 
 	mapped = 0
 	for mapping in component.bone_mappings:
-		if(mapping.bone and mapping.bone in context_object.bones):
+		if(mapping.bone and mapping.bone in context_resource.bones):
 			mapped += 1
 	if(mapped < len(_humanoid_bones)):
 		layout.label(text=f"Mapped {mapped} of {len(_humanoid_bones)} Bones.", icon="WARNING_LARGE")
@@ -310,7 +310,7 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 				col.alert = True
 				col.label(text="Duplicate Bone Mapping! Bone '" + mapping.bone + "' is also mapped in " + _get_display_name(candidate_mapping.name), icon="ERROR")
 				break
-		col.prop_search(mapping, "bone", context_object, "bones", text="Mapped Bone")
+		col.prop_search(mapping, "bone", context_resource, "bones", text="Mapped Bone")
 
 		if(mapping_definition[4] and len(mapping_definition[4]) == 3):
 			layout.prop(mapping, "set_rotation_limits")
@@ -443,11 +443,6 @@ class Handler_STFEXP_Armature_Humanoid(STF_Handler_Component):
 	draw = _draw_component
 
 	pretty_name_template = "Humanoid Bone Mappings"
-
-
-register_stf_handlers = [
-	Handler_STFEXP_Armature_Humanoid
-]
 
 
 def register():

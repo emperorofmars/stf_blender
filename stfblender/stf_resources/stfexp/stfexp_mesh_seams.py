@@ -17,79 +17,70 @@ class STFEXP_Mesh_Seams(STF_ComponentResourceBase):
 	pass
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: bpy.types.Mesh | None) -> Any | STFReport:
-	buffer_seams = BytesIO(context.import_buffer(json_resource, json_resource["seams"]))  # pyright: ignore[reportArgumentType]
-
-	indices_width: int = json_resource.get("indices_width", 4)
-
-	edge_dict: dict[int, dict[int, bpy.types.MeshEdge]] = {}
-	for edge in context_resource.edges:
-		if(edge.vertices[0] not in edge_dict):
-			edge_dict[edge.vertices[0]] = {}
-		if(edge.vertices[1] not in edge_dict):
-			edge_dict[edge.vertices[1]] = {}
-		edge_dict[edge.vertices[0]][edge.vertices[1]] = edge
-		edge_dict[edge.vertices[1]][edge.vertices[0]] = edge
-
-	for _ in range(int((buffer_seams.getbuffer().nbytes / indices_width) / 2)):
-		v0_index = parse_uint(buffer_seams, indices_width)  # pyright: ignore[reportArgumentType]
-		v1_index = parse_uint(buffer_seams, indices_width)  # pyright: ignore[reportArgumentType]
-		edge_dict[v0_index][v1_index].use_seam = True
-
-	component_ref, component = add_component(context_resource, _blender_property_name, stf_id, _stf_type)
-	import_component_base(context, component, json_resource, _blender_property_name, context_resource)
-
-	return component
-
-
-def _stf_export(context: STF_ExportContext, blender_resource: STFEXP_Mesh_Seams, context_resource: bpy.types.Mesh | None) -> tuple[dict, str]:
-	ret = export_component_base(context, _stf_type, blender_resource, _blender_property_name, context_resource)
-
-	indices_width = determine_indices_width(len(context_resource.loops))
-
-	buffer_seams = BytesIO()
-	for edge in context_resource.edges:
-		if(edge.use_seam and not edge.is_loose):
-			for edge_vertex_index in edge.vertices: # pyright: ignore[reportGeneralTypeIssues]
-				buffer_seams.write(serialize_uint(edge_vertex_index, indices_width))
-	ret["indices_width"] = indices_width
-	ret["seams"] = context.serialize_buffer(ret, buffer_seams.getvalue())
-
-	return ret, blender_resource.stf_id
-
-
 class Handler_STF_Mesh_Seams(STF_Handler_Component):
 	"""Represents the existence of mesh-seams. If they are present, Blender will automatically create this component on export, no need to add it manually"""
 	stf_type = _stf_type
 	stf_category = STF_Category.COMPONENT
 	understood_blender_types = [STFEXP_Mesh_Seams]
-	import_resource = _stf_import
-	export_resource = _stf_export
 
 	blender_property_name = _blender_property_name
 	single = True
 	filter = [bpy.types.Mesh]
 
+	@staticmethod
+	def import_resource(context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: bpy.types.Mesh | None) -> Any | STFReport:
+		buffer_seams = BytesIO(context.import_buffer(json_resource, json_resource["seams"])) # pyright: ignore[reportArgumentType]
 
-def _hook_can_handle_func(blender_resource: Any) -> bool:
-	mesh: bpy.types.Mesh = blender_resource
-	if(mesh.stfexp_mesh_seams and len(mesh.stfexp_mesh_seams) > 0): return False
-	return True
+		indices_width: int = json_resource.get("indices_width", 4)
 
-def _hook_export_resource(context: STF_ExportContext, blender_resource: bpy.types.Mesh, context_resource: Any):
-	add_component(blender_resource, _blender_property_name, str(uuid.uuid4()), _stf_type)
+		edge_dict: dict[int, dict[int, bpy.types.MeshEdge]] = {}
+		for edge in context_resource.edges:
+			if(edge.vertices[0] not in edge_dict):
+				edge_dict[edge.vertices[0]] = {}
+			if(edge.vertices[1] not in edge_dict):
+				edge_dict[edge.vertices[1]] = {}
+			edge_dict[edge.vertices[0]][edge.vertices[1]] = edge
+			edge_dict[edge.vertices[1]][edge.vertices[0]] = edge
+
+		for _ in range(int((buffer_seams.getbuffer().nbytes / indices_width) / 2)):
+			v0_index = parse_uint(buffer_seams, indices_width) # pyright: ignore[reportArgumentType]
+			v1_index = parse_uint(buffer_seams, indices_width) # pyright: ignore[reportArgumentType]
+			edge_dict[v0_index][v1_index].use_seam = True
+
+		component_ref, component = add_component(context_resource, _blender_property_name, stf_id, _stf_type)
+		import_component_base(context, component, json_resource, _blender_property_name, context_resource)
+
+		return component
+
+	@staticmethod
+	def export_resource(context: STF_ExportContext, blender_resource: STFEXP_Mesh_Seams, context_resource: bpy.types.Mesh | None) -> tuple[dict, str]:
+		ret = export_component_base(context, _stf_type, blender_resource, _blender_property_name, context_resource)
+
+		indices_width = determine_indices_width(len(context_resource.loops))
+
+		buffer_seams = BytesIO()
+		for edge in context_resource.edges:
+			if(edge.use_seam and not edge.is_loose):
+				for edge_vertex_index in edge.vertices: # pyright: ignore[reportGeneralTypeIssues]
+					buffer_seams.write(serialize_uint(edge_vertex_index, indices_width))
+		ret["indices_width"] = indices_width
+		ret["seams"] = context.serialize_buffer(ret, buffer_seams.getvalue())
+
+		return ret, blender_resource.stf_id
 
 
 class HOOK_STFEXP_Mesh_Seams(STF_ExportComponentHook):
 	hook_understood_blender_types = [bpy.types.Mesh]
-	hook_can_handle_blender_resource = _hook_can_handle_func
-	hook_export_resource = _hook_export_resource
 
+	@staticmethod
+	def hook_can_handle_blender_resource(blender_resource: Any) -> bool:
+		mesh: bpy.types.Mesh = blender_resource
+		if(mesh.stfexp_mesh_seams and len(mesh.stfexp_mesh_seams) > 0): return False
+		return True
 
-register_stf_handlers = [
-	Handler_STF_Mesh_Seams,
-	HOOK_STFEXP_Mesh_Seams
-]
+	@staticmethod
+	def hook_export_resource(context: STF_ExportContext, blender_resource: bpy.types.Mesh, context_resource: Any):
+		add_component(blender_resource, _blender_property_name, str(uuid.uuid4()), _stf_type)
 
 
 def register():
