@@ -10,7 +10,7 @@ from .stf_animation_common import *
 _stf_type = stf_animation_type
 
 
-def stf_animation_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any | STFReport:
+def stf_animation_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: Any) -> Any | STFReport:
 	if(not hasattr(bpy.types.Action, "slot_link")):
 		context.report(STFReport("Slot-Link is required to import animations!", STFReportSeverity.Warn, stf_id, _stf_type))
 		return
@@ -60,7 +60,7 @@ def stf_animation_import(context: STF_ImportContext, json_resource: dict, stf_id
 
 	if("reset_animation" in json_resource):
 		def _handle_reset_animation():
-			if(reset_animation := context.import_resource(json_resource, json_resource["reset_animation"], context_object, STF_Category.DATA)):
+			if(reset_animation := context.import_resource(json_resource, json_resource["reset_animation"], context_resource, STF_Category.DATA)):
 				blender_animation.slot_link.reset_animation = reset_animation
 		context.add_task(STF_TaskSteps.AFTER_ANIMATION, _handle_reset_animation)
 

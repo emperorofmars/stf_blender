@@ -40,7 +40,7 @@ class STF_ImportContext(ISTF_ImportContext):
 			for component_id in json_resource["components"]:
 				if(json_component := self.get_json_resource(component_id)):
 					if(component_handler := self._state.determine_handler(json_component, STF_Category.COMPONENT)):
-						component_result = component_handler.import_func(self, json_component, component_id, application_object)
+						component_result = component_handler.import_resource(self, json_component, component_id, application_object)
 						if(component_result and type(component_result) is not STFReport):
 							application_component_object: Any = component_result
 							self.register_imported_resource(component_id, STF_Component_Editmode_Resistant_Reference(application_component_object, application_object))
@@ -77,10 +77,10 @@ class STF_ImportContext(ISTF_ImportContext):
 			self.report(STFReport("Invalid JSON resource", STFReportSeverity.FatalError, stf_id, application_object=context_object))
 
 		if(handler := self._state.determine_handler(json_resource, stf_category)): # pyright: ignore[reportArgumentType]
-			application_object = handler.import_func(self, json_resource, stf_id, context_object) # pyright: ignore[reportArgumentType]
+			application_object = handler.import_resource(self, json_resource, stf_id, context_object) # pyright: ignore[reportArgumentType]
 			if(application_object and type(application_object) is not STFReport):
 				self.register_imported_resource(stf_id, application_object)
-				self.__run_components(json_resource, handler.get_components_holder_func(application_object) if hasattr(handler, "get_components_holder_func") else application_object) # pyright: ignore[reportArgumentType]
+				self.__run_components(json_resource, handler.get_components_holder(application_object) if hasattr(handler, "get_components_holder") else application_object) # pyright: ignore[reportArgumentType]
 				return application_object
 			else:
 				_logger.error("Resource import error", stack_info=True)
@@ -109,7 +109,7 @@ class STF_ImportContext(ISTF_ImportContext):
 		if(stf_path is None or len(stf_path) == 0): return None
 
 		if(selected_handler := self._state.determine_property_resolution_handler(stf_path[0])):
-			return selected_handler.resolve_stf_property_to_blender_func(self, stf_path, blender_object)
+			return selected_handler.import_stf_animation_property_path_func(self, stf_path, blender_object)
 
 		return None
 

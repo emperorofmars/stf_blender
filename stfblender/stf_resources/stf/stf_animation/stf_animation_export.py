@@ -13,20 +13,20 @@ from .stf_animation_bake import bake_constraints
 _stf_type = stf_animation_type
 
 
-def stf_animation_export(context: STF_ExportContext, application_object: Any, context_object: Any) -> tuple[dict, str] | STFReport:
-	blender_animation: bpy.types.Action = application_object
+def stf_animation_export(context: STF_ExportContext, blender_resource: Any, context_resource: Any) -> tuple[dict, str] | STFReport:
+	blender_animation: bpy.types.Action = blender_resource
 	if(blender_animation.stf_animation.exclude): return None # pyright: ignore[reportReturnType]
 	if(blender_animation.is_action_legacy):
-		return STFReport("Ignoring legacy animation: " + blender_animation.name, STFReportSeverity.Debug, blender_animation.stf_info.stf_id, _stf_type, application_object)
+		return STFReport("Ignoring legacy animation: " + blender_animation.name, STFReportSeverity.Debug, blender_animation.stf_info.stf_id, _stf_type, blender_resource)
 	if(not hasattr(blender_animation, "slot_link")):
-		return STFReport("Slot-Link is required to export animations!", STFReportSeverity.Debug, blender_animation.stf_info.stf_id, _stf_type, application_object)
+		return STFReport("Slot-Link is required to export animations!", STFReportSeverity.Debug, blender_animation.stf_info.stf_id, _stf_type, blender_resource)
 
 	action_slot_link: ActionSlotLink = blender_animation.slot_link
 	for slot_link in action_slot_link.links:
 		if(slot_link.target):
 			break
 	else:
-		return STFReport("No valid Slot Link target specified!", STFReportSeverity.Debug, blender_animation.stf_info.stf_id, _stf_type, application_object)
+		return STFReport("No valid Slot Link target specified!", STFReportSeverity.Debug, blender_animation.stf_info.stf_id, _stf_type, blender_resource)
 
 	animation_range = [blender_animation.frame_start, blender_animation.frame_end] if blender_animation.use_frame_range else [blender_animation.frame_range[0], blender_animation.frame_range[1]]
 

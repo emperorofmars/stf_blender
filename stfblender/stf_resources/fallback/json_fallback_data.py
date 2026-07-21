@@ -2,7 +2,7 @@ import bpy
 import json
 from typing import Any
 
-from ....stfblender_common import STF_ExportContext, STF_ImportContext, STF_TaskSteps, STF_Category, STF_Handler_Data, STF_DataResourceBase, STF_Data_Ref, add_resource, export_data_resource_base, get_components_from_data_resource, import_data_resource_base
+from ....stfblender_common import STF_ExportContext, STF_ImportContext, STF_TaskSteps, STF_Category, STF_Handler_Data, STF_DataResourceBase, STF_Data_Ref, STFReport, add_resource, export_data_resource_base, get_components_from_data_resource, import_data_resource_base
 from ....stfblender_common.blender_grr import BlenderGRR, construct_blender_grr, resolve_blender_grr
 from .json_fallback_buffer import STF_FallbackBuffer, decode_buffer, encode_buffer
 from .json_fallback_ui import draw_fallback
@@ -19,12 +19,12 @@ class JsonFallbackData(STF_DataResourceBase):
 	active_buffer: bpy.props.IntProperty() # type: ignore
 
 
-def _draw_resource(layout: bpy.types.UILayout, context: bpy.types.Context, resource_ref: STF_Data_Ref, context_object: bpy.types.Collection, resource: JsonFallbackData):
+def _draw_resource(layout: bpy.types.UILayout, context: bpy.types.Context, resource_ref: STF_Data_Ref, context_resource: bpy.types.Collection | None, resource: JsonFallbackData):
 	draw_fallback(layout, resource_ref, resource)
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: bpy.types.Collection) -> Any:
-	resource_ref, resource = add_resource(context_object, _blender_property_name, stf_id, json_resource["type"])
+def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: bpy.types.Collection | None) -> Any | STFReport:
+	resource_ref, resource = add_resource(context_resource, _blender_property_name, stf_id, json_resource["type"]) # pyright: ignore[reportArgumentType]
 	resource: JsonFallbackData = resource
 	import_data_resource_base(resource, json_resource)
 
@@ -43,28 +43,28 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	return resource
 
 
-def _stf_export(context: STF_ExportContext, resource: JsonFallbackData, context_object: Any) -> tuple[dict, str]:
+def _stf_export(context: STF_ExportContext, blender_resource: JsonFallbackData, context_resource: Any) -> tuple[dict, str] | STFReport:
 	try:
-		json_resource = json.loads(resource.json)
+		json_resource = json.loads(blender_resource.json)
 		if("type" not in json_resource or not json_resource["type"]):
 			return None  # pyright: ignore[reportReturnType]
-		ret = export_data_resource_base(context, json_resource["type"], resource)
+		ret = export_data_resource_base(context, json_resource["type"], blender_resource)
 		ret = ret | json_resource
 
 		ret["referenced_resources"] = []
 		ret["referenced_buffers"] = []
 
-		for referenced_resource in resource.referenced_resources:
+		for referenced_resource in blender_resource.referenced_resources:
 			referenced_resource: BlenderGRR = referenced_resource
 			if(blender_resource := resolve_blender_grr(referenced_resource)):
 				def _handle():
 					context.serialize_resource(ret, blender_resource)
 				context.add_task(STF_TaskSteps.FINALE, _handle)
 
-		for buffer in resource.buffers:
+		for buffer in blender_resource.buffers:
 			decode_buffer(context, ret, buffer)
 
-		return ret, resource.stf_id
+		return ret, blender_resource.stf_id
 	except Exception:
 		return None  # pyright: ignore[reportReturnType]
 
@@ -74,13 +74,13 @@ class Handler_JsonFallbackData(STF_Handler_Data):
 	You have to edit the raw json string, resource references and base64 encoded binary buffers"""
 	stf_type = None  # pyright: ignore[reportAssignmentType]
 	stf_category = STF_Category.DATA
-	understood_application_types = [JsonFallbackData]
-	import_func = _stf_import
-	export_func = _stf_export
+	understood_blender_types = [JsonFallbackData]
+	import_resource = _stf_import
+	export_resource = _stf_export
 
 	blender_property_name = _blender_property_name
 	draw_resource_func = _draw_resource
-	get_components_func = get_components_from_data_resource
+	get_components = get_components_from_data_resource
 
 
 register_stf_handlers = [

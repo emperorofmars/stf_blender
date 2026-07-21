@@ -80,14 +80,14 @@ class Handler_AVA_FaceTracking_Blendshapes(STF_Handler_Component):
 	"""Define face-tracking blendshapes"""
 	stf_type = _stf_type
 	stf_category = STF_Category.COMPONENT
-	understood_application_types = [AVA_FaceTracking_Blendshapes]
-	import_func = _stf_import # pyright: ignore[reportAssignmentType]
-	export_func = _stf_export # pyright: ignore[reportAssignmentType]
+	understood_blender_types = [AVA_FaceTracking_Blendshapes]
+	import_resource = _stf_import # pyright: ignore[reportAssignmentType]
+	export_resource = _stf_export # pyright: ignore[reportAssignmentType]
 
 	blender_property_name = _blender_property_name
 	single = True
 	filter = [bpy.types.Mesh]
-	draw_component_func = _draw_component
+	draw = _draw_component
 
 	like_types = []
 	pretty_name_template = "Face Tracking Blendshapes"

@@ -117,14 +117,14 @@ class Handler_AVA_Visemes_Blendshape(STF_Handler_Component):
 	"""Define which shape-keys/blendshapes represent visemes"""
 	stf_type = _stf_type
 	stf_category = STF_Category.COMPONENT
-	understood_application_types = [AVA_Visemes_Blendshape]
-	import_func = _stf_import
-	export_func = _stf_export
+	understood_blender_types = [AVA_Visemes_Blendshape]
+	import_resource = _stf_import
+	export_resource = _stf_export
 
 	blender_property_name = _blender_property_name
 	single = True
 	filter = [bpy.types.Mesh]
-	draw_component_func = _draw_component
+	draw = _draw_component
 
 	like_types = []
 

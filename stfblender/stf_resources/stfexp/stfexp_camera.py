@@ -21,7 +21,7 @@ class STFSetSTFEXPCameraIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
 Import
 """
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
+def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: Any) -> Any:
 	blender_camera = bpy.data.cameras.new(json_resource.get("name", "STFEXP Camera"))
 	blender_object = bpy.data.objects.new(json_resource.get("name", "STF Node"), blender_camera)
 	blender_object.stf_instance.stf_id = stf_id
@@ -30,7 +30,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	context.register_imported_resource(stf_id, (blender_object, blender_camera))
 
 	if(not blender_object or type(blender_object) is not bpy.types.Object):
-		context.report(STFReport("Failed to import camera", STFReportSeverity.Error, stf_id, _stf_type, context_object))
+		context.report(STFReport("Failed to import camera", STFReportSeverity.Error, stf_id, _stf_type, context_resource))
 
 	blender_camera.sensor_fit = "VERTICAL"
 
@@ -51,8 +51,8 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 Export
 """
 
-def _can_handle_application_object_func(application_object: Any) -> int:
-	if(type(application_object) is tuple and type(application_object[0]) is bpy.types.Object and type(application_object[1]) is bpy.types.Camera):
+def _can_handle_blender_resource(blender_resource: Any) -> int:
+	if(type(blender_resource) is tuple and type(blender_resource[0]) is bpy.types.Object and type(blender_resource[1]) is bpy.types.Camera):
 		return 1000
 	else:
 		return -1
@@ -77,9 +77,9 @@ def _h_fov_to_v_fov(camera: bpy.types.Camera, cur_angle: float, cur_ortho_scale:
 		else:
 			return cur_angle
 
-def _stf_export(context: STF_ExportContext, application_object: Any, context_object: Any) -> tuple[dict, str]:
-	blender_object: bpy.types.Object = application_object[0]
-	blender_camera: bpy.types.Camera = application_object[1]
+def _stf_export(context: STF_ExportContext, blender_resource: Any, context_resource: Any) -> tuple[dict, str]:
+	blender_object: bpy.types.Object = blender_resource[0]
+	blender_camera: bpy.types.Camera = blender_resource[1]
 	ensure_stf_id(context, blender_object.stf_instance)
 
 	ret = {
@@ -111,13 +111,13 @@ def _get__convert_lens_to_fov_func(camera: bpy.types.Camera) -> Callable:
 			return [_h_fov_to_v_fov(camera, 2 * math.atan((camera.sensor_width if _is_sensor_fit_horizontal(camera) else camera.sensor_height) / (2 * value[0])), 0)] # convert lens to fov
 	return _ret
 
-def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: Any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart | None:
-	if(application_object.data.type == "ORTHO"):
-		if(match := re.search(r"^ortho_scale", data_path)):
-			return STFPropertyPathPart([application_object.stf_info.stf_id, "instance", "fov"], _get__convert_lens_to_fov_func(application_object.data))
-	elif(application_object.data.type == "PERSP"):
-		if(match := re.search(r"^lens", data_path)):
-			return STFPropertyPathPart([application_object.stf_info.stf_id, "instance", "fov"], _get__convert_lens_to_fov_func(application_object.data))
+def _export_blender_animation(context: STF_ExportContext, blender_resource: Any, property_index: int, blender_property_path: str) -> STFPropertyPathPart | None:
+	if(blender_resource.data.type == "ORTHO"):
+		if(match := re.search(r"^ortho_scale", blender_property_path)):
+			return STFPropertyPathPart([blender_resource.stf_info.stf_id, "instance", "fov"], _get__convert_lens_to_fov_func(blender_resource.data))
+	elif(blender_resource.data.type == "PERSP"):
+		if(match := re.search(r"^lens", blender_property_path)):
+			return STFPropertyPathPart([blender_resource.stf_info.stf_id, "instance", "fov"], _get__convert_lens_to_fov_func(blender_resource.data))
 	# todo enabled maybe?
 	return None
 
@@ -127,13 +127,13 @@ def _get__convert_fov_to_blender_func(camera: bpy.types.Camera) -> Callable:
 		return [(camera.sensor_width if _is_sensor_fit_horizontal(camera) else camera.sensor_height) / (2 * math.tan(value[0] / 2))] # convert fov to lens
 	return _ret
 
-def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: Any) -> BlenderPropertyPathPart | None:
-	match(stf_path[1]):
+def _import_stf_animation_property_path_func(context: STF_ImportContext, stf_property_path: list[str], blender_resource: Any) -> BlenderPropertyPathPart | None:
+	match(stf_property_path[1]):
 		case "fov":
-			if(application_object.data.type == "ORTHO"):
+			if(blender_resource.data.type == "ORTHO"):
 				return BlenderPropertyPathPart("CAMERA", "ortho_scale")
-			elif(application_object.data.type == "PERSP"):
-				return BlenderPropertyPathPart("CAMERA", "lens", _get__convert_fov_to_blender_func(application_object.data))
+			elif(blender_resource.data.type == "PERSP"):
+				return BlenderPropertyPathPart("CAMERA", "lens", _get__convert_fov_to_blender_func(blender_resource.data))
 	return None
 
 
@@ -145,17 +145,17 @@ class Handler_STFEXP_Camera(STF_Handler_BlenderNative, STF_Handler_Animation):
 	stf_type = _stf_type
 	stf_category = STF_Category.INSTANCE
 	like_types = ["camera"]
-	understood_application_types = [tuple]
-	import_func = _stf_import
-	export_func = _stf_export
-	can_handle_application_object_func = _can_handle_application_object_func
+	understood_blender_types = [tuple]
+	import_resource = _stf_import
+	export_resource = _stf_export
+	can_handle_blender_resource = _can_handle_blender_resource
 	get_stf_prop_holder = lambda bo: bo[0].stf_instance
 	operator_set_stf_id = STFSetSTFEXPCameraIDOperator.bl_idname
 
-	understood_application_property_path_types = [bpy.types.Object]
-	understood_application_property_path_parts = ["lens", "ortho_scale"]
-	resolve_property_path_to_stf_func = _resolve_property_path_to_stf_func
-	resolve_stf_property_to_blender_func = _resolve_stf_property_to_blender_func
+	understood_blender_animation_types = [bpy.types.Object]
+	understood_blender_animation_data_paths = ["lens", "ortho_scale"]
+	export_blender_animation = _export_blender_animation
+	import_stf_animation_property_path_func = _import_stf_animation_property_path_func
 
 
 register_stf_handlers = [

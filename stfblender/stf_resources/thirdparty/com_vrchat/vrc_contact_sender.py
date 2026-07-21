@@ -1,7 +1,7 @@
 import bpy
 from typing import Any
 
-from .vrc_contact_base import VRC_ContactBase, vrc_contact_create_resolve_property_path_to_stf_func, vrc_contact_create_resolve_stf_property_to_blender_func, vrc_contact_draw_base, vrc_contact_export_base, vrc_contact_import_base
+from .vrc_contact_base import VRC_ContactBase, vrc_contact_create_export_blender_animation, vrc_contact_create_import_stf_animation_property_path_func, vrc_contact_draw_base, vrc_contact_export_base, vrc_contact_import_base
 from .....stfblender_common import STF_ExportContext, STF_ImportContext, STF_Category, STF_Handler_BoneComponent, STF_Component_Ref, ComponentLoadJsonOperatorBase, add_component, export_component_base, import_component_base
 
 
@@ -54,19 +54,19 @@ class STF_Module_VRC_ContactSender(STF_Handler_BoneComponent):
 	Serialize the component in Unity and paste the Json-definition into the `Set from JSON` operator"""
 	stf_type = _stf_type
 	stf_category = STF_Category.COMPONENT
-	understood_application_types = [VRC_ContactSender]
-	import_func = _stf_import
-	export_func = _stf_export
+	understood_blender_types = [VRC_ContactSender]
+	import_resource = _stf_import
+	export_resource = _stf_export
 
 	blender_property_name = _blender_property_name
 	single = False
 	filter = [bpy.types.Object, bpy.types.Bone]
-	draw_component_func = _draw_component
+	draw = _draw_component
 
-	understood_application_property_path_types = [bpy.types.Object]
-	understood_application_property_path_parts = [_blender_property_name]
-	resolve_property_path_to_stf_func = vrc_contact_create_resolve_property_path_to_stf_func(_blender_property_name)
-	resolve_stf_property_to_blender_func = vrc_contact_create_resolve_stf_property_to_blender_func(_blender_property_name)
+	understood_blender_animation_types = [bpy.types.Object]
+	understood_blender_animation_data_paths = [_blender_property_name]
+	export_blender_animation = vrc_contact_create_export_blender_animation(_blender_property_name)
+	import_stf_animation_property_path_func = vrc_contact_create_import_stf_animation_property_path_func(_blender_property_name)
 
 	like_types = []
 

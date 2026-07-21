@@ -22,13 +22,15 @@ class Handler_STF_Animation(STF_Handler_BlenderNative, STF_Handler_ComponentHold
 	stf_type = _stf_type
 	stf_category = STF_Category.DATA
 	like_types = ["animation"]
-	understood_application_types = [bpy.types.Action]
-	import_func = stf_animation_import
-	export_func = stf_animation_export
+	understood_blender_types = [bpy.types.Action]
+
 	operator_set_stf_id = STFSetAnimationIDOperator.bl_idname
 	draw = draw_animation_ui
 
-	get_components_func = get_components_from_object
+	import_resource = stf_animation_import
+	export_resource = stf_animation_export
+
+	get_components = get_components_from_object
 	operator_component_add = STFAddAnimationComponentOperator.bl_idname
 	operator_component_remove = STFRemoveAnimationComponentOperator.bl_idname
 	operator_component_edit = STFEditAnimationComponentIdOperator.bl_idname

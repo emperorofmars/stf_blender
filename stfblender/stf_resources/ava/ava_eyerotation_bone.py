@@ -51,14 +51,14 @@ class Handler_AVA_EyeRotation_Bone(STF_Handler_Component):
 	"""Define limits to eyebone rotations"""
 	stf_type = _stf_type
 	stf_category = STF_Category.COMPONENT
-	understood_application_types = [AVA_EyeRotation_Bone]
-	import_func = _stf_import
-	export_func = _stf_export
+	understood_blender_types = [AVA_EyeRotation_Bone]
+	import_resource = _stf_import
+	export_resource = _stf_export
 
 	blender_property_name = _blender_property_name
 	single = True
 	filter = [bpy.types.Armature]
-	draw_component_func = _draw_component
+	draw = _draw_component
 
 	like_types = []
 	pretty_name_template = "Eye-Rotation Limits"

@@ -322,14 +322,14 @@ class STF_Module_Squirrelbite_Avatar_Setup(STF_Handler_Component):
 	"""Opinionated setup of animation logic and behaviors for VR & V-Tubing avatars"""
 	stf_type = _stf_type
 	stf_category = STF_Category.COMPONENT
-	understood_application_types = [Squirrelbite_Avatar_Setup]
-	import_func = _stf_import
-	export_func = _stf_export
+	understood_blender_types = [Squirrelbite_Avatar_Setup]
+	import_resource = _stf_import
+	export_resource = _stf_export
 
 	blender_property_name = _blender_property_name
 	single = True
 	filter = [bpy.types.Collection]
-	draw_component_func = _draw_component
+	draw = _draw_component
 
 	like_types = []
 

@@ -91,24 +91,24 @@ def _create_scale_to_stf_func(blender_object: bpy.types.Object) -> Callable:
 	return _ret
 
 
-def stf_node_resolve_property_path_to_stf_func(context: STF_ExportContext, blender_object: bpy.types.Object, application_object_property_index: int, data_path: str) -> STFPropertyPathPart | None:
+def stf_node_export_blender_animation(context: STF_ExportContext, blender_resource: bpy.types.Object, property_index: int, blender_property_path: str) -> STFPropertyPathPart | None:
 
-	has_constraints = len(blender_object.constraints) > 0
+	has_constraints = len(blender_resource.constraints) > 0
 
-	if(match := re.search(r"^location", data_path)):
-		return STFPropertyPathPart([blender_object.stf_info.stf_id, "t"], _create_translation_to_stf_func(blender_object), translation_index_conversion_to_stf, has_constraints)
+	if(match := re.search(r"^location", blender_property_path)):
+		return STFPropertyPathPart([blender_resource.stf_info.stf_id, "t"], _create_translation_to_stf_func(blender_resource), translation_index_conversion_to_stf, has_constraints)
 
-	if(match := re.search(r"^rotation_quaternion", data_path)):
-		return STFPropertyPathPart([blender_object.stf_info.stf_id, "r"], _create_rotation_to_stf_func(blender_object), rotation_index_conversion_to_stf, has_constraints)
+	if(match := re.search(r"^rotation_quaternion", blender_property_path)):
+		return STFPropertyPathPart([blender_resource.stf_info.stf_id, "r"], _create_rotation_to_stf_func(blender_resource), rotation_index_conversion_to_stf, has_constraints)
 
-	if(match := re.search(r"^rotation_euler", data_path)):
-		return STFPropertyPathPart([blender_object.stf_info.stf_id, "r_euler"], _create_rotation_euler_to_stf_func(blender_object), rotation_euler_index_conversion_to_stf, has_constraints)
+	if(match := re.search(r"^rotation_euler", blender_property_path)):
+		return STFPropertyPathPart([blender_resource.stf_info.stf_id, "r_euler"], _create_rotation_euler_to_stf_func(blender_resource), rotation_euler_index_conversion_to_stf, has_constraints)
 
-	if(match := re.search(r"^scale", data_path)):
-		return STFPropertyPathPart([blender_object.stf_info.stf_id, "s"], _create_scale_to_stf_func(blender_object), scale_index_conversion_to_stf, has_constraints)
+	if(match := re.search(r"^scale", blender_property_path)):
+		return STFPropertyPathPart([blender_resource.stf_info.stf_id, "s"], _create_scale_to_stf_func(blender_resource), scale_index_conversion_to_stf, has_constraints)
 
-	if(match := re.search(r"^hide_render", data_path)):
-		return STFPropertyPathPart([blender_object.stf_info.stf_id, "enabled"], lambda v: [0 if v[0] else 1], None, has_constraints)
+	if(match := re.search(r"^hide_render", blender_property_path)):
+		return STFPropertyPathPart([blender_resource.stf_info.stf_id, "enabled"], lambda v: [0 if v[0] else 1], None, has_constraints)
 
 	return None
 
@@ -196,22 +196,22 @@ def _create_scale_to_blender_func(blender_object: bpy.types.Object) -> Callable:
 	return _ret
 
 
-def stf_node_resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], blender_object: Any) -> BlenderPropertyPathPart | None:
-	blender_object = context.get_imported_resource(stf_path[0])
-	match(stf_path[1]):
+def stf_node_import_stf_animation_property_path_func(context: STF_ImportContext, stf_property_path: list[str], blender_resource: Any) -> BlenderPropertyPathPart | None:
+	blender_resource = context.get_imported_resource(stf_property_path[0])
+	match(stf_property_path[1]):
 		case "t":
-			return BlenderPropertyPathPart("OBJECT", "location", _create_translation_to_blender_func(blender_object), translation_index_conversion_to_blender, blender_object)
+			return BlenderPropertyPathPart("OBJECT", "location", _create_translation_to_blender_func(blender_resource), translation_index_conversion_to_blender, blender_resource)
 		case "r":
-			return BlenderPropertyPathPart("OBJECT", "rotation_quaternion", _create_rotation_to_blender_func(blender_object), rotation_index_conversion_to_blender, blender_object)
+			return BlenderPropertyPathPart("OBJECT", "rotation_quaternion", _create_rotation_to_blender_func(blender_resource), rotation_index_conversion_to_blender, blender_resource)
 		case "r_euler":
-			return BlenderPropertyPathPart("OBJECT", "rotation_euler", _create_rotation_euler_to_blender_func(blender_object), rotation_euler_index_conversion_to_blender, blender_object)
+			return BlenderPropertyPathPart("OBJECT", "rotation_euler", _create_rotation_euler_to_blender_func(blender_resource), rotation_euler_index_conversion_to_blender, blender_resource)
 		case "s":
-			return BlenderPropertyPathPart("OBJECT", "scale", _create_scale_to_blender_func(blender_object), scale_index_conversion_to_blender, blender_object)
+			return BlenderPropertyPathPart("OBJECT", "scale", _create_scale_to_blender_func(blender_resource), scale_index_conversion_to_blender, blender_resource)
 		case "instance":
-			return BlenderPropertyPathPart(slot_link_target = blender_object) + context.resolve_stf_property_path([blender_object.stf_instance.stf_id] + stf_path[2:], blender_object)
+			return BlenderPropertyPathPart(slot_link_target = blender_resource) + context.resolve_stf_property_path([blender_resource.stf_instance.stf_id] + stf_property_path[2:], blender_resource)
 		case "components":
-			return BlenderPropertyPathPart(slot_link_target = blender_object) + context.resolve_stf_property_path(stf_path[2:], blender_object)
+			return BlenderPropertyPathPart(slot_link_target = blender_resource) + context.resolve_stf_property_path(stf_property_path[2:], blender_resource)
 		case "enabled":
-			return BlenderPropertyPathPart("OBJECT", "hide_render", lambda v: [not v[0]], slot_link_target = blender_object)
+			return BlenderPropertyPathPart("OBJECT", "hide_render", lambda v: [not v[0]], slot_link_target = blender_resource)
 
 	return None

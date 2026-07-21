@@ -18,14 +18,14 @@ float_threshold_blendshape = 0.0001
 
 # Mesh import and export are the lowest hanging fruits for performance improvements.
 
-def export_stf_mesh(context: STF_ExportContext, application_object: Any, parent_application_object: Any) -> tuple[dict, str] | STFReport:
+def export_stf_mesh(context: STF_ExportContext, blender_resource: Any, context_resource: Any) -> tuple[dict, str] | STFReport:
 	#import time
 	#time_start = time.time()
 
-	blender_mesh: bpy.types.Mesh = application_object
+	blender_mesh: bpy.types.Mesh = blender_resource
 	ensure_stf_id(context, blender_mesh)
 
-	armature: bpy.types.Armature = parent_application_object
+	armature: bpy.types.Armature = context_resource
 
 	tmp_blender_mesh_object: bpy.types.Object = bpy.data.objects.new("TRASH", blender_mesh)
 	context.register_trash_object(tmp_blender_mesh_object)

@@ -232,12 +232,12 @@ def draw_component(
 			box.separator(factor=1, type="LINE")
 			draw_multiline_text(box, selected_module.__doc__)
 
-		if(is_instance and hasattr(selected_module, "draw_component_instance_func")):
+		if(is_instance and hasattr(selected_module, "draw_instance")):
 			box.separator(factor=1, type="LINE")
-			selected_module.draw_component_instance_func(box, context, component_ref, stf_application_object, component)
-		elif(not is_instance and hasattr(selected_module, "draw_component_func")):
+			selected_module.draw_instance(box, context, component_ref, stf_application_object, component)
+		elif(not is_instance and hasattr(selected_module, "draw")):
 			box.separator(factor=1, type="LINE")
-			selected_module.draw_component_func(box, context, component_ref, stf_application_object, component)
+			selected_module.draw(box, context, component_ref, stf_application_object, component)
 		else:
 			pass
 	else:

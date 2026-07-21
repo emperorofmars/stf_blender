@@ -57,7 +57,7 @@ class STF_ImportState(STF_State_Base):
 	def determine_property_resolution_handler(self, stf_id: str) -> STF_HandlerBase | None:
 		if(json_resource := self.get_json_resource(stf_id)):
 			handler = self.determine_handler(json_resource)
-			if(hasattr(handler, "resolve_stf_property_to_blender_func")):
+			if(hasattr(handler, "import_stf_animation_property_path_func")):
 				return handler
 		return None
 

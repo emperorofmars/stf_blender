@@ -9,11 +9,11 @@ class STF_Material_Value_Float(STF_Material_Value_Base):
 	number: bpy.props.FloatProperty(name="Float") # type: ignore
 
 
-def _value_import_func(context: STF_ImportContext, json_material: dict, blender_material: bpy.types.Material, json_resource: Any, value: STF_Material_Value_Float):
+def _import_material_value(context: STF_ImportContext, json_material: dict, blender_material: bpy.types.Material, json_resource: Any, value: STF_Material_Value_Float):
 	value.number = json_resource
 
 
-def _value_export_func(context: STF_ExportContext, json_material: dict, blender_material: bpy.types.Material, value: STF_Material_Value_Float) -> Any:
+def _export_material_value(context: STF_ExportContext, json_material: dict, blender_material: bpy.types.Material, value: STF_Material_Value_Float) -> Any:
 	return value.number
 
 
@@ -21,22 +21,22 @@ def _draw_func(layout: bpy.types.UILayout, context: bpy.types.Context, blender_m
 	layout.prop(value, "number")
 
 
-def _resolve_property_path_to_stf_func(context: STF_ExportContext, blender_property_path: str, value: STF_Material_Value_Float) -> STFPropertyPathPart | None:
+def _export_blender_animation(context: STF_ExportContext, blender_property_path: str, value: STF_Material_Value_Float) -> STFPropertyPathPart | None:
 	return STFPropertyPathPart(["number"])
 
-def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str]) -> BlenderPropertyPathPart | None:
+def _import_stf_animation_property_path_func(context: STF_ImportContext, stf_path: list[str]) -> BlenderPropertyPathPart | None:
 	return BlenderPropertyPathPart("MATERIAL", "number")
 
 
 class STF_Material_Value_Module_Float(STF_Material_Value_Module_Base):
 	value_type = "float"
 	property_name = "stf_material_value_float"
-	value_import_func = _value_import_func  # pyright: ignore[reportAssignmentType]
-	value_export_func = _value_export_func  # pyright: ignore[reportAssignmentType]
+	import_material_value = _import_material_value  # pyright: ignore[reportAssignmentType]
+	export_material_value = _export_material_value  # pyright: ignore[reportAssignmentType]
 	draw_func = _draw_func  # pyright: ignore[reportAssignmentType]
 
-	resolve_property_path_to_stf_func = _resolve_property_path_to_stf_func  # pyright: ignore[reportAssignmentType]
-	resolve_stf_property_to_blender_func = _resolve_stf_property_to_blender_func
+	export_blender_animation = _export_blender_animation  # pyright: ignore[reportAssignmentType]
+	import_stf_animation_property_path_func = _import_stf_animation_property_path_func
 
 
 def register():

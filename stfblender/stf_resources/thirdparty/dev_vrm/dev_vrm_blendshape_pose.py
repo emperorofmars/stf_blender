@@ -167,13 +167,13 @@ class STF_Module_VRM_Blendshape_Pose(STF_Handler_Data):
 	"""Define a blendshape pose. This is useful for VR/V-Tubing avatars that get will get converted to VRM, since VRM doesn't support animations"""
 	stf_type = _stf_type
 	stf_category = STF_Category.DATA
-	understood_application_types = [VRM_Blendshape_Pose]
-	import_func = _stf_import
-	export_func = _stf_export
+	understood_blender_types = [VRM_Blendshape_Pose]
+	import_resource = _stf_import
+	export_resource = _stf_export
 
 	blender_property_name = _blender_property_name
 	draw_resource_func = _draw_resource
-	get_components_func = get_components_from_data_resource
+	get_components = get_components_from_data_resource
 
 
 register_stf_handlers = [

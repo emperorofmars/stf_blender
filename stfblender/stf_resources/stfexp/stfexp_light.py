@@ -19,7 +19,7 @@ class STFSetSTFEXPLightIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
 Import
 """
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
+def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: Any) -> Any | STFReport:
 	blender_light_type = "POINT"
 	match(json_resource.get("light_type")):
 		case "point":
@@ -37,7 +37,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	context.register_imported_resource(stf_id, (blender_object, blender_light))
 
 	if(not blender_object or type(blender_object) is not bpy.types.Object):
-		context.report(STFReport("Failed to import light", STFReportSeverity.Error, stf_id, _stf_type, context_object))
+		return STFReport("Failed to import light", STFReportSeverity.Error, stf_id, _stf_type, context_resource)
 
 	# todo figure out energy conversion properly
 	if("brightness" in json_resource): blender_light.energy = json_resource["brightness"]
@@ -62,15 +62,15 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 Export
 """
 
-def _can_handle_application_object_func(application_object: Any) -> int:
-	if(type(application_object) is tuple and type(application_object[0]) is bpy.types.Object and isinstance(application_object[1], bpy.types.Light) and application_object[1].type in ["POINT", "SUN", "SPOT"]):
+def _can_handle_blender_resource(blender_resource: Any) -> int:
+	if(type(blender_resource) is tuple and type(blender_resource[0]) is bpy.types.Object and isinstance(blender_resource[1], bpy.types.Light) and blender_resource[1].type in ["POINT", "SUN", "SPOT"]):
 		return 1000
 	else:
 		return -1
 
-def _stf_export(context: STF_ExportContext, application_object: Any, context_object: Any) -> tuple[dict, str]:
-	blender_object: bpy.types.Object = application_object[0]
-	blender_light: bpy.types.Light = application_object[1]
+def _stf_export(context: STF_ExportContext, blender_resource: Any, context_resource: Any) -> tuple[dict, str]:
+	blender_object: bpy.types.Object = blender_resource[0]
+	blender_light: bpy.types.Light = blender_resource[1]
 	ensure_stf_id(context, blender_object.stf_instance)
 
 	ret = {
@@ -103,23 +103,23 @@ def _stf_export(context: STF_ExportContext, application_object: Any, context_obj
 Animation
 """
 
-def _resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: Any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart | None:
-	if(match := re.search(r"^temperature", data_path)):
-		return STFPropertyPathPart([application_object.stf_info.stf_id, "instance", "temperature"])
-	elif(match := re.search(r"^color", data_path)):
-		return STFPropertyPathPart([application_object.stf_info.stf_id, "instance", "color"])
-	elif(match := re.search(r"^energy", data_path)):
-		return STFPropertyPathPart([application_object.stf_info.stf_id, "instance", "brightness"]) # todo converter
-	elif(match := re.search(r"^shadow_soft_size", data_path)):
-		return STFPropertyPathPart([application_object.stf_info.stf_id, "instance", "range"])
-	elif(match := re.search(r"^spot_size", data_path)):
-		return STFPropertyPathPart([application_object.stf_info.stf_id, "instance", "spot_angle"])
+def _export_blender_animation(context: STF_ExportContext, blender_resource: Any, property_index: int, blender_property_path: str) -> STFPropertyPathPart | None:
+	if(match := re.search(r"^temperature", blender_property_path)):
+		return STFPropertyPathPart([blender_resource.stf_info.stf_id, "instance", "temperature"])
+	elif(match := re.search(r"^color", blender_property_path)):
+		return STFPropertyPathPart([blender_resource.stf_info.stf_id, "instance", "color"])
+	elif(match := re.search(r"^energy", blender_property_path)):
+		return STFPropertyPathPart([blender_resource.stf_info.stf_id, "instance", "brightness"]) # todo converter
+	elif(match := re.search(r"^shadow_soft_size", blender_property_path)):
+		return STFPropertyPathPart([blender_resource.stf_info.stf_id, "instance", "range"])
+	elif(match := re.search(r"^spot_size", blender_property_path)):
+		return STFPropertyPathPart([blender_resource.stf_info.stf_id, "instance", "spot_angle"])
 	# todo enabled maybe?
 	return None
 
 
-def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: Any) -> BlenderPropertyPathPart | None:
-	match(stf_path[1]):
+def _import_stf_animation_property_path_func(context: STF_ImportContext, stf_property_path: list[str], blender_resource: Any) -> BlenderPropertyPathPart | None:
+	match(stf_property_path[1]):
 		case "temperature":
 			return BlenderPropertyPathPart("LIGHT", "temperature")
 		case "color":
@@ -141,17 +141,17 @@ class Handler_STFEXP_Light(STF_Handler_BlenderNative, STF_Handler_Animation):
 	stf_type = _stf_type
 	stf_category = STF_Category.INSTANCE
 	like_types = ["light"]
-	understood_application_types = [tuple]
-	import_func = _stf_import
-	export_func = _stf_export
-	can_handle_application_object_func = _can_handle_application_object_func
-	get_stf_prop_holder = lambda bo: bo[0].stf_instance
+	understood_blender_types = [tuple]
+	import_resource = _stf_import
+	export_resource = _stf_export
+	can_handle_blender_resource = _can_handle_blender_resource
+	get_stf_prop_holder = lambda blender_resource: blender_resource[0].stf_instance
 	operator_set_stf_id = STFSetSTFEXPLightIDOperator.bl_idname
 
-	understood_application_property_path_types = [bpy.types.Object]
-	understood_application_property_path_parts = ["temperature", "color", "energy", "shadow_soft_size", "spot_size"]
-	resolve_property_path_to_stf_func = _resolve_property_path_to_stf_func
-	resolve_stf_property_to_blender_func = _resolve_stf_property_to_blender_func
+	understood_blender_animation_types = [bpy.types.Object]
+	understood_blender_animation_data_paths = ["temperature", "color", "energy", "shadow_soft_size", "spot_size"]
+	export_blender_animation = _export_blender_animation
+	import_stf_animation_property_path_func = _import_stf_animation_property_path_func
 
 
 register_stf_handlers = [

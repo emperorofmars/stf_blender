@@ -339,10 +339,10 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 					row.prop(mapping, "t_max", text="Max")
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, context_object: Any) -> Any | STFReport:
-	component_ref, component = add_component(context_object, _blender_property_name, id, _stf_type)  # pyright: ignore[reportAssignmentType]
+def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: Any) -> Any | STFReport:
+	component_ref, component = add_component(context_resource, _blender_property_name, stf_id, _stf_type)  # pyright: ignore[reportAssignmentType]
 	component: STFEXP_Armature_Humanoid = component
-	import_component_base(context, component, json_resource, _blender_property_name, context_object)
+	import_component_base(context, component, json_resource, _blender_property_name, context_resource)
 
 	component.locomotion_type = json_resource.get("locomotion_type", "planti")
 	component.no_jaw = json_resource.get("no_jaw", False)
@@ -386,8 +386,9 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, contex
 	return component
 
 
-def _stf_export(context: STF_ExportContext, component: STFEXP_Armature_Humanoid, context_object: Any) -> tuple[dict, str] | STFReport:
-	ret = export_component_base(context, _stf_type, component, _blender_property_name, context_object)
+def _stf_export(context: STF_ExportContext, blender_resource: STFEXP_Armature_Humanoid, context_resource: Any) -> tuple[dict, str] | STFReport:
+	component: STFEXP_Armature_Humanoid = blender_resource
+	ret = export_component_base(context, _stf_type, component, _blender_property_name, context_resource)
 	ret["locomotion_type"] = component.locomotion_type
 	ret["no_jaw"] = component.no_jaw
 
@@ -410,7 +411,7 @@ def _stf_export(context: STF_ExportContext, component: STFEXP_Armature_Humanoid,
 		else:
 			continue
 		if(mapping.bone):
-			json_mapping = { "target": context_object.bones[mapping.bone].stf_info.stf_id }
+			json_mapping = { "target": context_resource.bones[mapping.bone].stf_info.stf_id }
 			if(mapping.set_rotation_limits and mapping_definition[4] and len(mapping_definition[4]) == 3):
 				json_limits = {}
 				if(mapping_definition[4][0]):
@@ -432,14 +433,14 @@ class Handler_STFEXP_Armature_Humanoid(STF_Handler_Component):
 	stf_type = _stf_type
 	stf_category = STF_Category.COMPONENT
 	like_types = ["armature_humanoid"]
-	understood_application_types = [STFEXP_Armature_Humanoid]
-	import_func = _stf_import
-	export_func = _stf_export
+	understood_blender_types = [STFEXP_Armature_Humanoid]
+	import_resource = _stf_import
+	export_resource = _stf_export
 
 	blender_property_name = _blender_property_name
 	single = True
 	filter = [bpy.types.Armature]
-	draw_component_func = _draw_component
+	draw = _draw_component
 
 	pretty_name_template = "Humanoid Bone Mappings"
 

@@ -20,7 +20,7 @@ def update_armature_instance_component_standins(context: bpy.types.Context, blen
 				else:
 					continue
 			if(stf_module := find_component_handler(stf_modules, component_ref.stf_type)):
-				if(hasattr(stf_module, "set_component_instance_standin_func")):
+				if(hasattr(stf_module, "update_component_instance")):
 					for standin_component_ref in blender_object.stf_instance_armature_component_standins.stf_components:
 						if(standin_component_ref.stf_id == component_ref.stf_id):
 							for standin_component in getattr(blender_object, component_ref.blender_property_name):
@@ -31,7 +31,7 @@ def update_armature_instance_component_standins(context: bpy.types.Context, blen
 						standin_component_ref, standin_component = add_component(blender_object, component_ref.blender_property_name, component_ref.stf_id, component_ref.stf_type, blender_object.stf_instance_armature_component_standins.stf_components)
 					standin_component_ref.bone = bone.name
 					if(not standin_component_ref.override):
-						set_func = getattr(stf_module, "set_component_instance_standin_func")
+						set_func = getattr(stf_module, "update_component_instance")
 						set_func(context, component_ref, blender_object, component, standin_component)  # pyright: ignore[reportPossiblyUnboundVariable]
 					handled_ids.append(component_ref.stf_id)
 
@@ -59,8 +59,8 @@ def serialize_standin(context: STF_ExportContext, blender_object: bpy.types.Obje
 
 	stf_modules = get_blender_native_component_handlers()
 	if(stf_module := find_component_handler(stf_modules, component_standin_ref.stf_type)):
-		if(hasattr(stf_module, "serialize_component_instance_standin_func")):
-			return stf_module.serialize_component_instance_standin_func(context, component_standin_ref, standin_component, blender_object)
+		if(hasattr(stf_module, "export_component_instance")):
+			return stf_module.export_component_instance(context, component_standin_ref, standin_component, blender_object)
 	return None
 
 
@@ -78,9 +78,9 @@ def parse_standin(context: STF_ImportContext, blender_object: bpy.types.Object, 
 
 	stf_modules = get_blender_native_component_handlers()
 	if(stf_module := find_component_handler(stf_modules, standin_ref.stf_type)):
-		if(hasattr(stf_module, "serialize_component_instance_standin_func")):
+		if(hasattr(stf_module, "export_component_instance")):
 			standin_ref.override = True
-			return stf_module.parse_component_instance_standin_func(context, json_resource, standin_ref, standin_component, blender_object)
+			return stf_module.import_component_instance(context, json_resource, standin_ref, standin_component, blender_object)
 
 
 class UpdateArmatureInstanceComponentStandins(bpy.types.Operator):

@@ -7,126 +7,120 @@ from .material_value_modules import blender_material_value_modules
 from .stf_material_operators import add_property, add_value_to_property
 from .convert_blender_material_to_stf import blender_material_to_stf
 from .convert_stf_material_to_blender import stf_material_to_blender
-from .stf_material_property_conversion import stf_material_resolve_property_path_to_stf_func, stf_material_resolve_stf_property_to_blender_func
+from .stf_material_property_conversion import stf_material_export_blender_animation, stf_material_import_stf_animation_property_path_func
 from .stf_material_ui import STFAddMaterialComponentOperator, STFEditMaterialComponentIdOperator, STFRemoveMaterialComponentOperator, STFSetMaterialIDOperator, draw_material_ui
 
 
 _stf_type = "stf.material"
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any | STFReport:
-	blender_material = bpy.data.materials.new(json_resource.get("name", "STF Material"))
-	blender_material.stf_info.stf_id = stf_id
-	if(json_resource.get("name")):
-		blender_material.stf_info.stf_name = json_resource["name"]
-		blender_material.stf_info.stf_name_source_of_truth = True
-	blender_material.stf_info.stf_is_source_of_truth = True
-	context.register_imported_resource(stf_id, blender_material)
-
-	for style_hint in json_resource.get("style_hints", []):
-		hint = blender_material.stf_material.style_hints.add()
-		hint.value = style_hint
-
-	for stf_target, stf_shaders in blender_material.get("shader_targets", {}).items():
-		shader_target = blender_material.stf_material.shader_targets.add()
-		shader_target.target = stf_target
-		for stf_shader in stf_shaders:
-			shader = shader_target.shaders.add()
-			shader.value = stf_shader
-
-	for property_type, stf_property in json_resource.get("properties", {}).items():
-		for mat_module in blender_material_value_modules:
-			mat_module: STF_Material_Value_Module_Base = mat_module
-			if(mat_module.value_type == stf_property.get("type")):
-				prop, value_ref, value = add_property(blender_material, property_type, mat_module)
-				stf_values = stf_property.get("values")
-				if(len(stf_values) > 0):
-					mat_module.value_import_func(context, json_resource, blender_material, stf_values[0], value)
-					if(len(stf_values) > 1):
-						prop.multi_value = True
-						for stf_value in stf_values[1:]:
-							value_ref, value = add_value_to_property(blender_material, len(blender_material.stf_material.properties) - 1)
-							mat_module.value_import_func(context, json_resource, blender_material, stf_value, value)
-				break
-
-	stf_material_to_blender(blender_material)
-
-	return blender_material
-
-
-def _stf_export(context: STF_ExportContext, application_object: Any, context_object: Any) -> tuple[dict, str] | STFReport:
-	blender_material: bpy.types.Material = application_object
-	ensure_stf_id(context, blender_material)
-
-	ret = {
-		"type": _stf_type,
-		"name": blender_material.stf_info.stf_name if blender_material.stf_info.stf_name_source_of_truth else blender_material.name,
-		"properties": {},
-	}
-
-	if(not blender_material.stf_material.stf_is_source_of_truth):
-		blender_material_to_stf(blender_material)
-
-	ret["style_hints"] = []
-	for style_hint in blender_material.stf_material.style_hints:
-		ret["style_hints"].append(style_hint.value)
-
-	ret["shader_targets"] = {}
-	for target in blender_material.stf_material.shader_targets:
-		ret["shader_targets"][target.target] = []
-		for shader in target.shaders:
-			ret["shader_targets"][target.target].append(shader.value)
-
-
-	for property in blender_material.stf_material.properties:
-		property: STF_Material_Property = property
-		json_prop = {"type": property.value_type}
-
-		values = []
-		for value_ref in property.values:
-			for mat_module in blender_material_value_modules:
-				mat_module: STF_Material_Value_Module_Base = mat_module
-				if(mat_module.property_name == property.value_property_name):
-					for property_value in getattr(blender_material, property.value_property_name):
-						if(property_value.value_id == value_ref.value_id):
-							serialized_value = mat_module.value_export_func(context, ret, blender_material, property_value)
-							if(serialized_value is not None):
-								values.append(serialized_value)
-							else:
-								context.report(STFReport("Failed to export material property: " + property.property_type + " ( " + property.value_property_name + " )", STFReportSeverity.Warn, blender_material.stf_info.stf_id, _stf_type, blender_material))
-							break
-
-		json_prop["values"] = values
-
-		ret["properties"][property.property_type] = json_prop
-
-	return ret, blender_material.stf_info.stf_id
-
-
 class Handler_STF_Material(STF_Handler_BlenderNative, STF_Handler_ComponentHolder, STF_Handler_Animation):
 	stf_type = _stf_type
 	stf_category = STF_Category.DATA
 	like_types = ["material"]
-	understood_application_types = [bpy.types.Material]
-	import_func = _stf_import
-	export_func = _stf_export
+	understood_blender_types = [bpy.types.Material]
+
 	operator_set_stf_id = STFSetMaterialIDOperator.bl_idname
+
 	draw = draw_material_ui
 
-	get_components_func = get_components_from_object
+	@staticmethod
+	def import_resource(context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: Any) -> Any | STFReport:
+		blender_material = bpy.data.materials.new(json_resource.get("name", "STF Material"))
+		blender_material.stf_info.stf_id = stf_id
+		if(json_resource.get("name")):
+			blender_material.stf_info.stf_name = json_resource["name"]
+			blender_material.stf_info.stf_name_source_of_truth = True
+		blender_material.stf_info.stf_is_source_of_truth = True
+		context.register_imported_resource(stf_id, blender_material)
+
+		for style_hint in json_resource.get("style_hints", []):
+			hint = blender_material.stf_material.style_hints.add()
+			hint.value = style_hint
+
+		for stf_target, stf_shaders in blender_material.get("shader_targets", {}).items():
+			shader_target = blender_material.stf_material.shader_targets.add()
+			shader_target.target = stf_target
+			for stf_shader in stf_shaders:
+				shader = shader_target.shaders.add()
+				shader.value = stf_shader
+
+		for property_type, stf_property in json_resource.get("properties", {}).items():
+			for mat_module in blender_material_value_modules:
+				mat_module: STF_Material_Value_Module_Base = mat_module
+				if(mat_module.value_type == stf_property.get("type")):
+					prop, value_ref, value = add_property(blender_material, property_type, mat_module)
+					stf_values = stf_property.get("values")
+					if(len(stf_values) > 0):
+						mat_module.import_material_value(context, json_resource, blender_material, stf_values[0], value)
+						if(len(stf_values) > 1):
+							prop.multi_value = True
+							for stf_value in stf_values[1:]:
+								value_ref, value = add_value_to_property(blender_material, len(blender_material.stf_material.properties) - 1)
+								mat_module.import_material_value(context, json_resource, blender_material, stf_value, value)
+					break
+
+		stf_material_to_blender(blender_material)
+
+		return blender_material
+
+	@staticmethod
+	def export_resource(context: STF_ExportContext, blender_resource: Any, context_resource: Any) -> tuple[dict, str] | STFReport:
+		blender_material: bpy.types.Material = blender_resource
+		ensure_stf_id(context, blender_material)
+
+		ret = {
+			"type": _stf_type,
+			"name": blender_material.stf_info.stf_name if blender_material.stf_info.stf_name_source_of_truth else blender_material.name,
+			"properties": {},
+		}
+
+		if(not blender_material.stf_material.stf_is_source_of_truth):
+			blender_material_to_stf(blender_material)
+
+		ret["style_hints"] = []
+		for style_hint in blender_material.stf_material.style_hints:
+			ret["style_hints"].append(style_hint.value)
+
+		ret["shader_targets"] = {}
+		for target in blender_material.stf_material.shader_targets:
+			ret["shader_targets"][target.target] = []
+			for shader in target.shaders:
+				ret["shader_targets"][target.target].append(shader.value)
+
+		for property in blender_material.stf_material.properties:
+			property: STF_Material_Property = property
+			json_prop = {"type": property.value_type}
+
+			values = []
+			for value_ref in property.values:
+				for mat_module in blender_material_value_modules:
+					mat_module: STF_Material_Value_Module_Base = mat_module
+					if(mat_module.property_name == property.value_property_name):
+						for property_value in getattr(blender_material, property.value_property_name):
+							if(property_value.value_id == value_ref.value_id):
+								serialized_value = mat_module.export_material_value(context, ret, blender_material, property_value)
+								if(serialized_value is not None):
+									values.append(serialized_value)
+								else:
+									context.report(STFReport("Failed to export material property: " + property.property_type + " ( " + property.value_property_name + " )", STFReportSeverity.Warn, blender_material.stf_info.stf_id, _stf_type, blender_material))
+								break
+
+			json_prop["values"] = values
+
+			ret["properties"][property.property_type] = json_prop
+
+		return ret, blender_material.stf_info.stf_id
+
+	get_components = get_components_from_object
 	operator_component_add = STFAddMaterialComponentOperator.bl_idname
 	operator_component_remove = STFRemoveMaterialComponentOperator.bl_idname
 	operator_component_edit = STFEditMaterialComponentIdOperator.bl_idname
 
-	understood_application_property_path_types = [bpy.types.Object]
-	understood_application_property_path_parts = ["stf_material_value_"]
-	resolve_property_path_to_stf_func = stf_material_resolve_property_path_to_stf_func
-	resolve_stf_property_to_blender_func = stf_material_resolve_stf_property_to_blender_func
-
-
-register_stf_handlers = [
-	Handler_STF_Material
-]
+	understood_blender_animation_types = [bpy.types.Object]
+	understood_blender_animation_data_paths = ["stf_material_value_"]
+	export_blender_animation = stf_material_export_blender_animation
+	import_stf_animation_property_path_func = stf_material_import_stf_animation_property_path_func
 
 
 def register():

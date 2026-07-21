@@ -36,9 +36,9 @@ class STF_ExportContext(ISTF_ExportContext):
 		"""Run hooks on application object"""
 		if(hooks := self._state.determine_hooks(application_object)):
 			for hook in hooks:
-				if(hook.hook_can_handle_application_object_func(application_object)):
+				if(hook.hook_can_handle_blender_resource(application_object)):
 					if("components" not in json_resource): json_resource["components"] = []
-					hook.hook_apply_func(self, application_object, context_object)
+					hook.hook_export_resource(self, application_object, context_object)
 
 
 	def __run_components(self, blender_object: Any, json_resource: dict, stf_id: str, components: list[Any]):
@@ -47,7 +47,7 @@ class STF_ExportContext(ISTF_ExportContext):
 			if("components" not in json_resource): json_resource["components"] = []
 			for component in components:
 				if(selected_handler := self._state.determine_handler(component, "component")):
-					component_ret = selected_handler.export_func(self, component, blender_object)
+					component_ret = selected_handler.export_resource(self, component, blender_object)
 					if(component_ret and type(component_ret) is not STFReport):
 						component_json_resource, component_id = component_ret # pyright: ignore[reportGeneralTypeIssues]
 						self._state.register_serialized_resource(component, component_json_resource, component_id)
@@ -57,9 +57,9 @@ class STF_ExportContext(ISTF_ExportContext):
 						if(type(component_ret) is STFReport):
 							self.report(component_ret)
 						else:
-							self.report(STFReport("Export Component Failed", STFReportSeverity.Error, stf_id, selected_handler.stf_type, blender_object))
+							self.report(STFReport("Export Component Failed", STFReportSeverity.Error, stf_id, selected_handler.stf_type, component))
 				else:
-					self.report(STFReport("Unsupported Component", STFReportSeverity.Warn, None, None, blender_object))
+					self.report(STFReport("Unsupported Component", STFReportSeverity.Warn, None, None, component))
 
 
 	def serialize_resource(self, json_parent: dict, blender_object: Any, context_object: Any = None, stf_category: STF_Category | str | None = None, export_fail_severity: STFReportSeverity = STFReportSeverity.Error) -> int | None:
@@ -81,7 +81,7 @@ class STF_ExportContext(ISTF_ExportContext):
 		if(existing_id := self.get_resource_id(blender_object)): return existing_id
 
 		if(selected_handler := self._state.determine_handler(blender_object, stf_category)):
-			handler_ret = selected_handler.export_func(self, blender_object, context_object)
+			handler_ret = selected_handler.export_resource(self, blender_object, context_object)
 
 			if(handler_ret and type(handler_ret) is not STFReport):
 				json_resource, resource_id = handler_ret # pyright: ignore[reportGeneralTypeIssues]
@@ -91,9 +91,9 @@ class STF_ExportContext(ISTF_ExportContext):
 					# Export components from application native constructs
 					self.__run_hooks(blender_object, context_object, json_resource, resource_id)
 
-					if(hasattr(selected_handler, "get_components_func")):
+					if(hasattr(selected_handler, "get_components")):
 						# Export components explicitly defined
-						components = selected_handler.get_components_func(blender_object)
+						components = selected_handler.get_components(blender_object)
 						if(components):
 							self.__run_components(blender_object, json_resource, resource_id, components)
 
@@ -138,7 +138,7 @@ class STF_ExportContext(ISTF_ExportContext):
 		if(data_path.startswith(".")): data_path = data_path[1:]
 
 		if(selected_handler := self._state.determine_property_resolution_handler(blender_object, data_path)):
-			return selected_handler.resolve_property_path_to_stf_func(self, blender_object, property_index, data_path)
+			return selected_handler.export_blender_animation(self, blender_object, property_index, data_path)
 
 		return None
 

@@ -27,14 +27,14 @@ def draw_blender_native_panel(
 
 	# Components
 	if(stf_handler.stf_category in [STF_Category.DATA, STF_Category.NODE]
-		and hasattr(stf_handler, "get_components_func")
-		and hasattr(stf_handler, "get_components_holder_func")
+		and hasattr(stf_handler, "get_components")
+		and hasattr(stf_handler, "get_components_holder")
 		and hasattr(stf_handler, "operator_component_add")
 		and hasattr(stf_handler, "operator_component_remove")
 		and hasattr(stf_handler, "operator_component_edit")
 	):
 		layout.separator(factor=2, type="LINE")
 		header, body = layout.panel("stf.node_components", default_closed = False)
-		header.label(text="STF Components (" + str(len(stf_handler.get_components_func(blender_resource))) + ")", icon="GROUP")
-		if(body): draw_components_ui(body, context, stf_handler.get_stf_prop_holder(blender_resource), stf_handler.get_components_holder_func(blender_resource), stf_handler.operator_component_add, stf_handler.operator_component_remove, stf_handler.operator_component_edit)
+		header.label(text="STF Components (" + str(len(stf_handler.get_components(blender_resource))) + ")", icon="GROUP")
+		if(body): draw_components_ui(body, context, stf_handler.get_stf_prop_holder(blender_resource), stf_handler.get_components_holder(blender_resource), stf_handler.operator_component_add, stf_handler.operator_component_remove, stf_handler.operator_component_edit)
 

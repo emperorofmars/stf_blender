@@ -6,12 +6,12 @@ from .stf_material_definition import STF_Material_Value_Base
 from .material_value_modules import blender_material_value_modules
 
 
-def stf_material_resolve_property_path_to_stf_func(context: STF_ExportContext, application_object: bpy.types.Object, application_object_property_index: int, data_path: str) -> STFPropertyPathPart | None:
-	if(len(application_object.material_slots) <= application_object_property_index or not application_object.material_slots[application_object_property_index].material):
+def stf_material_export_blender_animation(context: STF_ExportContext, blender_resource: bpy.types.Object, property_index: int, blender_property_path: str) -> STFPropertyPathPart | None:
+	if(len(blender_resource.material_slots) <= property_index or not blender_resource.material_slots[property_index].material):
 		return None
-	blender_material: bpy.types.Material = application_object.material_slots[application_object_property_index].material # pyright: ignore[reportAssignmentType]
+	blender_material: bpy.types.Material = blender_resource.material_slots[property_index].material # pyright: ignore[reportAssignmentType]
 
-	if(match := re.search(r"^(?P<property>stf_material_value_[a-zA-Z]+)\[(?P<index>[\d]+)\]", data_path)):
+	if(match := re.search(r"^(?P<property>stf_material_value_[a-zA-Z]+)\[(?P<index>[\d]+)\]", blender_property_path)):
 		if("property" not in match.groupdict() or "index" not in match.groupdict()):
 			return None
 
@@ -37,15 +37,15 @@ def stf_material_resolve_property_path_to_stf_func(context: STF_ExportContext, a
 
 		for mat_module in blender_material_value_modules:
 			if(mat_module.property_name == material_property.value_property_name):
-				return STFPropertyPathPart([application_object.stf_info.stf_id, "instance", "material", application_object_property_index, material_property.property_type, value_index]) + mat_module.resolve_property_path_to_stf_func(context, data_path, property_value) # pyright: ignore[reportArgumentType, reportAttributeAccessIssue]
+				return STFPropertyPathPart([blender_resource.stf_info.stf_id, "instance", "material", property_index, material_property.property_type, value_index]) + mat_module.export_blender_animation(context, blender_property_path, property_value) # pyright: ignore[reportArgumentType, reportAttributeAccessIssue]
 	return None
 
 
-def stf_material_resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: bpy.types.Object) -> BlenderPropertyPathPart | None:
-	material_index = int(stf_path[1])
-	material_property_type = stf_path[2]
-	material_property_value_index = int(stf_path[3])
-	blender_material = application_object.material_slots[int(stf_path[1])].material
+def stf_material_import_stf_animation_property_path_func(context: STF_ImportContext, stf_property_path: list[str], blender_resource: bpy.types.Object) -> BlenderPropertyPathPart | None:
+	material_index = int(stf_property_path[1])
+	material_property_type = stf_property_path[2]
+	material_property_value_index = int(stf_property_path[3])
+	blender_material = blender_resource.material_slots[int(stf_property_path[1])].material
 
 	# let material_property
 	for material_property in blender_material.stf_material.properties:
@@ -56,6 +56,6 @@ def stf_material_resolve_stf_property_to_blender_func(context: STF_ImportContext
 
 	for mat_module in blender_material_value_modules:
 		if(mat_module.property_name == material_property.value_property_name):
-			return BlenderPropertyPathPart("MATERIAL", material_property.value_property_name + "[" + str(material_property_value_index) + "]", slot_link_property_index = material_index) + mat_module.resolve_stf_property_to_blender_func(context, stf_path[4:])
+			return BlenderPropertyPathPart("MATERIAL", material_property.value_property_name + "[" + str(material_property_value_index) + "]", slot_link_property_index = material_index) + mat_module.import_stf_animation_property_path_func(context, stf_property_path[4:])
 	return None
 

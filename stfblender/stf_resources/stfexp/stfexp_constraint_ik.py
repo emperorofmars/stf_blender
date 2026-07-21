@@ -199,7 +199,7 @@ def _set_component_instance_standin(context: bpy.types.Context, component_ref: S
 	standin_component.pole.target_bone = component.pole.target_bone
 
 
-def _serialize_component_instance_standin_func(context: STF_ExportContext, component_ref: STF_Component_Ref, standin_component: STFEXP_Constraint_IK, context_object: Any) -> dict:
+def _export_component_instance(context: STF_ExportContext, component_ref: STF_Component_Ref, standin_component: STFEXP_Constraint_IK, context_object: Any) -> dict:
 	ret = { "chain_length": standin_component.chain_length }
 	_get_component = preserve_component_reference(standin_component, _blender_property_name, context_object)
 	def _handle():
@@ -211,7 +211,7 @@ def _serialize_component_instance_standin_func(context: STF_ExportContext, compo
 	context.add_task(STF_TaskSteps.DEFAULT, _handle)
 	return ret
 
-def _parse_component_instance_standin_func(context: STF_ImportContext, json_resource: dict, component_ref: STF_Component_Ref, standin_component: STFEXP_Constraint_IK, context_object: Any):
+def _import_component_instance(context: STF_ImportContext, json_resource: dict, component_ref: STF_Component_Ref, standin_component: STFEXP_Constraint_IK, context_object: Any):
 	if("chain_length" in json_resource): standin_component.chain_length = json_resource["chain_length"]
 
 	if("target" in json_resource or "pole" in json_resource):
@@ -227,13 +227,13 @@ def _parse_component_instance_standin_func(context: STF_ImportContext, json_reso
 
 """Animation"""
 
-def _resolve_property_path_to_stf_func(context: STF_ExportContext, blender_object: Any, property_index: int, data_path: str) -> STFPropertyPathPart | None:
+def _export_blender_animation(context: STF_ExportContext, blender_object: Any, property_index: int, data_path: str) -> STFPropertyPathPart | None:
 	if(match := re.search(r"^" + _blender_property_name + r"\[(?P<component_index>[\d]+)\].enabled", data_path)):
 		if(component_path := get_component_stf_path_from_collection(blender_object, _blender_property_name, int(match.groupdict()["component_index"]))):
 			return STFPropertyPathPart(component_path + ["enabled"])
 	return None
 
-def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], blender_object: Any) -> BlenderPropertyPathPart | None:
+def _import_stf_animation_property_path_func(context: STF_ImportContext, stf_path: list[str], blender_object: Any) -> BlenderPropertyPathPart | None:
 	blender_object = context.get_imported_resource(stf_path[0])
 	component_index = get_component_index(blender_object, _blender_property_name, blender_object.stf_id)
 	if(component_index is not None):
@@ -250,25 +250,25 @@ class Handler_STFEXP_Constraint_IK(STF_Handler_BoneComponent, STF_Handler_Animat
 	stf_type = _stf_type
 	stf_category = STF_Category.COMPONENT
 	like_types = ["constraint.ik", "constraint"]
-	understood_application_types = [STFEXP_Constraint_IK]
-	import_func = _stf_import
-	export_func = _stf_export
+	understood_blender_types = [STFEXP_Constraint_IK]
+	import_resource = _stf_import
+	export_resource = _stf_export
 
-	understood_application_property_path_types = [bpy.types.Object]
-	understood_application_property_path_parts = [_blender_property_name]
-	resolve_property_path_to_stf_func = _resolve_property_path_to_stf_func
-	resolve_stf_property_to_blender_func = _resolve_stf_property_to_blender_func
+	understood_blender_animation_types = [bpy.types.Object]
+	understood_blender_animation_data_paths = [_blender_property_name]
+	export_blender_animation = _export_blender_animation
+	import_stf_animation_property_path_func = _import_stf_animation_property_path_func
 
 	blender_property_name = _blender_property_name
 	single = False
 	filter = [bpy.types.Bone]
-	draw_component_func = _draw_component
+	draw = _draw_component
 
-	draw_component_instance_func = _draw_component # pyright: ignore[reportAssignmentType]
-	set_component_instance_standin_func = _set_component_instance_standin
+	draw_instance = _draw_component # pyright: ignore[reportAssignmentType]
+	update_component_instance = _set_component_instance_standin
 
-	serialize_component_instance_standin_func = _serialize_component_instance_standin_func # pyright: ignore[reportAssignmentType]
-	parse_component_instance_standin_func = _parse_component_instance_standin_func # pyright: ignore[reportAssignmentType]
+	export_component_instance = _export_component_instance # pyright: ignore[reportAssignmentType]
+	import_component_instance = _import_component_instance # pyright: ignore[reportAssignmentType]
 
 	process_func = _process_func # pyright: ignore[reportAssignmentType]
 

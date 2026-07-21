@@ -215,14 +215,14 @@ class Handler_AVA_Expressions(STF_Handler_Component):
 	stf_type = _stf_type
 	stf_category = STF_Category.COMPONENT
 	like_types = ["expressions"]
-	understood_application_types = [AVA_Expressions]
-	import_func = _stf_import
-	export_func = _stf_export
+	understood_blender_types = [AVA_Expressions]
+	import_resource = _stf_import
+	export_resource = _stf_export
 
 	blender_property_name = _blender_property_name
 	single = True
 	filter = [bpy.types.Collection]
-	draw_component_func = _draw_component
+	draw = _draw_component
 
 	pretty_name_template = "Avatar Expressions"
 

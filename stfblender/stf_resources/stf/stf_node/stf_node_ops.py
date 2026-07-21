@@ -1,7 +1,6 @@
 import bpy
 
 from .....stfblender_common.resource import STFSetIDOperatorBase, STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
-from .....stfblender_common.helpers import draw_multiline_text
 
 
 class STFSetObjectIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
@@ -46,13 +45,3 @@ class STFNodeFixRotationMode(bpy.types.Operator):
 	def execute(self, context: bpy.types.Context) -> set:
 		context.object.rotation_mode = "QUATERNION"
 		return {"FINISHED"}
-
-
-def draw_node_ui(layout: bpy.types.UILayout, context: bpy.types.Context, blender_resource: bpy.types.Object) -> None | bool:
-	if(context.object.rotation_mode != "QUATERNION"):
-		text_row = draw_multiline_text(layout, "Please set the Rotation-Mode to 'Quaternion (WXYZ)'\nDoing so ensures consistency with game-engines.\nBe aware that existing rotation animations will break!", width=80, icon="ERROR", alert=True)
-		row_fix = text_row.row()
-		row_fix.alignment = "LEFT"
-		text_row.operator(STFNodeFixRotationMode.bl_idname)
-	else:
-		return False

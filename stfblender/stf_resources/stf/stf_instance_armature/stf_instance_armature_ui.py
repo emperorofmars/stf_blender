@@ -1,10 +1,17 @@
 import bpy
 from typing import Any
 
-from .....stfblender_common.resource import STF_Component_Ref, STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase, STF_ComponentBoneInstanceRef
+from .....stfblender_common.resource import STFSetIDOperatorBase, STF_Component_Ref, STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase, STF_ComponentBoneInstanceRef
 from .....stfblender_common.helpers import draw_multiline_text
 from .stf_instance_armature_utils import ProcessComponentsOntoArmatureInstance, UpdateArmatureInstanceComponentStandins
 
+
+class STFSetArmatureInstanceIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
+	"""Set STF-ID for Armature-Instance"""
+	bl_idname = "stf.set_armature_instance_stf_id"
+	@classmethod
+	def poll(cls, context) -> bool: return hasattr(context, "object") and context.object is not None and context.object.stf_instance is not None and context.object.data and type(context.object.data) is bpy.types.Armature  # pyright: ignore[reportReturnType]
+	def get_property(self, context): return context.object.stf_instance
 
 class STFAddArmatureInstanceComponentOperator(bpy.types.Operator, STFAddComponentOperatorBase):
 	"""Add Component to Armature-Instance"""

@@ -13,45 +13,42 @@ class STFEXP_Text(bpy.types.PropertyGroup):
 	pass
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
-	blender_text: bpy.types.TextCurve = bpy.data.curves.new(json_resource.get("name", "STF Text"), "FONT")  # pyright: ignore[reportAssignmentType]
-	blender_text.stf_info.stf_id = stf_id
-	if(json_resource.get("name")):
-		blender_text.stf_info.stf_name = json_resource["name"]
-		blender_text.stf_info.stf_name_source_of_truth = True
-
-	blender_text.body = json_resource.get("text", "")
-
-	return blender_text
-
-
-def _stf_export(context: STF_ExportContext, application_object: Any, context_object: Any) -> tuple[dict, str]:
-	blender_text: bpy.types.TextCurve = application_object
-	ensure_stf_id(context, blender_text)
-
-	ret = {
-		"type": _stf_type,
-		"name": blender_text.stf_info.stf_name if blender_text.stf_info.stf_name_source_of_truth else blender_text.name,
-		"text": blender_text.body
-	}
-
-	return ret, blender_text.stf_info.stf_id
-
-
 class Handler_STFEXP_Text(STF_Handler_BlenderNative, STF_Handler_ComponentHolder):
 	stf_type = _stf_type
 	stf_category = STF_Category.DATA
 	like_types = ["text"]
-	understood_application_types = [bpy.types.TextCurve]
-	import_func = _stf_import
-	export_func = _stf_export
+	understood_blender_types = [bpy.types.TextCurve]
+
 	operator_set_stf_id = STFSetTextIDOperator.bl_idname
 
-	get_components_func = get_components_from_object
+	@staticmethod
+	def import_resource(context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: Any) -> Any:
+		blender_text: bpy.types.TextCurve = bpy.data.curves.new(json_resource.get("name", "STF Text"), "FONT")  # pyright: ignore[reportAssignmentType]
+		blender_text.stf_info.stf_id = stf_id
+		if(json_resource.get("name")):
+			blender_text.stf_info.stf_name = json_resource["name"]
+			blender_text.stf_info.stf_name_source_of_truth = True
+
+		blender_text.body = json_resource.get("text", "")
+		return blender_text
+
+	@staticmethod
+	def export_resource(context: STF_ExportContext, blender_resource: Any, context_resource: Any) -> tuple[dict, str]:
+		blender_text: bpy.types.TextCurve = blender_resource
+		ensure_stf_id(context, blender_text)
+
+		ret = {
+			"type": _stf_type,
+			"name": blender_text.stf_info.stf_name if blender_text.stf_info.stf_name_source_of_truth else blender_text.name,
+			"text": blender_text.body
+		}
+		return ret, blender_text.stf_info.stf_id
+
+
+	get_components = get_components_from_object
 	operator_component_add = STFAddTextComponentOperator.bl_idname
 	operator_component_remove = STFRemoveTextComponentOperator.bl_idname
 	operator_component_edit = STFEditTextComponentIdOperator.bl_idname
-
 
 register_stf_handlers = [
 	Handler_STFEXP_Text

@@ -66,37 +66,37 @@ def _create_scale_to_stf_func(blender_object: ArmatureBone) -> Callable:
 	return _ret
 
 
-def resolve_property_path_to_stf_func(context: STF_ExportContext, blender_object: ArmatureBone, application_object_property_index: int, data_path: str) -> STFPropertyPathPart | None:
+def export_blender_bone_animation(context: STF_ExportContext, blender_resource: ArmatureBone, property_index: int, blender_property_path: str) -> STFPropertyPathPart | None:
 	import re
 
 	has_constraints = False
 	for obj in context.get_root().all_objects[:]:
-		if(obj.data and obj.data == blender_object.armature):
-			if(len(obj.pose.bones[blender_object.name].constraints) > 0):
+		if(obj.data and obj.data == blender_resource.armature):
+			if(len(obj.pose.bones[blender_resource.name].constraints) > 0):
 				has_constraints = True
 				break
 			for bone in obj.pose.bones:
 				if(len(bone.constraints) > 0):
 					for constraint in bone.constraints:
 						if(constraint.type == "IK"):
-							if(constraint.target == obj and constraint.subtarget == blender_object.name):
+							if(constraint.target == obj and constraint.subtarget == blender_resource.name):
 								has_constraints = True
 								break
 				if(has_constraints): break
 		if(has_constraints): break
 
 
-	if(match := re.search(r"^location", data_path)):
-		return STFPropertyPathPart([blender_object.get_bone().stf_info.stf_id, "t"], _create_translation_to_stf_func(blender_object), translation_bone_index_conversion_to_stf, has_constraints)
+	if(match := re.search(r"^location", blender_property_path)):
+		return STFPropertyPathPart([blender_resource.get_bone().stf_info.stf_id, "t"], _create_translation_to_stf_func(blender_resource), translation_bone_index_conversion_to_stf, has_constraints)
 
-	if(match := re.search(r"^rotation_quaternion", data_path)):
-		return STFPropertyPathPart([blender_object.get_bone().stf_info.stf_id, "r"], _create_rotation_to_stf_func(blender_object), rotation_bone_index_conversion_to_stf, has_constraints)
+	if(match := re.search(r"^rotation_quaternion", blender_property_path)):
+		return STFPropertyPathPart([blender_resource.get_bone().stf_info.stf_id, "r"], _create_rotation_to_stf_func(blender_resource), rotation_bone_index_conversion_to_stf, has_constraints)
 
-	if(match := re.search(r"^rotation_euler", data_path)):
-		return STFPropertyPathPart([blender_object.get_bone().stf_info.stf_id, "r_euler"], _create_rotation_euler_to_stf_func(blender_object), rotation_euler_bone_index_conversion_to_stf, has_constraints)
+	if(match := re.search(r"^rotation_euler", blender_property_path)):
+		return STFPropertyPathPart([blender_resource.get_bone().stf_info.stf_id, "r_euler"], _create_rotation_euler_to_stf_func(blender_resource), rotation_euler_bone_index_conversion_to_stf, has_constraints)
 
-	if(match := re.search(r"^scale", data_path)):
-		return STFPropertyPathPart([blender_object.get_bone().stf_info.stf_id, "s"], _create_scale_to_stf_func(blender_object), scale_bone_index_conversion_to_stf, has_constraints)
+	if(match := re.search(r"^scale", blender_property_path)):
+		return STFPropertyPathPart([blender_resource.get_bone().stf_info.stf_id, "s"], _create_scale_to_stf_func(blender_resource), scale_bone_index_conversion_to_stf, has_constraints)
 
 	return None
 
@@ -154,11 +154,11 @@ def _create_scale_to_blender_func(blender_object: ArmatureBone) -> Callable:
 	return _ret
 
 
-def resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str], application_object: Any) -> BlenderPropertyPathPart | None:
-	blender_object = context.get_imported_resource(stf_path[0])
+def import_blender_bone_animation(context: STF_ImportContext, stf_property_path: list[str], blender_resource: Any) -> BlenderPropertyPathPart | None:
+	blender_object = context.get_imported_resource(stf_property_path[0])
 	if(blender_object is None):
 		return None
-	match(stf_path[1]):
+	match(stf_property_path[1]):
 		case "t":
 			return BlenderPropertyPathPart("OBJECT", "pose.bones[\"" + blender_object.name + "\"].location", _create_translation_to_blender_func(blender_object), translation_bone_index_conversion_to_blender)
 		case "r":
@@ -168,8 +168,8 @@ def resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: l
 		case "s":
 			return BlenderPropertyPathPart("OBJECT", "pose.bones[\"" + blender_object.name + "\"].scale", _create_scale_to_blender_func(blender_object), scale_bone_index_conversion_to_blender)
 		case "components":
-			return context.resolve_stf_property_path(stf_path[2:], application_object)
+			return context.resolve_stf_property_path(stf_property_path[2:], blender_resource)
 		case "component_mods":
-			return context.resolve_stf_property_path(stf_path[2:], application_object)
+			return context.resolve_stf_property_path(stf_property_path[2:], blender_resource)
 
 	return None

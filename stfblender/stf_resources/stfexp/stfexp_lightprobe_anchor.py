@@ -1,7 +1,7 @@
 import bpy
 from typing import Any
 
-from ....stfblender_common import STF_ExportContext, STF_ImportContext, STF_TaskSteps, STF_Category, STF_ComponentResourceBase, STF_Handler_Component, STF_Component_Ref, add_component, export_component_base, import_component_base
+from ....stfblender_common import STF_ExportContext, STF_ImportContext, STF_TaskSteps, STF_Category, STF_ComponentResourceBase, STF_Handler_Component, STF_Component_Ref, STFReport, add_component, export_component_base, import_component_base
 from ....stfblender_common.helpers import register_exported_resource
 
 
@@ -14,16 +14,16 @@ class STFEXP_LightprobeAnchor(STF_ComponentResourceBase):
 	anchor_bone: bpy.props.StringProperty(name="Anchor Bone", options=set()) # type: ignore
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: STFEXP_LightprobeAnchor):
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_resource: Any, component: STFEXP_LightprobeAnchor):
 	layout.use_property_split = True
 	layout.prop(component, "anchor_object")
 	if(component.anchor_object and type(component.anchor_object.data) is bpy.types.Armature):
 		layout.prop_search(component, "anchor_bone", component.anchor_object.data, "bones")
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, context_object: Any) -> Any:
-	component_ref, component = add_component(context_object, _blender_property_name, id, _stf_type)
-	import_component_base(context, component, json_resource, _blender_property_name, context_object)
+def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: Any) -> Any | STFReport:
+	component_ref, component = add_component(context_resource, _blender_property_name, stf_id, _stf_type)
+	import_component_base(context, component, json_resource, _blender_property_name, context_resource)
 
 	if("anchor" in json_resource):
 		if(len(json_resource["anchor"]) == 1):
@@ -40,33 +40,33 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, contex
 	return component
 
 
-def _stf_export(context: STF_ExportContext, component: STFEXP_LightprobeAnchor, context_object: Any) -> tuple[dict, str]:
-	ret = export_component_base(context, _stf_type, component, _blender_property_name, context_object)
+def _stf_export(context: STF_ExportContext, blender_resource: STFEXP_LightprobeAnchor, context_resource: Any) -> tuple[dict, str]:
+	ret = export_component_base(context, _stf_type, blender_resource, _blender_property_name, context_resource)
 
-	if(component.anchor_object):
+	if(blender_resource.anchor_object):
 		def _handle():
-			if(type(component.anchor_object.data) is bpy.types.Armature and component.anchor_bone):
-				ret["anchor"] = [register_exported_resource(ret, component.anchor_object.stf_info.stf_id), "instance", register_exported_resource(ret, component.anchor_object.data.bones[component.anchor_bone].stf_info.stf_id)]
+			if(type(blender_resource.anchor_object.data) is bpy.types.Armature and blender_resource.anchor_bone):
+				ret["anchor"] = [register_exported_resource(ret, blender_resource.anchor_object.stf_info.stf_id), "instance", register_exported_resource(ret, blender_resource.anchor_object.data.bones[blender_resource.anchor_bone].stf_info.stf_id)]
 			else:
-				ret["anchor"] = [register_exported_resource(ret, component.anchor_object.stf_info.stf_id)]
+				ret["anchor"] = [register_exported_resource(ret, blender_resource.anchor_object.stf_info.stf_id)]
 
 		context.add_task(STF_TaskSteps.DEFAULT, _handle)
 
-	return ret, component.stf_id
+	return ret, blender_resource.stf_id
 
 
 class Handler_STFEXP_LightprobeAnchor(STF_Handler_Component):
 	"""Define a object/bone from which a game-engine will sample lightprobe values"""
 	stf_type = _stf_type
 	stf_category = STF_Category.COMPONENT
-	understood_application_types = [STFEXP_LightprobeAnchor]
-	import_func = _stf_import
-	export_func = _stf_export
+	understood_blender_types = [STFEXP_LightprobeAnchor]
+	import_resource = _stf_import
+	export_resource = _stf_export
 
 	blender_property_name = _blender_property_name
 	single = True
 	filter = [bpy.types.Object]
-	draw_component_func = _draw_component
+	draw = _draw_component
 
 	like_types = []
 

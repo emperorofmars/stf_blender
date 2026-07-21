@@ -121,14 +121,14 @@ class Handler_AVA_Avatar(STF_Handler_Component):
 	"""Represents a VR & V-tubing avatar model"""
 	stf_type = _stf_type
 	stf_category = STF_Category.COMPONENT
-	understood_application_types = [AVA_Avatar]
-	import_func = _stf_import
-	export_func = _stf_export
+	understood_blender_types = [AVA_Avatar]
+	import_resource = _stf_import
+	export_resource = _stf_export
 
 	blender_property_name = _blender_property_name
 	single = True
 	filter = [bpy.types.Collection]
-	draw_component_func = _draw_component
+	draw = _draw_component
 
 	like_types = ["avatar"]
 	pretty_name_template = "Avatar"

@@ -47,14 +47,14 @@ class STF_Module_VRC_AvatarColliders(STF_Handler_Component):
 	Serialize the component in Unity and paste the Json-definition into the `Data` field"""
 	stf_type = _stf_type
 	stf_category = STF_Category.COMPONENT
-	understood_application_types = [VRC_AvatarColliders]
-	import_func = _stf_import
-	export_func = _stf_export
+	understood_blender_types = [VRC_AvatarColliders]
+	import_resource = _stf_import
+	export_resource = _stf_export
 
 	blender_property_name = _blender_property_name
 	single = True
 	filter = [bpy.types.Collection]
-	draw_component_func = _draw_component
+	draw = _draw_component
 
 	like_types = []
 

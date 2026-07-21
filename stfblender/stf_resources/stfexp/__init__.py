@@ -18,12 +18,15 @@ from . import stfexp_collider_capsule
 from . import stfexp_collider_plane
 from . import stfexp_camera
 from . import stfexp_light
-from .stfexp_text import stfexp_text
+from .stfexp_text.stfexp_text import Handler_STFEXP_Text
 from . import stfexp_instance_text
-from . import stfexp_animation_blendtree
+from .stfexp_animation_blendtree import Handler_STFEXP_Animation_Blendtree
 from . import stfexp_node_ethereal
 
-register_stf_handlers = \
+register_stf_handlers = [
+	Handler_STFEXP_Text,
+	Handler_STFEXP_Animation_Blendtree,
+] + \
 	stfexp_mesh_seams.register_stf_handlers + \
 	stfexp_mesh_creases.register_stf_handlers + \
 	stfexp_armature_humanoid.register_stf_handlers + \
@@ -37,7 +40,5 @@ register_stf_handlers = \
 	stfexp_collider_plane.register_stf_handlers + \
 	stfexp_camera.register_stf_handlers + \
 	stfexp_light.register_stf_handlers + \
-	stfexp_text.register_stf_handlers + \
 	stfexp_instance_text.register_stf_handlers + \
-	stfexp_animation_blendtree.register_stf_handlers + \
 	stfexp_node_ethereal.register_stf_handlers

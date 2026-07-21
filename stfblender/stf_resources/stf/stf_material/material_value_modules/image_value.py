@@ -11,12 +11,12 @@ class STF_Material_Value_Image(STF_Material_Value_Base):
 	# uv_offset:
 
 
-def _value_import_func(context: STF_ImportContext, json_material: dict, blender_material: bpy.types.Material, json_resource: Any, value: STF_Material_Value_Image):
+def _import_material_value(context: STF_ImportContext, json_material: dict, blender_material: bpy.types.Material, json_resource: Any, value: STF_Material_Value_Image):
 	if("image" in json_resource and json_resource["image"] != None):
 		value.image = context.import_resource(json_material, json_resource["image"], stf_category=STF_Category.DATA)
 
 
-def _value_export_func(context: STF_ExportContext, json_material: dict, blender_material: bpy.types.Material, value: STF_Material_Value_Image) -> Any:
+def _export_material_value(context: STF_ExportContext, json_material: dict, blender_material: bpy.types.Material, value: STF_Material_Value_Image) -> Any:
 	ret = {}
 	if(value.image):
 		ret["image"] = context.serialize_resource(json_material, value.image, stf_category=STF_Category.DATA)
@@ -27,22 +27,22 @@ def _draw_func(layout: bpy.types.UILayout, context: bpy.types.Context, blender_m
 	layout.prop(value, "image")
 
 
-def _resolve_property_path_to_stf_func(context: STF_ExportContext, blender_property_path: str, value: STF_Material_Value_Image) -> STFPropertyPathPart | None:
+def _export_blender_animation(context: STF_ExportContext, blender_property_path: str, value: STF_Material_Value_Image) -> STFPropertyPathPart | None:
 	return None
 
-def _resolve_stf_property_to_blender_func(context: STF_ImportContext, stf_path: list[str]) -> BlenderPropertyPathPart | None:
+def _import_stf_animation_property_path_func(context: STF_ImportContext, stf_path: list[str]) -> BlenderPropertyPathPart | None:
 	return None
 
 
 class STF_Material_Value_Module_Image(STF_Material_Value_Module_Base):
 	value_type = "image"
 	property_name = "stf_material_value_image"
-	value_import_func = _value_import_func # pyright: ignore[reportAssignmentType]
-	value_export_func = _value_export_func # pyright: ignore[reportAssignmentType]
+	import_material_value = _import_material_value # pyright: ignore[reportAssignmentType]
+	export_material_value = _export_material_value # pyright: ignore[reportAssignmentType]
 	draw_func = _draw_func # pyright: ignore[reportAssignmentType]
 
-	resolve_property_path_to_stf_func = _resolve_property_path_to_stf_func # pyright: ignore[reportAssignmentType]
-	resolve_stf_property_to_blender_func = _resolve_stf_property_to_blender_func # pyright: ignore[reportAssignmentType]
+	export_blender_animation = _export_blender_animation # pyright: ignore[reportAssignmentType]
+	import_stf_animation_property_path_func = _import_stf_animation_property_path_func # pyright: ignore[reportAssignmentType]
 
 
 def register():

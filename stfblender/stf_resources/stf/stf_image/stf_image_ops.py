@@ -41,14 +41,3 @@ class STFImageFixColorspace(bpy.types.Operator):
 	def execute(self, context) -> set:
 		context.edit_image.colorspace_settings.name = "Non-Color"
 		return {"FINISHED"}
-
-
-def draw_image_ui(layout: bpy.types.UILayout, context: bpy.types.Context, blender_resource: tuple[bpy.types.Object, bpy.types.Mesh]) -> None:
-	layout.prop(context.edit_image.stf_image, "is_normal_map")
-
-	if(context.edit_image.stf_image.is_normal_map and context.edit_image.colorspace_settings.name != "Non-Color"):
-		warn_row = layout.row()
-		warn_row.alert = True
-		warn_row.label(text="Invalid Color Space!", icon="WARNING_LARGE")
-		warn_row.operator(STFImageFixColorspace.bl_idname)
-		layout.label(text="A Normal-Maps Color Space must be Non-Color!", icon="INFO_LARGE")

@@ -148,7 +148,7 @@ def vrc_contact_export_base(component: VRC_ContactBase, context_object: Any, jso
 	json_resource["collision_tags"] = collision_tags
 
 
-def vrc_contact_create_resolve_property_path_to_stf_func(blender_property_name: str) -> Callable:
+def vrc_contact_create_export_blender_animation(blender_property_name: str) -> Callable:
 	def handle(context: STF_ExportContext, application_object: Any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart | None:
 		if(match := re.search(r"^" + blender_property_name + r"\[(?P<component_index>[\d]+)\].enabled", data_path)):
 			if(component_path := get_component_stf_path_from_collection(application_object, blender_property_name, int(match.groupdict()["component_index"]))):
@@ -157,7 +157,7 @@ def vrc_contact_create_resolve_property_path_to_stf_func(blender_property_name: 
 	return handle
 
 
-def vrc_contact_create_resolve_stf_property_to_blender_func(blender_property_name: str) -> Callable:
+def vrc_contact_create_import_stf_animation_property_path_func(blender_property_name: str) -> Callable:
 	def handle(context: STF_ImportContext, stf_path: list[str], application_object: Any) -> BlenderPropertyPathPart | None:
 		blender_object = context.get_imported_resource(stf_path[0])
 		component_index = get_component_index(application_object, blender_property_name, blender_object.stf_id)

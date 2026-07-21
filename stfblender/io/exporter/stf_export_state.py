@@ -56,8 +56,8 @@ class STF_ExportState(STF_State_Base):
 		selected_priority = -1
 
 		for handler in self._handlers.get(type(application_object), []):
-			if(hasattr(handler, "can_handle_application_object_func")):
-				priority = handler.can_handle_application_object_func(application_object)
+			if(hasattr(handler, "can_handle_blender_resource")):
+				priority = handler.can_handle_blender_resource(application_object)
 				if(priority > selected_priority and (stf_category is None or handler.stf_category == stf_category)):
 					selected_handler = handler
 					selected_priority = priority
@@ -77,10 +77,10 @@ class STF_ExportState(STF_State_Base):
 
 		for _, handler_list in self._handlers.items():
 			for handler in handler_list:
-				if(hasattr(handler, "understood_application_property_path_types") and type(application_object) in handler.understood_application_property_path_types
-						and hasattr(handler, "understood_application_property_path_parts")
-						and hasattr(handler, "resolve_property_path_to_stf_func")):
-					for understood_property in handler.understood_application_property_path_parts:
+				if(hasattr(handler, "understood_blender_animation_types") and type(application_object) in handler.understood_blender_animation_types
+						and hasattr(handler, "understood_blender_animation_data_paths")
+						and hasattr(handler, "export_blender_animation")):
+					for understood_property in handler.understood_blender_animation_data_paths:
 						if(data_path.startswith(understood_property)):
 							return handler
 		return None

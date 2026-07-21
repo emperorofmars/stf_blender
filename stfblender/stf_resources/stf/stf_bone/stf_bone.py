@@ -8,14 +8,14 @@ from .....stfblender_common import STF_ImportContext, STF_ExportContext, STFRepo
 from .....stfblender_common.utils import trs_utils
 from .....stfblender_common.utils.armature_bone import ArmatureBone
 from .....stfblender_common.utils.animation_conversion_utils import *
-from .stf_bone_property_conversion import resolve_property_path_to_stf_func, resolve_stf_property_to_blender_func
-from .stf_bone_ui import STFAddBoneComponentOperator, STFEditBoneComponentIdOperator, STFRemoveBoneComponentOperator, STFSetBoneIDOperator
+from .stf_bone_property_conversion import export_blender_bone_animation, import_blender_bone_animation
+from .stf_bone_ops import STFAddBoneComponentOperator, STFEditBoneComponentIdOperator, STFRemoveBoneComponentOperator, STFSetBoneIDOperator
 
 
 _stf_type = "stf.bone"
 
 
-def search_uses(self, context: bpy.types.Context, edit_text: str) -> Sequence[tuple[str, str]]:
+def _search_uses(self, context: bpy.types.Context, edit_text: str) -> Sequence[tuple[str, str]]:
 	return (
 		("position", "Position"),
 		("ik_target", "IK Target"),
@@ -23,138 +23,131 @@ def search_uses(self, context: bpy.types.Context, edit_text: str) -> Sequence[tu
 	)
 
 class STF_Bone(bpy.types.PropertyGroup):
-	non_deform_use: bpy.props.StringProperty(name="Use non-deform Bone as", options=set(), search=search_uses) # type: ignore
-
-
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any | STFReport:
-	blender_armature: bpy.types.Armature = context_object.data
-	blender_object: bpy.types.Object = context_object
-
-	# Once Blender enters into edit-mode, the Bone references will be invalidated. Store the child-names as string.
-	children = []
-	for child_id in json_resource.get("children", []):
-		child: ArmatureBone | None = context.import_resource(json_resource, child_id, context_object, STF_Category.NODE)
-		if(child):
-			children.append(child.name)
-		else:
-			context.report(STFReport("Invalid Child: " + str(child_id), STFReportSeverity.Error, stf_id, _stf_type, blender_object))
-
-	if(bpy.context.mode != "OBJECT"): bpy.ops.object.mode_set(mode="OBJECT", toggle=False)
-	bpy.context.view_layer.objects.active = blender_object
-	bpy.ops.object.mode_set(mode="EDIT", toggle=False)
-
-	blender_edit_bone = blender_armature.edit_bones.new(json_resource.get("name", "STF Bone"))
-	blender_bone_name = blender_edit_bone.name
-
-	blender_edit_bone.head = mathutils.Vector([0, 0, 0])
-	blender_edit_bone.tail = mathutils.Vector([0, 0, 1])
-	blender_edit_bone.roll = 0
-
-	blender_edit_bone.matrix = mathutils.Matrix.LocRotScale(trs_utils.stf_translation_to_blender(json_resource["translation"]), trs_utils.stf_rotation_to_blender(json_resource["rotation"]), mathutils.Vector([1, 1, 1])) @ mathutils.Matrix.Rotation(math.radians(90), 4, "X") # pyright: ignore[reportArgumentType]
-	blender_edit_bone.length = json_resource["length"]
-
-	if("connected" in json_resource): blender_edit_bone.use_connect = json_resource["connected"]
-	if("deform" in json_resource): blender_edit_bone.use_deform = json_resource["deform"]
-
-	for child_name in children:
-		child = blender_armature.edit_bones[child_name]
-		child.parent = blender_edit_bone
-
-	bpy.ops.object.mode_set(mode="OBJECT", toggle=False)
-
-	blender_bone = ArmatureBone(blender_armature, blender_bone_name)
-
-	context.register_imported_resource(stf_id, blender_bone)
-
-	blender_armature.bones[blender_bone_name].stf_info.stf_id = stf_id
-	if(json_resource.get("name")):
-		blender_armature.bones[blender_bone_name].stf_info.stf_name = json_resource["name"]
-		blender_armature.bones[blender_bone_name].stf_info.stf_name_source_of_truth = True
-	if("non_deform_use" in json_resource):
-		blender_armature.bones[blender_bone_name].stf_bone.non_deform_use = json_resource["non_deform_use"]
-		if(json_resource["non_deform_use"] in ["ik_target", "ik_pole"]):
-			blender_armature.bones[blender_bone_name].color.palette = "THEME03"
-
-	return blender_bone
-
-
-def _stf_export(context: STF_ExportContext, application_object: Any, context_object: Any) -> tuple[dict, str] | STFReport:
-	blender_bone_def: ArmatureBone = application_object
-	ensure_stf_id(context, blender_bone_def.get_bone(), blender_bone_def.get_bone().stf_info)
-
-	blender_armature: bpy.types.Armature = context_object
-
-	# Once Blender enters into edit-mode, the Bone reference will be invalidated. Access by name instead.
-	blender_bone_name = blender_bone_def.name
-	blender_child_bones = [ArmatureBone(blender_armature, child.name) for child in blender_bone_def.get_bone().children]
-	stf_id = blender_bone_def.get_bone().stf_info.stf_id
-
-	children = []
-	ret = {
-		"type": _stf_type,
-		"name": blender_bone_def.get_bone().stf_info.stf_name if blender_bone_def.get_bone().stf_info.stf_name_source_of_truth else blender_bone_def.get_bone().name,
-		"children": children,
-	}
-	if(blender_armature.bones[blender_bone_name].parent):
-		ret["connected"] = blender_armature.bones[blender_bone_name].use_connect
-
-	for child in blender_child_bones:
-		children.append(context.serialize_resource(ret, child, context_object, "node"))
-
-	blender_bone: bpy.types.Bone = blender_armature.bones[blender_bone_name]
-
-	t, r, _ = (blender_bone.matrix_local @ mathutils.Matrix.Rotation(math.radians(-90), 4, "X")).decompose()
-
-	ret["translation"] = trs_utils.blender_translation_to_stf(t)
-	ret["rotation"] = trs_utils.blender_rotation_to_stf(r)
-	ret["length"] = blender_bone.length
-	if(not blender_bone.use_deform):
-		ret["deform"] = False
-		ret["non_deform_use"] = blender_bone.stf_bone.non_deform_use if blender_bone.stf_bone.non_deform_use else "position"
-
-	return ret, stf_id
-
-
-def _draw_ui(layout: bpy.types.UILayout, context: bpy.types.Context, blender_resource: ArmatureBone) -> None:
-	if(not blender_resource.get_bone().use_deform):
-		col = layout.column()
-		col.use_property_split = True
-		col.prop(blender_resource.get_bone().stf_bone, "non_deform_use")
+	non_deform_use: bpy.props.StringProperty(name="Use non-deform Bone as", options=set(), search=_search_uses) # type: ignore
 
 
 class Handler_STF_Bone(STF_Handler_BlenderNative, STF_Handler_ComponentHolder, STF_Handler_Animation):
 	stf_type = _stf_type
 	stf_category = STF_Category.NODE
 	like_types = ["bone", "node"]
-	understood_application_types = [ArmatureBone]
-	import_func = _stf_import
-	export_func = _stf_export
-	get_resource_object = lambda bo: bo.get_bone()
-	get_stf_prop_holder = lambda bo: bo.get_bone().stf_info
-	operator_set_stf_id = STFSetBoneIDOperator.bl_idname
-	draw = _draw_ui
+	understood_blender_types = [ArmatureBone]
 
-	get_components_holder_func = lambda bo: bo.get_bone()
-	get_components_func = lambda bo: get_components_from_object(bo.get_bone())
+	operator_set_stf_id = STFSetBoneIDOperator.bl_idname
+	get_resource_object = lambda blender_resource: blender_resource.get_bone()
+	get_stf_prop_holder = lambda blender_resource: blender_resource.get_bone().stf_info
+
+	@staticmethod
+	def draw(layout: bpy.types.UILayout, context: bpy.types.Context, blender_resource: ArmatureBone) -> None:
+		if(not blender_resource.get_bone().use_deform):
+			col = layout.column()
+			col.use_property_split = True
+			col.prop(blender_resource.get_bone().stf_bone, "non_deform_use")
+
+	@staticmethod
+	def import_resource(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any | STFReport:
+		blender_armature: bpy.types.Armature = context_object.data
+		blender_object: bpy.types.Object = context_object
+
+		# Once Blender enters into edit-mode, the Bone references will be invalidated. Store the child-names as string.
+		children = []
+		for child_id in json_resource.get("children", []):
+			child: ArmatureBone | None = context.import_resource(json_resource, child_id, context_object, STF_Category.NODE)
+			if(child):
+				children.append(child.name)
+			else:
+				context.report(STFReport("Invalid Child: " + str(child_id), STFReportSeverity.Error, stf_id, _stf_type, blender_object))
+
+		if(bpy.context.mode != "OBJECT"): bpy.ops.object.mode_set(mode="OBJECT", toggle=False)
+		bpy.context.view_layer.objects.active = blender_object
+		bpy.ops.object.mode_set(mode="EDIT", toggle=False)
+
+		blender_edit_bone = blender_armature.edit_bones.new(json_resource.get("name", "STF Bone"))
+		blender_bone_name = blender_edit_bone.name
+
+		blender_edit_bone.head = mathutils.Vector([0, 0, 0])
+		blender_edit_bone.tail = mathutils.Vector([0, 0, 1])
+		blender_edit_bone.roll = 0
+
+		blender_edit_bone.matrix = mathutils.Matrix.LocRotScale(trs_utils.stf_translation_to_blender(json_resource["translation"]), trs_utils.stf_rotation_to_blender(json_resource["rotation"]), mathutils.Vector([1, 1, 1])) @ mathutils.Matrix.Rotation(math.radians(90), 4, "X") # pyright: ignore[reportArgumentType]
+		blender_edit_bone.length = json_resource["length"]
+
+		if("connected" in json_resource): blender_edit_bone.use_connect = json_resource["connected"]
+		if("deform" in json_resource): blender_edit_bone.use_deform = json_resource["deform"]
+
+		for child_name in children:
+			child = blender_armature.edit_bones[child_name]
+			child.parent = blender_edit_bone
+
+		bpy.ops.object.mode_set(mode="OBJECT", toggle=False)
+
+		blender_bone = ArmatureBone(blender_armature, blender_bone_name)
+
+		context.register_imported_resource(stf_id, blender_bone)
+
+		blender_armature.bones[blender_bone_name].stf_info.stf_id = stf_id
+		if(json_resource.get("name")):
+			blender_armature.bones[blender_bone_name].stf_info.stf_name = json_resource["name"]
+			blender_armature.bones[blender_bone_name].stf_info.stf_name_source_of_truth = True
+		if("non_deform_use" in json_resource):
+			blender_armature.bones[blender_bone_name].stf_bone.non_deform_use = json_resource["non_deform_use"]
+			if(json_resource["non_deform_use"] in ["ik_target", "ik_pole"]):
+				blender_armature.bones[blender_bone_name].color.palette = "THEME03"
+
+		return blender_bone
+
+	@staticmethod
+	def export_resource(context: STF_ExportContext, application_object: Any, context_object: Any) -> tuple[dict, str] | STFReport:
+		blender_bone_def: ArmatureBone = application_object
+		ensure_stf_id(context, blender_bone_def.get_bone(), blender_bone_def.get_bone().stf_info)
+
+		blender_armature: bpy.types.Armature = context_object
+
+		# Once Blender enters into edit-mode, the Bone reference will be invalidated. Access by name instead.
+		blender_bone_name = blender_bone_def.name
+		blender_child_bones = [ArmatureBone(blender_armature, child.name) for child in blender_bone_def.get_bone().children]
+		stf_id = blender_bone_def.get_bone().stf_info.stf_id
+
+		children = []
+		ret = {
+			"type": _stf_type,
+			"name": blender_bone_def.get_bone().stf_info.stf_name if blender_bone_def.get_bone().stf_info.stf_name_source_of_truth else blender_bone_def.get_bone().name,
+			"children": children,
+		}
+		if(blender_armature.bones[blender_bone_name].parent):
+			ret["connected"] = blender_armature.bones[blender_bone_name].use_connect
+
+		for child in blender_child_bones:
+			children.append(context.serialize_resource(ret, child, context_object, "node"))
+
+		blender_bone: bpy.types.Bone = blender_armature.bones[blender_bone_name]
+
+		t, r, _ = (blender_bone.matrix_local @ mathutils.Matrix.Rotation(math.radians(-90), 4, "X")).decompose()
+
+		ret["translation"] = trs_utils.blender_translation_to_stf(t)
+		ret["rotation"] = trs_utils.blender_rotation_to_stf(r)
+		ret["length"] = blender_bone.length
+		if(not blender_bone.use_deform):
+			ret["deform"] = False
+			ret["non_deform_use"] = blender_bone.stf_bone.non_deform_use if blender_bone.stf_bone.non_deform_use else "position"
+
+		return ret, stf_id
+
+
+	get_components_holder = lambda blender_resource: blender_resource.get_bone()
+	get_components = lambda blender_resource: get_components_from_object(blender_resource.get_bone())
 	operator_component_add = STFAddBoneComponentOperator.bl_idname
 	operator_component_remove = STFRemoveBoneComponentOperator.bl_idname
 	operator_component_edit = STFEditBoneComponentIdOperator.bl_idname
 
-	understood_application_property_path_types = [ArmatureBone]
-	understood_application_property_path_parts = ["location", "rotation_quaternion", "rotation_euler", "scale"]
-	resolve_property_path_to_stf_func = resolve_property_path_to_stf_func # pyright: ignore[reportAssignmentType]
-	resolve_stf_property_to_blender_func = resolve_stf_property_to_blender_func # pyright: ignore[reportAssignmentType]
-
-
-register_stf_handlers = [
-	Handler_STF_Bone
-]
+	understood_blender_animation_types = [ArmatureBone]
+	understood_blender_animation_data_paths = ["location", "rotation_quaternion", "rotation_euler", "scale"]
+	export_blender_animation = export_blender_bone_animation
+	import_stf_animation_property_path_func = import_blender_bone_animation
 
 
 def register():
 	boilerplate_register(bpy.types.Bone)
 	bpy.types.Bone.stf_bone = bpy.props.PointerProperty(type=STF_Bone, name="STF Bone", options=set())
-	#bpy.types.Bone.stf_bone_non_deform_use_select = bpy.props.PointerProperty(type=STF_Bone, name="STF Bone", options=set())
 
 
 def unregister():

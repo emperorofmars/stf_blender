@@ -32,9 +32,9 @@ def _stf_export(context: STF_ExportContext, component: Blender_Armature_Display,
 class STF_Module_Blender_Armature_Display(STF_Handler_Component):
 	stf_type = _stf_type
 	stf_category = STF_Category.COMPONENT
-	understood_application_types = [Blender_Armature_Display]
-	import_func = _stf_import
-	export_func = _stf_export
+	understood_blender_types = [Blender_Armature_Display]
+	import_resource = _stf_import
+	export_resource = _stf_export
 
 	blender_property_name = _blender_property_name
 	single = True
@@ -47,14 +47,14 @@ def _hook_can_handle_func(application_object: Any) -> bool:
 	if(armature.org_blender_armature_display and len(armature.org_blender_armature_display) > 0): return False
 	return True
 
-def _hook_apply_func(context: STF_ExportContext, application_object: bpy.types.Armature, context_object: Any):
+def _hook_export_resource(context: STF_ExportContext, application_object: bpy.types.Armature, context_object: Any):
 	add_component(application_object, _blender_property_name, str(uuid.uuid4()), _stf_type)
 
 
 class HOOK_Blender_Armature_Display(STF_ExportComponentHook):
-	hook_target_application_types = [bpy.types.Armature]
-	hook_can_handle_application_object_func = _hook_can_handle_func
-	hook_apply_func = _hook_apply_func
+	hook_understood_blender_types = [bpy.types.Armature]
+	hook_can_handle_blender_resource = _hook_can_handle_func
+	hook_export_resource = _hook_export_resource
 
 
 register_stf_handlers = [

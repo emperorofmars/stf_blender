@@ -13,14 +13,14 @@ class STF_Material_Value_Module_Base:
 	property_name: str
 
 	# (STF Context, Material Json, Blender Material, STF Value Json, Blender STF Material Value)
-	value_import_func: Callable[[STF_ImportContext, dict, bpy.types.Material, Any, STF_Material_Value_Base], None]
+	import_material_value: Callable[[STF_ImportContext, dict, bpy.types.Material, Any, STF_Material_Value_Base], None]
 
 	# (STF Context, Material Json, Blender Material, Blender STF Material Value) -> Json Value
-	value_export_func: Callable[[STF_ExportContext, dict, bpy.types.Material, STF_Material_Value_Base], Any]
+	export_material_value: Callable[[STF_ExportContext, dict, bpy.types.Material, STF_Material_Value_Base], Any]
 
 	# Animation import export
-	resolve_property_path_to_stf_func: Callable[[STF_ExportContext, str, STF_Material_Value_Base], STFPropertyPathPart | None]
-	resolve_stf_property_to_blender_func: Callable[[STF_ImportContext, list[str]], BlenderPropertyPathPart | None]
+	export_blender_animation: Callable[[STF_ExportContext, str, STF_Material_Value_Base], STFPropertyPathPart | None]
+	import_stf_animation_property_path_func: Callable[[STF_ImportContext, list[str]], BlenderPropertyPathPart | None]
 
 	draw_func: Callable[[bpy.types.UILayout, bpy.types.Context, bpy.types.Material, STF_Material_Value_Base], None]
 

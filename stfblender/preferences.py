@@ -84,7 +84,7 @@ def draw_handler_list(layout: bpy.types.UILayout, context: bpy.types.Context, ha
 	layout.separator(factor=1, type="LINE")
 	col = layout.column(align=True)
 	for handler_idx, handler in enumerate(handlers):
-		is_valid = hasattr(handler, "stf_type") and handler.stf_type and hasattr(handler, "stf_category") and handler.stf_category and hasattr(handler, "understood_application_types") and handler.understood_application_types
+		is_valid = hasattr(handler, "stf_type") and handler.stf_type and hasattr(handler, "stf_category") and handler.stf_category and hasattr(handler, "understood_blender_types") and handler.understood_blender_types
 
 		row_outer = col.row(align=True)
 		col_l = row_outer.column(align=True)
@@ -96,17 +96,17 @@ def draw_handler_list(layout: bpy.types.UILayout, context: bpy.types.Context, ha
 		if(is_valid):
 			row.label(text=handler.stf_type)
 			row.label(text=handler.stf_category.capitalize())
-			for t in handler.understood_application_types:
+			for t in handler.understood_blender_types:
 				col_r.label(text=t.__name__)
 				row_inner = col_r.row()
 				row_inner.active = False
 				row_inner.scale_x = row_inner.scale_y = 0.6
 				row_inner.label(text=t.__module__)
 		else:
-			if(hasattr(handler, "hook_target_application_types") and handler.hook_target_application_types):
+			if(hasattr(handler, "hook_understood_blender_types") and handler.hook_understood_blender_types):
 				row.label(text="")
 				row.label(text="Hook")
-				for t in handler.hook_target_application_types:
+				for t in handler.hook_understood_blender_types:
 					col_r.label(text=t.__name__)
 					row_inner = col_r.row()
 					row_inner.active = False

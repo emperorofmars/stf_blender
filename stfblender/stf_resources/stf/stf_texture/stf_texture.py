@@ -55,14 +55,14 @@ class Handler_STF_Texture(STF_Handler_Component):
 	"""Information how an Image is to be processed into a GPU texture"""
 	stf_type = _stf_type
 	stf_category = STF_Category.COMPONENT
-	understood_application_types = [STF_Texture]
-	import_func = _stf_import
-	export_func = _stf_export
+	understood_blender_types = [STF_Texture]
+	import_resource = _stf_import
+	export_resource = _stf_export
 
 	blender_property_name = _blender_property_name
 	single = True
 	filter = [bpy.types.Image]
-	draw_component_func = _draw_component
+	draw = _draw_component
 
 	like_types = ["texture"]
 	pretty_name_template = "Texture Settings"
