@@ -12,9 +12,9 @@ from .stfexp_mesh_seams import Handler_STF_Mesh_Seams, HOOK_STFEXP_Mesh_Seams
 from .stfexp_mesh_creases import Handler_STF_Mesh_Creases, HOOK_STFEXP_Mesh_Creases
 from .stfexp_armature_humanoid import Handler_STFEXP_Armature_Humanoid
 from .stfexp_constraint_twist import Handler_STFEXP_Constraint_Twist
-from . import stfexp_constraint_rotation
-from . import stfexp_constraint_parent
-from . import stfexp_constraint_ik
+from .stfexp_constraint_rotation import Handler_STFEXP_Constraint_Rotation
+from .stfexp_constraint_parent import Handler_STFEXP_Constraint_Parent
+from .stfexp_constraint_ik import Handler_STFEXP_Constraint_IK
 from . import stfexp_lightprobe_anchor
 from . import stfexp_collider_sphere
 from . import stfexp_collider_capsule
@@ -34,15 +34,15 @@ register_stf_handlers = [
 	HOOK_STFEXP_Mesh_Creases,
 	Handler_STFEXP_Armature_Humanoid,
 	Handler_STFEXP_Constraint_Twist,
+	Handler_STFEXP_Constraint_Rotation,
+	Handler_STFEXP_Constraint_Parent,
+	Handler_STFEXP_Constraint_IK,
 
 	Handler_STFEXP_Instance_Text,
 	Handler_STFEXP_Text,
 	Handler_STFEXP_Animation_Blendtree,
 	Handler_STFEXP_Node_Ethereal,
 ] + \
-	stfexp_constraint_rotation.register_stf_handlers + \
-	stfexp_constraint_parent.register_stf_handlers + \
-	stfexp_constraint_ik.register_stf_handlers + \
 	stfexp_lightprobe_anchor.register_stf_handlers + \
 	stfexp_collider_sphere.register_stf_handlers + \
 	stfexp_collider_capsule.register_stf_handlers + \

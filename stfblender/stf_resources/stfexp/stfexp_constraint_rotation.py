@@ -209,11 +209,6 @@ class Handler_STFEXP_Constraint_Rotation(STF_Handler_BoneComponent, STF_Handler_
 	pretty_name_template = "Rotation Constraint"
 
 
-register_stf_handlers = [
-	Handler_STFEXP_Constraint_Rotation
-]
-
-
 def register():
 	setattr(bpy.types.Object, _blender_property_name, bpy.props.CollectionProperty(type=STFEXP_Constraint_Rotation, options=set()))
 	setattr(bpy.types.Bone, _blender_property_name, bpy.props.CollectionProperty(type=STFEXP_Constraint_Rotation, options=set()))

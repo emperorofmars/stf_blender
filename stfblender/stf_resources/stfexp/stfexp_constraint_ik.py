@@ -3,7 +3,7 @@ import re
 import math
 from typing import Any
 
-from ....stfblender_common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STF_TaskSteps, STF_Category, STF_ComponentResourceBase, STF_Handler_BoneComponent, STF_Handler_Animation, STF_Component_Ref, add_component, export_component_base, import_component_base, preserve_component_reference
+from ....stfblender_common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STF_TaskSteps, STF_Category, STF_ComponentResourceBase, STF_Handler_BoneComponent, STF_Handler_Animation, STF_Component_Ref, STFReport, add_component, export_component_base, import_component_base, preserve_component_reference
 from ....stfblender_common.utils.animation_conversion_utils import get_component_index, get_component_stf_path_from_collection
 from ....stfblender_common.blender_grr.stf_node_path_selector import NodePathSelector, draw_node_path_selector, node_path_selector_from_stf, node_path_selector_to_stf
 
@@ -139,7 +139,7 @@ class ApplyToCurrentArmatureInstance(bpy.types.Operator):
 		return {"FINISHED"}
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: STFEXP_Constraint_IK):
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_resource: Any, component: STFEXP_Constraint_IK):
 	layout.use_property_split = True
 	layout.prop(component, "chain_length")
 
@@ -155,13 +155,13 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 
 """Import export"""
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
-	component_ref, component = add_component(context_object, _blender_property_name, stf_id, _stf_type)
-	import_component_base(context, component, json_resource, _blender_property_name, context_object)
+def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: Any) -> Any | STFReport:
+	component_ref, component = add_component(context_resource, _blender_property_name, stf_id, _stf_type)
+	import_component_base(context, component, json_resource, _blender_property_name, context_resource)
 	component.chain_length = json_resource.get("chain_length")
 
 	if("target" in json_resource or "pole" in json_resource):
-		_get_component = preserve_component_reference(component, _blender_property_name, context_object)
+		_get_component = preserve_component_reference(component, _blender_property_name, context_resource)
 		def _handle():
 			component = _get_component()
 			if("target" in json_resource):
@@ -173,11 +173,11 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	return component
 
 
-def _stf_export(context: STF_ExportContext, component: STFEXP_Constraint_IK, context_object: Any) -> tuple[dict, str]:
-	ret = export_component_base(context, _stf_type, component, _blender_property_name, context_object)
-	ret["chain_length"] = component.chain_length
+def _stf_export(context: STF_ExportContext, blender_resource: STFEXP_Constraint_IK, context_resource: Any) -> tuple[dict, str] | STFReport:
+	ret = export_component_base(context, _stf_type, blender_resource, _blender_property_name, context_resource)
+	ret["chain_length"] = blender_resource.chain_length
 
-	_get_component = preserve_component_reference(component, _blender_property_name, context_object)
+	_get_component = preserve_component_reference(blender_resource, _blender_property_name, context_resource)
 	def _handle():
 		component = _get_component()
 		if(target_ret := node_path_selector_to_stf(context, component.target, ret)):
@@ -186,17 +186,17 @@ def _stf_export(context: STF_ExportContext, component: STFEXP_Constraint_IK, con
 			ret["pole"] = pole_ret
 	context.add_task(STF_TaskSteps.DEFAULT, _handle)
 
-	return ret, component.stf_id
+	return ret, blender_resource.stf_id
 
 
 """Bone instance handling"""
 
-def _set_component_instance_standin(context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: STFEXP_Constraint_IK, standin_component: STFEXP_Constraint_IK):
-	standin_component.chain_length = component.chain_length
-	standin_component.target.target_object = context_object
-	standin_component.target.target_bone = component.target.target_bone
-	standin_component.pole.target_object = context_object
-	standin_component.pole.target_bone = component.pole.target_bone
+def _set_component_instance_standin(context: bpy.types.Context, component_ref: STF_Component_Ref, context_resource: Any, component: STFEXP_Constraint_IK, component_instance: STFEXP_Constraint_IK):
+	component_instance.chain_length = component.chain_length
+	component_instance.target.target_object = context_resource
+	component_instance.target.target_bone = component.target.target_bone
+	component_instance.pole.target_object = context_resource
+	component_instance.pole.target_bone = component.pole.target_bone
 
 
 def _export_component_instance(context: STF_ExportContext, component_ref: STF_Component_Ref, standin_component: STFEXP_Constraint_IK, context_object: Any) -> dict:
@@ -227,17 +227,17 @@ def _import_component_instance(context: STF_ImportContext, json_resource: dict, 
 
 """Animation"""
 
-def _export_blender_animation(context: STF_ExportContext, blender_object: Any, property_index: int, data_path: str) -> STFPropertyPathPart | None:
-	if(match := re.search(r"^" + _blender_property_name + r"\[(?P<component_index>[\d]+)\].enabled", data_path)):
-		if(component_path := get_component_stf_path_from_collection(blender_object, _blender_property_name, int(match.groupdict()["component_index"]))):
+def _export_blender_animation(context: STF_ExportContext, blender_resource: Any, property_index: int, blender_property_path: str) -> STFPropertyPathPart | None:
+	if(match := re.search(r"^" + _blender_property_name + r"\[(?P<component_index>[\d]+)\].enabled", blender_property_path)):
+		if(component_path := get_component_stf_path_from_collection(blender_resource, _blender_property_name, int(match.groupdict()["component_index"]))):
 			return STFPropertyPathPart(component_path + ["enabled"])
 	return None
 
-def _import_stf_animation_property_path_func(context: STF_ImportContext, stf_path: list[str], blender_object: Any) -> BlenderPropertyPathPart | None:
-	blender_object = context.get_imported_resource(stf_path[0])
-	component_index = get_component_index(blender_object, _blender_property_name, blender_object.stf_id)
+def _import_stf_animation_property_path_func(context: STF_ImportContext, stf_property_path: list[str], blender_resource: Any) -> BlenderPropertyPathPart | None:
+	blender_resource = context.get_imported_resource(stf_property_path[0])
+	component_index = get_component_index(blender_resource, _blender_property_name, blender_resource.stf_id)
 	if(component_index is not None):
-		match(stf_path[1]):
+		match(stf_property_path[1]):
 			case "enabled":
 				return BlenderPropertyPathPart("OBJECT", _blender_property_name + "[" + str(component_index) + "].enabled")
 	return None
@@ -273,11 +273,6 @@ class Handler_STFEXP_Constraint_IK(STF_Handler_BoneComponent, STF_Handler_Animat
 	process_func = _process_func # pyright: ignore[reportAssignmentType]
 
 	pretty_name_template = "IK Constraint"
-
-
-register_stf_handlers = [
-	Handler_STFEXP_Constraint_IK
-]
 
 
 def register():
