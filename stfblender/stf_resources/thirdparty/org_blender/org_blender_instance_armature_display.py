@@ -9,7 +9,7 @@ class Blender_Instance_Armature_Display(STF_ComponentResourceBase):
 	pass
 
 
-class Handler_Blender_Armature_Display(STF_Handler_Component):
+class Handler_Blender_ArmatureInstance_Display(STF_Handler_Component):
 	stf_type = "org.blender.instance.armature.display"
 	stf_category = STF_Category.COMPONENT
 	understood_blender_types = [Blender_Instance_Armature_Display]
@@ -34,24 +34,24 @@ class Handler_Blender_Armature_Display(STF_Handler_Component):
 		return ret, blender_resource.stf_id
 
 
-class Hook_Blender_Instance_Armature_Display(STF_ExportComponentHook):
+class Hook_Blender_ArmatureInstance_Display(STF_ExportComponentHook):
 	hook_understood_blender_types = [bpy.types.Object]
 
 	@staticmethod
 	def hook_can_handle_blender_resource(blender_resource: bpy.types.Object) -> bool:
 		if(type(blender_resource.data) is not bpy.types.Armature): return False
 		blender_object: bpy.types.Object = blender_resource
-		if(hasattr(blender_object, Handler_Blender_Armature_Display.blender_property_name) and len(getattr(blender_object, Handler_Blender_Armature_Display.blender_property_name)) > 0): return False
+		if(hasattr(blender_object, Handler_Blender_ArmatureInstance_Display.blender_property_name) and len(getattr(blender_object, Handler_Blender_ArmatureInstance_Display.blender_property_name)) > 0): return False
 		return True
 
 	@staticmethod
 	def hook_export_resource(context: STF_ExportContext, blender_resource: bpy.types.Object, context_resource: Any):
-		add_component(blender_resource, Handler_Blender_Armature_Display.blender_property_name, str(uuid.uuid4()), Handler_Blender_Armature_Display.stf_type)
+		add_component(blender_resource, Handler_Blender_ArmatureInstance_Display.blender_property_name, str(uuid.uuid4()), Handler_Blender_ArmatureInstance_Display.stf_type)
 
 
 def register():
-	setattr(bpy.types.Object, Handler_Blender_Armature_Display.blender_property_name, bpy.props.CollectionProperty(type=Blender_Instance_Armature_Display, options=set()))
+	setattr(bpy.types.Object, Handler_Blender_ArmatureInstance_Display.blender_property_name, bpy.props.CollectionProperty(type=Blender_Instance_Armature_Display, options=set()))
 
 def unregister():
-	if hasattr(bpy.types.Object, Handler_Blender_Armature_Display.blender_property_name):
-		delattr(bpy.types.Object, Handler_Blender_Armature_Display.blender_property_name)
+	if hasattr(bpy.types.Object, Handler_Blender_ArmatureInstance_Display.blender_property_name):
+		delattr(bpy.types.Object, Handler_Blender_ArmatureInstance_Display.blender_property_name)

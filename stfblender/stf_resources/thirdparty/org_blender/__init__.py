@@ -1,6 +1,6 @@
 
 from .org_blender_armature_display import Handler_Blender_Armature_Display, Hook_Blender_Armature_Display
-from .org_blender_instance_armature_display import Handler_Blender_Armature_Display, Hook_Blender_Instance_Armature_Display
+from .org_blender_instance_armature_display import Handler_Blender_ArmatureInstance_Display, Hook_Blender_ArmatureInstance_Display
 from .org_blender_object_rotation_mode import Handler_Blender_Object_Rotation_Mode, Hook_Blender_Object_Rotation_Mode
 
 
@@ -10,8 +10,8 @@ __all__ = ["register_stf_handlers"]
 register_stf_handlers = [
 	Handler_Blender_Armature_Display,
 	Hook_Blender_Armature_Display,
-	Handler_Blender_Armature_Display,
-	Hook_Blender_Instance_Armature_Display,
+	Handler_Blender_ArmatureInstance_Display,
+	Hook_Blender_ArmatureInstance_Display,
 	Handler_Blender_Object_Rotation_Mode,
 	Hook_Blender_Object_Rotation_Mode,
 ]
