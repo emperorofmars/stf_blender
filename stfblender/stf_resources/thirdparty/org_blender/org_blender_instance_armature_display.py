@@ -2,71 +2,56 @@ import bpy
 import uuid
 from typing import Any
 
-from .....stfblender_common import STF_ExportContext, STF_ImportContext, STF_Category, STF_ComponentResourceBase, STF_Handler_Component, STF_ExportComponentHook, add_component, export_component_base, import_component_base
-
-
-_stf_type = "org.blender.instance.armature.display"
-_blender_property_name = "org_blender_instance_armature_display"
+from .....stfblender_common import STF_ExportContext, STF_ImportContext, STF_Category, STF_ComponentResourceBase, STF_Handler_Component, STF_ExportComponentHook, STFReport, add_component, export_component_base, import_component_base
 
 
 class Blender_Instance_Armature_Display(STF_ComponentResourceBase):
 	pass
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: bpy.types.Object) -> Any:
-	component_ref, component = add_component(context_object, _blender_property_name, stf_id, _stf_type)
-	import_component_base(context, component, json_resource, _blender_property_name, context_object)
-
-	if("display_in_front" in json_resource):
-		context_object.show_in_front = json_resource["display_in_front"]
-
-	return component
-
-
-def _stf_export(context: STF_ExportContext, component: Blender_Instance_Armature_Display, context_object: bpy.types.Object) -> tuple[dict, str]:
-	ret = export_component_base(context, _stf_type, component, _blender_property_name, context_object)
-	ret["display_in_front"] = context_object.show_in_front
-	return ret, component.stf_id
-
-
-class STF_Module_Blender_Armature_Display(STF_Handler_Component):
-	stf_type = _stf_type
+class Handler_Blender_Armature_Display(STF_Handler_Component):
+	stf_type = "org.blender.instance.armature.display"
 	stf_category = STF_Category.COMPONENT
 	understood_blender_types = [Blender_Instance_Armature_Display]
-	import_resource = _stf_import
-	export_resource = _stf_export
-
-	blender_property_name = _blender_property_name
+	blender_property_name = "org_blender_instance_armature_display"
 	single = True
 	filter = [bpy.types.Object]
 
+	@classmethod
+	def import_resource(cls, context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: bpy.types.Object) -> Any | STFReport:
+		component_ref, component = add_component(context_resource, cls.blender_property_name, stf_id, cls.stf_type)
+		import_component_base(context, component, json_resource, cls.blender_property_name, context_resource)
+
+		if("display_in_front" in json_resource):
+			context_resource.show_in_front = json_resource["display_in_front"]
+
+		return component
+
+	@classmethod
+	def export_resource(cls, context: STF_ExportContext, blender_resource: Blender_Instance_Armature_Display, context_resource: bpy.types.Object) -> tuple[dict, str] | STFReport:
+		ret = export_component_base(context, cls.stf_type, blender_resource, cls.blender_property_name, context_resource)
+		ret["display_in_front"] = context_resource.show_in_front
+		return ret, blender_resource.stf_id
 
 
-def _hook_can_handle_func(application_object: bpy.types.Object) -> bool:
-	if(type(application_object.data) is not bpy.types.Armature): return False
-	blender_object: bpy.types.Object = application_object
-	if(blender_object.org_blender_instance_armature_display and len(blender_object.org_blender_instance_armature_display) > 0): return False
-	return True
-
-def _hook_export_resource(context: STF_ExportContext, application_object: bpy.types.Object, context_object: Any):
-	add_component(application_object, _blender_property_name, str(uuid.uuid4()), _stf_type)
-
-
-class HOOK_Blender_Instance_Armature_Display(STF_ExportComponentHook):
+class Hook_Blender_Instance_Armature_Display(STF_ExportComponentHook):
 	hook_understood_blender_types = [bpy.types.Object]
-	hook_can_handle_blender_resource = _hook_can_handle_func
-	hook_export_resource = _hook_export_resource
 
+	@staticmethod
+	def hook_can_handle_blender_resource(blender_resource: bpy.types.Object) -> bool:
+		if(type(blender_resource.data) is not bpy.types.Armature): return False
+		blender_object: bpy.types.Object = blender_resource
+		if(hasattr(blender_object, Handler_Blender_Armature_Display.blender_property_name) and len(getattr(blender_object, Handler_Blender_Armature_Display.blender_property_name)) > 0): return False
+		return True
 
-register_stf_handlers = [
-	STF_Module_Blender_Armature_Display,
-	HOOK_Blender_Instance_Armature_Display
-]
+	@staticmethod
+	def hook_export_resource(context: STF_ExportContext, blender_resource: bpy.types.Object, context_resource: Any):
+		add_component(blender_resource, Handler_Blender_Armature_Display.blender_property_name, str(uuid.uuid4()), Handler_Blender_Armature_Display.stf_type)
 
 
 def register():
-	setattr(bpy.types.Object, _blender_property_name, bpy.props.CollectionProperty(type=Blender_Instance_Armature_Display, options=set()))
+	setattr(bpy.types.Object, Handler_Blender_Armature_Display.blender_property_name, bpy.props.CollectionProperty(type=Blender_Instance_Armature_Display, options=set()))
 
 def unregister():
-	if hasattr(bpy.types.Object, _blender_property_name):
-		delattr(bpy.types.Object, _blender_property_name)
+	if hasattr(bpy.types.Object, Handler_Blender_Armature_Display.blender_property_name):
+		delattr(bpy.types.Object, Handler_Blender_Armature_Display.blender_property_name)
