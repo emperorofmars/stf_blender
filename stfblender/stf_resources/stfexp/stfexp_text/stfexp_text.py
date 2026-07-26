@@ -44,15 +44,10 @@ class Handler_STFEXP_Text(STF_Handler_BlenderNative, STF_Handler_ComponentHolder
 		}
 		return ret, blender_text.stf_info.stf_id
 
-
 	get_components = get_components_from_object
 	operator_component_add = STFAddTextComponentOperator.bl_idname
 	operator_component_remove = STFRemoveTextComponentOperator.bl_idname
 	operator_component_edit = STFEditTextComponentIdOperator.bl_idname
-
-register_stf_handlers = [
-	Handler_STFEXP_Text
-]
 
 
 def register():
