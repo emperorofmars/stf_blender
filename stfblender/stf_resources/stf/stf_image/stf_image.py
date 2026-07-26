@@ -5,15 +5,12 @@ from .....stfblender_common import STF_ExportContext, STF_Handler_ComponentHolde
 from .stf_image_ops import STFAddImageComponentOperator, STFEditImageComponentIdOperator, STFImageFixColorspace, STFRemoveImageComponentOperator, STFSetImageIDOperator
 
 
-_stf_type = "stf.image"
-
-
 class STF_Image(bpy.types.PropertyGroup):
 	is_normal_map: bpy.props.BoolProperty(name="Use as Normal-Map", default=False, options=set()) # type: ignore
 
 
 class Handler_STF_Image(STF_Handler_BlenderNative, STF_Handler_ComponentHolder):
-	stf_type = _stf_type
+	stf_type = "stf.image"
 	stf_category = STF_Category.DATA
 	like_types = ["image"]
 	understood_blender_types = [bpy.types.Image]
@@ -31,8 +28,8 @@ class Handler_STF_Image(STF_Handler_BlenderNative, STF_Handler_ComponentHolder):
 			warn_row.operator(STFImageFixColorspace.bl_idname)
 			layout.label(text="A Normal-Maps Color Space must be Non-Color!", icon="INFO_LARGE")
 
-	@staticmethod
-	def import_resource(context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: Any) -> Any | STFReport:
+	@classmethod
+	def import_resource(cls, context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: Any) -> Any | STFReport:
 		blender_image = bpy.data.images.new(json_resource.get("name", "STF Image"), 8, 8)
 		blender_image.stf_info.stf_id = stf_id
 		if(json_resource.get("name")):
@@ -59,10 +56,10 @@ class Handler_STF_Image(STF_Handler_BlenderNative, STF_Handler_ComponentHolder):
 
 			return blender_image
 		except Exception as error:
-			return STFReport("Could not import image", STFReportSeverity.Error, stf_id, _stf_type)
+			return STFReport("Could not import image", STFReportSeverity.Error, stf_id, cls.stf_type)
 
-	@staticmethod
-	def export_resource(context: STF_ExportContext, application_object: Any, context_object: Any) -> tuple[dict, str] | STFReport:
+	@classmethod
+	def export_resource(cls, context: STF_ExportContext, application_object: Any, context_object: Any) -> tuple[dict, str] | STFReport:
 		blender_image: bpy.types.Image = application_object
 		ensure_stf_id(context, blender_image)
 
@@ -75,7 +72,7 @@ class Handler_STF_Image(STF_Handler_BlenderNative, STF_Handler_ComponentHolder):
 				image_bytes = pathlib.Path(bpy.path.abspath(blender_image.filepath)).resolve().read_bytes()
 
 			ret = {
-				"type": _stf_type,
+				"type": cls.stf_type,
 				"name": blender_image.stf_info.stf_name if blender_image.stf_info.stf_name_source_of_truth else blender_image.name,
 				"format": blender_image.file_format.lower(),
 				"data_type": "non_color" if blender_image.colorspace_settings.name == "Non-Color" else "color"
@@ -92,7 +89,7 @@ class Handler_STF_Image(STF_Handler_BlenderNative, STF_Handler_ComponentHolder):
 
 			return ret, blender_image.stf_info.stf_id
 		except Exception as error:
-			return STFReport("Could not export image: " + str(blender_image.filepath), STFReportSeverity.Error, blender_image.stf_info.stf_id, _stf_type, blender_image)
+			return STFReport("Could not export image: " + str(blender_image.filepath), STFReportSeverity.Error, blender_image.stf_info.stf_id, cls.stf_type, blender_image)
 
 	get_components = get_components_from_object
 	operator_component_add = STFAddImageComponentOperator.bl_idname
@@ -103,7 +100,6 @@ class Handler_STF_Image(STF_Handler_BlenderNative, STF_Handler_ComponentHolder):
 def register():
 	boilerplate_register(bpy.types.Image)
 	bpy.types.Image.stf_image = bpy.props.PointerProperty(type=STF_Image, options=set())
-
 
 def unregister():
 	if hasattr(bpy.types.Image, "stf_image"):

@@ -4,17 +4,14 @@ from typing import Any
 from .....stfblender_common import STF_ImportContext, STF_ExportContext, STF_Handler_ComponentHolder, STF_TaskSteps, STFReportSeverity, STF_Category, STFReport, STF_Handler_BlenderNative, STF_Data_Ref, boilerplate_register, boilerplate_unregister, get_components_from_object, ensure_stf_id
 
 
-_stf_type = "stf.prefab"
-
-
 class Handler_STF_Prefab(STF_Handler_BlenderNative, STF_Handler_ComponentHolder):
-	stf_type = _stf_type
+	stf_type = "stf.prefab"
 	stf_category = STF_Category.DATA
 	like_types = ["prefab"]
 	understood_blender_types = [bpy.types.Collection]
 
-	@staticmethod
-	def import_resource(context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: Any) -> Any | STFReport:
+	@classmethod
+	def import_resource(cls, context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: Any) -> Any | STFReport:
 		collection = bpy.data.collections.new(json_resource.get("name", context.get_filename()))
 		collection.stf_info.stf_id = stf_id
 		if(json_resource.get("name")):
@@ -33,15 +30,15 @@ class Handler_STF_Prefab(STF_Handler_BlenderNative, STF_Handler_ComponentHolder)
 
 		return collection
 
-	@staticmethod
-	def export_resource(context: STF_ExportContext, blender_resource: Any, context_resource: Any | None) -> tuple[dict, str] | STFReport:
+	@classmethod
+	def export_resource(cls, context: STF_ExportContext, blender_resource: Any, context_resource: Any | None) -> tuple[dict, str] | STFReport:
 		collection: bpy.types.Collection = blender_resource
 		ensure_stf_id(context, collection)
 
 		root_nodes = []
 		animations = []
 		ret = {
-			"type": _stf_type,
+			"type": cls.stf_type,
 			"name": collection.stf_info.stf_name if collection.stf_info.stf_name_source_of_truth else collection.name,
 			"root_nodes": root_nodes,
 			"animations": animations,

@@ -12,9 +12,6 @@ from .stf_bone_property_conversion import export_blender_bone_animation, import_
 from .stf_bone_ops import STFAddBoneComponentOperator, STFEditBoneComponentIdOperator, STFRemoveBoneComponentOperator, STFSetBoneIDOperator
 
 
-_stf_type = "stf.bone"
-
-
 def _search_uses(self, context: bpy.types.Context, edit_text: str) -> Sequence[tuple[str, str]]:
 	return (
 		("position", "Position"),
@@ -27,7 +24,7 @@ class STF_Bone(bpy.types.PropertyGroup):
 
 
 class Handler_STF_Bone(STF_Handler_BlenderNative, STF_Handler_ComponentHolder, STF_Handler_Animation):
-	stf_type = _stf_type
+	stf_type = "stf.bone"
 	stf_category = STF_Category.NODE
 	like_types = ["bone", "node"]
 	understood_blender_types = [ArmatureBone]
@@ -43,8 +40,8 @@ class Handler_STF_Bone(STF_Handler_BlenderNative, STF_Handler_ComponentHolder, S
 			col.use_property_split = True
 			col.prop(blender_resource.get_bone().stf_bone, "non_deform_use")
 
-	@staticmethod
-	def import_resource(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any | STFReport:
+	@classmethod
+	def import_resource(cls, context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any | STFReport:
 		blender_armature: bpy.types.Armature = context_object.data
 		blender_object: bpy.types.Object = context_object
 
@@ -55,7 +52,7 @@ class Handler_STF_Bone(STF_Handler_BlenderNative, STF_Handler_ComponentHolder, S
 			if(child):
 				children.append(child.name)
 			else:
-				context.report(STFReport("Invalid Child: " + str(child_id), STFReportSeverity.Error, stf_id, _stf_type, blender_object))
+				context.report(STFReport("Invalid Child: " + str(child_id), STFReportSeverity.Error, stf_id, cls.stf_type, blender_object))
 
 		if(bpy.context.mode != "OBJECT"): bpy.ops.object.mode_set(mode="OBJECT", toggle=False)
 		bpy.context.view_layer.objects.active = blender_object
@@ -95,8 +92,8 @@ class Handler_STF_Bone(STF_Handler_BlenderNative, STF_Handler_ComponentHolder, S
 
 		return blender_bone
 
-	@staticmethod
-	def export_resource(context: STF_ExportContext, application_object: Any, context_object: Any) -> tuple[dict, str] | STFReport:
+	@classmethod
+	def export_resource(cls, context: STF_ExportContext, application_object: Any, context_object: Any) -> tuple[dict, str] | STFReport:
 		blender_bone_def: ArmatureBone = application_object
 		ensure_stf_id(context, blender_bone_def.get_bone(), blender_bone_def.get_bone().stf_info)
 
@@ -109,7 +106,7 @@ class Handler_STF_Bone(STF_Handler_BlenderNative, STF_Handler_ComponentHolder, S
 
 		children = []
 		ret = {
-			"type": _stf_type,
+			"type": cls.stf_type,
 			"name": blender_bone_def.get_bone().stf_info.stf_name if blender_bone_def.get_bone().stf_info.stf_name_source_of_truth else blender_bone_def.get_bone().name,
 			"children": children,
 		}
@@ -148,7 +145,6 @@ class Handler_STF_Bone(STF_Handler_BlenderNative, STF_Handler_ComponentHolder, S
 def register():
 	boilerplate_register(bpy.types.Bone)
 	bpy.types.Bone.stf_bone = bpy.props.PointerProperty(type=STF_Bone, name="STF Bone", options=set())
-
 
 def unregister():
 	boilerplate_unregister(bpy.types.Bone)

@@ -11,11 +11,8 @@ from .stf_material_property_conversion import stf_material_export_blender_animat
 from .stf_material_ui import STFAddMaterialComponentOperator, STFEditMaterialComponentIdOperator, STFRemoveMaterialComponentOperator, STFSetMaterialIDOperator, draw_material_ui
 
 
-_stf_type = "stf.material"
-
-
 class Handler_STF_Material(STF_Handler_BlenderNative, STF_Handler_ComponentHolder, STF_Handler_Animation):
-	stf_type = _stf_type
+	stf_type = "stf.material"
 	stf_category = STF_Category.DATA
 	like_types = ["material"]
 	understood_blender_types = [bpy.types.Material]
@@ -24,8 +21,8 @@ class Handler_STF_Material(STF_Handler_BlenderNative, STF_Handler_ComponentHolde
 
 	draw = draw_material_ui
 
-	@staticmethod
-	def import_resource(context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: Any) -> Any | STFReport:
+	@classmethod
+	def import_resource(cls, context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: Any) -> Any | STFReport:
 		blender_material = bpy.data.materials.new(json_resource.get("name", "STF Material"))
 		blender_material.stf_info.stf_id = stf_id
 		if(json_resource.get("name")):
@@ -64,13 +61,13 @@ class Handler_STF_Material(STF_Handler_BlenderNative, STF_Handler_ComponentHolde
 
 		return blender_material
 
-	@staticmethod
-	def export_resource(context: STF_ExportContext, blender_resource: Any, context_resource: Any) -> tuple[dict, str] | STFReport:
+	@classmethod
+	def export_resource(cls, context: STF_ExportContext, blender_resource: Any, context_resource: Any) -> tuple[dict, str] | STFReport:
 		blender_material: bpy.types.Material = blender_resource
 		ensure_stf_id(context, blender_material)
 
 		ret = {
-			"type": _stf_type,
+			"type": cls.stf_type,
 			"name": blender_material.stf_info.stf_name if blender_material.stf_info.stf_name_source_of_truth else blender_material.name,
 			"properties": {},
 		}
@@ -103,7 +100,7 @@ class Handler_STF_Material(STF_Handler_BlenderNative, STF_Handler_ComponentHolde
 								if(serialized_value is not None):
 									values.append(serialized_value)
 								else:
-									context.report(STFReport("Failed to export material property: " + property.property_type + " ( " + property.value_property_name + " )", STFReportSeverity.Warn, blender_material.stf_info.stf_id, _stf_type, blender_material))
+									context.report(STFReport("Failed to export material property: " + property.property_type + " ( " + property.value_property_name + " )", STFReportSeverity.Warn, blender_material.stf_info.stf_id, cls.stf_type, blender_material))
 								break
 
 			json_prop["values"] = values

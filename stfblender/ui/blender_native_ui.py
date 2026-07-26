@@ -33,8 +33,9 @@ def draw_blender_native_panel(
 		and hasattr(stf_handler, "operator_component_remove")
 		and hasattr(stf_handler, "operator_component_edit")
 	):
+		components = stf_handler.get_components(blender_resource)
 		layout.separator(factor=2, type="LINE")
 		header, body = layout.panel("stf.node_components", default_closed = False)
-		header.label(text="STF Components (" + str(len(stf_handler.get_components(blender_resource))) + ")", icon="GROUP")
+		header.label(text="STF Components (" + (str(len(components)) if components else "0") + ")", icon="GROUP")
 		if(body): draw_components_ui(body, context, stf_handler.get_stf_prop_holder(blender_resource), stf_handler.get_components_holder(blender_resource), stf_handler.operator_component_add, stf_handler.operator_component_remove, stf_handler.operator_component_edit)
 

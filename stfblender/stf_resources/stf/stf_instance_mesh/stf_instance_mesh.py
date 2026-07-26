@@ -7,11 +7,8 @@ from .stf_instance_mesh_ui import STFSetMeshInstanceIDOperator, draw_instance_me
 from .stf_instance_mesh_util import set_instance_blendshapes
 
 
-_stf_type = "stf.instance.mesh"
-
-
 class Handler_STF_Instance_Mesh(STF_Handler_BlenderNative, STF_Handler_Animation):
-	stf_type = _stf_type
+	stf_type = "stf.instance.mesh"
 	stf_category = STF_Category.INSTANCE
 	like_types = ["instance.mesh", "instance"]
 	understood_blender_types = [tuple]
@@ -19,13 +16,12 @@ class Handler_STF_Instance_Mesh(STF_Handler_BlenderNative, STF_Handler_Animation
 	operator_set_stf_id = STFSetMeshInstanceIDOperator.bl_idname
 	draw = draw_instance_mesh_ui
 
-	get_stf_prop_holder = lambda blender_resource: blender_resource[0].stf_instance
 	@staticmethod
 	def get_stf_prop_holder(blender_resource: Any) -> STF_Info:
 		return blender_resource[0].stf_instance
 
-	@staticmethod
-	def import_resource(context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: Any) -> Any | STFReport:
+	@classmethod
+	def import_resource(cls, context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: Any) -> Any | STFReport:
 		blender_resource = context.import_resource(json_resource, json_resource["mesh"], stf_category=STF_Category.DATA)
 		blender_object = bpy.data.objects.new(json_resource.get("name", "STF Node"), blender_resource)
 		blender_object.stf_instance.stf_id = stf_id
@@ -34,12 +30,12 @@ class Handler_STF_Instance_Mesh(STF_Handler_BlenderNative, STF_Handler_Animation
 		context.register_imported_resource(stf_id, (blender_object, blender_resource))
 
 		if(not blender_object or type(blender_object) is not bpy.types.Object):
-			context.report(STFReport("Failed to import mesh: " + str(json_resource.get("instance", {}).get("mesh")), STFReportSeverity.Error, stf_id, _stf_type, context_resource))
+			context.report(STFReport("Failed to import mesh: " + str(json_resource.get("instance", {}).get("mesh")), STFReportSeverity.Error, stf_id, cls.stf_type, context_resource))
 
 		if("armature_instance" in json_resource):
 			armature_instance: bpy.types.Object | None = context.import_resource(json_resource, json_resource["armature_instance"], stf_category=STF_Category.NODE)
 			if(not armature_instance):
-				context.report(STFReport("Invalid armature instance: " + str(json_resource["armature_instance"]), STFReportSeverity.Error, stf_id, _stf_type, context_resource))
+				context.report(STFReport("Invalid armature instance: " + str(json_resource["armature_instance"]), STFReportSeverity.Error, stf_id, cls.stf_type, context_resource))
 			else:
 				modifier: bpy.types.ArmatureModifier = blender_object.modifiers.new("Armature", "ARMATURE")  # pyright: ignore[reportAssignmentType]
 				modifier.object = armature_instance
@@ -64,13 +60,13 @@ class Handler_STF_Instance_Mesh(STF_Handler_BlenderNative, STF_Handler_Animation
 
 		return blender_object
 
-	@staticmethod
-	def export_resource(context: STF_ExportContext, application_object: Any, context_object: bpy.types.Collection) -> tuple[dict, str] | STFReport:
+	@classmethod
+	def export_resource(cls, context: STF_ExportContext, application_object: Any, context_object: bpy.types.Collection) -> tuple[dict, str] | STFReport:
 		blender_object: bpy.types.Object = application_object[0]
 		blender_mesh: bpy.types.Mesh = application_object[1]
 
 		ensure_stf_id(context, blender_object.stf_instance)
-		ret = {"type": _stf_type, "name": blender_object.stf_instance.stf_name}
+		ret = {"type": cls.stf_type, "name": blender_object.stf_instance.stf_name}
 
 		blender_object.update_from_editmode()
 
@@ -81,12 +77,12 @@ class Handler_STF_Instance_Mesh(STF_Handler_BlenderNative, STF_Handler_Animation
 
 		if(len(blender_armatures) == 1 and blender_armatures[0] and blender_armatures[0].object and blender_armatures[0].object.data):
 			if(not context_object.is_embedded_data and context_object not in blender_armatures[0].object.users_collection):
-				return STFReport("Armature sits outside the exported asset", severity=STFReportSeverity.FatalError, stf_id=blender_object.stf_info.stf_id, stf_type=_stf_type, application_object=blender_object)
+				return STFReport("Armature sits outside the exported asset", severity=STFReportSeverity.FatalError, stf_id=blender_object.stf_info.stf_id, stf_type=cls.stf_type, application_object=blender_object)
 			# The armature has to be passed, because in Blenders datamodel, the relationship between mesh and armature is loose.
 			ret["mesh"] = context.serialize_resource(ret, blender_mesh, blender_armatures[0].object.data, stf_category=STF_Category.DATA)
 			ret["armature_instance"] = context.serialize_resource(ret, blender_armatures[0].object, stf_category=STF_Category.NODE)
 		elif(len(blender_armatures) > 1):
-			return STFReport("More than one Armature per mesh is not supported!", severity=STFReportSeverity.FatalError, stf_id=blender_object.stf_info.stf_id, stf_type=_stf_type, application_object=blender_object)
+			return STFReport("More than one Armature per mesh is not supported!", severity=STFReportSeverity.FatalError, stf_id=blender_object.stf_info.stf_id, stf_type=cls.stf_type, application_object=blender_object)
 		else:
 			ret["mesh"] = context.serialize_resource(ret, blender_mesh, stf_category=STF_Category.DATA)
 

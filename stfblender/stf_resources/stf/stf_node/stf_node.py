@@ -10,9 +10,6 @@ from .node_property_conversion import stf_node_export_blender_animation, stf_nod
 from .stf_node_ops import STFAddObjectComponentOperator, STFEditObjectComponentIdOperator, STFNodeFixRotationMode, STFRemoveObjectComponentOperator, STFSetObjectIDOperator
 
 
-_stf_type = "stf.node"
-
-
 class STF_Instance(bpy.types.PropertyGroup):
 	stf_id: bpy.props.StringProperty(name="ID", options=set())
 	stf_name: bpy.props.StringProperty(name="Name", options=set())
@@ -20,15 +17,15 @@ class STF_Instance(bpy.types.PropertyGroup):
 
 
 class Handler_STF_Node(STF_Handler_BlenderNative, STF_Handler_ComponentHolder, STF_Handler_Animation):
-	stf_type = _stf_type
+	stf_type = "stf.node"
 	stf_category = STF_Category.NODE
 	like_types = ["node", "node.spatial"]
 	understood_blender_types = [bpy.types.Object]
 
 	operator_set_stf_id = STFSetObjectIDOperator.bl_idname
 
-	@staticmethod
-	def draw(layout: bpy.types.UILayout, context: bpy.types.Context, blender_resource: bpy.types.Object) -> None | bool:
+	@classmethod
+	def draw(cls, layout: bpy.types.UILayout, context: bpy.types.Context, blender_resource: bpy.types.Object) -> None | bool:
 		if(context.object.rotation_mode != "QUATERNION"):
 			text_row = draw_multiline_text(layout, "Please set the Rotation-Mode to 'Quaternion (WXYZ)'\nDoing so ensures consistency with game-engines.\nBe aware that existing rotation animations will break!", width=80, icon="ERROR", alert=True)
 			row_fix = text_row.row()
@@ -37,8 +34,8 @@ class Handler_STF_Node(STF_Handler_BlenderNative, STF_Handler_ComponentHolder, S
 		else:
 			return False # No UI has been drawn
 
-	@staticmethod
-	def import_resource(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any | STFReport:
+	@classmethod
+	def import_resource(cls, context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any | STFReport:
 		if("instance" in json_resource):
 			blender_object: bpy.types.Object = context.import_resource(json_resource, json_resource["instance"], stf_category=STF_Category.INSTANCE) # pyright: ignore[reportAssignmentType]
 		else:
@@ -86,12 +83,12 @@ class Handler_STF_Node(STF_Handler_BlenderNative, STF_Handler_ComponentHolder, S
 
 		return blender_object
 
-	@staticmethod
-	def export_resource(context: STF_ExportContext, blender_object: bpy.types.Object, context_object: bpy.types.Collection) -> tuple[dict, str] | STFReport:
+	@classmethod
+	def export_resource(cls, context: STF_ExportContext, blender_object: bpy.types.Object, context_object: bpy.types.Collection) -> tuple[dict, str] | STFReport:
 		ensure_stf_id(context, blender_object)
 
 		json_resource = {
-			"type": _stf_type,
+			"type": cls.stf_type,
 			"name": blender_object.stf_info.stf_name if blender_object.stf_info.stf_name_source_of_truth else blender_object.name
 		}
 

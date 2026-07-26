@@ -12,16 +12,13 @@ from .stf_instance_armature_ui import STFSetArmatureInstanceIDOperator, draw_arm
 from .stf_instance_armature_utils import parse_standin, process_components, serialize_standin, update_armature_instance_component_standins
 
 
-_stf_type = "stf.instance.armature"
-
-
 class STF_Instance_Armature(bpy.types.PropertyGroup):
 	stf_components: bpy.props.CollectionProperty(type=STF_ComponentBoneInstanceRef, options=set()) # type: ignore
 	stf_active_component_index: bpy.props.IntProperty(options=set()) # type: ignore
 
 
 class Handler_STF_Instance_Armature(STF_Handler_BlenderNative, STF_Handler_Animation):
-	stf_type = _stf_type
+	stf_type = "stf.instance.armature"
 	stf_category = STF_Category.INSTANCE
 	like_types = ["instance.armature", "instance"]
 	understood_blender_types = [tuple]
@@ -31,11 +28,11 @@ class Handler_STF_Instance_Armature(STF_Handler_BlenderNative, STF_Handler_Anima
 
 	draw = draw_armature_instance_ui
 
-	@staticmethod
-	def import_resource(context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: Any) -> Any | STFReport:
+	@classmethod
+	def import_resource(cls, context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: Any) -> Any | STFReport:
 		blender_armature = context.import_resource(json_resource, json_resource["armature"], stf_category=STF_Category.DATA)
 		if(not blender_armature or type(blender_armature) is not bpy.types.Armature):
-			return STFReport("Failed to import armature: " + str(json_resource.get("instance", {}).get("armature")), STFReportSeverity.Error, stf_id, _stf_type, context_resource)
+			return STFReport("Failed to import armature: " + str(json_resource.get("instance", {}).get("armature")), STFReportSeverity.Error, stf_id, cls.stf_type, context_resource)
 
 		blender_object = bpy.data.objects.new("STF Instance", blender_armature)
 		blender_object.stf_instance.stf_id = stf_id
@@ -73,7 +70,7 @@ class Handler_STF_Instance_Armature(STF_Handler_BlenderNative, STF_Handler_Anima
 								pose.color.palette = "THEME03"
 						next_poses += pose.children
 			else:
-				context.report(STFReport("Failed to import pose for armature: " + str(json_resource.get("armature")), STFReportSeverity.Error, stf_id, _stf_type, blender_armature))
+				context.report(STFReport("Failed to import pose for armature: " + str(json_resource.get("armature")), STFReportSeverity.Error, stf_id, cls.stf_type, blender_armature))
 
 		# components that exist on bones of this armature instance
 		if("added_components" in json_resource):
@@ -104,13 +101,13 @@ class Handler_STF_Instance_Armature(STF_Handler_BlenderNative, STF_Handler_Anima
 
 		return blender_object
 
-	@staticmethod
-	def export_resource(context: STF_ExportContext, blender_resource: Any, context_resource: Any) -> tuple[dict, str] | STFReport:
+	@classmethod
+	def export_resource(cls, context: STF_ExportContext, blender_resource: Any, context_resource: Any) -> tuple[dict, str] | STFReport:
 		blender_object: bpy.types.Object = blender_resource[0]
 		blender_armature: bpy.types.Armature = blender_resource[1]
 
 		ensure_stf_id(context, blender_object.stf_instance)
-		ret = {"type": _stf_type, "name": blender_object.stf_instance.stf_name}
+		ret = {"type": cls.stf_type, "name": blender_object.stf_instance.stf_name}
 
 		ret["armature"] = context.serialize_resource(ret, blender_armature, stf_category="data")
 

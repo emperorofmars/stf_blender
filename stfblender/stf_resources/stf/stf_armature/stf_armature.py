@@ -7,19 +7,16 @@ from .....stfblender_common.utils.armature_bone import ArmatureBone
 from .stf_armature_ops import STFAddArmatureComponentOperator, STFEditArmatureComponentIdOperator, STFRemoveArmatureComponentOperator, STFSetArmatureIDOperator
 
 
-_stf_type = "stf.armature"
-
-
 class Handler_STF_Armature(STF_Handler_BlenderNative, STF_Handler_ComponentHolder):
-	stf_type = _stf_type
+	stf_type = "stf.armature"
 	stf_category = STF_Category.DATA
 	like_types = ["armature", "prefab"]
 	understood_blender_types = [bpy.types.Armature]
 
 	operator_set_stf_id = STFSetArmatureIDOperator.bl_idname
 
-	@staticmethod
-	def import_resource(context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: Any) -> Any | STFReport:
+	@classmethod
+	def import_resource(cls, context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: Any) -> Any | STFReport:
 		blender_armature = bpy.data.armatures.new(json_resource.get("name", "STF Armature"))
 		blender_armature.stf_info.stf_id = stf_id
 		if(json_resource.get("name")):
@@ -34,8 +31,8 @@ class Handler_STF_Armature(STF_Handler_BlenderNative, STF_Handler_ComponentHolde
 
 		return blender_armature
 
-	@staticmethod
-	def export_resource(context: STF_ExportContext, blender_resource: Any, context_resource: Any) -> tuple[dict, str] | STFReport:
+	@classmethod
+	def export_resource(cls, context: STF_ExportContext, blender_resource: Any, context_resource: Any) -> tuple[dict, str] | STFReport:
 		blender_armature: bpy.types.Armature = blender_resource
 		ensure_stf_id(context, blender_armature)
 
@@ -45,7 +42,7 @@ class Handler_STF_Armature(STF_Handler_BlenderNative, STF_Handler_ComponentHolde
 
 		root_bones = []
 		ret = {
-			"type": _stf_type,
+			"type": cls.stf_type,
 			"name": blender_armature.stf_info.stf_name if blender_armature.stf_info.stf_name_source_of_truth else blender_armature.name,
 			"root_bones": root_bones,
 		}

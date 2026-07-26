@@ -7,9 +7,8 @@ import numpy as np
 
 from .....stfblender_common import STF_ExportContext, STFReport, STF_Category, ensure_stf_id
 from .....stfblender_common.utils.buffer_utils import determine_indices_width, determine_pack_format_float, determine_pack_format_uint, serialize_float, serialize_uint
+from .mesh_common import stf_mesh_type
 
-
-_stf_type = "stf.mesh"
 
 
 float_threshold = 0.0001
@@ -34,7 +33,7 @@ def export_stf_mesh(context: STF_ExportContext, blender_resource: Any, context_r
 	blender_mesh.calc_loop_triangles()
 
 	stf_mesh = {
-		"type": _stf_type,
+		"type": stf_mesh_type,
 		"name": blender_mesh.stf_info.stf_name if blender_mesh.stf_info.stf_name_source_of_truth else blender_mesh.name,
 	}
 

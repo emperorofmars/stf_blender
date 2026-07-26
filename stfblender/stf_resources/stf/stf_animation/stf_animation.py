@@ -1,13 +1,10 @@
 import bpy
 
 from .....stfblender_common import STF_Category, STF_Handler_ComponentHolder, STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister, get_components_from_object
-from .stf_animation_common import *
+from .stf_animation_common import stf_animation_type
 from .stf_animation_export import stf_animation_export
 from .stf_animation_import import stf_animation_import
 from .stf_animation_ui import STFAddAnimationComponentOperator, STFEditAnimationComponentIdOperator, STFRemoveAnimationComponentOperator, STFSetAnimationIDOperator, draw_animation_ui
-
-
-_stf_type = stf_animation_type
 
 
 class STF_Animation(bpy.types.PropertyGroup):
@@ -19,7 +16,7 @@ class STF_Animation(bpy.types.PropertyGroup):
 
 
 class Handler_STF_Animation(STF_Handler_BlenderNative, STF_Handler_ComponentHolder):
-	stf_type = _stf_type
+	stf_type = stf_animation_type
 	stf_category = STF_Category.DATA
 	like_types = ["animation"]
 	understood_blender_types = [bpy.types.Action]

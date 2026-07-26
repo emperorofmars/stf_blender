@@ -7,9 +7,7 @@ import numpy as np
 
 from .....stfblender_common import STF_ImportContext, STFReportSeverity, STFReport, STF_Category
 from .....stfblender_common.utils.buffer_utils import determine_pack_format_float, determine_pack_format_uint, parse_float, parse_uint
-
-
-_stf_type = "stf.mesh"
+from .mesh_common import stf_mesh_type
 
 
 # Mesh import and export are the lowest hanging fruits for performance improvements.
@@ -76,7 +74,7 @@ def import_stf_mesh(context: STF_ImportContext, json_resource: dict, stf_id: str
 	# Construct the topology
 	blender_mesh.from_pydata(buffer_vertices, py_lines, py_faces, False)
 	if(blender_mesh.validate(verbose=True)): # return is True if errors found
-		context.report(STFReport("Invalid mesh", STFReportSeverity.Error, stf_id, _stf_type, blender_mesh))
+		context.report(STFReport("Invalid mesh", STFReportSeverity.Error, stf_id, stf_mesh_type, blender_mesh))
 
 
 	# Face smooth setting
@@ -159,7 +157,7 @@ def import_stf_mesh(context: STF_ImportContext, json_resource: dict, stf_id: str
 	if("armature" in json_resource and "weights" in json_resource and "bones" in json_resource):
 		armature: bpy.types.Armature | None = context.import_resource(json_resource, json_resource["armature"], stf_category=STF_Category.DATA)
 		if(not armature):
-			context.report(STFReport("Invalid Armature (armature id: " + json_resource["armature"] + " )", STFReportSeverity.Error, stf_id, _stf_type, blender_mesh))
+			context.report(STFReport("Invalid Armature (armature id: " + json_resource["armature"] + " )", STFReportSeverity.Error, stf_id, stf_mesh_type, blender_mesh))
 		else:
 			bone_indices_width = json_resource.get("bone_indices_width", 1)
 			weight_lens_width = json_resource.get("weight_lens_width", 1)
@@ -172,7 +170,7 @@ def import_stf_mesh(context: STF_ImportContext, json_resource: dict, stf_id: str
 						vertex_groups.append(tmp_blender_mesh_object.vertex_groups.new(name=blender_bone.name))
 						break
 			if(len(vertex_groups) < len(json_resource["bones"])):
-				context.report(STFReport("Invalid Bone Mapping", STFReportSeverity.Error, stf_id, _stf_type, blender_mesh))
+				context.report(STFReport("Invalid Bone Mapping", STFReportSeverity.Error, stf_id, stf_mesh_type, blender_mesh))
 
 			buffer_weight_lens = BytesIO(context.import_buffer(json_resource, json_resource["weight_lens"]))
 			buffer_bone_indices = BytesIO(context.import_buffer(json_resource, json_resource["bone_indices"]))

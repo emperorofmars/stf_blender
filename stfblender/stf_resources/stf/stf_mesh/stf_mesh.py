@@ -6,9 +6,7 @@ from .....stfblender_common.helpers import draw_multiline_text
 from .mesh_import import import_stf_mesh
 from .mesh_export import export_stf_mesh
 from .stf_mesh_ops import STFAddMeshComponentOperator, STFEditMeshComponentIdOperator, STFRemoveMeshComponentOperator, STFSetMeshIDOperator
-
-
-_stf_type = "stf.mesh"
+from .mesh_common import stf_mesh_type
 
 
 class STF_Mesh(bpy.types.PropertyGroup):
@@ -17,7 +15,7 @@ class STF_Mesh(bpy.types.PropertyGroup):
 
 
 class Handler_STF_Mesh(STF_Handler_BlenderNative, STF_Handler_ComponentHolder):
-	stf_type = _stf_type
+	stf_type = stf_mesh_type
 	stf_category = STF_Category.DATA
 	like_types = ["mesh"]
 	understood_blender_types = [bpy.types.Mesh]
