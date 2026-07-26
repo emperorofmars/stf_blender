@@ -12,7 +12,7 @@ class STFSetSTFEXPInstanceTextIDOperator(bpy.types.Operator, STFSetIDOperatorBas
 	"""Set STF-ID for Text Instance"""
 	bl_idname = "stf.set_stfexp_instance_text_stf_id"
 	@classmethod
-	def poll(cls, context) -> bool: return context.object.stf_instance is not None and context.object.data and isinstance(context.object.data, bpy.types.TextCurve)  # pyright: ignore[reportReturnType]
+	def poll(cls, context) -> bool: return context.object.stf_instance is not None and context.object.data and isinstance(context.object.data, bpy.types.TextCurve) # pyright: ignore[reportReturnType]
 	def get_property(self, context): return context.object.stf_instance
 
 

@@ -15,12 +15,12 @@ from .stfexp_constraint_twist import Handler_STFEXP_Constraint_Twist
 from .stfexp_constraint_rotation import Handler_STFEXP_Constraint_Rotation
 from .stfexp_constraint_parent import Handler_STFEXP_Constraint_Parent
 from .stfexp_constraint_ik import Handler_STFEXP_Constraint_IK
-from . import stfexp_lightprobe_anchor
-from . import stfexp_collider_sphere
-from . import stfexp_collider_capsule
-from . import stfexp_collider_plane
-from . import stfexp_camera
-from . import stfexp_light
+from .stfexp_lightprobe_anchor import Handler_STFEXP_LightprobeAnchor
+from .stfexp_collider_sphere import Handler_STFEXP_Collider_Sphere
+from .stfexp_collider_capsule import Handler_STFEXP_Collider_Capsule
+from .stfexp_collider_plane import Handler_STFEXP_Collider_Plane
+from .stfexp_camera import Handler_STFEXP_Camera
+from .stfexp_light import Handler_STFEXP_Light
 from .stfexp_instance_text import Handler_STFEXP_Instance_Text
 from .stfexp_text.stfexp_text import Handler_STFEXP_Text
 from .stfexp_animation_blendtree import Handler_STFEXP_Animation_Blendtree
@@ -37,15 +37,14 @@ register_stf_handlers = [
 	Handler_STFEXP_Constraint_Rotation,
 	Handler_STFEXP_Constraint_Parent,
 	Handler_STFEXP_Constraint_IK,
-
+	Handler_STFEXP_LightprobeAnchor,
+	Handler_STFEXP_Collider_Sphere,
+	Handler_STFEXP_Collider_Capsule,
+	Handler_STFEXP_Collider_Plane,
+	Handler_STFEXP_Camera,
+	Handler_STFEXP_Light,
 	Handler_STFEXP_Instance_Text,
 	Handler_STFEXP_Text,
 	Handler_STFEXP_Animation_Blendtree,
 	Handler_STFEXP_Node_Ethereal,
-] + \
-	stfexp_lightprobe_anchor.register_stf_handlers + \
-	stfexp_collider_sphere.register_stf_handlers + \
-	stfexp_collider_capsule.register_stf_handlers + \
-	stfexp_collider_plane.register_stf_handlers + \
-	stfexp_camera.register_stf_handlers + \
-	stfexp_light.register_stf_handlers
+]

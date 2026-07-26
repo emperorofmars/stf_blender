@@ -53,7 +53,7 @@ class STFEXP_Collider_Plane_LoadJsonOperator(ComponentLoadJsonOperatorBase, bpy.
 		return {"FINISHED"}
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: STF_ComponentResourceBase): # pyright: ignore[reportRedeclaration]
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_resource: Any, component: STF_ComponentResourceBase): # pyright: ignore[reportRedeclaration]
 	component: STFEXP_Collider_Plane = component # pyright: ignore[reportAssignmentType]
 	layout.use_property_split = True
 	layout.prop(component, "offset_position")
@@ -66,45 +66,45 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 
 """Bone instance handling"""
 
-def _set_component_instance_standin(context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: STFEXP_Collider_Plane, standin_component: STFEXP_Collider_Plane):
-	standin_component.offset_position = component.offset_position
-	standin_component.offset_rotation = component.offset_rotation
+def _set_component_instance_standin(context: bpy.types.Context, component_ref: STF_Component_Ref, context_resource: Any, component: STFEXP_Collider_Plane, component_instance: STFEXP_Collider_Plane):
+	component_instance.offset_position = component.offset_position
+	component_instance.offset_rotation = component.offset_rotation
 
 
-def _export_component_instance(context: STF_ExportContext, component_ref: STF_Component_Ref, standin_component: STFEXP_Collider_Plane, context_object: Any) -> dict:
-	return _serialize_json(standin_component)
+def _export_component_instance(context: STF_ExportContext, component_ref: STF_Component_Ref, component_instance: STFEXP_Collider_Plane, context_resource: Any) -> dict:
+	return _serialize_json(component_instance)
 
-def _import_component_instance(context: STF_ImportContext, json_resource: dict, component_ref: STF_Component_Ref, standin_component: STFEXP_Collider_Plane, context_object: Any):
-	_parse_json(standin_component, json_resource)
+def _import_component_instance(context: STF_ImportContext, json_resource: dict, component_ref: STF_Component_Ref, component_instance: STFEXP_Collider_Plane, context_resource: Any):
+	_parse_json(component_instance, json_resource)
 
 
 """Import & export"""
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
-	component_ref, component = add_component(context_object, _blender_property_name, stf_id, _stf_type)
-	import_component_base(context, component, json_resource, _blender_property_name, context_object)
+def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: Any) -> Any:
+	component_ref, component = add_component(context_resource, _blender_property_name, stf_id, _stf_type)
+	import_component_base(context, component, json_resource, _blender_property_name, context_resource)
 	_parse_json(component, json_resource)  # pyright: ignore[reportArgumentType]
 	return component
 
-def _stf_export(context: STF_ExportContext, blender_object: STFEXP_Collider_Plane, context_object: Any) -> tuple[dict, str] | STFReport:
-	component = blender_object
-	ret = export_component_base(context, _stf_type, component, _blender_property_name, context_object)
+def _stf_export(context: STF_ExportContext, blender_resource: STFEXP_Collider_Plane, context_resource: Any) -> tuple[dict, str] | STFReport:
+	component = blender_resource
+	ret = export_component_base(context, _stf_type, component, _blender_property_name, context_resource)
 	ret = _serialize_json(component, ret)
 	return ret, component.stf_id
 
 
 """Animation"""
 
-def _export_blender_animation(context: STF_ExportContext, blender_object: Any, property_index: int, blender_property_path: str) -> STFPropertyPathPart | None:
+def _export_blender_animation(context: STF_ExportContext, blender_resource: Any, property_index: int, blender_property_path: str) -> STFPropertyPathPart | None:
 	if(match := re.search(r"^" + _blender_property_name + r"\[(?P<component_index>[\d]+)\].enabled", blender_property_path)):
-		if(component_path := get_component_stf_path_from_collection(blender_object, _blender_property_name, int(match.groupdict()["component_index"]))):
+		if(component_path := get_component_stf_path_from_collection(blender_resource, _blender_property_name, int(match.groupdict()["component_index"]))):
 			return STFPropertyPathPart(component_path + ["enabled"])
 	return None
 
 
-def _import_stf_animation_property_path_func(context: STF_ImportContext, stf_property_path: list[str], blender_object: Any) -> BlenderPropertyPathPart | None:
-	blender_object = context.get_imported_resource(stf_property_path[0])
-	component_index = get_component_index(blender_object, _blender_property_name, blender_object.stf_id)
+def _import_stf_animation_property_path_func(context: STF_ImportContext, stf_property_path: list[str], blender_resource: Any) -> BlenderPropertyPathPart | None:
+	blender_resource = context.get_imported_resource(stf_property_path[0])
+	component_index = get_component_index(blender_resource, _blender_property_name, blender_resource.stf_id)
 	if(component_index is not None):
 		match(stf_property_path[1]):
 			case "enabled":
@@ -120,13 +120,14 @@ class Handler_STFEXP_Collider_Plane(STF_Handler_BoneComponent, STF_Handler_Anima
 	stf_category = STF_Category.COMPONENT
 	like_types = ["collider.plane", "collider"]
 	understood_blender_types = [STFEXP_Collider_Plane]
-	import_resource = _stf_import
-	export_resource = _stf_export
-
 	blender_property_name = _blender_property_name
 	single = False
 	filter = [bpy.types.Object, bpy.types.Bone]
+	pretty_name_template = "Plane Collider"
+
 	draw = _draw_component
+	import_resource = _stf_import
+	export_resource = _stf_export
 
 	understood_blender_animation_types = [bpy.types.Object]
 	understood_blender_animation_data_paths = [_blender_property_name]
@@ -136,15 +137,8 @@ class Handler_STFEXP_Collider_Plane(STF_Handler_BoneComponent, STF_Handler_Anima
 	draw_instance = _draw_component
 	update_component_instance = _set_component_instance_standin
 
-	export_component_instance = _export_component_instance  # pyright: ignore[reportAssignmentType]
-	import_component_instance = _import_component_instance  # pyright: ignore[reportAssignmentType]
-
-	pretty_name_template = "Plane Collider"
-
-
-register_stf_handlers = [
-	Handler_STFEXP_Collider_Plane
-]
+	export_component_instance = _export_component_instance
+	import_component_instance = _import_component_instance
 
 
 def register():

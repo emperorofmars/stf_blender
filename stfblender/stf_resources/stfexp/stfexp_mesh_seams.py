@@ -22,13 +22,12 @@ class Handler_STF_Mesh_Seams(STF_Handler_Component):
 	stf_type = _stf_type
 	stf_category = STF_Category.COMPONENT
 	understood_blender_types = [STFEXP_Mesh_Seams]
-
 	blender_property_name = _blender_property_name
 	single = True
 	filter = [bpy.types.Mesh]
 
-	@staticmethod
-	def import_resource(context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: bpy.types.Mesh | None) -> Any | STFReport:
+	@classmethod
+	def import_resource(cls, context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: bpy.types.Mesh | None) -> Any | STFReport:
 		buffer_seams = BytesIO(context.import_buffer(json_resource, json_resource["seams"])) # pyright: ignore[reportArgumentType]
 
 		indices_width: int = json_resource.get("indices_width", 4)
@@ -47,14 +46,14 @@ class Handler_STF_Mesh_Seams(STF_Handler_Component):
 			v1_index = parse_uint(buffer_seams, indices_width) # pyright: ignore[reportArgumentType]
 			edge_dict[v0_index][v1_index].use_seam = True
 
-		component_ref, component = add_component(context_resource, _blender_property_name, stf_id, _stf_type)
-		import_component_base(context, component, json_resource, _blender_property_name, context_resource)
+		component_ref, component = add_component(context_resource, cls.blender_property_name, stf_id, cls.stf_type)
+		import_component_base(context, component, json_resource, cls.blender_property_name, context_resource)
 
 		return component
 
-	@staticmethod
-	def export_resource(context: STF_ExportContext, blender_resource: STFEXP_Mesh_Seams, context_resource: bpy.types.Mesh | None) -> tuple[dict, str]:
-		ret = export_component_base(context, _stf_type, blender_resource, _blender_property_name, context_resource)
+	@classmethod
+	def export_resource(cls, context: STF_ExportContext, blender_resource: STFEXP_Mesh_Seams, context_resource: bpy.types.Mesh | None) -> tuple[dict, str]:
+		ret = export_component_base(context, cls.stf_type, blender_resource, cls.blender_property_name, context_resource)
 
 		indices_width = determine_indices_width(len(context_resource.loops))
 
