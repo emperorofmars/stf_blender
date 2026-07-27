@@ -7,9 +7,9 @@
 🌰 **[Read the User Guide!](https://docs.stfform.at/guide/blender.html)** 🌰 **[Report Issues](https://codeberg.org/stf_format/stf_blender/issues)** 🌰 **[STF Documentation](https://docs.stfform.at/)**
 
 ## Installation
-Follow the steps on [docs.stfform.at](https://docs.stfform.at/installation/blender.html)!
+**Follow the steps on [docs.stfform.at](https://docs.stfform.at/installation/blender.html)!**
 
-Alternatively you can also install the .zip from the latest release manually.
+*Alternatively you can also manually install the .zip from the latest release.*
 
 ---
 
