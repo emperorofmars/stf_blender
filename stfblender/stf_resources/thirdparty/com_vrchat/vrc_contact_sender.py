@@ -15,7 +15,8 @@ class VRC_ContactSender(VRC_ContactBase):
 
 class VRC_ContactSender_LoadJsonOperator(ComponentLoadJsonOperatorBase, bpy.types.Operator):
 	bl_idname = "stf.vrc_contact_sender_loadjson"
-	blender_bone: bpy.props.BoolProperty() # type: ignore
+
+	blender_bone: bpy.props.BoolProperty()
 
 	def get_property(self, context) -> Any:
 		if(not self.blender_bone):
@@ -27,63 +28,53 @@ class VRC_ContactSender_LoadJsonOperator(ComponentLoadJsonOperatorBase, bpy.type
 		if(json_resource.get("type") != _stf_type): raise Exception("Invalid Type")
 		vrc_contact_import_base(component, json_resource)
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: VRC_ContactSender):
-	layout.use_property_split = True
-	vrc_contact_draw_base(layout, context, component_ref, context_object, component, _blender_property_name)
 
-	load_json_button = layout.operator(VRC_ContactSender_LoadJsonOperator.bl_idname)
-	load_json_button.blender_bone = type(component.id_data) is bpy.types.Armature
-	load_json_button.component_id = component.stf_id
-
-
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
-	component_ref, component = add_component(context_object, _blender_property_name, stf_id, _stf_type)
-	import_component_base(context, component, json_resource, _blender_property_name, context_object)
-	vrc_contact_import_base(component, json_resource)  # pyright: ignore[reportArgumentType]
-	return component
-
-
-def _stf_export(context: STF_ExportContext, component: VRC_ContactSender, context_object: Any) -> tuple[dict, str]:
-	ret = export_component_base(context, _stf_type, component, _blender_property_name, context_object)
-	vrc_contact_export_base(component, context_object, ret)
-	return ret, component.stf_id
-
-
-class STF_Module_VRC_ContactSender(STF_Handler_BoneComponent):
+class Handler_VRC_ContactSender(STF_Handler_BoneComponent):
 	"""Represents a `VRCContactSender`.
 	Serialize the component in Unity and paste the Json-definition into the `Set from JSON` operator"""
 	stf_type = _stf_type
 	stf_category = STF_Category.COMPONENT
+	like_types = []
 	understood_blender_types = [VRC_ContactSender]
-	import_resource = _stf_import
-	export_resource = _stf_export
-
 	blender_property_name = _blender_property_name
 	single = False
 	filter = [bpy.types.Object, bpy.types.Bone]
-	draw = _draw_component
-
-	understood_blender_animation_types = [bpy.types.Object]
-	understood_blender_animation_data_paths = [_blender_property_name]
-	export_blender_animation = vrc_contact_create_export_blender_animation(_blender_property_name)
-	import_stf_animation = vrc_contact_create_import_stf_animation(_blender_property_name)
-
-	like_types = []
-
 	pretty_name_template = "VRChat Contact Sender"
 
+	@classmethod
+	def draw(cls, layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_resource: Any, component: VRC_ContactSender):
+		layout.use_property_split = True
+		vrc_contact_draw_base(layout, context, component_ref, context_resource, component, cls.blender_property_name)
 
-register_stf_handlers = [
-	STF_Module_VRC_ContactSender
-]
+		load_json_button = layout.operator(VRC_ContactSender_LoadJsonOperator.bl_idname)
+		load_json_button.blender_bone = type(component.id_data) is bpy.types.Armature
+		load_json_button.component_id = component.stf_id
+
+	@classmethod
+	def import_resource(cls, context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: Any) -> Any:
+		component_ref, component = add_component(context_resource, cls.blender_property_name, stf_id, cls.stf_type)
+		import_component_base(context, component, json_resource, cls.blender_property_name, context_resource)
+		vrc_contact_import_base(component, json_resource) # pyright: ignore[reportArgumentType]
+		return component
+
+	@classmethod
+	def export_resource(cls, context: STF_ExportContext, component: VRC_ContactSender, context_resource: Any) -> tuple[dict, str]:
+		ret = export_component_base(context, cls.stf_type, component, cls.blender_property_name, context_resource)
+		vrc_contact_export_base(component, context_resource, ret)
+		return ret, component.stf_id
+
+	understood_blender_animation_types = [bpy.types.Object]
+	understood_blender_animation_data_paths = [blender_property_name]
+	export_blender_animation = vrc_contact_create_export_blender_animation(blender_property_name)
+	import_stf_animation = vrc_contact_create_import_stf_animation(blender_property_name)
 
 
 def register():
-	setattr(bpy.types.Object, _blender_property_name, bpy.props.CollectionProperty(type=VRC_ContactSender, options=set()))
-	setattr(bpy.types.Bone, _blender_property_name, bpy.props.CollectionProperty(type=VRC_ContactSender, options=set()))
+	setattr(bpy.types.Object, Handler_VRC_ContactSender.blender_property_name, bpy.props.CollectionProperty(type=VRC_ContactSender, options=set()))
+	setattr(bpy.types.Bone, Handler_VRC_ContactSender.blender_property_name, bpy.props.CollectionProperty(type=VRC_ContactSender, options=set()))
 
 def unregister():
-	if hasattr(bpy.types.Bone, _blender_property_name):
-		delattr(bpy.types.Bone, _blender_property_name)
-	if hasattr(bpy.types.Object, _blender_property_name):
-		delattr(bpy.types.Object, _blender_property_name)
+	if hasattr(bpy.types.Bone, Handler_VRC_ContactSender.blender_property_name):
+		delattr(bpy.types.Bone, Handler_VRC_ContactSender.blender_property_name)
+	if hasattr(bpy.types.Object, Handler_VRC_ContactSender.blender_property_name):
+		delattr(bpy.types.Object, Handler_VRC_ContactSender.blender_property_name)

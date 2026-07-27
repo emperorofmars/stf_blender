@@ -10,24 +10,20 @@ from .....stfblender_common.blender_grr.stf_node_path_selector import NodePathSe
 from .....stfblender_common.blender_grr.stf_node_path_component_selector import NodePathComponentSelector, draw_node_path_component_selector, node_path_component_selector_from_stf, node_path_component_selector_to_stf
 
 
-_stf_type = "com.vrchat.physbone"
-_blender_property_name = "vrc_physbone"
-
-
 class VRC_Physbone(STF_ComponentResourceBase):
 	ignores: bpy.props.CollectionProperty(type=NodePathSelector, name="Ignored Children", options=set())
 	colliders: bpy.props.CollectionProperty(type=NodePathComponentSelector, name="Colliders", options=set())
 	values: bpy.props.StringProperty(name="Json Values", options=set())
 
 
-class STF_Module_VRC_Physbone(STF_Handler_BoneComponent, STF_Handler_Animation):
+class Handler_VRC_Physbone(STF_Handler_BoneComponent, STF_Handler_Animation):
 	"""Represents a `VRCPhysbone`. Serialize the component in Unity and paste the Json-definition into the `Json Values` field.
 	You must manually set the ID's of referenced Collider components and the Objects/Bones that should be ignored by the Physbone"""
-	stf_type = _stf_type
+	stf_type = "com.vrchat.physbone"
 	stf_category = STF_Category.COMPONENT
 	like_types = ["secondary_motion"]
 	understood_blender_types = [VRC_Physbone]
-	blender_property_name = _blender_property_name
+	blender_property_name = "vrc_physbone"
 	single = False
 	filter = [bpy.types.Object, bpy.types.Bone]
 	pretty_name_template = "VRChat Physbone"
@@ -37,7 +33,7 @@ class STF_Module_VRC_Physbone(STF_Handler_BoneComponent, STF_Handler_Animation):
 		box = layout.box().column(align=True)
 		row = box.row()
 		row.label(text="Colliders")
-		create_add_button(row, "bone" if type(component.id_data) is bpy.types.Armature else "object", _blender_property_name, component.stf_id, "colliders")
+		create_add_button(row, "bone" if type(component.id_data) is bpy.types.Armature else "object", cls.blender_property_name, component.stf_id, "colliders")
 		box.separator(factor=1)
 		for index, collider in enumerate(component.colliders):
 			if(index > 0):
@@ -46,17 +42,17 @@ class STF_Module_VRC_Physbone(STF_Handler_BoneComponent, STF_Handler_Animation):
 			col = row.column(align=True)
 			col.use_property_split = True
 			draw_node_path_component_selector(col, collider)
-			create_remove_button(row, "bone" if type(component.id_data) is bpy.types.Armature else "object", _blender_property_name, component.stf_id, "colliders", index)
+			create_remove_button(row, "bone" if type(component.id_data) is bpy.types.Armature else "object", cls.blender_property_name, component.stf_id, "colliders", index)
 
 		box = layout.box().column(align=True)
 		row = box.row()
 		row.label(text="Ignores")
-		create_add_button(row, "bone" if type(component.id_data) is bpy.types.Armature else "object", _blender_property_name, component.stf_id, "ignores")
+		create_add_button(row, "bone" if type(component.id_data) is bpy.types.Armature else "object", cls.blender_property_name, component.stf_id, "ignores")
 		box.separator(factor=1)
 		for index, ignore in enumerate(component.ignores):
 			row = box.row(align=True)
 			draw_node_path_selector(row, ignore)
-			create_remove_button(row, "bone" if type(component.id_data) is bpy.types.Armature else "object", _blender_property_name, component.stf_id, "ignores", index)
+			create_remove_button(row, "bone" if type(component.id_data) is bpy.types.Armature else "object", cls.blender_property_name, component.stf_id, "ignores", index)
 
 		layout.separator(factor=1)
 		col = layout.column(align=True)
@@ -130,26 +126,20 @@ class STF_Module_VRC_Physbone(STF_Handler_BoneComponent, STF_Handler_Animation):
 	@classmethod
 	def import_stf_animation(cls, context: STF_ImportContext, stf_property_path: list[str], blender_resource: Any) -> BlenderPropertyPathPart | None:
 		blender_object = context.get_imported_resource(stf_property_path[0])
-		component_index = get_component_index(blender_resource, _blender_property_name, blender_object.stf_id)
+		component_index = get_component_index(blender_resource, cls.blender_property_name, blender_object.stf_id)
 		if(component_index is not None):
 			match(stf_property_path[1]):
 				case "enabled":
-					return BlenderPropertyPathPart("OBJECT", _blender_property_name + "[" + str(component_index) + "].enabled")
+					return BlenderPropertyPathPart("OBJECT", cls.blender_property_name + "[" + str(component_index) + "].enabled")
 		return None
 
 
-
-register_stf_handlers = [
-	STF_Module_VRC_Physbone
-]
-
-
 def register():
-	setattr(bpy.types.Object, _blender_property_name, bpy.props.CollectionProperty(type=VRC_Physbone))
-	setattr(bpy.types.Bone, _blender_property_name, bpy.props.CollectionProperty(type=VRC_Physbone))
+	setattr(bpy.types.Object, Handler_VRC_Physbone.blender_property_name, bpy.props.CollectionProperty(type=VRC_Physbone))
+	setattr(bpy.types.Bone, Handler_VRC_Physbone.blender_property_name, bpy.props.CollectionProperty(type=VRC_Physbone))
 
 def unregister():
-	if hasattr(bpy.types.Object, _blender_property_name):
-		delattr(bpy.types.Object, _blender_property_name)
-	if hasattr(bpy.types.Bone, _blender_property_name):
-		delattr(bpy.types.Bone, _blender_property_name)
+	if hasattr(bpy.types.Object, Handler_VRC_Physbone.blender_property_name):
+		delattr(bpy.types.Object, Handler_VRC_Physbone.blender_property_name)
+	if hasattr(bpy.types.Bone, Handler_VRC_Physbone.blender_property_name):
+		delattr(bpy.types.Bone, Handler_VRC_Physbone.blender_property_name)

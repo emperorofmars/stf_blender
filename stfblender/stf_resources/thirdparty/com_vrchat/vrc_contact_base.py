@@ -74,7 +74,7 @@ class VRC_ContactBase(STF_ComponentResourceBase):
 	collision_tags: bpy.props.CollectionProperty(name="Collision Tags", type=CollisionTag, options=set()) # type: ignore
 
 
-def vrc_contact_draw_base(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: VRC_ContactBase, blender_property_name: str):
+def vrc_contact_draw_base(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_resource: Any, component: VRC_ContactBase, blender_property_name: str):
 	col = layout.column(align=True)
 	col.prop(component, "shape")
 	col.prop(component, "radius")
@@ -126,7 +126,7 @@ def vrc_contact_import_base(component: VRC_ContactBase, json_resource: dict):
 		new_tag.tag_name = coltag
 
 
-def vrc_contact_export_base(component: VRC_ContactBase, context_object: Any, json_resource: dict):
+def vrc_contact_export_base(component: VRC_ContactBase, context_resource: Any, json_resource: dict):
 	json_resource["shape"] = component.shape
 	json_resource["radius"] = component.radius
 	if(component.shape == "capsule"):
@@ -149,20 +149,20 @@ def vrc_contact_export_base(component: VRC_ContactBase, context_object: Any, jso
 
 
 def vrc_contact_create_export_blender_animation(blender_property_name: str) -> Callable:
-	def handle(context: STF_ExportContext, application_object: Any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart | None:
-		if(match := re.search(r"^" + blender_property_name + r"\[(?P<component_index>[\d]+)\].enabled", data_path)):
-			if(component_path := get_component_stf_path_from_collection(application_object, blender_property_name, int(match.groupdict()["component_index"]))):
+	def handle(context: STF_ExportContext, blender_resource: Any, property_index: int, blender_property_path: str) -> STFPropertyPathPart | None:
+		if(match := re.search(r"^" + blender_property_name + r"\[(?P<component_index>[\d]+)\].enabled", blender_property_path)):
+			if(component_path := get_component_stf_path_from_collection(blender_resource, blender_property_name, int(match.groupdict()["component_index"]))):
 				return STFPropertyPathPart(component_path + ["enabled"])
 		return None
 	return handle
 
 
 def vrc_contact_create_import_stf_animation(blender_property_name: str) -> Callable:
-	def handle(context: STF_ImportContext, stf_path: list[str], application_object: Any) -> BlenderPropertyPathPart | None:
-		blender_object = context.get_imported_resource(stf_path[0])
-		component_index = get_component_index(application_object, blender_property_name, blender_object.stf_id)
+	def handle(context: STF_ImportContext, stf_property_path: list[str], blender_resource: Any) -> BlenderPropertyPathPart | None:
+		blender_object = context.get_imported_resource(stf_property_path[0])
+		component_index = get_component_index(blender_resource, blender_property_name, blender_object.stf_id)
 		if(component_index is not None):
-			match(stf_path[1]):
+			match(stf_property_path[1]):
 				case "enabled":
 					return BlenderPropertyPathPart("OBJECT", blender_property_name + "[" + str(component_index) + "].enabled")
 		return None
