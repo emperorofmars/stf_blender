@@ -43,7 +43,7 @@ class Handler_STFEXP_Animation_Blendtree(STF_Handler_Data, STF_Handler_Component
 	blender_property_name = _blender_property_name
 
 	@staticmethod
-	def draw_resource(layout: bpy.types.UILayout, context: bpy.types.Context, resource_ref: STF_Data_Ref, context_resource: Any, resource: STFEXP_Animation_Blendtree):
+	def draw(layout: bpy.types.UILayout, context: bpy.types.Context, resource_ref: STF_Data_Ref, context_resource: Any, resource: STFEXP_Animation_Blendtree):
 		layout.prop(resource, "type")
 
 		if(resource.type == "2d"):

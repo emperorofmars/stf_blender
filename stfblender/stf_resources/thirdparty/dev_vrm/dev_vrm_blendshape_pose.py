@@ -85,7 +85,7 @@ class Handler_VRM_Blendshape_Pose(STF_Handler_Data):
 	blender_property_name = _blender_property_name
 
 	@classmethod
-	def draw_resource(cls, layout: bpy.types.UILayout, context: bpy.types.Context, resource_ref: STF_Data_Ref, context_resource: bpy.types.Collection, resource: VRM_Blendshape_Pose):
+	def draw(cls, layout: bpy.types.UILayout, context: bpy.types.Context, resource_ref: STF_Data_Ref, context_resource: bpy.types.Collection, resource: VRM_Blendshape_Pose):
 		add_button = layout.operator(Edit_VRM_Blendshape_Pose_Target.bl_idname, text="Add Target", icon="ADD")
 		add_button.use_scene_collection = context_resource == context.scene.collection
 		add_button.resource_id = resource.stf_id

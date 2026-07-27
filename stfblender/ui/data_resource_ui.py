@@ -121,7 +121,7 @@ class STFEditDataResourceComponentIdOperator(bpy.types.Operator, STFEditComponen
 	def get_components_ref_property(self, context) -> Any: return _get_data_resource_component_ref_property_collection(context)
 
 
-def draw_resource(layout: bpy.types.UILayout, context: bpy.types.Context, resource_ref: STF_Data_Ref, collection: bpy.types.Collection, resource: STF_DataResourceBase):
+def draw(layout: bpy.types.UILayout, context: bpy.types.Context, resource_ref: STF_Data_Ref, collection: bpy.types.Collection, resource: STF_DataResourceBase):
 	box = layout.box()
 	# Component header info
 	row = box.row()
@@ -151,9 +151,9 @@ def draw_resource(layout: bpy.types.UILayout, context: bpy.types.Context, resour
 			box.separator(factor=1, type="LINE")
 			draw_multiline_text(box, selected_module.__doc__)
 
-		if(hasattr(selected_module, "draw_resource")):
+		if(hasattr(selected_module, "draw")):
 			box.separator(factor=1, type="LINE")
-			selected_module.draw_resource(box, context, resource_ref, collection, resource)
+			selected_module.draw(box, context, resource_ref, collection, resource)
 		else:
 			pass
 
@@ -215,7 +215,7 @@ def draw_data_resources_ui(
 		if(hasattr(collection, resource_ref.blender_property_name)):
 			for resource in getattr(collection, resource_ref.blender_property_name):
 				if(resource.stf_id == resource_ref.stf_id):
-					draw_resource(layout, context, resource_ref, collection, resource)
+					draw(layout, context, resource_ref, collection, resource)
 					break
 		else:
 			layout.label(text="Invalid Resource: " + resource_ref.blender_property_name)

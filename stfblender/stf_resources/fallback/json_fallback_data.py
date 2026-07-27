@@ -19,7 +19,7 @@ class JsonFallbackData(STF_DataResourceBase):
 	active_buffer: bpy.props.IntProperty() # type: ignore
 
 
-def _draw_resource(layout: bpy.types.UILayout, context: bpy.types.Context, resource_ref: STF_Data_Ref, context_resource: bpy.types.Collection | None, resource: JsonFallbackData):
+def _draw(layout: bpy.types.UILayout, context: bpy.types.Context, resource_ref: STF_Data_Ref, context_resource: bpy.types.Collection | None, resource: JsonFallbackData):
 	draw_fallback(layout, resource_ref, resource)
 
 
@@ -79,7 +79,7 @@ class Handler_JsonFallbackData(STF_Handler_Data):
 	export_resource = _stf_export
 
 	blender_property_name = _blender_property_name
-	draw_resource = _draw_resource
+	draw = _draw
 	get_components = get_components_from_data_resource
 
 
