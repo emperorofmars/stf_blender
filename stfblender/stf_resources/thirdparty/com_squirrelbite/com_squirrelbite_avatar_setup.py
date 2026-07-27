@@ -98,7 +98,7 @@ def _draw_func_blendtree(layout: bpy.types.UILayout, element: Any) -> bpy.types.
 	return row
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: Squirrelbite_Avatar_Setup):
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_resource: Any, component: Squirrelbite_Avatar_Setup):
 	layout.use_property_split = True
 
 	header, body = layout.panel("com.squirrelbite_avatar_setup_toggles_pre", default_closed = True)
@@ -137,10 +137,10 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 		box.prop(component, "additive_idle")
 
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any | STFReport:
-	component_ref, component = add_component(context_object, _blender_property_name, stf_id, _stf_type)  # pyright: ignore[reportAssignmentType]
+def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: Any) -> Any | STFReport:
+	component_ref, component = add_component(context_resource, _blender_property_name, stf_id, _stf_type)  # pyright: ignore[reportAssignmentType]
 	component: Squirrelbite_Avatar_Setup = component
-	import_component_base(context, component, json_resource, _blender_property_name, context_object)
+	import_component_base(context, component, json_resource, _blender_property_name, context_resource)
 
 	def _handle():
 		# toggles pre
@@ -164,7 +164,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 				puppet.blendtree.collection = context.get_root_collection()
 				puppet.blendtree.stf_data_resource_id = blendtree_resource.stf_id
 			else:
-				context.report(STFReport("module: %s stf_id: %s, context-object: %s" % (_stf_type, stf_id, context_object), STFReportSeverity.Warn, stf_id, _stf_type, context_object))
+				context.report(STFReport("module: %s stf_id: %s, context-object: %s" % (_stf_type, stf_id, context_resource), STFReportSeverity.Warn, stf_id, _stf_type, context_resource))
 
 		# toggles
 		for toggle_json in json_resource.get("toggles", []):
@@ -191,7 +191,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 				puppet.collection = context.get_root_collection()
 				puppet.stf_data_resource_id = blendtree_resource.stf_id
 			else:
-				context.report(STFReport("module: %s stf_id: %s, context-object: %s" % (_stf_type, stf_id, context_object), STFReportSeverity.Warn, stf_id, _stf_type, context_object))
+				context.report(STFReport("module: %s stf_id: %s, context-object: %s" % (_stf_type, stf_id, context_resource), STFReportSeverity.Warn, stf_id, _stf_type, context_resource))
 
 		# breathing
 		if("breathing" in json_resource):
@@ -212,14 +212,14 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	return component
 
 
-def _stf_export(context: STF_ExportContext, component: Squirrelbite_Avatar_Setup, context_object: Any) -> tuple[dict, str] | STFReport:
-	ret = export_component_base(context, _stf_type, component, _blender_property_name, context_object)
+def _stf_export(context: STF_ExportContext, blender_resource: Squirrelbite_Avatar_Setup, context_resource: Any) -> tuple[dict, str] | STFReport:
+	ret = export_component_base(context, _stf_type, blender_resource, _blender_property_name, context_resource)
 
 	def _handle():
 		# toggles pre
 		toggles_pre = []
 		ret["toggles_pre"] = toggles_pre
-		for toggle in component.toggles_pre:
+		for toggle in blender_resource.toggles_pre:
 			toggle: Toggle = toggle  # pyright: ignore[reportRedeclaration]
 			if(not toggle.animation_off and not toggle.animation_on):
 				continue
@@ -232,7 +232,7 @@ def _stf_export(context: STF_ExportContext, component: Squirrelbite_Avatar_Setup
 		# puppets pre
 		puppets_pre = []
 		ret["puppets_pre"] = puppets_pre
-		for puppet in component.puppets_pre:
+		for puppet in blender_resource.puppets_pre:
 			puppet: PersistentPuppet = puppet
 			if(not puppet.blendtree):
 				continue
@@ -251,14 +251,14 @@ def _stf_export(context: STF_ExportContext, component: Squirrelbite_Avatar_Setup
 					puppet_json["blendtree"] = context.serialize_resource(ret, puppet_resource)
 					puppets_pre.append(puppet_json)
 				else:
-					context.report(STFReport("module: %s stf_id: %s, context-object: %s :: blendtree invalid resource type" % (_stf_type, component.stf_id, context_object), STFReportSeverity.Warn, component.stf_id, _stf_type, context_object))
+					context.report(STFReport("module: %s stf_id: %s, context-object: %s :: blendtree invalid resource type" % (_stf_type, blender_resource.stf_id, context_resource), STFReportSeverity.Warn, blender_resource.stf_id, _stf_type, context_resource))
 			else:
-				context.report(STFReport("module: %s stf_id: %s, context-object: %s :: failed to resolve blendtree resource" % (_stf_type, component.stf_id, context_object), STFReportSeverity.Warn, component.stf_id, _stf_type, context_object))
+				context.report(STFReport("module: %s stf_id: %s, context-object: %s :: failed to resolve blendtree resource" % (_stf_type, blender_resource.stf_id, context_resource), STFReportSeverity.Warn, blender_resource.stf_id, _stf_type, context_resource))
 
 		# toggles
 		toggles = []
 		ret["toggles"] = toggles
-		for toggle in component.toggles:
+		for toggle in blender_resource.toggles:
 			toggle: Toggle = toggle  # pyright: ignore[reportRedeclaration]
 			if(not toggle.animation_off and not toggle.animation_on):
 				continue
@@ -271,7 +271,7 @@ def _stf_export(context: STF_ExportContext, component: Squirrelbite_Avatar_Setup
 		# grab toggles
 		grab_toggles = []
 		ret["grab_toggles"] = grab_toggles
-		for toggle in component.grab_toggles:
+		for toggle in blender_resource.grab_toggles:
 			toggle: GrabToggle = toggle
 			if(not toggle.toggle.animation_off and not toggle.toggle.animation_on):
 				continue
@@ -286,7 +286,7 @@ def _stf_export(context: STF_ExportContext, component: Squirrelbite_Avatar_Setup
 		# puppets
 		puppets = []
 		ret["puppets"] = puppets
-		for puppet in component.puppets:
+		for puppet in blender_resource.puppets:
 			if(puppet_ret := resolve_stf_data_resource_reference(puppet)):  # pyright: ignore[reportArgumentType]
 				puppet_ref, puppet_resource = puppet_ret
 				if(puppet_ref.stf_type == "stfexp.animation_blendtree"):
@@ -295,45 +295,43 @@ def _stf_export(context: STF_ExportContext, component: Squirrelbite_Avatar_Setup
 						"blendtree": context.serialize_resource(ret, puppet_resource)
 					})
 				else:
-					context.report(STFReport("module: %s stf_id: %s, context-object: %s :: blendtree invalid resource type" % (_stf_type, component.stf_id, context_object), STFReportSeverity.Warn, component.stf_id, _stf_type, context_object))
+					context.report(STFReport("module: %s stf_id: %s, context-object: %s :: blendtree invalid resource type" % (_stf_type, blender_resource.stf_id, context_resource), STFReportSeverity.Warn, blender_resource.stf_id, _stf_type, context_resource))
 
 		# breathing
-		if(component.breathing_intense or component.breathing_normal):
+		if(blender_resource.breathing_intense or blender_resource.breathing_normal):
 			ret["breathing"] = {}
-			if(component.breathing_normal):
-				ret["breathing"]["normal"] = context.serialize_resource(ret, component.breathing_normal)
-			if(component.breathing_intense):
-				ret["breathing"]["intense"] = context.serialize_resource(ret, component.breathing_intense)
+			if(blender_resource.breathing_normal):
+				ret["breathing"]["normal"] = context.serialize_resource(ret, blender_resource.breathing_normal)
+			if(blender_resource.breathing_intense):
+				ret["breathing"]["intense"] = context.serialize_resource(ret, blender_resource.breathing_intense)
 
 		# additive
-		if(component.additive_idle or component.additive_excited):
+		if(blender_resource.additive_idle or blender_resource.additive_excited):
 			ret["additive"] = {}
-			if(component.additive_idle):
-				ret["additive"]["idle"] = context.serialize_resource(ret, component.additive_idle)
-			if(component.additive_excited):
-				ret["additive"]["excited"] = context.serialize_resource(ret, component.additive_excited)
+			if(blender_resource.additive_idle):
+				ret["additive"]["idle"] = context.serialize_resource(ret, blender_resource.additive_idle)
+			if(blender_resource.additive_excited):
+				ret["additive"]["excited"] = context.serialize_resource(ret, blender_resource.additive_excited)
 
 	context.add_task(STF_TaskSteps.AFTER_ANIMATION, _handle)
 
-	return ret, component.stf_id
+	return ret, blender_resource.stf_id
 
 
 class STF_Module_Squirrelbite_Avatar_Setup(STF_Handler_Component):
 	"""Opinionated setup of animation logic and behaviors for VR & V-Tubing avatars"""
 	stf_type = _stf_type
 	stf_category = STF_Category.COMPONENT
+	like_types = []
 	understood_blender_types = [Squirrelbite_Avatar_Setup]
-	import_resource = _stf_import
-	export_resource = _stf_export
-
 	blender_property_name = _blender_property_name
 	single = True
 	filter = [bpy.types.Collection]
-	draw = _draw_component
-
-	like_types = []
-
 	pretty_name_template = "Squirrelbite Avatar Setup"
+
+	draw = _draw_component
+	import_resource = _stf_import
+	export_resource = _stf_export
 
 
 register_stf_handlers = [

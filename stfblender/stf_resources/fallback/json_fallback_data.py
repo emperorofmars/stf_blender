@@ -79,7 +79,7 @@ class Handler_JsonFallbackData(STF_Handler_Data):
 	export_resource = _stf_export
 
 	blender_property_name = _blender_property_name
-	draw_resource_func = _draw_resource
+	draw_resource = _draw_resource
 	get_components = get_components_from_data_resource
 
 

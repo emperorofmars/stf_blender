@@ -1,8 +1,7 @@
 import bpy
 from typing import Any
 
-from .....stfblender_common import STF_ExportContext, STF_ImportContext, STF_TaskSteps, STF_Category
-from .....stfblender_common.resource.data import STF_DataResourceBase, STF_Handler_Data, STF_Data_Ref, add_resource, export_data_resource_base, get_components_from_data_resource, import_data_resource_base
+from .....stfblender_common import STF_ExportContext, STF_ImportContext, STF_TaskSteps, STF_Category, STFReport, STF_DataResourceBase, STF_Handler_Data, STF_Data_Ref, add_resource, export_data_resource_base, get_components_from_data_resource, import_data_resource_base
 from .....stfblender_common.helpers import register_exported_resource
 
 
@@ -78,112 +77,104 @@ class VRM_Blendshape_Pose(STF_DataResourceBase):
 	targets: bpy.props.CollectionProperty(type=VRM_Blendshape_Pose_Target, options=set()) # type: ignore
 
 
-def _draw_resource(layout: bpy.types.UILayout, context: bpy.types.Context, resource_ref: STF_Data_Ref, context_object: bpy.types.Collection, resource: VRM_Blendshape_Pose):
-	add_button = layout.operator(Edit_VRM_Blendshape_Pose_Target.bl_idname, text="Add Target", icon="ADD")
-	add_button.use_scene_collection = context_object == context.scene.collection
-	add_button.resource_id = resource.stf_id
-	add_button.op = True
-	for index, target in enumerate(resource.targets):
-		box = layout.box()
-		inner_row = box.row(align=True)
-		inner_row.prop(target, "mesh_instance", text="Mesh Instance", icon="MESH_DATA")
-
-		remove_button = inner_row.operator(Edit_VRM_Blendshape_Pose_Target.bl_idname, text="", icon="X")
-		remove_button.use_scene_collection = context_object == context.scene.collection
-		remove_button.resource_id = resource.stf_id
-		remove_button.op = False
-		remove_button.index = index
-
-		row = box.row()
-		row.label(text="Blendshapes")
-		if(target.mesh_instance and type(target.mesh_instance.data) is bpy.types.Mesh):
-			add_value_button = row.operator(Edit_VRM_Blendshape_Pose_Value.bl_idname, icon="ADD", text="Add Value")
-			add_value_button.use_scene_collection = context_object == context.scene.collection
-			add_value_button.resource_id = resource.stf_id
-			add_value_button.op = True
-			add_value_button.target_index = index
-
-			col = box.column(align=True)
-			for value_index, value in enumerate(target.values):
-				row = col.row(align=True)
-				row.prop_search(value, "blendshape_name", target.mesh_instance.data.shape_keys, "key_blocks", text="")
-				row.prop(value, "blendshape_value", text="")
-
-				remove_button = row.operator(Edit_VRM_Blendshape_Pose_Value.bl_idname, text="", icon="X")
-				remove_button.use_scene_collection = context_object == context.scene.collection
-				remove_button.resource_id = resource.stf_id
-				remove_button.op = False
-				remove_button.target_index = index
-				remove_button.index = value_index
-
-
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: bpy.types.Collection) -> Any:
-	resource_ref, resource = add_resource(context.get_root_collection(), _blender_property_name, stf_id, _stf_type)
-	import_data_resource_base(resource, json_resource)
-
-	def _handle():
-		for target_id_index_as_str_because_its_a_json_key, values in json_resource.get("targets", {}).items():
-			target_id_index = int(target_id_index_as_str_because_its_a_json_key)
-			if(meshinstance := context.import_resource(json_resource, target_id_index, STF_Category.NODE)):
-				target = resource.targets.add()
-				target.mesh_instance = meshinstance
-				for blendshape_name, blendshape_value in values.items():
-					value = target.values.add()
-					value.blendshape_name = blendshape_name
-					value.blendshape_value = blendshape_value
-
-	context.add_task(STF_TaskSteps.DEFAULT, _handle)
-
-	return resource
-
-
-def _stf_export(context: STF_ExportContext, resource: VRM_Blendshape_Pose, context_object: bpy.types.Collection) -> tuple[dict, str]:
-	ret = export_data_resource_base(context, _stf_type, resource)
-
-	target_dict: dict[str, dict[str, float]] = {}
-	ret["targets"] = target_dict
-
-	def _handle():
-		for target in resource.targets:
-			target: VRM_Blendshape_Pose_Target = target # Because syntax highlighting
-			if(target.mesh_instance):
-				value_dict: dict[str, float] = {}
-				mesh_id_index = register_exported_resource(ret, target.mesh_instance.stf_info.stf_id)
-				if(mesh_id_index not in target_dict):
-					target_dict[mesh_id_index] = value_dict  # pyright: ignore[reportArgumentType]
-				else:
-					value_dict = target_dict[mesh_id_index]
-				for value in target.values:
-					value: VRM_Blendshape_Pose_Value = value # Because syntax highlighting
-					if(value.blendshape_name and value.blendshape_name not in value_dict):
-						value_dict[value.blendshape_name] = value.blendshape_value
-
-	context.add_task(STF_TaskSteps.DEFAULT, _handle)
-
-	return ret, resource.stf_id
-
-
-class STF_Module_VRM_Blendshape_Pose(STF_Handler_Data):
+class Handler_VRM_Blendshape_Pose(STF_Handler_Data):
 	"""Define a blendshape pose. This is useful for VR/V-Tubing avatars that get will get converted to VRM, since VRM doesn't support animations"""
 	stf_type = _stf_type
 	stf_category = STF_Category.DATA
 	understood_blender_types = [VRM_Blendshape_Pose]
-	import_resource = _stf_import
-	export_resource = _stf_export
-
 	blender_property_name = _blender_property_name
-	draw_resource_func = _draw_resource
+
+	@classmethod
+	def draw_resource(cls, layout: bpy.types.UILayout, context: bpy.types.Context, resource_ref: STF_Data_Ref, context_resource: bpy.types.Collection, resource: VRM_Blendshape_Pose):
+		add_button = layout.operator(Edit_VRM_Blendshape_Pose_Target.bl_idname, text="Add Target", icon="ADD")
+		add_button.use_scene_collection = context_resource == context.scene.collection
+		add_button.resource_id = resource.stf_id
+		add_button.op = True
+		for index, target in enumerate(resource.targets):
+			box = layout.box()
+			inner_row = box.row(align=True)
+			inner_row.prop(target, "mesh_instance", text="Mesh Instance", icon="MESH_DATA")
+
+			remove_button = inner_row.operator(Edit_VRM_Blendshape_Pose_Target.bl_idname, text="", icon="X")
+			remove_button.use_scene_collection = context_resource == context.scene.collection
+			remove_button.resource_id = resource.stf_id
+			remove_button.op = False
+			remove_button.index = index
+
+			row = box.row()
+			row.label(text="Blendshapes")
+			if(target.mesh_instance and type(target.mesh_instance.data) is bpy.types.Mesh):
+				add_value_button = row.operator(Edit_VRM_Blendshape_Pose_Value.bl_idname, icon="ADD", text="Add Value")
+				add_value_button.use_scene_collection = context_resource == context.scene.collection
+				add_value_button.resource_id = resource.stf_id
+				add_value_button.op = True
+				add_value_button.target_index = index
+
+				col = box.column(align=True)
+				for value_index, value in enumerate(target.values):
+					row = col.row(align=True)
+					row.prop_search(value, "blendshape_name", target.mesh_instance.data.shape_keys, "key_blocks", text="")
+					row.prop(value, "blendshape_value", text="")
+
+					remove_button = row.operator(Edit_VRM_Blendshape_Pose_Value.bl_idname, text="", icon="X")
+					remove_button.use_scene_collection = context_resource == context.scene.collection
+					remove_button.resource_id = resource.stf_id
+					remove_button.op = False
+					remove_button.target_index = index
+					remove_button.index = value_index
+
+	@classmethod
+	def import_resource(cls, context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: bpy.types.Collection) -> Any | STFReport:
+		resource_ref, resource = add_resource(context.get_root_collection(), cls.blender_property_name, stf_id, cls.stf_type)
+		import_data_resource_base(resource, json_resource)
+
+		def _handle():
+			for target_id_index_as_str_because_its_a_json_key, values in json_resource.get("targets", {}).items():
+				target_id_index = int(target_id_index_as_str_because_its_a_json_key)
+				if(meshinstance := context.import_resource(json_resource, target_id_index, STF_Category.NODE)):
+					target = resource.targets.add()
+					target.mesh_instance = meshinstance
+					for blendshape_name, blendshape_value in values.items():
+						value = target.values.add()
+						value.blendshape_name = blendshape_name
+						value.blendshape_value = blendshape_value
+
+		context.add_task(STF_TaskSteps.DEFAULT, _handle)
+
+		return resource
+
+	@classmethod
+	def export_resource(cls, context: STF_ExportContext, resource: VRM_Blendshape_Pose, context_resource: bpy.types.Collection) -> tuple[dict, str] | STFReport:
+		ret = export_data_resource_base(context, cls.stf_type, resource)
+
+		target_dict: dict[str, dict[str, float]] = {}
+		ret["targets"] = target_dict
+
+		def _handle():
+			for target in resource.targets:
+				target: VRM_Blendshape_Pose_Target = target # Because syntax highlighting
+				if(target.mesh_instance):
+					value_dict: dict[str, float] = {}
+					mesh_id_index = register_exported_resource(ret, target.mesh_instance.stf_info.stf_id)
+					if(mesh_id_index not in target_dict):
+						target_dict[mesh_id_index] = value_dict  # pyright: ignore[reportArgumentType]
+					else:
+						value_dict = target_dict[mesh_id_index]
+					for value in target.values:
+						value: VRM_Blendshape_Pose_Value = value # Because syntax highlighting
+						if(value.blendshape_name and value.blendshape_name not in value_dict):
+							value_dict[value.blendshape_name] = value.blendshape_value
+
+		context.add_task(STF_TaskSteps.DEFAULT, _handle)
+
+		return ret, resource.stf_id
+
 	get_components = get_components_from_data_resource
 
 
-register_stf_handlers = [
-	STF_Module_VRM_Blendshape_Pose,
-]
-
-
 def register():
-	setattr(bpy.types.Collection, _blender_property_name, bpy.props.CollectionProperty(type=VRM_Blendshape_Pose, options=set()))
+	setattr(bpy.types.Collection, Handler_VRM_Blendshape_Pose.blender_property_name, bpy.props.CollectionProperty(type=VRM_Blendshape_Pose, options=set()))
 
 def unregister():
-	if hasattr(bpy.types.Collection, _blender_property_name):
-		delattr(bpy.types.Collection, _blender_property_name)
+	if hasattr(bpy.types.Collection, Handler_VRM_Blendshape_Pose.blender_property_name):
+		delattr(bpy.types.Collection, Handler_VRM_Blendshape_Pose.blender_property_name)

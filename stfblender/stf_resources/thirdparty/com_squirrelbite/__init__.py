@@ -1,6 +1,7 @@
 
-from . import com_squirrelbite_avatar_setup
+from .com_squirrelbite_avatar_setup import STF_Module_Squirrelbite_Avatar_Setup
 
-register_stf_handlers = \
-	com_squirrelbite_avatar_setup.register_stf_handlers
+__all__ = ["register_stf_handlers"]
+
+register_stf_handlers = [STF_Module_Squirrelbite_Avatar_Setup]
 

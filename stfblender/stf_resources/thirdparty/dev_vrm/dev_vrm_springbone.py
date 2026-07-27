@@ -2,7 +2,7 @@ import bpy
 import re
 from typing import Any
 
-from .....stfblender_common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STF_TaskSteps, STF_Category, STF_ComponentResourceBase, STF_Handler_BoneComponent, STF_Component_Ref, ComponentLoadJsonOperatorBase, add_component, export_component_base, import_component_base, preserve_component_reference
+from .....stfblender_common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STF_TaskSteps, STF_Category, STF_ComponentResourceBase, STF_Handler_BoneComponent, STF_Component_Ref, ComponentLoadJsonOperatorBase, STFReport, add_component, export_component_base, import_component_base, preserve_component_reference
 from .....stfblender_common.utils.animation_conversion_utils import get_component_index, get_component_stf_path_from_collection
 from .....stfblender_common.utils import trs_utils
 from .....stfblender_common.helpers import create_add_button, create_remove_button
@@ -12,6 +12,7 @@ from .....stfblender_common.blender_grr.stf_node_path_component_selector import 
 
 _stf_type = "dev.vrm.springbone"
 _blender_property_name = "dev_vrm_springbone"
+
 
 class VRM_Springbone(STF_ComponentResourceBase):
 	stiffness: bpy.props.FloatProperty(default=1, min=0, soft_max=4, precision=2, name="Stiffness Force", description="The resilience of the swaying object (the power of returning to the initial pose)") # type: ignore
@@ -43,139 +44,123 @@ class VRM_Springbone_LoadJsonOperator(ComponentLoadJsonOperatorBase, bpy.types.O
 		if("hitRadius" in json_resource): component.hitRadius = json_resource["hitRadius"]
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: VRM_Springbone):
-	layout.use_property_split = True
-	col = layout.column()
-	col.prop(component, "stiffness", slider=True)
-	col.prop(component, "gravityPower", slider=True)
-	col.prop(component, "gravityDir")
-	col.prop(component, "dragForce", slider=True)
-	draw_node_path_selector(col, component.center, text="Center")
-	col.prop(component, "hitRadius", slider=True)
-
-	layout.separator(factor=1)
-
-	box = layout.box().column(align=True)
-	row = box.row()
-	row.label(text="Colliders")
-	create_add_button(row, "bone" if type(component.id_data) is bpy.types.Armature else "object", _blender_property_name, component.stf_id, "colliders")
-	box.separator(factor=1)
-	for index, collider in enumerate(component.colliders):
-		if(index > 0):
-			box.separator(factor=1, type="LINE")
-		row = box.row(align=True)
-		col = row.column(align=True)
-		col.use_property_split = True
-		draw_node_path_component_selector(col, collider)
-		create_remove_button(row, "bone" if type(component.id_data) is bpy.types.Armature else "object", _blender_property_name, component.stf_id, "colliders", index)
-
-	load_json_button = layout.operator(VRM_Springbone_LoadJsonOperator.bl_idname)
-	load_json_button.blender_bone = type(component.id_data) is bpy.types.Armature
-	load_json_button.component_id = component.stf_id
-
-
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
-	component_ref, component = add_component(context_object, _blender_property_name, stf_id, _stf_type)
-	import_component_base(context, component, json_resource, _blender_property_name, context_object)
-
-	if("stiffness" in json_resource): component.stiffness = json_resource["stiffness"]
-	if("gravityPower" in json_resource): component.gravityPower = json_resource["gravityPower"]
-	if("gravityDir" in json_resource): component.gravityDir = trs_utils.stf_translation_to_blender(json_resource["gravityDir"])
-	if("dragForce" in json_resource): component.dragForce = json_resource["dragForce"]
-	if("hitRadius" in json_resource): component.hitRadius = json_resource["hitRadius"]
-
-	_get_component = preserve_component_reference(component, _blender_property_name, context_object)
-	def _handle():
-		component = _get_component()
-		for collider_path in json_resource.get("colliders", []):
-			new_collider = component.colliders.add()
-			node_path_component_selector_from_stf(context, json_resource, collider_path, new_collider)
-		if("center" in json_resource):
-			node_path_selector_from_stf(context, json_resource, json_resource["center"], component.center)
-	context.add_task(STF_TaskSteps.DEFAULT, _handle)
-
-	return component
-
-
-def _stf_export(context: STF_ExportContext, component: VRM_Springbone, context_object: Any) -> tuple[dict, str]:
-	ret = export_component_base(context, _stf_type, component, _blender_property_name, context_object)
-	ret["stiffness"] = component.stiffness
-	ret["gravityPower"] = component.gravityPower
-	ret["gravityDir"] = trs_utils.blender_translation_to_stf(component.gravityDir)
-	ret["dragForce"] = component.dragForce
-	ret["hitRadius"] = component.hitRadius
-
-	_get_component = preserve_component_reference(component, _blender_property_name, context_object)
-	def _handle():
-		component = _get_component()
-		colliders = []
-		for collider in component.colliders:
-			if(collider_ret := node_path_component_selector_to_stf(context, collider, ret)):
-				colliders.append(collider_ret)
-		if(len(colliders)):
-			ret["colliders"] = colliders
-		if(component.center):
-			if(center_ret := node_path_selector_to_stf(context, component.center, ret)):
-				ret["center"] = center_ret
-	context.add_task(STF_TaskSteps.DEFAULT, _handle)
-
-	return ret, component.stf_id
-
-
-"""Animation"""
-
-def _export_blender_animation(context: STF_ExportContext, application_object: Any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart | None:
-	if(match := re.search(r"^" + _blender_property_name + r"\[(?P<component_index>[\d]+)\].enabled", data_path)):
-		if(component_path := get_component_stf_path_from_collection(application_object, _blender_property_name, int(match.groupdict()["component_index"]))):
-			return STFPropertyPathPart(component_path + ["enabled"])
-	return None
-
-
-def _import_stf_animation_property_path_func(context: STF_ImportContext, stf_path: list[str], application_object: Any) -> BlenderPropertyPathPart | None:
-	blender_object = context.get_imported_resource(stf_path[0])
-	component_index = get_component_index(application_object, _blender_property_name, blender_object.stf_id)
-	if(component_index is not None):
-		match(stf_path[1]):
-			case "enabled":
-				return BlenderPropertyPathPart("OBJECT", _blender_property_name + "[" + str(component_index) + "].enabled")
-	return None
-
-
-"""Module definition"""
-
-class STF_Module_VRM_Springbone(STF_Handler_BoneComponent):
+class Handler_VRM_Springbone(STF_Handler_BoneComponent):
 	"""Represents a `VRM Springbone`"""
 	stf_type = _stf_type
 	stf_category = STF_Category.COMPONENT
 	like_types = ["secondary_motion"]
 	understood_blender_types = [VRM_Springbone]
-	import_resource = _stf_import
-	export_resource = _stf_export
-
 	blender_property_name = _blender_property_name
 	single = False
 	filter = [bpy.types.Object, bpy.types.Bone]
-	draw = _draw_component
-
-	understood_blender_animation_types = [bpy.types.Object]
-	understood_blender_animation_data_paths = [_blender_property_name]
-	export_blender_animation = _export_blender_animation
-	import_stf_animation_property_path_func = _import_stf_animation_property_path_func
-
 	pretty_name_template = "VRM Springbone"
 
+	@classmethod
+	def draw(cls, layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_resource: Any, component: Any) -> None:
+		layout.use_property_split = True
+		col = layout.column()
+		col.prop(component, "stiffness", slider=True)
+		col.prop(component, "gravityPower", slider=True)
+		col.prop(component, "gravityDir")
+		col.prop(component, "dragForce", slider=True)
+		draw_node_path_selector(col, component.center, text="Center")
+		col.prop(component, "hitRadius", slider=True)
 
-register_stf_handlers = [
-	STF_Module_VRM_Springbone
-]
+		layout.separator(factor=1)
+
+		box = layout.box().column(align=True)
+		row = box.row()
+		row.label(text="Colliders")
+		create_add_button(row, "bone" if type(component.id_data) is bpy.types.Armature else "object", cls.blender_property_name, component.stf_id, "colliders")
+		box.separator(factor=1)
+		for index, collider in enumerate(component.colliders):
+			if(index > 0):
+				box.separator(factor=1, type="LINE")
+			row = box.row(align=True)
+			col = row.column(align=True)
+			col.use_property_split = True
+			draw_node_path_component_selector(col, collider)
+			create_remove_button(row, "bone" if type(component.id_data) is bpy.types.Armature else "object", cls.blender_property_name, component.stf_id, "colliders", index)
+
+		load_json_button = layout.operator(VRM_Springbone_LoadJsonOperator.bl_idname)
+		load_json_button.blender_bone = type(component.id_data) is bpy.types.Armature
+		load_json_button.component_id = component.stf_id
+
+	@classmethod
+	def import_resource(cls, context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: Any | None) -> Any | STFReport:
+		component_ref, component = add_component(context_resource, cls.blender_property_name, stf_id, _stf_type)
+		import_component_base(context, component, json_resource, cls.blender_property_name, context_resource)
+
+		if("stiffness" in json_resource): component.stiffness = json_resource["stiffness"]
+		if("gravityPower" in json_resource): component.gravityPower = json_resource["gravityPower"]
+		if("gravityDir" in json_resource): component.gravityDir = trs_utils.stf_translation_to_blender(json_resource["gravityDir"])
+		if("dragForce" in json_resource): component.dragForce = json_resource["dragForce"]
+		if("hitRadius" in json_resource): component.hitRadius = json_resource["hitRadius"]
+
+		_get_component = preserve_component_reference(component, cls.blender_property_name, context_resource)
+		def _handle():
+			component = _get_component()
+			for collider_path in json_resource.get("colliders", []):
+				new_collider = component.colliders.add()
+				node_path_component_selector_from_stf(context, json_resource, collider_path, new_collider)
+			if("center" in json_resource):
+				node_path_selector_from_stf(context, json_resource, json_resource["center"], component.center)
+		context.add_task(STF_TaskSteps.DEFAULT, _handle)
+
+		return component
+
+	@classmethod
+	def export_resource(cls, context: STF_ExportContext, blender_resource: Any, context_resource: Any | None) -> tuple[dict, str] | STFReport:
+		ret = export_component_base(context, cls.stf_type, blender_resource, cls.blender_property_name, context_resource)
+		ret["stiffness"] = blender_resource.stiffness
+		ret["gravityPower"] = blender_resource.gravityPower
+		ret["gravityDir"] = trs_utils.blender_translation_to_stf(blender_resource.gravityDir)
+		ret["dragForce"] = blender_resource.dragForce
+		ret["hitRadius"] = blender_resource.hitRadius
+
+		_get_component = preserve_component_reference(blender_resource, cls.blender_property_name, context_resource)
+		def _handle():
+			component = _get_component()
+			colliders = []
+			for collider in component.colliders:
+				if(collider_ret := node_path_component_selector_to_stf(context, collider, ret)):
+					colliders.append(collider_ret)
+			if(len(colliders)):
+				ret["colliders"] = colliders
+			if(component.center):
+				if(center_ret := node_path_selector_to_stf(context, component.center, ret)):
+					ret["center"] = center_ret
+		context.add_task(STF_TaskSteps.DEFAULT, _handle)
+
+		return ret, blender_resource.stf_id
+
+	understood_blender_animation_types = [bpy.types.Object]
+	understood_blender_animation_data_paths = [blender_property_name]
+
+	@classmethod
+	def export_blender_animation(cls, context: STF_ExportContext, blender_resource: Any, property_index: int, blender_property_path: str) -> STFPropertyPathPart | None:
+		if(match := re.search(r"^" + cls.blender_property_name + r"\[(?P<component_index>[\d]+)\].enabled", blender_property_path)):
+			if(component_path := get_component_stf_path_from_collection(blender_resource, cls.blender_property_name, int(match.groupdict()["component_index"]))):
+				return STFPropertyPathPart(component_path + ["enabled"])
+		return None
+
+	@classmethod
+	def import_stf_animation_property_path_func(cls, context: STF_ImportContext, stf_property_path: list[str], blender_resource: Any) -> BlenderPropertyPathPart | None:
+		blender_object = context.get_imported_resource(stf_property_path[0])
+		component_index = get_component_index(blender_resource, cls.blender_property_name, blender_object.stf_id)
+		if(component_index is not None):
+			match(stf_property_path[1]):
+				case "enabled":
+					return BlenderPropertyPathPart("OBJECT", cls.blender_property_name + "[" + str(component_index) + "].enabled")
+		return None
 
 
 def register():
-	setattr(bpy.types.Object, _blender_property_name, bpy.props.CollectionProperty(type=VRM_Springbone))
-	setattr(bpy.types.Bone, _blender_property_name, bpy.props.CollectionProperty(type=VRM_Springbone))
+	setattr(bpy.types.Object, Handler_VRM_Springbone.blender_property_name, bpy.props.CollectionProperty(type=VRM_Springbone))
+	setattr(bpy.types.Bone, Handler_VRM_Springbone.blender_property_name, bpy.props.CollectionProperty(type=VRM_Springbone))
 
 def unregister():
-	if hasattr(bpy.types.Object, _blender_property_name):
-		delattr(bpy.types.Object, _blender_property_name)
-	if hasattr(bpy.types.Bone, _blender_property_name):
-		delattr(bpy.types.Bone, _blender_property_name)
+	if hasattr(bpy.types.Object, Handler_VRM_Springbone.blender_property_name):
+		delattr(bpy.types.Object, Handler_VRM_Springbone.blender_property_name)
+	if hasattr(bpy.types.Bone, Handler_VRM_Springbone.blender_property_name):
+		delattr(bpy.types.Bone, Handler_VRM_Springbone.blender_property_name)
