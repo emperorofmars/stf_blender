@@ -196,7 +196,7 @@ def _create_scale_to_blender_func(blender_object: bpy.types.Object) -> Callable:
 	return _ret
 
 
-def stf_node_import_stf_animation_property_path_func(context: STF_ImportContext, stf_property_path: list[str], blender_resource: Any) -> BlenderPropertyPathPart | None:
+def stf_node_import_stf_animation(context: STF_ImportContext, stf_property_path: list[str], blender_resource: Any) -> BlenderPropertyPathPart | None:
 	blender_resource = context.get_imported_resource(stf_property_path[0])
 	match(stf_property_path[1]):
 		case "t":

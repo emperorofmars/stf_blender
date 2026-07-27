@@ -109,7 +109,7 @@ class STF_ImportContext(ISTF_ImportContext):
 		if(stf_path is None or len(stf_path) == 0): return None
 
 		if(selected_handler := self._state.determine_property_resolution_handler(stf_path[0])):
-			return selected_handler.import_stf_animation_property_path_func(self, stf_path, blender_object)
+			return selected_handler.import_stf_animation(self, stf_path, blender_object)
 
 		return None
 

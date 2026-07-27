@@ -126,7 +126,7 @@ class Handler_STF_Instance_Mesh(STF_Handler_BlenderNative, STF_Handler_Animation
 		return None
 
 	@staticmethod
-	def import_stf_animation_property_path_func(context: STF_ImportContext, stf_path: list[str], blender_object: bpy.types.Object) -> BlenderPropertyPathPart | None:
+	def import_stf_animation(context: STF_ImportContext, stf_path: list[str], blender_object: bpy.types.Object) -> BlenderPropertyPathPart | None:
 		if(len(stf_path) == 4 and stf_path[1] == "blendshape" and stf_path[3] == "value"):
 			return BlenderPropertyPathPart("KEY", "key_blocks[\"" + stf_path[2] + "\"].value")
 		elif(len(stf_path) >= 5 and stf_path[1] == "material"):

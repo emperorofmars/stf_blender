@@ -41,7 +41,7 @@ def stf_material_export_blender_animation(context: STF_ExportContext, blender_re
 	return None
 
 
-def stf_material_import_stf_animation_property_path_func(context: STF_ImportContext, stf_property_path: list[str], blender_resource: bpy.types.Object) -> BlenderPropertyPathPart | None:
+def stf_material_import_stf_animation(context: STF_ImportContext, stf_property_path: list[str], blender_resource: bpy.types.Object) -> BlenderPropertyPathPart | None:
 	material_index = int(stf_property_path[1])
 	material_property_type = stf_property_path[2]
 	material_property_value_index = int(stf_property_path[3])
@@ -56,6 +56,6 @@ def stf_material_import_stf_animation_property_path_func(context: STF_ImportCont
 
 	for mat_module in blender_material_value_modules:
 		if(mat_module.property_name == material_property.value_property_name):
-			return BlenderPropertyPathPart("MATERIAL", material_property.value_property_name + "[" + str(material_property_value_index) + "]", slot_link_property_index = material_index) + mat_module.import_stf_animation_property_path_func(context, stf_property_path[4:])
+			return BlenderPropertyPathPart("MATERIAL", material_property.value_property_name + "[" + str(material_property_value_index) + "]", slot_link_property_index = material_index) + mat_module.import_stf_animation(context, stf_property_path[4:])
 	return None
 

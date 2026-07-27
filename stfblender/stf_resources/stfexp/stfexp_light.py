@@ -117,7 +117,7 @@ class Handler_STFEXP_Light(STF_Handler_BlenderNative, STF_Handler_Animation):
 		return None
 
 	@staticmethod
-	def import_stf_animation_property_path_func(context: STF_ImportContext, stf_property_path: list[str], blender_resource: Any) -> BlenderPropertyPathPart | None:
+	def import_stf_animation(context: STF_ImportContext, stf_property_path: list[str], blender_resource: Any) -> BlenderPropertyPathPart | None:
 		match(stf_property_path[1]):
 			case "temperature":
 				return BlenderPropertyPathPart("LIGHT", "temperature")

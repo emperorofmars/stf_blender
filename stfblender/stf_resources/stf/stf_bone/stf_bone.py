@@ -139,7 +139,7 @@ class Handler_STF_Bone(STF_Handler_BlenderNative, STF_Handler_ComponentHolder, S
 	understood_blender_animation_types = [ArmatureBone]
 	understood_blender_animation_data_paths = ["location", "rotation_quaternion", "rotation_euler", "scale"]
 	export_blender_animation = export_blender_bone_animation
-	import_stf_animation_property_path_func = import_blender_bone_animation
+	import_stf_animation = import_blender_bone_animation
 
 
 def register():

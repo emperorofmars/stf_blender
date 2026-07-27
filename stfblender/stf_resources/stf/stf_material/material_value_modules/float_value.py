@@ -24,7 +24,7 @@ def _draw_func(layout: bpy.types.UILayout, context: bpy.types.Context, blender_m
 def _export_blender_animation(context: STF_ExportContext, blender_property_path: str, value: STF_Material_Value_Float) -> STFPropertyPathPart | None:
 	return STFPropertyPathPart(["number"])
 
-def _import_stf_animation_property_path_func(context: STF_ImportContext, stf_path: list[str]) -> BlenderPropertyPathPart | None:
+def _import_stf_animation(context: STF_ImportContext, stf_path: list[str]) -> BlenderPropertyPathPart | None:
 	return BlenderPropertyPathPart("MATERIAL", "number")
 
 
@@ -36,7 +36,7 @@ class STF_Material_Value_Module_Float(STF_Material_Value_Module_Base):
 	draw_func = _draw_func  # pyright: ignore[reportAssignmentType]
 
 	export_blender_animation = _export_blender_animation  # pyright: ignore[reportAssignmentType]
-	import_stf_animation_property_path_func = _import_stf_animation_property_path_func
+	import_stf_animation = _import_stf_animation
 
 
 def register():

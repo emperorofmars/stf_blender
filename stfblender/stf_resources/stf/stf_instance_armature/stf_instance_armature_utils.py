@@ -106,7 +106,7 @@ def process_components(armature_instance: bpy.types.Object, stf_resources: list[
 		for component_ref in bone.stf_info.stf_components:
 			component_ref: STF_Component_Ref = component_ref  # pyright: ignore[reportRedeclaration]
 			for stf_module in stf_resources:
-				if(stf_module.stf_type == component_ref.stf_type and hasattr(stf_module, "process_func") and getattr(stf_module, "process_func")):
+				if(stf_module.stf_type == component_ref.stf_type and hasattr(stf_module, "apply_functionality") and getattr(stf_module, "apply_functionality")):
 					for component in getattr(bone, component_ref.blender_property_name):
 						if(component.stf_id == component_ref.stf_id):
 							components_to_process[component.stf_id] = ([component, bone, stf_module])
@@ -124,7 +124,7 @@ def process_components(armature_instance: bpy.types.Object, stf_resources: list[
 		for component_ref in bone.stf_info.stf_components:
 			component_ref: STF_Component_Ref = component_ref
 			for stf_module in stf_resources:
-				if(stf_module.stf_type == component_ref.stf_type and hasattr(stf_module, "process_func") and getattr(stf_module, "process_func")):
+				if(stf_module.stf_type == component_ref.stf_type and hasattr(stf_module, "apply_functionality") and getattr(stf_module, "apply_functionality")):
 					for component in getattr(bone, component_ref.blender_property_name):
 						if(component.stf_id == component_ref.stf_id):
 							components_to_process[component.stf_id] = ([component, bone, stf_module])
@@ -133,7 +133,7 @@ def process_components(armature_instance: bpy.types.Object, stf_resources: list[
 	for component_id in components_to_process:
 		component, bone, stf_module = components_to_process[component_id]
 		component: STF_ComponentResourceBase = component
-		stf_module.process_func(component, bone, armature_instance)
+		stf_module.apply_functionality(component, bone, armature_instance)
 
 
 class ProcessComponentsOntoArmatureInstance(bpy.types.Operator):

@@ -30,7 +30,7 @@ def _draw_func(layout: bpy.types.UILayout, context: bpy.types.Context, blender_m
 def _export_blender_animation(context: STF_ExportContext, blender_property_path: str, value: STF_Material_Value_Image) -> STFPropertyPathPart | None:
 	return None
 
-def _import_stf_animation_property_path_func(context: STF_ImportContext, stf_path: list[str]) -> BlenderPropertyPathPart | None:
+def _import_stf_animation(context: STF_ImportContext, stf_path: list[str]) -> BlenderPropertyPathPart | None:
 	return None
 
 
@@ -42,7 +42,7 @@ class STF_Material_Value_Module_Image(STF_Material_Value_Module_Base):
 	draw_func = _draw_func # pyright: ignore[reportAssignmentType]
 
 	export_blender_animation = _export_blender_animation # pyright: ignore[reportAssignmentType]
-	import_stf_animation_property_path_func = _import_stf_animation_property_path_func # pyright: ignore[reportAssignmentType]
+	import_stf_animation = _import_stf_animation # pyright: ignore[reportAssignmentType]
 
 
 def register():

@@ -145,7 +145,7 @@ class Handler_VRM_Springbone(STF_Handler_BoneComponent):
 		return None
 
 	@classmethod
-	def import_stf_animation_property_path_func(cls, context: STF_ImportContext, stf_property_path: list[str], blender_resource: Any) -> BlenderPropertyPathPart | None:
+	def import_stf_animation(cls, context: STF_ImportContext, stf_property_path: list[str], blender_resource: Any) -> BlenderPropertyPathPart | None:
 		blender_object = context.get_imported_resource(stf_property_path[0])
 		component_index = get_component_index(blender_resource, cls.blender_property_name, blender_object.stf_id)
 		if(component_index is not None):

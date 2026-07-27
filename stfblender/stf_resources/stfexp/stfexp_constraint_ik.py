@@ -18,7 +18,7 @@ class STFEXP_Constraint_IK(STF_ComponentResourceBase):
 	pole: bpy.props.PointerProperty(name="Pole", type=NodePathSelector, options=set()) # type: ignore
 
 
-def _process_func(component: STFEXP_Constraint_IK, context_object: bpy.types.Bone, target_object: bpy.types.Object):
+def _apply_functionality(component: STFEXP_Constraint_IK, context_object: bpy.types.Bone, target_object: bpy.types.Object):
 	pose_bone: bpy.types.PoseBone = target_object.pose.bones[context_object.name]
 
 	index = 0
@@ -135,7 +135,7 @@ class ApplyToCurrentArmatureInstance(bpy.types.Operator):
 		else:
 			return {"CANCELLED"}
 
-		_process_func(component, context.bone, context.object)  # pyright: ignore[reportArgumentType]
+		_apply_functionality(component, context.bone, context.object)  # pyright: ignore[reportArgumentType]
 		return {"FINISHED"}
 
 
@@ -233,7 +233,7 @@ def _export_blender_animation(context: STF_ExportContext, blender_resource: Any,
 			return STFPropertyPathPart(component_path + ["enabled"])
 	return None
 
-def _import_stf_animation_property_path_func(context: STF_ImportContext, stf_property_path: list[str], blender_resource: Any) -> BlenderPropertyPathPart | None:
+def _import_stf_animation(context: STF_ImportContext, stf_property_path: list[str], blender_resource: Any) -> BlenderPropertyPathPart | None:
 	blender_resource = context.get_imported_resource(stf_property_path[0])
 	component_index = get_component_index(blender_resource, _blender_property_name, blender_resource.stf_id)
 	if(component_index is not None):
@@ -257,7 +257,7 @@ class Handler_STFEXP_Constraint_IK(STF_Handler_BoneComponent, STF_Handler_Animat
 	understood_blender_animation_types = [bpy.types.Object]
 	understood_blender_animation_data_paths = [_blender_property_name]
 	export_blender_animation = _export_blender_animation
-	import_stf_animation_property_path_func = _import_stf_animation_property_path_func
+	import_stf_animation = _import_stf_animation
 
 	blender_property_name = _blender_property_name
 	single = False
@@ -270,7 +270,7 @@ class Handler_STFEXP_Constraint_IK(STF_Handler_BoneComponent, STF_Handler_Animat
 	export_component_instance = _export_component_instance # pyright: ignore[reportAssignmentType]
 	import_component_instance = _import_component_instance # pyright: ignore[reportAssignmentType]
 
-	process_func = _process_func # pyright: ignore[reportAssignmentType]
+	apply_functionality = _apply_functionality # pyright: ignore[reportAssignmentType]
 
 	pretty_name_template = "IK Constraint"
 

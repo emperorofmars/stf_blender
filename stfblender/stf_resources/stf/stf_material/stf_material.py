@@ -7,7 +7,7 @@ from .material_value_modules import blender_material_value_modules
 from .stf_material_operators import add_property, add_value_to_property
 from .convert_blender_material_to_stf import blender_material_to_stf
 from .convert_stf_material_to_blender import stf_material_to_blender
-from .stf_material_property_conversion import stf_material_export_blender_animation, stf_material_import_stf_animation_property_path_func
+from .stf_material_property_conversion import stf_material_export_blender_animation, stf_material_import_stf_animation
 from .stf_material_ui import STFAddMaterialComponentOperator, STFEditMaterialComponentIdOperator, STFRemoveMaterialComponentOperator, STFSetMaterialIDOperator, draw_material_ui
 
 
@@ -117,7 +117,7 @@ class Handler_STF_Material(STF_Handler_BlenderNative, STF_Handler_ComponentHolde
 	understood_blender_animation_types = [bpy.types.Object]
 	understood_blender_animation_data_paths = ["stf_material_value_"]
 	export_blender_animation = stf_material_export_blender_animation
-	import_stf_animation_property_path_func = stf_material_import_stf_animation_property_path_func
+	import_stf_animation = stf_material_import_stf_animation
 
 
 def register():

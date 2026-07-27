@@ -157,7 +157,7 @@ def vrc_contact_create_export_blender_animation(blender_property_name: str) -> C
 	return handle
 
 
-def vrc_contact_create_import_stf_animation_property_path_func(blender_property_name: str) -> Callable:
+def vrc_contact_create_import_stf_animation(blender_property_name: str) -> Callable:
 	def handle(context: STF_ImportContext, stf_path: list[str], application_object: Any) -> BlenderPropertyPathPart | None:
 		blender_object = context.get_imported_resource(stf_path[0])
 		component_index = get_component_index(application_object, blender_property_name, blender_object.stf_id)

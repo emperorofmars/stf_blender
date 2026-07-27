@@ -1,7 +1,7 @@
 import bpy
 from typing import Any
 
-from .vrc_contact_base import VRC_ContactBase, vrc_contact_create_export_blender_animation, vrc_contact_create_import_stf_animation_property_path_func, vrc_contact_draw_base, vrc_contact_export_base, vrc_contact_import_base
+from .vrc_contact_base import VRC_ContactBase, vrc_contact_create_export_blender_animation, vrc_contact_create_import_stf_animation, vrc_contact_draw_base, vrc_contact_export_base, vrc_contact_import_base
 from .....stfblender_common import STF_ExportContext, STF_ImportContext, STF_Category, STF_Handler_BoneComponent, STF_Component_Ref, ComponentLoadJsonOperatorBase, add_component, export_component_base, import_component_base
 
 
@@ -78,7 +78,7 @@ class STF_Module_VRC_ContactReceiver(STF_Handler_BoneComponent):
 	understood_blender_animation_types = [bpy.types.Object]
 	understood_blender_animation_data_paths = [_blender_property_name]
 	export_blender_animation = vrc_contact_create_export_blender_animation(_blender_property_name)
-	import_stf_animation_property_path_func = vrc_contact_create_import_stf_animation_property_path_func(_blender_property_name)
+	import_stf_animation = vrc_contact_create_import_stf_animation(_blender_property_name)
 
 	like_types = []
 

@@ -96,7 +96,7 @@ def _export_blender_animation(context: STF_ExportContext, blender_resource: Any,
 	return None
 
 
-def _import_stf_animation_property_path_func(context: STF_ImportContext, stf_property_path: list[str], blender_resource: Any) -> BlenderPropertyPathPart | None:
+def _import_stf_animation(context: STF_ImportContext, stf_property_path: list[str], blender_resource: Any) -> BlenderPropertyPathPart | None:
 	blender_resource = context.get_imported_resource(stf_property_path[0])
 	component_index = get_component_index(blender_resource, _blender_property_name, blender_resource.stf_id)
 	if(component_index is not None):
@@ -127,7 +127,7 @@ class Handler_STFEXP_Collider_Sphere(STF_Handler_BoneComponent, STF_Handler_Anim
 	understood_blender_animation_types = [bpy.types.Object]
 	understood_blender_animation_data_paths = [_blender_property_name]
 	export_blender_animation = _export_blender_animation
-	import_stf_animation_property_path_func = _import_stf_animation_property_path_func
+	import_stf_animation = _import_stf_animation
 
 	draw_instance = _draw_component
 	update_component_instance = _set_component_instance_standin
