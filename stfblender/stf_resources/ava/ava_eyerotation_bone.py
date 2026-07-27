@@ -2,11 +2,7 @@ import bpy
 import math
 from typing import Any
 
-from ....stfblender_common import STF_ExportContext, STF_ImportContext, STF_Category, STF_ComponentResourceBase, STF_Handler_Component, STF_Component_Ref, add_component, export_component_base, import_component_base
-
-
-_stf_type = "ava.eye_rotation.bone"
-_blender_property_name = "ava_eye_rotation_bone"
+from ....stfblender_common import STF_ExportContext, STF_ImportContext, STF_Category, STF_ComponentResourceBase, STF_Handler_Component, STF_Component_Ref, STFReport, add_component, export_component_base, import_component_base
 
 
 class AVA_EyeRotation_Bone(STF_ComponentResourceBase):
@@ -16,63 +12,51 @@ class AVA_EyeRotation_Bone(STF_ComponentResourceBase):
 	limit_out: bpy.props.FloatProperty(name="Out", subtype="ANGLE", default=math.radians(16), options=set(), soft_min=0, soft_max=math.radians(60)) # type: ignore
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: AVA_EyeRotation_Bone):
-	layout.use_property_split = True
-	col = layout.column(align=True)
-	col.prop(component, "limit_up")
-	col.prop(component, "limit_down")
-	col.prop(component, "limit_in")
-	col.prop(component, "limit_out")
-
-
-
-def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, context_object: Any) -> Any:
-	component_ref, component = add_component(context_object, _blender_property_name, id, _stf_type)
-	import_component_base(context, component, json_resource, _blender_property_name, context_object)
-
-	component.limit_up = json_resource.get("up", math.radians(15))
-	component.limit_down = json_resource.get("down", math.radians(12))
-	component.limit_in = json_resource.get("in", math.radians(15))
-	component.limit_out = json_resource.get("out", math.radians(16))
-
-	return component
-
-
-def _stf_export(context: STF_ExportContext, component: AVA_EyeRotation_Bone, context_object: Any) -> tuple[dict, str]:
-	ret = export_component_base(context, _stf_type, component, _blender_property_name, context_object)
-	ret["up"] = component.limit_up
-	ret["down"] = component.limit_down
-	ret["in"] = component.limit_in
-	ret["out"] = component.limit_out
-	return ret, component.stf_id
-
-
 class Handler_AVA_EyeRotation_Bone(STF_Handler_Component):
 	"""Define limits to eyebone rotations"""
-	stf_type = _stf_type
+	stf_type = "ava.eye_rotation.bone"
 	stf_category = STF_Category.COMPONENT
+	like_types = []
 	understood_blender_types = [AVA_EyeRotation_Bone]
-	import_resource = _stf_import
-	export_resource = _stf_export
-
-	blender_property_name = _blender_property_name
+	blender_property_name = "ava_eye_rotation_bone"
 	single = True
 	filter = [bpy.types.Armature]
-	draw = _draw_component
-
-	like_types = []
 	pretty_name_template = "Eye-Rotation Limits"
 
+	@classmethod
+	def draw(cls, layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_resource: Any, component: AVA_EyeRotation_Bone):
+		layout.use_property_split = True
+		col = layout.column(align=True)
+		col.prop(component, "limit_up")
+		col.prop(component, "limit_down")
+		col.prop(component, "limit_in")
+		col.prop(component, "limit_out")
 
-register_stf_handlers = [
-	Handler_AVA_EyeRotation_Bone
-]
+	@classmethod
+	def import_resource(cls, context: STF_ImportContext, json_resource: dict, id: str, context_resource: Any) -> Any | STFReport:
+		component_ref, component = add_component(context_resource, cls.blender_property_name, id, cls.stf_type)
+		import_component_base(context, component, json_resource, cls.blender_property_name, context_resource)
+
+		component.limit_up = json_resource.get("up", math.radians(15))
+		component.limit_down = json_resource.get("down", math.radians(12))
+		component.limit_in = json_resource.get("in", math.radians(15))
+		component.limit_out = json_resource.get("out", math.radians(16))
+
+		return component
+
+	@classmethod
+	def export_resource(cls, context: STF_ExportContext, component: AVA_EyeRotation_Bone, context_resource: Any) -> tuple[dict, str] | STFReport:
+		ret = export_component_base(context, cls.stf_type, component, cls.blender_property_name, context_resource)
+		ret["up"] = component.limit_up
+		ret["down"] = component.limit_down
+		ret["in"] = component.limit_in
+		ret["out"] = component.limit_out
+		return ret, component.stf_id
 
 
 def register():
-	setattr(bpy.types.Armature, _blender_property_name, bpy.props.CollectionProperty(type=AVA_EyeRotation_Bone, options=set()))
+	setattr(bpy.types.Armature, Handler_AVA_EyeRotation_Bone.blender_property_name, bpy.props.CollectionProperty(type=AVA_EyeRotation_Bone, options=set()))
 
 def unregister():
-	if hasattr(bpy.types.Armature, _blender_property_name):
-		delattr(bpy.types.Armature, _blender_property_name)
-
+	if hasattr(bpy.types.Armature, Handler_AVA_EyeRotation_Bone.blender_property_name):
+		delattr(bpy.types.Armature, Handler_AVA_EyeRotation_Bone.blender_property_name)

@@ -2,7 +2,7 @@ import bpy
 import re
 from typing import Any
 
-from ....stfblender_common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STF_Category, STF_ComponentResourceBase, STF_Handler_BoneComponent, STF_Component_Ref, add_component, export_component_base, import_component_base
+from ....stfblender_common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STF_Category, STF_ComponentResourceBase, STF_Handler_BoneComponent, STF_Component_Ref, STFReport, add_component, export_component_base, import_component_base
 from ....stfblender_common.utils.animation_conversion_utils import get_component_index, get_component_stf_path_from_collection
 
 
@@ -11,10 +11,10 @@ _blender_property_name = "ava_secondary_motion"
 
 
 class AVA_SecondaryMotion(STF_ComponentResourceBase):
-	intensity: bpy.props.FloatProperty(name="Intensity", default=0.3) # type: ignore
+	intensity: bpy.props.FloatProperty(name="Intensity", default=0.3)
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: AVA_SecondaryMotion):
+def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_resource: Any, component: AVA_SecondaryMotion):
 	layout.label(text="This component is mostly a stub for now.")
 	layout.label(text="Use application specific bone-physics")
 	layout.label(text="components if possible and override this one.")
@@ -23,46 +23,46 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 
 """Bone instance handling"""
 
-def _set_component_instance_standin(context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: AVA_SecondaryMotion, standin_component: AVA_SecondaryMotion):
-	standin_component.intensity = component.intensity
+def _set_component_instance_standin(context: bpy.types.Context, component_ref: STF_Component_Ref, context_resource: Any, component: AVA_SecondaryMotion, component_instance: AVA_SecondaryMotion):
+	component_instance.intensity = component.intensity
 
 
-def _export_component_instance(context: STF_ExportContext, component_ref: STF_Component_Ref, standin_component: AVA_SecondaryMotion, context_object: Any) -> dict:
-	return {"intensity": standin_component.intensity}
+def _export_component_instance(context: STF_ExportContext, component_ref: STF_Component_Ref, component_instance: AVA_SecondaryMotion, context_resource: Any) -> dict:
+	return {"intensity": component_instance.intensity}
 
-def _import_component_instance(context: STF_ImportContext, json_resource: dict, component_ref: STF_Component_Ref, standin_component: AVA_SecondaryMotion, context_object: Any):
-	standin_component.intensity = json_resource.get("intensity", 0.3)
+def _import_component_instance(context: STF_ImportContext, json_resource: dict, component_ref: STF_Component_Ref, component_instance: AVA_SecondaryMotion, context_resource: Any):
+	component_instance.intensity = json_resource.get("intensity", 0.3)
 
 
 """Import & export"""
 
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
-	component_ref, component = add_component(context_object, _blender_property_name, stf_id, _stf_type)
-	import_component_base(context, component, json_resource, _blender_property_name, context_object)
+def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: Any) -> Any | STFReport:
+	component_ref, component = add_component(context_resource, _blender_property_name, stf_id, _stf_type)
+	import_component_base(context, component, json_resource, _blender_property_name, context_resource)
 	component.intensity = json_resource.get("intensity")
 	return component
 
 
-def _stf_export(context: STF_ExportContext, component: AVA_SecondaryMotion, context_object: Any) -> tuple[dict, str]:
-	ret = export_component_base(context, _stf_type, component, _blender_property_name, context_object)
-	ret["intensity"] = component.intensity
-	return ret, component.stf_id
+def _stf_export(context: STF_ExportContext, blender_resource: AVA_SecondaryMotion, context_resource: Any) -> tuple[dict, str] | STFReport:
+	ret = export_component_base(context, _stf_type, blender_resource, _blender_property_name, context_resource)
+	ret["intensity"] = blender_resource.intensity
+	return ret, blender_resource.stf_id
 
 
 """Animation"""
 
-def _export_blender_animation(context: STF_ExportContext, application_object: Any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart | None:
-	if(match := re.search(r"^" + _blender_property_name + r"\[(?P<component_index>[\d]+)\].enabled", data_path)):
-		if(component_path := get_component_stf_path_from_collection(application_object, _blender_property_name, int(match.groupdict()["component_index"]))):
+def _export_blender_animation(context: STF_ExportContext, blender_resource: Any, property_index: int, blender_property_path: str) -> STFPropertyPathPart | None:
+	if(match := re.search(r"^" + _blender_property_name + r"\[(?P<component_index>[\d]+)\].enabled", blender_property_path)):
+		if(component_path := get_component_stf_path_from_collection(blender_resource, _blender_property_name, int(match.groupdict()["component_index"]))):
 			return STFPropertyPathPart(component_path + ["enabled"])
 	return None
 
 
-def _import_stf_animation(context: STF_ImportContext, stf_path: list[str], application_object: Any) -> BlenderPropertyPathPart | None:
-	blender_object = context.get_imported_resource(stf_path[0])
-	component_index = get_component_index(application_object, _blender_property_name, blender_object.stf_id)
+def _import_stf_animation(context: STF_ImportContext, stf_property_path: list[str], blender_resource: Any) -> BlenderPropertyPathPart | None:
+	blender_object = context.get_imported_resource(stf_property_path[0])
+	component_index = get_component_index(blender_resource, _blender_property_name, blender_object.stf_id)
 	if(component_index is not None):
-		match(stf_path[1]):
+		match(stf_property_path[1]):
 			case "enabled":
 				return BlenderPropertyPathPart("OBJECT", _blender_property_name + "[" + str(component_index) + "].enabled")
 	return None
@@ -76,31 +76,25 @@ class Handler_AVA_SecondaryMotion(STF_Handler_BoneComponent):
 	stf_category = STF_Category.COMPONENT
 	like_types = ["secondary_motion"]
 	understood_blender_types = [AVA_SecondaryMotion]
-	import_resource = _stf_import
-	export_resource = _stf_export
-
 	blender_property_name = _blender_property_name
 	single = False
 	filter = [bpy.types.Object, bpy.types.Bone]
+	pretty_name_template = "Secondary Motion"
+
 	draw = _draw_component
+	import_resource = _stf_import
+	export_resource = _stf_export
 
 	understood_blender_animation_types = [bpy.types.Object]
 	understood_blender_animation_data_paths = [_blender_property_name]
 	export_blender_animation = _export_blender_animation
 	import_stf_animation = _import_stf_animation
 
-	draw_instance = _draw_component # pyright: ignore[reportAssignmentType]
+	draw_instance = _draw_component
 	update_component_instance = _set_component_instance_standin
 
-	export_component_instance = _export_component_instance  # pyright: ignore[reportAssignmentType]
-	import_component_instance = _import_component_instance  # pyright: ignore[reportAssignmentType]
-
-	pretty_name_template = "Secondary Motion"
-
-
-register_stf_handlers = [
-	Handler_AVA_SecondaryMotion
-]
+	export_component_instance = _export_component_instance
+	import_component_instance = _import_component_instance
 
 
 def register():

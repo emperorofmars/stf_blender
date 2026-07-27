@@ -2,11 +2,7 @@ import bpy
 from typing import Any
 
 from .ft_csv import ft_definitions
-from .....stfblender_common import STF_ExportContext, STF_ImportContext, STF_Category, STF_ComponentResourceBase, STF_Handler_Component, STF_Component_Ref, add_component, export_component_base, import_component_base
-
-
-_stf_type = "ava.face_tracking.blendshape"
-_blender_property_name = "ava_face_tracking_blendshape"
+from .....stfblender_common import STF_ExportContext, STF_ImportContext, STF_Category, STF_ComponentResourceBase, STF_Handler_Component, STF_Component_Ref, STFReport, add_component, export_component_base, import_component_base
 
 
 def _match_ft_blendshapes(mesh: bpy.types.Mesh, shapes: list[str]) -> tuple[int, int]:
@@ -35,72 +31,62 @@ class AVA_FaceTracking_Blendshapes(STF_ComponentResourceBase):
 	ft_type_custom: bpy.props.StringProperty(name="Unknown Tracking Type", options=set()) # type: ignore
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: bpy.types.Mesh, component: AVA_FaceTracking_Blendshapes):
-	row = layout.row()
-	if(bpy.app.version[0] < 5 or bpy.app.version[1] < 2):
-		row.operator("wm.url_open", text="VRCFT Documentation", icon="HELP").url = "https://docs.vrcft.io/docs/tutorial-avatars/tutorial-avatars-extras/compatibility/overview"
-		row.operator("wm.url_open", text="Mappings Definition", icon="DOCUMENTS").url = "https://docs.google.com/spreadsheets/d/118jo960co3Mgw8eREFVBsaJ7z0GtKNr52IB4Bz99VTA"
-	else:
-		row.link(text="VRCFT Documentation", icon="HELP", url="https://docs.vrcft.io/docs/tutorial-avatars/tutorial-avatars-extras/compatibility/overview")
-		row.link(text="Mappings Definition", icon="DOCUMENTS", url="https://docs.google.com/spreadsheets/d/118jo960co3Mgw8eREFVBsaJ7z0GtKNr52IB4Bz99VTA")
-
-	layout.use_property_split = True
-	layout.label(text="Not all shapes are required, consult the above links to learn more!", icon="INFO")
-	layout.prop(component, "ft_type")
-
-	if(component.ft_type != "other"):
-		shape_match = _match_ft_blendshapes(context_object, ft_definitions[component.ft_type])
-		split = layout.split(factor=0.4); split.row(); split.label(text=str(shape_match[0]) + " / " + str(shape_match[1]) + " Matched")
-	else:
-		layout.prop(component, "ft_type_custom")
-
-
-def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, context_object: bpy.types.Mesh) -> Any:
-	component_ref, component = add_component(context_object, _blender_property_name, id, _stf_type)
-	import_component_base(context, component, json_resource, _blender_property_name, context_object)
-	if("ft_type" in json_resource):
-		if(json_resource["ft_type"] in ft_definitions):
-			component.ft_type = json_resource["ft_type"]
-		else:
-			component.ft_type = "other"
-			component.ft_type_custom= json_resource["ft_type"]
-	return component
-
-
-def _stf_export(context: STF_ExportContext, component: AVA_FaceTracking_Blendshapes, context_object: bpy.types.Mesh) -> tuple[dict, str]:
-	ret = export_component_base(context, _stf_type, component, _blender_property_name, context_object)
-	if(component.ft_type != "other"):
-		ret["ft_type"] = component.ft_type
-	else:
-		ret["ft_type"] = component.ft_type_custom
-	return ret, component.stf_id
-
-
 class Handler_AVA_FaceTracking_Blendshapes(STF_Handler_Component):
 	"""Define face-tracking blendshapes"""
-	stf_type = _stf_type
+	stf_type = "ava.face_tracking.blendshape"
 	stf_category = STF_Category.COMPONENT
+	like_types = []
 	understood_blender_types = [AVA_FaceTracking_Blendshapes]
-	import_resource = _stf_import # pyright: ignore[reportAssignmentType]
-	export_resource = _stf_export # pyright: ignore[reportAssignmentType]
-
-	blender_property_name = _blender_property_name
+	blender_property_name = "ava_face_tracking_blendshape"
 	single = True
 	filter = [bpy.types.Mesh]
-	draw = _draw_component
-
-	like_types = []
 	pretty_name_template = "Face Tracking Blendshapes"
 
+	@classmethod
+	def draw(cls, layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_resource: bpy.types.Mesh, component: AVA_FaceTracking_Blendshapes):
+		row = layout.row()
+		if(bpy.app.version[0] < 5 or bpy.app.version[1] < 2):
+			row.operator("wm.url_open", text="VRCFT Documentation", icon="HELP").url = "https://docs.vrcft.io/docs/tutorial-avatars/tutorial-avatars-extras/compatibility/overview"
+			row.operator("wm.url_open", text="Mappings Definition", icon="DOCUMENTS").url = "https://docs.google.com/spreadsheets/d/118jo960co3Mgw8eREFVBsaJ7z0GtKNr52IB4Bz99VTA"
+		else:
+			row.link(text="VRCFT Documentation", icon="HELP", url="https://docs.vrcft.io/docs/tutorial-avatars/tutorial-avatars-extras/compatibility/overview")
+			row.link(text="Mappings Definition", icon="DOCUMENTS", url="https://docs.google.com/spreadsheets/d/118jo960co3Mgw8eREFVBsaJ7z0GtKNr52IB4Bz99VTA")
 
-register_stf_handlers = [
-	Handler_AVA_FaceTracking_Blendshapes
-]
+		layout.use_property_split = True
+		layout.label(text="Not all shapes are required, consult the above links to learn more!", icon="INFO")
+		layout.prop(component, "ft_type")
+
+		if(component.ft_type != "other"):
+			shape_match = _match_ft_blendshapes(context_resource, ft_definitions[component.ft_type])
+			split = layout.split(factor=0.4); split.row(); split.label(text=str(shape_match[0]) + " / " + str(shape_match[1]) + " Matched")
+		else:
+			layout.prop(component, "ft_type_custom")
+
+	@classmethod
+	def import_resource(cls, context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: bpy.types.Mesh) -> Any | STFReport:
+		component_ref, component = add_component(context_resource, cls.blender_property_name, stf_id, cls.stf_type)
+		import_component_base(context, component, json_resource, cls.blender_property_name, context_resource)
+		if("ft_type" in json_resource):
+			if(json_resource["ft_type"] in ft_definitions):
+				component.ft_type = json_resource["ft_type"]
+			else:
+				component.ft_type = "other"
+				component.ft_type_custom= json_resource["ft_type"]
+		return component
+
+	@classmethod
+	def export_resource(cls, context: STF_ExportContext, component: AVA_FaceTracking_Blendshapes, context_resource: bpy.types.Mesh) -> tuple[dict, str] | STFReport:
+		ret = export_component_base(context, cls.stf_type, component, cls.blender_property_name, context_resource)
+		if(component.ft_type != "other"):
+			ret["ft_type"] = component.ft_type
+		else:
+			ret["ft_type"] = component.ft_type_custom
+		return ret, component.stf_id
 
 
 def register():
-	setattr(bpy.types.Mesh, _blender_property_name, bpy.props.CollectionProperty(type=AVA_FaceTracking_Blendshapes, options=set()))
+	setattr(bpy.types.Mesh, Handler_AVA_FaceTracking_Blendshapes.blender_property_name, bpy.props.CollectionProperty(type=AVA_FaceTracking_Blendshapes, options=set()))
 
 def unregister():
-	if hasattr(bpy.types.Mesh, _blender_property_name):
-		delattr(bpy.types.Mesh, _blender_property_name)
+	if hasattr(bpy.types.Mesh, Handler_AVA_FaceTracking_Blendshapes.blender_property_name):
+		delattr(bpy.types.Mesh, Handler_AVA_FaceTracking_Blendshapes.blender_property_name)

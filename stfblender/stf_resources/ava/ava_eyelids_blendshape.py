@@ -4,10 +4,6 @@ from typing import Any
 from ....stfblender_common import STF_ExportContext, STF_ImportContext, STF_Category, STF_ComponentResourceBase, STF_Handler_Component, STF_Component_Ref, add_component, export_component_base, import_component_base
 
 
-_stf_type = "ava.eyelids.blendshape"
-_blender_property_name = "ava_eyelids_blendshape"
-
-
 _eyelid_prefixes = ["", "vis.", "vis_", "vis ", "vrc.", "vrc_", "vrc ", "eye", "eye.", "eye_", "eye ", "eyes", "eyes.", "eyes_", "eyes ", "eyelid", "eyelids"]
 _eyelid_shapes = {
 	"closed": ["close", "closed", "blink"],
@@ -79,99 +75,88 @@ class AutomapEyelids(bpy.types.Operator):
 		return {"CANCELLED"}
 
 
-
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: AVA_Eyelids_Blendshape):
-	if(not context_object or type(context_object) is not bpy.types.Mesh):
-		return
-
-	layout.use_property_split = True
-	layout.operator(AutomapEyelids.bl_idname, icon="LOOP_FORWARDS").component_id = component.stf_id
-
-	col = layout.column(align=True)
-	col.prop_search(component, "eyes_closed", context_object.shape_keys, "key_blocks")
-	col.prop_search(component, "look_up", context_object.shape_keys, "key_blocks")
-	col.prop_search(component, "look_down", context_object.shape_keys, "key_blocks")
-	col.prop_search(component, "look_left", context_object.shape_keys, "key_blocks")
-	col.prop_search(component, "look_right", context_object.shape_keys, "key_blocks")
-
-	layout.separator(factor=1)
-
-	col = layout.column(align=True)
-	col.prop_search(component, "eye_closed_left", context_object.shape_keys, "key_blocks")
-	col.prop_search(component, "look_up_left", context_object.shape_keys, "key_blocks")
-	col.prop_search(component, "look_down_left", context_object.shape_keys, "key_blocks")
-	col.prop_search(component, "look_left_left", context_object.shape_keys, "key_blocks")
-	col.prop_search(component, "look_right_left", context_object.shape_keys, "key_blocks")
-
-	layout.separator(factor=1)
-
-	col = layout.column(align=True)
-	col.prop_search(component, "eye_closed_right", context_object.shape_keys, "key_blocks")
-	col.prop_search(component, "look_up_right", context_object.shape_keys, "key_blocks")
-	col.prop_search(component, "look_down_right", context_object.shape_keys, "key_blocks")
-	col.prop_search(component, "look_left_right", context_object.shape_keys, "key_blocks")
-	col.prop_search(component, "look_right_right", context_object.shape_keys, "key_blocks")
-
-
-def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, context_object: Any) -> Any:
-	component_ref, component = add_component(context_object, _blender_property_name, id, _stf_type)
-	import_component_base(context, component, json_resource, _blender_property_name, context_object)
-
-	for shape_name, _ in _eyelid_shapes.items():
-		if(shape_name in json_resource):
-			setattr(component, "eyes_closed" if shape_name == "closed" else "look_" + shape_name, json_resource[shape_name])
-
-	for shape_name, _ in _eyelid_shapes.items():
-		if(shape_name + "_left" in json_resource):
-			setattr(component, "eye_closed_left" if shape_name == "closed" else "look_" + shape_name + "_left", json_resource[shape_name + "_left"])
-
-	for shape_name, _ in _eyelid_shapes.items():
-		if(shape_name + "_right" in json_resource):
-			setattr(component, "eye_closed_right" if shape_name == "closed" else "look_" + shape_name + "_right", json_resource[shape_name + "_right"])
-
-	return component
-
-
-def _stf_export(context: STF_ExportContext, component: AVA_Eyelids_Blendshape, context_object: Any) -> tuple[dict, str]:
-	ret = export_component_base(context, _stf_type, component, _blender_property_name, context_object)
-
-	for shape_name, _ in _eyelid_shapes.items():
-		ret[shape_name] = getattr(component, "eyes_closed" if shape_name == "closed" else "look_" + shape_name)
-
-	for shape_name, _ in _eyelid_shapes.items():
-		ret[shape_name + "_left"] = getattr(component, "eye_closed_left" if shape_name == "closed" else "look_" + shape_name + "_left")
-
-	for shape_name, _ in _eyelid_shapes.items():
-		ret[shape_name + "_right"] = getattr(component, "eye_closed_right" if shape_name == "closed" else "look_" + shape_name + "_right")
-
-	return ret, component.stf_id
-
-
 class Handler_AVA_Eyelids_Blendshape(STF_Handler_Component):
 	"""Define which shape-keys/blendshapes move eyelids"""
-	stf_type = _stf_type
+	stf_type = "ava.eyelids.blendshape"
 	stf_category = STF_Category.COMPONENT
+	like_types = []
 	understood_blender_types = [AVA_Eyelids_Blendshape]
-	import_resource = _stf_import
-	export_resource = _stf_export
-
-	blender_property_name = _blender_property_name
+	blender_property_name = "ava_eyelids_blendshape"
 	single = True
 	filter = [bpy.types.Mesh]
-	draw = _draw_component
-
-	like_types = []
 	pretty_name_template = "Eyelid Blendshapes"
 
+	@classmethod
+	def draw(cls, layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_resource: Any, component: AVA_Eyelids_Blendshape):
+		if(not context_resource or type(context_resource) is not bpy.types.Mesh):
+			return
 
-register_stf_handlers = [
-	Handler_AVA_Eyelids_Blendshape
-]
+		layout.use_property_split = True
+		layout.operator(AutomapEyelids.bl_idname, icon="LOOP_FORWARDS").component_id = component.stf_id
+
+		col = layout.column(align=True)
+		col.prop_search(component, "eyes_closed", context_resource.shape_keys, "key_blocks")
+		col.prop_search(component, "look_up", context_resource.shape_keys, "key_blocks")
+		col.prop_search(component, "look_down", context_resource.shape_keys, "key_blocks")
+		col.prop_search(component, "look_left", context_resource.shape_keys, "key_blocks")
+		col.prop_search(component, "look_right", context_resource.shape_keys, "key_blocks")
+
+		layout.separator(factor=1)
+
+		col = layout.column(align=True)
+		col.prop_search(component, "eye_closed_left", context_resource.shape_keys, "key_blocks")
+		col.prop_search(component, "look_up_left", context_resource.shape_keys, "key_blocks")
+		col.prop_search(component, "look_down_left", context_resource.shape_keys, "key_blocks")
+		col.prop_search(component, "look_left_left", context_resource.shape_keys, "key_blocks")
+		col.prop_search(component, "look_right_left", context_resource.shape_keys, "key_blocks")
+
+		layout.separator(factor=1)
+
+		col = layout.column(align=True)
+		col.prop_search(component, "eye_closed_right", context_resource.shape_keys, "key_blocks")
+		col.prop_search(component, "look_up_right", context_resource.shape_keys, "key_blocks")
+		col.prop_search(component, "look_down_right", context_resource.shape_keys, "key_blocks")
+		col.prop_search(component, "look_left_right", context_resource.shape_keys, "key_blocks")
+		col.prop_search(component, "look_right_right", context_resource.shape_keys, "key_blocks")
+
+	@classmethod
+	def import_resource(cls, context: STF_ImportContext, json_resource: dict, id: str, context_resource: Any) -> Any:
+		component_ref, component = add_component(context_resource, cls.blender_property_name, id, cls.stf_type)
+		import_component_base(context, component, json_resource, cls.blender_property_name, context_resource)
+
+		for shape_name, _ in _eyelid_shapes.items():
+			if(shape_name in json_resource):
+				setattr(component, "eyes_closed" if shape_name == "closed" else "look_" + shape_name, json_resource[shape_name])
+
+		for shape_name, _ in _eyelid_shapes.items():
+			if(shape_name + "_left" in json_resource):
+				setattr(component, "eye_closed_left" if shape_name == "closed" else "look_" + shape_name + "_left", json_resource[shape_name + "_left"])
+
+		for shape_name, _ in _eyelid_shapes.items():
+			if(shape_name + "_right" in json_resource):
+				setattr(component, "eye_closed_right" if shape_name == "closed" else "look_" + shape_name + "_right", json_resource[shape_name + "_right"])
+
+		return component
+
+	@classmethod
+	def export_resource(cls, context: STF_ExportContext, component: AVA_Eyelids_Blendshape, context_resource: Any) -> tuple[dict, str]:
+		ret = export_component_base(context, cls.stf_type, component, cls.blender_property_name, context_resource)
+
+		for shape_name, _ in _eyelid_shapes.items():
+			ret[shape_name] = getattr(component, "eyes_closed" if shape_name == "closed" else "look_" + shape_name)
+
+		for shape_name, _ in _eyelid_shapes.items():
+			ret[shape_name + "_left"] = getattr(component, "eye_closed_left" if shape_name == "closed" else "look_" + shape_name + "_left")
+
+		for shape_name, _ in _eyelid_shapes.items():
+			ret[shape_name + "_right"] = getattr(component, "eye_closed_right" if shape_name == "closed" else "look_" + shape_name + "_right")
+
+		return ret, component.stf_id
 
 
 def register():
-	setattr(bpy.types.Mesh, _blender_property_name, bpy.props.CollectionProperty(type=AVA_Eyelids_Blendshape, options=set()))
+	setattr(bpy.types.Mesh, Handler_AVA_Eyelids_Blendshape.blender_property_name, bpy.props.CollectionProperty(type=AVA_Eyelids_Blendshape, options=set()))
 
 def unregister():
-	if hasattr(bpy.types.Mesh, _blender_property_name):
-		delattr(bpy.types.Mesh, _blender_property_name)
+	if hasattr(bpy.types.Mesh, Handler_AVA_Eyelids_Blendshape.blender_property_name):
+		delattr(bpy.types.Mesh, Handler_AVA_Eyelids_Blendshape.blender_property_name)
