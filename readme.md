@@ -7,12 +7,9 @@
 🌰 **[Read the User Guide!](https://docs.stfform.at/guide/blender.html)** 🌰 **[Report Issues](https://codeberg.org/stf_format/stf_blender/issues)** 🌰 **[STF Documentation](https://docs.stfform.at/)**
 
 ## Installation
-### From Repository (preferred)
 Follow the steps on [docs.stfform.at](https://docs.stfform.at/installation/blender.html)!
 
-### Manual
-Download the [latest release](https://codeberg.org/stf_format/stf_blender/releases/latest)\
-Add it under: `Edit` → `Preferences` → `Get Extensions` → **Click on the top right most dropdown** → `Install from Disk...`
+Alternatively you can also install the .zip from the latest release manually.
 
 ---
 
@@ -20,6 +17,10 @@ Add it under: `Edit` → `Preferences` → `Get Extensions` → **Click on the t
 > **Also install the [Slot Link](https://extensions.blender.org/add-ons/slot-link/) extension if you want to import/export animations.**
 
 Please open issues for any bugs or misbehavior you notice. Feel free to open issues for feature requests.
+
+## Extend STF
+You can easily implement your own resources as a separate Blender extension, and have this importer & exporter detect them!\
+[Get started from this template!](https://codeberg.org/stf_format/stfblender_custom_resource_template)
 
 ## Development Setup
 * After cloning, change into the repo dir and run:
@@ -31,7 +32,7 @@ Please open issues for any bugs or misbehavior you notice. Feel free to open iss
 	* Use `bpydev.py` included in this repository.
 	* Use VSCode with the [recommended extensions](./.vscode/extensions.json).\
 		The most important one is [Blender VS Code](https://github.com/JacquesLucke/blender_vscode).
-* Create a Python 3.13 venv in the repo directory.
+* Create a Python 3.14 venv in the repo directory.
 * Inside the venv run:
 	``` sh
 	pip install -r requirements.txt
