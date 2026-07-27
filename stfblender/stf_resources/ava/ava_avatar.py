@@ -12,9 +12,9 @@ _blender_property_name = "stf_ava_avatar"
 
 
 def _poll_armature_instance(self, blender_object: bpy.types.Object) -> bool:
-	return blender_object.data and type(blender_object.data) is bpy.types.Armature  # pyright: ignore[reportReturnType]
+	return blender_object.data is not None and type(blender_object.data) is bpy.types.Armature
 def _poll_mesh_instance(self, blender_object: bpy.types.Object) -> bool:
-	return blender_object.data and type(blender_object.data) is bpy.types.Mesh  # pyright: ignore[reportReturnType]
+	return blender_object.data is not None and type(blender_object.data) is bpy.types.Mesh
 
 class AVA_Avatar(STF_ComponentResourceBase):
 	viewport: bpy.props.PointerProperty(type=bpy.types.Object, name="Viewport", description="This Object's location will be used to determine the viewport location", options=set()) # type: ignore
@@ -51,97 +51,85 @@ class CreateViewportObjectOperator(bpy.types.Operator):
 		return {"FINISHED"}
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: AVA_Avatar):
-	layout.use_property_split = True
-	if(component.viewport):
-		layout.prop(component, "viewport")
-		row = layout.row()
-		row.alignment = "RIGHT"
-		row.operator(OP_SetActiveObjectOperator, text="Select Viewport Object", icon="EYEDROPPER").target_name = component.viewport.name
-	else:
-		create_viewport_button = layout.operator(CreateViewportObjectOperator.bl_idname, text="Create Viewport Object", icon="ADD")
-		create_viewport_button.blender_collection = context_object.name
-		create_viewport_button.component_id = component.stf_id
-
-	layout.prop(component, "primary_armature_instance", icon="ARMATURE_DATA")
-	if(component.primary_armature_instance and (not component.primary_armature_instance.data or type(component.primary_armature_instance.data) != bpy.types.Armature)):
-		layout.label(text="Warning! The Object doesn't instantiate an Armature!")
-
-	layout.prop(component, "primary_mesh_instance", icon="MESH_DATA")
-	if(component.primary_mesh_instance and (not component.primary_mesh_instance.data or type(component.primary_mesh_instance.data) != bpy.types.Mesh)):
-		layout.label(text="Warning! The Object doesn't instantiate a Mesh!")
-
-
-
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any | STFReport:
-	component_ref, component = add_component(context_object, _blender_property_name, stf_id, _stf_type)
-	import_component_base(context, component, json_resource, _blender_property_name, context_object)
-
-	if("viewport" in json_resource):
-		def _handle_viewport():
-			component.viewport = context.import_resource(json_resource, json_resource["viewport"], STF_Category.NODE)
-		context.add_task(STF_TaskSteps.DEFAULT, _handle_viewport)
-
-	if("primary_armature_instance" in json_resource):
-		def _handle_primary_armature_instance():
-			component.primary_armature_instance = context.import_resource(json_resource, json_resource["primary_armature_instance"], STF_Category.NODE)
-		context.add_task(STF_TaskSteps.DEFAULT, _handle_primary_armature_instance)
-
-	if("primary_mesh_instance" in json_resource):
-		def _handle_primary_mesh_instance():
-			component.primary_mesh_instance = context.import_resource(json_resource, json_resource["primary_mesh_instance"], STF_Category.NODE)
-		context.add_task(STF_TaskSteps.DEFAULT, _handle_primary_mesh_instance)
-
-	return component
-
-
-def _stf_export(context: STF_ExportContext, blender_object: AVA_Avatar, context_object: Any) -> tuple[dict, str] | STFReport:
-	component = blender_object
-	ret = export_component_base(context, _stf_type, component, _blender_property_name, context_object)
-
-	if(component.viewport):
-		def _handle_viewport():
-			ret["viewport"] = register_exported_resource(ret, context.get_resource_id(component.viewport))  # pyright: ignore[reportArgumentType]
-		context.add_task(STF_TaskSteps.DEFAULT, _handle_viewport)
-
-	if(component.primary_armature_instance and component.primary_armature_instance.data and type(component.primary_armature_instance.data) is bpy.types.Armature):
-		def _handle_primary_armature_instance():
-			ret["primary_armature_instance"] = register_exported_resource(ret, context.get_resource_id(component.primary_armature_instance))  # pyright: ignore[reportArgumentType]
-		context.add_task(STF_TaskSteps.DEFAULT, _handle_primary_armature_instance)
-
-	if(component.primary_mesh_instance and component.primary_mesh_instance.data and type(component.primary_mesh_instance.data) is bpy.types.Mesh):
-		def _handle_primary_mesh_instance():
-			ret["primary_mesh_instance"] = register_exported_resource(ret, context.get_resource_id(component.primary_mesh_instance))  # pyright: ignore[reportArgumentType]
-		context.add_task(STF_TaskSteps.DEFAULT, _handle_primary_mesh_instance)
-
-	return ret, component.stf_id
-
-
 class Handler_AVA_Avatar(STF_Handler_Component):
 	"""Represents a VR & V-tubing avatar model"""
 	stf_type = _stf_type
 	stf_category = STF_Category.COMPONENT
+	like_types = ["avatar"]
 	understood_blender_types = [AVA_Avatar]
-	import_resource = _stf_import
-	export_resource = _stf_export
-
 	blender_property_name = _blender_property_name
 	single = True
 	filter = [bpy.types.Collection]
-	draw = _draw_component
-
-	like_types = ["avatar"]
 	pretty_name_template = "Avatar"
 
+	@classmethod
+	def draw(cls, layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_resource: Any, component: AVA_Avatar):
+		layout.use_property_split = True
+		if(component.viewport):
+			layout.prop(component, "viewport")
+			row = layout.row()
+			row.alignment = "RIGHT"
+			row.operator(OP_SetActiveObjectOperator, text="Select Viewport Object", icon="EYEDROPPER").target_name = component.viewport.name
+		else:
+			create_viewport_button = layout.operator(CreateViewportObjectOperator.bl_idname, text="Create Viewport Object", icon="ADD")
+			create_viewport_button.blender_collection = context_resource.name
+			create_viewport_button.component_id = component.stf_id
 
-register_stf_handlers = [
-	Handler_AVA_Avatar
-]
+		layout.prop(component, "primary_armature_instance", icon="ARMATURE_DATA")
+		if(component.primary_armature_instance and (not component.primary_armature_instance.data or type(component.primary_armature_instance.data) != bpy.types.Armature)):
+			layout.label(text="Warning! The Object doesn't instantiate an Armature!")
+
+		layout.prop(component, "primary_mesh_instance", icon="MESH_DATA")
+		if(component.primary_mesh_instance and (not component.primary_mesh_instance.data or type(component.primary_mesh_instance.data) != bpy.types.Mesh)):
+			layout.label(text="Warning! The Object doesn't instantiate a Mesh!")
+
+	@classmethod
+	def import_resource(cls, context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: Any) -> Any | STFReport:
+		component_ref, component = add_component(context_resource, cls.blender_property_name, stf_id, cls.stf_type)
+		import_component_base(context, component, json_resource, cls.blender_property_name, context_resource)
+
+		if("viewport" in json_resource):
+			def _handle_viewport():
+				component.viewport = context.import_resource(json_resource, json_resource["viewport"], STF_Category.NODE)
+			context.add_task(STF_TaskSteps.DEFAULT, _handle_viewport)
+
+		if("primary_armature_instance" in json_resource):
+			def _handle_primary_armature_instance():
+				component.primary_armature_instance = context.import_resource(json_resource, json_resource["primary_armature_instance"], STF_Category.NODE)
+			context.add_task(STF_TaskSteps.DEFAULT, _handle_primary_armature_instance)
+
+		if("primary_mesh_instance" in json_resource):
+			def _handle_primary_mesh_instance():
+				component.primary_mesh_instance = context.import_resource(json_resource, json_resource["primary_mesh_instance"], STF_Category.NODE)
+			context.add_task(STF_TaskSteps.DEFAULT, _handle_primary_mesh_instance)
+
+		return component
+
+	@classmethod
+	def export_resource(cls, context: STF_ExportContext, component: AVA_Avatar, context_resource: Any) -> tuple[dict, str] | STFReport:
+		ret = export_component_base(context, cls.stf_type, component, cls.blender_property_name, context_resource)
+
+		if(component.viewport):
+			def _handle_viewport():
+				ret["viewport"] = register_exported_resource(ret, context.get_resource_id(component.viewport)) # pyright: ignore[reportArgumentType]
+			context.add_task(STF_TaskSteps.DEFAULT, _handle_viewport)
+
+		if(component.primary_armature_instance and component.primary_armature_instance.data and type(component.primary_armature_instance.data) is bpy.types.Armature):
+			def _handle_primary_armature_instance():
+				ret["primary_armature_instance"] = register_exported_resource(ret, context.get_resource_id(component.primary_armature_instance)) # pyright: ignore[reportArgumentType]
+			context.add_task(STF_TaskSteps.DEFAULT, _handle_primary_armature_instance)
+
+		if(component.primary_mesh_instance and component.primary_mesh_instance.data and type(component.primary_mesh_instance.data) is bpy.types.Mesh):
+			def _handle_primary_mesh_instance():
+				ret["primary_mesh_instance"] = register_exported_resource(ret, context.get_resource_id(component.primary_mesh_instance)) # pyright: ignore[reportArgumentType]
+			context.add_task(STF_TaskSteps.DEFAULT, _handle_primary_mesh_instance)
+
+		return ret, component.stf_id
 
 
 def register():
-	setattr(bpy.types.Collection, _blender_property_name, bpy.props.CollectionProperty(type=AVA_Avatar))
+	setattr(bpy.types.Collection, Handler_AVA_Avatar.blender_property_name, bpy.props.CollectionProperty(type=AVA_Avatar))
 
 def unregister():
-	if hasattr(bpy.types.Collection, _blender_property_name):
-		delattr(bpy.types.Collection, _blender_property_name)
+	if hasattr(bpy.types.Collection, Handler_AVA_Avatar.blender_property_name):
+		delattr(bpy.types.Collection, Handler_AVA_Avatar.blender_property_name)

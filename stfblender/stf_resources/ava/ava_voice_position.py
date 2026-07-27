@@ -2,7 +2,7 @@ import bpy
 import uuid
 from typing import Any
 
-from ....stfblender_common import STF_ExportContext, STF_ImportContext, STF_TaskSteps, STF_Category, STF_ComponentResourceBase, STF_Handler_Component, STF_Component_Ref, add_component, export_component_base, import_component_base
+from ....stfblender_common import STF_ExportContext, STF_ImportContext, STF_TaskSteps, STF_Category, STF_ComponentResourceBase, STF_Handler_Component, STF_Component_Ref, STFReport, add_component, export_component_base, import_component_base
 from ....stfblender_common.helpers import register_exported_resource, OP_SetActiveObjectOperator
 from ..stfexp import stfexp_node_ethereal
 
@@ -43,67 +43,57 @@ class CreateVoicePositionObjectOperator(bpy.types.Operator):
 		return {"FINISHED"}
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: AVA_VoicePosition):
-	layout.use_property_split = True
-	if(component.voice_position):
-		layout.prop(component, "voice_position")
-		row = layout.row()
-		row.alignment = "RIGHT"
-		row.operator(OP_SetActiveObjectOperator, text="Select Position Object", icon="EYEDROPPER").target_name = component.voice_position.name
-	else:
-		create_button = layout.operator(CreateVoicePositionObjectOperator.bl_idname, text="Create Position Object", icon="ADD")
-		create_button.blender_collection = context_object.name
-		create_button.component_id = component.stf_id
-
-
-def _stf_import(context: STF_ImportContext, json_resource: dict, id: str, context_object: Any) -> Any:
-	component_ref, component = add_component(context_object, _blender_property_name, id, _stf_type)
-	import_component_base(context, component, json_resource, _blender_property_name, context_object)
-
-	if("voice_position" in json_resource):
-		def _handle():
-			component.voice_position = context.import_resource(json_resource, json_resource["voice_position"], STF_Category.NODE)
-		context.add_task(STF_TaskSteps.DEFAULT, _handle)
-
-	return component
-
-
-def _stf_export(context: STF_ExportContext, component: AVA_VoicePosition, context_object: Any) -> tuple[dict, str]:
-	ret = export_component_base(context, _stf_type, component, _blender_property_name, context_object)
-
-	if(component.voice_position):
-		def _handle():
-			ret["voice_position"] = register_exported_resource(ret, context.get_resource_id(component.voice_position))  # pyright: ignore[reportArgumentType]
-		context.add_task(STF_TaskSteps.DEFAULT, _handle)
-
-	return ret, component.stf_id
-
-
 class Handler_AVA_VoicePosition(STF_Handler_Component):
 	"""Specify the position from which a VR & V-Tubing avatars voice originates"""
 	stf_type = _stf_type
 	stf_category = STF_Category.COMPONENT
+	like_types = ["voice_position"]
 	understood_blender_types = [AVA_VoicePosition]
-	import_resource = _stf_import
-	export_resource = _stf_export
-
 	blender_property_name = _blender_property_name
 	single = True
 	filter = [bpy.types.Collection]
-	draw = _draw_component
-
-	like_types = ["voice_position"]
 	pretty_name_template = "Voice Position"
 
+	@classmethod
+	def draw(cls, layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_resource: Any, component: AVA_VoicePosition):
+		layout.use_property_split = True
+		if(component.voice_position):
+			layout.prop(component, "voice_position")
+			row = layout.row()
+			row.alignment = "RIGHT"
+			row.operator(OP_SetActiveObjectOperator, text="Select Position Object", icon="EYEDROPPER").target_name = component.voice_position.name
+		else:
+			create_button = layout.operator(CreateVoicePositionObjectOperator.bl_idname, text="Create Position Object", icon="ADD")
+			create_button.blender_collection = context_resource.name
+			create_button.component_id = component.stf_id
 
-register_stf_handlers = [
-	Handler_AVA_VoicePosition
-]
+	@classmethod
+	def import_resource(cls, context: STF_ImportContext, json_resource: dict, id: str, context_resource: Any) -> Any | STFReport:
+		component_ref, component = add_component(context_resource, cls.blender_property_name, id, cls.stf_type)
+		import_component_base(context, component, json_resource, cls.blender_property_name, context_resource)
+
+		if("voice_position" in json_resource):
+			def _handle():
+				component.voice_position = context.import_resource(json_resource, json_resource["voice_position"], STF_Category.NODE)
+			context.add_task(STF_TaskSteps.DEFAULT, _handle)
+
+		return component
+
+	@classmethod
+	def export_resource(cls, context: STF_ExportContext, component: AVA_VoicePosition, context_resource: Any) -> tuple[dict, str] | STFReport:
+		ret = export_component_base(context, cls.stf_type, component, cls.blender_property_name, context_resource)
+
+		if(component.voice_position):
+			def _handle():
+				ret["voice_position"] = register_exported_resource(ret, context.get_resource_id(component.voice_position)) # pyright: ignore[reportArgumentType]
+			context.add_task(STF_TaskSteps.DEFAULT, _handle)
+
+		return ret, component.stf_id
 
 
 def register():
-	setattr(bpy.types.Collection, _blender_property_name, bpy.props.CollectionProperty(type=AVA_VoicePosition))
+	setattr(bpy.types.Collection, Handler_AVA_VoicePosition.blender_property_name, bpy.props.CollectionProperty(type=AVA_VoicePosition))
 
 def unregister():
-	if hasattr(bpy.types.Collection, _blender_property_name):
-		delattr(bpy.types.Collection, _blender_property_name)
+	if hasattr(bpy.types.Collection, Handler_AVA_VoicePosition.blender_property_name):
+		delattr(bpy.types.Collection, Handler_AVA_VoicePosition.blender_property_name)

@@ -6,10 +6,6 @@ from ....stfblender_common.helpers import register_exported_resource, create_add
 from ....stfblender_common.blender_grr import *
 
 
-_stf_type = "ava.expressions"
-_blender_property_name = "ava_expressions"
-
-
 expression_values = (
 	("smile", "Smile", ""),
 	("happy", "Happy", ""),
@@ -108,133 +104,123 @@ class STFDrawAVAExpressionList(bpy.types.UIList):
 			layout.label(text="No Fallback", icon="X")
 
 
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: AVA_Expressions):
-	if(not hasattr(bpy.types.Action, "slot_links")):
-		draw_slot_link_warning(layout)
-
-	layout.use_property_split = True
-
-	create_add_button(layout, "collection" if context_object != context.scene.collection else True, _blender_property_name, component.stf_id, "expressions", text="Add Expression")
-
-	row = layout.row(align=True)
-	row.template_list(STFDrawAVAExpressionList.bl_idname, "", component, "expressions", component, "active_expression")
-	if(component.active_expression >= len(component.expressions)):
-		return
-
-	create_remove_button(row, "collection" if context_object != context.scene.collection else True, _blender_property_name, component.stf_id, "expressions", component.active_expression)
-
-	expression = component.expressions[component.active_expression]
-
-	box = layout.box()
-	row = box.row()
-	row.prop(expression, "expression")
-
-	if(expression.expression == "custom"):
-		box.prop(expression, "custom_expression")
-
-	box.prop(expression, "animation")
-	box.label(text="Note: the animation must have valid 'Slot Link' targets.", icon="INFO_LARGE")
-
-	box.separator(factor=1, type="LINE")
-	box.use_property_split = False
-	box.prop(expression, "use_blendshape_fallback")
-
-	if(expression.use_blendshape_fallback):
-		box = box.box()
-		box.label(text="Blendshape Only Fallback (For VRM)")
-		if(not validate_stf_data_resource_reference(expression.blendshape_fallback, ["dev.vrm.blendshape_pose"])):
-			box.label(text="Create a 'dev.vrm.blendshape_pose' type resource in a Blender-Collection under 'STF Data Resources'.", icon="INFO_LARGE")
-		box.use_property_split = True
-		draw_stf_data_resource_reference(box.column(align=True), expression.blendshape_fallback, ["dev.vrm.blendshape_pose"])
-
-
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
-	component_ref, component = add_component(context_object, _blender_property_name, stf_id, _stf_type)
-	import_component_base(context, component, json_resource, _blender_property_name, context_object)
-
-	def _handle():
-		for meaning, json_expression in json_resource.get("expressions", {}).items():
-			blender_expression: AVA_Expression = component.expressions.add()
-			for enum_value in expression_values:
-				if(enum_value[0] == meaning):
-					blender_expression.expression = enum_value[0]
-					break
-			else:
-				blender_expression.expression = "custom"
-				blender_expression.custom_expression = meaning
-			blender_expression.animation = context.import_resource(json_resource, json_expression.get("animation"), STF_Category.DATA)
-
-			if("fallback" in json_expression):
-				blender_expression.use_blendshape_fallback = True
-				if(fallback_resource := context.import_resource(json_resource, json_expression["fallback"], STF_Category.DATA)):
-					blender_expression.blendshape_fallback.collection = context.get_root_collection() # todo maybe handle root collection import?
-					blender_expression.blendshape_fallback.stf_data_resource_id = fallback_resource.stf_id
-				else:
-					context.report(STFReport("module: %s stf_id: %s, context-object: %s" % (_stf_type, stf_id, context_object), STFReportSeverity.Warn, stf_id, _stf_type, context_object))
-
-	context.add_task(STF_TaskSteps.AFTER_ANIMATION, _handle)
-
-	return component
-
-
-def _stf_export(context: STF_ExportContext, component: AVA_Expressions, context_object: Any) -> tuple[dict, str]:
-	ret = export_component_base(context, _stf_type, component, _blender_property_name, context_object)
-
-	expressions = {}
-	ret["expressions"] = expressions
-
-	def _handle():
-		for blender_expression in component.expressions:
-			blender_expression: AVA_Expression = blender_expression
-			meaning = blender_expression.expression if blender_expression.expression != "custom" else blender_expression.custom_expression
-			animation_id = context.get_resource_id(blender_expression.animation)
-
-			if(meaning and animation_id):
-				json_expression = { "animation": register_exported_resource(ret, animation_id) }
-				expressions[meaning] = json_expression
-
-				if(blender_expression.use_blendshape_fallback):
-					if(fallback_ret := resolve_stf_data_resource_reference(blender_expression.blendshape_fallback)):
-						fallback_ref, fallback_resource = fallback_ret
-						if(fallback_ref.stf_type == "dev.vrm.blendshape_pose"):
-							json_expression["fallback"] = context.serialize_resource(ret, fallback_resource, stf_category=STF_Category.DATA)  # pyright: ignore[reportArgumentType]
-						else:
-							context.report(STFReport("module: %s stf_id: %s, context-object: %s :: blendshape fallback invalid resource type" % (_stf_type, component.stf_id, context_object), STFReportSeverity.Warn, component.stf_id, _stf_type, context_object))
-					else:
-						context.report(STFReport("module: %s stf_id: %s, context-object: %s :: failed to resolve blendshape fallback" % (_stf_type, component.stf_id, context_object), STFReportSeverity.Warn, component.stf_id, _stf_type, context_object))
-			else:
-				context.report(STFReport("Invalid Expression", STFReportSeverity.Info, component.stf_id, _stf_type, component))
-
-	context.add_task(STF_TaskSteps.AFTER_ANIMATION, _handle)
-
-	return ret, component.stf_id
-
-
 class Handler_AVA_Expressions(STF_Handler_Component):
 	"""Map facial-expressions/emotions to animations"""
-	stf_type = _stf_type
+	stf_type = "ava.expressions"
 	stf_category = STF_Category.COMPONENT
 	like_types = ["expressions"]
 	understood_blender_types = [AVA_Expressions]
-	import_resource = _stf_import
-	export_resource = _stf_export
-
-	blender_property_name = _blender_property_name
+	blender_property_name = "ava_expressions"
 	single = True
 	filter = [bpy.types.Collection]
-	draw = _draw_component
-
 	pretty_name_template = "Avatar Expressions"
 
+	@classmethod
+	def draw(cls, layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_resource: Any, component: AVA_Expressions):
+		if(not hasattr(bpy.types.Action, "slot_links")):
+			draw_slot_link_warning(layout)
 
-register_stf_handlers = [
-	Handler_AVA_Expressions
-]
+		layout.use_property_split = True
+
+		create_add_button(layout, "collection" if context_resource != context.scene.collection else True, cls.blender_property_name, component.stf_id, "expressions", text="Add Expression")
+
+		row = layout.row(align=True)
+		row.template_list(STFDrawAVAExpressionList.bl_idname, "", component, "expressions", component, "active_expression")
+		if(component.active_expression >= len(component.expressions)):
+			return
+
+		create_remove_button(row, "collection" if context_resource != context.scene.collection else True, cls.blender_property_name, component.stf_id, "expressions", component.active_expression)
+
+		expression = component.expressions[component.active_expression]
+
+		box = layout.box()
+		row = box.row()
+		row.prop(expression, "expression")
+
+		if(expression.expression == "custom"):
+			box.prop(expression, "custom_expression")
+
+		box.prop(expression, "animation")
+		box.label(text="Note: the animation must have valid 'Slot Link' targets.", icon="INFO_LARGE")
+
+		box.separator(factor=1, type="LINE")
+		box.use_property_split = False
+		box.prop(expression, "use_blendshape_fallback")
+
+		if(expression.use_blendshape_fallback):
+			box = box.box()
+			box.label(text="Blendshape Only Fallback (For VRM)")
+			if(not validate_stf_data_resource_reference(expression.blendshape_fallback, ["dev.vrm.blendshape_pose"])):
+				box.label(text="Create a 'dev.vrm.blendshape_pose' type resource in a Blender-Collection under 'STF Data Resources'.", icon="INFO_LARGE")
+			box.use_property_split = True
+			draw_stf_data_resource_reference(box.column(align=True), expression.blendshape_fallback, ["dev.vrm.blendshape_pose"])
+
+	@classmethod
+	def import_resource(cls, context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: Any) -> Any | STFReport:
+		component_ref, component = add_component(context_resource, cls.blender_property_name, stf_id, cls.stf_type)
+		import_component_base(context, component, json_resource, cls.blender_property_name, context_resource)
+
+		def _handle():
+			for meaning, json_expression in json_resource.get("expressions", {}).items():
+				blender_expression: AVA_Expression = component.expressions.add()
+				for enum_value in expression_values:
+					if(enum_value[0] == meaning):
+						blender_expression.expression = enum_value[0]
+						break
+				else:
+					blender_expression.expression = "custom"
+					blender_expression.custom_expression = meaning
+				blender_expression.animation = context.import_resource(json_resource, json_expression.get("animation"), STF_Category.DATA)
+
+				if("fallback" in json_expression):
+					blender_expression.use_blendshape_fallback = True
+					if(fallback_resource := context.import_resource(json_resource, json_expression["fallback"], STF_Category.DATA)):
+						blender_expression.blendshape_fallback.collection = context.get_root_collection() # todo maybe handle root collection import?
+						blender_expression.blendshape_fallback.stf_data_resource_id = fallback_resource.stf_id
+					else:
+						context.report(STFReport("module: %s stf_id: %s, context-object: %s" % (cls.stf_type, stf_id, context_resource), STFReportSeverity.Warn, stf_id, cls.stf_type, context_resource))
+
+		context.add_task(STF_TaskSteps.AFTER_ANIMATION, _handle)
+
+		return component
+
+	@classmethod
+	def export_resource(cls, context: STF_ExportContext, component: AVA_Expressions, context_resource: Any) -> tuple[dict, str] | STFReport:
+		ret = export_component_base(context, cls.stf_type, component, cls.blender_property_name, context_resource)
+
+		expressions = {}
+		ret["expressions"] = expressions
+
+		def _handle():
+			for blender_expression in component.expressions:
+				blender_expression: AVA_Expression = blender_expression
+				meaning = blender_expression.expression if blender_expression.expression != "custom" else blender_expression.custom_expression
+				animation_id = context.get_resource_id(blender_expression.animation)
+
+				if(meaning and animation_id):
+					json_expression = { "animation": register_exported_resource(ret, animation_id) }
+					expressions[meaning] = json_expression
+
+					if(blender_expression.use_blendshape_fallback):
+						if(fallback_ret := resolve_stf_data_resource_reference(blender_expression.blendshape_fallback)):
+							fallback_ref, fallback_resource = fallback_ret
+							if(fallback_ref.stf_type == "dev.vrm.blendshape_pose"):
+								json_expression["fallback"] = context.serialize_resource(ret, fallback_resource, stf_category=STF_Category.DATA)  # pyright: ignore[reportArgumentType]
+							else:
+								context.report(STFReport("module: %s stf_id: %s, context-object: %s :: blendshape fallback invalid resource type" % (cls.stf_type, component.stf_id, context_resource), STFReportSeverity.Warn, component.stf_id, cls.stf_type, context_resource))
+						else:
+							context.report(STFReport("module: %s stf_id: %s, context-object: %s :: failed to resolve blendshape fallback" % (cls.stf_type, component.stf_id, context_resource), STFReportSeverity.Warn, component.stf_id, cls.stf_type, context_resource))
+				else:
+					context.report(STFReport("Invalid Expression", STFReportSeverity.Info, component.stf_id, cls.stf_type, component))
+
+		context.add_task(STF_TaskSteps.AFTER_ANIMATION, _handle)
+
+		return ret, component.stf_id
 
 
 def register():
-	setattr(bpy.types.Collection, _blender_property_name, bpy.props.CollectionProperty(type=AVA_Expressions, options=set()))
+	setattr(bpy.types.Collection, Handler_AVA_Expressions.blender_property_name, bpy.props.CollectionProperty(type=AVA_Expressions, options=set()))
 
 def unregister():
-	if hasattr(bpy.types.Collection, _blender_property_name):
-		delattr(bpy.types.Collection, _blender_property_name)
+	if hasattr(bpy.types.Collection, Handler_AVA_Expressions.blender_property_name):
+		delattr(bpy.types.Collection, Handler_AVA_Expressions.blender_property_name)

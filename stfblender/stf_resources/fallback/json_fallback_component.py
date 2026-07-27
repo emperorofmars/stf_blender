@@ -89,11 +89,6 @@ class Handler_JsonFallbackComponent(STF_Handler_Component):
 	like_types = []
 
 
-register_stf_handlers = [
-	Handler_JsonFallbackComponent
-]
-
-
 def register():
 	# register wherever components could be possibly added
 	setattr(bpy.types.Action, _blender_property_name, bpy.props.CollectionProperty(type=JsonFallbackComponent))

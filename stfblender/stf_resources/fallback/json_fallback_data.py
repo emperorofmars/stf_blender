@@ -83,11 +83,6 @@ class Handler_JsonFallbackData(STF_Handler_Data):
 	get_components = get_components_from_data_resource
 
 
-register_stf_handlers = [
-	Handler_JsonFallbackData
-]
-
-
 def register():
 	setattr(bpy.types.Collection, _blender_property_name, bpy.props.CollectionProperty(type=JsonFallbackData, options=set()))
 
