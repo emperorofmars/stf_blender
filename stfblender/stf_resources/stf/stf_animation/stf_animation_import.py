@@ -3,7 +3,7 @@ import bpy
 import numpy as np
 
 from .....stfblender_common import STF_ImportContext, STF_TaskSteps, STFReportSeverity, STFReport, STF_Category
-from .....stfblender_common.slot_link import SlotLink
+from .....stfblender_common.slot_link import SlotLink, SlotLinkTarget
 from .stf_animation_common import *
 
 
@@ -84,11 +84,13 @@ def __parse_tracks(context: STF_ImportContext, stf_id: str, tracks: list, blende
 				index_conversion.append(track_index)
 
 		selected_slot_link: SlotLink | None = None
+		selected_slot_link_target: SlotLinkTarget | None = None
 		for slot_link in blender_animation.slot_link.links:
-			if(slot_link.target == target_ret.slot_link_target and slot_link.datablock_index == target_ret.slot_link_property_index):
-				for slot in blender_animation.slots:
-					if(slot.handle == slot_link.slot_handle and slot.target_id_type == target_ret.slot_type):
+			for link_target in slot_link.targets:
+				if(link_target.target == target_ret.slot_link_target and link_target.datablock_index == target_ret.slot_link_property_index):
+					for slot in blender_animation.slots:
 						selected_slot_link = slot_link
+						selected_slot_link_target = link_target
 						break
 			if(selected_slot_link):
 				break
@@ -98,16 +100,13 @@ def __parse_tracks(context: STF_ImportContext, stf_id: str, tracks: list, blende
 			blender_slot = blender_animation.slots.new(target_ret.slot_type, target_ret.slot_link_target.name + " - " + target_ret.slot_type) # pyright: ignore[reportOperatorIssue, reportArgumentType]
 			selected_slot_link = blender_animation.slot_link.links.add()
 			selected_slot_link.slot_handle = blender_slot.handle
-			selected_slot_link.target = target_ret.slot_link_target
-			selected_slot_link.datablock_index = target_ret.slot_link_property_index
+			selected_slot_link_target = selected_slot_link.targets.add()
+			selected_slot_link_target.target = target_ret.slot_link_target
+			selected_slot_link_target.datablock_index = target_ret.slot_link_property_index
 			selected_channelbag = strip.channelbags.new(blender_slot)
 
-		for slot in blender_animation.slots:
-			if(slot.handle == selected_slot_link.slot_handle):
-				blender_slot = slot
-				break
 		for channelbag in strip.channelbags:
-			if(channelbag.slot_handle == blender_slot.handle): # pyright: ignore[reportPossiblyUnboundVariable]
+			if(channelbag.slot_handle == selected_slot_link.slot_handle):
 				selected_channelbag = channelbag
 				break
 

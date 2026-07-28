@@ -2,10 +2,9 @@ from io import BytesIO
 from typing import Any, Callable
 import bpy
 
-
 from .....stfblender_common import STF_ExportContext, STFReportSeverity, STFReport, STF_TaskSteps, ensure_stf_id
+from .....stfblender_common.slot_link import ActionSlotLink, SlotLink, SlotLinkTarget
 from .....stfblender_common.utils.buffer_utils import serialize_float
-from .....stfblender_common.slot_link import ActionSlotLink
 from .stf_animation_common import *
 from .stf_animation_bake import bake_constraints
 
@@ -23,7 +22,7 @@ def stf_animation_export(context: STF_ExportContext, blender_resource: Any, cont
 
 	action_slot_link: ActionSlotLink = blender_animation.slot_link
 	for slot_link in action_slot_link.links:
-		if(slot_link.target):
+		if(len(slot_link.targets) > 0):
 			break
 	else:
 		return STFReport("No valid Slot Link target specified!", STFReportSeverity.Debug, blender_animation.stf_info.stf_id, _stf_type, blender_resource)
@@ -89,36 +88,37 @@ def __convert(context: STF_ExportContext, blender_animation: bpy.types.Action, a
 							break
 					if(selected_slot_link):
 						# Yay we can finally deal with curves
+						for link_target in selected_slot_link.targets:
+							link_target: SlotLinkTarget = link_target
+							# Collect curves belonging together. I.e. curves animating the x, y, z positions under the same data_path
+							kurwas: dict[str, dict[int, bpy.types.FCurve]] = dict()
+							for fcurve in channelbag.fcurves:
+								if(fcurve.data_path not in kurwas):
+									kurwas[fcurve.data_path] = {fcurve.array_index: fcurve}
+								else:
+									kurwas[fcurve.data_path][fcurve.array_index] = fcurve
 
-						# Collect curves belonging together. I.e. curves animating the x, y, z positions under the same data_path
-						kurwas: dict[str, dict[int, bpy.types.FCurve]] = dict()
-						for fcurve in channelbag.fcurves:
-							if(fcurve.data_path not in kurwas):
-								kurwas[fcurve.data_path] = {fcurve.array_index: fcurve}
-							else:
-								kurwas[fcurve.data_path][fcurve.array_index] = fcurve
+							for data_path, fcurves in kurwas.items():
+								fcurve.update() # pyright: ignore[reportPossiblyUnboundVariable]
 
-						for data_path, fcurves in kurwas.items():
-							fcurve.update() # pyright: ignore[reportPossiblyUnboundVariable]
+								# See if this data_path can be exported
+								property_translation = context.resolve_blender_property_path(link_target.target, link_target.datablock_index, data_path)
+								if(not property_translation):
+									context.report(STFReport("Could not convert animated property", STFReportSeverity.Debug, blender_animation.stf_info.stf_id, _stf_type, blender_animation))
+									continue
 
-							# See if this data_path can be exported
-							property_translation = context.resolve_blender_property_path(selected_slot_link.target, selected_slot_link.datablock_index, data_path)
-							if(not property_translation):
-								context.report(STFReport("Could not convert animated property", STFReportSeverity.Debug, blender_animation.stf_info.stf_id, _stf_type, blender_animation))
-								continue
+								if(property_translation.bake_constraints): requires_constraint_bake = True
 
-							if(property_translation.bake_constraints): requires_constraint_bake = True
+								index_conversion = property_translation.index_conversion
+								if(not index_conversion):
+									index_conversion = []
+									for _, fcurve in fcurves.items():
+										if(fcurve):
+											index_conversion.append(fcurve.array_index)
 
-							index_conversion = property_translation.index_conversion
-							if(not index_conversion):
-								index_conversion = []
-								for _, fcurve in fcurves.items():
-									if(fcurve):
-										index_conversion.append(fcurve.array_index)
-
-							sub_tracks_serialized = __serialize_subtracks(context, blender_animation, property_translation.stf_path_part, fcurves, animation_range, index_conversion, property_translation.convert_func, bake_only, reference_holder)  # pyright: ignore[reportArgumentType]
-							if(sub_tracks_serialized):
-								stf_tracks.append(sub_tracks_serialized)
+								sub_tracks_serialized = __serialize_subtracks(context, blender_animation, property_translation.stf_path_part, fcurves, animation_range, index_conversion, property_translation.convert_func, bake_only, reference_holder)  # pyright: ignore[reportArgumentType]
+								if(sub_tracks_serialized):
+									stf_tracks.append(sub_tracks_serialized)
 					else:
 						context.report(STFReport("Invalid Animation Target", STFReportSeverity.Debug, None, _stf_type, blender_animation))
 	return stf_tracks, requires_constraint_bake

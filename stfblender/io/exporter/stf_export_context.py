@@ -53,7 +53,7 @@ class STF_ExportContext(ISTF_ExportContext):
 						self._state.register_serialized_resource(component, component_json_resource, component_id)
 						json_resource["components"].append(component_id)
 					else:
-						_logger.error("Export Component Failed", stack_info=True)
+						_logger.error(f"Export Component Failed: {component}", stack_info=True)
 						if(type(component_ret) is STFReport):
 							self.report(component_ret)
 						else:
@@ -100,7 +100,7 @@ class STF_ExportContext(ISTF_ExportContext):
 				return resource_id
 			else:
 				if(export_fail_severity.value >= STFReportSeverity.Error.value):
-					_logger.error("Resource Export Failed", stack_info=True)
+					_logger.error(f"Resource Export Failed: {blender_object}", stack_info=True)
 				if(type(handler_ret) is STFReport):
 					self.report(handler_ret)
 				else:

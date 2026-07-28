@@ -28,7 +28,8 @@ You can easily implement your own resources as a separate Blender extension, and
 	```
 * Have an up to date version of Blender installed.
 * Either:
-	* Use `bpydev.py` included in this repository.
+	* Use `bpydev.py` included in this repository.\
+		Run `python bpydev.py -h` for more info.
 	* Use VSCode with the [recommended extensions](./.vscode/extensions.json).\
 		The most important one is [Blender VS Code](https://github.com/JacquesLucke/blender_vscode).
 * Create a Python 3.14 venv in the repo directory.

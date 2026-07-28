@@ -54,7 +54,7 @@ class Handler_STFEXP_Animation_Blendtree(STF_Handler_Data, STF_Handler_Component
 		resource.type = json_resource["blendtree_type"]
 
 		def _handle():
-			for animation_mapping in json_resource.get("animations"):  # pyright: ignore[reportOptionalIterable]
+			for animation_mapping in json_resource.get("animations"): # pyright: ignore[reportOptionalIterable]
 				mapping: BlendtreeAnimationMapping = resource.animations.add()
 				mapping.position[0] = animation_mapping["position"][0]
 				if(resource.type == "2d"):
