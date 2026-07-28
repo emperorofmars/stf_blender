@@ -75,17 +75,22 @@ class STF_ImportContext(ISTF_ImportContext):
 		if(not json_resource or type(json_resource) is not dict or "type" not in json_resource):
 			_logger.fatal("Invalid JSON resource", stack_info=True)
 			self.report(STFReport("Invalid JSON resource", STFReportSeverity.FatalError, stf_id, application_object=context_resource))
+			return None
 
 		if(handler := self._state.determine_handler(json_resource, stf_category)): # pyright: ignore[reportArgumentType]
-			application_object = handler.import_resource(self, json_resource, stf_id, context_resource) # pyright: ignore[reportArgumentType]
-			if(application_object and type(application_object) is not STFReport):
-				self.register_imported_resource(stf_id, application_object)
-				self.__run_components(json_resource, handler.get_components_holder(application_object) if hasattr(handler, "get_components_holder") else application_object) # pyright: ignore[reportArgumentType]
-				return application_object
+			if(handler.stf_category == STF_Category.COMPONENT and stf_category != STF_Category.COMPONENT):
+				return None # clearly a fail, likely caused by fallback handling
+
+			blender_resource = handler.import_resource(self, json_resource, stf_id, context_resource) # pyright: ignore[reportArgumentType]
+			if(blender_resource and type(blender_resource) is not STFReport):
+				self.register_imported_resource(stf_id, blender_resource)
+				if(handler.stf_category in [STF_Category.DATA, STF_Category.NODE]):
+					self.__run_components(json_resource, handler.get_components_holder(blender_resource) if hasattr(handler, "get_components_holder") else blender_resource) # pyright: ignore[reportArgumentType]
+				return blender_resource
 			else:
 				_logger.error("Resource import error", stack_info=True)
-				if(type(application_object) is STFReport):
-					self.report(application_object)
+				if(type(blender_resource) is STFReport):
+					self.report(blender_resource)
 				else:
 					self.report(STFReport("Resource import error", STFReportSeverity.Error, stf_id, handler.stf_type, None))
 		else:
