@@ -37,15 +37,15 @@ class Handler_Blender_ArmatureInstance_Display(STF_Handler_Component):
 class Hook_Blender_ArmatureInstance_Display(STF_ExportComponentHook):
 	hook_understood_blender_types = [bpy.types.Object]
 
-	@staticmethod
-	def hook_can_handle_blender_resource(blender_resource: bpy.types.Object) -> bool:
+	@classmethod
+	def hook_can_handle_blender_resource(cls, blender_resource: bpy.types.Object) -> bool:
 		if(type(blender_resource.data) is not bpy.types.Armature): return False
 		blender_object: bpy.types.Object = blender_resource
 		if(hasattr(blender_object, Handler_Blender_ArmatureInstance_Display.blender_property_name) and len(getattr(blender_object, Handler_Blender_ArmatureInstance_Display.blender_property_name)) > 0): return False
 		return True
 
-	@staticmethod
-	def hook_export_resource(context: STF_ExportContext, blender_resource: bpy.types.Object, context_resource: Any):
+	@classmethod
+	def hook_export_resource(cls, context: STF_ExportContext, blender_resource: bpy.types.Object, context_resource: Any):
 		add_component(blender_resource, Handler_Blender_ArmatureInstance_Display.blender_property_name, str(uuid.uuid4()), Handler_Blender_ArmatureInstance_Display.stf_type)
 
 

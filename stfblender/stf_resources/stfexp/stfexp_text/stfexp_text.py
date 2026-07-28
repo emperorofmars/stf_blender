@@ -21,9 +21,9 @@ class Handler_STFEXP_Text(STF_Handler_BlenderNative, STF_Handler_ComponentHolder
 
 	operator_set_stf_id = STFSetTextIDOperator.bl_idname
 
-	@staticmethod
-	def import_resource(context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: Any) -> Any:
-		blender_text: bpy.types.TextCurve = bpy.data.curves.new(json_resource.get("name", "STF Text"), "FONT")  # pyright: ignore[reportAssignmentType]
+	@classmethod
+	def import_resource(cls, context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: Any) -> Any:
+		blender_text: bpy.types.TextCurve = bpy.data.curves.new(json_resource.get("name", "STF Text"), "FONT") # pyright: ignore[reportAssignmentType]
 		blender_text.stf_info.stf_id = stf_id
 		if(json_resource.get("name")):
 			blender_text.stf_info.stf_name = json_resource["name"]
@@ -32,8 +32,8 @@ class Handler_STFEXP_Text(STF_Handler_BlenderNative, STF_Handler_ComponentHolder
 		blender_text.body = json_resource.get("text", "")
 		return blender_text
 
-	@staticmethod
-	def export_resource(context: STF_ExportContext, blender_resource: Any, context_resource: Any) -> tuple[dict, str]:
+	@classmethod
+	def export_resource(cls, context: STF_ExportContext, blender_resource: Any, context_resource: Any) -> tuple[dict, str]:
 		blender_text: bpy.types.TextCurve = blender_resource
 		ensure_stf_id(context, blender_text)
 

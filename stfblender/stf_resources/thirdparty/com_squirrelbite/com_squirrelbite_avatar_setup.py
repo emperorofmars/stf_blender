@@ -1,3 +1,5 @@
+# pyright: reportAssignmentType=none
+
 import bpy
 from typing import Any
 
@@ -212,14 +214,14 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 	return component
 
 
-def _stf_export(context: STF_ExportContext, blender_resource: Squirrelbite_Avatar_Setup, context_resource: Any) -> tuple[dict, str] | STFReport:
-	ret = export_component_base(context, _stf_type, blender_resource, _blender_property_name, context_resource)
+def _stf_export(context: STF_ExportContext, component: Squirrelbite_Avatar_Setup, context_resource: Any) -> tuple[dict, str] | STFReport:
+	ret = export_component_base(context, _stf_type, component, _blender_property_name, context_resource)
 
 	def _handle():
 		# toggles pre
 		toggles_pre = []
 		ret["toggles_pre"] = toggles_pre
-		for toggle in blender_resource.toggles_pre:
+		for toggle in component.toggles_pre:
 			toggle: Toggle = toggle  # pyright: ignore[reportRedeclaration]
 			if(not toggle.animation_off and not toggle.animation_on):
 				continue
@@ -232,7 +234,7 @@ def _stf_export(context: STF_ExportContext, blender_resource: Squirrelbite_Avata
 		# puppets pre
 		puppets_pre = []
 		ret["puppets_pre"] = puppets_pre
-		for puppet in blender_resource.puppets_pre:
+		for puppet in component.puppets_pre:
 			puppet: PersistentPuppet = puppet
 			if(not puppet.blendtree):
 				continue
@@ -251,14 +253,14 @@ def _stf_export(context: STF_ExportContext, blender_resource: Squirrelbite_Avata
 					puppet_json["blendtree"] = context.serialize_resource(ret, puppet_resource)
 					puppets_pre.append(puppet_json)
 				else:
-					context.report(STFReport("module: %s stf_id: %s, context-object: %s :: blendtree invalid resource type" % (_stf_type, blender_resource.stf_id, context_resource), STFReportSeverity.Warn, blender_resource.stf_id, _stf_type, context_resource))
+					context.report(STFReport("module: %s stf_id: %s, context-object: %s :: blendtree invalid resource type" % (_stf_type, component.stf_id, context_resource), STFReportSeverity.Warn, component.stf_id, _stf_type, context_resource))
 			else:
-				context.report(STFReport("module: %s stf_id: %s, context-object: %s :: failed to resolve blendtree resource" % (_stf_type, blender_resource.stf_id, context_resource), STFReportSeverity.Warn, blender_resource.stf_id, _stf_type, context_resource))
+				context.report(STFReport("module: %s stf_id: %s, context-object: %s :: failed to resolve blendtree resource" % (_stf_type, component.stf_id, context_resource), STFReportSeverity.Warn, component.stf_id, _stf_type, context_resource))
 
 		# toggles
 		toggles = []
 		ret["toggles"] = toggles
-		for toggle in blender_resource.toggles:
+		for toggle in component.toggles:
 			toggle: Toggle = toggle  # pyright: ignore[reportRedeclaration]
 			if(not toggle.animation_off and not toggle.animation_on):
 				continue
@@ -271,7 +273,7 @@ def _stf_export(context: STF_ExportContext, blender_resource: Squirrelbite_Avata
 		# grab toggles
 		grab_toggles = []
 		ret["grab_toggles"] = grab_toggles
-		for toggle in blender_resource.grab_toggles:
+		for toggle in component.grab_toggles:
 			toggle: GrabToggle = toggle
 			if(not toggle.toggle.animation_off and not toggle.toggle.animation_on):
 				continue
@@ -286,8 +288,8 @@ def _stf_export(context: STF_ExportContext, blender_resource: Squirrelbite_Avata
 		# puppets
 		puppets = []
 		ret["puppets"] = puppets
-		for puppet in blender_resource.puppets:
-			if(puppet_ret := resolve_stf_data_resource_reference(puppet)):  # pyright: ignore[reportArgumentType]
+		for puppet in component.puppets:
+			if(puppet_ret := resolve_stf_data_resource_reference(puppet)): # pyright: ignore[reportArgumentType]
 				puppet_ref, puppet_resource = puppet_ret
 				if(puppet_ref.stf_type == "stfexp.animation_blendtree"):
 					puppets.append({
@@ -295,27 +297,27 @@ def _stf_export(context: STF_ExportContext, blender_resource: Squirrelbite_Avata
 						"blendtree": context.serialize_resource(ret, puppet_resource)
 					})
 				else:
-					context.report(STFReport("module: %s stf_id: %s, context-object: %s :: blendtree invalid resource type" % (_stf_type, blender_resource.stf_id, context_resource), STFReportSeverity.Warn, blender_resource.stf_id, _stf_type, context_resource))
+					context.report(STFReport("module: %s stf_id: %s, context-object: %s :: blendtree invalid resource type" % (_stf_type, component.stf_id, context_resource), STFReportSeverity.Warn, component.stf_id, _stf_type, context_resource))
 
 		# breathing
-		if(blender_resource.breathing_intense or blender_resource.breathing_normal):
+		if(component.breathing_intense or component.breathing_normal):
 			ret["breathing"] = {}
-			if(blender_resource.breathing_normal):
-				ret["breathing"]["normal"] = context.serialize_resource(ret, blender_resource.breathing_normal)
-			if(blender_resource.breathing_intense):
-				ret["breathing"]["intense"] = context.serialize_resource(ret, blender_resource.breathing_intense)
+			if(component.breathing_normal):
+				ret["breathing"]["normal"] = context.serialize_resource(ret, component.breathing_normal)
+			if(component.breathing_intense):
+				ret["breathing"]["intense"] = context.serialize_resource(ret, component.breathing_intense)
 
 		# additive
-		if(blender_resource.additive_idle or blender_resource.additive_excited):
+		if(component.additive_idle or component.additive_excited):
 			ret["additive"] = {}
-			if(blender_resource.additive_idle):
-				ret["additive"]["idle"] = context.serialize_resource(ret, blender_resource.additive_idle)
-			if(blender_resource.additive_excited):
-				ret["additive"]["excited"] = context.serialize_resource(ret, blender_resource.additive_excited)
+			if(component.additive_idle):
+				ret["additive"]["idle"] = context.serialize_resource(ret, component.additive_idle)
+			if(component.additive_excited):
+				ret["additive"]["excited"] = context.serialize_resource(ret, component.additive_excited)
 
 	context.add_task(STF_TaskSteps.AFTER_ANIMATION, _handle)
 
-	return ret, blender_resource.stf_id
+	return ret, component.stf_id
 
 
 class STF_Module_Squirrelbite_Avatar_Setup(STF_Handler_Component):

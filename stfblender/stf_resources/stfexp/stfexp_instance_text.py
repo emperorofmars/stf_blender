@@ -12,7 +12,7 @@ class STFSetSTFEXPInstanceTextIDOperator(bpy.types.Operator, STFSetIDOperatorBas
 	"""Set STF-ID for Text Instance"""
 	bl_idname = "stf.set_stfexp_instance_text_stf_id"
 	@classmethod
-	def poll(cls, context) -> bool: return context.object.stf_instance is not None and context.object.data and isinstance(context.object.data, bpy.types.TextCurve) # pyright: ignore[reportReturnType]
+	def poll(cls, context) -> bool: return context.object.stf_instance is not None and context.object.data is not None and isinstance(context.object.data, bpy.types.TextCurve)
 	def get_property(self, context): return context.object.stf_instance
 
 
@@ -24,8 +24,8 @@ class Handler_STFEXP_Instance_Text(STF_Handler_BlenderNative):
 	operator_set_stf_id = STFSetSTFEXPInstanceTextIDOperator.bl_idname
 	get_stf_prop_holder = lambda blender_resource: blender_resource[0].stf_instance
 
-	@staticmethod
-	def import_resource(context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: Any) -> Any | STFReport:
+	@classmethod
+	def import_resource(cls, context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: Any) -> Any | STFReport:
 		blender_text = context.import_resource(json_resource, json_resource["text"], STF_Category.DATA)
 
 		blender_object = bpy.data.objects.new(json_resource.get("name", "STFEXP Instance Text"), blender_text)
@@ -41,8 +41,8 @@ class Handler_STFEXP_Instance_Text(STF_Handler_BlenderNative):
 
 		return blender_object
 
-	@staticmethod
-	def export_resource(context: STF_ExportContext, blender_resource: Any, context_resource: Any) -> tuple[dict, str]:
+	@classmethod
+	def export_resource(cls, context: STF_ExportContext, blender_resource: Any, context_resource: Any) -> tuple[dict, str]:
 		blender_object: bpy.types.Object = blender_resource[0]
 		blender_text: bpy.types.Text = blender_resource[1]
 		ensure_stf_id(context, blender_object.stf_instance)
@@ -57,8 +57,8 @@ class Handler_STFEXP_Instance_Text(STF_Handler_BlenderNative):
 
 		return ret, blender_object.stf_instance.stf_id
 
-	@staticmethod
-	def can_handle_blender_resource(blender_resource: Any) -> int:
+	@classmethod
+	def can_handle_blender_resource(cls, blender_resource: Any) -> int:
 		if(type(blender_resource) is tuple and type(blender_resource[0]) is bpy.types.Object and isinstance(blender_resource[1], bpy.types.TextCurve)):
 			return 1000
 		else:

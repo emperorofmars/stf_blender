@@ -9,20 +9,16 @@ from ....stfblender_common import STF_ExportContext, STF_ImportContext, STF_Cate
 from ....stfblender_common.utils.buffer_utils import determine_indices_width, parse_uint, serialize_uint
 
 
-_stf_type = "stfexp.mesh.seams"
-_blender_property_name = "stfexp_mesh_seams"
-
-
 class STFEXP_Mesh_Seams(STF_ComponentResourceBase):
 	pass
 
 
 class Handler_STF_Mesh_Seams(STF_Handler_Component):
 	"""Represents the existence of mesh-seams. If they are present, Blender will automatically create this component on export, no need to add it manually"""
-	stf_type = _stf_type
+	stf_type = "stfexp.mesh.seams"
 	stf_category = STF_Category.COMPONENT
 	understood_blender_types = [STFEXP_Mesh_Seams]
-	blender_property_name = _blender_property_name
+	blender_property_name = "stfexp_mesh_seams"
 	single = True
 	filter = [bpy.types.Mesh]
 
@@ -52,8 +48,8 @@ class Handler_STF_Mesh_Seams(STF_Handler_Component):
 		return component
 
 	@classmethod
-	def export_resource(cls, context: STF_ExportContext, blender_resource: STFEXP_Mesh_Seams, context_resource: bpy.types.Mesh | None) -> tuple[dict, str]:
-		ret = export_component_base(context, cls.stf_type, blender_resource, cls.blender_property_name, context_resource)
+	def export_resource(cls, context: STF_ExportContext, component: STFEXP_Mesh_Seams, context_resource: bpy.types.Mesh | None) -> tuple[dict, str]:
+		ret = export_component_base(context, cls.stf_type, component, cls.blender_property_name, context_resource)
 
 		indices_width = determine_indices_width(len(context_resource.loops))
 
@@ -65,26 +61,26 @@ class Handler_STF_Mesh_Seams(STF_Handler_Component):
 		ret["indices_width"] = indices_width
 		ret["seams"] = context.serialize_buffer(ret, buffer_seams.getvalue())
 
-		return ret, blender_resource.stf_id
+		return ret, component.stf_id
 
 
 class HOOK_STFEXP_Mesh_Seams(STF_ExportComponentHook):
 	hook_understood_blender_types = [bpy.types.Mesh]
 
-	@staticmethod
-	def hook_can_handle_blender_resource(blender_resource: Any) -> bool:
+	@classmethod
+	def hook_can_handle_blender_resource(cls, blender_resource: Any) -> bool:
 		mesh: bpy.types.Mesh = blender_resource
-		if(mesh.stfexp_mesh_seams and len(mesh.stfexp_mesh_seams) > 0): return False
+		if(hasattr(mesh, Handler_STF_Mesh_Seams.blender_property_name) and len(getattr(mesh, Handler_STF_Mesh_Seams.blender_property_name)) > 0): return False
 		return True
 
-	@staticmethod
-	def hook_export_resource(context: STF_ExportContext, blender_resource: bpy.types.Mesh, context_resource: Any):
-		add_component(blender_resource, _blender_property_name, str(uuid.uuid4()), _stf_type)
+	@classmethod
+	def hook_export_resource(cls, context: STF_ExportContext, blender_resource: bpy.types.Mesh, context_resource: Any):
+		add_component(blender_resource, Handler_STF_Mesh_Seams.blender_property_name, str(uuid.uuid4()), Handler_STF_Mesh_Seams.stf_type)
 
 
 def register():
-	setattr(bpy.types.Mesh, _blender_property_name, bpy.props.CollectionProperty(type=STFEXP_Mesh_Seams, options=set()))
+	setattr(bpy.types.Mesh, Handler_STF_Mesh_Seams.blender_property_name, bpy.props.CollectionProperty(type=STFEXP_Mesh_Seams, options=set()))
 
 def unregister():
-	if hasattr(bpy.types.Mesh, _blender_property_name):
-		delattr(bpy.types.Mesh, _blender_property_name)
+	if hasattr(bpy.types.Mesh, Handler_STF_Mesh_Seams.blender_property_name):
+		delattr(bpy.types.Mesh, Handler_STF_Mesh_Seams.blender_property_name)

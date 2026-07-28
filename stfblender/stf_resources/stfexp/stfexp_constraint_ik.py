@@ -1,3 +1,5 @@
+# pyright: reportAssignmentType=none
+
 import bpy
 import re
 import math
@@ -251,6 +253,12 @@ class Handler_STFEXP_Constraint_IK(STF_Handler_BoneComponent, STF_Handler_Animat
 	stf_category = STF_Category.COMPONENT
 	like_types = ["constraint.ik", "constraint"]
 	understood_blender_types = [STFEXP_Constraint_IK]
+	blender_property_name = _blender_property_name
+	single = False
+	filter = [bpy.types.Bone]
+	pretty_name_template = "IK Constraint"
+
+	draw = _draw_component
 	import_resource = _stf_import
 	export_resource = _stf_export
 
@@ -259,20 +267,13 @@ class Handler_STFEXP_Constraint_IK(STF_Handler_BoneComponent, STF_Handler_Animat
 	export_blender_animation = _export_blender_animation
 	import_stf_animation = _import_stf_animation
 
-	blender_property_name = _blender_property_name
-	single = False
-	filter = [bpy.types.Bone]
-	draw = _draw_component
-
-	draw_instance = _draw_component # pyright: ignore[reportAssignmentType]
+	draw_instance = _draw_component
 	update_component_instance = _set_component_instance_standin
+	export_component_instance = _export_component_instance
+	import_component_instance = _import_component_instance
 
-	export_component_instance = _export_component_instance # pyright: ignore[reportAssignmentType]
-	import_component_instance = _import_component_instance # pyright: ignore[reportAssignmentType]
+	apply_functionality = _apply_functionality
 
-	apply_functionality = _apply_functionality # pyright: ignore[reportAssignmentType]
-
-	pretty_name_template = "IK Constraint"
 
 
 def register():

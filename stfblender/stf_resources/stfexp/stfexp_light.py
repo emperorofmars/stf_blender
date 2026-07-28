@@ -91,8 +91,8 @@ class Handler_STFEXP_Light(STF_Handler_BlenderNative, STF_Handler_Animation):
 
 		return ret, blender_object.stf_instance.stf_id
 
-	@staticmethod
-	def can_handle_blender_resource(blender_resource: Any) -> int:
+	@classmethod
+	def can_handle_blender_resource(cls, blender_resource: Any) -> int:
 		if(type(blender_resource) is tuple and type(blender_resource[0]) is bpy.types.Object and isinstance(blender_resource[1], bpy.types.Light) and blender_resource[1].type in ["POINT", "SUN", "SPOT"]):
 			return 1000
 		else:
@@ -101,8 +101,8 @@ class Handler_STFEXP_Light(STF_Handler_BlenderNative, STF_Handler_Animation):
 	understood_blender_animation_types = [bpy.types.Object]
 	understood_blender_animation_data_paths = ["temperature", "color", "energy", "shadow_soft_size", "spot_size"]
 
-	@staticmethod
-	def export_blender_animation(context: STF_ExportContext, blender_resource: Any, property_index: int, blender_property_path: str) -> STFPropertyPathPart | None:
+	@classmethod
+	def export_blender_animation(cls, context: STF_ExportContext, blender_resource: Any, property_index: int, blender_property_path: str) -> STFPropertyPathPart | None:
 		if(match := re.search(r"^temperature", blender_property_path)):
 			return STFPropertyPathPart([blender_resource.stf_info.stf_id, "instance", "temperature"])
 		elif(match := re.search(r"^color", blender_property_path)):
@@ -116,8 +116,8 @@ class Handler_STFEXP_Light(STF_Handler_BlenderNative, STF_Handler_Animation):
 		# todo enabled maybe?
 		return None
 
-	@staticmethod
-	def import_stf_animation(context: STF_ImportContext, stf_property_path: list[str], blender_resource: Any) -> BlenderPropertyPathPart | None:
+	@classmethod
+	def import_stf_animation(cls, context: STF_ImportContext, stf_property_path: list[str], blender_resource: Any) -> BlenderPropertyPathPart | None:
 		match(stf_property_path[1]):
 			case "temperature":
 				return BlenderPropertyPathPart("LIGHT", "temperature")

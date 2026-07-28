@@ -5,50 +5,42 @@ from ....stfblender_common import STF_ExportContext, STF_ImportContext, STF_Cate
 from ....stfblender_common.blender_grr import *
 
 
-_stf_type = "placeholder.remove.me.data_resource"
-_blender_property_name = "stf_data_resource_component_test"
-
-
 class STF_Data_Resource_Component_Test(STF_ComponentResourceBase):
-	blender_reference: bpy.props.PointerProperty(type=BlenderResourceReference) # type: ignore
-	data_reference: bpy.props.PointerProperty(type=STFDataResourceReference) # type: ignore
-	grr: bpy.props.PointerProperty(type=BlenderGRR) # type: ignore
-
-
-def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: STF_Data_Resource_Component_Test):
-	layout.use_property_split = True
-	layout.label(text="Blender Ref")
-	draw_blender_resource_reference(layout.column(align=True), component.blender_reference)
-	layout.label(text="STF Data Ref")
-	draw_stf_data_resource_reference(layout.column(align=True), component.data_reference)
-	layout.label(text="GRR")
-	draw_blender_grr(layout.column(align=True), component.grr)
-
-
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
-	component_ref, component = add_component(context_object, _blender_property_name, stf_id, _stf_type)
-	import_component_base(context, component, json_resource, _blender_property_name, context_object)
-	return component
-
-
-def _stf_export(context: STF_ExportContext, component: STF_Data_Resource_Component_Test, context_object: Any) -> tuple[dict, str]:
-	ret = export_component_base(context, _stf_type, component, _blender_property_name, context_object)
-	return ret, component.stf_id
+	blender_reference: bpy.props.PointerProperty(type=BlenderResourceReference)
+	data_reference: bpy.props.PointerProperty(type=STFDataResourceReference)
+	grr: bpy.props.PointerProperty(type=BlenderGRR)
 
 
 class Handler_Data_Resource_Component_Test(STF_Handler_Component):
 	"""Placeholder Test"""
-	stf_type = _stf_type
+	stf_type = "placeholder.remove.me.data_resource"
 	stf_category = STF_Category.COMPONENT
-	like_types = []
 	understood_blender_types = [STF_Data_Resource_Component_Test]
-	import_resource = _stf_import
-	export_resource = _stf_export
-
-	blender_property_name = _blender_property_name
+	blender_property_name = "stf_data_resource_component_test"
 	single = False
-	draw = _draw_component
 	filter_all_data_modules = True
+
+	@classmethod
+	def draw(cls, layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: STF_Data_Resource_Component_Test):
+		layout.use_property_split = True
+		layout.label(text="Blender Ref")
+		draw_blender_resource_reference(layout.column(align=True), component.blender_reference)
+		layout.label(text="STF Data Ref")
+		draw_stf_data_resource_reference(layout.column(align=True), component.data_reference)
+		layout.label(text="GRR")
+		draw_blender_grr(layout.column(align=True), component.grr)
+
+	@classmethod
+	def import_resource(cls, context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
+		component_ref, component = add_component(context_object, cls.blender_property_name, stf_id, cls.stf_type)
+		import_component_base(context, component, json_resource, cls.blender_property_name, context_object)
+		return component
+
+	@classmethod
+	def export_resource(cls, context: STF_ExportContext, component: STF_Data_Resource_Component_Test, context_object: Any) -> tuple[dict, str]:
+		ret = export_component_base(context, cls.stf_type, component, cls.blender_property_name, context_object)
+		return ret, component.stf_id
+
 
 
 register_stf_handlers = [
@@ -57,8 +49,8 @@ register_stf_handlers = [
 
 
 def register():
-	setattr(bpy.types.Collection, _blender_property_name, bpy.props.CollectionProperty(type=STF_Data_Resource_Component_Test))
+	setattr(bpy.types.Collection, Handler_Data_Resource_Component_Test.blender_property_name, bpy.props.CollectionProperty(type=STF_Data_Resource_Component_Test))
 
 def unregister():
-	if hasattr(bpy.types.Collection, _blender_property_name):
-		delattr(bpy.types.Collection, _blender_property_name)
+	if hasattr(bpy.types.Collection, Handler_Data_Resource_Component_Test.blender_property_name):
+		delattr(bpy.types.Collection, Handler_Data_Resource_Component_Test.blender_property_name)

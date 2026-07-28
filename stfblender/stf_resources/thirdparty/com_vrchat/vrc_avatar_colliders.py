@@ -35,8 +35,8 @@ class Handler_VRC_AvatarColliders(STF_Handler_Component):
 		col.prop(component, "data", text="", icon="ERROR" if json_error else "NONE")
 
 	@classmethod
-	def import_resource(cls, context: STF_ImportContext, json_resource: dict, id: str, context_resource: Any) -> Any | STFReport:
-		component_ref, component = add_component(context_resource, cls.blender_property_name, id, cls.stf_type)
+	def import_resource(cls, context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: Any) -> Any | STFReport:
+		component_ref, component = add_component(context_resource, cls.blender_property_name, stf_id, cls.stf_type)
 		import_component_base(context, component, json_resource, cls.blender_property_name, context_resource)
 		component.data = json.dumps(json_resource["values"])
 		return component

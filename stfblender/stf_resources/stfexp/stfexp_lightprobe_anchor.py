@@ -23,8 +23,8 @@ class Handler_STFEXP_LightprobeAnchor(STF_Handler_Component):
 	filter = [bpy.types.Object]
 	pretty_name_template = "Lightprobe Anchor"
 
-	@staticmethod
-	def draw(layout: UILayout, context: Context, component_ref: STF_Component_Ref, context_resource: Any, component: Any) -> None:
+	@classmethod
+	def draw(cls, layout: UILayout, context: Context, component_ref: STF_Component_Ref, context_resource: Any, component: Any) -> None:
 		layout.use_property_split = True
 		layout.prop(component, "anchor_object")
 		if(component.anchor_object and type(component.anchor_object.data) is bpy.types.Armature):
@@ -50,19 +50,19 @@ class Handler_STFEXP_LightprobeAnchor(STF_Handler_Component):
 		return component
 
 	@classmethod
-	def export_resource(cls, context: STF_ExportContext, blender_resource: Any, context_resource: Any | None) -> tuple[dict, str] | STFReport:
-		ret = export_component_base(context, cls.stf_type, blender_resource, cls.blender_property_name, context_resource)
+	def export_resource(cls, context: STF_ExportContext, component: Any, context_resource: Any | None) -> tuple[dict, str] | STFReport:
+		ret = export_component_base(context, cls.stf_type, component, cls.blender_property_name, context_resource)
 
-		if(blender_resource.anchor_object):
+		if(component.anchor_object):
 			def _handle():
-				if(type(blender_resource.anchor_object.data) is bpy.types.Armature and blender_resource.anchor_bone):
-					ret["anchor"] = [register_exported_resource(ret, blender_resource.anchor_object.stf_info.stf_id), "instance", register_exported_resource(ret, blender_resource.anchor_object.data.bones[blender_resource.anchor_bone].stf_info.stf_id)]
+				if(type(component.anchor_object.data) is bpy.types.Armature and component.anchor_bone):
+					ret["anchor"] = [register_exported_resource(ret, component.anchor_object.stf_info.stf_id), "instance", register_exported_resource(ret, component.anchor_object.data.bones[component.anchor_bone].stf_info.stf_id)]
 				else:
-					ret["anchor"] = [register_exported_resource(ret, blender_resource.anchor_object.stf_info.stf_id)]
+					ret["anchor"] = [register_exported_resource(ret, component.anchor_object.stf_info.stf_id)]
 
 			context.add_task(STF_TaskSteps.DEFAULT, _handle)
 
-		return ret, blender_resource.stf_id
+		return ret, component.stf_id
 
 
 def register():

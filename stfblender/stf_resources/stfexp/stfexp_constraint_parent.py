@@ -1,3 +1,5 @@
+# pyright: reportAssignmentType=none
+
 import bpy
 import re
 from typing import Any

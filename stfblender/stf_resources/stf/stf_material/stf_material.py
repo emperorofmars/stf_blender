@@ -1,7 +1,7 @@
 import bpy
 from typing import Any
 
-from .....stfblender_common import STF_ExportContext, STF_ImportContext, STF_Category, STFReport, STFReportSeverity, STF_Handler_Animation, STF_Handler_ComponentHolder, STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister, get_components_from_object, ensure_stf_id
+from .....stfblender_common import STF_ExportContext, STF_ImportContext, STF_Category, STFReport, STFReportSeverity, STF_Handler_Animation, STF_Handler_ComponentHolder, STF_Handler_BlenderNative, STFPropertyPathPart, BlenderPropertyPathPart, boilerplate_register, boilerplate_unregister, get_components_from_object, ensure_stf_id
 from .stf_material_definition import STF_Material_Property, STF_Material_Value_Module_Base
 from .material_value_modules import blender_material_value_modules
 from .stf_material_operators import add_property, add_value_to_property
@@ -19,7 +19,9 @@ class Handler_STF_Material(STF_Handler_BlenderNative, STF_Handler_ComponentHolde
 
 	operator_set_stf_id = STFSetMaterialIDOperator.bl_idname
 
-	draw = draw_material_ui
+	@classmethod
+	def draw(cls, layout: bpy.types.UILayout, context: bpy.types.Context, blender_resource: Any) -> None | bool:
+		return draw_material_ui(layout, context, blender_resource)
 
 	@classmethod
 	def import_resource(cls, context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: Any) -> Any | STFReport:
@@ -116,8 +118,14 @@ class Handler_STF_Material(STF_Handler_BlenderNative, STF_Handler_ComponentHolde
 
 	understood_blender_animation_types = [bpy.types.Object]
 	understood_blender_animation_data_paths = ["stf_material_value_"]
-	export_blender_animation = stf_material_export_blender_animation
-	import_stf_animation = stf_material_import_stf_animation
+
+	@classmethod
+	def export_blender_animation(cls, context: STF_ExportContext, blender_resource: Any, property_index: int, blender_property_path: str, /) -> STFPropertyPathPart | None:
+		return stf_material_export_blender_animation(context, blender_resource, property_index, blender_property_path)
+
+	@classmethod
+	def import_stf_animation(cls, context: STF_ImportContext, stf_property_path: list[str], blender_resource: Any, /) -> BlenderPropertyPathPart | None:
+		return stf_material_import_stf_animation(context, stf_property_path, blender_resource)
 
 
 def register():

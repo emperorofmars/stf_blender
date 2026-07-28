@@ -4,7 +4,7 @@ import math
 from typing import Any
 from collections.abc import Sequence
 
-from .....stfblender_common import STF_ImportContext, STF_ExportContext, STFReportSeverity, STFReport, STF_Category, STF_Handler_Animation, STF_Handler_ComponentHolder, STF_Handler_BlenderNative, boilerplate_register, boilerplate_unregister, get_components_from_object, ensure_stf_id
+from .....stfblender_common import STF_ImportContext, STF_ExportContext, STFReportSeverity, STFReport, STF_Category, STF_Handler_Animation, STF_Handler_ComponentHolder, STF_Handler_BlenderNative, STFPropertyPathPart, BlenderPropertyPathPart, boilerplate_register, boilerplate_unregister, get_components_from_object, ensure_stf_id
 from .....stfblender_common.utils import trs_utils
 from .....stfblender_common.utils.armature_bone import ArmatureBone
 from .....stfblender_common.utils.animation_conversion_utils import *
@@ -33,8 +33,8 @@ class Handler_STF_Bone(STF_Handler_BlenderNative, STF_Handler_ComponentHolder, S
 	get_resource_object = lambda blender_resource: blender_resource.get_bone()
 	get_stf_prop_holder = lambda blender_resource: blender_resource.get_bone().stf_info
 
-	@staticmethod
-	def draw(layout: bpy.types.UILayout, context: bpy.types.Context, blender_resource: ArmatureBone) -> None:
+	@classmethod
+	def draw(cls, layout: bpy.types.UILayout, context: bpy.types.Context, blender_resource: ArmatureBone) -> None:
 		if(not blender_resource.get_bone().use_deform):
 			col = layout.column()
 			col.use_property_split = True
@@ -129,7 +129,6 @@ class Handler_STF_Bone(STF_Handler_BlenderNative, STF_Handler_ComponentHolder, S
 
 		return ret, stf_id
 
-
 	get_components_holder = lambda blender_resource: blender_resource.get_bone()
 	get_components = lambda blender_resource: get_components_from_object(blender_resource.get_bone())
 	operator_component_add = STFAddBoneComponentOperator.bl_idname
@@ -138,8 +137,14 @@ class Handler_STF_Bone(STF_Handler_BlenderNative, STF_Handler_ComponentHolder, S
 
 	understood_blender_animation_types = [ArmatureBone]
 	understood_blender_animation_data_paths = ["location", "rotation_quaternion", "rotation_euler", "scale"]
-	export_blender_animation = export_blender_bone_animation
-	import_stf_animation = import_blender_bone_animation
+
+	@classmethod
+	def export_blender_animation(cls, context: STF_ExportContext, blender_resource: Any, property_index: int, blender_property_path: str) -> STFPropertyPathPart | None:
+		return export_blender_bone_animation(context, blender_resource, property_index, blender_property_path)
+
+	@classmethod
+	def import_stf_animation(cls, context: STF_ImportContext, stf_property_path: list[str], blender_resource: Any) -> BlenderPropertyPathPart | None:
+		return import_blender_bone_animation(context, stf_property_path, blender_resource)
 
 
 def register():

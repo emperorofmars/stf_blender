@@ -19,67 +19,64 @@ class JsonFallbackData(STF_DataResourceBase):
 	active_buffer: bpy.props.IntProperty() # type: ignore
 
 
-def _draw(layout: bpy.types.UILayout, context: bpy.types.Context, resource_ref: STF_Data_Ref, context_resource: bpy.types.Collection | None, resource: JsonFallbackData):
-	draw_fallback(layout, resource_ref, resource)
-
-
-def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: bpy.types.Collection | None) -> Any | STFReport:
-	resource_ref, resource = add_resource(context_resource, _blender_property_name, stf_id, json_resource["type"]) # pyright: ignore[reportArgumentType]
-	resource: JsonFallbackData = resource
-	import_data_resource_base(resource, json_resource)
-
-	resource.json = json.dumps(json_resource)
-
-	def _handle():
-		for resource_id in json_resource.get("referenced_resources", []):
-			resource_grr = resource.referenced_resources.add()
-			if(referenced_resource := context._import_resource(resource_id)):
-				construct_blender_grr(referenced_resource, resource_grr, resource_id)
-	context.add_task(STF_TaskSteps.FINALE, _handle)
-
-	for buffer_id in json_resource.get("referenced_buffers", []):
-		encode_buffer(context, buffer_id, resource)  # pyright: ignore[reportArgumentType]
-
-	return resource
-
-
-def _stf_export(context: STF_ExportContext, blender_resource: JsonFallbackData, context_resource: Any) -> tuple[dict, str] | STFReport:
-	try:
-		json_resource = json.loads(blender_resource.json)
-		if("type" not in json_resource or not json_resource["type"]):
-			return None  # pyright: ignore[reportReturnType]
-		ret = export_data_resource_base(context, json_resource["type"], blender_resource)
-		ret = ret | json_resource
-
-		ret["referenced_resources"] = []
-		ret["referenced_buffers"] = []
-
-		for referenced_resource in blender_resource.referenced_resources:
-			referenced_resource: BlenderGRR = referenced_resource
-			if(blender_resource := resolve_blender_grr(referenced_resource)):
-				def _handle():
-					context.serialize_resource(ret, blender_resource)
-				context.add_task(STF_TaskSteps.FINALE, _handle)
-
-		for buffer in blender_resource.buffers:
-			decode_buffer(context, ret, buffer)
-
-		return ret, blender_resource.stf_id
-	except Exception:
-		return None  # pyright: ignore[reportReturnType]
-
-
 class Handler_JsonFallbackData(STF_Handler_Data):
 	"""This type is not supported.
 	You have to edit the raw json string, resource references and base64 encoded binary buffers"""
-	stf_type = None  # pyright: ignore[reportAssignmentType]
+	stf_type = None # pyright: ignore[reportAssignmentType]
 	stf_category = STF_Category.DATA
 	understood_blender_types = [JsonFallbackData]
-	import_resource = _stf_import
-	export_resource = _stf_export
-
 	blender_property_name = _blender_property_name
-	draw = _draw
+
+	@classmethod
+	def draw(cls, layout: bpy.types.UILayout, context: bpy.types.Context, resource_ref: STF_Data_Ref, context_resource: bpy.types.Collection | None, resource: JsonFallbackData):
+		draw_fallback(layout, resource_ref, resource)
+
+	@classmethod
+	def import_resource(cls, context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: bpy.types.Collection | None) -> Any | STFReport:
+		resource_ref, resource = add_resource(context_resource, cls.blender_property_name, stf_id, json_resource["type"]) # pyright: ignore[reportArgumentType]
+		resource: JsonFallbackData = resource
+		import_data_resource_base(resource, json_resource)
+
+		resource.json = json.dumps(json_resource)
+
+		def _handle():
+			for resource_id in json_resource.get("referenced_resources", []):
+				resource_grr = resource.referenced_resources.add()
+				if(referenced_resource := context._import_resource(resource_id)):
+					construct_blender_grr(referenced_resource, resource_grr, resource_id)
+		context.add_task(STF_TaskSteps.FINALE, _handle)
+
+		for buffer_id in json_resource.get("referenced_buffers", []):
+			encode_buffer(context, buffer_id, resource) # pyright: ignore[reportArgumentType]
+
+		return resource
+
+	@classmethod
+	def export_resource(cls, context: STF_ExportContext, blender_resource: JsonFallbackData, context_resource: Any) -> tuple[dict, str] | STFReport:
+		try:
+			json_resource = json.loads(blender_resource.json)
+			if("type" not in json_resource or not json_resource["type"]):
+				return None # pyright: ignore[reportReturnType]
+			ret = export_data_resource_base(context, json_resource["type"], blender_resource)
+			ret = ret | json_resource
+
+			ret["referenced_resources"] = []
+			ret["referenced_buffers"] = []
+
+			for referenced_resource in blender_resource.referenced_resources:
+				referenced_resource: BlenderGRR = referenced_resource
+				if(blender_resource := resolve_blender_grr(referenced_resource)):
+					def _handle():
+						context.serialize_resource(ret, blender_resource)
+					context.add_task(STF_TaskSteps.FINALE, _handle)
+
+			for buffer in blender_resource.buffers:
+				decode_buffer(context, ret, buffer)
+
+			return ret, blender_resource.stf_id
+		except Exception:
+			return None # pyright: ignore[reportReturnType]
+
 	get_components = get_components_from_data_resource
 
 

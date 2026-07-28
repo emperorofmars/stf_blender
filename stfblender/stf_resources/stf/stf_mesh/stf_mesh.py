@@ -1,7 +1,8 @@
+from typing import Any
+
 import bpy
 
-from .....stfblender_common import STF_Category
-from .....stfblender_common.resource import STF_Handler_BlenderNative, STF_Handler_ComponentHolder, boilerplate_register, boilerplate_unregister, get_components_from_object
+from .....stfblender_common import STF_Category, STF_ImportContext, STF_ExportContext, STFReport, STF_Handler_BlenderNative, STF_Handler_ComponentHolder, boilerplate_register, boilerplate_unregister, get_components_from_object
 from .....stfblender_common.helpers import draw_multiline_text
 from .mesh_import import import_stf_mesh
 from .mesh_export import export_stf_mesh
@@ -21,8 +22,8 @@ class Handler_STF_Mesh(STF_Handler_BlenderNative, STF_Handler_ComponentHolder):
 	understood_blender_types = [bpy.types.Mesh]
 	operator_set_stf_id = STFSetMeshIDOperator.bl_idname
 
-	@staticmethod
-	def draw(layout: bpy.types.UILayout, context: bpy.types.Context, blender_resource: bpy.types.Mesh) -> None:
+	@classmethod
+	def draw(cls, layout: bpy.types.UILayout, context: bpy.types.Context, blender_resource: bpy.types.Mesh) -> None:
 		if(context.object.find_armature()):
 			t, r, s = context.object.matrix_local.decompose()
 			if(t.length > 0.0001 or abs(r.x) > 0.0001 or abs(r.y) > 0.0001 or abs(r.z) > 0.0001 or abs((r.w - 1)) > 0.0001 or abs(s.x - 1) > 0.0001 or abs(s.y - 1) > 0.0001 or abs(s.z - 1) > 0.0001):
@@ -32,8 +33,13 @@ class Handler_STF_Mesh(STF_Handler_BlenderNative, STF_Handler_ComponentHolder):
 		layout.prop(context.mesh.stf_mesh, "export_blendshape_normals")
 		layout.prop(context.mesh.stf_mesh, "export_vertex_colors")
 
-	import_resource = import_stf_mesh
-	export_resource = export_stf_mesh
+	@classmethod
+	def import_resource(cls, context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: Any) -> Any | STFReport:
+		return import_stf_mesh(context, json_resource, stf_id, context_resource)
+
+	@classmethod
+	def export_resource(cls, context: STF_ExportContext, blender_resource: Any, context_resource: Any) -> tuple[dict, str] | STFReport:
+		return export_stf_mesh(context, blender_resource, context_resource)
 
 	get_components = get_components_from_object
 	operator_component_add = STFAddMeshComponentOperator.bl_idname

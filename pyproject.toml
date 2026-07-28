@@ -25,7 +25,7 @@ reportMissingModuleSource = "none"
 reportInvalidTypeForm = "none"
 reportAttributeAccessIssue = "none"
 reportOptionalMemberAccess = "none"
-reportIncompatibleMethodOverride = "none"
+#reportIncompatibleMethodOverride = "none"
 
 
 [tool.ruff]

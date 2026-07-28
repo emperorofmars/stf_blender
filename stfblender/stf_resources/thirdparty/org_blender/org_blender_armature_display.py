@@ -37,13 +37,13 @@ class Handler_Blender_Armature_Display(STF_Handler_Component):
 class Hook_Blender_Armature_Display(STF_ExportComponentHook):
 	hook_understood_blender_types = [bpy.types.Armature]
 
-	@staticmethod
-	def hook_can_handle_blender_resource(blender_resource: bpy.types.Armature) -> bool:
+	@classmethod
+	def hook_can_handle_blender_resource(cls, blender_resource: bpy.types.Armature) -> bool:
 		if(hasattr(blender_resource, Handler_Blender_Armature_Display.blender_property_name) and len(getattr(blender_resource, Handler_Blender_Armature_Display.blender_property_name)) > 0): return False
 		return True
 
-	@staticmethod
-	def hook_export_resource(context: STF_ExportContext, blender_resource: bpy.types.Armature, context_resource: Any):
+	@classmethod
+	def hook_export_resource(cls, context: STF_ExportContext, blender_resource: bpy.types.Armature, context_resource: Any):
 		add_component(blender_resource, Handler_Blender_Armature_Display.blender_property_name, str(uuid.uuid4()), Handler_Blender_Armature_Display.stf_type)
 
 

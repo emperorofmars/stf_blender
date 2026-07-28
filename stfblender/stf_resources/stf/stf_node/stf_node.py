@@ -3,7 +3,7 @@ import math
 import mathutils
 from typing import Any
 
-from .....stfblender_common import STF_ExportContext, STF_ImportContext, STF_TaskSteps, STFReportSeverity, STFReport, STF_Category, STF_Handler_BlenderNative, STF_Handler_Animation, STF_Handler_ComponentHolder, boilerplate_register, boilerplate_unregister, get_components_from_object, ensure_stf_id
+from .....stfblender_common import STF_ExportContext, STF_ImportContext, STF_TaskSteps, STFReportSeverity, STFReport, STF_Category, STF_Handler_BlenderNative, STF_Handler_Animation, STF_Handler_ComponentHolder, BlenderPropertyPathPart, STFPropertyPathPart, boilerplate_register, boilerplate_unregister, get_components_from_object, ensure_stf_id
 from .....stfblender_common.utils import trs_utils
 from .....stfblender_common.helpers import get_resource_id, register_exported_resource, draw_multiline_text
 from .node_property_conversion import stf_node_export_blender_animation, stf_node_import_stf_animation
@@ -150,8 +150,14 @@ class Handler_STF_Node(STF_Handler_BlenderNative, STF_Handler_ComponentHolder, S
 
 	understood_blender_animation_types = [bpy.types.Object]
 	understood_blender_animation_data_paths = ["location", "rotation_quaternion", "rotation_euler", "scale", "hide_render"]
-	export_blender_animation = stf_node_export_blender_animation
-	import_stf_animation = stf_node_import_stf_animation
+
+	@classmethod
+	def export_blender_animation(cls, context: STF_ExportContext, blender_resource: Any, property_index: int, blender_property_path: str) -> STFPropertyPathPart | None:
+		return stf_node_export_blender_animation(context, blender_resource, property_index, blender_property_path)
+
+	@classmethod
+	def import_stf_animation(cls, context: STF_ImportContext, stf_property_path: list[str], blender_resource: Any) -> BlenderPropertyPathPart | None:
+		return stf_node_import_stf_animation(context, stf_property_path, blender_resource)
 
 
 def register():

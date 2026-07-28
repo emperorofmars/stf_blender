@@ -105,8 +105,8 @@ class Handler_STFEXP_Camera(STF_Handler_BlenderNative, STF_Handler_Animation):
 		}
 		return ret, blender_object.stf_instance.stf_id
 
-	@staticmethod
-	def can_handle_blender_resource(blender_resource: Any) -> int:
+	@classmethod
+	def can_handle_blender_resource(cls, blender_resource: Any) -> int:
 		if(type(blender_resource) is tuple and type(blender_resource[0]) is bpy.types.Object and type(blender_resource[1]) is bpy.types.Camera):
 			return 1000
 		else:
@@ -115,8 +115,8 @@ class Handler_STFEXP_Camera(STF_Handler_BlenderNative, STF_Handler_Animation):
 	understood_blender_animation_types = [bpy.types.Object]
 	understood_blender_animation_data_paths = ["lens", "ortho_scale"]
 
-	@staticmethod
-	def export_blender_animation(context: STF_ExportContext, blender_resource: Any, property_index: int, blender_property_path: str) -> STFPropertyPathPart | None:
+	@classmethod
+	def export_blender_animation(cls, context: STF_ExportContext, blender_resource: Any, property_index: int, blender_property_path: str) -> STFPropertyPathPart | None:
 		if(blender_resource.data.type == "ORTHO"):
 			if(match := re.search(r"^ortho_scale", blender_property_path)):
 				return STFPropertyPathPart([blender_resource.stf_info.stf_id, "instance", "fov"], _get__convert_lens_to_fov_func(blender_resource.data))
@@ -126,8 +126,8 @@ class Handler_STFEXP_Camera(STF_Handler_BlenderNative, STF_Handler_Animation):
 		# todo enabled maybe?
 		return None
 
-	@staticmethod
-	def import_stf_animation(context: STF_ImportContext, stf_property_path: list[str], blender_resource: Any) -> BlenderPropertyPathPart | None:
+	@classmethod
+	def import_stf_animation(cls, context: STF_ImportContext, stf_property_path: list[str], blender_resource: Any) -> BlenderPropertyPathPart | None:
 		match(stf_property_path[1]):
 			case "fov":
 				if(blender_resource.data.type == "ORTHO"):

@@ -14,7 +14,10 @@ class Handler_STF_Instance_Mesh(STF_Handler_BlenderNative, STF_Handler_Animation
 	understood_blender_types = [tuple]
 
 	operator_set_stf_id = STFSetMeshInstanceIDOperator.bl_idname
-	draw = draw_instance_mesh_ui
+
+	@classmethod
+	def draw(cls, layout: bpy.types.UILayout, context: bpy.types.Context, blender_resource: Any) -> None | bool:
+		return draw_instance_mesh_ui(layout, context, blender_resource)
 
 	@staticmethod
 	def get_stf_prop_holder(blender_resource: Any) -> STF_Info:
@@ -107,8 +110,8 @@ class Handler_STF_Instance_Mesh(STF_Handler_BlenderNative, STF_Handler_Animation
 
 		return ret, blender_object.stf_instance.stf_id
 
-	@staticmethod
-	def can_handle_blender_resource(blender_resource: Any) -> int:
+	@classmethod
+	def can_handle_blender_resource(cls, blender_resource: Any) -> int:
 		if(type(blender_resource) is tuple and type(blender_resource[0]) is bpy.types.Object and type(blender_resource[1]) is bpy.types.Mesh):
 			return 1000
 		else:
@@ -117,16 +120,16 @@ class Handler_STF_Instance_Mesh(STF_Handler_BlenderNative, STF_Handler_Animation
 	understood_blender_animation_types = [bpy.types.Object]
 	understood_blender_animation_data_paths = ["key_blocks"]
 
-	@staticmethod
-	def export_blender_animation(context: STF_ExportContext, blender_object: Any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart | None:
+	@classmethod
+	def export_blender_animation(cls, context: STF_ExportContext, blender_object: Any, application_object_property_index: int, data_path: str) -> STFPropertyPathPart | None:
 		import re
 		match = re.search(r"^key_blocks\[\"(?P<blendshape_name>[\w. -:,]+)\"\].value", data_path)
 		if(match and "blendshape_name" in match.groupdict()):
 			return STFPropertyPathPart([blender_object.stf_info.stf_id, "instance", "blendshape", match.groupdict()["blendshape_name"], "value"])
 		return None
 
-	@staticmethod
-	def import_stf_animation(context: STF_ImportContext, stf_path: list[str], blender_object: bpy.types.Object) -> BlenderPropertyPathPart | None:
+	@classmethod
+	def import_stf_animation(cls, context: STF_ImportContext, stf_path: list[str], blender_object: bpy.types.Object) -> BlenderPropertyPathPart | None:
 		if(len(stf_path) == 4 and stf_path[1] == "blendshape" and stf_path[3] == "value"):
 			return BlenderPropertyPathPart("KEY", "key_blocks[\"" + stf_path[2] + "\"].value")
 		elif(len(stf_path) >= 5 and stf_path[1] == "material"):

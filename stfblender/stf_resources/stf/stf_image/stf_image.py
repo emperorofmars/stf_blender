@@ -17,8 +17,8 @@ class Handler_STF_Image(STF_Handler_BlenderNative, STF_Handler_ComponentHolder):
 
 	operator_set_stf_id = STFSetImageIDOperator.bl_idname
 
-	@staticmethod
-	def draw(layout: bpy.types.UILayout, context: bpy.types.Context, blender_resource: tuple[bpy.types.Object, bpy.types.Mesh]) -> None:
+	@classmethod
+	def draw(cls, layout: bpy.types.UILayout, context: bpy.types.Context, blender_resource: tuple[bpy.types.Object, bpy.types.Mesh]) -> None:
 		layout.prop(context.edit_image.stf_image, "is_normal_map")
 
 		if(context.edit_image.stf_image.is_normal_map and context.edit_image.colorspace_settings.name != "Non-Color"):

@@ -28,27 +28,3 @@ class STFEditAnimationComponentIdOperator(bpy.types.Operator, STFEditComponentOp
 	"""Edit the ID of this Component"""
 	bl_idname = "stf.edit_animation_component_id"
 	def get_property(self, context): return hasattr(context, "active_action") and context.active_action
-
-
-def draw_animation_ui(layout: bpy.types.UILayout, context: bpy.types.Context, blender_resource: tuple[bpy.types.Object, bpy.types.Mesh]) -> None:
-	layout.use_property_split = True
-
-	if(not hasattr(bpy.types.Action, "slot_link")):
-		draw_slot_link_warning(layout)
-		return
-
-	if(context.active_action.stf_animation.is_baked_from):
-		row_readonly =  layout.row()
-		row_readonly.enabled = False
-		row_readonly.prop(context.active_action.stf_animation, "is_baked_from")
-
-	layout.prop(context.active_action.stf_animation, "exclude")
-	if(context.active_action.stf_animation.exclude):
-		return
-
-	if(not context.active_action.stf_animation.is_baked_from):
-		layout.separator(factor=2, type="SPACE")
-
-		layout.prop(context.active_action.stf_animation, "constraint_bake")
-		if(context.active_action.stf_animation.constraint_bake != "nobake"):
-			layout.operator(STFBakeAnimationOperator.bl_idname)

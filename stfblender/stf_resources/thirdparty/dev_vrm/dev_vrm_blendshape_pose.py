@@ -144,14 +144,14 @@ class Handler_VRM_Blendshape_Pose(STF_Handler_Data):
 		return resource
 
 	@classmethod
-	def export_resource(cls, context: STF_ExportContext, resource: VRM_Blendshape_Pose, context_resource: bpy.types.Collection) -> tuple[dict, str] | STFReport:
-		ret = export_data_resource_base(context, cls.stf_type, resource)
+	def export_resource(cls, context: STF_ExportContext, component: VRM_Blendshape_Pose, context_resource: bpy.types.Collection) -> tuple[dict, str] | STFReport:
+		ret = export_data_resource_base(context, cls.stf_type, component)
 
 		target_dict: dict[str, dict[str, float]] = {}
 		ret["targets"] = target_dict
 
 		def _handle():
-			for target in resource.targets:
+			for target in component.targets:
 				target: VRM_Blendshape_Pose_Target = target # Because syntax highlighting
 				if(target.mesh_instance):
 					value_dict: dict[str, float] = {}
@@ -167,7 +167,7 @@ class Handler_VRM_Blendshape_Pose(STF_Handler_Data):
 
 		context.add_task(STF_TaskSteps.DEFAULT, _handle)
 
-		return ret, resource.stf_id
+		return ret, component.stf_id
 
 	get_components = get_components_from_data_resource
 

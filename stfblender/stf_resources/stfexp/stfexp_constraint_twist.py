@@ -1,3 +1,5 @@
+# pyright: reportAssignmentType=none
+
 import bpy
 import re
 from typing import Any
@@ -60,7 +62,8 @@ def _stf_export(context: STF_ExportContext, blender_resource: STFEXP_Constraint_
 
 def _set_component_instance_standin(context: bpy.types.Context, component_ref: STF_Component_Ref, context_resource: Any, component: STFEXP_Constraint_Twist, component_instance: STFEXP_Constraint_Twist):
 	component_instance.weight = component.weight
-	component_instance.source.target_object = context_resource
+	# If the target bone is empty, the parent of the parent is assumed. In that case do not set the default target_object.
+	component_instance.source.target_object = context_resource if component.source.target_bone else None
 	component_instance.source.target_bone = component.source.target_bone
 
 
@@ -114,6 +117,12 @@ class Handler_STFEXP_Constraint_Twist(STF_Handler_BoneComponent, STF_Handler_Ani
 	stf_category = STF_Category.COMPONENT
 	like_types = ["constraint.rotation", "constraint"]
 	understood_blender_types = [STFEXP_Constraint_Twist]
+	blender_property_name = _blender_property_name
+	single = False
+	filter = [bpy.types.Object, bpy.types.Bone]
+	pretty_name_template = "Twist Constraint"
+
+	draw = _draw_component
 	import_resource = _stf_import
 	export_resource = _stf_export
 
@@ -122,18 +131,10 @@ class Handler_STFEXP_Constraint_Twist(STF_Handler_BoneComponent, STF_Handler_Ani
 	export_blender_animation = _export_blender_animation
 	import_stf_animation = _import_stf_animation
 
-	blender_property_name = _blender_property_name
-	single = False
-	filter = [bpy.types.Object, bpy.types.Bone]
-	draw = _draw_component
-
 	draw_instance = _draw_component
 	update_component_instance = _set_component_instance_standin
-
 	export_component_instance = _export_component_instance
 	import_component_instance = _import_component_instance
-
-	pretty_name_template = "Twist Constraint"
 
 
 def register():

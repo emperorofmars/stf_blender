@@ -1,4 +1,5 @@
 import bpy
+from bpy.types import Context, UILayout
 import mathutils
 import math
 from typing import Any
@@ -26,7 +27,9 @@ class Handler_STF_Instance_Armature(STF_Handler_BlenderNative, STF_Handler_Anima
 	get_stf_prop_holder = lambda blender_resource: blender_resource[0].stf_instance
 	operator_set_stf_id = STFSetArmatureInstanceIDOperator.bl_idname
 
-	draw = draw_armature_instance_ui
+	@classmethod
+	def draw(cls, layout: UILayout, context: Context, blender_resource: Any) -> None | bool:
+		return draw_armature_instance_ui(layout, context, blender_resource)
 
 	@classmethod
 	def import_resource(cls, context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: Any) -> Any | STFReport:
@@ -164,8 +167,8 @@ class Handler_STF_Instance_Armature(STF_Handler_BlenderNative, STF_Handler_Anima
 
 		return ret, blender_object.stf_instance.stf_id
 
-	@staticmethod
-	def can_handle_blender_resource(blender_resource: Any) -> int:
+	@classmethod
+	def can_handle_blender_resource(cls, blender_resource: Any) -> int:
 		if(type(blender_resource) is tuple and type(blender_resource[0]) is bpy.types.Object and type(blender_resource[1]) is bpy.types.Armature):
 			return 1000
 		else:
@@ -174,8 +177,8 @@ class Handler_STF_Instance_Armature(STF_Handler_BlenderNative, STF_Handler_Anima
 	understood_blender_animation_types = [bpy.types.Object]
 	understood_blender_animation_data_paths = ["pose.bones"]
 
-	@staticmethod
-	def export_blender_animation(context: STF_ExportContext, blender_resource: Any, property_index: int, blender_property_path: str) -> STFPropertyPathPart | None:
+	@classmethod
+	def export_blender_animation(cls, context: STF_ExportContext, blender_resource: Any, property_index: int, blender_property_path: str) -> STFPropertyPathPart | None:
 		import re
 		if(match := re.search(r"^pose.bones\[\"(?P<bone_name>[\w. -:,]+)\"\]", blender_property_path)):
 			if(type(blender_resource.data) is not bpy.types.Armature or match.groupdict()["bone_name"] not in blender_resource.data.bones):
@@ -183,8 +186,8 @@ class Handler_STF_Instance_Armature(STF_Handler_BlenderNative, STF_Handler_Anima
 			return STFPropertyPathPart([blender_resource.stf_info.stf_id, "instance"]) + context.resolve_application_property_path(ArmatureBone(blender_resource.data, match.groupdict()["bone_name"]), property_index, blender_property_path[match.span()[1] :])
 		return None
 
-	@staticmethod
-	def import_stf_animation(context: STF_ImportContext, stf_property_path: list[str], blender_resource: Any) -> BlenderPropertyPathPart | None:
+	@classmethod
+	def import_stf_animation(cls, context: STF_ImportContext, stf_property_path: list[str], blender_resource: Any) -> BlenderPropertyPathPart | None:
 		return context.resolve_stf_property_path(stf_property_path[1:], blender_resource)
 
 
