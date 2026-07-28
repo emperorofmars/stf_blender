@@ -15,10 +15,10 @@ _blender_property_name = "stfexp_collider_capsule"
 
 
 class STFEXP_Collider_Capsule(STF_ComponentResourceBase):
-	radius: bpy.props.FloatProperty(name="Radius", default=1, min=0, precision=3) # type: ignore
-	height: bpy.props.FloatProperty(name="Height", default=1, min=0, precision=3) # type: ignore
-	offset_position: bpy.props.FloatVectorProperty(name="Position Offset", size=3, default=(0, 0, 0), subtype="XYZ") # type: ignore
-	offset_rotation: bpy.props.FloatVectorProperty(name="Rotation Offset", size=3, default=(0, 0, 0), subtype="EULER") # type: ignore
+	radius: bpy.props.FloatProperty(name="Radius", default=1, min=0, precision=3)
+	height: bpy.props.FloatProperty(name="Height", default=1, min=0, precision=3)
+	offset_position: bpy.props.FloatVectorProperty(name="Position Offset", size=3, default=(0, 0, 0), subtype="XYZ")
+	offset_rotation: bpy.props.FloatVectorProperty(name="Rotation Offset", size=3, default=(0, 0, 0), subtype="EULER")
 
 
 def _parse_json(component: STFEXP_Collider_Capsule, json_resource: dict):
@@ -47,7 +47,7 @@ def _serialize_json(component: STFEXP_Collider_Capsule, json_resource: dict = {}
 
 class STFEXP_Collider_Capsule_LoadJsonOperator(ComponentLoadJsonOperatorBase, bpy.types.Operator):
 	bl_idname = "stf.stfexp_collider_capsule_loadjson"
-	blender_bone: bpy.props.BoolProperty() # type: ignore
+	blender_bone: bpy.props.BoolProperty()
 
 	def get_property(self, context) -> Any:
 		if(not self.blender_bone):

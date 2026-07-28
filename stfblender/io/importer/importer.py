@@ -54,23 +54,23 @@ def import_stf_file(filepath: str, import_settings: STF_ImportSettings) -> STF_I
 				bpy.data.objects.remove(trash)
 
 
-class ImportSTF(bpy.types.Operator, ImportHelper): # pyright: ignore[reportIncompatibleMethodOverride]
+class ImportSTF(bpy.types.Operator, ImportHelper):
 	"""Import STF files (.stf)"""
 	bl_idname = "stf.import_files"
 	bl_label = "Import STF"
 	bl_options = {"PRESET", "REGISTER", "UNDO"}
 
-	filter_glob: bpy.props.StringProperty(default="*.stf", options={"HIDDEN"}) # type: ignore
+	filter_glob: bpy.props.StringProperty(default="*.stf", options={"HIDDEN"})
 
-	directory: bpy.props.StringProperty(subtype="DIR_PATH") # type: ignore
-	files: bpy.props.CollectionProperty(name="File Paths", type=bpy.types.OperatorFileListElement) # type: ignore
+	directory: bpy.props.StringProperty(subtype="DIR_PATH")
+	files: bpy.props.CollectionProperty(name="File Paths", type=bpy.types.OperatorFileListElement)
 
-	import_settings: bpy.props.PointerProperty(type=STF_ImportSettings) # type: ignore
+	import_settings: bpy.props.PointerProperty(type=STF_ImportSettings)
 
 
-	def invoke(self, context: bpy.types.Context, event: bpy.types.Event) -> set: # pyright: ignore[reportIncompatibleMethodOverride]
+	def invoke(self, context: bpy.types.Context, event: bpy.types.Event) -> set:
 		self.invoking_from_ui = True
-		return ImportHelper.invoke_popup(self, context) # pyright: ignore[reportReturnType]
+		return ImportHelper.invoke_popup(self, context)
 
 
 	def execute(self, context: bpy.types.Context) -> set:
@@ -121,7 +121,7 @@ class ImportSTF(bpy.types.Operator, ImportHelper): # pyright: ignore[reportIncom
 
 
 	def draw(self, context: bpy.types.Context):
-		layout: bpy.types.UILayout = self.layout # type: ignore
+		layout: bpy.types.UILayout = self.layout # pyright: ignore[reportAssignmentType]
 		if(bpy.app.version[0] < 5 or bpy.app.version[1] < 2):
 			layout.operator("wm.url_open", text="Open User Guide", icon="HELP").url = "https://docs.stfform.at/guide/blender.html"
 		else:

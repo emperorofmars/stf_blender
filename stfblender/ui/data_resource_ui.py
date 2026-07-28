@@ -14,7 +14,7 @@ class STFDrawDataResourceList(bpy.types.UIList):
 	"""List of STF data-resources"""
 	bl_idname = "COLLECTION_UL_stf_data_resource_list"
 
-	sort_reverse: bpy.props.BoolProperty(default=False, name="Reverse") # type: ignore
+	sort_reverse: bpy.props.BoolProperty(default=False, name="Reverse")
 	sort_by: bpy.props.EnumProperty(items=[("original", "Added Order", "", "SORTSIZE", 0),("stf_type", "Component Type", "", "GROUP", 1),("stf_name", "Name", "", "FILE_TEXT", 2)], name="Sort by")# type: ignore
 	filter_name: bpy.props.StringProperty(name="Filter Name")# type: ignore
 	filter_type: bpy.props.StringProperty(name="Filter Type")# type: ignore

@@ -6,7 +6,7 @@ from .stf_image_ops import STFAddImageComponentOperator, STFEditImageComponentId
 
 
 class STF_Image(bpy.types.PropertyGroup):
-	is_normal_map: bpy.props.BoolProperty(name="Use as Normal-Map", default=False, options=set()) # type: ignore
+	is_normal_map: bpy.props.BoolProperty(name="Use as Normal-Map", default=False, options=set())
 
 
 class Handler_STF_Image(STF_Handler_BlenderNative, STF_Handler_ComponentHolder):

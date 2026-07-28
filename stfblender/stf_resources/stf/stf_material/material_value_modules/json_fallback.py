@@ -4,8 +4,8 @@ from ..stf_material_definition import STF_Material_Value_Base
 
 
 class STF_Material_Value_RawJson(STF_Material_Value_Base):
-	json_text: bpy.props.StringProperty(name="Raw Json Text") # type: ignore
-	reference: bpy.props.PointerProperty(type=bpy.types.ID, name="Referenced Resource") # type: ignore
+	json_text: bpy.props.StringProperty(name="Raw Json Text")
+	reference: bpy.props.PointerProperty(type=bpy.types.ID, name="Referenced Resource")
 
 
 def register():

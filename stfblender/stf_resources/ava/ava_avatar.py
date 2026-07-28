@@ -17,9 +17,9 @@ def _poll_mesh_instance(self, blender_object: bpy.types.Object) -> bool:
 	return blender_object.data is not None and type(blender_object.data) is bpy.types.Mesh
 
 class AVA_Avatar(STF_ComponentResourceBase):
-	viewport: bpy.props.PointerProperty(type=bpy.types.Object, name="Viewport", description="This Object's location will be used to determine the viewport location", options=set()) # type: ignore
-	primary_armature_instance: bpy.props.PointerProperty(type=bpy.types.Object, name="Main Armature Instance", description="Armature instance for humanoid IK, eye-rotations, ...", options=set(), poll=_poll_armature_instance) # type: ignore
-	primary_mesh_instance: bpy.props.PointerProperty(type=bpy.types.Object, name="Main Mesh Instance", description="Mesh instance for facial visemes", options=set(), poll=_poll_mesh_instance) # type: ignore
+	viewport: bpy.props.PointerProperty(type=bpy.types.Object, name="Viewport", description="This Object's location will be used to determine the viewport location", options=set())
+	primary_armature_instance: bpy.props.PointerProperty(type=bpy.types.Object, name="Main Armature Instance", description="Armature instance for humanoid IK, eye-rotations, ...", options=set(), poll=_poll_armature_instance)
+	primary_mesh_instance: bpy.props.PointerProperty(type=bpy.types.Object, name="Main Mesh Instance", description="Mesh instance for facial visemes", options=set(), poll=_poll_mesh_instance)
 
 
 class CreateViewportObjectOperator(bpy.types.Operator):
@@ -28,8 +28,8 @@ class CreateViewportObjectOperator(bpy.types.Operator):
 	bl_label = "Create Viewport Object"
 	bl_options = {"REGISTER", "UNDO"}
 
-	blender_collection: bpy.props.StringProperty() # type: ignore
-	component_id: bpy.props.StringProperty() # type: ignore
+	blender_collection: bpy.props.StringProperty()
+	component_id: bpy.props.StringProperty()
 
 	def execute(self, context) -> set:
 		target_object = bpy.data.collections[self.blender_collection]

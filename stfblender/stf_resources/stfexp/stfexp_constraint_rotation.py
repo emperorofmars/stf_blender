@@ -16,10 +16,10 @@ _blender_property_name = "stfexp_constraint_rotation"
 
 
 class STFEXP_Constraint_Rotation(STF_ComponentResourceBase):
-	weight: bpy.props.FloatProperty(name="Constraint Weight", default=1.0, subtype="FACTOR", min=0, max=1) # type: ignore
-	axes: bpy.props.BoolVectorProperty(name="Axes", default=(True, True, True), options=set(), size=3) # type: ignore
-	sources: bpy.props.CollectionProperty(type=ConstraintSource, name="Sources") # type: ignore
-	active_source_index: bpy.props.IntProperty() # type: ignore
+	weight: bpy.props.FloatProperty(name="Constraint Weight", default=1.0, subtype="FACTOR", min=0, max=1)
+	axes: bpy.props.BoolVectorProperty(name="Axes", default=(True, True, True), options=set(), size=3)
+	sources: bpy.props.CollectionProperty(type=ConstraintSource, name="Sources")
+	active_source_index: bpy.props.IntProperty()
 
 
 class STFDrawAVAExpressionList(bpy.types.UIList):

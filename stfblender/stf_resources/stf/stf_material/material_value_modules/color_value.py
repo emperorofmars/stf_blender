@@ -6,7 +6,7 @@ from ..stf_material_definition import STF_Material_Value_Module_Base, STF_Materi
 
 
 class STF_Material_Value_Color(STF_Material_Value_Base):
-	color: bpy.props.FloatVectorProperty(name="Color", subtype="COLOR", size=4, min=0, max=1, default=(1,1,1,1)) # type: ignore
+	color: bpy.props.FloatVectorProperty(name="Color", subtype="COLOR", size=4, min=0, max=1, default=(1,1,1,1))
 
 
 def _import_material_value(context: STF_ImportContext, json_material: dict, blender_material: bpy.types.Material, json_resource: Any, value: STF_Material_Value_Color):

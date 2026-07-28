@@ -13,10 +13,10 @@ class FallbackResourcesAdd(bpy.types.Operator):
 	bl_label = "Add Reference"
 	bl_options = {"REGISTER", "UNDO"}
 
-	blender_id_property: bpy.props.StringProperty() # type: ignore
-	blender_id_object: bpy.props.StringProperty() # type: ignore
-	blender_property_name: bpy.props.StringProperty() # type: ignore
-	resource_id: bpy.props.StringProperty() # type: ignore
+	blender_id_property: bpy.props.StringProperty()
+	blender_id_object: bpy.props.StringProperty()
+	blender_property_name: bpy.props.StringProperty()
+	resource_id: bpy.props.StringProperty()
 
 	def execute(self, context) -> set:
 		if(blender_id_property := getattr(bpy.data, self.blender_id_property.lower() + "s")):
@@ -32,11 +32,11 @@ class FallbackResourcesRemove(bpy.types.Operator):
 	bl_label = "Remove Reference"
 	bl_options = {"REGISTER", "UNDO"}
 
-	blender_id_property: bpy.props.StringProperty() # type: ignore
-	blender_id_object: bpy.props.StringProperty() # type: ignore
-	blender_property_name: bpy.props.StringProperty() # type: ignore
-	resource_id: bpy.props.StringProperty() # type: ignore
-	reference_index: bpy.props.IntProperty() # type: ignore
+	blender_id_property: bpy.props.StringProperty()
+	blender_id_object: bpy.props.StringProperty()
+	blender_property_name: bpy.props.StringProperty()
+	resource_id: bpy.props.StringProperty()
+	reference_index: bpy.props.IntProperty()
 
 	def execute(self, context) -> set:
 		if(blender_id_property := getattr(bpy.data, self.blender_id_property.lower() + "s")):
@@ -53,10 +53,10 @@ class FallbackBuffersAdd(bpy.types.Operator):
 	bl_label = "Add Buffer"
 	bl_options = {"REGISTER", "UNDO"}
 
-	blender_id_property: bpy.props.StringProperty() # type: ignore
-	blender_id_object: bpy.props.StringProperty() # type: ignore
-	blender_property_name: bpy.props.StringProperty() # type: ignore
-	resource_id: bpy.props.StringProperty() # type: ignore
+	blender_id_property: bpy.props.StringProperty()
+	blender_id_object: bpy.props.StringProperty()
+	blender_property_name: bpy.props.StringProperty()
+	resource_id: bpy.props.StringProperty()
 
 	def execute(self, context) -> set:
 		if(blender_id_property := getattr(bpy.data, self.blender_id_property.lower() + "s")):
@@ -74,11 +74,11 @@ class FallbackBuffersRemove(bpy.types.Operator):
 	bl_label = "Remove Buffer"
 	bl_options = {"REGISTER", "UNDO"}
 
-	blender_id_property: bpy.props.StringProperty() # type: ignore
-	blender_id_object: bpy.props.StringProperty() # type: ignore
-	blender_property_name: bpy.props.StringProperty() # type: ignore
-	resource_id: bpy.props.StringProperty() # type: ignore
-	buffer_index: bpy.props.IntProperty() # type: ignore
+	blender_id_property: bpy.props.StringProperty()
+	blender_id_object: bpy.props.StringProperty()
+	blender_property_name: bpy.props.StringProperty()
+	resource_id: bpy.props.StringProperty()
+	buffer_index: bpy.props.IntProperty()
 
 	def execute(self, context) -> set:
 		if(blender_id_property := getattr(bpy.data, self.blender_id_property.lower() + "s")):

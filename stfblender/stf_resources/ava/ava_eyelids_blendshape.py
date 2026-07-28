@@ -1,6 +1,8 @@
 import bpy
 from typing import Any
 
+from bpy.types import Context
+
 from ....stfblender_common import STF_ExportContext, STF_ImportContext, STF_Category, STF_ComponentResourceBase, STF_Handler_Component, STF_Component_Ref, add_component, export_component_base, import_component_base
 
 
@@ -32,23 +34,23 @@ def _map_blendshape(blendshape_name: str) -> str | None:
 
 
 class AVA_Eyelids_Blendshape(STF_ComponentResourceBase):
-	eyes_closed: bpy.props.StringProperty(name="Both Closed", options=set()) # type: ignore
-	look_up: bpy.props.StringProperty(name="Both Up", options=set()) # type: ignore
-	look_down: bpy.props.StringProperty(name="Both Down", options=set()) # type: ignore
-	look_left: bpy.props.StringProperty(name="Both Left", options=set()) # type: ignore
-	look_right: bpy.props.StringProperty(name="Both Right", options=set()) # type: ignore
+	eyes_closed: bpy.props.StringProperty(name="Both Closed", options=set())
+	look_up: bpy.props.StringProperty(name="Both Up", options=set())
+	look_down: bpy.props.StringProperty(name="Both Down", options=set())
+	look_left: bpy.props.StringProperty(name="Both Left", options=set())
+	look_right: bpy.props.StringProperty(name="Both Right", options=set())
 
-	eye_closed_left: bpy.props.StringProperty(name="Left Closed", options=set()) # type: ignore
-	look_up_left: bpy.props.StringProperty(name="Left Up", options=set()) # type: ignore
-	look_down_left: bpy.props.StringProperty(name="Left Down", options=set()) # type: ignore
-	look_left_left: bpy.props.StringProperty(name="Left Left", options=set()) # type: ignore
-	look_right_left: bpy.props.StringProperty(name="Left Right", options=set()) # type: ignore
+	eye_closed_left: bpy.props.StringProperty(name="Left Closed", options=set())
+	look_up_left: bpy.props.StringProperty(name="Left Up", options=set())
+	look_down_left: bpy.props.StringProperty(name="Left Down", options=set())
+	look_left_left: bpy.props.StringProperty(name="Left Left", options=set())
+	look_right_left: bpy.props.StringProperty(name="Left Right", options=set())
 
-	eye_closed_right: bpy.props.StringProperty(name="Right Closed", options=set()) # type: ignore
-	look_up_right: bpy.props.StringProperty(name="Right Up", options=set()) # type: ignore
-	look_down_right: bpy.props.StringProperty(name="Right Down", options=set()) # type: ignore
-	look_left_right: bpy.props.StringProperty(name="Right Left", options=set()) # type: ignore
-	look_right_right: bpy.props.StringProperty(name="Right Right", options=set()) # type: ignore
+	eye_closed_right: bpy.props.StringProperty(name="Right Closed", options=set())
+	look_up_right: bpy.props.StringProperty(name="Right Up", options=set())
+	look_down_right: bpy.props.StringProperty(name="Right Down", options=set())
+	look_left_right: bpy.props.StringProperty(name="Right Left", options=set())
+	look_right_right: bpy.props.StringProperty(name="Right Right", options=set())
 
 
 def automap(component: AVA_Eyelids_Blendshape, mesh: bpy.types.Mesh):
@@ -65,12 +67,16 @@ class AutomapEyelids(bpy.types.Operator):
 	bl_label = "Map from Names"
 	bl_options = {"REGISTER", "UNDO"}
 
-	component_id: bpy.props.StringProperty() # type: ignore
+	component_id: bpy.props.StringProperty()
+
+	@classmethod
+	def poll(cls, context: Context) -> bool:
+		return hasattr(context, "mesh") and context.mesh is not None and context.mesh.shape_keys is not None and context.mesh.shape_keys.key_blocks is not None
 
 	def execute(self, context) -> set:
 		for component in context.mesh.ava_eyelids_blendshape:
 			if(component.stf_id == self.component_id):
-				automap(component, context.mesh)  # pyright: ignore[reportArgumentType]
+				automap(component, context.mesh) # pyright: ignore[reportArgumentType]
 				return {"FINISHED"}
 		return {"CANCELLED"}
 

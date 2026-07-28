@@ -12,7 +12,7 @@ _blender_property_name = "ava_voice_position"
 
 
 class AVA_VoicePosition(STF_ComponentResourceBase):
-	voice_position: bpy.props.PointerProperty(type=bpy.types.Object, name="Voice Position", description="This Object's location will be used to determine the voice position", options=set()) # type: ignore
+	voice_position: bpy.props.PointerProperty(type=bpy.types.Object, name="Voice Position", description="This Object's location will be used to determine the voice position", options=set())
 
 
 class CreateVoicePositionObjectOperator(bpy.types.Operator):
@@ -21,8 +21,8 @@ class CreateVoicePositionObjectOperator(bpy.types.Operator):
 	bl_label = "Create Position Object"
 	bl_options = {"REGISTER", "UNDO"}
 
-	blender_collection: bpy.props.StringProperty() # type: ignore
-	component_id: bpy.props.StringProperty() # type: ignore
+	blender_collection: bpy.props.StringProperty()
+	component_id: bpy.props.StringProperty()
 
 	def execute(self, context) -> set:
 		target_object = bpy.data.collections[self.blender_collection]

@@ -16,11 +16,11 @@ _blender_property_name = "stfexp_constraint_parent"
 
 
 class STFEXP_Constraint_Parent(STF_ComponentResourceBase):
-	weight: bpy.props.FloatProperty(name="Constraint Weight", default=1.0, subtype="FACTOR", min=0, max=1) # type: ignore
-	translation_axes: bpy.props.BoolVectorProperty(name="Translation Axes", default=(True, True, True), options=set(), size=3) # type: ignore
-	rotation_axes: bpy.props.BoolVectorProperty(name="Rotation Axes", default=(True, True, True), options=set(), size=3) # type: ignore
-	sources: bpy.props.CollectionProperty(type=ConstraintSource, name="Sources") # type: ignore
-	active_source_index: bpy.props.IntProperty() # type: ignore
+	weight: bpy.props.FloatProperty(name="Constraint Weight", default=1.0, subtype="FACTOR", min=0, max=1)
+	translation_axes: bpy.props.BoolVectorProperty(name="Translation Axes", default=(True, True, True), options=set(), size=3)
+	rotation_axes: bpy.props.BoolVectorProperty(name="Rotation Axes", default=(True, True, True), options=set(), size=3)
+	sources: bpy.props.CollectionProperty(type=ConstraintSource, name="Sources")
+	active_source_index: bpy.props.IntProperty()
 
 
 class STFDrawAVAExpressionList(bpy.types.UIList):

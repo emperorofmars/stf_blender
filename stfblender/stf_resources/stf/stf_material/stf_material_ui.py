@@ -36,7 +36,7 @@ class STFEditMaterialComponentIdOperator(bpy.types.Operator, STFEditComponentOpe
 class STFDrawMaterialPropertyList(bpy.types.UIList):
 	bl_idname = "COLLECTION_UL_stf_material_list"
 
-	sort_reverse: bpy.props.BoolProperty(default=False, name="Reverse") # type: ignore
+	sort_reverse: bpy.props.BoolProperty(default=False, name="Reverse")
 	sort_by: bpy.props.EnumProperty(items=[("original", "Added Order", "", "SORTSIZE", 0),("property_type", "ID", "", "NONE", 1),("value_type", "Type", "", "NONE", 2)], name="Sort by")# type: ignore
 	filter_id: bpy.props.StringProperty(name="Filter Property ID")# type: ignore
 	filter_type: bpy.props.EnumProperty(items=[("none", "None", "", "NONE", 0),("color", "Color", "", "COLOR", 1),("float", "Float", "", "NONE", 2),("int", "Int", "", "NONE", 3),("image", "Image", "", "IMAGE", 4)], default="none", name="Filter Type")# type: ignore
@@ -110,7 +110,7 @@ class STFMaterialHintRemove(bpy.types.Operator):
 	bl_idname = "stf.material_hint_remove"
 	bl_label = "Remove Style Hint"
 	bl_options = {"REGISTER", "UNDO"}
-	index: bpy.props.IntProperty() # type: ignore
+	index: bpy.props.IntProperty()
 	def execute(self, context) -> set:
 		context.material.stf_material.style_hints.remove(self.index)
 		return {"FINISHED"}
@@ -130,7 +130,7 @@ class STFMaterialShaderTargetRemove(bpy.types.Operator):
 	bl_idname = "stf.material_shader_target_remove"
 	bl_label = "Remove Shader Target"
 	bl_options = {"REGISTER", "UNDO"}
-	index: bpy.props.IntProperty() # type: ignore
+	index: bpy.props.IntProperty()
 	def execute(self, context) -> set:
 		context.material.stf_material.shader_targets.remove(self.index)
 		return {"FINISHED"}
@@ -140,7 +140,7 @@ class STFMaterialShaderTargetShaderAdd(bpy.types.Operator):
 	bl_idname = "stf.material_shader_target_shader_add"
 	bl_label = "Add Shader"
 	bl_options = {"REGISTER", "UNDO"}
-	index: bpy.props.IntProperty() # type: ignore
+	index: bpy.props.IntProperty()
 	def execute(self, context) -> set:
 		context.material.stf_material.shader_targets[self.index].shaders.add()
 		return {"FINISHED"}
@@ -150,8 +150,8 @@ class STFMaterialShaderTargetShaderRemove(bpy.types.Operator):
 	bl_idname = "stf.material_shader_target_shader_remove"
 	bl_label = "Remove Shader"
 	bl_options = {"REGISTER", "UNDO"}
-	index: bpy.props.IntProperty() # type: ignore
-	index_shader: bpy.props.IntProperty() # type: ignore
+	index: bpy.props.IntProperty()
+	index_shader: bpy.props.IntProperty()
 	def execute(self, context) -> set:
 		context.material.stf_material.shader_targets[self.index].shaders.remove(self.index_shader)
 		return {"FINISHED"}

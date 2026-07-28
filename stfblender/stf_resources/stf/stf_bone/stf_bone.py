@@ -20,7 +20,7 @@ def _search_uses(self, context: bpy.types.Context, edit_text: str) -> Sequence[t
 	)
 
 class STF_Bone(bpy.types.PropertyGroup):
-	non_deform_use: bpy.props.StringProperty(name="Use non-deform Bone as", options=set(), search=_search_uses) # type: ignore
+	non_deform_use: bpy.props.StringProperty(name="Use non-deform Bone as", options=set(), search=_search_uses)
 
 
 class Handler_STF_Bone(STF_Handler_BlenderNative, STF_Handler_ComponentHolder, STF_Handler_Animation):

@@ -27,8 +27,8 @@ def automap(mesh: bpy.types.Mesh) -> str | None:
 
 
 class AVA_FaceTracking_Blendshapes(STF_ComponentResourceBase):
-	ft_type: bpy.props.EnumProperty(items=[("unified_expressions", "Unified Expressions (Preferred)", ""),("arkit", "ARkit", ""),("sranipal", "SRanipal", ""),("facs_reduced", "FACS Reduced (Quest Pro)", ""),("other", "Unknown Tracking Type", "")], name="Type", default="unified_expressions", options=set()) # type: ignore
-	ft_type_custom: bpy.props.StringProperty(name="Unknown Tracking Type", options=set()) # type: ignore
+	ft_type: bpy.props.EnumProperty(items=[("unified_expressions", "Unified Expressions (Preferred)", ""),("arkit", "ARkit", ""),("sranipal", "SRanipal", ""),("facs_reduced", "FACS Reduced (Quest Pro)", ""),("other", "Unknown Tracking Type", "")], name="Type", default="unified_expressions", options=set())
+	ft_type_custom: bpy.props.StringProperty(name="Unknown Tracking Type", options=set())
 
 
 class Handler_AVA_FaceTracking_Blendshapes(STF_Handler_Component):

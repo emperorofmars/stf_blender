@@ -14,8 +14,8 @@ _blender_property_name = "stfexp_collider_plane"
 
 
 class STFEXP_Collider_Plane(STF_ComponentResourceBase):
-	offset_position: bpy.props.FloatVectorProperty(name="Position Offset", size=3, default=(0, 0, 0), subtype="XYZ", precision=3) # type: ignore
-	offset_rotation: bpy.props.FloatVectorProperty(name="Rotation Offset", size=3, default=(0, 0, 0), subtype="EULER", precision=3) # type: ignore
+	offset_position: bpy.props.FloatVectorProperty(name="Position Offset", size=3, default=(0, 0, 0), subtype="XYZ", precision=3)
+	offset_rotation: bpy.props.FloatVectorProperty(name="Rotation Offset", size=3, default=(0, 0, 0), subtype="EULER", precision=3)
 
 
 def _parse_json(component: STFEXP_Collider_Plane, json_resource: dict):
@@ -41,7 +41,7 @@ def _serialize_json(component: STFEXP_Collider_Plane, json_resource: dict = {}) 
 
 class STFEXP_Collider_Plane_LoadJsonOperator(ComponentLoadJsonOperatorBase, bpy.types.Operator):
 	bl_idname = "stf.stfexp_collider_plane_loadjson"
-	blender_bone: bpy.props.BoolProperty() # type: ignore
+	blender_bone: bpy.props.BoolProperty()
 
 	def get_property(self, context) -> Any:
 		if(not self.blender_bone):

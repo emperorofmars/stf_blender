@@ -9,7 +9,7 @@ class SetActiveObjectOperator(bpy.types.Operator):
 	bl_label = "Select"
 	bl_options = {"REGISTER", "UNDO"}
 
-	target_name: bpy.props.StringProperty(name = "target_name") # type: ignore
+	target_name: bpy.props.StringProperty(name = "target_name")
 
 	def execute(self, context) -> set:
 		blender_object = bpy.data.objects.get(self.target_name)
@@ -26,7 +26,7 @@ class CopyToClipboard(bpy.types.Operator):
 	bl_label = "Copy to Clipboard"
 	bl_options = {"REGISTER", "UNDO"}
 
-	text: bpy.props.StringProperty() # type: ignore
+	text: bpy.props.StringProperty()
 
 	def execute(self, context) -> set:
 		bpy.context.window_manager.clipboard = self.text

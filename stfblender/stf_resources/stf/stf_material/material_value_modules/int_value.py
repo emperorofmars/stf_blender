@@ -6,7 +6,7 @@ from ..stf_material_definition import STF_Material_Value_Base, STF_Material_Valu
 
 
 class STF_Material_Value_Int(STF_Material_Value_Base):
-	number: bpy.props.IntProperty(name="Int") # type: ignore
+	number: bpy.props.IntProperty(name="Int")
 
 
 def _import_material_value(context: STF_ImportContext, json_material: dict, blender_material: bpy.types.Material, json_resource: Any, value: STF_Material_Value_Int):

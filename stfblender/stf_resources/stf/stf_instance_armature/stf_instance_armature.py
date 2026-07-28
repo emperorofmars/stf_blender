@@ -14,8 +14,8 @@ from .stf_instance_armature_utils import parse_standin, process_components, seri
 
 
 class STF_Instance_Armature(bpy.types.PropertyGroup):
-	stf_components: bpy.props.CollectionProperty(type=STF_ComponentBoneInstanceRef, options=set()) # type: ignore
-	stf_active_component_index: bpy.props.IntProperty(options=set()) # type: ignore
+	stf_components: bpy.props.CollectionProperty(type=STF_ComponentBoneInstanceRef, options=set())
+	stf_active_component_index: bpy.props.IntProperty(options=set())
 
 
 class Handler_STF_Instance_Armature(STF_Handler_BlenderNative, STF_Handler_Animation):

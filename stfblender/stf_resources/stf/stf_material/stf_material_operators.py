@@ -66,7 +66,7 @@ class STFAddMaterialProperty(bpy.types.Operator):
 	bl_label = "Add Property"
 	bl_options = {"REGISTER", "UNDO"}
 
-	property_type: bpy.props.StringProperty() # type: ignore
+	property_type: bpy.props.StringProperty()
 
 	def execute(self, context) -> set:
 		for mat_module in blender_material_value_modules:
@@ -82,7 +82,7 @@ class STFRemoveMaterialProperty(bpy.types.Operator):
 	bl_label = "Remove"
 	bl_options = {"REGISTER", "UNDO"}
 
-	index: bpy.props.IntProperty() # type: ignore
+	index: bpy.props.IntProperty()
 
 	def invoke(self, context, event):
 		return context.window_manager.invoke_confirm(self, event)
@@ -98,7 +98,7 @@ class STFAddMaterialPropertyValue(bpy.types.Operator):
 	bl_label = "Add Value"
 	bl_options = {"REGISTER", "UNDO"}
 
-	index: bpy.props.IntProperty() # type: ignore
+	index: bpy.props.IntProperty()
 
 	def execute(self, context) -> set:
 		add_value_to_property(context.material, self.index) # pyright: ignore[reportArgumentType]
@@ -110,7 +110,7 @@ class STFRemoveMaterialPropertyValue(bpy.types.Operator):
 	bl_label = "Remove"
 	bl_options = {"REGISTER", "UNDO"}
 
-	index: bpy.props.IntProperty() # type: ignore
+	index: bpy.props.IntProperty()
 
 	def invoke(self, context, event):
 		return context.window_manager.invoke_confirm(self, event)

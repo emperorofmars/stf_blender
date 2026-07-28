@@ -30,26 +30,26 @@ expression_values = (
 )
 
 class AVA_Expression(bpy.types.PropertyGroup):
-	expression: bpy.props.EnumProperty(name="Expression", items=expression_values, description="The semantic meaning of the mapped animation", options=set()) # type: ignore
-	custom_expression: bpy.props.StringProperty(name="Custom Expression", options=set()) # type: ignore
+	expression: bpy.props.EnumProperty(name="Expression", items=expression_values, description="The semantic meaning of the mapped animation", options=set())
+	custom_expression: bpy.props.StringProperty(name="Custom Expression", options=set())
 
-	animation: bpy.props.PointerProperty(type=bpy.types.Action, name="Animation", description="The animation which represents the expression", options=set(), poll=poll_valid_animations) # type: ignore
+	animation: bpy.props.PointerProperty(type=bpy.types.Action, name="Animation", description="The animation which represents the expression", options=set(), poll=poll_valid_animations)
 
-	use_blendshape_fallback: bpy.props.BoolProperty(name="Provide Blendshape Only Fallback", default=False, description="Some targets like VRM have a very limited system for avatar expressions. Provide a blendshape-only pose for these applications", options=set()) # type: ignore
-	blendshape_fallback: bpy.props.PointerProperty(type=STFDataResourceReference, options=set()) # type: ignore
+	use_blendshape_fallback: bpy.props.BoolProperty(name="Provide Blendshape Only Fallback", default=False, description="Some targets like VRM have a very limited system for avatar expressions. Provide a blendshape-only pose for these applications", options=set())
+	blendshape_fallback: bpy.props.PointerProperty(type=STFDataResourceReference, options=set())
 
 
 class AVA_Expressions(STF_ComponentResourceBase):
-	expressions: bpy.props.CollectionProperty(type=AVA_Expression) # type: ignore
-	active_expression: bpy.props.IntProperty() # type: ignore
+	expressions: bpy.props.CollectionProperty(type=AVA_Expression)
+	active_expression: bpy.props.IntProperty()
 
 
 class STFDrawAVAExpressionList(bpy.types.UIList):
 	bl_idname = "COLLECTION_UL_ava_expression_list"
 
-	sort_reverse: bpy.props.BoolProperty(default=False, name="Reverse") # type: ignore
-	sort_by: bpy.props.EnumProperty(items=[("original", "Added Order", "", "SORTSIZE", 0),("expression", "Expression", "", "NONE", 1)], name="Sort by")# type: ignore
-	filter_expression: bpy.props.StringProperty(name="Filter Expression")# type: ignore
+	sort_reverse: bpy.props.BoolProperty(default=False, name="Reverse")
+	sort_by: bpy.props.EnumProperty(items=[("original", "Added Order", "", "SORTSIZE", 0),("expression", "Expression", "", "NONE", 1)], name="Sort by")
+	filter_expression: bpy.props.StringProperty(name="Filter Expression")
 
 	def draw_filter(self, context: bpy.types.Context, layout: bpy.types.UILayout):
 		row = layout.row(align=True)
@@ -61,7 +61,7 @@ class STFDrawAVAExpressionList(bpy.types.UIList):
 		row_r.alignment = "RIGHT"
 		row_r.prop(self, "sort_reverse", text="", icon="SORT_DESC" if self.sort_reverse else "SORT_ASC")
 
-	def filter_items(self, context: bpy.types.Context, data, propname: str):  # pyright: ignore[reportIncompatibleMethodOverride]
+	def filter_items(self, context: bpy.types.Context, data, propname: str) -> tuple[list[int], None]: # pyright: ignore[reportIncompatibleMethodOverride]
 		items: list[AVA_Expression] = getattr(data, propname)
 
 		filter = [self.bitflag_filter_item] * len(items)
@@ -90,7 +90,7 @@ class STFDrawAVAExpressionList(bpy.types.UIList):
 
 		return filter, sortorder
 
-	def draw_item(self, context: bpy.types.Context, layout: bpy.types.UILayout, data, item: AVA_Expression, icon, active_data, active_propname, index):  # pyright: ignore[reportIncompatibleMethodOverride]
+	def draw_item(self, context: bpy.types.Context, layout: bpy.types.UILayout, data, item: AVA_Expression, icon, active_data, active_propname, index): # pyright: ignore[reportIncompatibleMethodOverride]
 		layout.label(text=item.custom_expression.capitalize() if item.expression == "custom" else str(item.expression).capitalize())
 		if(item.animation):
 			layout.label(text=item.animation.name, icon="ACTION")

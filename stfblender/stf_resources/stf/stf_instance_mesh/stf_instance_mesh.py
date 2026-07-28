@@ -142,7 +142,7 @@ class Handler_STF_Instance_Mesh(STF_Handler_BlenderNative, STF_Handler_Animation
 
 
 def register():
-	bpy.types.Object.stf_instance_mesh = bpy.props.PointerProperty(type=STF_Instance_Mesh, options=set()) # type: ignore
+	bpy.types.Object.stf_instance_mesh = bpy.props.PointerProperty(type=STF_Instance_Mesh, options=set())
 
 def unregister():
 	if hasattr(bpy.types.Object, "stf_instance_mesh"):

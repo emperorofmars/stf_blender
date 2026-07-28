@@ -6,10 +6,10 @@ from ....stfblender_common import STF_ExportContext, STF_ImportContext, STF_Cate
 
 
 class AVA_EyeRotation_Bone(STF_ComponentResourceBase):
-	limit_up: bpy.props.FloatProperty(name="Up", subtype="ANGLE", default=math.radians(15), options=set(), soft_min=0, soft_max=math.radians(60)) # type: ignore
-	limit_down: bpy.props.FloatProperty(name="Down", subtype="ANGLE", default=math.radians(12), options=set(), soft_min=0, soft_max=math.radians(60)) # type: ignore
-	limit_in: bpy.props.FloatProperty(name="In", subtype="ANGLE", default=math.radians(15), options=set(), soft_min=0, soft_max=math.radians(60)) # type: ignore
-	limit_out: bpy.props.FloatProperty(name="Out", subtype="ANGLE", default=math.radians(16), options=set(), soft_min=0, soft_max=math.radians(60)) # type: ignore
+	limit_up: bpy.props.FloatProperty(name="Up", subtype="ANGLE", default=math.radians(15), options=set(), soft_min=0, soft_max=math.radians(60))
+	limit_down: bpy.props.FloatProperty(name="Down", subtype="ANGLE", default=math.radians(12), options=set(), soft_min=0, soft_max=math.radians(60))
+	limit_in: bpy.props.FloatProperty(name="In", subtype="ANGLE", default=math.radians(15), options=set(), soft_min=0, soft_max=math.radians(60))
+	limit_out: bpy.props.FloatProperty(name="Out", subtype="ANGLE", default=math.radians(16), options=set(), soft_min=0, soft_max=math.radians(60))
 
 
 class Handler_AVA_EyeRotation_Bone(STF_Handler_Component):

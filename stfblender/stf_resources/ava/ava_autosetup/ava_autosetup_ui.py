@@ -4,8 +4,8 @@ from .ava_autosetup import ava_autosetup, detect_mesh_and_armature
 
 
 class AVA_Autosetup_Data(bpy.types.PropertyGroup):
-	use_scene_collection: bpy.props.BoolProperty(name="Use Scene Collection", default=False, options=set()) # type: ignore
-	target_collection: bpy.props.PointerProperty(type=bpy.types.Collection, name="Target Collection", options=set()) # type: ignore
+	use_scene_collection: bpy.props.BoolProperty(name="Use Scene Collection", default=False, options=set())
+	target_collection: bpy.props.PointerProperty(type=bpy.types.Collection, name="Target Collection", options=set())
 
 
 class AVA_Autosetup_Operator(bpy.types.Operator):

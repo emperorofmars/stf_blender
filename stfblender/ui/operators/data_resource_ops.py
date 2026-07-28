@@ -12,9 +12,9 @@ class STFCreateDataResourceOperator(bpy.types.Operator):
 	bl_label = "Create New Resource"
 	bl_options = {"REGISTER", "UNDO", "INTERNAL"}
 
-	use_scene_collection: bpy.props.BoolProperty(default=False) # type: ignore
-	stf_type: bpy.props.StringProperty(name="Type") # type: ignore
-	property_name: bpy.props.StringProperty() # type: ignore
+	use_scene_collection: bpy.props.BoolProperty(default=False)
+	stf_type: bpy.props.StringProperty(name="Type")
+	property_name: bpy.props.StringProperty()
 
 	def execute(self, context) -> set:
 		import uuid
@@ -28,9 +28,9 @@ class STFRemoveDataResourceOperator(bpy.types.Operator):
 	bl_label = "Remove Resource"
 	bl_options = {"REGISTER", "UNDO", "INTERNAL"}
 
-	use_scene_collection: bpy.props.BoolProperty(default=False) # type: ignore
-	index: bpy.props.IntProperty(name="Resource Index", default=-1) # type: ignore
-	property_name: bpy.props.StringProperty() # type: ignore
+	use_scene_collection: bpy.props.BoolProperty(default=False)
+	index: bpy.props.IntProperty(name="Resource Index", default=-1)
+	property_name: bpy.props.StringProperty()
 
 	def invoke(self, context, event):
 		return context.window_manager.invoke_confirm(self, event)
@@ -61,9 +61,9 @@ class STFEditDataResourceOperator(bpy.types.Operator):
 	bl_label = "Edit ID"
 	bl_options = {"REGISTER", "UNDO", "INTERNAL"}
 
-	use_scene_collection: bpy.props.BoolProperty(default=False) # type: ignore
-	resource_id: bpy.props.StringProperty() # type: ignore
-	edit_id: bpy.props.StringProperty(name="ID") # type: ignore
+	use_scene_collection: bpy.props.BoolProperty(default=False)
+	resource_id: bpy.props.StringProperty()
+	edit_id: bpy.props.StringProperty(name="ID")
 
 	def invoke(self, context, event):
 		self.edit_id = self.resource_id

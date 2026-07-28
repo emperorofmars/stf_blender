@@ -6,11 +6,11 @@ from .....stfblender_common import STF_ExportContext, STF_ImportContext, STF_Cat
 
 class STF_Texture(STF_ComponentResourceBase):
 	"""Define information on how an image is to be uploaded to the GPU"""
-	width: bpy.props.IntProperty(name="Width", subtype="PIXEL", default=1024, min=1, options=set()) # type: ignore
-	height: bpy.props.IntProperty(name="Height", subtype="PIXEL", default=1024, min=1, options=set()) # type: ignore
-	downscale_priority: bpy.props.IntProperty(name="Downscale Priority", default=0, min=-1, options=set()) # type: ignore
-	quality: bpy.props.FloatProperty(name="Quality", subtype="FACTOR", default=1, min=0, max=1, options=set()) # type: ignore
-	mipmaps: bpy.props.BoolProperty(name="Mipmaps", default=True, options=set()) # type: ignore
+	width: bpy.props.IntProperty(name="Width", subtype="PIXEL", default=1024, min=1, options=set())
+	height: bpy.props.IntProperty(name="Height", subtype="PIXEL", default=1024, min=1, options=set())
+	downscale_priority: bpy.props.IntProperty(name="Downscale Priority", default=0, min=-1, options=set())
+	quality: bpy.props.FloatProperty(name="Quality", subtype="FACTOR", default=1, min=0, max=1, options=set())
+	mipmaps: bpy.props.BoolProperty(name="Mipmaps", default=True, options=set())
 	# TODO more gpu texture relevant properties
 
 

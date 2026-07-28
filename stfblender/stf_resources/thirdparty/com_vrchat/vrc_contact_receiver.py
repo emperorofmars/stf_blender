@@ -10,13 +10,13 @@ _blender_property_name = "com_vrchat_contact_receiver"
 
 
 class VRC_ContactReceiver(VRC_ContactBase):
-	receiver_type: bpy.props.EnumProperty(name="Receiver Type", items=(("constant", "Constant", ""), ("on_enter", "On Enter", ""), ("proximity", "Proximity", "")), default="constant", options=set()) # type: ignore
-	parameter: bpy.props.StringProperty(name="Parameter", options=set()) # type: ignore
+	receiver_type: bpy.props.EnumProperty(name="Receiver Type", items=(("constant", "Constant", ""), ("on_enter", "On Enter", ""), ("proximity", "Proximity", "")), default="constant", options=set())
+	parameter: bpy.props.StringProperty(name="Parameter", options=set())
 
 
 class VRC_ContactReceiver_LoadJsonOperator(ComponentLoadJsonOperatorBase, bpy.types.Operator):
 	bl_idname = "stf.vrc_contact_receiver_loadjson"
-	blender_bone: bpy.props.BoolProperty() # type: ignore
+	blender_bone: bpy.props.BoolProperty()
 
 	def get_property(self, context) -> Any:
 		if(not self.blender_bone):

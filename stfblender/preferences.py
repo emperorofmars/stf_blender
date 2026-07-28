@@ -8,7 +8,7 @@ from .package_key import package_key
 class STF_Extension_Preferences(bpy.types.AddonPreferences):
 	bl_idname = package_key
 
-	#enable_dev_mode: bpy.props.BoolProperty(name="Enable Development Mode", default=False) # type: ignore
+	#enable_dev_mode: bpy.props.BoolProperty(name="Enable Development Mode", default=False)
 
 	def draw(self, context: bpy.types.Context):
 		layout = self.layout

@@ -59,19 +59,19 @@ def search_collision_tags(self, context: bpy.types.Context, edit_text: str):
 
 
 class CollisionTag(bpy.types.PropertyGroup):
-	tag_name: bpy.props.StringProperty(name="Tag", options=set(), search=search_collision_tags) # type: ignore
+	tag_name: bpy.props.StringProperty(name="Tag", options=set(), search=search_collision_tags)
 
 
 class VRC_ContactBase(STF_ComponentResourceBase):
-	shape: bpy.props.EnumProperty(name="Shape", items=(("sphere", "Sphere", ""), ("capsule", "Capsule", "")), default="sphere", options=set()) # type: ignore
-	radius: bpy.props.FloatProperty(name="Radius", default=1, min=0, precision=3) # type: ignore
-	height: bpy.props.FloatProperty(name="Height", default=1, min=0, precision=3) # type: ignore
-	offset_position: bpy.props.FloatVectorProperty(name="Position Offset", size=3, default=(0, 0, 0), subtype="XYZ", precision=3) # type: ignore
-	offset_rotation: bpy.props.FloatVectorProperty(name="Rotation Offset", size=3, default=(0, 0, 0), subtype="EULER", precision=3) # type: ignore
-	filter_avatar: bpy.props.BoolProperty(name="Avatar", default=False, options=set()) # type: ignore
-	filter_world: bpy.props.BoolProperty(name="World", default=False, options=set()) # type: ignore
-	local_only: bpy.props.BoolProperty(name="Local Only", default=False, options=set()) # type: ignore
-	collision_tags: bpy.props.CollectionProperty(name="Collision Tags", type=CollisionTag, options=set()) # type: ignore
+	shape: bpy.props.EnumProperty(name="Shape", items=(("sphere", "Sphere", ""), ("capsule", "Capsule", "")), default="sphere", options=set())
+	radius: bpy.props.FloatProperty(name="Radius", default=1, min=0, precision=3)
+	height: bpy.props.FloatProperty(name="Height", default=1, min=0, precision=3)
+	offset_position: bpy.props.FloatVectorProperty(name="Position Offset", size=3, default=(0, 0, 0), subtype="XYZ", precision=3)
+	offset_rotation: bpy.props.FloatVectorProperty(name="Rotation Offset", size=3, default=(0, 0, 0), subtype="EULER", precision=3)
+	filter_avatar: bpy.props.BoolProperty(name="Avatar", default=False, options=set())
+	filter_world: bpy.props.BoolProperty(name="World", default=False, options=set())
+	local_only: bpy.props.BoolProperty(name="Local Only", default=False, options=set())
+	collision_tags: bpy.props.CollectionProperty(name="Collision Tags", type=CollisionTag, options=set())
 
 
 def vrc_contact_draw_base(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_resource: Any, component: VRC_ContactBase, blender_property_name: str):

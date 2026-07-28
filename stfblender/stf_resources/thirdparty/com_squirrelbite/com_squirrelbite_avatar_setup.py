@@ -13,37 +13,37 @@ _blender_property_name = "com_squirrelbite_avatar_setup"
 
 
 class Toggle(bpy.types.PropertyGroup):
-	animation_on: bpy.props.PointerProperty(name="On", type=bpy.types.Action, options=set(), poll=poll_valid_animations) # type: ignore
-	animation_off: bpy.props.PointerProperty(name="Off", type=bpy.types.Action, options=set(), poll=poll_valid_animations) # type: ignore
+	animation_on: bpy.props.PointerProperty(name="On", type=bpy.types.Action, options=set(), poll=poll_valid_animations)
+	animation_off: bpy.props.PointerProperty(name="Off", type=bpy.types.Action, options=set(), poll=poll_valid_animations)
 
 
 class GrabToggle(bpy.types.PropertyGroup):
-	toggle: bpy.props.PointerProperty(name="Toggle", type=Toggle, options=set()) # type: ignore
-	grab_collider: bpy.props.PointerProperty(name="Contact", type=NodePathComponentSelector, options=set()) # type: ignore
-	hand_filter: bpy.props.EnumProperty(name="Filter Hands", items=(("left", "Left", ""), ("right", "Right", "")), default="right", options=set()) # type: ignore
+	toggle: bpy.props.PointerProperty(name="Toggle", type=Toggle, options=set())
+	grab_collider: bpy.props.PointerProperty(name="Contact", type=NodePathComponentSelector, options=set())
+	hand_filter: bpy.props.EnumProperty(name="Filter Hands", items=(("left", "Left", ""), ("right", "Right", "")), default="right", options=set())
 
 
 class PersistentPuppet(bpy.types.PropertyGroup):
-	type: bpy.props.EnumProperty(name="Type", items=(("1d", "1D", ""), ("2d", "2D", ""))) # type: ignore
-	property_enabled: bpy.props.StringProperty(name="Enabled Property", options=set()) # type: ignore
-	property_x: bpy.props.StringProperty(name="Value Property", options=set()) # type: ignore
-	property_y: bpy.props.StringProperty(name="Value Property", options=set()) # type: ignore
-	blendtree: bpy.props.PointerProperty(type=STFDataResourceReference, options=set()) # type: ignore
+	type: bpy.props.EnumProperty(name="Type", items=(("1d", "1D", ""), ("2d", "2D", "")))
+	property_enabled: bpy.props.StringProperty(name="Enabled Property", options=set())
+	property_x: bpy.props.StringProperty(name="Value Property", options=set())
+	property_y: bpy.props.StringProperty(name="Value Property", options=set())
+	blendtree: bpy.props.PointerProperty(type=STFDataResourceReference, options=set())
 
 
 class Squirrelbite_Avatar_Setup(STF_ComponentResourceBase):
-	toggles_pre: bpy.props.CollectionProperty(name="Overridable Toggles", type=Toggle, options=set()) # type: ignore
-	puppets_pre: bpy.props.CollectionProperty(name="Persistent Puppets", type=PersistentPuppet, options=set()) # type: ignore
+	toggles_pre: bpy.props.CollectionProperty(name="Overridable Toggles", type=Toggle, options=set())
+	puppets_pre: bpy.props.CollectionProperty(name="Persistent Puppets", type=PersistentPuppet, options=set())
 
-	puppets: bpy.props.CollectionProperty(name="Puppets", type=STFDataResourceReference, options=set()) # type: ignore
-	toggles: bpy.props.CollectionProperty(name="Toggles", type=Toggle, options=set()) # type: ignore
-	grab_toggles: bpy.props.CollectionProperty(name="Grab Toggles", type=GrabToggle, options=set()) # type: ignore
+	puppets: bpy.props.CollectionProperty(name="Puppets", type=STFDataResourceReference, options=set())
+	toggles: bpy.props.CollectionProperty(name="Toggles", type=Toggle, options=set())
+	grab_toggles: bpy.props.CollectionProperty(name="Grab Toggles", type=GrabToggle, options=set())
 
-	breathing_normal: bpy.props.PointerProperty(name="Breathing Normal Animation", type=bpy.types.Action, options=set(), poll=poll_valid_animations) # type: ignore
-	breathing_intense: bpy.props.PointerProperty(name="Breathing Intense Animation", type=bpy.types.Action, options=set(), poll=poll_valid_animations) # type: ignore
+	breathing_normal: bpy.props.PointerProperty(name="Breathing Normal Animation", type=bpy.types.Action, options=set(), poll=poll_valid_animations)
+	breathing_intense: bpy.props.PointerProperty(name="Breathing Intense Animation", type=bpy.types.Action, options=set(), poll=poll_valid_animations)
 
-	additive_excited: bpy.props.PointerProperty(name="Additive Excited Animation", type=bpy.types.Action, options=set(), poll=poll_valid_animations) # type: ignore
-	additive_idle: bpy.props.PointerProperty(name="Additive Idle Animation", type=bpy.types.Action, options=set(), poll=poll_valid_animations) # type: ignore
+	additive_excited: bpy.props.PointerProperty(name="Additive Excited Animation", type=bpy.types.Action, options=set(), poll=poll_valid_animations)
+	additive_idle: bpy.props.PointerProperty(name="Additive Idle Animation", type=bpy.types.Action, options=set(), poll=poll_valid_animations)
 
 
 def _draw_func_toggle(layout: bpy.types.UILayout, element: Any) -> bpy.types.UILayout:

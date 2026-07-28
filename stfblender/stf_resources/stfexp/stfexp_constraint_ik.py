@@ -15,9 +15,9 @@ _blender_property_name = "stfexp_constraint_ik"
 
 
 class STFEXP_Constraint_IK(STF_ComponentResourceBase):
-	chain_length: bpy.props.IntProperty(name="Chain Length", default=2, min=1, options=set()) # type: ignore
-	target: bpy.props.PointerProperty(name="Target", type=NodePathSelector, options=set()) # type: ignore
-	pole: bpy.props.PointerProperty(name="Pole", type=NodePathSelector, options=set()) # type: ignore
+	chain_length: bpy.props.IntProperty(name="Chain Length", default=2, min=1, options=set())
+	target: bpy.props.PointerProperty(name="Target", type=NodePathSelector, options=set())
+	pole: bpy.props.PointerProperty(name="Pole", type=NodePathSelector, options=set())
 
 
 def _apply_functionality(component: STFEXP_Constraint_IK, context_object: bpy.types.Bone, target_object: bpy.types.Object):
@@ -78,7 +78,7 @@ class ParseFromCurrentArmatureInstance(bpy.types.Operator):
 	bl_label = "Parse from Armature Instance"
 	bl_options = {"REGISTER", "UNDO"}
 
-	component_id: bpy.props.StringProperty() # type: ignore
+	component_id: bpy.props.StringProperty()
 
 	@classmethod
 	def poll(cls, context: bpy.types.Context) -> bool: return context.object is not None and type(context.object.data) is bpy.types.Armature and context.bone  # pyright: ignore[reportReturnType]
@@ -121,7 +121,7 @@ class ApplyToCurrentArmatureInstance(bpy.types.Operator):
 	bl_label = "Apply to Armature Instance"
 	bl_options = {"REGISTER", "UNDO"}
 
-	component_id: bpy.props.StringProperty() # type: ignore
+	component_id: bpy.props.StringProperty()
 
 	@classmethod
 	def poll(cls, context: bpy.types.Context) -> bool: return context.object is not None and type(context.object.data) is bpy.types.Armature and context.bone  # pyright: ignore[reportReturnType]

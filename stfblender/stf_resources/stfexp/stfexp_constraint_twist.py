@@ -14,8 +14,8 @@ _blender_property_name = "stfexp_constraint_twist"
 
 
 class STFEXP_Constraint_Twist(STF_ComponentResourceBase):
-	weight: bpy.props.FloatProperty(name="Weight", default=0.5) # type: ignore
-	source: bpy.props.PointerProperty(name="Source", type=NodePathSelector) # type: ignore
+	weight: bpy.props.FloatProperty(name="Weight", default=0.5)
+	source: bpy.props.PointerProperty(name="Source", type=NodePathSelector)
 
 
 def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_resource: Any, component: STFEXP_Constraint_Twist):

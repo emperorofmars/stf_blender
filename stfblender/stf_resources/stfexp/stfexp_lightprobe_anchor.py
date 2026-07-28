@@ -8,8 +8,8 @@ from ....stfblender_common.helpers import register_exported_resource
 
 
 class STFEXP_LightprobeAnchor(STF_ComponentResourceBase):
-	anchor_object: bpy.props.PointerProperty(type=bpy.types.Object, name="Anchor Object", options=set()) # type: ignore
-	anchor_bone: bpy.props.StringProperty(name="Anchor Bone", options=set()) # type: ignore
+	anchor_object: bpy.props.PointerProperty(type=bpy.types.Object, name="Anchor Object", options=set())
+	anchor_bone: bpy.props.StringProperty(name="Anchor Bone", options=set())
 
 
 class Handler_STFEXP_LightprobeAnchor(STF_Handler_Component):

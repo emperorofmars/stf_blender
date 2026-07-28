@@ -20,7 +20,7 @@ def _get_component_holder(component_ref: STF_Component_Ref) -> bpy.types.bpy_str
 
 class STFDrawComponentList:
 	"""List of STF components"""
-	sort_reverse: bpy.props.BoolProperty(default=False, name="Reverse") # type: ignore
+	sort_reverse: bpy.props.BoolProperty(default=False, name="Reverse")
 	sort_by: bpy.props.EnumProperty(items=[("original", "Added Order", "", "SORTSIZE", 0),("stf_type", "Component Type", "", "GROUP", 1),("stf_name", "Name", "", "FILE_TEXT", 2)], name="Sort by")# type: ignore
 	filter_name: bpy.props.StringProperty(name="Filter Name")# type: ignore
 	filter_type: bpy.props.StringProperty(name="Filter Type")# type: ignore
@@ -111,7 +111,7 @@ class STFDrawInstanceComponentList(bpy.types.UIList):
 	"""List of STF component instances"""
 	bl_idname = "COLLECTION_UL_stf_instance_component_list"
 
-	sort_reverse: bpy.props.BoolProperty(default=False, name="Reverse") # type: ignore
+	sort_reverse: bpy.props.BoolProperty(default=False, name="Reverse")
 	sort_by: bpy.props.EnumProperty(items=[("bone", "Bone", "", "BONE_DATA", 0),("stf_type", "Component Type", "", "GROUP", 1)], name="Sort by")# type: ignore
 	filter_bone: bpy.props.StringProperty(name="Filter Bone")# type: ignore
 	filter_type: bpy.props.StringProperty(name="Filter Type")# type: ignore
@@ -237,7 +237,7 @@ def draw_component(
 			selected_module.draw_instance(box, context, component_ref, stf_application_object, component)
 		elif(not is_instance and hasattr(selected_module, "draw")):
 			box.separator(factor=1, type="LINE")
-			selected_module.draw(box, context, component_ref, stf_application_object, component)
+			selected_module.draw(box, context, component_ref, stf_application_object, component) # pyright: ignore[reportArgumentType]
 		else:
 			pass
 	else:

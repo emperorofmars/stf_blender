@@ -7,21 +7,21 @@ __all__ = ["STF_KV", "STF_Meta", "draw_meta_editor"]
 
 
 class STF_KV(bpy.types.PropertyGroup):
-	name: bpy.props.StringProperty(name="Name", options=set()) # type: ignore
-	value: bpy.props.StringProperty(name="Value", options=set()) # type: ignore
+	name: bpy.props.StringProperty(name="Name", options=set())
+	value: bpy.props.StringProperty(name="Value", options=set())
 
 
 class STF_Meta(bpy.types.PropertyGroup):
 	"""Meta-Information about the STF asset"""
-	asset_name: bpy.props.StringProperty(name="Asset Name", options=set()) # type: ignore
-	version: bpy.props.StringProperty(name="Version", options=set()) # type: ignore
-	url: bpy.props.StringProperty(name="Asset URL", options=set()) # type: ignore
-	author: bpy.props.StringProperty(name="Author(s)", options=set()) # type: ignore
-	license: bpy.props.StringProperty(name="License", options=set()) # type: ignore
-	license_url: bpy.props.StringProperty(name="License URL", options=set()) # type: ignore
-	documentation_url: bpy.props.StringProperty(name="Documentation URL", options=set()) # type: ignore
+	asset_name: bpy.props.StringProperty(name="Asset Name", options=set())
+	version: bpy.props.StringProperty(name="Version", options=set())
+	url: bpy.props.StringProperty(name="Asset URL", options=set())
+	author: bpy.props.StringProperty(name="Author(s)", options=set())
+	license: bpy.props.StringProperty(name="License", options=set())
+	license_url: bpy.props.StringProperty(name="License URL", options=set())
+	documentation_url: bpy.props.StringProperty(name="Documentation URL", options=set())
 
-	custom_properties: bpy.props.CollectionProperty(type=STF_KV, name="Type", options=set()) # type: ignore
+	custom_properties: bpy.props.CollectionProperty(type=STF_KV, name="Type", options=set())
 
 	def to_stf_meta_assetInfo(self) -> tuple[STF_Meta_AssetInfo_Json, STF_Meta_AssetProperties_Json]:
 		ret_meta = STF_Meta_AssetInfo_Json()
@@ -90,7 +90,7 @@ class STFRemoveMetaPropertyCollection(bpy.types.Operator):
 	bl_label = "Remove"
 	bl_options = {"REGISTER", "UNDO"}
 
-	index: bpy.props.IntProperty(name="Index") # type: ignore
+	index: bpy.props.IntProperty(name="Index")
 
 	@classmethod
 	def poll(cls, context: bpy.types.Context): return context.collection is not None
@@ -106,7 +106,7 @@ class STFRemoveMetaPropertyScene(bpy.types.Operator):
 	bl_label = "Remove"
 	bl_options = {"REGISTER", "UNDO"}
 
-	index: bpy.props.IntProperty(name="Index") # type: ignore
+	index: bpy.props.IntProperty(name="Index")
 
 	@classmethod
 	def poll(cls, context: bpy.types.Context): return context.scene is not None and context.scene.collection is not None
@@ -147,8 +147,8 @@ def draw_meta_editor(layout: bpy.types.UILayout, collection: bpy.types.Collectio
 
 
 def register():
-	bpy.types.Scene.stf_root_collection = bpy.props.PointerProperty(type=bpy.types.Collection, name="Root Collection", options=set()) # type: ignore
-	bpy.types.Collection.stf_meta = bpy.props.PointerProperty(type=STF_Meta, name="STF Meta", options=set()) # type: ignore
+	bpy.types.Scene.stf_root_collection = bpy.props.PointerProperty(type=bpy.types.Collection, name="Root Collection", options=set())
+	bpy.types.Collection.stf_meta = bpy.props.PointerProperty(type=STF_Meta, name="STF Meta", options=set())
 
 def unregister():
 	if hasattr(bpy.types.Scene, "stf_root_collection"):

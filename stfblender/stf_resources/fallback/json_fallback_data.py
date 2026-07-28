@@ -12,11 +12,11 @@ _blender_property_name = "stf_json_fallback_data"
 
 
 class JsonFallbackData(STF_DataResourceBase):
-	json: bpy.props.StringProperty(name="Raw Json") # type: ignore
-	referenced_resources: bpy.props.CollectionProperty(type=BlenderGRR, name="Referenced Resources", options=set()) # type: ignore
-	active_referenced_resource: bpy.props.IntProperty() # type: ignore
-	buffers: bpy.props.CollectionProperty(type=STF_FallbackBuffer, name="Buffers", options=set()) # type: ignore
-	active_buffer: bpy.props.IntProperty() # type: ignore
+	json: bpy.props.StringProperty(name="Raw Json")
+	referenced_resources: bpy.props.CollectionProperty(type=BlenderGRR, name="Referenced Resources", options=set())
+	active_referenced_resource: bpy.props.IntProperty()
+	buffers: bpy.props.CollectionProperty(type=STF_FallbackBuffer, name="Buffers", options=set())
+	active_buffer: bpy.props.IntProperty()
 
 
 class Handler_JsonFallbackData(STF_Handler_Data):

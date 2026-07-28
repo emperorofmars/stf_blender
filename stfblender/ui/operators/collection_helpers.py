@@ -7,14 +7,14 @@ class Edit_Component_Collection(bpy.types.Operator):
 	bl_label = "Edit"
 	bl_options = {"REGISTER", "UNDO", "INTERNAL"}
 
-	scene_collection: bpy.props.BoolProperty(default=False) # type: ignore
-	blender_id_type: bpy.props.StringProperty() # type: ignore
-	blender_property_name: bpy.props.StringProperty() # type: ignore
-	component_id: bpy.props.StringProperty() # type: ignore
+	scene_collection: bpy.props.BoolProperty(default=False)
+	blender_id_type: bpy.props.StringProperty()
+	blender_property_name: bpy.props.StringProperty()
+	component_id: bpy.props.StringProperty()
 
-	op: bpy.props.StringProperty() # type: ignore
-	component_property: bpy.props.StringProperty() # type: ignore
-	index: bpy.props.IntProperty() # type: ignore
+	op: bpy.props.StringProperty()
+	component_property: bpy.props.StringProperty()
+	index: bpy.props.IntProperty()
 
 	def invoke(self, context: bpy.types.Context, event) -> set:
 		if(self.op == "remove"):

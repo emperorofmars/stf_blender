@@ -162,7 +162,7 @@ class Handler_STF_Node(STF_Handler_BlenderNative, STF_Handler_ComponentHolder, S
 
 def register():
 	boilerplate_register(bpy.types.Object)
-	bpy.types.Object.stf_instance = bpy.props.PointerProperty(type=STF_Instance, options=set()) # type: ignore
+	bpy.types.Object.stf_instance = bpy.props.PointerProperty(type=STF_Instance, options=set())
 
 def unregister():
 	if hasattr(bpy.types.Object, "stf_instance"):

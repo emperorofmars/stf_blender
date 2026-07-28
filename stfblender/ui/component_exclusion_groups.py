@@ -5,7 +5,7 @@ __all__ = ["STF_ExclusionGroups", "STF_RegisterExclusionGroup", "STF_RemoveExclu
 
 
 class STF_ExclusionGroups(bpy.types.PropertyGroup):
-	group_name: bpy.props.StringProperty(name="Group Name", options=set()) # type: ignore
+	group_name: bpy.props.StringProperty(name="Group Name", options=set())
 
 class STF_RegisterExclusionGroup(bpy.types.Operator):
 	"""Register new Exclusion Group to make it selectable globally"""
@@ -13,7 +13,7 @@ class STF_RegisterExclusionGroup(bpy.types.Operator):
 	bl_label = "Register new Exclusion Group"
 	bl_options = {"REGISTER", "UNDO"}
 
-	group_name: bpy.props.StringProperty(name="Group Name") # type: ignore
+	group_name: bpy.props.StringProperty(name="Group Name")
 
 	@classmethod
 	def poll(cls, context): return context.collection is not None
@@ -37,7 +37,7 @@ class STF_RemoveExclusionGroup(bpy.types.Operator):
 	bl_label = "Remove"
 	bl_options = {"REGISTER", "UNDO"}
 
-	group_name: bpy.props.StringProperty(name="Group Name") # type: ignore
+	group_name: bpy.props.StringProperty(name="Group Name")
 
 	@classmethod
 	def poll(cls, context): return context.collection is not None
@@ -54,7 +54,7 @@ class STF_ManageExclusionGroups(bpy.types.Operator):
 	bl_label = "Manage Exclusion-Groups"
 	bl_options = {"REGISTER", "UNDO", "INTERNAL"}
 
-	initial_groups: bpy.props.CollectionProperty(type=STF_ExclusionGroups, name="Exclusion Groups", options=set()) # type: ignore
+	initial_groups: bpy.props.CollectionProperty(type=STF_ExclusionGroups, name="Exclusion Groups", options=set())
 
 	@classmethod
 	def poll(cls, context): return context.collection is not None

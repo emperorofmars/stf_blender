@@ -11,11 +11,11 @@ from .stf_animation_ops import STFAddAnimationComponentOperator, STFEditAnimatio
 
 
 class STF_Animation(bpy.types.PropertyGroup):
-	exclude: bpy.props.BoolProperty(name="Exclude from STF export", default=False, options=set()) # type: ignore
-	fps_override: bpy.props.BoolProperty(name="FPS Override", default=False, options=set()) # type: ignore
-	fps: bpy.props.FloatProperty(name="FPS", default=30, options=set()) # type: ignore
-	is_baked_from: bpy.props.PointerProperty(name="Is Baked From", type=bpy.types.Action) # type: ignore
-	constraint_bake: bpy.props.EnumProperty(name="Constraint-Baking", items=(("auto", "Automatic", ""), ("bake", "Bake", ""), ("nobake", "Don't Bake", "")), default="auto") # type: ignore
+	exclude: bpy.props.BoolProperty(name="Exclude from STF export", default=False, options=set())
+	fps_override: bpy.props.BoolProperty(name="FPS Override", default=False, options=set())
+	fps: bpy.props.FloatProperty(name="FPS", default=30, options=set())
+	is_baked_from: bpy.props.PointerProperty(name="Is Baked From", type=bpy.types.Action)
+	constraint_bake: bpy.props.EnumProperty(name="Constraint-Baking", items=(("auto", "Automatic", ""), ("bake", "Bake", ""), ("nobake", "Don't Bake", "")), default="auto")
 
 
 class Handler_STF_Animation(STF_Handler_BlenderNative, STF_Handler_ComponentHolder):

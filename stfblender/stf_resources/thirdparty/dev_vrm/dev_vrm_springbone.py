@@ -15,18 +15,18 @@ _blender_property_name = "dev_vrm_springbone"
 
 
 class VRM_Springbone(STF_ComponentResourceBase):
-	stiffness: bpy.props.FloatProperty(default=1, min=0, soft_max=4, precision=2, name="Stiffness Force", description="The resilience of the swaying object (the power of returning to the initial pose)") # type: ignore
-	gravityPower: bpy.props.FloatProperty(min=0, soft_max=1, precision=2, name="Gravity Power", description="The strength of gravity") # type: ignore
-	gravityDir: bpy.props.FloatVectorProperty(default=(0, 0, -1), subtype="XYZ", soft_min=-1, soft_max=1, precision=2, name="Gravity Direction", description="The direction of gravity. Set (0, 0, -1) for simulating the gravity. Set (1, 0, 0) for simulating the wind") # type: ignore
-	dragForce: bpy.props.FloatProperty(default=0.4, min=0, max=1, precision=2, name="Drag Force", description="The resistance (deceleration) of automatic animation") # type: ignore
-	center: bpy.props.PointerProperty(type=NodePathSelector, name="Center", description="The reference point of a swaying object can be set at any location except the origin. When implementing UI moving with warp, the parent node to move with warp can be specified if you don't want to make the object swaying with warp movement") # type: ignore
-	hitRadius: bpy.props.FloatProperty(default=0.02, min=0, soft_max=10, precision=2, unit="LENGTH", name="Hit Radius", description="The radius of the sphere used for the collision detection with colliders") # type: ignore
-	colliders: bpy.props.CollectionProperty(type=NodePathComponentSelector, name="Colliders", description="Specify the of the collider components for collisions with swaying objects", options=set()) # type: ignore
+	stiffness: bpy.props.FloatProperty(default=1, min=0, soft_max=4, precision=2, name="Stiffness Force", description="The resilience of the swaying object (the power of returning to the initial pose)")
+	gravityPower: bpy.props.FloatProperty(min=0, soft_max=1, precision=2, name="Gravity Power", description="The strength of gravity")
+	gravityDir: bpy.props.FloatVectorProperty(default=(0, 0, -1), subtype="XYZ", soft_min=-1, soft_max=1, precision=2, name="Gravity Direction", description="The direction of gravity. Set (0, 0, -1) for simulating the gravity. Set (1, 0, 0) for simulating the wind")
+	dragForce: bpy.props.FloatProperty(default=0.4, min=0, max=1, precision=2, name="Drag Force", description="The resistance (deceleration) of automatic animation")
+	center: bpy.props.PointerProperty(type=NodePathSelector, name="Center", description="The reference point of a swaying object can be set at any location except the origin. When implementing UI moving with warp, the parent node to move with warp can be specified if you don't want to make the object swaying with warp movement")
+	hitRadius: bpy.props.FloatProperty(default=0.02, min=0, soft_max=10, precision=2, unit="LENGTH", name="Hit Radius", description="The radius of the sphere used for the collision detection with colliders")
+	colliders: bpy.props.CollectionProperty(type=NodePathComponentSelector, name="Colliders", description="Specify the of the collider components for collisions with swaying objects", options=set())
 
 
 class VRM_Springbone_LoadJsonOperator(ComponentLoadJsonOperatorBase, bpy.types.Operator):
 	bl_idname = "stf.dev_vrm_springbone_loadjson"
-	blender_bone: bpy.props.BoolProperty() # type: ignore
+	blender_bone: bpy.props.BoolProperty()
 
 	def get_property(self, context) -> Any:
 		if(not self.blender_bone):

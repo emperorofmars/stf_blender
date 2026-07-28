@@ -5,8 +5,8 @@ from ....stfblender_common import STF_ExportContext, STF_ImportContext
 
 
 class STF_FallbackBuffer(bpy.types.PropertyGroup):
-	stf_id: bpy.props.StringProperty(name="ID", options=set()) # type: ignore
-	buffer_base64: bpy.props.StringProperty(name="Base64 Buffer", options=set()) # type: ignore
+	stf_id: bpy.props.StringProperty(name="ID", options=set())
+	buffer_base64: bpy.props.StringProperty(name="Base64 Buffer", options=set())
 
 
 def encode_buffer(context: STF_ImportContext, buffer_id: str, stf_fallback: bpy.types.CollectionProperty):

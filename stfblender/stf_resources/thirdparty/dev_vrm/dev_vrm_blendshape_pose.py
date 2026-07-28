@@ -14,11 +14,11 @@ class Edit_VRM_Blendshape_Pose_Target(bpy.types.Operator):
 	bl_label = "Edit"
 	bl_options = {"REGISTER", "UNDO"}
 
-	use_scene_collection: bpy.props.BoolProperty(default=False) # type: ignore
-	resource_id: bpy.props.StringProperty() # type: ignore
+	use_scene_collection: bpy.props.BoolProperty(default=False)
+	resource_id: bpy.props.StringProperty()
 
-	op: bpy.props.BoolProperty() # type: ignore
-	index: bpy.props.IntProperty() # type: ignore
+	op: bpy.props.BoolProperty()
+	index: bpy.props.IntProperty()
 
 	def execute(self, context) -> set:
 		collection = context.scene.collection if self.use_scene_collection else context.collection
@@ -41,12 +41,12 @@ class Edit_VRM_Blendshape_Pose_Value(bpy.types.Operator):
 	bl_label = "Edit"
 	bl_options = {"REGISTER", "UNDO"}
 
-	use_scene_collection: bpy.props.BoolProperty(default=False) # type: ignore
-	resource_id: bpy.props.StringProperty() # type: ignore
-	target_index: bpy.props.IntProperty() # type: ignore
+	use_scene_collection: bpy.props.BoolProperty(default=False)
+	resource_id: bpy.props.StringProperty()
+	target_index: bpy.props.IntProperty()
 
-	op: bpy.props.BoolProperty() # type: ignore
-	index: bpy.props.IntProperty() # type: ignore
+	op: bpy.props.BoolProperty()
+	index: bpy.props.IntProperty()
 
 	def execute(self, context) -> set:
 		collection = context.scene.collection if self.use_scene_collection else context.collection
@@ -66,15 +66,15 @@ class Edit_VRM_Blendshape_Pose_Value(bpy.types.Operator):
 
 
 class VRM_Blendshape_Pose_Value(bpy.types.PropertyGroup):
-	blendshape_name: bpy.props.StringProperty(name="Name", options=set()) # type: ignore
-	blendshape_value: bpy.props.FloatProperty(name="Value", default=0, soft_min=0, soft_max=1, subtype="FACTOR", options=set()) # type: ignore
+	blendshape_name: bpy.props.StringProperty(name="Name", options=set())
+	blendshape_value: bpy.props.FloatProperty(name="Value", default=0, soft_min=0, soft_max=1, subtype="FACTOR", options=set())
 
 class VRM_Blendshape_Pose_Target(bpy.types.PropertyGroup):
-	mesh_instance: bpy.props.PointerProperty(type=bpy.types.Object, name="Meshinstance", poll=lambda _, o: o.data and type(o.data) is bpy.types.Mesh, options=set()) # type: ignore
-	values: bpy.props.CollectionProperty(type=VRM_Blendshape_Pose_Value, options=set()) # type: ignore
+	mesh_instance: bpy.props.PointerProperty(type=bpy.types.Object, name="Meshinstance", poll=lambda _, o: o.data and type(o.data) is bpy.types.Mesh, options=set())
+	values: bpy.props.CollectionProperty(type=VRM_Blendshape_Pose_Value, options=set())
 
 class VRM_Blendshape_Pose(STF_DataResourceBase):
-	targets: bpy.props.CollectionProperty(type=VRM_Blendshape_Pose_Target, options=set()) # type: ignore
+	targets: bpy.props.CollectionProperty(type=VRM_Blendshape_Pose_Target, options=set())
 
 
 class Handler_VRM_Blendshape_Pose(STF_Handler_Data):

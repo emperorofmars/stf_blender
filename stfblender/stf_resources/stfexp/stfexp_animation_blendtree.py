@@ -6,12 +6,12 @@ from ....stfblender_common.helpers import draw_list, poll_valid_animations
 
 
 class BlendtreeAnimationMapping(bpy.types.PropertyGroup):
-	position: bpy.props.FloatVectorProperty(name="Position", size=2, default=(0, 0), soft_min=-1, soft_max=1, options=set(), subtype="XYZ") # type: ignore
-	animation: bpy.props.PointerProperty(name="Animation", type=bpy.types.Action, options=set(), poll=poll_valid_animations) # type: ignore
+	position: bpy.props.FloatVectorProperty(name="Position", size=2, default=(0, 0), soft_min=-1, soft_max=1, options=set(), subtype="XYZ")
+	animation: bpy.props.PointerProperty(name="Animation", type=bpy.types.Action, options=set(), poll=poll_valid_animations)
 
 class STFEXP_Animation_Blendtree(STF_DataResourceBase):
-	type: bpy.props.EnumProperty(name="Type", items=(("1d", "1D", ""), ("2d", "2D", ""))) # type: ignore
-	animations: bpy.props.CollectionProperty(type=BlendtreeAnimationMapping, options=set()) # type: ignore
+	type: bpy.props.EnumProperty(name="Type", items=(("1d", "1D", ""), ("2d", "2D", "")))
+	animations: bpy.props.CollectionProperty(type=BlendtreeAnimationMapping, options=set())
 
 
 def _draw_func_animation2d(layout: bpy.types.UILayout, element: Any) -> bpy.types.UILayout:
