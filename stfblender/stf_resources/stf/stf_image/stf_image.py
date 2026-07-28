@@ -89,7 +89,7 @@ class Handler_STF_Image(STF_Handler_BlenderNative, STF_Handler_ComponentHolder):
 
 			return ret, blender_image.stf_info.stf_id
 		except Exception as error:
-			return STFReport("Could not export image: " + str(blender_image.filepath), STFReportSeverity.Error, blender_image.stf_info.stf_id, cls.stf_type, blender_image)
+			return STFReport("Could not export image: " + str(blender_image.filepath), STFReportSeverity.Warn, blender_image.stf_info.stf_id, cls.stf_type, blender_image)
 
 	get_components = get_components_from_object
 	operator_component_add = STFAddImageComponentOperator.bl_idname
