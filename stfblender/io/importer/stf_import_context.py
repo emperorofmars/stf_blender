@@ -31,40 +31,40 @@ class STF_ImportContext(ISTF_ImportContext):
 	def get_imported_resource(self, stf_id: str) -> Any | None:
 		return self._state.get_imported_resource(stf_id)
 
-	def register_imported_resource(self, stf_id: str, application_object: Any):
-		self._state.register_imported_resource(stf_id, application_object)
+	def register_imported_resource(self, stf_id: str, blender_resource: Any):
+		self._state.register_imported_resource(stf_id, blender_resource)
 
 
-	def __run_components(self, json_resource: dict, application_object: Any):
+	def __run_components(self, json_resource: dict, blender_resource: Any):
 		if("components" in json_resource):
 			for component_id in json_resource["components"]:
 				if(json_component := self.get_json_resource(component_id)):
 					if(component_handler := self._state.determine_handler(json_component, STF_Category.COMPONENT)):
-						component_result = component_handler.import_resource(self, json_component, component_id, application_object)
+						component_result = component_handler.import_resource(self, json_component, component_id, blender_resource)
 						if(component_result and type(component_result) is not STFReport):
 							application_component_object: Any = component_result
-							self.register_imported_resource(component_id, STF_Component_Editmode_Resistant_Reference(application_component_object, application_object))
+							self.register_imported_resource(component_id, STF_Component_Editmode_Resistant_Reference(application_component_object, blender_resource))
 						else:
 							_logger.error("Component import error", stack_info=True)
 							if(type(component_result) is STFReport):
 								self.report(component_result)
 							else:
-								self.report(STFReport("Component import error", STFReportSeverity.Error, component_id, json_component.get("type"), application_object))
+								self.report(STFReport("Component import error", STFReportSeverity.Error, component_id, json_component.get("type"), blender_resource))
 					else:
 						self.report(STFReport("No STF_Module registered for component", STFReportSeverity.Warn, component_id, json_component.get("type")))
 				else:
 					self.report(STFReport("Invalid JSON resource", STFReportSeverity.FatalError, component_id))
 
 
-	def import_resource(self, json_parent: dict, resource_index: int, context_object: Any = None, stf_category: STF_Category | str = STF_Category.DATA) -> Any | None:
+	def import_resource(self, json_parent: dict, resource_index: int, context_resource: Any = None, stf_category: STF_Category | str = STF_Category.DATA) -> Any | None:
 		if(type(resource_index) is str): # todo remove this possibility sometime after stf v0.1.x
-			return self._import_resource(resource_index, context_object, stf_category)
+			return self._import_resource(resource_index, context_resource, stf_category)
 		if(resource_index is None or "referenced_resources" not in json_parent or len(json_parent["referenced_resources"]) < resource_index):
 			return None
 		else:
-			return self._import_resource(json_parent["referenced_resources"][resource_index], context_object, stf_category)
+			return self._import_resource(json_parent["referenced_resources"][resource_index], context_resource, stf_category)
 
-	def _import_resource(self, stf_id: str, context_object: Any = None, stf_category: str | None = STF_Category.DATA) -> Any | None:
+	def _import_resource(self, stf_id: str, context_resource: Any = None, stf_category: STF_Category | str = STF_Category.DATA) -> Any | None:
 		if(stf_id in self._state._imported_resources):
 			if(type(self._state._imported_resources[stf_id]) is STF_Component_Editmode_Resistant_Reference):
 				return self._state._imported_resources[stf_id].get()
@@ -74,10 +74,10 @@ class STF_ImportContext(ISTF_ImportContext):
 		json_resource = self.get_json_resource(stf_id)
 		if(not json_resource or type(json_resource) is not dict or "type" not in json_resource):
 			_logger.fatal("Invalid JSON resource", stack_info=True)
-			self.report(STFReport("Invalid JSON resource", STFReportSeverity.FatalError, stf_id, application_object=context_object))
+			self.report(STFReport("Invalid JSON resource", STFReportSeverity.FatalError, stf_id, application_object=context_resource))
 
 		if(handler := self._state.determine_handler(json_resource, stf_category)): # pyright: ignore[reportArgumentType]
-			application_object = handler.import_resource(self, json_resource, stf_id, context_object) # pyright: ignore[reportArgumentType]
+			application_object = handler.import_resource(self, json_resource, stf_id, context_resource) # pyright: ignore[reportArgumentType]
 			if(application_object and type(application_object) is not STFReport):
 				self.register_imported_resource(stf_id, application_object)
 				self.__run_components(json_resource, handler.get_components_holder(application_object) if hasattr(handler, "get_components_holder") else application_object) # pyright: ignore[reportArgumentType]

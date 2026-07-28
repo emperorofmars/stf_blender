@@ -102,7 +102,7 @@ def __convert(context: STF_ExportContext, blender_animation: bpy.types.Action, a
 							fcurve.update() # pyright: ignore[reportPossiblyUnboundVariable]
 
 							# See if this data_path can be exported
-							property_translation = context.resolve_application_property_path(selected_slot_link.target, selected_slot_link.datablock_index, data_path)
+							property_translation = context.resolve_blender_property_path(selected_slot_link.target, selected_slot_link.datablock_index, data_path)
 							if(not property_translation):
 								context.report(STFReport("Could not convert animated property", STFReportSeverity.Debug, blender_animation.stf_info.stf_id, _stf_type, blender_animation))
 								continue

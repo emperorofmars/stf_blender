@@ -183,7 +183,7 @@ class Handler_STF_Instance_Armature(STF_Handler_BlenderNative, STF_Handler_Anima
 		if(match := re.search(r"^pose.bones\[\"(?P<bone_name>[\w. -:,]+)\"\]", blender_property_path)):
 			if(type(blender_resource.data) is not bpy.types.Armature or match.groupdict()["bone_name"] not in blender_resource.data.bones):
 				return None
-			return STFPropertyPathPart([blender_resource.stf_info.stf_id, "instance"]) + context.resolve_application_property_path(ArmatureBone(blender_resource.data, match.groupdict()["bone_name"]), property_index, blender_property_path[match.span()[1] :])
+			return STFPropertyPathPart([blender_resource.stf_info.stf_id, "instance"]) + context.resolve_blender_property_path(ArmatureBone(blender_resource.data, match.groupdict()["bone_name"]), property_index, blender_property_path[match.span()[1] :])
 		return None
 
 	@classmethod

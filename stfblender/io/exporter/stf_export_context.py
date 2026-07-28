@@ -130,7 +130,7 @@ class STF_ExportContext(ISTF_ExportContext):
 		return self._state.serialize_buffer(data, buffer_id)
 
 
-	def resolve_application_property_path(self, blender_object: Any, property_index: int, data_path: str) -> STFPropertyPathPart | None:
+	def resolve_blender_property_path(self, blender_object: Any, property_index: int, data_path: str) -> STFPropertyPathPart | None:
 		if(blender_object is None): return None
 		if(type(blender_object) is bpy.types.Object and not self.get_resource_id(blender_object)):
 			return None

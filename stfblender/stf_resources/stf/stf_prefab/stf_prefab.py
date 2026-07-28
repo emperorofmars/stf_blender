@@ -21,11 +21,11 @@ class Handler_STF_Prefab(STF_Handler_BlenderNative, STF_Handler_ComponentHolder)
 		context.set_root_collection(collection)
 
 		for node_id in json_resource.get("root_nodes", []):
-			context.import_resource(json_resource, node_id, context_object=collection, stf_category=STF_Category.NODE)
+			context.import_resource(json_resource, node_id, collection, STF_Category.NODE)
 
 		def _handle_animations():
 			for animation_id in json_resource.get("animations", []):
-				context.import_resource(json_resource, animation_id, context_object=collection, stf_category=STF_Category.DATA)
+				context.import_resource(json_resource, animation_id, collection, STF_Category.DATA)
 		context.add_task(STF_TaskSteps.ANIMATION, _handle_animations)
 
 		return collection
@@ -46,11 +46,11 @@ class Handler_STF_Prefab(STF_Handler_BlenderNative, STF_Handler_ComponentHolder)
 
 		for blender_resource in collection.all_objects[:]:
 			if(type(blender_resource) is bpy.types.Object and blender_resource.parent is None):
-				root_nodes.append(context.serialize_resource(ret, blender_resource, context_object=collection, stf_category="node", export_fail_severity=STFReportSeverity.FatalError))
+				root_nodes.append(context.serialize_resource(ret, blender_resource, collection, STF_Category.NODE, STFReportSeverity.FatalError))
 
 		def _handle_animations():
 			for action in bpy.data.actions:
-				stf_animation_id = context.serialize_resource(ret, action, context_object=collection, stf_category="data", export_fail_severity=STFReportSeverity.Debug)
+				stf_animation_id = context.serialize_resource(ret, action, collection, STF_Category.DATA, STFReportSeverity.Debug)
 				if(stf_animation_id is not None):
 					animations.append(stf_animation_id)
 		context.add_task(STF_TaskSteps.ANIMATION, _handle_animations)
