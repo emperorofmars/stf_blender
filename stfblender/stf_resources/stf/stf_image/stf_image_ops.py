@@ -21,11 +21,15 @@ class STFAddImageComponentOperator(bpy.types.Operator, STFAddComponentOperatorBa
 class STFRemoveImageComponentOperator(bpy.types.Operator, STFRemoveComponentOperatorBase):
 	"""Remove selected component from Image"""
 	bl_idname = "stf.remove_image_component"
+	@classmethod
+	def poll(cls, context): return hasattr(context, "edit_image") and context.edit_image is not None
 	def get_property(self, context): return context.edit_image
 
 class STFEditImageComponentIdOperator(bpy.types.Operator, STFEditComponentOperatorBase):
 	"""Edit the ID of this Component"""
 	bl_idname = "stf.edit_image_component_id"
+	@classmethod
+	def poll(cls, context): return hasattr(context, "edit_image") and context.edit_image is not None
 	def get_property(self, context): return context.edit_image
 
 
@@ -36,7 +40,7 @@ class STFImageFixColorspace(bpy.types.Operator):
 	bl_options = {"REGISTER", "UNDO"}
 
 	@classmethod
-	def poll(cls, context): return context.edit_image is not None
+	def poll(cls, context): return hasattr(context, "edit_image") and context.edit_image is not None
 
 	def execute(self, context) -> set:
 		context.edit_image.colorspace_settings.name = "Non-Color"

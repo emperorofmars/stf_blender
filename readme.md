@@ -1,22 +1,21 @@
 # STF Blender
-**Squirrel Transfer Format - Modular 3D File-Format**\
+**Squirrel Transfer Format - Modular 3D Interchange-Format**\
 *Intended for (not only) games-development use-cases.*
 
 **WIP implementation for Blender 4.5+. Do not use productively!**
 
 🌰 **[Read the User Guide!](https://docs.stfform.at/guide/blender.html)** 🌰 **[Report Issues](https://codeberg.org/stf_format/stf_blender/issues)** 🌰 **[STF Documentation](https://docs.stfform.at/)**
 
+---
+Please open issues for any bugs or misbehavior you notice. Feel free to open issues for feature requests.
+
 ## Installation
 **Follow the steps on [docs.stfform.at](https://docs.stfform.at/installation/blender.html)!**
 
 *Alternatively you can also manually install the .zip from the latest release.*
 
----
-
 > [!TIP]
 > **Also install the [Slot Link](https://extensions.blender.org/add-ons/slot-link/) extension if you want to import/export animations.**
-
-Please open issues for any bugs or misbehavior you notice. Feel free to open issues for feature requests.
 
 ## Extend STF
 You can easily implement your own resources as a separate Blender extension, and have this importer & exporter detect them!\
