@@ -94,7 +94,7 @@ class STF_ImportContext(ISTF_ImportContext):
 				else:
 					self.report(STFReport("Resource import error", STFReportSeverity.Error, stf_id, handler.stf_type, None))
 		else:
-			self.report(STFReport("Could not process resource: " + stf_id, STFReportSeverity.FatalError, stf_id, json_resource.get("type")))
+			self.report(STFReport("Could not import resource: " + stf_id, STFReportSeverity.FatalError, stf_id, json_resource.get("type")))
 		return None
 
 

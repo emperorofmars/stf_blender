@@ -170,12 +170,14 @@ class Handler_AVA_Expressions(STF_Handler_Component):
 				else:
 					blender_expression.expression = "custom"
 					blender_expression.custom_expression = meaning
-				blender_expression.animation = context.import_resource(json_resource, json_expression.get("animation"), STF_Category.DATA)
+
+				if("animation" in json_expression):
+					blender_expression.animation = context.import_resource(json_resource, json_expression.get("animation"), STF_Category.DATA)
 
 				if("fallback" in json_expression):
 					blender_expression.use_blendshape_fallback = True
 					if(fallback_resource := context.import_resource(json_resource, json_expression["fallback"], STF_Category.DATA)):
-						blender_expression.blendshape_fallback.collection = context.get_root_collection() # todo maybe handle root collection import?
+						blender_expression.blendshape_fallback.collection = context.get_root_collection() # TODO maybe handle root collection import?
 						blender_expression.blendshape_fallback.stf_data_resource_id = fallback_resource.stf_id
 					else:
 						context.report(STFReport("module: %s stf_id: %s, context-object: %s" % (cls.stf_type, stf_id, context_resource), STFReportSeverity.Warn, stf_id, cls.stf_type, context_resource))
@@ -195,23 +197,30 @@ class Handler_AVA_Expressions(STF_Handler_Component):
 			for blender_expression in component.expressions:
 				blender_expression: AVA_Expression = blender_expression
 				meaning = blender_expression.expression if blender_expression.expression != "custom" else blender_expression.custom_expression
+				if(not meaning):
+					context.report(STFReport("Invalid Expression, no meaning defined", STFReportSeverity.Info, component.stf_id, cls.stf_type, component))
+
+				json_expression = {}
+				any_success = False
+
 				animation_id = context.get_resource_id(blender_expression.animation)
+				if(animation_id):
+					json_expression["animation"] = register_exported_resource(ret, animation_id)
+					any_success = True
 
-				if(meaning and animation_id):
-					json_expression = { "animation": register_exported_resource(ret, animation_id) }
-					expressions[meaning] = json_expression
-
-					if(blender_expression.use_blendshape_fallback):
-						if(fallback_ret := resolve_stf_data_resource_reference(blender_expression.blendshape_fallback)):
-							fallback_ref, fallback_resource = fallback_ret
-							if(fallback_ref.stf_type == "dev.vrm.blendshape_pose"):
-								json_expression["fallback"] = context.serialize_resource(ret, fallback_resource, stf_category=STF_Category.DATA)  # pyright: ignore[reportArgumentType]
-							else:
-								context.report(STFReport("module: %s stf_id: %s, context-object: %s :: blendshape fallback invalid resource type" % (cls.stf_type, component.stf_id, context_resource), STFReportSeverity.Warn, component.stf_id, cls.stf_type, context_resource))
+				if(blender_expression.use_blendshape_fallback):
+					if(fallback_ret := resolve_stf_data_resource_reference(blender_expression.blendshape_fallback)):
+						fallback_ref, fallback_resource = fallback_ret
+						if(fallback_ref.stf_type == "dev.vrm.blendshape_pose"):
+							json_expression["fallback"] = context.serialize_resource(ret, fallback_resource, stf_category=STF_Category.DATA)
+							any_success = True
 						else:
-							context.report(STFReport("module: %s stf_id: %s, context-object: %s :: failed to resolve blendshape fallback" % (cls.stf_type, component.stf_id, context_resource), STFReportSeverity.Warn, component.stf_id, cls.stf_type, context_resource))
-				else:
-					context.report(STFReport("Invalid Expression", STFReportSeverity.Info, component.stf_id, cls.stf_type, component))
+							context.report(STFReport("module: %s stf_id: %s, context-object: %s :: blendshape fallback invalid resource type" % (cls.stf_type, component.stf_id, context_resource), STFReportSeverity.Warn, component.stf_id, cls.stf_type, context_resource))
+					else:
+						context.report(STFReport("module: %s stf_id: %s, context-object: %s :: failed to resolve blendshape fallback" % (cls.stf_type, component.stf_id, context_resource), STFReportSeverity.Warn, component.stf_id, cls.stf_type, context_resource))
+
+				if(any_success):
+					expressions[meaning] = json_expression
 
 		context.add_task(STF_TaskSteps.AFTER_ANIMATION, _handle)
 

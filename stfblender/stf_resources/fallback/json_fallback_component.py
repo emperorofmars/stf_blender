@@ -83,7 +83,6 @@ class Handler_JsonFallbackComponent(STF_Handler_Component):
 			return None # pyright: ignore[reportReturnType]
 
 
-
 def register():
 	# register wherever components could be possibly added
 	setattr(bpy.types.Action, _blender_property_name, bpy.props.CollectionProperty(type=JsonFallbackComponent))

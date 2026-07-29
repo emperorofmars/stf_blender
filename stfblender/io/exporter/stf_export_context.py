@@ -107,8 +107,8 @@ class STF_ExportContext(ISTF_ExportContext):
 					self.report(STFReport("Resource Export Failed", export_fail_severity, None, selected_handler.stf_type, blender_object))
 		else:
 			if(export_fail_severity.value >= STFReportSeverity.Error.value):
-				_logger.error("No Module Found", stack_info=True)
-			self.report(STFReport("No Module Found", export_fail_severity, None, None, blender_object))
+				_logger.error("No Handler Found", stack_info=True)
+			self.report(STFReport("No Handler Found", export_fail_severity, None, None, blender_object))
 		return None
 
 
