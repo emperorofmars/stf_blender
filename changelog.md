@@ -2,6 +2,7 @@
 
 ## v0.1.8
 * Adapted `stf.animation` to support SlotLink v0.2.x with multiple targets per slot.
+	* Previous SlotLink versions are not supported. SlotLink animations with the old data-model have to be migrated with one convenient button-press.
 * Improved logging & error messages.
 * Prevent faulty import of component-resources, i.e. when a fallback resource referenced a component from another resource, that didn't import correctly.
 * `ava.expressions` can handle animations that were not exported.
