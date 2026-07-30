@@ -3,7 +3,8 @@ from typing import Any, Callable
 import bpy
 
 from .....stfblender_common import STF_ExportContext, STFReportSeverity, STFReport, STF_TaskSteps, ensure_stf_id
-from .....stfblender_common.slot_link import ActionSlotLink, SlotLink, SlotLinkTarget
+from .....stfblender_common.slot_link import ActionSlotLink, SlotLinkTarget
+from .....stfblender_common.slot_link.slot_link import get_slot_link_data_model_version, get_slot_link_targets, get_slot_link_version
 from .....stfblender_common.utils.buffer_utils import serialize_float
 from .stf_animation_common import *
 from .stf_animation_bake import bake_constraints
@@ -17,12 +18,17 @@ def stf_animation_export(context: STF_ExportContext, blender_resource: Any, cont
 	if(blender_animation.stf_animation.exclude): return None # pyright: ignore[reportReturnType]
 	if(blender_animation.is_action_legacy):
 		return STFReport("Ignoring legacy animation: " + blender_animation.name, STFReportSeverity.Debug, blender_animation.stf_info.stf_id, _stf_type, blender_resource)
-	if(not hasattr(blender_animation, "slot_link")):
+
+	slot_link_version = get_slot_link_version()
+	slot_link_data_model_version = get_slot_link_data_model_version()
+	if(slot_link_version == None or slot_link_data_model_version == None or not hasattr(blender_animation, "slot_link")):
 		return STFReport("Slot-Link is required to export animations!", STFReportSeverity.Debug, blender_animation.stf_info.stf_id, _stf_type, blender_resource)
 
 	action_slot_link: ActionSlotLink = blender_animation.slot_link
 	for slot_link in action_slot_link.links:
-		if(len(slot_link.targets) > 0):
+		if(slot_link_data_model_version[0] == 0 and slot_link_data_model_version[1] < 2 and slot_link.target):
+			break
+		elif(len(slot_link.targets) > 0):
 			break
 	else:
 		return STFReport("No valid Slot Link target specified!", STFReportSeverity.Debug, blender_animation.stf_info.stf_id, _stf_type, blender_resource)
@@ -88,26 +94,28 @@ def __convert(context: STF_ExportContext, blender_animation: bpy.types.Action, a
 							break
 					if(selected_slot_link):
 						# Yay we can finally deal with curves
-						for link_target in selected_slot_link.targets:
+						for link_target in get_slot_link_targets(selected_slot_link):
 							link_target: SlotLinkTarget = link_target
+
 							# Collect curves belonging together. I.e. curves animating the x, y, z positions under the same data_path
+							# dict[data_path: str, dict[array_index: int, curve: FCurve]]
 							kurwas: dict[str, dict[int, bpy.types.FCurve]] = dict()
 							for fcurve in channelbag.fcurves:
+								fcurve.update()
 								if(fcurve.data_path not in kurwas):
 									kurwas[fcurve.data_path] = {fcurve.array_index: fcurve}
 								else:
 									kurwas[fcurve.data_path][fcurve.array_index] = fcurve
 
 							for data_path, fcurves in kurwas.items():
-								fcurve.update() # pyright: ignore[reportPossiblyUnboundVariable]
-
 								# See if this data_path can be exported
 								property_translation = context.resolve_blender_property_path(link_target.target, link_target.datablock_index, data_path)
 								if(not property_translation):
 									context.report(STFReport("Could not convert animated property", STFReportSeverity.Debug, blender_animation.stf_info.stf_id, _stf_type, blender_animation))
 									continue
 
-								if(property_translation.bake_constraints): requires_constraint_bake = True
+								if(property_translation.bake_constraints):
+									requires_constraint_bake = True
 
 								index_conversion = property_translation.index_conversion
 								if(not index_conversion):
@@ -116,7 +124,7 @@ def __convert(context: STF_ExportContext, blender_animation: bpy.types.Action, a
 										if(fcurve):
 											index_conversion.append(fcurve.array_index)
 
-								sub_tracks_serialized = __serialize_subtracks(context, blender_animation, property_translation.stf_path_part, fcurves, animation_range, index_conversion, property_translation.convert_func, bake_only, reference_holder)  # pyright: ignore[reportArgumentType]
+								sub_tracks_serialized = __serialize_subtracks(context, blender_animation, property_translation.stf_path_part, fcurves, animation_range, index_conversion, property_translation.convert_func, bake_only, reference_holder) # pyright: ignore[reportArgumentType]
 								if(sub_tracks_serialized):
 									stf_tracks.append(sub_tracks_serialized)
 					else:
@@ -144,7 +152,7 @@ def __serialize_subtracks(context: STF_ExportContext, blender_animation: bpy.typ
 	keyframe_indices: list[int] = [0] * len(index_conversion)
 
 	for real_timepoint in real_timepoints:
-		value_convert: list[float] = [None] * len(index_conversion) # pyright: ignore[reportAssignmentType]
+		value_convert: list[float] = [0] * len(index_conversion)
 		left_tangent_convert: list[float] = [0] * len(index_conversion)
 		right_tangent_convert: list[float] = [0] * len(index_conversion)
 
@@ -179,7 +187,7 @@ def __serialize_subtracks(context: STF_ExportContext, blender_animation: bpy.typ
 					interpolation = "mixed"
 
 				stf_keyframe = [
-					True, # is source of truth, false because it's baked
+					True, # is source of truth, false when it's baked
 					value_convert[index_conversion[fcurve.array_index]], #value
 				]
 
@@ -214,14 +222,12 @@ def __serialize_subtracks(context: STF_ExportContext, blender_animation: bpy.typ
 				if(left_tangent):
 					stf_keyframe = stf_keyframe + left_tangent
 
-				# todo more interpolation types, for sure cubic & quatratic
-
 				# Finally write the stf_keyframe
 				ret[index_conversion[fcurve.array_index]]["keyframes"].append(stf_keyframe) # pyright: ignore[reportOptionalSubscript]
 
 				keyframe_indices[fcurve.array_index] += 1
 			else:
-				# If one of the curves for this data_path doesn't contain a keyframe when the others do, bake it, regardles of the `bake` setting
+				# If one of the curves for this data_path doesn't contain a keyframe when the others do, bake it, regardless of the `bake` setting
 				ret[index_conversion[fcurve.array_index]]["keyframes"].append([ # pyright: ignore[reportOptionalSubscript]
 					False, # is source of truth, false because it's baked
 					value_convert[index_conversion[fcurve.array_index]], #value

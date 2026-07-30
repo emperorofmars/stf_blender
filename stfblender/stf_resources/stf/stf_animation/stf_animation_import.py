@@ -1,9 +1,9 @@
 from typing import Any, Callable
 import bpy
-import numpy as np
 
 from .....stfblender_common import STF_ImportContext, STF_TaskSteps, STFReportSeverity, STFReport, STF_Category
 from .....stfblender_common.slot_link import SlotLink, SlotLinkTarget
+from .....stfblender_common.slot_link.slot_link import ensure_first_slot_link_target, get_slot_link_data_model_version, get_slot_link_targets, get_slot_link_version
 from .stf_animation_common import *
 
 
@@ -11,7 +11,9 @@ _stf_type = stf_animation_type
 
 
 def stf_animation_import(context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: Any) -> Any | STFReport:
-	if(not hasattr(bpy.types.Action, "slot_link")):
+	slot_link_version = get_slot_link_version()
+	slot_link_data_model_version = get_slot_link_data_model_version()
+	if(not slot_link_version or not slot_link_data_model_version or not hasattr(bpy.types.Action, "slot_link")):
 		context.report(STFReport("Slot-Link is required to import animations!", STFReportSeverity.Warn, stf_id, _stf_type))
 		return
 
@@ -83,26 +85,36 @@ def __parse_tracks(context: STF_ImportContext, stf_id: str, tracks: list, blende
 			for track_index in range(len(track.get("subtracks", []))):
 				index_conversion.append(track_index)
 
+		if(len(index_conversion) != len(track.get("subtracks", []))):
+			continue
+
+		# Try find existing Slot and SlotLink for this track
 		selected_slot_link: SlotLink | None = None
 		selected_slot_link_target: SlotLinkTarget | None = None
 		for slot_link in blender_animation.slot_link.links:
-			for link_target in slot_link.targets:
+			for link_target in get_slot_link_targets(slot_link):
 				if(link_target.target == target_ret.slot_link_target and link_target.datablock_index == target_ret.slot_link_property_index):
 					for slot in blender_animation.slots:
-						selected_slot_link = slot_link
-						selected_slot_link_target = link_target
-						break
+						if(slot.target_id_type == target_ret.slot_type):
+							selected_slot_link = slot_link
+							selected_slot_link_target = link_target
+							break
+				if(selected_slot_link):
+					break
 			if(selected_slot_link):
 				break
 
 		selected_channelbag = None
+
+		# Add new Slot and Slotlink
 		if(not selected_slot_link):
 			blender_slot = blender_animation.slots.new(target_ret.slot_type, target_ret.slot_link_target.name + " - " + target_ret.slot_type) # pyright: ignore[reportOperatorIssue, reportArgumentType]
 			selected_slot_link = blender_animation.slot_link.links.add()
 			selected_slot_link.slot_handle = blender_slot.handle
-			selected_slot_link_target = selected_slot_link.targets.add()
+			selected_slot_link_target = ensure_first_slot_link_target(selected_slot_link) # pyright: ignore[reportArgumentType]
 			selected_slot_link_target.target = target_ret.slot_link_target
 			selected_slot_link_target.datablock_index = target_ret.slot_link_property_index
+
 			selected_channelbag = strip.channelbags.new(blender_slot)
 
 		for channelbag in strip.channelbags:
@@ -131,41 +143,46 @@ def __parse_subtracks(context: STF_ImportContext, stf_id: str, track: dict, sele
 
 	for keyframe_index in range(num_frames):
 		timepoint = timepoints[keyframe_index]
+
 		value_convert: list[float] = [None] * len(index_conversion) # pyright: ignore[reportAssignmentType]
+		has_left_tangent: list[bool] = [False] * len(index_conversion)
+		left_tangent_index: list[float] = [0] * len(index_conversion)
 		left_tangent_convert: list[float] = [0] * len(index_conversion)
 		right_tangent_convert: list[float] = [0] * len(index_conversion)
 
+		# Collect values for conversion. If the target is the translation of an object, this will collect the x-y-z values.
 		for subtrack_index, subtrack in enumerate(subtracks):
 			if(not subtrack): continue
 
 			stf_keyframe = subtrack["keyframes"][keyframe_index]
-
-			has_left_tangent = False
-			left_tangent_index = 0
+			if(not stf_keyframe[0]): continue # Not source of truth, ignore
 
 			value_convert[subtrack_index] = stf_keyframe[1]
 			interpolation_type = stf_keyframe[2]
 			if(interpolation_type == "bezier"):
 				right_tangent_convert[subtrack_index] = stf_keyframe[4][1]
 				if(len(stf_keyframe) > 5):
-					has_left_tangent = True
-					left_tangent_index = 5
+					has_left_tangent[subtrack_index] = True
+					left_tangent_index[subtrack_index] = 5
 					left_tangent_convert[subtrack_index] = stf_keyframe[5][1]
 			elif(interpolation_type in ["constant", "linear", "quadratic", "cubic"]):
 				if(len(stf_keyframe) > 3):
-					has_left_tangent = True
-					left_tangent_index = 4
+					has_left_tangent[subtrack_index] = True
+					left_tangent_index[subtrack_index] = 4
 					left_tangent_convert[subtrack_index] = stf_keyframe[3][1]
 
+		# De-normalize tangent values for Blender
 		for i in range(len(index_conversion)):
 			left_tangent_convert[i] += value_convert[i]
 			right_tangent_convert[i] += value_convert[i]
 
+		# Convert Y-axis values
 		if(conversion_func):
 			value_convert = conversion_func(value_convert)
 			left_tangent_convert = conversion_func(left_tangent_convert)
 			right_tangent_convert = conversion_func(right_tangent_convert)
 
+		# Create Blender keyframes
 		for subtrack_index, subtrack in enumerate(subtracks):
 			if(not subtrack): continue
 
@@ -191,10 +208,10 @@ def __parse_subtracks(context: STF_ImportContext, stf_id: str, track: dict, sele
 			else:
 				context.report(STFReport("Unsupported interpolation type: " + str(interpolation_type), STFReportSeverity.Warn, stf_id, _stf_type))
 
-			if(has_left_tangent and len(stf_keyframe) > left_tangent_index): # pyright: ignore[reportPossiblyUnboundVariable]
+			if(has_left_tangent[subtrack_index]):
 				#keyframe.handle_left_type = "FREE"
-				keyframe.handle_left.x = keyframe.co.x + stf_keyframe[left_tangent_index][0] # pyright: ignore[reportPossiblyUnboundVariable]
-				keyframe.handle_left.y =  left_tangent_convert[index_conversion[subtrack_index]]
+				keyframe.handle_left.x = keyframe.co.x + stf_keyframe[left_tangent_index[subtrack_index]][0]
+				keyframe.handle_left.y = left_tangent_convert[index_conversion[subtrack_index]]
 
 	for fcurve in fcurves:
 		if(fcurve):
