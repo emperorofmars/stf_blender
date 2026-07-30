@@ -6,6 +6,7 @@
 * Improved logging & error messages.
 * Prevent faulty import of component-resources, i.e. when a fallback resource referenced a component from another resource, that didn't import correctly.
 * `ava.expressions` can handle animations that were not exported.
+* `stfexp.armature.humanoid` fixed operator button parameters
 
 ## v0.1.7
 * The codebase received a biiiig refactoring

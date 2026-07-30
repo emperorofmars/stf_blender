@@ -287,8 +287,8 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 	layout.separator(factor=2, type="LINE")
 
 	row = layout.row()
-	row.operator(ResetHumanoidCollectionOperator.bl_idname, icon="WARNING_LARGE")
-	row.operator(MapHumanoidCollectionOperator.bl_idname, icon="LOOP_FORWARDS")
+	row.operator(ResetHumanoidCollectionOperator.bl_idname, icon="WARNING_LARGE").component_id = component.stf_id
+	row.operator(MapHumanoidCollectionOperator.bl_idname, icon="LOOP_FORWARDS").component_id = component.stf_id
 
 	mapped = 0
 	for mapping in component.bone_mappings:
