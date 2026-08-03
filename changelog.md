@@ -2,8 +2,12 @@
 
 ## v0.1.9
 * `stf.animation` handles SlotLink target-collection.
-* `stf.instance.mesh`: simplified instance shape key overrides.
+* `stf.instance.mesh`: simplified instance shape key overrides GUI and data-model.
+	* This is backwards compatible.
+	* If you set-up overrides previously, you'll find that all shape keys to have an override. Feel free to press the `Remove Unmodified Shape Key Overrides` button for some cleanup^^
 * Added primitive GUI to Collections to show which animations can be exported, if SlotLink v0.2 or higher is used.
+* Added the ability for handlers to programmatically determine their priority.
+* Improved the handling of resources that imported into a fallback representation.
 
 ## v0.1.8
 * Adapted `stf.animation` to support SlotLink v0.2.x with multiple targets per slot.
