@@ -131,7 +131,8 @@ class Handler_VRM_Blendshape_Pose(STF_Handler_Data):
 		def _handle():
 			for target_id_index_as_str_because_its_a_json_key, values in json_resource.get("targets", {}).items():
 				target_id_index = int(target_id_index_as_str_because_its_a_json_key)
-				if(meshinstance := context.import_resource(json_resource, target_id_index, STF_Category.NODE)):
+				meshinstance = context.import_resource(json_resource, target_id_index, STF_Category.NODE)
+				if(type(meshinstance) is bpy.types.Object and type(meshinstance.data) is bpy.types.Mesh):
 					target = resource.targets.add()
 					target.mesh_instance = meshinstance
 					for blendshape_name, blendshape_value in values.items():

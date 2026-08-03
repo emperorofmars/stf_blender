@@ -174,7 +174,7 @@ class Handler_AVA_Expressions(STF_Handler_Component):
 				if("animation" in json_expression):
 					expression_anim = context.import_resource(json_resource, json_expression.get("animation"), STF_Category.DATA)
 					if(type(expression_anim) is bpy.types.Action):
-						blender_expression.animation = context.import_resource(json_resource, json_expression.get("animation"), STF_Category.DATA)
+						blender_expression.animation = expression_anim
 
 				if("fallback" in json_expression):
 					blender_expression.use_blendshape_fallback = True

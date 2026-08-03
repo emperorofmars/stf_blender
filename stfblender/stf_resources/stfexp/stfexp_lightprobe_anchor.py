@@ -38,11 +38,15 @@ class Handler_STFEXP_LightprobeAnchor(STF_Handler_Component):
 		if("anchor" in json_resource):
 			if(len(json_resource["anchor"]) == 1):
 				def _handle_target_object():
-					component.anchor_object = context.import_resource(json_resource, json_resource["anchor"][0], STF_Category.NODE)
+					anchor_object = context.import_resource(json_resource, json_resource["anchor"][0], STF_Category.NODE)
+					if(type(anchor_object) is bpy.types.Object):
+						component.anchor_object = anchor_object
 				context.add_task(STF_TaskSteps.DEFAULT, _handle_target_object)
 			elif(len(json_resource["anchor"]) == 3):
 				def _handle_target_object():
-					component.anchor_object = context.import_resource(json_resource, json_resource["anchor"][0], STF_Category.NODE)
+					anchor_object = context.import_resource(json_resource, json_resource["anchor"][0], STF_Category.NODE)
+					if(type(anchor_object) is bpy.types.Object):
+						component.anchor_object = anchor_object
 					if(bone := context.import_resource(json_resource, json_resource["anchor"][2], STF_Category.NODE)):
 						component.anchor_bone = bone.name
 				context.add_task(STF_TaskSteps.DEFAULT, _handle_target_object)

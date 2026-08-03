@@ -58,7 +58,7 @@ class Handler_STFEXP_Light(STF_Handler_BlenderNative, STF_Handler_Animation):
 
 		if("shadow" in json_resource): blender_light.use_shadow = json_resource["shadow"]
 
-		return blender_object
+		return (blender_object, blender_light)
 
 	@classmethod
 	def export_resource(cls, context: STF_ExportContext, blender_resource: Any, context_resource: Any) -> tuple[dict, str]:

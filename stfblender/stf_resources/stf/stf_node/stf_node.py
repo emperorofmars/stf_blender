@@ -37,7 +37,11 @@ class Handler_STF_Node(STF_Handler_BlenderNative, STF_Handler_ComponentHolder, S
 	@classmethod
 	def import_resource(cls, context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any | STFReport:
 		if("instance" in json_resource):
-			blender_object: bpy.types.Object = context.import_resource(json_resource, json_resource["instance"], stf_category=STF_Category.INSTANCE) # pyright: ignore[reportAssignmentType]
+			blender_instance: tuple[bpy.types.Object, Any] = context.import_resource(json_resource, json_resource["instance"], stf_category=STF_Category.INSTANCE) # pyright: ignore[reportAssignmentType]
+			if(type(blender_instance) is tuple and len(blender_instance) == 2 and type(blender_instance[0]) is bpy.types.Object):
+				blender_object = blender_instance[0]
+			else:
+				return STFReport("Failed to import instance", STFReportSeverity.Error, stf_id, cls.stf_type, blender_instance)
 		else:
 			blender_object: bpy.types.Object = bpy.data.objects.new(json_resource.get("name", "STF Node"), None)
 		context.register_imported_resource(stf_id, blender_object)
@@ -73,7 +77,7 @@ class Handler_STF_Node(STF_Handler_BlenderNative, STF_Handler_ComponentHolder, S
 
 		for child_id in json_resource.get("children", []):
 			child: bpy.types.Object | None = context.import_resource(json_resource, child_id, context_object, stf_category=STF_Category.NODE)
-			if(child):
+			if(child and type(child) is bpy.types.Object):
 				child.parent = blender_object
 			else:
 				context.report(STFReport("Invalid Child: " + str(child_id), STFReportSeverity.Error, stf_id, json_resource["type"], blender_object))

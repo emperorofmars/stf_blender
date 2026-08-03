@@ -13,7 +13,9 @@ class STF_Material_Value_Image(STF_Material_Value_Base):
 
 def _import_material_value(context: STF_ImportContext, json_material: dict, blender_material: bpy.types.Material, json_resource: Any, value: STF_Material_Value_Image):
 	if("image" in json_resource and json_resource["image"] != None):
-		value.image = context.import_resource(json_material, json_resource["image"], stf_category=STF_Category.DATA)
+		image = context.import_resource(json_material, json_resource["image"], stf_category=STF_Category.DATA)
+		if(type(image) is bpy.types.Image):
+			value.image = image
 
 
 def _export_material_value(context: STF_ExportContext, json_material: dict, blender_material: bpy.types.Material, value: STF_Material_Value_Image) -> Any:

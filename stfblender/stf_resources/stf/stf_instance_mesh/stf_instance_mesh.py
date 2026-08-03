@@ -37,7 +37,10 @@ class Handler_STF_Instance_Mesh(STF_Handler_BlenderNative, STF_Handler_Animation
 
 	@classmethod
 	def import_resource(cls, context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: Any) -> Any | STFReport:
-		blender_mesh: bpy.types.Mesh = context.import_resource(json_resource, json_resource["mesh"], stf_category=STF_Category.DATA) # pyright: ignore[reportAssignmentType]
+		blender_mesh: bpy.types.Mesh | None = context.import_resource(json_resource, json_resource["mesh"], stf_category=STF_Category.DATA)
+		if(not blender_mesh or type(blender_mesh) is not bpy.types.Mesh):
+			return STFReport("Failed to import mesh: " + str(json_resource["mesh"]), STFReportSeverity.Error, stf_id, cls.stf_type, context_resource)
+
 		blender_object = bpy.data.objects.new(json_resource.get("name", "STF Node"), blender_mesh)
 		blender_object.stf_instance.stf_id = stf_id
 		if(json_resource.get("name")):
@@ -49,7 +52,7 @@ class Handler_STF_Instance_Mesh(STF_Handler_BlenderNative, STF_Handler_Animation
 
 		if("armature_instance" in json_resource):
 			armature_instance: bpy.types.Object | None = context.import_resource(json_resource, json_resource["armature_instance"], stf_category=STF_Category.NODE)
-			if(not armature_instance):
+			if(not armature_instance or type(armature_instance) is not bpy.types.Object):
 				context.report(STFReport("Invalid armature instance: " + str(json_resource["armature_instance"]), STFReportSeverity.Error, stf_id, cls.stf_type, context_resource))
 			else:
 				modifier: bpy.types.ArmatureModifier = blender_object.modifiers.new("Armature", "ARMATURE") # pyright: ignore[reportAssignmentType]
@@ -70,11 +73,12 @@ class Handler_STF_Instance_Mesh(STF_Handler_BlenderNative, STF_Handler_Animation
 		if("materials" in json_resource):
 			for material_index, material_id in enumerate(json_resource["materials"]):
 				if(material_id and len(blender_object.material_slots) > material_index):
-					if(material := context.import_resource(json_resource, material_id, stf_category=STF_Category.DATA)):
+					material = context.import_resource(json_resource, material_id, stf_category=STF_Category.DATA)
+					if(type(material) is bpy.types.Material):
 						blender_object.material_slots[material_index].link = "OBJECT"
 						blender_object.material_slots[material_index].material = material
 
-		return blender_object
+		return (blender_object, blender_mesh)
 
 	@classmethod
 	def export_resource(cls, context: STF_ExportContext, application_object: Any, context_object: bpy.types.Collection) -> tuple[dict, str] | STFReport:

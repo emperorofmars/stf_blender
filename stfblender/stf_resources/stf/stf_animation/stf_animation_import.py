@@ -65,7 +65,8 @@ def stf_animation_import(context: STF_ImportContext, json_resource: dict, stf_id
 
 	if("reset_animation" in json_resource):
 		def _handle_reset_animation():
-			if(reset_animation := context.import_resource(json_resource, json_resource["reset_animation"], context_resource, STF_Category.DATA)):
+			reset_animation = context.import_resource(json_resource, json_resource["reset_animation"], context_resource, STF_Category.DATA)
+			if(type(reset_animation) is bpy.types.Action):
 				blender_animation.slot_link.reset_animation = reset_animation
 		context.add_task(STF_TaskSteps.AFTER_ANIMATION, _handle_reset_animation)
 

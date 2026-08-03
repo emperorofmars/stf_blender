@@ -90,17 +90,23 @@ class Handler_AVA_Avatar(STF_Handler_Component):
 
 		if("viewport" in json_resource):
 			def _handle_viewport():
-				component.viewport = context.import_resource(json_resource, json_resource["viewport"], STF_Category.NODE)
+				viewport = context.import_resource(json_resource, json_resource["viewport"], STF_Category.NODE)
+				if(type(viewport) is bpy.types.Object):
+					component.viewport = viewport
 			context.add_task(STF_TaskSteps.DEFAULT, _handle_viewport)
 
 		if("primary_armature_instance" in json_resource):
 			def _handle_primary_armature_instance():
-				component.primary_armature_instance = context.import_resource(json_resource, json_resource["primary_armature_instance"], STF_Category.NODE)
+				primary_armature_instance = context.import_resource(json_resource, json_resource["primary_armature_instance"], STF_Category.NODE)
+				if(type(primary_armature_instance) is bpy.types.Object):
+					component.primary_armature_instance = primary_armature_instance
 			context.add_task(STF_TaskSteps.DEFAULT, _handle_primary_armature_instance)
 
 		if("primary_mesh_instance" in json_resource):
 			def _handle_primary_mesh_instance():
-				component.primary_mesh_instance = context.import_resource(json_resource, json_resource["primary_mesh_instance"], STF_Category.NODE)
+				primary_mesh_instance = context.import_resource(json_resource, json_resource["primary_mesh_instance"], STF_Category.NODE)
+				if(type(primary_mesh_instance) is bpy.types.Object):
+					component.primary_mesh_instance = primary_mesh_instance
 			context.add_task(STF_TaskSteps.DEFAULT, _handle_primary_mesh_instance)
 
 		return component

@@ -141,7 +141,7 @@ def import_stf_mesh(context: STF_ImportContext, json_resource: dict, stf_id: str
 	if("material_slots" in json_resource):
 		for material_slot in json_resource["material_slots"]:
 			material = context.import_resource(json_resource, material_slot, stf_category=STF_Category.DATA)
-			if(material):
+			if(material and type(material) is bpy.types.Material):
 				blender_mesh.materials.append(material)
 			else:
 				blender_mesh.materials.append(None)
@@ -156,7 +156,7 @@ def import_stf_mesh(context: STF_ImportContext, json_resource: dict, stf_id: str
 	# Weight paint
 	if("armature" in json_resource and "weights" in json_resource and "bones" in json_resource):
 		armature: bpy.types.Armature | None = context.import_resource(json_resource, json_resource["armature"], stf_category=STF_Category.DATA)
-		if(not armature):
+		if(not armature or type(armature) is not bpy.types.Armature):
 			context.report(STFReport("Invalid Armature (armature id: " + json_resource["armature"] + " )", STFReportSeverity.Error, stf_id, stf_mesh_type, blender_mesh))
 		else:
 			bone_indices_width = json_resource.get("bone_indices_width", 1)

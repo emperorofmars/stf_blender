@@ -74,7 +74,9 @@ class Handler_AVA_VoicePosition(STF_Handler_Component):
 
 		if("voice_position" in json_resource):
 			def _handle():
-				component.voice_position = context.import_resource(json_resource, json_resource["voice_position"], STF_Category.NODE)
+				voice_position = context.import_resource(json_resource, json_resource["voice_position"], STF_Category.NODE)
+				if(type(voice_position) is bpy.types.Object):
+					component.voice_position = voice_position
 			context.add_task(STF_TaskSteps.DEFAULT, _handle)
 
 		return component

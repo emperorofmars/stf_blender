@@ -26,7 +26,9 @@ class Handler_STFEXP_Instance_Text(STF_Handler_BlenderNative):
 
 	@classmethod
 	def import_resource(cls, context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: Any) -> Any | STFReport:
-		blender_text = context.import_resource(json_resource, json_resource["text"], STF_Category.DATA)
+		blender_text: bpy.types.Text | None = context.import_resource(json_resource, json_resource["text"], STF_Category.DATA)
+		if(type(blender_text) is not bpy.types.Text):
+			return STFReport("Failed to import text", STFReportSeverity.Error, stf_id, _stf_type, context_resource)
 
 		blender_object = bpy.data.objects.new(json_resource.get("name", "STFEXP Instance Text"), blender_text)
 		blender_object.stf_instance.stf_id = stf_id
@@ -34,12 +36,9 @@ class Handler_STFEXP_Instance_Text(STF_Handler_BlenderNative):
 			blender_object.stf_instance.stf_name = json_resource["name"]
 		context.register_imported_resource(stf_id, (blender_object, blender_text))
 
-		if(not blender_object or type(blender_object) is not bpy.types.Object):
-			context.report(STFReport("Failed to import text", STFReportSeverity.Error, stf_id, _stf_type, context_resource))
-
 		# todo handle materials
 
-		return blender_object
+		return (blender_object, blender_text)
 
 	@classmethod
 	def export_resource(cls, context: STF_ExportContext, blender_resource: Any, context_resource: Any) -> tuple[dict, str]:
