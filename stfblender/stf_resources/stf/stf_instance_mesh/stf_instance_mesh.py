@@ -36,7 +36,7 @@ class Handler_STF_Instance_Mesh(STF_Handler_BlenderNative, STF_Handler_Animation
 		return blender_resource[0].stf_instance
 
 	@classmethod
-	def import_resource(cls, context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: Any) -> Any | STFReport:
+	def import_resource(cls, context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: Any) -> tuple[bpy.types.Object, bpy.types.Mesh] | STFReport:
 		blender_mesh: bpy.types.Mesh | None = context.import_resource(json_resource, json_resource["mesh"], stf_category=STF_Category.DATA)
 		if(not blender_mesh or type(blender_mesh) is not bpy.types.Mesh):
 			return STFReport("Failed to import mesh: " + str(json_resource["mesh"]), STFReportSeverity.Error, stf_id, cls.stf_type, context_resource)

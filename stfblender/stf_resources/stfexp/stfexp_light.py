@@ -22,7 +22,7 @@ class Handler_STFEXP_Light(STF_Handler_BlenderNative, STF_Handler_Animation):
 	operator_set_stf_id = STFSetSTFEXPLightIDOperator.bl_idname
 
 	@classmethod
-	def import_resource(cls, context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: Any) -> Any | STFReport:
+	def import_resource(cls, context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: Any) -> tuple[bpy.types.Object, bpy.types.Light] | STFReport:
 		blender_light_type = "POINT"
 		match(json_resource.get("light_type")):
 			case "point":

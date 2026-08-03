@@ -32,7 +32,7 @@ class Handler_STF_Instance_Armature(STF_Handler_BlenderNative, STF_Handler_Anima
 		return draw_armature_instance_ui(layout, context, blender_resource)
 
 	@classmethod
-	def import_resource(cls, context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: Any) -> Any | STFReport:
+	def import_resource(cls, context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: Any) -> tuple[bpy.types.Object, bpy.types.Armature] | STFReport:
 		blender_armature: bpy.types.Armature | None = context.import_resource(json_resource, json_resource["armature"], stf_category=STF_Category.DATA)
 		if(not blender_armature or type(blender_armature) is not bpy.types.Armature):
 			return STFReport("Failed to import armature: " + str(json_resource.get("instance", {}).get("armature")), STFReportSeverity.Error, stf_id, cls.stf_type, context_resource)

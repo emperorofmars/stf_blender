@@ -25,7 +25,7 @@ class Handler_STFEXP_Instance_Text(STF_Handler_BlenderNative):
 	get_stf_prop_holder = lambda blender_resource: blender_resource[0].stf_instance
 
 	@classmethod
-	def import_resource(cls, context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: Any) -> Any | STFReport:
+	def import_resource(cls, context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: Any) -> tuple[bpy.types.Object, bpy.types.Text] | STFReport:
 		blender_text: bpy.types.Text | None = context.import_resource(json_resource, json_resource["text"], STF_Category.DATA)
 		if(type(blender_text) is not bpy.types.Text):
 			return STFReport("Failed to import text", STFReportSeverity.Error, stf_id, _stf_type, context_resource)
