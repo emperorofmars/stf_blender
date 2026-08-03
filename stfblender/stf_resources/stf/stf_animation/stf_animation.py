@@ -3,6 +3,7 @@ import bpy
 
 from .....stfblender_common import STF_Category, STF_ImportContext, STF_ExportContext, STF_Handler_ComponentHolder, STF_Handler_BlenderNative, STFReport, boilerplate_register, boilerplate_unregister, get_components_from_object
 from .....stfblender_common.helpers import draw_slot_link_warning
+from .....stfblender_common.slot_link import ActionSlotLink, get_slot_link_data_model_version, get_slot_link_version
 from .stf_animation_bake import STFBakeAnimationOperator
 from .stf_animation_common import stf_animation_type
 from .stf_animation_export import stf_animation_export
@@ -23,7 +24,7 @@ class Handler_STF_Animation(STF_Handler_BlenderNative, STF_Handler_ComponentHold
 	stf_category = STF_Category.DATA
 	like_types = ["animation"]
 	understood_blender_types = [bpy.types.Action]
-
+	priority = 1
 	operator_set_stf_id = STFSetAnimationIDOperator.bl_idname
 
 	@classmethod
@@ -57,6 +58,32 @@ class Handler_STF_Animation(STF_Handler_BlenderNative, STF_Handler_ComponentHold
 	@classmethod
 	def export_resource(cls, context: STF_ExportContext, blender_resource: Any, context_resource: Any) -> tuple[dict, str] | STFReport:
 		return stf_animation_export(context, blender_resource, context_resource)
+
+	@classmethod
+	def can_handle_stf_resource_type(cls) -> int:
+		return 1 if get_slot_link_version() is not None else -1
+
+	@classmethod
+	def can_handle_blender_resource(cls, blender_animation: bpy.types.Action) -> int:
+		slot_link_version = get_slot_link_version()
+		slot_link_data_model_version = get_slot_link_data_model_version()
+		if(slot_link_version == None or slot_link_data_model_version == None or not hasattr(blender_animation, "slot_link")):
+			return -1
+
+		if(blender_animation.stf_animation.exclude): return None # pyright: ignore[reportReturnType]
+		if(blender_animation.is_action_legacy):
+			return -1
+
+		action_slot_link: ActionSlotLink = blender_animation.slot_link
+		for slot_link in action_slot_link.links:
+			if(slot_link_data_model_version[0] == 0 and slot_link_data_model_version[1] < 2 and slot_link.target):
+				break
+			elif(len(slot_link.targets) > 0):
+				break
+		else:
+			return -1
+
+		return 10
 
 	get_components = get_components_from_object
 	operator_component_add = STFAddAnimationComponentOperator.bl_idname

@@ -40,6 +40,11 @@ class Handler_JsonFallbackData(STF_Handler_Data):
 		resource.json = json.dumps(json_resource)
 
 		def _handle():
+			for resource in getattr(context_resource, cls.blender_property_name): # The `resource` object is very likely invalidated
+				if(stf_id == resource.stf_id):
+					break
+			else:
+				return
 			for resource_id in json_resource.get("referenced_resources", []):
 				resource_grr = resource.referenced_resources.add()
 				if(referenced_resource := context._import_resource(resource_id)):

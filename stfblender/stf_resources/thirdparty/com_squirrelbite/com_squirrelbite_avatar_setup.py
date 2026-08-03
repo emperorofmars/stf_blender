@@ -149,8 +149,12 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 		for toggle_json in json_resource.get("toggles_pre", []):
 			toggle: Toggle = component.toggles_pre.add()  # pyright: ignore[reportRedeclaration]
 			toggle.name = toggle_json.get("name", "")
-			toggle.animation_on = context.import_resource(json_resource, toggle_json.get("on"))
-			toggle.animation_off = context.import_resource(json_resource, toggle_json.get("off"))
+			animation_on = context.import_resource(json_resource, toggle_json.get("on"))
+			if(type(animation_on) is bpy.types.Action):
+				toggle.animation_on = animation_on
+			animation_off = context.import_resource(json_resource, toggle_json.get("off"))
+			if(type(animation_off) is bpy.types.Action):
+				toggle.animation_off = animation_off
 
 		# puppets pre
 		for puppet_json in json_resource.get("puppets_pre", []):
@@ -172,8 +176,12 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 		for toggle_json in json_resource.get("toggles", []):
 			toggle: Toggle = component.toggles.add()  # pyright: ignore[reportRedeclaration]
 			toggle.name = toggle_json.get("name", "")
-			toggle.animation_on = context.import_resource(json_resource, toggle_json.get("on"))
-			toggle.animation_off = context.import_resource(json_resource, toggle_json.get("off"))
+			animation_on = context.import_resource(json_resource, toggle_json.get("on"))
+			if(type(animation_on) is bpy.types.Action):
+				toggle.animation_on = animation_on
+			animation_off = context.import_resource(json_resource, toggle_json.get("off"))
+			if(type(animation_off) is bpy.types.Action):
+				toggle.animation_off = animation_off
 
 		# grab toggles
 		for toggle_json in json_resource.get("grab_toggles", []):
@@ -181,9 +189,12 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 			toggle.name = toggle_json.get("name", "")
 			toggle.hand_filter = toggle_json.get("hand", "right")
 			node_path_component_selector_from_stf(context, json_resource, toggle_json.get("collider"), toggle.grab_collider)
-			toggle.toggle.animation_on = context.import_resource(json_resource, toggle_json.get("on"))
-			toggle.toggle.animation_off = context.import_resource(json_resource, toggle_json.get("off"))
-
+			animation_on = context.import_resource(json_resource, toggle_json.get("on"))
+			if(type(animation_on) is bpy.types.Action):
+				toggle.toggle.animation_on = animation_on
+			animation_off = context.import_resource(json_resource, toggle_json.get("off"))
+			if(type(animation_off) is bpy.types.Action):
+				toggle.toggle.animation_off = animation_off
 
 		# puppets
 		for puppet_json in json_resource.get("puppets", []):
@@ -193,21 +204,29 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 				puppet.collection = context.get_root_collection()
 				puppet.stf_data_resource_id = blendtree_resource.stf_id
 			else:
-				context.report(STFReport("module: %s stf_id: %s, context-object: %s" % (_stf_type, stf_id, context_resource), STFReportSeverity.Warn, stf_id, _stf_type, context_resource))
+				context.report(STFReport("Handler: %s stf_id: %s, context-object: %s" % (_stf_type, stf_id, context_resource), STFReportSeverity.Warn, stf_id, _stf_type, context_resource))
 
 		# breathing
 		if("breathing" in json_resource):
 			if("normal" in json_resource["breathing"]):
-				component.breathing_normal = context.import_resource(json_resource, json_resource["breathing"]["normal"])
+				breathing_normal = context.import_resource(json_resource, json_resource["breathing"]["normal"])
+				if(type(breathing_normal) is bpy.types.Action):
+					component.breathing_normal = breathing_normal
 			if("intense" in json_resource["breathing"]):
-				component.breathing_intense = context.import_resource(json_resource, json_resource["breathing"]["intense"])
+				breathing_intense = context.import_resource(json_resource, json_resource["breathing"]["intense"])
+				if(type(breathing_intense) is bpy.types.Action):
+					component.breathing_intense = breathing_intense
 
 		# additive
 		if("additive" in json_resource):
 			if("idle" in json_resource["additive"]):
-				component.additive_idle = context.import_resource(json_resource, json_resource["additive"]["idle"])
+				additive_idle = context.import_resource(json_resource, json_resource["additive"]["idle"])
+				if(type(additive_idle) is bpy.types.Action):
+					component.additive_idle = additive_idle
 			if("excited" in json_resource["additive"]):
-				component.additive_excited = context.import_resource(json_resource, json_resource["additive"]["excited"])
+				additive_excited = context.import_resource(json_resource, json_resource["additive"]["excited"])
+				if(type(additive_excited) is bpy.types.Action):
+					component.additive_excited = additive_excited
 
 	context.add_task(STF_TaskSteps.AFTER_ANIMATION, _handle)
 

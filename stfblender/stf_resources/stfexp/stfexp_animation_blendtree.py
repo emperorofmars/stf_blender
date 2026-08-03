@@ -59,7 +59,9 @@ class Handler_STFEXP_Animation_Blendtree(STF_Handler_Data, STF_Handler_Component
 				mapping.position[0] = animation_mapping["position"][0]
 				if(resource.type == "2d"):
 					mapping.position[1] = animation_mapping["position"][1]
-				mapping.animation = context.import_resource(json_resource, animation_mapping.get("animation"), STF_Category.DATA)
+				animation = context.import_resource(json_resource, animation_mapping.get("animation"), STF_Category.DATA)
+				if(type(animation) is bpy.types.Action):
+					mapping.animation = animation
 		context.add_task(STF_TaskSteps.AFTER_ANIMATION, _handle)
 
 		return resource

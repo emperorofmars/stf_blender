@@ -14,8 +14,7 @@ def stf_animation_import(context: STF_ImportContext, json_resource: dict, stf_id
 	slot_link_version = get_slot_link_version()
 	slot_link_data_model_version = get_slot_link_data_model_version()
 	if(not slot_link_version or not slot_link_data_model_version or not hasattr(bpy.types.Action, "slot_link")):
-		context.report(STFReport("Slot-Link is required to import animations!", STFReportSeverity.Warn, stf_id, _stf_type))
-		return
+		return STFReport("Slot-Link is required to import animations!", STFReportSeverity.Warn, stf_id, _stf_type)
 
 	blender_animation = bpy.data.actions.new(json_resource.get("name", "STF Animation"))
 	blender_animation.stf_info.stf_id = stf_id
