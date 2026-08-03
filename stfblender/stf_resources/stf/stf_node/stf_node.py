@@ -41,7 +41,8 @@ class Handler_STF_Node(STF_Handler_BlenderNative, STF_Handler_ComponentHolder, S
 			if(type(blender_instance) is tuple and len(blender_instance) == 2 and type(blender_instance[0]) is bpy.types.Object):
 				blender_object = blender_instance[0]
 			else:
-				return STFReport("Failed to import instance", STFReportSeverity.Error, stf_id, cls.stf_type, blender_instance)
+				context.report(STFReport("Failed to import instance", STFReportSeverity.Error, stf_id, cls.stf_type, blender_instance))
+				blender_object: bpy.types.Object = bpy.data.objects.new(json_resource.get("name", "STF Node") + " [Instance Error]", None)
 		else:
 			blender_object: bpy.types.Object = bpy.data.objects.new(json_resource.get("name", "STF Node"), None)
 		context.register_imported_resource(stf_id, blender_object)
