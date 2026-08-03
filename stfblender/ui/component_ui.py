@@ -21,9 +21,9 @@ def _get_component_holder(component_ref: STF_Component_Ref) -> bpy.types.bpy_str
 class STFDrawComponentList:
 	"""List of STF components"""
 	sort_reverse: bpy.props.BoolProperty(default=False, name="Reverse")
-	sort_by: bpy.props.EnumProperty(items=[("original", "Added Order", "", "SORTSIZE", 0),("stf_type", "Component Type", "", "GROUP", 1),("stf_name", "Name", "", "FILE_TEXT", 2)], name="Sort by")# type: ignore
-	filter_name: bpy.props.StringProperty(name="Filter Name")# type: ignore
-	filter_type: bpy.props.StringProperty(name="Filter Type")# type: ignore
+	sort_by: bpy.props.EnumProperty(items=[("original", "Added Order", "", "SORTSIZE", 0),("stf_type", "Component Type", "", "GROUP", 1),("stf_name", "Name", "", "FILE_TEXT", 2)], name="Sort by")
+	filter_name: bpy.props.StringProperty(name="Filter Name")
+	filter_type: bpy.props.StringProperty(name="Filter Type")
 
 	def draw_filter(self, context: bpy.types.Context, layout: bpy.types.UILayout):
 		row = layout.row(align=True)
@@ -112,9 +112,9 @@ class STFDrawInstanceComponentList(bpy.types.UIList):
 	bl_idname = "COLLECTION_UL_stf_instance_component_list"
 
 	sort_reverse: bpy.props.BoolProperty(default=False, name="Reverse")
-	sort_by: bpy.props.EnumProperty(items=[("bone", "Bone", "", "BONE_DATA", 0),("stf_type", "Component Type", "", "GROUP", 1)], name="Sort by")# type: ignore
-	filter_bone: bpy.props.StringProperty(name="Filter Bone")# type: ignore
-	filter_type: bpy.props.StringProperty(name="Filter Type")# type: ignore
+	sort_by: bpy.props.EnumProperty(items=[("bone", "Bone", "", "BONE_DATA", 0),("stf_type", "Component Type", "", "GROUP", 1)], name="Sort by")
+	filter_bone: bpy.props.StringProperty(name="Filter Bone")
+	filter_type: bpy.props.StringProperty(name="Filter Type")
 
 	def draw_filter(self, context: bpy.types.Context, layout: bpy.types.UILayout):
 		row = layout.row(align=True)
@@ -282,22 +282,22 @@ def draw_components_ui(
 		component_filter = type(component_holder)
 
 	row = layout.row(align=True)
-	# let available_component_modules
+	# let selected_component_type
 	if(is_data_resource_component):
 		set_stf_data_resource_component_filter(component_filter)
-		available_component_modules = context.scene.stf_data_resource_component_modules
+		selected_component_type = context.scene.stf_data_resource_component_modules
 		row.prop(bpy.context.scene, "stf_data_resource_component_modules", text="")
 	elif(is_component_instance):
 		set_stf_component_instance_filter(component_filter)
-		available_component_modules = context.scene.stf_component_instance_modules
+		selected_component_type = context.scene.stf_component_instance_modules
 		row.prop(bpy.context.scene, "stf_component_instance_modules", text="")
 	else:
 		set_stf_component_filter(component_filter)
-		available_component_modules = context.scene.stf_component_modules
+		selected_component_type = context.scene.stf_component_modules
 		row.prop(bpy.context.scene, "stf_component_modules", text="")
 
-	selected_add_module = find_component_handler(stf_modules, available_component_modules)
-	if(selected_add_module and selected_add_module.stf_type is None): # Fallback
+	selected_component_handler = find_component_handler(stf_modules, selected_component_type)
+	if(selected_component_handler and selected_component_handler.stf_type is None): # Fallback
 		row2 = layout.row(align=True)
 		row2_l = row2.row(align=True)
 		if(not bpy.context.scene.stf_fallback_component_type or len(bpy.context.scene.stf_fallback_component_type) < 3 or "." not in bpy.context.scene.stf_fallback_component_type):
@@ -309,15 +309,15 @@ def draw_components_ui(
 			row2_r.enabled = False
 		add_button = row2_r.operator(add_component_op, icon="PLUS", text="Add Fallback Component")
 		add_button.stf_type = bpy.context.scene.stf_fallback_component_type
-		add_button.property_name = selected_add_module.blender_property_name
+		add_button.property_name = selected_component_handler.blender_property_name
 		add_button.default_name = bpy.context.scene.stf_fallback_component_type
-	elif(selected_add_module):
+	elif(selected_component_handler):
 		row_l = row.row(align=True)
 		row_l.alignment = "RIGHT"
 		add_button = row_l.operator(add_component_op, icon="PLUS", text="Add Component")
-		add_button.stf_type = available_component_modules
-		add_button.property_name = selected_add_module.blender_property_name
-		add_button.default_name = selected_add_module.pretty_name_template if hasattr(selected_add_module, "pretty_name_template") and selected_add_module.pretty_name_template else selected_add_module.stf_type
+		add_button.stf_type = selected_component_type
+		add_button.property_name = selected_component_handler.blender_property_name
+		add_button.default_name = selected_component_handler.pretty_name_template if hasattr(selected_component_handler, "pretty_name_template") and selected_component_handler.pretty_name_template else selected_component_handler.stf_type
 	else:
 		row.separator(factor=1)
 		row.label(text="Please select a component type")

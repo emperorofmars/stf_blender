@@ -20,9 +20,13 @@ def stf_animation_import(context: STF_ImportContext, json_resource: dict, stf_id
 	blender_animation = bpy.data.actions.new(json_resource.get("name", "STF Animation"))
 	blender_animation.stf_info.stf_id = stf_id
 	blender_animation.use_fake_user = True
+
 	if(json_resource.get("name")):
 		blender_animation.stf_info.stf_name = json_resource["name"]
 		blender_animation.stf_info.stf_name_source_of_truth = True
+
+	if(slot_link_data_model_version[0] > 0 or slot_link_data_model_version[1] >= 2):
+		blender_animation.slot_link.target_collection = context.get_root_collection()
 
 	fps = json_resource.get("fps", 30)
 	if(fps != bpy.context.scene.render.fps):

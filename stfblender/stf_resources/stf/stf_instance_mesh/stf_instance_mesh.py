@@ -2,9 +2,9 @@ import bpy
 from typing import Any
 
 from .....stfblender_common import STF_ExportContext, STF_ImportContext, STF_Handler_BlenderNative, STF_Info, BlenderPropertyPathPart, STF_Handler_Animation, STFPropertyPathPart, STFReportSeverity, STFReport, STF_Category, ensure_stf_id
+from .....stfblender_common.helpers import draw_multiline_text
 from .stf_instance_mesh_data import STF_Instance_Mesh
-from .stf_instance_mesh_ui import STFSetMeshInstanceIDOperator, draw_instance_mesh_ui
-from .stf_instance_mesh_util import set_instance_blendshapes
+from .stf_instance_mesh_ops import RemoveUnmodifiedBlendshapeOverrides, STFDrawMeshInstanceBlendshapeList, STFSetMeshInstanceIDOperator
 
 
 class Handler_STF_Instance_Mesh(STF_Handler_BlenderNative, STF_Handler_Animation):
@@ -17,7 +17,19 @@ class Handler_STF_Instance_Mesh(STF_Handler_BlenderNative, STF_Handler_Animation
 
 	@classmethod
 	def draw(cls, layout: bpy.types.UILayout, context: bpy.types.Context, blender_resource: Any) -> None | bool:
-		return draw_instance_mesh_ui(layout, context, blender_resource)
+		if(blender_resource[0].find_armature()):
+			t, r, s = blender_resource[0].matrix_local.decompose()
+			if(t.length > 0.0001 or abs(r.x) > 0.0001 or abs(r.y) > 0.0001 or abs(r.z) > 0.0001 or abs((r.w - 1)) > 0.0001 or abs(s.x - 1) > 0.0001 or abs(s.y - 1) > 0.0001 or abs(s.z - 1) > 0.0001):
+				draw_multiline_text(layout, "Warning, this mesh is not aligned with its Armature!\nThis will lead to differing behavior outside of Blender.\nApplying all Transforms for the Mesh and Armature will likely fix this.", width=80, icon="ERROR", alert=True) # pyright: ignore[reportArgumentType]
+				layout.separator(factor=2, type="LINE")
+
+		# Blendshape Values per Instance
+		if(blender_resource[1].shape_keys and len(blender_resource[1].shape_keys.key_blocks) > 1):
+			layout.label(text=f"Instance Shape Key Overrides ({len(blender_resource[0].stf_instance_mesh.blendshape_values)}):")
+			layout.template_list(STFDrawMeshInstanceBlendshapeList.bl_idname, "", blender_resource[1].shape_keys, "key_blocks", blender_resource[0].stf_instance_mesh, "active_blendshape")
+			row = layout.row()
+			row.alignment = "RIGHT"
+			row.operator(RemoveUnmodifiedBlendshapeOverrides.bl_idname)
 
 	@staticmethod
 	def get_stf_prop_holder(blender_resource: Any) -> STF_Info:
@@ -25,12 +37,12 @@ class Handler_STF_Instance_Mesh(STF_Handler_BlenderNative, STF_Handler_Animation
 
 	@classmethod
 	def import_resource(cls, context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: Any) -> Any | STFReport:
-		blender_resource = context.import_resource(json_resource, json_resource["mesh"], stf_category=STF_Category.DATA)
-		blender_object = bpy.data.objects.new(json_resource.get("name", "STF Node"), blender_resource)
+		blender_mesh: bpy.types.Mesh = context.import_resource(json_resource, json_resource["mesh"], stf_category=STF_Category.DATA) # pyright: ignore[reportAssignmentType]
+		blender_object = bpy.data.objects.new(json_resource.get("name", "STF Node"), blender_mesh)
 		blender_object.stf_instance.stf_id = stf_id
 		if(json_resource.get("name")):
 			blender_object.stf_instance.stf_name = json_resource["name"]
-		context.register_imported_resource(stf_id, (blender_object, blender_resource))
+		context.register_imported_resource(stf_id, (blender_object, blender_mesh))
 
 		if(not blender_object or type(blender_object) is not bpy.types.Object):
 			context.report(STFReport("Failed to import mesh: " + str(json_resource.get("instance", {}).get("mesh")), STFReportSeverity.Error, stf_id, cls.stf_type, context_resource))
@@ -40,19 +52,20 @@ class Handler_STF_Instance_Mesh(STF_Handler_BlenderNative, STF_Handler_Animation
 			if(not armature_instance):
 				context.report(STFReport("Invalid armature instance: " + str(json_resource["armature_instance"]), STFReportSeverity.Error, stf_id, cls.stf_type, context_resource))
 			else:
-				modifier: bpy.types.ArmatureModifier = blender_object.modifiers.new("Armature", "ARMATURE")  # pyright: ignore[reportAssignmentType]
+				modifier: bpy.types.ArmatureModifier = blender_object.modifiers.new("Armature", "ARMATURE") # pyright: ignore[reportAssignmentType]
 				modifier.object = armature_instance
 
 		# blendshape values per instance
 		if("blendshape_values" in json_resource):
-			set_instance_blendshapes(blender_object)
-			blender_object.stf_instance_mesh.override_blendshape_values = True
 			for index, blendshape_value in enumerate(json_resource["blendshape_values"]):
-				instance_blendshape = blender_object.stf_instance_mesh.blendshape_values[index + 1]
-				if(blendshape_value != None):
-					instance_blendshape.value = blendshape_value
-					instance_blendshape.override = True
-					instance_blendshape.index_on_mesh = index
+				if(blendshape_value is None):
+					continue
+				if(not blender_mesh.shape_keys or index >= len(blender_mesh.shape_keys.key_blocks)):
+					context.report(STFReport("Invalid blendshape instance override", STFReportSeverity.Error, stf_id, cls.stf_type, context_resource))
+					break
+				instance_blendshape = blender_object.stf_instance_mesh.blendshape_values.add()
+				instance_blendshape.name = blender_mesh.shape_keys.key_blocks[index].name
+				instance_blendshape.value = blendshape_value
 
 		if("materials" in json_resource):
 			for material_index, material_id in enumerate(json_resource["materials"]):
@@ -97,13 +110,11 @@ class Handler_STF_Instance_Mesh(STF_Handler_BlenderNative, STF_Handler_Animation
 				material_slots.append(None)
 		ret["materials"] = material_slots
 
-		if(blender_mesh.shape_keys and len(blender_mesh.shape_keys.key_blocks) > 1 and blender_object.stf_instance_mesh.override_blendshape_values):
+		if(blender_mesh.shape_keys and len(blender_mesh.shape_keys.key_blocks) > 1 and len(blender_object.stf_instance_mesh.blendshape_values) > 0):
 			blendshape_values = []
 			for blendshape in blender_mesh.shape_keys.key_blocks[1:]:
-				for instance_blendshape in blender_object.stf_instance_mesh.blendshape_values:
-					if(instance_blendshape.name == blendshape.name):
-						blendshape_values.append(instance_blendshape.value if instance_blendshape.override else None)
-						break
+				if(blendshape.name in blender_object.stf_instance_mesh.blendshape_values):
+					blendshape_values.append(blender_object.stf_instance_mesh.blendshape_values[blendshape.name].value)
 				else:
 					blendshape_values.append(None)
 			ret["blendshape_values"] = blendshape_values

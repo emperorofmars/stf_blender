@@ -1,6 +1,9 @@
 # Changelog
 
 ## v0.1.9
+* `stf.animation` handles SlotLink target-collection.
+* `stf.instance.mesh`: simplified instance shape key overrides.
+* Added primitive GUI to Collections to show which animations can be exported, if SlotLink v0.2 or higher is used.
 
 ## v0.1.8
 * Adapted `stf.animation` to support SlotLink v0.2.x with multiple targets per slot.
@@ -8,7 +11,7 @@
 * Improved logging & error messages.
 * Prevent faulty import of component-resources, i.e. when a fallback resource referenced a component from another resource, that didn't import correctly.
 * `ava.expressions` can handle animations that were not exported.
-* `stfexp.armature.humanoid` fixed operator button parameters
+* `stfexp.armature.humanoid` fixed operator button parameters.
 
 ## v0.1.7
 * The codebase received a biiiig refactoring

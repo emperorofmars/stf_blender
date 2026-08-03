@@ -153,7 +153,7 @@ def draw(layout: bpy.types.UILayout, context: bpy.types.Context, resource_ref: S
 
 		if(hasattr(selected_module, "draw")):
 			box.separator(factor=1, type="LINE")
-			selected_module.draw(box, context, resource_ref, collection, resource)
+			selected_module.draw(box, context, resource_ref, collection, resource) # pyright: ignore[reportArgumentType]
 		else:
 			pass
 
