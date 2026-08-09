@@ -81,7 +81,8 @@ class ParseFromCurrentArmatureInstance(bpy.types.Operator):
 	component_id: bpy.props.StringProperty()
 
 	@classmethod
-	def poll(cls, context: bpy.types.Context) -> bool: return context.object is not None and type(context.object.data) is bpy.types.Armature and context.bone  # pyright: ignore[reportReturnType]
+	def poll(cls, context: bpy.types.Context) -> bool:
+		return context.object is not None and type(context.object.data) is bpy.types.Armature and hasattr(context, "bone") and context.bone is not None
 
 	def invoke(self, context, event):
 		return context.window_manager.invoke_confirm(self, event, message="This will overwrite current values!")

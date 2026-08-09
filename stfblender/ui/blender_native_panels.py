@@ -70,7 +70,7 @@ class BonePanel(bpy.types.Panel):
 
 	@classmethod
 	def poll(cls, context: bpy.types.Context):
-		return hasattr(context, "bone") and context.bone is not None and find_export_handler(ArmatureBone(context.armature, context.bone.name)) is not None # pyright: ignore[reportArgumentType]
+		return hasattr(context, "armature") and context.armature is not None and hasattr(context, "bone") and context.bone is not None and find_export_handler(ArmatureBone(context.armature, context.bone.name)) is not None
 
 	def draw(self, context: bpy.types.Context):
 		handler = find_export_handler(ArmatureBone(context.armature, context.bone.name)) # pyright: ignore[reportArgumentType]
