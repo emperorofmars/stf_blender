@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.1.10
+* Poll function bugfixes when checking whether a bone is selected.
+
 ## v0.1.9
 * `stf.animation` handles SlotLink target-collection.
 * `stf.instance.mesh`: simplified instance shape key overrides GUI and data-model.
