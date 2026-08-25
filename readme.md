@@ -1,10 +1,13 @@
+![](https://codeberg.org/stf_format/stf_blender/badges/release.svg)
+![](https://codeberg.org/stf_format/stf_blender/badges/stars.svg)
+
 # STF Blender
 **Squirrel Transfer Format - Modular 3D Interchange-Format**\
 *Intended for (not only) games-development use-cases.*
 
 **WIP implementation for Blender 4.5+. Do not use productively!**
 
-🌰 **[Read the User Guide!](https://docs.stfform.at/guide/blender.html)** 🌰 **[Report Issues](https://codeberg.org/stf_format/stf_blender/issues)** 🌰 **[STF Documentation](https://docs.stfform.at/)**
+🌰 **[User Guide!](https://docs.stfform.at/guide/blender.html)** 🌰 **[Report Issues](https://codeberg.org/stf_format/stf_blender/issues)** 🌰 **[STF Documentation](https://docs.stfform.at/)**
 
 ---
 Please open issues for any bugs or misbehavior you notice. Feel free to open issues for feature requests.
@@ -50,15 +53,25 @@ All source-code in this repository, except when noted in individual files and/or
 * Apache License, Version 2.0 (LICENSE-APACHE2 or http://www.apache.org/licenses/LICENSE-2.0)
 
 <!--
-**Build the extension**
 
-Install dependencies (preferably into a venv):
+# Install dependencies (preferably into a venv):
 ``` sh
 pip install -r requirements.txt
 ```
 
-Build the extension:
+# Build the extension
 ``` python
 python bpydev.py package -o packages
 ```
+
+# Release new version
+* Create tags both ./stfblender_common and the root repo
+* Update the ./stfblender_common latest branch to the tagged commit
+* Push everything
+* Build the extension and create a new codeberg release
+* Update latest version in stf_documentation
+* Run publish actions:
+	* https://codeberg.org/stf_format/stf_documentation
+	* https://codeberg.org/stf_format/stf_blender_extension_repository
+
 -->

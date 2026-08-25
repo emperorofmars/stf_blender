@@ -27,11 +27,12 @@ reportAttributeAccessIssue = "none"
 reportOptionalMemberAccess = "none"
 #reportIncompatibleMethodOverride = "none"
 
-
 [tool.ruff]
 ignore = [
 	"E701",
 	"E401",
+	"I001",
+	"RUF022",
 ]
 [tool.ruff.format]
 quote-style = "double"
