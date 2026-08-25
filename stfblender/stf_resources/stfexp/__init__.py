@@ -22,7 +22,9 @@ from .stfexp_collider_plane import Handler_STFEXP_Collider_Plane
 from .stfexp_camera import Handler_STFEXP_Camera
 from .stfexp_light import Handler_STFEXP_Light
 from .stfexp_instance_text import Handler_STFEXP_Instance_Text
-from .stfexp_text.stfexp_text import Handler_STFEXP_Text
+from .stfexp_text import Handler_STFEXP_Text
+from .stfexp_curve import Handler_STFEXP_Curve
+from .stfexp_instance_curve import Handler_STFEXP_Instance_Curve
 from .stfexp_animation_blendtree import Handler_STFEXP_Animation_Blendtree
 from .stfexp_node_ethereal import Handler_STFEXP_Node_Ethereal
 
@@ -45,6 +47,8 @@ register_stf_handlers = [
 	Handler_STFEXP_Light,
 	Handler_STFEXP_Instance_Text,
 	Handler_STFEXP_Text,
+	Handler_STFEXP_Instance_Curve,
+	Handler_STFEXP_Curve,
 	Handler_STFEXP_Animation_Blendtree,
 	Handler_STFEXP_Node_Ethereal,
 ]

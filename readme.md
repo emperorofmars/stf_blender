@@ -7,7 +7,7 @@
 
 **WIP implementation for Blender 4.5+. Do not use productively!**
 
-🌰 **[User Guide!](https://docs.stfform.at/guide/blender.html)** 🌰 **[Report Issues](https://codeberg.org/stf_format/stf_blender/issues)** 🌰 **[STF Documentation](https://docs.stfform.at/)**
+🌰 **[User Guide](https://docs.stfform.at/guide/blender.html)** 🌰 **[Report Issues](https://codeberg.org/stf_format/stf_blender/issues)** 🌰 **[STF Documentation](https://docs.stfform.at/)**
 
 ---
 Please open issues for any bugs or misbehavior you notice. Feel free to open issues for feature requests.

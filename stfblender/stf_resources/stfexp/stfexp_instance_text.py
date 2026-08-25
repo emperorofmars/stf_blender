@@ -5,8 +5,6 @@ from ....stfblender_common import STF_ExportContext, STF_ImportContext, STFRepor
 
 # TODO this module is at a bare minimum level, improve it
 
-_stf_type = "stfexp.instance.text"
-
 
 class STFSetSTFEXPInstanceTextIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
 	"""Set STF-ID for Text Instance"""
@@ -17,7 +15,7 @@ class STFSetSTFEXPInstanceTextIDOperator(bpy.types.Operator, STFSetIDOperatorBas
 
 
 class Handler_STFEXP_Instance_Text(STF_Handler_BlenderNative):
-	stf_type = _stf_type
+	stf_type = "stfexp.instance.text"
 	stf_category = STF_Category.INSTANCE
 	like_types = ["instance.text"]
 	understood_blender_types = [tuple]
@@ -25,10 +23,10 @@ class Handler_STFEXP_Instance_Text(STF_Handler_BlenderNative):
 	get_stf_prop_holder = lambda blender_resource: blender_resource[0].stf_instance
 
 	@classmethod
-	def import_resource(cls, context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: Any) -> tuple[bpy.types.Object, bpy.types.Text] | STFReport:
-		blender_text: bpy.types.Text | None = context.import_resource(json_resource, json_resource["text"], STF_Category.DATA)
-		if(type(blender_text) is not bpy.types.Text):
-			return STFReport("Failed to import text", STFReportSeverity.Error, stf_id, _stf_type, context_resource)
+	def import_resource(cls, context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: Any) -> tuple[bpy.types.Object, bpy.types.TextCurve] | STFReport:
+		blender_text: bpy.types.TextCurve | None = context.import_resource(json_resource, json_resource["text"], STF_Category.DATA)
+		if(type(blender_text) is not bpy.types.TextCurve):
+			return STFReport("Failed to import text", STFReportSeverity.Error, stf_id, cls.stf_type, context_resource)
 
 		blender_object = bpy.data.objects.new(json_resource.get("name", "STFEXP Instance Text"), blender_text)
 		blender_object.stf_instance.stf_id = stf_id
@@ -43,11 +41,11 @@ class Handler_STFEXP_Instance_Text(STF_Handler_BlenderNative):
 	@classmethod
 	def export_resource(cls, context: STF_ExportContext, blender_resource: Any, context_resource: Any) -> tuple[dict, str]:
 		blender_object: bpy.types.Object = blender_resource[0]
-		blender_text: bpy.types.Text = blender_resource[1]
+		blender_text: bpy.types.TextCurve = blender_resource[1]
 		ensure_stf_id(context, blender_object.stf_instance)
 
 		ret = {
-			"type": _stf_type,
+			"type": cls.stf_type,
 			"name": blender_object.stf_instance.stf_name,
 		}
 		ret["text"] = context.serialize_resource(ret, blender_text, None, STF_Category.DATA)
