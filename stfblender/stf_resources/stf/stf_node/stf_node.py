@@ -4,6 +4,7 @@ import mathutils
 from typing import Any
 
 from .....stfblender_common import STF_ExportContext, STF_ImportContext, STF_TaskSteps, STFReportSeverity, STFReport, STF_Category, STF_Handler_BlenderNative, STF_Handler_Animation, STF_Handler_ComponentHolder, BlenderPropertyPathPart, STFPropertyPathPart, boilerplate_register, boilerplate_unregister, get_components_from_object, ensure_stf_id
+from .....stfblender_common.blender_grr import STFDataResourceReference
 from .....stfblender_common.utils import trs_utils
 from .....stfblender_common.helpers import get_resource_id, register_exported_resource, draw_multiline_text
 from .node_property_conversion import stf_node_export_blender_animation, stf_node_import_stf_animation
@@ -14,6 +15,11 @@ class STF_Instance(bpy.types.PropertyGroup):
 	stf_id: bpy.props.StringProperty(name="ID", options=set())
 	stf_name: bpy.props.StringProperty(name="Name", options=set())
 	enabled: bpy.props.BoolProperty(name="Enabled", default=True, options=set())
+
+	# TODO the following properties are not yet accounted for
+	use_non_native_resource: bpy.props.BoolProperty(name="Instantiates Non-Native Resource", default=False, options=set())
+	use_fallback_resource: bpy.props.BoolProperty(name="Fallback Instance", default=False, options=set())
+	non_native_resource: bpy.props.PointerProperty(type=STFDataResourceReference, name="Instantiated Non-Native Resource", options=set())
 
 
 class Handler_STF_Node(STF_Handler_BlenderNative, STF_Handler_ComponentHolder, STF_Handler_Animation):
@@ -131,8 +137,15 @@ class Handler_STF_Node(STF_Handler_BlenderNative, STF_Handler_ComponentHolder, S
 		if(blender_object.hide_render):
 			json_resource["enabled"] = False
 
-		if(blender_object.data):
-			instance_id = context.serialize_resource(json_resource, (blender_object, blender_object.data), context_object, stf_category="instance")
+		instance_resource = None
+		if(blender_object.stf_instance.use_fallback_resource):
+			instance_resource = (blender_object, blender_object.stf_json_fallback_instance)
+		elif(blender_object.stf_instance.use_non_native_resource):
+			pass # TODO
+		elif(blender_object.data is not None):
+			instance_resource = (blender_object, blender_object.data)
+		if(instance_resource is not None):
+			instance_id = context.serialize_resource(json_resource, instance_resource, context_object, stf_category=STF_Category.INSTANCE)
 			if(instance_id is not None):
 				json_resource["instance"] = instance_id
 

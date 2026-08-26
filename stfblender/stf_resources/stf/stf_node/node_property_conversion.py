@@ -2,7 +2,7 @@ import bpy
 import math
 import re
 import mathutils
-from typing import Any, Callable
+from typing import Any, Callable, Sequence
 
 from .....stfblender_common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart
 from .....stfblender_common.utils.animation_conversion_utils import *
@@ -17,11 +17,11 @@ from .....stfblender_common.utils.animation_conversion_utils import *
 Export
 """
 
-def _create_translation_to_stf_func(blender_object: bpy.types.Object) -> Callable:
+def _create_translation_to_stf_func(blender_object: bpy.types.Object) -> Callable[[Sequence[float]], Sequence[float]]:
 	if(blender_object.parent_type == "OBJECT" and blender_object.parent):
 		offset = blender_object.matrix_parent_inverse.copy()
 
-		def _ret(value: list[float]) -> list[float]: # pyright: ignore[reportRedeclaration]
+		def _ret(value: Sequence[float]) -> Sequence[float]: # pyright: ignore[reportRedeclaration]
 			return convert_translation_to_stf((offset @ mathutils.Matrix.Translation(value)).translation)
 		return _ret
 
@@ -29,7 +29,7 @@ def _create_translation_to_stf_func(blender_object: bpy.types.Object) -> Callabl
 		pose_bone = blender_object.parent.pose.bones[blender_object.parent_bone]
 		offset = mathutils.Matrix.Translation([0, 0, (pose_bone.tail - pose_bone.head).length]) @ mathutils.Matrix.Rotation(math.radians(90), 4, "X") @ blender_object.matrix_parent_inverse
 
-		def _ret(value: list[float]) -> list[float]:
+		def _ret(value: Sequence[float]) -> Sequence[float]:
 			return convert_translation_to_stf((offset @ mathutils.Matrix.Translation(value)).translation)
 		return _ret
 
@@ -39,43 +39,43 @@ def _create_translation_to_stf_func(blender_object: bpy.types.Object) -> Callabl
 def _convert_bone_offset_rotation_to_stf(blender_object: bpy.types.Object) -> mathutils.Matrix:
 	return mathutils.Matrix.Rotation(math.radians(90), 4, "X") @ blender_object.matrix_parent_inverse
 
-def _create_rotation_to_stf_func(blender_object: bpy.types.Object) -> Callable:
+def _create_rotation_to_stf_func(blender_object: bpy.types.Object) -> Callable[[Sequence[float]], Sequence[float]]:
 	if(blender_object.parent_type == "OBJECT" and blender_object.parent):
 		offset = blender_object.matrix_parent_inverse.copy()
 
-		def _ret(value: list[float]) -> list[float]: # pyright: ignore[reportRedeclaration]
+		def _ret(value: Sequence[float]) -> Sequence[float]: # pyright: ignore[reportRedeclaration]
 			return convert_rotation_to_stf((offset @ mathutils.Quaternion(value).to_matrix().to_4x4()).to_quaternion())
 		return _ret
 
 	elif(blender_object.parent_type == "BONE" and blender_object.parent and blender_object.parent_bone):
 		offset = _convert_bone_offset_rotation_to_stf(blender_object)
 
-		def _ret(value: list[float]) -> list[float]:
+		def _ret(value: Sequence[float]) -> Sequence[float]:
 			return convert_rotation_to_stf((offset @ mathutils.Quaternion(value).to_matrix().to_4x4()).to_quaternion())
 		return _ret
 
 	else:
 		return convert_rotation_to_stf
 
-def _create_rotation_euler_to_stf_func(blender_object: bpy.types.Object) -> Callable:
+def _create_rotation_euler_to_stf_func(blender_object: bpy.types.Object) -> Callable[[Sequence[float]], Sequence[float]]:
 	if(blender_object.parent_type == "OBJECT" and blender_object.parent):
 		offset = blender_object.matrix_parent_inverse.copy()
 
-		def _ret(value: list[float]) -> list[float]: # pyright: ignore[reportRedeclaration]
+		def _ret(value: Sequence[float]) -> Sequence[float]: # pyright: ignore[reportRedeclaration]
 			return convert_rotation_euler_to_stf((offset @ mathutils.Euler(value).to_matrix().to_4x4()).to_euler()) # pyright: ignore[reportArgumentType]
 		return _ret
 
 	elif(blender_object.parent_type == "BONE" and blender_object.parent and blender_object.parent_bone):
 		offset = _convert_bone_offset_rotation_to_stf(blender_object)
 
-		def _ret(value: list[float]) -> list[float]:
+		def _ret(value: Sequence[float]) -> Sequence[float]:
 			return convert_rotation_euler_to_stf((offset @ mathutils.Euler(value).to_matrix().to_4x4()).to_euler()) # pyright: ignore[reportArgumentType]
 		return _ret
 
 	else:
 		return convert_rotation_euler_to_stf
 
-def _create_scale_to_stf_func(blender_object: bpy.types.Object) -> Callable:
+def _create_scale_to_stf_func(blender_object: bpy.types.Object) -> Callable[[Sequence[float]], Sequence[float]]:
 	offset = mathutils.Vector([1, 1, 1])
 	if(blender_object.parent_type == "OBJECT" and blender_object.parent):
 		_, _, s = (blender_object.parent.matrix_world.inverted_safe() @ blender_object.matrix_world).decompose()
@@ -85,7 +85,7 @@ def _create_scale_to_stf_func(blender_object: bpy.types.Object) -> Callable:
 		_, _, s = ((blender_object.parent.matrix_world @ (blender_object.parent.pose.bones[blender_object.parent_bone].matrix @ mathutils.Matrix.Rotation(math.radians(-90), 4, "X"))).inverted_safe() @ blender_object.matrix_world).decompose() # Blender why
 		offset = [s[i] / blender_object.scale[i] for i in range(3)]
 
-	def _ret(value: list[float]) -> list[float]:
+	def _ret(value: Sequence[float]) -> Sequence[float]:
 		value = [value[i] * offset[i] for i in range(3)]
 		return convert_scale_to_stf(value)
 	return _ret
@@ -190,7 +190,7 @@ def _create_scale_to_blender_func(blender_object: bpy.types.Object) -> Callable:
 	elif(blender_object.parent_type == "BONE" and blender_object.parent and blender_object.parent_bone):
 		_, _, offset = (blender_object.parent.matrix_world).decompose()
 
-	def _ret(value: list[float]) -> list[float]:
+	def _ret(value: Sequence[float]) -> Sequence[float]:
 		value = [value[i] * offset[i] for i in range(3)]
 		return convert_scale_to_stf(value)
 	return _ret

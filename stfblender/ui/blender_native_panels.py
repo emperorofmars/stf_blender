@@ -36,11 +36,28 @@ class ObjectInstancePanel(bpy.types.Panel):
 
 	@classmethod
 	def poll(cls, context: bpy.types.Context):
-		return hasattr(context, "object") and context.object is not None and context.object.data is not None and find_export_handler((context.object, context.object.data)) is not None
+		return (
+			hasattr(context, "object") and context.object is not None
+			and (
+				(context.object.data is not None and find_export_handler((context.object, context.object.data)) is not None)
+				or context.object.stf_instance.use_non_native_resource
+				or context.object.stf_instance.use_fallback_resource
+			)
+		)
 
 	def draw(self, context: bpy.types.Context):
-		handler = find_export_handler((context.object, context.object.data))
-		draw_blender_native_panel(self.layout, context, (context.object, context.object.data), handler) # pyright: ignore[reportArgumentType]
+		handler = None
+		context_resource = None
+		if(context.object.stf_instance.use_fallback_resource):
+			handler = find_export_handler((context.object, context.object.stf_json_fallback_instance))
+			context_resource = (context.object, context.object.stf_json_fallback_instance)
+		elif(context.object.stf_instance.use_non_native_resource):
+			pass # TODO
+		elif(context.object.data is not None):
+			handler = find_export_handler((context.object, context.object.data))
+			context_resource = (context.object, context.object.data)
+		if(handler and context_resource):
+			draw_blender_native_panel(self.layout, context, context_resource, handler) # pyright: ignore[reportArgumentType]
 
 class ArmaturePanel(bpy.types.Panel):
 	"""STF Resources for Blender Armatures"""

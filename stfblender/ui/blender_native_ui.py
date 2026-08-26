@@ -14,10 +14,12 @@ def draw_blender_native_panel(
 		stf_handler: STF_Handler_BlenderNative | STF_Handler_ComponentHolder
 ) -> None:
 	if(not hasattr(stf_handler, "get_stf_prop_holder") or not hasattr(stf_handler, "operator_set_stf_id")):
-		layout.label(text="No get_stf_prop_holder or operator_set_stf_id: " + str(stf_handler))
+		layout.label(text="No `get_stf_prop_holder` or `operator_set_stf_id`: " + str(stf_handler))
 		return
-
-	layout.box().label(text=stf_handler.stf_type)
+	if(stf_handler.stf_type == None):
+		layout.box().label(text="Fallback!", icon="WARNING_LARGE")
+	else:
+		layout.box().label(text=stf_handler.stf_type)
 	draw_stf_id_ui(layout, context, stf_handler.get_resource_object(blender_resource), stf_handler.get_stf_prop_holder(blender_resource), stf_handler.operator_set_stf_id, stf_handler.stf_category == STF_Category.INSTANCE)
 
 	if(hasattr(stf_handler, "draw")):

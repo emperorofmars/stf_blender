@@ -109,6 +109,7 @@ class STF_ExportContext(ISTF_ExportContext):
 			if(export_fail_severity.value >= STFReportSeverity.Error.value):
 				_logger.error("No Handler Found", stack_info=True)
 			self.report(STFReport("No Handler Found", export_fail_severity, None, None, blender_object))
+
 		return None
 
 

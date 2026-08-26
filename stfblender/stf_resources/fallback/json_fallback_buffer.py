@@ -1,5 +1,6 @@
 import bpy
 import base64
+from typing import Any
 
 from ....stfblender_common import STF_ExportContext, STF_ImportContext
 
@@ -9,7 +10,7 @@ class STF_FallbackBuffer(bpy.types.PropertyGroup):
 	buffer_base64: bpy.props.StringProperty(name="Base64 Buffer", options=set())
 
 
-def encode_buffer(context: STF_ImportContext, buffer_id: str, stf_fallback: bpy.types.CollectionProperty):
+def encode_buffer(context: STF_ImportContext, buffer_id: str, stf_fallback: Any):
 	blender_buffer = stf_fallback.buffers.add()
 	blender_buffer.name = buffer_id
 	blender_buffer.stf_id = buffer_id

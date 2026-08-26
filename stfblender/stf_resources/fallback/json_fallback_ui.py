@@ -7,6 +7,16 @@ from ....stfblender_common.resource.data import STF_Data_Ref
 from ....stfblender_common.blender_grr import BlenderGRR, draw_blender_grr
 
 
+def _get_resource(blender_id_property: str, blender_id_object: str, blender_property_name: str, resource_id: str, is_instance: bool) -> Any | None:
+	if(blender_id := getattr(bpy.data, blender_id_property.lower() + "s")):
+		if(is_instance):
+			return getattr(blender_id[blender_id_object], blender_property_name)
+		else:
+			for resource in getattr(blender_id[blender_id_object], blender_property_name):
+				if(resource.stf_id == resource_id):
+					return resource
+
+
 class FallbackResourcesAdd(bpy.types.Operator):
 	"""Add a referenced resource"""
 	bl_idname = "stf.fallback_component_resources_add"
@@ -17,13 +27,12 @@ class FallbackResourcesAdd(bpy.types.Operator):
 	blender_id_object: bpy.props.StringProperty()
 	blender_property_name: bpy.props.StringProperty()
 	resource_id: bpy.props.StringProperty()
+	is_instance: bpy.props.BoolProperty()
 
 	def execute(self, context) -> set:
-		if(blender_id_property := getattr(bpy.data, self.blender_id_property.lower() + "s")):
-			for component in getattr(blender_id_property[self.blender_id_object], self.blender_property_name):
-				if(component.stf_id == self.resource_id):
-					component.referenced_resources.add()
-					return {"FINISHED"}
+		if(resource := _get_resource(self.blender_id_property, self.blender_id_object, self.blender_property_name, self.resource_id, self.is_instance)):
+			resource.referenced_resources.add()
+			return {"FINISHED"}
 		return {"CANCELLED"}
 
 class FallbackResourcesRemove(bpy.types.Operator):
@@ -37,13 +46,12 @@ class FallbackResourcesRemove(bpy.types.Operator):
 	blender_property_name: bpy.props.StringProperty()
 	resource_id: bpy.props.StringProperty()
 	reference_index: bpy.props.IntProperty()
+	is_instance: bpy.props.BoolProperty()
 
 	def execute(self, context) -> set:
-		if(blender_id_property := getattr(bpy.data, self.blender_id_property.lower() + "s")):
-			for component in getattr(blender_id_property[self.blender_id_object], self.blender_property_name):
-				if(component.stf_id == self.resource_id):
-					component.referenced_resources.remove(self.reference_index)
-					return {"FINISHED"}
+		if(resource := _get_resource(self.blender_id_property, self.blender_id_object, self.blender_property_name, self.resource_id, self.is_instance)):
+			resource.referenced_resources.remove(self.reference_index)
+			return {"FINISHED"}
 		return {"CANCELLED"}
 
 
@@ -57,15 +65,14 @@ class FallbackBuffersAdd(bpy.types.Operator):
 	blender_id_object: bpy.props.StringProperty()
 	blender_property_name: bpy.props.StringProperty()
 	resource_id: bpy.props.StringProperty()
+	is_instance: bpy.props.BoolProperty()
 
 	def execute(self, context) -> set:
-		if(blender_id_property := getattr(bpy.data, self.blender_id_property.lower() + "s")):
-			for component in getattr(blender_id_property[self.blender_id_object], self.blender_property_name):
-				if(component.stf_id == self.resource_id):
-					import uuid
-					buffer = component.buffers.add()
-					buffer.stf_id = str(uuid.uuid4())
-					return {"FINISHED"}
+		if(resource := _get_resource(self.blender_id_property, self.blender_id_object, self.blender_property_name, self.resource_id, self.is_instance)):
+			import uuid
+			buffer = resource.buffers.add()
+			buffer.stf_id = str(uuid.uuid4())
+			return {"FINISHED"}
 		return {"CANCELLED"}
 
 class FallbackBuffersRemove(bpy.types.Operator):
@@ -79,13 +86,12 @@ class FallbackBuffersRemove(bpy.types.Operator):
 	blender_property_name: bpy.props.StringProperty()
 	resource_id: bpy.props.StringProperty()
 	buffer_index: bpy.props.IntProperty()
+	is_instance: bpy.props.BoolProperty()
 
 	def execute(self, context) -> set:
-		if(blender_id_property := getattr(bpy.data, self.blender_id_property.lower() + "s")):
-			for component in getattr(blender_id_property[self.blender_id_object], self.blender_property_name):
-				if(component.stf_id == self.resource_id):
-					component.buffers.remove(self.buffer_index)
-					return {"FINISHED"}
+		if(resource := _get_resource(self.blender_id_property, self.blender_id_object, self.blender_property_name, self.resource_id, self.is_instance)):
+			resource.buffers.remove(self.buffer_index)
+			return {"FINISHED"}
 		return {"CANCELLED"}
 
 
@@ -105,15 +111,15 @@ class FallbackBuffersList(bpy.types.UIList):
 
 
 
-def draw_fallback(layout: bpy.types.UILayout, resource_ref: STF_Component_Ref | STF_Data_Ref, resource: Any):
+def draw_fallback(layout: bpy.types.UILayout, resource_ref: STF_Component_Ref | STF_Data_Ref, resource: Any, is_instance: bool = False):
 	col = layout.column(align=True)
 	json_error = None
 	try:
 		json_resource = json.loads(resource.json)
 		if("type" not in json_resource or json_resource["type"] != resource_ref.stf_type):
 			json_error = "Invalid 'type' in Json"
-	except Exception:
-		json_error = "Json Invalid"
+	except Exception as e:
+		json_error = "Json Invalid: " + str(e)
 	if(json_error):
 		col.alert = True
 		col.label(text=json_error, icon="ERROR")
@@ -135,6 +141,7 @@ def draw_fallback(layout: bpy.types.UILayout, resource_ref: STF_Component_Ref | 
 	add_resource_button.blender_property_name = resource_ref.blender_property_name
 	add_resource_button.blender_id_object = resource_ref.id_data.name
 	add_resource_button.blender_id_property = resource_ref.id_data.id_type
+	add_resource_button.is_instance = is_instance
 	if(len(resource.referenced_resources) > 0 and len(resource.referenced_resources) > resource.active_referenced_resource):
 		remove_resource_button = col.operator(FallbackResourcesRemove.bl_idname, text="", icon="X")
 		remove_resource_button.reference_index = resource.active_referenced_resource
@@ -142,6 +149,7 @@ def draw_fallback(layout: bpy.types.UILayout, resource_ref: STF_Component_Ref | 
 		remove_resource_button.blender_property_name = resource_ref.blender_property_name
 		remove_resource_button.blender_id_object = resource_ref.id_data.name
 		remove_resource_button.blender_id_property = resource_ref.id_data.id_type
+		remove_resource_button.is_instance = is_instance
 
 		box.use_property_split = True
 		draw_blender_grr(box.column(align=True), resource.referenced_resources[resource.active_referenced_resource])
@@ -158,6 +166,7 @@ def draw_fallback(layout: bpy.types.UILayout, resource_ref: STF_Component_Ref | 
 	add_buffer_button.blender_property_name = resource_ref.blender_property_name
 	add_buffer_button.blender_id_object = resource_ref.id_data.name
 	add_buffer_button.blender_id_property = resource_ref.id_data.id_type
+	add_buffer_button.is_instance = is_instance
 	if(len(resource.buffers) > 0 and len(resource.buffers) > resource.active_buffer):
 		remove_buffer_button = col.operator(FallbackBuffersRemove.bl_idname, text="", icon="X")
 		remove_buffer_button.buffer_index = resource.active_buffer
@@ -165,5 +174,6 @@ def draw_fallback(layout: bpy.types.UILayout, resource_ref: STF_Component_Ref | 
 		remove_buffer_button.blender_property_name = resource_ref.blender_property_name
 		remove_buffer_button.blender_id_object = resource_ref.id_data.name
 		remove_buffer_button.blender_id_property = resource_ref.id_data.id_type
+		remove_buffer_button.is_instance = is_instance
 
 		box.prop(resource.buffers[resource.active_buffer], "buffer_base64", text="Raw Base64 Data")

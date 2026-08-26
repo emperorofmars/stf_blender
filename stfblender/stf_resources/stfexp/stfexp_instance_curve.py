@@ -3,8 +3,6 @@ from typing import Any
 
 from ....stfblender_common import STF_ExportContext, STF_ImportContext, STFReportSeverity, STFReport, STF_Category, STF_Handler_BlenderNative, STFSetIDOperatorBase, ensure_stf_id
 
-# TODO this module is at a bare minimum level, improve it
-
 
 class STFSetSTFEXPInstanceCurveIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
 	"""Set STF-ID for Curve Instance"""
@@ -50,8 +48,6 @@ class Handler_STFEXP_Instance_Curve(STF_Handler_BlenderNative):
 		}
 		ret["curve"] = context.serialize_resource(ret, blender_curve, None, STF_Category.DATA)
 
-		#TODO
-
 		return ret, blender_object.stf_instance.stf_id
 
 	@classmethod
@@ -60,10 +56,3 @@ class Handler_STFEXP_Instance_Curve(STF_Handler_BlenderNative):
 			return 1000
 		else:
 			return -1
-
-
-def register():
-	pass
-
-def unregister():
-	pass

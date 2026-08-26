@@ -88,7 +88,7 @@ class Handler_STFEXP_Camera(STF_Handler_BlenderNative, STF_Handler_Animation):
 				#blender_camera.ortho_scale = _v_fov_to_h_fov(blender_camera, json_resource.get("fov", 40))
 				blender_camera.ortho_scale = json_resource.get("fov", 40)
 
-		return blender_object
+		return (blender_object, blender_camera)
 
 	@classmethod
 	def export_resource(cls, context: STF_ExportContext, blender_resource: Any, context_resource: Any) -> tuple[dict, str]:

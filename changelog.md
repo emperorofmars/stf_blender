@@ -4,7 +4,9 @@
 * Code cleanup & improved type annotations in common.
 * Uses multiline textboxes & labels if possible.
 * Serializes blenders "Empty" display settings.
-* `stfexp.instance.text` bugfix.
+* `stfexp.instance.text` wrong type-check bugfix.
+* `stfexp.instance.camera` return type bugfix.
+* Implemented instance-resources fallback.
 
 ## v0.1.10
 * Poll function bugfixes when checking whether a bone is selected.
