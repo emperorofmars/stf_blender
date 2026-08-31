@@ -37,14 +37,20 @@ def draw_blender_native_resource_selector(
 		else:
 			row.label(text=f"{spacing}Could not determine STF handler!", icon="ERROR")
 	elif(stf_info.determine_type == "manual"):
-		if(context.scene.stf_edit_resource_usage):
-			row.prop(stf_info, "use_as", text="")
-		else:
-			row.label(text=f"{stf_info.use_as}    (manually overridden!)")
 		for candidate in handlers:
 			if(candidate[0].stf_type == stf_info.use_as):
 				handler = candidate[0]
 				break
+		if(context.scene.stf_edit_resource_usage):
+			row_inner = row.row()
+			if(not handler):
+				row_inner.alert = True
+			row_inner.prop(stf_info, "use_as", text="", icon="NONE" if handler else "ERROR")
+		else:
+			if(handler):
+				row.label(text=f"{stf_info.use_as}    (manually overridden!)")
+			else:
+				row.label(text=f"{stf_info.use_as}    Invalid STF type!", icon="ERROR")
 	elif(not context.scene.stf_edit_resource_usage):
 		row.label(text=stf_info.determine_type.capitalize())
 
