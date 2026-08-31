@@ -60,7 +60,8 @@ class Handler_JsonFallbackInstance(STF_Handler_BlenderNative):
 	def import_resource(cls, context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: Any) -> Any | STFReport:
 		blender_object = bpy.data.objects.new(json_resource.get("name", "STF Fallback"), None)
 
-		blender_object.stf_instance.use_fallback_resource = True
+		blender_object.stf_instance.determine_type = "fallback"
+
 		blender_object.stf_instance.stf_id = stf_id
 		if(json_resource.get("name")):
 			blender_object.stf_instance.stf_name = json_resource["name"]

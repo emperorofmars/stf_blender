@@ -4,7 +4,7 @@ import math
 from typing import Any
 from collections.abc import Sequence
 
-from .....stfblender_common import STF_ImportContext, STF_ExportContext, STFReportSeverity, STFReport, STF_Category, STF_Handler_Animation, STF_Handler_ComponentHolder, STF_Handler_BlenderNative, STFPropertyPathPart, BlenderPropertyPathPart, boilerplate_register, boilerplate_unregister, get_components_from_object, ensure_stf_id
+from .....stfblender_common import STF_ImportContext, STF_ExportContext, STFReportSeverity, STFReport, STF_Category, STF_Handler_Animation, STF_Handler_ComponentHolder, STF_Handler_BlenderNative, STFPropertyPathPart, BlenderPropertyPathPart, get_components_from_object, ensure_stf_id
 from .....stfblender_common.utils import trs_utils
 from .....stfblender_common.utils.armature_bone import ArmatureBone
 from .....stfblender_common.utils.animation_conversion_utils import *
@@ -148,10 +148,8 @@ class Handler_STF_Bone(STF_Handler_BlenderNative, STF_Handler_ComponentHolder, S
 
 
 def register():
-	boilerplate_register(bpy.types.Bone)
 	bpy.types.Bone.stf_bone = bpy.props.PointerProperty(type=STF_Bone, name="STF Bone", options=set())
 
 def unregister():
-	boilerplate_unregister(bpy.types.Bone)
 	if hasattr(bpy.types.Bone, "stf_bone"):
 		del bpy.types.Bone.stf_bone

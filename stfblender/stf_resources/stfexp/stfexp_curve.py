@@ -1,7 +1,7 @@
 import bpy
 from typing import Any
 
-from ....stfblender_common import STF_ExportContext, STF_ImportContext, STF_Category, STF_Handler_BlenderNative, STF_Handler_ComponentHolder, STFSetIDOperatorBase, STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase, STFReport, STFReportSeverity, boilerplate_register, boilerplate_unregister, get_components_from_object, ensure_stf_id
+from ....stfblender_common import STF_ExportContext, STF_ImportContext, STF_Category, STF_Handler_BlenderNative, STF_Handler_ComponentHolder, STFSetIDOperatorBase, STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase, STFReport, STFReportSeverity, get_components_from_object, ensure_stf_id
 from ....stfblender_common.utils import trs_utils
 
 
@@ -130,10 +130,3 @@ def handle_conversion_to_blender(stf_handle: str):
 		case "aligned": return "ALIGNED"
 		case "auto": return "AUTO"
 		case _: return "FREE"
-
-
-def register():
-	boilerplate_register(bpy.types.Curve)
-
-def unregister():
-	boilerplate_unregister(bpy.types.Curve)

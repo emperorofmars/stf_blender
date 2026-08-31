@@ -1,7 +1,7 @@
 from typing import Any
 import bpy
 
-from .....stfblender_common import STF_Category, STF_ImportContext, STF_ExportContext, STF_Handler_ComponentHolder, STF_Handler_BlenderNative, STFReport, boilerplate_register, boilerplate_unregister, get_components_from_object
+from .....stfblender_common import STF_Category, STF_ImportContext, STF_ExportContext, STF_Handler_ComponentHolder, STF_Handler_BlenderNative, STFReport, get_components_from_object
 from .....stfblender_common.helpers import draw_slot_link_warning
 from .....stfblender_common.slot_link import ActionSlotLink, get_slot_link_data_model_version, get_slot_link_version
 from .stf_animation_bake import STFBakeAnimationOperator
@@ -92,10 +92,8 @@ class Handler_STF_Animation(STF_Handler_BlenderNative, STF_Handler_ComponentHold
 
 
 def register():
-	boilerplate_register(bpy.types.Action)
 	bpy.types.Action.stf_animation = bpy.props.PointerProperty(type=STF_Animation, options=set())
 
 def unregister():
 	if hasattr(bpy.types.Action, "stf_animation"):
 		del bpy.types.Action.stf_animation
-	boilerplate_unregister(bpy.types.Action)

@@ -3,6 +3,7 @@ import logging
 from typing import Any, Callable
 
 from ....stfblender_common import STF_ExportContext as ISTF_ExportContext, STF_TaskSteps, STF_Meta_AssetInfo_Json,  STFReportSeverity, STFReport, STFPropertyPathPart, STF_Category
+from ...register_stf_data import blender_types
 from .stf_export_state import STF_ExportState
 
 
@@ -79,6 +80,12 @@ class STF_ExportContext(ISTF_ExportContext):
 	def _serialize_resource(self, blender_object: Any, context_object: Any = None, stf_category: STF_Category | str | None = None, export_fail_severity: STFReportSeverity = STFReportSeverity.Error) -> str | None:
 		if(blender_object is None): return None
 		if(existing_id := self.get_resource_id(blender_object)): return existing_id
+
+		# Ignore native resources that are set to be ignored
+		if(stf_category == STF_Category.INSTANCE and type(blender_object) is tuple and hasattr(blender_object[0], "stf_instance") and blender_object[0].stf_instance.determine_type == "none"):
+			return None
+		elif(stf_category in [STF_Category.DATA, STF_Category.NODE] and type(blender_object) in blender_types and hasattr(blender_object, "stf_info") and blender_object.stf_info.determine_type == "none"):
+			return None
 
 		if(selected_handler := self._state.determine_handler(blender_object, stf_category)):
 			handler_ret = selected_handler.export_resource(self, blender_object, context_object)

@@ -2,7 +2,7 @@ from typing import Any
 
 import bpy
 
-from .....stfblender_common import STF_Category, STF_ImportContext, STF_ExportContext, STFReport, STF_Handler_BlenderNative, STF_Handler_ComponentHolder, boilerplate_register, boilerplate_unregister, get_components_from_object
+from .....stfblender_common import STF_Category, STF_ImportContext, STF_ExportContext, STFReport, STF_Handler_BlenderNative, STF_Handler_ComponentHolder, get_components_from_object
 from .....stfblender_common.helpers import draw_multiline_text
 from .mesh_import import import_stf_mesh
 from .mesh_export import export_stf_mesh
@@ -49,9 +49,7 @@ class Handler_STF_Mesh(STF_Handler_BlenderNative, STF_Handler_ComponentHolder):
 
 def register():
 	bpy.types.Mesh.stf_mesh = bpy.props.PointerProperty(type=STF_Mesh)
-	boilerplate_register(bpy.types.Mesh)
 
 def unregister():
-	boilerplate_unregister(bpy.types.Mesh)
 	if hasattr(bpy.types.Mesh, "stf_mesh"):
 		del bpy.types.Mesh.stf_mesh

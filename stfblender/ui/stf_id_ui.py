@@ -41,7 +41,7 @@ def draw_stf_id_ui(layout: bpy.types.UILayout, context: bpy.types.Context, blend
 
 
 def register():
-	bpy.types.Scene.stf_edit_resource_id = bpy.props.BoolProperty(name="Edit ID", description="Toggle the editing of the ID", default=False)
+	bpy.types.Scene.stf_edit_resource_id = bpy.props.BoolProperty(name="Edit ID", description="Toggle the editing of the ID", default=False, options={"SKIP_SAVE"})
 
 def unregister():
 	if hasattr(bpy.types.Scene, "stf_edit_resource_id"):

@@ -1,7 +1,7 @@
 import bpy
 from typing import Any
 
-from ....stfblender_common import STF_ExportContext, STF_ImportContext, STF_Category, STF_Handler_BlenderNative, STF_Handler_ComponentHolder, STFSetIDOperatorBase, STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase, boilerplate_register, boilerplate_unregister, get_components_from_object, ensure_stf_id
+from ....stfblender_common import STF_ExportContext, STF_ImportContext, STF_Category, STF_Handler_BlenderNative, STF_Handler_ComponentHolder, STFSetIDOperatorBase, STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase, get_components_from_object, ensure_stf_id
 
 
 class STFSetTextIDOperator(bpy.types.Operator, STFSetIDOperatorBase):
@@ -68,13 +68,3 @@ class Handler_STFEXP_Text(STF_Handler_BlenderNative, STF_Handler_ComponentHolder
 	operator_component_add = STFAddTextComponentOperator.bl_idname
 	operator_component_remove = STFRemoveTextComponentOperator.bl_idname
 	operator_component_edit = STFEditTextComponentIdOperator.bl_idname
-
-
-def register():
-	#bpy.types.TextCurve.stf_text = bpy.props.PointerProperty(type=STFEXP_Text)
-	boilerplate_register(bpy.types.TextCurve)
-
-def unregister():
-	boilerplate_unregister(bpy.types.TextCurve)
-	#if(hasattr(bpy.types.TextCurve, "stf_text")):
-	#	del bpy.types.TextCurve.stf_text

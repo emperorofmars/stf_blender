@@ -2,7 +2,7 @@ import bpy
 from typing import Any
 
 from .....stfblender_common import STF_ImportContext, STF_ExportContext, STF_Category, STFReport
-from .....stfblender_common.resource import STF_Handler_BlenderNative, STF_Handler_ComponentHolder, boilerplate_register, boilerplate_unregister, get_components_from_object, ensure_stf_id
+from .....stfblender_common.resource import STF_Handler_BlenderNative, STF_Handler_ComponentHolder, get_components_from_object, ensure_stf_id
 from .....stfblender_common.utils.armature_bone import ArmatureBone
 from .stf_armature_ops import STFAddArmatureComponentOperator, STFEditArmatureComponentIdOperator, STFRemoveArmatureComponentOperator, STFSetArmatureIDOperator
 
@@ -61,10 +61,3 @@ class Handler_STF_Armature(STF_Handler_BlenderNative, STF_Handler_ComponentHolde
 	operator_component_add = STFAddArmatureComponentOperator.bl_idname
 	operator_component_remove = STFRemoveArmatureComponentOperator.bl_idname
 	operator_component_edit = STFEditArmatureComponentIdOperator.bl_idname
-
-
-def register():
-	boilerplate_register(bpy.types.Armature)
-
-def unregister():
-	boilerplate_unregister(bpy.types.Armature)

@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.1.12
+* Select how to export each Blender native resource
+* Removed `boilerplate_(un)register` in common. All Blender resources that are relevant for STF get the appropriate stf info registered by default, even if not supported by default.
+
 ## v0.1.11
 * Code cleanup & improved type annotations in common.
 * Uses multiline textboxes & labels if possible.

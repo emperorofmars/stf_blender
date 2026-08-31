@@ -1,7 +1,7 @@
 import bpy
 from typing import Any
 
-from .....stfblender_common import STF_ExportContext, STF_ImportContext, STF_Category, STFReport, STFReportSeverity, STF_Handler_Animation, STF_Handler_ComponentHolder, STF_Handler_BlenderNative, STFPropertyPathPart, BlenderPropertyPathPart, boilerplate_register, boilerplate_unregister, get_components_from_object, ensure_stf_id
+from .....stfblender_common import STF_ExportContext, STF_ImportContext, STF_Category, STFReport, STFReportSeverity, STF_Handler_Animation, STF_Handler_ComponentHolder, STF_Handler_BlenderNative, STFPropertyPathPart, BlenderPropertyPathPart, get_components_from_object, ensure_stf_id
 from .stf_material_definition import STF_Material_Property, STF_Material_Value_Module_Base
 from .material_value_modules import blender_material_value_modules
 from .stf_material_operators import add_property, add_value_to_property
@@ -126,10 +126,3 @@ class Handler_STF_Material(STF_Handler_BlenderNative, STF_Handler_ComponentHolde
 	@classmethod
 	def import_stf_animation(cls, context: STF_ImportContext, stf_property_path: list[str], blender_resource: Any, /) -> BlenderPropertyPathPart | None:
 		return stf_material_import_stf_animation(context, stf_property_path, blender_resource)
-
-
-def register():
-	boilerplate_register(bpy.types.Material)
-
-def unregister():
-	boilerplate_unregister(bpy.types.Material)

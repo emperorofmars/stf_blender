@@ -110,13 +110,12 @@ class FallbackBuffersList(bpy.types.UIList):
 		layout.label(text=str(len(item.buffer_base64)))
 
 
-
 def draw_fallback(layout: bpy.types.UILayout, resource_ref: STF_Component_Ref | STF_Data_Ref, resource: Any, is_instance: bool = False):
 	col = layout.column(align=True)
 	json_error = None
 	try:
 		json_resource = json.loads(resource.json)
-		if("type" not in json_resource or json_resource["type"] != resource_ref.stf_type):
+		if("type" not in json_resource):
 			json_error = "Invalid 'type' in Json"
 	except Exception as e:
 		json_error = "Json Invalid: " + str(e)

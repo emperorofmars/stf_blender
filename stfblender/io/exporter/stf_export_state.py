@@ -2,9 +2,10 @@ import bpy
 import logging
 from typing import Any
 
-from ....stfblender_common import STFReportSeverity, STFReport, STF_ExportComponentHook, STF_Buffer_Json, STF_JsonDefinition, STF_Meta_AssetInfo_Json, STF_Meta_AssetProperties_Json
+from ....stfblender_common import STFReportSeverity, STFReport, STF_Category, STF_ExportComponentHook, STF_Buffer_Json, STF_JsonDefinition, STF_Meta_AssetInfo_Json, STF_Meta_AssetProperties_Json
 from ....stfblender_common.resource.stf_handler_base import STF_HandlerBase
 from ....stfblender_common.helpers import get_stf_version
+from ...register_stf_data import blender_types
 from ..stf_file import STF_File
 from ..stf_state_base import STF_State_Base
 from .export_settings import STF_ExportSettings
@@ -50,20 +51,25 @@ class STF_ExportState(STF_State_Base):
 		self._settings: STF_ExportSettings | None = settings
 
 
-	def determine_handler(self, application_object: Any, stf_category: str | None = None) -> STF_HandlerBase | None:
+	def determine_handler(self, blender_object: Any, stf_category: STF_Category | str | None = None) -> STF_HandlerBase | None:
 		"""Find the best suited registered STF_Handler for the type of this object"""
 		selected_handler = None
 		selected_priority = -1
 
-		for handler in self._handlers.get(type(application_object), []):
-			if(hasattr(handler, "can_handle_blender_resource")):
-				priority = handler.can_handle_blender_resource(application_object)
-				if(priority > selected_priority and (stf_category is None or handler.stf_category == stf_category)):
+		force_stf_type: str | None = None
+
+		# Set force_stf_type if a target type is manually set
+		if(stf_category == STF_Category.INSTANCE and type(blender_object) is tuple and hasattr(blender_object[0], "stf_instance") and blender_object[0].stf_instance.determine_type == "manual"):
+			force_stf_type = blender_object[0].stf_instance.use_as
+		elif(stf_category in [STF_Category.DATA, STF_Category.NODE] and type(blender_object) in blender_types and hasattr(blender_object, "stf_info") and blender_object.stf_info.determine_type == "manual"):
+			force_stf_type = blender_object.stf_info.use_as
+
+		for handler in self._handlers.get(type(blender_object), []):
+			if(hasattr(handler, "can_handle_blender_resource") and (stf_category is None or handler.stf_category == stf_category) and (force_stf_type is None or handler.stf_type == force_stf_type)):
+				priority = handler.can_handle_blender_resource(blender_object)
+				if(priority > selected_priority):
 					selected_handler = handler
 					selected_priority = priority
-			elif(1 > selected_priority):
-				selected_handler = handler
-				selected_priority = 1
 
 		return selected_handler
 
@@ -73,13 +79,14 @@ class STF_ExportState(STF_State_Base):
 
 
 	def determine_property_resolution_handler(self, application_object: Any, data_path: str) -> STF_HandlerBase | None:
-		# TODO handle priority for animation path handling maybe at some point?
-
 		for _, handler_list in self._handlers.items():
 			for handler in handler_list:
-				if(hasattr(handler, "understood_blender_animation_types") and type(application_object) in handler.understood_blender_animation_types
-						and hasattr(handler, "understood_blender_animation_data_paths")
-						and hasattr(handler, "export_blender_animation")):
+				if(
+					hasattr(handler, "understood_blender_animation_types")
+					and type(application_object) in handler.understood_blender_animation_types
+					and hasattr(handler, "understood_blender_animation_data_paths")
+					and hasattr(handler, "export_blender_animation")
+				):
 					for understood_property in handler.understood_blender_animation_data_paths:
 						if(data_path.startswith(understood_property)):
 							return handler
