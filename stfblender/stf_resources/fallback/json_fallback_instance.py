@@ -3,7 +3,7 @@ import json
 from typing import Any
 
 from ....stfblender_common import STF_ExportContext, STF_ImportContext, STF_TaskSteps, STF_Category, STF_ComponentResourceBase, STF_Handler_BlenderNative, STFReport, STFSetIDOperatorBase, ensure_stf_id
-from ....stfblender_common.blender_grr import BlenderGRR, construct_blender_grr, resolve_blender_grr
+from ....stfblender_common.blender_grr import BlenderGRR
 from .json_fallback_buffer import STF_FallbackBuffer, decode_buffer, encode_buffer
 from .json_fallback_ui import draw_fallback
 
@@ -75,7 +75,7 @@ class Handler_JsonFallbackInstance(STF_Handler_BlenderNative):
 			for resource_id in json_resource.get("referenced_resources", []):
 				resource_grr = fallback_instance.referenced_resources.add()
 				if(referenced_resource := context._import_resource(resource_id)):
-					construct_blender_grr(referenced_resource, resource_grr)
+					resource_grr.construct(referenced_resource)
 		context.add_task(STF_TaskSteps.FINALE, _handle)
 
 		for buffer_id in json_resource.get("referenced_buffers", []):
@@ -104,7 +104,7 @@ class Handler_JsonFallbackInstance(STF_Handler_BlenderNative):
 
 			def _handle():
 				for referenced_resource in fallback_instance.referenced_resources:
-					if(blender_resource := resolve_blender_grr(referenced_resource)):
+					if(blender_resource := referenced_resource.resolve()):
 						context.serialize_resource(ret, blender_resource)
 			context.add_task(STF_TaskSteps.FINALE, _handle)
 

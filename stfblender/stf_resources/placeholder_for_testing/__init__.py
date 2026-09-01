@@ -3,6 +3,6 @@
 For testing, should be restricted to development eventually.
 """
 
-from . import data_resource_component_test
+from .data_resource_component_test import Handler_Data_Resource_Component_Test
 
-register_stf_handlers = data_resource_component_test.register_stf_handlers
+register_stf_handlers = [Handler_Data_Resource_Component_Test]

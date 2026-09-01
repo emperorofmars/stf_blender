@@ -1,7 +1,7 @@
 import bpy
 from typing import Any
 
-from .....stfblender_common import STF_ExportContext, STF_ImportContext, STF_TaskSteps, STF_Category, STFReport, STF_DataResourceBase, STF_Handler_Data, STF_Data_Ref, add_resource, export_data_resource_base, get_components_from_data_resource, import_data_resource_base
+from .....stfblender_common import STF_ExportContext, STF_ImportContext, STF_TaskSteps, STF_Category, STFReport, STF_NonNativeResourceBase, STF_Handler_NonNative, STF_NonNativeResource_Ref, add_nonnative_resource, export_nonnative_resource_base, get_components_from_nonnative_resource, import_nonnative_resource_base
 from .....stfblender_common.helpers import register_exported_resource
 
 
@@ -73,11 +73,11 @@ class VRM_Blendshape_Pose_Target(bpy.types.PropertyGroup):
 	mesh_instance: bpy.props.PointerProperty(type=bpy.types.Object, name="Meshinstance", poll=lambda _, o: o.data and type(o.data) is bpy.types.Mesh, options=set())
 	values: bpy.props.CollectionProperty(type=VRM_Blendshape_Pose_Value, options=set())
 
-class VRM_Blendshape_Pose(STF_DataResourceBase):
+class VRM_Blendshape_Pose(STF_NonNativeResourceBase):
 	targets: bpy.props.CollectionProperty(type=VRM_Blendshape_Pose_Target, options=set())
 
 
-class Handler_VRM_Blendshape_Pose(STF_Handler_Data):
+class Handler_VRM_Blendshape_Pose(STF_Handler_NonNative):
 	"""Define a blendshape pose. This is useful for VR/V-Tubing avatars that get will get converted to VRM, since VRM doesn't support animations"""
 	stf_type = _stf_type
 	stf_category = STF_Category.DATA
@@ -85,7 +85,7 @@ class Handler_VRM_Blendshape_Pose(STF_Handler_Data):
 	blender_property_name = _blender_property_name
 
 	@classmethod
-	def draw(cls, layout: bpy.types.UILayout, context: bpy.types.Context, resource_ref: STF_Data_Ref, context_resource: bpy.types.Collection, resource: VRM_Blendshape_Pose):
+	def draw(cls, layout: bpy.types.UILayout, context: bpy.types.Context, resource_ref: STF_NonNativeResource_Ref, context_resource: bpy.types.Collection, resource: VRM_Blendshape_Pose):
 		add_button = layout.operator(Edit_VRM_Blendshape_Pose_Target.bl_idname, text="Add Target", icon="ADD")
 		add_button.use_scene_collection = context_resource == context.scene.collection
 		add_button.resource_id = resource.stf_id
@@ -125,8 +125,8 @@ class Handler_VRM_Blendshape_Pose(STF_Handler_Data):
 
 	@classmethod
 	def import_resource(cls, context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: bpy.types.Collection) -> Any | STFReport:
-		resource_ref, resource = add_resource(context.get_root_collection(), cls.blender_property_name, stf_id, cls.stf_type)
-		import_data_resource_base(resource, json_resource)
+		resource_ref, resource = add_nonnative_resource(context.get_root_collection(), cls.blender_property_name, stf_id, cls.stf_type)
+		import_nonnative_resource_base(resource, json_resource)
 
 		def _handle():
 			for target_id_index_as_str_because_its_a_json_key, values in json_resource.get("targets", {}).items():
@@ -146,7 +146,7 @@ class Handler_VRM_Blendshape_Pose(STF_Handler_Data):
 
 	@classmethod
 	def export_resource(cls, context: STF_ExportContext, component: VRM_Blendshape_Pose, context_resource: bpy.types.Collection) -> tuple[dict, str] | STFReport:
-		ret = export_data_resource_base(context, cls.stf_type, component)
+		ret = export_nonnative_resource_base(context, cls.stf_type, component)
 
 		target_dict: dict[str, dict[str, float]] = {}
 		ret["targets"] = target_dict
@@ -170,7 +170,7 @@ class Handler_VRM_Blendshape_Pose(STF_Handler_Data):
 
 		return ret, component.stf_id
 
-	get_components = get_components_from_data_resource
+	get_components = get_components_from_nonnative_resource
 
 
 def register():

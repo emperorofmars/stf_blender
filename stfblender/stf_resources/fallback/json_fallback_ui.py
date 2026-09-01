@@ -3,8 +3,8 @@ import json
 from typing import Any
 
 from ....stfblender_common.resource.component import STF_Component_Ref
-from ....stfblender_common.resource.data import STF_Data_Ref
-from ....stfblender_common.blender_grr import BlenderGRR, draw_blender_grr
+from ....stfblender_common.resource.non_native import STF_NonNativeResource_Ref
+from ....stfblender_common.blender_grr import BlenderGRR
 
 
 def _get_resource(blender_id_property: str, blender_id_object: str, blender_property_name: str, resource_id: str, is_instance: bool) -> Any | None:
@@ -110,7 +110,7 @@ class FallbackBuffersList(bpy.types.UIList):
 		layout.label(text=str(len(item.buffer_base64)))
 
 
-def draw_fallback(layout: bpy.types.UILayout, resource_ref: STF_Component_Ref | STF_Data_Ref, resource: Any, is_instance: bool = False):
+def draw_fallback(layout: bpy.types.UILayout, resource_ref: STF_Component_Ref | STF_NonNativeResource_Ref, resource: Any, is_instance: bool = False):
 	col = layout.column(align=True)
 	json_error = None
 	try:
@@ -151,7 +151,7 @@ def draw_fallback(layout: bpy.types.UILayout, resource_ref: STF_Component_Ref | 
 		remove_resource_button.is_instance = is_instance
 
 		box.use_property_split = True
-		draw_blender_grr(box.column(align=True), resource.referenced_resources[resource.active_referenced_resource])
+		resource.referenced_resources[resource.active_referenced_resource].draw(box.column(align=True))
 
 	layout.separator(factor=1)
 

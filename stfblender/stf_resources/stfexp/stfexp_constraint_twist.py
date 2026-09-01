@@ -4,7 +4,7 @@ from typing import Any
 
 from ....stfblender_common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STF_TaskSteps, STF_Category, STF_ComponentResourceBase, STF_Handler_BoneComponent, STF_Handler_Animation, STF_Component_Ref, STF_ComponentBoneInstanceRef, STFReport, add_component, export_component_base, import_component_base, preserve_component_reference
 from ....stfblender_common.utils.animation_conversion_utils import get_component_index, get_component_stf_path_from_collection
-from ....stfblender_common.blender_grr.stf_node_path_selector import NodePathSelector, draw_node_path_selector, node_path_selector_from_stf, node_path_selector_to_stf, validate_node_path_selector
+from ....stfblender_common.blender_grr.stf_node_path_selector import NodePathSelector
 
 
 class STFEXP_Constraint_Twist(STF_ComponentResourceBase):
@@ -27,14 +27,14 @@ class Handler_STFEXP_Constraint_Twist(STF_Handler_BoneComponent, STF_Handler_Ani
 	def _draw(cls, layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref | STF_ComponentBoneInstanceRef, context_resource: Any, component: STFEXP_Constraint_Twist, default_parent: bpy.types.Bone | bpy.types.Object | None):
 		layout.use_property_split = True
 		layout.prop(component, "weight")
-		if(not validate_node_path_selector(component.source)):
+		if(not component.source.validate()):
 			if(default_parent):
 				layout.label(text="Default target if no valid Source is selected: " + default_parent.name)
 			else:
 				layout.label(text="If no Source is selected, the parent of the parent will be assumed.", icon="INFO")
 		col = layout.column(align=True)
 		col.use_property_split = True
-		draw_node_path_selector(col, component.source, "Source")
+		component.source.draw(col, "Source")
 
 	@classmethod
 	def draw(cls, layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_resource: Any, component: STFEXP_Constraint_Twist):
@@ -60,7 +60,7 @@ class Handler_STFEXP_Constraint_Twist(STF_Handler_BoneComponent, STF_Handler_Ani
 			_get_component = preserve_component_reference(component, cls.blender_property_name, context_resource)
 			def _handle():
 				component = _get_component()
-				node_path_selector_from_stf(context, json_resource, json_resource["source"], component.source)
+				component.source.from_stf(context, json_resource, json_resource["source"])
 			context.add_task(STF_TaskSteps.DEFAULT, _handle)
 
 		return component
@@ -73,7 +73,8 @@ class Handler_STFEXP_Constraint_Twist(STF_Handler_BoneComponent, STF_Handler_Ani
 		_get_component = preserve_component_reference(blender_resource, cls.blender_property_name, context_resource)
 		def _handle():
 			component = _get_component()
-			if(source_ret := node_path_selector_to_stf(context, component.source, ret)):
+			source_ret = component.source.to_stf(context, ret)
+			if(source_ret is not None):
 				ret["source"] = source_ret
 		context.add_task(STF_TaskSteps.DEFAULT, _handle)
 
@@ -117,7 +118,8 @@ class Handler_STFEXP_Constraint_Twist(STF_Handler_BoneComponent, STF_Handler_Ani
 	def export_component_instance(cls, context: STF_ExportContext, component_ref: STF_Component_Ref, component_instance: STFEXP_Constraint_Twist, context_resource: Any) -> dict:
 		ret = { "weight": component_instance.weight }
 		def _handle():
-			if(source_ret := node_path_selector_to_stf(context, component_instance.source, ret)):
+			source_ret = component_instance.source.to_stf(context, ret)
+			if(source_ret is not None):
 				ret["source"] = source_ret
 		context.add_task(STF_TaskSteps.DEFAULT, _handle)
 		return ret
@@ -129,7 +131,7 @@ class Handler_STFEXP_Constraint_Twist(STF_Handler_BoneComponent, STF_Handler_Ani
 			_get_component = preserve_component_reference(component_instance, cls.blender_property_name, context_resource)
 			def _handle():
 				standin_component = _get_component()
-				node_path_selector_from_stf(context, json_resource, json_resource["source"], standin_component.source)
+				standin_component.source.from_stf(context, json_resource, json_resource["source"])
 			context.add_task(STF_TaskSteps.DEFAULT, _handle)
 
 

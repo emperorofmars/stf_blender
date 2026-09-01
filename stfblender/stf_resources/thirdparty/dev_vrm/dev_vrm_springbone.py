@@ -6,8 +6,7 @@ from .....stfblender_common import STF_ExportContext, STF_ImportContext, Blender
 from .....stfblender_common.utils.animation_conversion_utils import get_component_index, get_component_stf_path_from_collection
 from .....stfblender_common.utils import trs_utils
 from .....stfblender_common.helpers import create_add_button, create_remove_button
-from .....stfblender_common.blender_grr.stf_node_path_selector import NodePathSelector, draw_node_path_selector, node_path_selector_from_stf, node_path_selector_to_stf
-from .....stfblender_common.blender_grr.stf_node_path_component_selector import NodePathComponentSelector, draw_node_path_component_selector, node_path_component_selector_from_stf, node_path_component_selector_to_stf
+from .....stfblender_common.blender_grr import NodePathSelector, NodePathComponentSelector
 
 
 _stf_type = "dev.vrm.springbone"
@@ -63,7 +62,7 @@ class Handler_VRM_Springbone(STF_Handler_BoneComponent):
 		col.prop(component, "gravityPower", slider=True)
 		col.prop(component, "gravityDir")
 		col.prop(component, "dragForce", slider=True)
-		draw_node_path_selector(col, component.center, text="Center")
+		component.center.draw(col, text="Center")
 		col.prop(component, "hitRadius", slider=True)
 
 		layout.separator(factor=1)
@@ -79,7 +78,7 @@ class Handler_VRM_Springbone(STF_Handler_BoneComponent):
 			row = box.row(align=True)
 			col = row.column(align=True)
 			col.use_property_split = True
-			draw_node_path_component_selector(col, collider)
+			collider.draw(col)
 			create_remove_button(row, "bone" if type(component.id_data) is bpy.types.Armature else "object", cls.blender_property_name, component.stf_id, "colliders", index)
 
 		load_json_button = layout.operator(VRM_Springbone_LoadJsonOperator.bl_idname)
@@ -102,9 +101,9 @@ class Handler_VRM_Springbone(STF_Handler_BoneComponent):
 			component = _get_component()
 			for collider_path in json_resource.get("colliders", []):
 				new_collider = component.colliders.add()
-				node_path_component_selector_from_stf(context, json_resource, collider_path, new_collider)
+				new_collider.from_stf(context, json_resource, collider_path)
 			if("center" in json_resource):
-				node_path_selector_from_stf(context, json_resource, json_resource["center"], component.center)
+				component.center.from_stf(context, json_resource, json_resource["center"])
 		context.add_task(STF_TaskSteps.DEFAULT, _handle)
 
 		return component
@@ -123,12 +122,12 @@ class Handler_VRM_Springbone(STF_Handler_BoneComponent):
 			component = _get_component()
 			colliders = []
 			for collider in component.colliders:
-				if(collider_ret := node_path_component_selector_to_stf(context, collider, ret)):
+				if(collider_ret := collider.to_stf(context, ret)):
 					colliders.append(collider_ret)
 			if(len(colliders)):
 				ret["colliders"] = colliders
 			if(component.center):
-				if(center_ret := node_path_selector_to_stf(context, component.center, ret)):
+				if(center_ret := component.center.to_stf(context, ret)):
 					ret["center"] = center_ret
 		context.add_task(STF_TaskSteps.DEFAULT, _handle)
 

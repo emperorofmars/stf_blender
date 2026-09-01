@@ -6,8 +6,8 @@ from typing import Any
 from .....stfblender_common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STF_TaskSteps, STF_Category, STFReport, STF_ComponentResourceBase, STF_Handler_BoneComponent, STF_Component_Ref, STF_Handler_Animation, add_component, export_component_base, import_component_base, preserve_component_reference
 from .....stfblender_common.utils.animation_conversion_utils import get_component_index, get_component_stf_path_from_collection
 from .....stfblender_common.helpers import create_add_button, create_remove_button
-from .....stfblender_common.blender_grr.stf_node_path_selector import NodePathSelector, draw_node_path_selector, node_path_selector_from_stf, node_path_selector_to_stf
-from .....stfblender_common.blender_grr.stf_node_path_component_selector import NodePathComponentSelector, draw_node_path_component_selector, node_path_component_selector_from_stf, node_path_component_selector_to_stf
+from .....stfblender_common.blender_grr.stf_node_path_selector import NodePathSelector
+from .....stfblender_common.blender_grr.stf_node_path_component_selector import NodePathComponentSelector
 
 
 class VRC_Physbone(STF_ComponentResourceBase):
@@ -41,7 +41,7 @@ class Handler_VRC_Physbone(STF_Handler_BoneComponent, STF_Handler_Animation):
 			row = box.row(align=True)
 			col = row.column(align=True)
 			col.use_property_split = True
-			draw_node_path_component_selector(col, collider)
+			collider.draw(col)
 			create_remove_button(row, "bone" if type(component.id_data) is bpy.types.Armature else "object", cls.blender_property_name, component.stf_id, "colliders", index)
 
 		box = layout.box().column(align=True)
@@ -51,7 +51,7 @@ class Handler_VRC_Physbone(STF_Handler_BoneComponent, STF_Handler_Animation):
 		box.separator(factor=1)
 		for index, ignore in enumerate(component.ignores):
 			row = box.row(align=True)
-			draw_node_path_selector(row, ignore)
+			ignore.draw(row)
 			create_remove_button(row, "bone" if type(component.id_data) is bpy.types.Armature else "object", cls.blender_property_name, component.stf_id, "ignores", index)
 
 		layout.separator(factor=1)
@@ -76,11 +76,11 @@ class Handler_VRC_Physbone(STF_Handler_BoneComponent, STF_Handler_Animation):
 			component = _get_component()
 			for ignore_path in json_resource.get("ignores", []):
 				new_ignore = component.ignores.add()
-				node_path_selector_from_stf(context, json_resource, ignore_path, new_ignore)
+				new_ignore.from_stf(context, json_resource, ignore_path)
 
 			for collider_path in json_resource.get("colliders", []):
 				new_collider = component.colliders.add()
-				node_path_component_selector_from_stf(context, json_resource, collider_path, new_collider)
+				new_collider.from_stf(context, json_resource, collider_path)
 
 		context.add_task(STF_TaskSteps.DEFAULT, _handle)
 
@@ -98,13 +98,13 @@ class Handler_VRC_Physbone(STF_Handler_BoneComponent, STF_Handler_Animation):
 
 				ignores = []
 				for ignore in component.ignores:
-					if(ignore_ret := node_path_selector_to_stf(context, ignore, ret)):
+					if(ignore_ret := ignore.to_stf(context, ret)):
 						ignores.append(ignore_ret)
 				ret["ignores"] = ignores
 
 				colliders = []
 				for collider in component.colliders:
-					if(collider_ret := node_path_component_selector_to_stf(context, collider, ret)):
+					if(collider_ret := collider.to_stf(context, ret)):
 						colliders.append(collider_ret)
 				ret["colliders"] = colliders
 			context.add_task(STF_TaskSteps.DEFAULT, _handle)

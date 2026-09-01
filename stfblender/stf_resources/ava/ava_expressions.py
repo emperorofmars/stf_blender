@@ -36,7 +36,7 @@ class AVA_Expression(bpy.types.PropertyGroup):
 	animation: bpy.props.PointerProperty(type=bpy.types.Action, name="Animation", description="The animation which represents the expression", options=set(), poll=poll_valid_animations)
 
 	use_blendshape_fallback: bpy.props.BoolProperty(name="Provide Blendshape Only Fallback", default=False, description="Some targets like VRM have a very limited system for avatar expressions. Provide a blendshape-only pose for these applications", options=set())
-	blendshape_fallback: bpy.props.PointerProperty(type=STFDataResourceReference, options=set())
+	blendshape_fallback: bpy.props.PointerProperty(type=STFNonNativeResourceReference, options=set())
 
 
 class AVA_Expressions(STF_ComponentResourceBase):
@@ -98,7 +98,7 @@ class STFDrawAVAExpressionList(bpy.types.UIList):
 			row = layout.row()
 			row.alert = True
 			row.label(text="No Action", icon="ACTION")
-		if(item.use_blendshape_fallback and validate_stf_data_resource_reference(item.blendshape_fallback)):
+		if(item.use_blendshape_fallback and item.blendshape_fallback.validate()):
 			layout.label(text="Has Fallback", icon="CHECKMARK")
 		else:
 			layout.label(text="No Fallback", icon="X")
@@ -150,10 +150,10 @@ class Handler_AVA_Expressions(STF_Handler_Component):
 		if(expression.use_blendshape_fallback):
 			box = box.box()
 			box.label(text="Blendshape Only Fallback (For VRM)")
-			if(not validate_stf_data_resource_reference(expression.blendshape_fallback, ["dev.vrm.blendshape_pose"])):
+			if(not expression.blendshape_fallback.validate(["dev.vrm.blendshape_pose"])):
 				box.label(text="Create a 'dev.vrm.blendshape_pose' type resource in a Blender-Collection under 'STF Data Resources'.", icon="INFO_LARGE")
 			box.use_property_split = True
-			draw_stf_data_resource_reference(box.column(align=True), expression.blendshape_fallback, ["dev.vrm.blendshape_pose"])
+			expression.blendshape_fallback.draw(box.column(align=True), ["dev.vrm.blendshape_pose"])
 
 	@classmethod
 	def import_resource(cls, context: STF_ImportContext, json_resource: dict, stf_id: str, context_resource: Any) -> Any | STFReport:
@@ -211,7 +211,7 @@ class Handler_AVA_Expressions(STF_Handler_Component):
 					any_success = True
 
 				if(blender_expression.use_blendshape_fallback):
-					if(fallback_ret := resolve_stf_data_resource_reference(blender_expression.blendshape_fallback)):
+					if(fallback_ret := blender_expression.blendshape_fallback.resolve()):
 						fallback_ref, fallback_resource = fallback_ret
 						if(fallback_ref.stf_type == "dev.vrm.blendshape_pose"):
 							json_expression["fallback"] = context.serialize_resource(ret, fallback_resource, stf_category=STF_Category.DATA)

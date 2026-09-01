@@ -2,8 +2,8 @@ import bpy
 
 from collections.abc import Sequence
 
-from ..stfblender_common import STF_Component_Ref, STF_Data_Ref
-from ..stfblender_common.blender_grr import STFDataResourceReference
+from ..stfblender_common import STF_Component_Ref, STF_NonNativeResource_Ref
+from ..stfblender_common.blender_grr import STFNonNativeResourceReference
 from ..stfblender_common.resource.stf_registry import find_eligible_export_handlers
 from ..stfblender_common.utils.armature_bone import ArmatureBone
 
@@ -98,7 +98,7 @@ blender_types: Sequence[type] = _blender_types + [ArmatureBone]
 
 def register():
 	# STF-Data modules are stored on Collections
-	bpy.types.Collection.stf_data_refs = bpy.props.CollectionProperty(type=STF_Data_Ref, name="STF Data Refs", options=set())
+	bpy.types.Collection.stf_data_refs = bpy.props.CollectionProperty(type=STF_NonNativeResource_Ref, name="STF Data Refs", options=set())
 	bpy.types.Collection.stf_data_ref_selected = bpy.props.IntProperty(options=set())
 
 	bpy.types.Object.stf_instance = bpy.props.PointerProperty(type=STF_Instance, options=set())

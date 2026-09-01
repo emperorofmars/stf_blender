@@ -1,11 +1,11 @@
 import bpy
 
-from .data_resource_ui import draw_data_resources_ui
+from .nonnative_resource_ui import draw_data_resources_ui
 
 
-class STFDataResourcesCollectionPanel(bpy.types.Panel):
-	bl_idname = "COLLECTION_PT_stf_data_resources_collection_editor"
-	bl_label = "STF Data Resources"
+class STFNonNativeResourcesCollectionPanel(bpy.types.Panel):
+	bl_idname = "COLLECTION_PT_stf_nonnative_resources_collection_editor"
+	bl_label = "STF Non-Native Resources"
 	bl_region_type = "WINDOW"
 	bl_space_type = "PROPERTIES"
 	bl_context = "collection"
@@ -18,9 +18,9 @@ class STFDataResourcesCollectionPanel(bpy.types.Panel):
 		draw_data_resources_ui(self.layout, context, context.collection) # pyright: ignore[reportArgumentType]
 
 
-class STFDataResourcesSceneCollectionPanel(bpy.types.Panel):
-	bl_idname = "COLLECTION_PT_stf_data_resources_scene_collection_editor"
-	bl_label = "STF Data Resources"
+class STFNonNativeResourcesSceneCollectionPanel(bpy.types.Panel):
+	bl_idname = "COLLECTION_PT_stf_nonnative_resources_scene_collection_editor"
+	bl_label = "STF Non-Native Resources"
 	bl_region_type = "WINDOW"
 	bl_space_type = "PROPERTIES"
 	bl_context = "scene"

@@ -7,7 +7,7 @@ from typing import Any
 
 from ....stfblender_common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STF_TaskSteps, STF_Category, STF_ComponentResourceBase, STF_Handler_BoneComponent, STF_Handler_Animation, STF_Component_Ref, STFReport, add_component, export_component_base, import_component_base, preserve_component_reference
 from ....stfblender_common.utils.animation_conversion_utils import get_component_index, get_component_stf_path_from_collection
-from ....stfblender_common.blender_grr.stf_node_path_selector import NodePathSelector, draw_node_path_selector, node_path_selector_from_stf, node_path_selector_to_stf
+from ....stfblender_common.blender_grr.stf_node_path_selector import NodePathSelector
 
 
 _stf_type = "stfexp.constraint.ik"
@@ -148,8 +148,8 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 
 	col = layout.column(align=True)
 	col.use_property_split = True
-	draw_node_path_selector(col, component.target, "Target")
-	draw_node_path_selector(col, component.pole, "Pole")
+	component.target.draw(col, "Target")
+	component.pole.draw(col, "Pole")
 
 	layout.separator()
 	layout.operator(ParseFromCurrentArmatureInstance.bl_idname).component_id = component.stf_id
@@ -168,9 +168,9 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 		def _handle():
 			component = _get_component()
 			if("target" in json_resource):
-				node_path_selector_from_stf(context, json_resource, json_resource["target"], component.target)
+				component.target.from_stf(context, json_resource, json_resource["target"])
 			if("pole" in json_resource):
-				node_path_selector_from_stf(context, json_resource, json_resource["pole"], component.pole)
+				component.pole.from_stf(context, json_resource, json_resource["pole"])
 		context.add_task(STF_TaskSteps.DEFAULT, _handle)
 
 	return component
@@ -183,9 +183,11 @@ def _stf_export(context: STF_ExportContext, blender_resource: STFEXP_Constraint_
 	_get_component = preserve_component_reference(blender_resource, _blender_property_name, context_resource)
 	def _handle():
 		component = _get_component()
-		if(target_ret := node_path_selector_to_stf(context, component.target, ret)):
+		target_ret = component.target.to_stf(context, ret)
+		if(target_ret is not None):
 			ret["target"] = target_ret
-		if(pole_ret := node_path_selector_to_stf(context, component.pole, ret)):
+		pole_ret = component.pole.to_stf(context, ret)
+		if(pole_ret is not None):
 			ret["pole"] = pole_ret
 	context.add_task(STF_TaskSteps.DEFAULT, _handle)
 
@@ -207,9 +209,11 @@ def _export_component_instance(context: STF_ExportContext, component_ref: STF_Co
 	_get_component = preserve_component_reference(standin_component, _blender_property_name, context_object)
 	def _handle():
 		component: STFEXP_Constraint_IK = _get_component() # pyright: ignore[reportAssignmentType]
-		if(target_ret := node_path_selector_to_stf(context, component.target, ret)):
+		target_ret = component.target.to_stf(context, ret)
+		if(target_ret is not None):
 			ret["target"] = target_ret
-		if(pole_ret := node_path_selector_to_stf(context, component.pole, ret)):
+		pole_ret = component.pole.to_stf(context, ret)
+		if(pole_ret is not None):
 			ret["pole"] = pole_ret
 	context.add_task(STF_TaskSteps.DEFAULT, _handle)
 	return ret
@@ -222,9 +226,9 @@ def _import_component_instance(context: STF_ImportContext, json_resource: dict, 
 		def _handle():
 			component: STFEXP_Constraint_IK = _get_component() # pyright: ignore[reportAssignmentType]
 			if("target" in json_resource):
-				node_path_selector_from_stf(context, json_resource, json_resource["target"], component.target)
+				component.target.from_stf(context, json_resource, json_resource["target"])
 			if("pole" in json_resource):
-				node_path_selector_from_stf(context, json_resource, json_resource["pole"], component.pole)
+				component.pole.from_stf(context, json_resource, json_resource["pole"])
 		context.add_task(STF_TaskSteps.DEFAULT, _handle)
 
 

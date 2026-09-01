@@ -1,6 +1,6 @@
 import bpy
 
-from ....stfblender_common.resource.data.stf_data_resource import add_resource
+from ....stfblender_common.resource.non_native.stf_nonnative_resource import add_nonnative_resource
 
 
 __all__ = ["STFCreateDataResourceOperator", "STFRemoveDataResourceOperator", "STFEditDataResourceOperator"]
@@ -18,7 +18,7 @@ class STFCreateDataResourceOperator(bpy.types.Operator):
 
 	def execute(self, context) -> set:
 		import uuid
-		add_resource(context.scene.collection if self.use_scene_collection else context.collection, self.property_name, str(uuid.uuid4()), self.stf_type) # pyright: ignore[reportArgumentType]
+		add_nonnative_resource(context.scene.collection if self.use_scene_collection else context.collection, self.property_name, str(uuid.uuid4()), self.stf_type) # pyright: ignore[reportArgumentType]
 		return {"FINISHED"}
 
 

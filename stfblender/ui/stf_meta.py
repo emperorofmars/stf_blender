@@ -1,6 +1,6 @@
 import bpy
 
-from ....stfblender_common import STF_Meta_AssetInfo_Json, STF_Meta_AssetProperties_Json
+from ...stfblender_common import STF_Meta_AssetInfo_Json, STF_Meta_AssetProperties_Json
 
 
 __all__ = ["STF_KV", "STF_Meta", "draw_meta_editor"]

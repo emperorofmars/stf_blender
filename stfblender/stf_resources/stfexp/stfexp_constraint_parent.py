@@ -7,7 +7,6 @@ from typing import Any
 from ....stfblender_common import STF_ExportContext, STF_ImportContext, BlenderPropertyPathPart, STFPropertyPathPart, STF_TaskSteps, STF_Category, STF_ComponentResourceBase, STF_Handler_BoneComponent, STF_Handler_Animation, STF_Component_Ref, STFReport, add_component, export_component_base, import_component_base, preserve_component_reference
 from ....stfblender_common.utils.animation_conversion_utils import get_component_index, get_component_stf_path_from_collection
 from ....stfblender_common.helpers import create_add_button, create_remove_button
-from ....stfblender_common.blender_grr.stf_node_path_selector import draw_node_path_selector, node_path_selector_from_stf, node_path_selector_to_stf, node_path_selector_to_string, validate_node_path_selector
 from .util.constraint_source import ConstraintSource
 
 
@@ -27,8 +26,8 @@ class STFDrawAVAExpressionList(bpy.types.UIList):
 	bl_idname = "COLLECTION_UL_stfexp_constraint_parent_sources_list"
 
 	def draw_item(self, context: bpy.types.Context, layout: bpy.types.UILayout, data, item: ConstraintSource, icon, active_data, active_propname, index):  # pyright: ignore[reportIncompatibleMethodOverride]
-		if(validate_node_path_selector(item.source)):
-			layout.label(text=node_path_selector_to_string(item.source), icon="RIGHTARROW")
+		if(item.source.validate()):
+			layout.label(text=item.source.to_string(), icon="RIGHTARROW")
 			layout.prop(item, "weight")
 		else:
 			layout.alert = True
@@ -59,9 +58,9 @@ def _draw_component(layout: bpy.types.UILayout, context: bpy.types.Context, comp
 	if(component.active_source_index < len(component.sources)):
 		source = component.sources[component.active_source_index]
 		col = layout.column(align=True)
-		if(not validate_node_path_selector(source.source)):
+		if(not source.source.validate()):
 			col.alert = True
-		draw_node_path_selector(col, source.source, "Source")
+		source.source.draw(col, "Source")
 		layout.prop(source, "weight")
 
 
@@ -82,7 +81,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 		for json_source in json_resource.get("sources", []):
 			source = component.sources.add()
 			source.weight = json_source.get("weight")
-			node_path_selector_from_stf(context, json_resource, json_source.get("source"), source.source)
+			source.source.from_stf(context, json_resource, json_source.get("source"))
 	context.add_task(STF_TaskSteps.DEFAULT, _handle)
 
 	return component
@@ -102,7 +101,7 @@ def _stf_export(context: STF_ExportContext, blender_resource: STFEXP_Constraint_
 	def _handle():
 		component = _get_component()
 		for source in component.sources:
-			if(source_ret := node_path_selector_to_stf(context, source.source, ret)):
+			if(source_ret := source.source.to_stf(context, ret)):
 				sources.append({
 					"source": source_ret,
 					"weight": source.weight,
@@ -137,7 +136,7 @@ def _export_component_instance(context: STF_ExportContext, component_ref: STF_Co
 	def _handle():
 		component = _get_component()
 		for source in component.sources:
-			if(source_ret := node_path_selector_to_stf(context, source.source, ret)):
+			if(source_ret := source.source.to_stf(context, ret)):
 				sources.append({
 					"source": source_ret,
 					"weight": source.weight,
@@ -157,7 +156,7 @@ def _import_component_instance(context: STF_ImportContext, json_resource: dict, 
 		for json_source in json_resource.get("sources", []):
 			source = component.sources.add()
 			source.weight = json_source.get("weight")
-			node_path_selector_from_stf(context, json_resource, json_source.get("source"), source.source)
+			source.source.from_stf(context, json_resource, json_source.get("source"))
 	context.add_task(STF_TaskSteps.DEFAULT, _handle)
 
 

@@ -3,9 +3,9 @@ from typing import Any
 
 from ...stfblender_common.resource.stf_registry import find_data_handler, get_blender_non_native_data_handlers
 from ...stfblender_common.helpers import draw_multiline_text, OP_CopyToClipboard
-from ...stfblender_common.resource import STF_DataResourceBase, STF_Data_Ref
+from ...stfblender_common.resource import STF_NonNativeResourceBase, STF_NonNativeResource_Ref
 from ...stfblender_common.resource.component import STFAddComponentOperatorBase, STFEditComponentOperatorBase, STFRemoveComponentOperatorBase
-from ..stf_resources.fallback.json_fallback_data import Handler_JsonFallbackData
+from ..stf_resources.fallback.json_fallback_nonnative import Handler_JsonFallbackNonNative
 from .operators.data_resource_ops import STFCreateDataResourceOperator, STFEditDataResourceOperator, STFRemoveDataResourceOperator
 from .component_ui import draw_components_ui
 
@@ -31,7 +31,7 @@ class STFDrawDataResourceList(bpy.types.UIList):
 		row_r.prop(self, "sort_reverse", text="", icon="SORT_DESC" if self.sort_reverse else "SORT_ASC")
 
 	def filter_items(self, context: bpy.types.Context, data, propname: str) -> tuple[list[int], list[int]]: # pyright: ignore[reportIncompatibleMethodOverride]
-		items: list[STF_Data_Ref] = getattr(data, propname)
+		items: list[STF_NonNativeResource_Ref] = getattr(data, propname)
 
 		filter = [self.bitflag_filter_item] * len(items)
 		if(self.filter_name or self.filter_type):
@@ -50,7 +50,7 @@ class STFDrawDataResourceList(bpy.types.UIList):
 					filter[idx] = ~self.bitflag_filter_item
 
 		_sort = [(idx, item) for idx, item in enumerate(items)]
-		def _sort_func(item: tuple[int, STF_Data_Ref]):
+		def _sort_func(item: tuple[int, STF_NonNativeResource_Ref]):
 			match(self.sort_by):
 				case "stf_name":
 					if(hasattr(item[1].id_data, item[1].blender_property_name)):
@@ -66,7 +66,7 @@ class STFDrawDataResourceList(bpy.types.UIList):
 
 		return filter, sortorder
 
-	def draw_item(self, context: bpy.types.Context, layout: bpy.types.UILayout, data, item: STF_Data_Ref, icon, active_data, active_propname): # pyright: ignore[reportIncompatibleMethodOverride]
+	def draw_item(self, context: bpy.types.Context, layout: bpy.types.UILayout, data, item: STF_NonNativeResource_Ref, icon, active_data, active_propname): # pyright: ignore[reportIncompatibleMethodOverride]
 		component = None
 		if(hasattr(item.id_data, item.blender_property_name)):
 			for component in getattr(item.id_data, item.blender_property_name):
@@ -121,7 +121,7 @@ class STFEditDataResourceComponentIdOperator(bpy.types.Operator, STFEditComponen
 	def get_components_ref_property(self, context) -> Any: return _get_data_resource_component_ref_property_collection(context)
 
 
-def draw(layout: bpy.types.UILayout, context: bpy.types.Context, resource_ref: STF_Data_Ref, collection: bpy.types.Collection, resource: STF_DataResourceBase):
+def draw(layout: bpy.types.UILayout, context: bpy.types.Context, resource_ref: STF_NonNativeResource_Ref, collection: bpy.types.Collection, resource: STF_NonNativeResourceBase):
 	box = layout.box()
 	# Component header info
 	row = box.row()
@@ -138,8 +138,8 @@ def draw(layout: bpy.types.UILayout, context: bpy.types.Context, resource_ref: S
 
 	stf_modules = get_blender_non_native_data_handlers()
 	selected_module = None
-	if(resource_ref.blender_property_name == Handler_JsonFallbackData.blender_property_name):
-		selected_module = Handler_JsonFallbackData
+	if(resource_ref.blender_property_name == Handler_JsonFallbackNonNative.blender_property_name):
+		selected_module = Handler_JsonFallbackNonNative
 	else:
 		for stf_module in stf_modules:
 			if(stf_module.stf_type == resource_ref.stf_type):

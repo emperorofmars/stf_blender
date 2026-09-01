@@ -8,7 +8,7 @@ from ....stfblender_common import STFReport, STFReportSeverity
 from ....stfblender_common.resource.stf_registry import get_export_handlers
 from ....stfblender_common.helpers.misc import draw_slot_link_warning, get_stf_version
 from ...package_key import package_key
-from ...ui.operators.stf_meta import draw_meta_editor
+from ...ui.stf_meta import draw_meta_editor
 from .export_settings import STF_ExportSettings
 from .stf_export_state import STF_ExportState
 from .stf_export_context import STF_ExportContext
@@ -29,7 +29,7 @@ def export_stf_file(collection: bpy.types.Collection, filepath: str, export_sett
 	files: Sequence[BufferedWriter] = []
 	trash_objects: list[bpy.types.Object] = []
 	try:
-		stf_state = STF_ExportState(collection.stf_meta.to_stf_meta_assetInfo(), get_export_handlers(), trash_objects, settings = export_settings)
+		stf_state = STF_ExportState(collection.stf_meta.to_stf_meta_assetInfo(), get_export_handlers(), trash_objects, settings=export_settings)
 		stf_context = STF_ExportContext(stf_state, collection)
 		root_id = stf_context.run()
 

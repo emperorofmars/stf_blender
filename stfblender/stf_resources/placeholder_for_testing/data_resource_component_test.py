@@ -7,7 +7,7 @@ from ....stfblender_common.blender_grr import *
 
 class STF_Data_Resource_Component_Test(STF_ComponentResourceBase):
 	blender_reference: bpy.props.PointerProperty(type=BlenderResourceReference)
-	data_reference: bpy.props.PointerProperty(type=STFDataResourceReference)
+	data_reference: bpy.props.PointerProperty(type=STFNonNativeResourceReference)
 	grr: bpy.props.PointerProperty(type=BlenderGRR)
 
 
@@ -24,28 +24,24 @@ class Handler_Data_Resource_Component_Test(STF_Handler_Component):
 	def draw(cls, layout: bpy.types.UILayout, context: bpy.types.Context, component_ref: STF_Component_Ref, context_object: Any, component: STF_Data_Resource_Component_Test):
 		layout.use_property_split = True
 		layout.label(text="Blender Ref")
-		draw_blender_resource_reference(layout.column(align=True), component.blender_reference)
+		component.blender_reference.draw(layout.column(align=True))
 		layout.label(text="STF Data Ref")
-		draw_stf_data_resource_reference(layout.column(align=True), component.data_reference)
+		component.data_reference.draw(layout.column(align=True))
 		layout.label(text="GRR")
-		draw_blender_grr(layout.column(align=True), component.grr)
+		component.grr.draw(layout.column(align=True))
 
 	@classmethod
 	def import_resource(cls, context: STF_ImportContext, json_resource: dict, stf_id: str, context_object: Any) -> Any:
 		component_ref, component = add_component(context_object, cls.blender_property_name, stf_id, cls.stf_type)
 		import_component_base(context, component, json_resource, cls.blender_property_name, context_object)
+		#TODO
 		return component
 
 	@classmethod
 	def export_resource(cls, context: STF_ExportContext, component: STF_Data_Resource_Component_Test, context_object: Any) -> tuple[dict, str]:
 		ret = export_component_base(context, cls.stf_type, component, cls.blender_property_name, context_object)
+		#TODO
 		return ret, component.stf_id
-
-
-
-register_stf_handlers = [
-	Handler_Data_Resource_Component_Test
-]
 
 
 def register():

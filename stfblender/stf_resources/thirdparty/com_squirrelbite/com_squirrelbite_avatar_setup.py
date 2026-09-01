@@ -28,14 +28,14 @@ class PersistentPuppet(bpy.types.PropertyGroup):
 	property_enabled: bpy.props.StringProperty(name="Enabled Property", options=set())
 	property_x: bpy.props.StringProperty(name="Value Property", options=set())
 	property_y: bpy.props.StringProperty(name="Value Property", options=set())
-	blendtree: bpy.props.PointerProperty(type=STFDataResourceReference, options=set())
+	blendtree: bpy.props.PointerProperty(type=STFNonNativeResourceReference, options=set())
 
 
 class Squirrelbite_Avatar_Setup(STF_ComponentResourceBase):
 	toggles_pre: bpy.props.CollectionProperty(name="Overridable Toggles", type=Toggle, options=set())
 	puppets_pre: bpy.props.CollectionProperty(name="Persistent Puppets", type=PersistentPuppet, options=set())
 
-	puppets: bpy.props.CollectionProperty(name="Puppets", type=STFDataResourceReference, options=set())
+	puppets: bpy.props.CollectionProperty(name="Puppets", type=STFNonNativeResourceReference, options=set())
 	toggles: bpy.props.CollectionProperty(name="Toggles", type=Toggle, options=set())
 	grab_toggles: bpy.props.CollectionProperty(name="Grab Toggles", type=GrabToggle, options=set())
 
@@ -61,7 +61,7 @@ def _draw_func_grab_toggle(layout: bpy.types.UILayout, element: Any) -> bpy.type
 	col = row.column(align=True)
 	col.prop(element, "name")
 	col.prop(element, "hand_filter")
-	draw_node_path_component_selector(col.box().column(align=True), element.grab_collider)
+	element.grab_collider.draw(col.box().column(align=True))
 	col.prop(element.toggle, "animation_on")
 	col.prop(element.toggle, "animation_off")
 	return row
@@ -79,10 +79,10 @@ def _draw_func_puppet(layout: bpy.types.UILayout, element: Any) -> bpy.types.UIL
 		col.prop(element, "property_y", text="Y", placeholder="puppet_y")
 
 	col.label(text="Blendtree")
-	if(not validate_stf_data_resource_reference(element.blendtree, ["stfexp.animation_blendtree"])):
+	if(not element.blendtree.validate(["stfexp.animation_blendtree"])):
 		col.label(text="Create a 'stfexp.animation_blendtree' type resource in a Blender-Collection under 'STF Data Resources'.", icon="INFO_LARGE")
 	col.use_property_split = True
-	draw_stf_data_resource_reference(col.column(align=True), element.blendtree, ["stfexp.animation_blendtree"])
+	element.blendtree.draw(col.column(align=True), ["stfexp.animation_blendtree"])
 	return row
 
 
@@ -93,10 +93,10 @@ def _draw_func_blendtree(layout: bpy.types.UILayout, element: Any) -> bpy.types.
 	col.prop(element, "name")
 	col.separator(factor=1, type="SPACE")
 
-	if(not validate_stf_data_resource_reference(element, ["stfexp.animation_blendtree"])):
+	if(not element.validate(["stfexp.animation_blendtree"])):
 		col.label(text="Create a 'stfexp.animation_blendtree' type resource in a Blender-Collection under 'STF Data Resources'.", icon="INFO_LARGE")
 	col.use_property_split = True
-	draw_stf_data_resource_reference(col.column(align=True), element, ["stfexp.animation_blendtree"])
+	element.draw(col.column(align=True), ["stfexp.animation_blendtree"])
 	return row
 
 
@@ -188,7 +188,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 			toggle: GrabToggle = component.grab_toggles.add()
 			toggle.name = toggle_json.get("name", "")
 			toggle.hand_filter = toggle_json.get("hand", "right")
-			node_path_component_selector_from_stf(context, json_resource, toggle_json.get("collider"), toggle.grab_collider)
+			toggle.grab_collider.from_stf(context, json_resource, toggle_json.get("collider"))
 			animation_on = context.import_resource(json_resource, toggle_json.get("on"))
 			if(type(animation_on) is bpy.types.Action):
 				toggle.toggle.animation_on = animation_on
@@ -199,7 +199,7 @@ def _stf_import(context: STF_ImportContext, json_resource: dict, stf_id: str, co
 		# puppets
 		for puppet_json in json_resource.get("puppets", []):
 			if(blendtree_resource := context.import_resource(json_resource, puppet_json["blendtree"], STF_Category.DATA)):
-				puppet: STFDataResourceReference = component.puppets.add()
+				puppet: STFNonNativeResourceReference = component.puppets.add()
 				puppet.name = puppet_json.get("name", "")
 				puppet.collection = context.get_root_collection()
 				puppet.stf_data_resource_id = blendtree_resource.stf_id
@@ -266,7 +266,7 @@ def _stf_export(context: STF_ExportContext, component: Squirrelbite_Avatar_Setup
 			if(puppet.type == "2d"):
 				puppet_json["property_y"] = puppet.property_y
 
-			if(puppet_ret := resolve_stf_data_resource_reference(puppet.blendtree)):
+			if(puppet_ret := puppet.blendtree.resolve()):
 				puppet_ref, puppet_resource = puppet_ret
 				if(puppet_ref.stf_type == "stfexp.animation_blendtree"):
 					puppet_json["blendtree"] = context.serialize_resource(ret, puppet_resource)
@@ -299,7 +299,7 @@ def _stf_export(context: STF_ExportContext, component: Squirrelbite_Avatar_Setup
 			grab_toggles.append({
 				"name": toggle.name,
 				"hand": toggle.hand_filter,
-				"collider": node_path_component_selector_to_stf(context, toggle.grab_collider, ret),
+				"collider": toggle.grab_collider.to_stf(context, ret),
 				"on": context.serialize_resource(ret, toggle.toggle.animation_on, stf_category=STF_Category.DATA),
 				"off": context.serialize_resource(ret, toggle.toggle.animation_off, stf_category=STF_Category.DATA),
 			})
@@ -308,7 +308,7 @@ def _stf_export(context: STF_ExportContext, component: Squirrelbite_Avatar_Setup
 		puppets = []
 		ret["puppets"] = puppets
 		for puppet in component.puppets:
-			if(puppet_ret := resolve_stf_data_resource_reference(puppet)): # pyright: ignore[reportArgumentType]
+			if(puppet_ret := puppet.resolve()): # pyright: ignore[reportArgumentType]
 				puppet_ref, puppet_resource = puppet_ret
 				if(puppet_ref.stf_type == "stfexp.animation_blendtree"):
 					puppets.append({
