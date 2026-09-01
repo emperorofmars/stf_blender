@@ -1,7 +1,7 @@
 # Changelog
 
 ## v0.1.12
-* Select how to export each Blender native resource.
+* Select how to export each Blender native resource. (Automatic, Ignore, Select STF-type manually)
 * Removed `boilerplate_(un)register` in common. All Blender resources that are relevant for STF get the appropriate stf info registered by default, even if not supported by default.
 * Renamed stf_data_resource to non-native resource for better clarity.
 * Refactored blender_grr code.
