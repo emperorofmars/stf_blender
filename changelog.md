@@ -1,6 +1,7 @@
 # Changelog
 
 ## v0.1.13
+* `stf.bone` exports transforms relative to armature and parent simultaneously.
 
 ## v0.1.12
 * Select how to export each Blender native resource. (Automatic, Ignore, Select STF-type manually)

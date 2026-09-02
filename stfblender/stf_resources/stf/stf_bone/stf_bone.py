@@ -118,10 +118,21 @@ class Handler_STF_Bone(STF_Handler_BlenderNative, STF_Handler_ComponentHolder, S
 
 		blender_bone: bpy.types.Bone = blender_armature.bones[blender_bone_name]
 
+		 # Relative to armature
 		t, r, _ = (blender_bone.matrix_local @ mathutils.Matrix.Rotation(math.radians(-90), 4, "X")).decompose()
+		ret["translation"] = trs_utils.blender_translation_to_stf(t[:]) # pyright: ignore[reportArgumentType]
+		ret["rotation"] = trs_utils.blender_rotation_to_stf(r[:]) # pyright: ignore[reportArgumentType]
 
-		ret["translation"] = trs_utils.blender_translation_to_stf(t)
-		ret["rotation"] = trs_utils.blender_rotation_to_stf(r)
+		 # Relative to parent
+		if(blender_bone.parent):
+			t, r, _ = (blender_bone.parent.matrix_local.inverted_safe() @ blender_bone.matrix_local).decompose()
+		else:
+			t, r, _ = (mathutils.Matrix.Rotation(math.radians(-90), 4, "X") @ blender_bone.matrix_local).decompose()
+		ret["translation_local"] = convert_bone_translation_to_stf(t[:]) # pyright: ignore[reportArgumentType]
+		ret["rotation_local"] = convert_bone_rotation_to_stf(r[:]) # pyright: ignore[reportArgumentType]
+
+		ret["source_of_truth_tr"] = "global" # In Blender the transform relative to the armature is closest to the source of truth.
+
 		ret["length"] = blender_bone.length
 		if(not blender_bone.use_deform):
 			ret["deform"] = False
