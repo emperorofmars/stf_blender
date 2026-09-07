@@ -52,8 +52,7 @@ class STF_State_Base:
 					task()
 				max_iterations -= 1
 			if(len(self._tasks[task_step]) > 0):
-				self.report(STFReport(message="Task Recursion", severity=STFReportSeverity.FatalError))
-
+				self.report(STFReport("Task Recursion", severity=STFReportSeverity.FatalError))
 			last_taskstep = task_step
 
 		max_iterations = 1000
@@ -64,4 +63,4 @@ class STF_State_Base:
 				task()
 			max_iterations -= 1
 		if(len(self._cleanup_tasks) > 0):
-			self.report(STFReport(message="Task Recursion", severity=STFReportSeverity.FatalError))
+			self.report(STFReport("Task Recursion", severity=STFReportSeverity.FatalError))
