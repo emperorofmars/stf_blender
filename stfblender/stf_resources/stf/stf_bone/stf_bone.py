@@ -65,8 +65,13 @@ class Handler_STF_Bone(STF_Handler_BlenderNative, STF_Handler_ComponentHolder, S
 		blender_edit_bone.tail = mathutils.Vector([0, 0, 1])
 		blender_edit_bone.roll = 0
 
-		blender_edit_bone.matrix = mathutils.Matrix.LocRotScale(trs_utils.stf_translation_to_blender(json_resource["translation"]), trs_utils.stf_rotation_to_blender(json_resource["rotation"]), mathutils.Vector([1, 1, 1])) @ mathutils.Matrix.Rotation(math.radians(90), 4, "X") # pyright: ignore[reportArgumentType]
-		blender_edit_bone.length = json_resource["length"]
+		if("tr_armature" in json_resource):
+			blender_edit_bone.matrix = mathutils.Matrix.LocRotScale(trs_utils.stf_translation_to_blender(json_resource["tr_armature"][0]), trs_utils.stf_rotation_to_blender(json_resource["tr_armature"][1]), mathutils.Vector([1, 1, 1])) @ mathutils.Matrix.Rotation(math.radians(90), 4, "X") # pyright: ignore[reportArgumentType]
+		else:
+			# TODO remove deprecated properties for stf format version 0.2
+			blender_edit_bone.matrix = mathutils.Matrix.LocRotScale(trs_utils.stf_translation_to_blender(json_resource["translation"]), trs_utils.stf_rotation_to_blender(json_resource["rotation"]), mathutils.Vector([1, 1, 1])) @ mathutils.Matrix.Rotation(math.radians(90), 4, "X") # pyright: ignore[reportArgumentType]
+
+		blender_edit_bone.length = json_resource.get("length", 0.1)
 
 		if("connected" in json_resource): blender_edit_bone.use_connect = json_resource["connected"]
 		if("deform" in json_resource): blender_edit_bone.use_deform = json_resource["deform"]
@@ -120,6 +125,11 @@ class Handler_STF_Bone(STF_Handler_BlenderNative, STF_Handler_ComponentHolder, S
 
 		 # Relative to armature
 		t, r, _ = (blender_bone.matrix_local @ mathutils.Matrix.Rotation(math.radians(-90), 4, "X")).decompose()
+		ret["tr_armature"] = [
+			trs_utils.blender_translation_to_stf(t[:]), # pyright: ignore[reportArgumentType]
+			trs_utils.blender_rotation_to_stf(r[:]) # pyright: ignore[reportArgumentType]
+		]
+		# TODO remove deprecated properties for stf format version 0.2
 		ret["translation"] = trs_utils.blender_translation_to_stf(t[:]) # pyright: ignore[reportArgumentType]
 		ret["rotation"] = trs_utils.blender_rotation_to_stf(r[:]) # pyright: ignore[reportArgumentType]
 
@@ -128,10 +138,12 @@ class Handler_STF_Bone(STF_Handler_BlenderNative, STF_Handler_ComponentHolder, S
 			t, r, _ = (blender_bone.parent.matrix_local.inverted_safe() @ blender_bone.matrix_local).decompose()
 		else:
 			t, r, _ = (mathutils.Matrix.Rotation(math.radians(-90), 4, "X") @ blender_bone.matrix_local).decompose()
-		ret["translation_local"] = convert_bone_translation_to_stf(t[:]) # pyright: ignore[reportArgumentType]
-		ret["rotation_local"] = convert_bone_rotation_to_stf(r[:]) # pyright: ignore[reportArgumentType]
+		ret["tr"] = [
+			convert_bone_translation_to_stf(t[:]), # pyright: ignore[reportArgumentType]
+			convert_bone_rotation_to_stf(r[:]) # pyright: ignore[reportArgumentType]
+		]
 
-		ret["source_of_truth_tr"] = "global" # In Blender the transform relative to the armature is closest to the source of truth.
+		ret["tr_source_of_truth"] = "armature" # In Blender the transform relative to the armature is closest to the source of truth.
 
 		ret["length"] = blender_bone.length
 		if(not blender_bone.use_deform):

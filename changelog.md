@@ -1,7 +1,7 @@
 # Changelog
 
 ## v0.1.13
-* `stf.bone` exports transforms relative to armature and parent simultaneously.
+* `stf.bone` added `tr` & `tr_armature` properties. They store transforms relative to parent and armature respectively. `translation` and `rotation` are deprecated.
 
 ## v0.1.12
 * Select how to export each Blender native resource. (Automatic, Ignore, Select STF-type manually)
