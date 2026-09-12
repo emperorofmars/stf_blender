@@ -169,7 +169,7 @@ def import_blender_bone_animation(context: STF_ImportContext, stf_property_path:
 			return BlenderPropertyPathPart("OBJECT", "pose.bones[\"" + blender_object.name + "\"].scale", _create_scale_to_blender_func(blender_object), scale_bone_index_conversion_to_blender)
 		case "components":
 			return context.resolve_stf_property_path(stf_property_path[2:], blender_resource)
-		case "component_mods":
+		case "component_mods": # TODO obsolete, remove for stf format v0.2
 			return context.resolve_stf_property_path(stf_property_path[2:], blender_resource)
 
 	return None
