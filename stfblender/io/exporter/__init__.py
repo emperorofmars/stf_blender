@@ -1,2 +1,0 @@
-
-from .exporter import ExportSTF
