@@ -1,7 +1,8 @@
 # Changelog
 
 ## v0.1.13
-* `stf.bone` added `tr` & `tr_armature` properties. They store transforms relative to parent and armature respectively. `translation` and `rotation` are deprecated.
+* `stf.bone`: added `tr` & `tr_armature` properties. They store transforms relative to the parent and armature respectively. `translation` and `rotation` are deprecated.
+* `stf.instance.armature`: Deprecated animation path part `component_mods`, replaced with `components`.
 
 ## v0.1.12
 * Select how to export each Blender native resource. (Automatic, Ignore, Select STF-type manually)
